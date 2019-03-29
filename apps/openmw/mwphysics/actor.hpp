@@ -67,6 +67,11 @@ namespace MWPhysics
         osg::Vec3f getHalfExtents() const;
 
         /**
+         * Returns the half extents of the collision body (not scaled)
+         */
+        osg::Vec3f getOriginalHalfExtents() const;
+
+        /**
          * Returns the position of the collision body
          * @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
          */

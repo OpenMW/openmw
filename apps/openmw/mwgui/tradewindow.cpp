@@ -106,9 +106,9 @@ namespace MWGui
         // Also restock any containers owned by this merchant, which are also available to buy in the trade window
         std::vector<MWWorld::Ptr> itemSources;
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
-        for (std::vector<MWWorld::Ptr>::iterator it = itemSources.begin(); it != itemSources.end(); ++it)
+        for (MWWorld::Ptr& source : itemSources)
         {
-            it->getClass().restock(*it);
+            source.getClass().restock(source);
         }
     }
 
@@ -306,16 +306,15 @@ namespace MWGui
         }
 
         // check if the player is attempting to sell back an item stolen from this actor
-        for (std::vector<ItemStack>::iterator it = merchantBought.begin(); it != merchantBought.end(); ++it)
+        for (ItemStack& itemStack : merchantBought)
         {
-            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(it->mBase.getCellRef().getRefId(), mPtr))
+            if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(itemStack.mBase.getCellRef().getRefId(), mPtr))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->mValue.getString();
-                if (msg.find("%s") != std::string::npos)
-                    msg.replace(msg.find("%s"), 2, it->mBase.getClass().getName(it->mBase));
+                Misc::StringUtils::replace(msg, "%s", itemStack.mBase.getClass().getName(itemStack.mBase).c_str(), 2);
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
-                MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, it->mBase, mPtr, it->mCount);
+                MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, itemStack.mBase, mPtr, itemStack.mCount);
 
                 onCancelButtonClicked(mCancelButton);
                 MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
@@ -470,15 +469,15 @@ namespace MWGui
         int merchantOffer = 0;
 
         std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
-        for (std::vector<ItemStack>::const_iterator it = playerBorrowed.begin(); it != playerBorrowed.end(); ++it)
+        for (const ItemStack& itemStack : playerBorrowed)
         {
-            merchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(it->mBase, it->mCount), true);
+            merchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), true);
         }
 
         std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
-        for (std::vector<ItemStack>::const_iterator it = merchantBorrowed.begin(); it != merchantBorrowed.end(); ++it)
+        for (const ItemStack& itemStack : merchantBorrowed)
         {
-            merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(it->mBase, it->mCount), false);
+            merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), false);
         }
 
         int diff = merchantOffer - mCurrentMerchantOffer;

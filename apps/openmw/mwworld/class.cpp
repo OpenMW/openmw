@@ -20,7 +20,6 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/magiceffects.hpp"
 
 namespace MWWorld
 {
@@ -408,7 +407,7 @@ namespace MWWorld
         return false;
     }
 
-    bool Class::isPureWaterCreature(const MWWorld::Ptr& ptr) const
+    bool Class::isPureWaterCreature(const ConstPtr& ptr) const
     {
         return canSwim(ptr)
                 && !isBipedal(ptr)
@@ -416,7 +415,7 @@ namespace MWWorld
                 && !canWalk(ptr);
     }
 
-    bool Class::isPureFlyingCreature(const Ptr& ptr) const
+    bool Class::isPureFlyingCreature(const ConstPtr& ptr) const
     {
         return canFly(ptr)
                 && !isBipedal(ptr)

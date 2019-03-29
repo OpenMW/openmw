@@ -102,24 +102,23 @@ bool parseOptions (int argc, char** argv, std::vector<std::string>& files)
         bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv).
             options(desc).positional(p).run();
         bpo::store(valid_opts, variables);
+        bpo::notify(variables);
+        if (variables.count ("help"))
+        {
+            std::cout << desc << std::endl;
+            return false;
+        }
+        if (variables.count("input-file"))
+        {
+            files = variables["input-file"].as< std::vector<std::string> >();
+            return true;
+        }
     }
     catch(std::exception &e)
     {
         std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
             << desc << std::endl;
         return false;
-    }
-
-    bpo::notify(variables);
-    if (variables.count ("help"))
-    {
-        std::cout << desc << std::endl;
-        return false;
-    }
-    if (variables.count("input-file"))
-    {
-        files = variables["input-file"].as< std::vector<std::string> >();
-        return true;
     }
 
     std::cout << "No input files or directories specified!" << std::endl;

@@ -128,7 +128,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
 
     ActorColumns actorsColumns (nameColumns);
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_UnsignedInteger8));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_AiHello, ColumnBase::Display_UnsignedInteger16));
     actorsColumns.mHello = &mColumns.back();
     mColumns.push_back (RefIdColumn (Columns::ColumnId_AiFlee, ColumnBase::Display_UnsignedInteger8));
     actorsColumns.mFlee = &mColumns.back();

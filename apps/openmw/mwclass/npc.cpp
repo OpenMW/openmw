@@ -619,6 +619,8 @@ namespace MWClass
                 damage  = attack[0] + ((attack[1]-attack[0])*attackStrength);
             }
             MWMechanics::adjustWeaponDamage(damage, weapon, ptr);
+            MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
+            MWMechanics::applyWerewolfDamageMult(victim, weapon, damage);
             MWMechanics::reduceWeaponCondition(damage, true, weapon, ptr);
             healthdmg = true;
         }
@@ -780,7 +782,7 @@ namespace MWClass
                 MWWorld::Ptr armor = ((armorslot != inv.end()) ? *armorslot : MWWorld::Ptr());
                 if(!armor.isEmpty() && armor.getTypeName() == typeid(ESM::Armor).name())
                 {
-                    if (attacker.isEmpty() || (!attacker.isEmpty() && !(object.isEmpty() && !attacker.getClass().isNpc()))) // Unarmed creature attacks don't affect armor condition
+                    if (!object.isEmpty() || attacker.isEmpty() || attacker.getClass().isNpc()) // Unarmed creature attacks don't affect armor condition
                     {
                         int armorhealth = armor.getClass().getItemHealth(armor);
                         armorhealth -= std::min(damageDiff, armorhealth);
@@ -935,8 +937,12 @@ namespace MWClass
 
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
-        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool running = MWBase::Environment::get().getMechanicsManager()->isRunning(ptr) && stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+        bool swimming = world->isSwimming(ptr);
+        bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
+        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
+        sneaking = sneaking && (inair || MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));
+        bool running =  stats.getStance(MWMechanics::CreatureStats::Stance_Run);
+        running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
                                                       (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
@@ -961,7 +967,7 @@ namespace MWClass
             flySpeed = std::max(0.0f, flySpeed);
             moveSpeed = flySpeed;
         }
-        else if (world->isSwimming(ptr))
+        else if (swimming)
         {
             float swimSpeed = walkSpeed;
             if(running)
@@ -971,7 +977,7 @@ namespace MWClass
                                                     gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
-        else if (running)
+        else if (running && !sneaking)
             moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
@@ -1199,11 +1205,7 @@ namespace MWClass
 
     int Npc::getServices(const MWWorld::ConstPtr &actor) const
     {
-        const MWWorld::LiveCellRef<ESM::NPC>* ref = actor.get<ESM::NPC>();
-        if (ref->mBase->mHasAI)
-            return ref->mBase->mAiData.mServices;
-        else
-            return 0;
+        return actor.get<ESM::NPC>()->mBase->mAiData.mServices;
     }
 
 

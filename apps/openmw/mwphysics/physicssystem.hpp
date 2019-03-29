@@ -136,6 +136,9 @@ namespace MWPhysics
             /// Get physical half extents (scaled) of the given actor.
             osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor) const;
 
+            /// Get physical half extents (not scaled) of the given actor.
+            osg::Vec3f getOriginalHalfExtents(const MWWorld::ConstPtr& actor) const;
+
             /// @see MWPhysics::Actor::getRenderingHalfExtents
             osg::Vec3f getRenderingHalfExtents(const MWWorld::ConstPtr& actor) const;
 

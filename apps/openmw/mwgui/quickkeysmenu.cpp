@@ -540,32 +540,32 @@ namespace MWGui
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
 
         int i=0;
-        for (std::vector<ESM::QuickKeys::QuickKey>::const_iterator it = keys.mKeys.begin(); it != keys.mKeys.end(); ++it)
+        for (ESM::QuickKeys::QuickKey& quickKey : keys.mKeys)
         {
             if (i >= 10)
                 return;
 
             mSelected = &mKey[i];
 
-            switch (it->mType)
+            switch (quickKey.mType)
             {
             case Type_Magic:
-                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->mId))
-                    onAssignMagic(it->mId);
+                if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(quickKey.mId))
+                    onAssignMagic(quickKey.mId);
                 break;
             case Type_Item:
             case Type_MagicItem:
             {
                 // Find the item by id
-                MWWorld::Ptr item = store.findReplacement(it->mId);
+                MWWorld::Ptr item = store.findReplacement(quickKey.mId);
 
                 if (item.isEmpty())
                     unassign(mSelected);
                 else
                 {
-                    if (it->mType == Type_Item)
+                    if (quickKey.mType == Type_Item)
                         onAssignItem(item);
-                    else // if (it->mType == Type_MagicItem)
+                    else // if (quickKey.mType == Type_MagicItem)
                         onAssignMagicItem(item);
                 }
 

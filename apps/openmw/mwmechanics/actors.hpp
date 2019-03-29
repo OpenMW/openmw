@@ -5,10 +5,23 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <map>
 
-#include "../mwbase/world.hpp"
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
 
-#include "movement.hpp"
+namespace osg
+{
+    class Vec3f;
+}
+
+namespace Loading
+{
+    class Listener;
+}
 
 namespace MWWorld
 {
@@ -19,6 +32,7 @@ namespace MWWorld
 namespace MWMechanics
 {
     class Actor;
+    class CharacterController;
     class CreatureStats;
 
     class Actors
@@ -102,13 +116,18 @@ namespace MWMechanics
             */
             void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer);
 
+            void playIdleDialogue(const MWWorld::Ptr& actor);
+
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
 
-            void rest(bool sleep);
-            ///< Update actors while the player is waiting or sleeping. This should be called every hour.
+            void rest(double hours, bool sleep);
+            ///< Update actors while the player is waiting or sleeping.
 
-            void restoreDynamicStats(const MWWorld::Ptr& actor, bool sleep);
+            void updateSneaking(CharacterController* ctrl, float duration);
+            ///< Update the sneaking indicator state according to the given player character controller.
+
+            void restoreDynamicStats(const MWWorld::Ptr& actor, double hours, bool sleep);
 
             int getHoursToRest(const MWWorld::Ptr& ptr) const;
             ///< Calculate how many hours the given actor needs to rest in order to be fully healed
@@ -169,6 +188,8 @@ namespace MWMechanics
             bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
     private:
+        void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);
+
         PtrActorMap mActors;
         float mTimerDisposeSummonsCorpses;
         float mActorsProcessingRange;

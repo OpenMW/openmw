@@ -12,9 +12,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
-
-#include "../mwgui/inventorywindow.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
@@ -465,14 +462,13 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
             iter->getClass().getEquipmentSlots (*iter);
 
         // checking if current item pointed by iter can be equipped
-        for (std::vector<int>::const_iterator iter2 (itemsSlots.first.begin());
-            iter2!=itemsSlots.first.end(); ++iter2)
+        for (int slot : itemsSlots.first)
         {
             // if true then it means slot is equipped already
             // check if slot may require swapping if current item is more valuable
-            if (slots_.at (*iter2)!=end())
+            if (slots_.at (slot)!=end())
             {
-                Ptr old = *slots_.at (*iter2);
+                Ptr old = *slots_.at (slot);
 
                 if (iter.getType() == ContainerStore::Type_Armor)
                 {
@@ -493,7 +489,7 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
                 else if (iter.getType() == ContainerStore::Type_Clothing)
                 {
                     // if left ring is equipped
-                    if (*iter2 == Slot_LeftRing)
+                    if (slot == Slot_LeftRing)
                     {
                         // if there is a place for right ring dont swap it
                         if (slots_.at(Slot_RightRing) == end())
@@ -533,7 +529,7 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
             }
 
             // if we are here it means item can be equipped or swapped
-            slots_[*iter2] = iter;
+            slots_[slot] = iter;
             break;
         }
     }
@@ -648,10 +644,9 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 
                 // Try resisting each effect
                 int i=0;
-                for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-                    effectIt!=enchantment.mEffects.mList.end(); ++effectIt)
+                for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
                 {
-                    params[i].mMultiplier = MWMechanics::getEffectMultiplier(effectIt->mEffectID, actor, actor);
+                    params[i].mMultiplier = MWMechanics::getEffectMultiplier(effect.mEffectID, actor, actor);
                     ++i;
                 }
 
@@ -665,18 +660,20 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()];
 
             int i=0;
-            for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-                effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
+            for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
             {
                 const ESM::MagicEffect *magicEffect =
                     MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-                    effectIt->mEffectID);
+                    effect.mEffectID);
 
                 // Fully resisted or can't be applied to target?
-                if (params[i].mMultiplier == 0 || !MWMechanics::checkEffectTarget(effectIt->mEffectID, actor, actor, actor == MWMechanics::getPlayer()))
+                if (params[i].mMultiplier == 0 || !MWMechanics::checkEffectTarget(effect.mEffectID, actor, actor, actor == MWMechanics::getPlayer()))
+                {
+                    i++;
                     continue;
+                }
 
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
+                float magnitude = effect.mMagnMin + (effect.mMagnMax - effect.mMagnMin) * params[i].mRandom;
                 magnitude *= params[i].mMultiplier;
 
                 if (!existed)
@@ -688,7 +685,9 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 }
 
                 if (magnitude)
-                    mMagicEffects.add (*effectIt, magnitude);
+                    mMagicEffects.add (effect, magnitude);
+
+                i++;
             }
         }
     }
@@ -952,17 +951,17 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             continue;
 
         int i=0;
-        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (enchantment.mEffects.mList.begin());
-            effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
+        for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
         {
+            i++;
             // Don't get spell icon display information for enchantments that weren't actually applied
-            if (mMagicEffects.get(MWMechanics::EffectKey(*effectIt)).getMagnitude() == 0)
+            if (mMagicEffects.get(MWMechanics::EffectKey(effect)).getMagnitude() == 0)
                 continue;
-            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()][i];
-            float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params.mRandom;
+            const EffectParams& params = mPermanentMagicEffectMagnitudes[(**iter).getCellRef().getRefId()][i-1];
+            float magnitude = effect.mMagnMin + (effect.mMagnMax - effect.mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
-                visitor.visit(MWMechanics::EffectKey(*effectIt), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
+                visitor.visit(MWMechanics::EffectKey(effect), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
         }
     }
 }

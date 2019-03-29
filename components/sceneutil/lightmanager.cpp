@@ -234,6 +234,7 @@ namespace SceneUtil
         {
             osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
             std::vector<osg::ref_ptr<osg::Light> > lights;
+            lights.reserve(lightList.size());
             for (unsigned int i=0; i<lightList.size();++i)
             {
                 lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
@@ -244,7 +245,8 @@ namespace SceneUtil
             osg::ref_ptr<LightStateAttribute> attr = new LightStateAttribute(mStartLight, lights);
             // don't use setAttributeAndModes, that does not support light indices!
             stateset->setAttribute(attr, osg::StateAttribute::ON);
-            stateset->setAssociatedModes(attr, osg::StateAttribute::ON);
+            for (unsigned int i=0; i<lightList.size(); ++i)
+                stateset->setMode(GL_LIGHT0 + mStartLight + i, osg::StateAttribute::ON);
 
             // need to push some dummy attributes to ensure proper state tracking
             // lights need to reset to their default when the StateSet is popped
@@ -399,7 +401,7 @@ namespace SceneUtil
                 return false;
         }
 
-        if (!(cv->getCurrentCamera()->getCullMask() & mLightManager->getLightingMask()))
+        if (!(cv->getTraversalMask() & mLightManager->getLightingMask()))
             return false;
 
         // Possible optimizations:

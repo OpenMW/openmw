@@ -53,12 +53,12 @@
                         <Property key="Caption" value="#{sDifficulty}"/>
                     </Widget>
                     <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
-                        <Property key="Range" value="10000"/>
-                        <Property key="Page" value="300"/>
+                        <Property key="Range" value="201"/>
+                        <Property key="Page" value="1"/>
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="difficulty"/>
-                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingValueType" value="Integer"/>
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
                         <UserString key="SettingLabelWidget" value="DifficultyText"/>
@@ -83,11 +83,11 @@
                         <UserString key="SettingType" value="Slider"/>
                         <UserString key="SettingCategory" value="Game"/>
                         <UserString key="SettingName" value="actors processing range"/>
-                        <UserString key="SettingValueType" value="Float"/>
+                        <UserString key="SettingValueType" value="Integer"/>
                         <UserString key="SettingMin" value="3584"/>
                         <UserString key="SettingMax" value="7168"/>
                         <UserString key="SettingLabelWidget" value="ActorProcessingText"/>
-                        <UserString key="SettingLabelCaption" value="Actors Processing Range"/>
+                        <UserString key="SettingLabelCaption" value="Actors Processing Range (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
                         <Property key="Caption" value="#{sLow}"/>
@@ -213,7 +213,7 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 224 300 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 224 360 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert x axis"/>
@@ -222,21 +222,19 @@
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
                         <Property key="Caption" value="Invert X Axis"/>
                     </Widget>
-                </Widget>
-                <Widget type="HBox" skin="" position="4 254 300 24" align="Left Bottom">
-                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="28 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert y axis"/>
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
-                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="56 4 78 16" align="Left Bottom">
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 284 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
                     <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 308 336 18" align="HStretch Bottom">
+                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -246,13 +244,23 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 332 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 332 336 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
+                </Widget>
+                <Widget type="HBox" skin="" position="4 324 336 24" align="Left Bottom">
+                    <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
+                        <UserString key="SettingCategory" value="Input"/>
+                        <UserString key="SettingName" value="enable controller"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
+                        <Property key="Caption" value="#{sEnableJoystick}"/>
+                    </Widget>
                 </Widget>
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
@@ -301,12 +309,12 @@
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top">
-                            <Property key="Range" value="10000"/>
-                            <Property key="Page" value="300"/>
+                            <Property key="Range" value="81"/>
+                            <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
-                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
                             <UserString key="SettingLabelWidget" value="FovText"/>
@@ -345,18 +353,19 @@
                     <Widget type="TabItem" skin="" position="0 28 352 268">
                         <Property key="Caption" value="  Detail  "/>
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
-                            <Property key="Caption" value="Texture filtering"/>
+                            <Property key="Caption" value="Texture Filtering"/>
                         </Widget>
                         <Widget type="ComboBox" skin="MW_ComboBox" position="14 28 110 24" align="Left Top" name="TextureFilteringButton">
                             <Property key="AddItem" value="Bilinear"/>
                             <Property key="AddItem" value="Trilinear"/>
                         </Widget>
                         <Widget type="Widget" skin="" position="184 4 300 50" align="Left Top" name="AnisotropyBox">
-                            <Widget type="TextBox" skin="SandText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
+                            <Widget type="TextBox" skin="NormalText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
                             <Widget type="MWScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top">
                                 <Property key="Range" value="17"/>
+                                <Property key="Page" value="1"/>
                                 <UserString key="SettingType" value="Slider"/>
                                 <UserString key="SettingCategory" value="General"/>
                                 <UserString key="SettingName" value="anisotropy"/>
@@ -364,18 +373,20 @@
                                 <UserString key="SettingLabelCaption" value="Anisotropy (%s)"/>
                             </Widget>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top">
+                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
                         <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top">
-                            <Property key="Range" value="10000"/>
+                            <Property key="Range" value="4667"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
-                            <UserString key="SettingValueType" value="Float"/>
+                            <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingMin" value="2000"/>
                             <UserString key="SettingMax" value="6666"/>
+                            <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
+                            <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
@@ -420,13 +431,15 @@
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 56 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
-                                    <UserString key="SettingCategory" value="Water"/>
-                                    <UserString key="SettingName" value="reflect actors"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 115 24" align="Left Top" name="WaterReflectionDetail">
+                                    <Property key="AddItem" value="Off"/>
+                                    <Property key="AddItem" value="Terrain"/>
+                                    <Property key="AddItem" value="World"/>
+                                    <Property key="AddItem" value="Objects"/>
+                                    <Property key="AddItem" value="Actors"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 79 16" align="Left Top">
-                                    <Property key="Caption" value="Reflect actors"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
+                                    <Property key="Caption" value="Reflection shader detail"/>
                                 </Widget>
                             </Widget>
                         </Widget>

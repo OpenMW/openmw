@@ -111,13 +111,14 @@ namespace MWWorld
 
             std::string mUserDataPath;
 
+            osg::Vec3f mDefaultHalfExtents;
+            bool mShouldUpdateNavigator = false;
+
             // not implemented
             World (const World&);
             World& operator= (const World&);
 
             int mActivationDistanceOverride;
-
-            std::string mStartupScript;
 
             std::map<MWWorld::Ptr, int> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
@@ -198,7 +199,7 @@ namespace MWWorld
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
                 ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& startupScript, const std::string& resourcePath, const std::string& userDataPath);
+                int activationDistanceOverride, const std::string& startCell, const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
 
@@ -238,6 +239,7 @@ namespace MWWorld
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;
+            MWWorld::ConstPtr getPlayerConstPtr() const override;
 
             const MWWorld::ESMStore& getStore() const override;
 
@@ -574,7 +576,7 @@ namespace MWWorld
             RestPermitted canRest() const override;
             ///< check if the player is allowed to rest
 
-            void rest() override;
+            void rest(double hours) override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
@@ -717,6 +719,9 @@ namespace MWWorld
             void removeActorPath(const MWWorld::ConstPtr& actor) const override;
 
             void setNavMeshNumberToRender(const std::size_t value) override;
+
+            /// Return physical half extents of the given actor to be used in pathfinding
+            osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
     };
 }
 

@@ -55,20 +55,25 @@ namespace MWInput
         , mInvertX (Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
+        , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
+        , mGamepadGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
         , mGuiCursorX(0)
         , mGuiCursorY(0)
         , mMouseWheel(0)
+        , mGamepadZoom(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
+        , mSneakToggleShortcutTimer(0.f)
+        , mSneakGamepadShortcut(false)
         , mSneaking(false)
         , mAttemptJump(false)
         , mInvUiScalingFactor(1.f)
@@ -218,6 +223,96 @@ namespace MWInput
         MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
     }
 
+    bool InputManager::gamepadToGuiControl(const SDL_ControllerButtonEvent &arg, bool release=false)
+    {
+        // Presumption of GUI mode will be removed in the future.
+        // MyGUI KeyCodes *may* change.
+        // Currently button releases are ignored.
+        if (release)
+            return false;
+
+        MyGUI::KeyCode key = MyGUI::KeyCode::None;
+        switch (arg.button)
+        {
+            case SDL_CONTROLLER_BUTTON_DPAD_UP:
+                key = MyGUI::KeyCode::ArrowUp;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+                key = MyGUI::KeyCode::ArrowRight;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                key = MyGUI::KeyCode::ArrowDown;
+                break;
+            case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+                key = MyGUI::KeyCode::ArrowLeft;
+                break;
+            case SDL_CONTROLLER_BUTTON_A:
+                // If we are using the joystick as a GUI mouse, A must be handled via mouse.
+                if (mGamepadGuiCursorEnabled)
+                    return false;
+                key = MyGUI::KeyCode::Space;
+                break;
+            case SDL_CONTROLLER_BUTTON_B:
+                if (MyGUI::InputManager::getInstance().isModalAny())
+                    MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+                else
+                    MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+                return true;
+            case SDL_CONTROLLER_BUTTON_X:
+                key = MyGUI::KeyCode::Semicolon;
+                break;
+            case SDL_CONTROLLER_BUTTON_Y:
+                key = MyGUI::KeyCode::Apostrophe;
+                break;
+            case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
+                key = MyGUI::KeyCode::Period;
+                break;
+            case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
+                key = MyGUI::KeyCode::Slash;
+                break;
+            case SDL_CONTROLLER_BUTTON_LEFTSTICK:
+                mGamepadGuiCursorEnabled = !mGamepadGuiCursorEnabled;
+                MWBase::Environment::get().getWindowManager()->setCursorActive(mGamepadGuiCursorEnabled);
+                return true;
+            default:
+                return false;
+        }
+
+        // Some keys will work even when Text Input windows/modals are in focus.
+        if (SDL_IsTextInputActive())
+            return false;
+
+        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+        return true;
+    }
+
+    bool InputManager::gamepadToGuiControl(const SDL_ControllerAxisEvent &arg)
+    {
+        switch (arg.axis)
+        {
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+                if (arg.value == 32767) // Treat like a button.
+                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Minus, 0, false);
+                break;
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+                if (arg.value == 32767) // Treat like a button.
+                    MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Equals, 0, false);
+                break;
+            case SDL_CONTROLLER_AXIS_LEFTX:
+            case SDL_CONTROLLER_AXIS_LEFTY:
+            case SDL_CONTROLLER_AXIS_RIGHTX:
+            case SDL_CONTROLLER_AXIS_RIGHTY:
+                // If we are using the joystick as a GUI mouse, process mouse movement elsewhere.
+                if (mGamepadGuiCursorEnabled)
+                    return false;
+                break;
+            default:
+                return false;
+        }
+
+        return true;
+    }
+
     void InputManager::channelChanged(ICS::Channel* channel, float currentValue, float previousValue)
     {
         resetIdleTime ();
@@ -252,11 +347,29 @@ namespace MWInput
         {
             if (action == A_Use)
             {
-                MWMechanics::DrawState_ state = MWBase::Environment::get().getWorld()->getPlayer().getDrawState();
-                mPlayer->setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                if(mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                    action = A_CycleWeaponRight;
+
+                else if (mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
+                    action = A_CycleSpellRight;
+
+                else
+                {
+                    MWMechanics::DrawState_ state = MWBase::Environment::get().getWorld()->getPlayer().getDrawState();
+                    mPlayer->setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                }
             }
             else if (action == A_Jump)
-                mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            {
+                if(mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                    action = A_CycleWeaponLeft;
+
+                else if (mJoystickLastUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
+                    action = A_CycleSpellLeft;
+
+                else
+                    mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+            }
         }
 
         if (currentValue == 1)
@@ -266,6 +379,9 @@ namespace MWInput
             {
             case A_GameMenu:
                 toggleMainMenu ();
+                break;
+            case A_OptionsMenu:
+                toggleOptionsMenu();
                 break;
             case A_Screenshot:
                 screenshot();
@@ -284,7 +400,8 @@ namespace MWInput
             case A_MoveRight:
             case A_MoveForward:
             case A_MoveBackward:
-                handleGuiArrowKey(action);
+                // Temporary shut-down of this function until deemed necessary.
+                //handleGuiArrowKey(action);
                 break;
             case A_Journal:
                 toggleJournal ();
@@ -429,7 +546,7 @@ namespace MWInput
 
         updateCursorMode();
 
-        if (mGuiCursorEnabled)
+        if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
             float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
             float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
@@ -493,28 +610,17 @@ namespace MWInput
                 // joystick movement
                 float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
                 float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
-                if (xAxis < .5)
+                if (xAxis != .5)
                 {
                     triedToMove = true;
-                    mPlayer->setLeftRight (-1);
-                }
-                else if (xAxis > .5)
-                {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (1);
+                    mPlayer->setLeftRight((xAxis - 0.5f) * 2);
                 }
 
-                if (yAxis < .5)
+                if (yAxis != .5)
                 {
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (1);
-                }
-                else if (yAxis > .5)
-                {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (-1);
+                    mPlayer->setForwardBackward((yAxis - 0.5f) * 2 * -1);
                 }
                 else if(mPlayer->getAutoMove())
                 {
@@ -559,7 +665,35 @@ namespace MWInput
 
                 if (!mSneakToggles)
                 {
-                    mPlayer->setSneak(actionIsActive(A_Sneak));
+                    if(mJoystickLastUsed)
+                    {
+                        if(actionIsActive(A_Sneak))
+                        {
+                            if(mSneakToggleShortcutTimer) // New Sneak Button Press
+                            {
+                                if(mSneakToggleShortcutTimer <= 0.3f)
+                                {
+                                    mSneakGamepadShortcut = true;
+                                    toggleSneaking();
+                                }
+                                else
+                                    mSneakGamepadShortcut = false;
+                            }
+
+                            if(!mSneaking)
+                                toggleSneaking();
+                            mSneakToggleShortcutTimer = 0.f;
+                        }
+                        else
+                        {
+                            if(!mSneakGamepadShortcut && mSneaking)
+                                toggleSneaking();
+                            if(mSneakToggleShortcutTimer <= 0.3f)
+                                mSneakToggleShortcutTimer += dt;
+                        }
+                    }
+                    else
+                        mPlayer->setSneak(actionIsActive(A_Sneak));
                 }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
@@ -606,6 +740,13 @@ namespace MWInput
                             MWBase::Environment::get().getWorld()->togglePOV();
                         }
                         mPreviewPOVDelay = 0.f;
+                        mGamepadZoom = 0;
+                    }
+
+                    if(mGamepadZoom)
+                    {
+                        MWBase::Environment::get().getWorld()->changeVanityModeScale(mGamepadZoom);
+                        MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
                     }
                 }
             }
@@ -622,6 +763,8 @@ namespace MWInput
                 updateIdleTime(dt);
             }
         }
+        else
+            mGamepadZoom = 0;
         mAttemptJump = false; // Can only jump on first frame input is on
     }
 
@@ -636,7 +779,7 @@ namespace MWInput
         mMouseLookEnabled = !guiMode;
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
-        MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode);
+        MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (mJoystickLastUsed && !mGamepadGuiCursorEnabled));
         // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
@@ -658,6 +801,9 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
+
+            if (it->first == "Input" && it->second == "enable controller")
+                mJoystickEnabled = Settings::Manager::getBool("enable controller", "Input");
 
             if (it->first == "Video" && (
                     it->second == "resolution x"
@@ -813,6 +959,8 @@ namespace MWInput
 
         if (mGuiCursorEnabled)
         {
+            if (!mGamepadGuiCursorEnabled)
+                mGamepadGuiCursorEnabled = true;
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
             mGuiCursorX = static_cast<float>(arg.x) * mInvUiScalingFactor;
@@ -858,33 +1006,37 @@ namespace MWInput
 
     void InputManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg )
     {
-        mJoystickLastUsed = true;
-        bool guiMode = false;
+        if (!mJoystickEnabled || mInputBinder->detectingBindingState())
+            return;
 
-        if (arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B) // We'll pretend that A is left click and B is right click
+        mJoystickLastUsed = true;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
-            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            if(!mInputBinder->detectingBindingState())
+            if (gamepadToGuiControl(arg, false))
+                return;
+            else if (mGamepadGuiCursorEnabled)
             {
-                guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY),
-                    sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
-                if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+                // Temporary mouse binding until keyboard controls are available:
+                if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
-                    MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-                    if (b && b->getEnabled())
+                    bool mousePressSuccess = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(SDL_BUTTON_LEFT));
+                    if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
-                        MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+                        MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
+                        if (b && b->getEnabled())
+                            MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
                     }
+
+                    setPlayerControlsEnabled(!mousePressSuccess);
                 }
             }
         }
-
-        setPlayerControlsEnabled(!guiMode);
+        else
+            setPlayerControlsEnabled(true);
 
         //esc, to leave initial movie screen
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
-        bool guiFocus = MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0);
-        setPlayerControlsEnabled(!guiFocus);
+        setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::Enum(kc), 0));
 
         if (!mControlsDisabled)
             mInputBinder->buttonPressed(deviceID, arg);
@@ -892,31 +1044,69 @@ namespace MWInput
 
     void InputManager::buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg )
     {
-        mJoystickLastUsed = true;
         if(mInputBinder->detectingBindingState())
-            mInputBinder->buttonReleased(deviceID, arg);
-        else if(arg.button == SDL_CONTROLLER_BUTTON_A || arg.button == SDL_CONTROLLER_BUTTON_B)
         {
-            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI((arg.button == SDL_CONTROLLER_BUTTON_B) ? SDL_BUTTON_RIGHT : SDL_BUTTON_LEFT)) && guiMode;
-
-            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
-
-            setPlayerControlsEnabled(!guiMode);
             mInputBinder->buttonReleased(deviceID, arg);
+            return;
+        }
+        if (!mJoystickEnabled || mControlsDisabled)
+            return;
+
+        mJoystickLastUsed = true;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            if (gamepadToGuiControl(arg, true))
+                return;
+            else if (mGamepadGuiCursorEnabled)
+            {
+                // Temporary mouse binding until keyboard controls are available:
+                if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
+                {
+                    bool mousePressSuccess = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(SDL_BUTTON_LEFT));
+                    if (mInputBinder->detectingBindingState()) // If the player just triggered binding, don't let button release bind.
+                        return;
+
+                    setPlayerControlsEnabled(!mousePressSuccess);
+                }
+            }
         }
         else
-            mInputBinder->buttonReleased(deviceID, arg);
+            setPlayerControlsEnabled(true);
 
-        ///to escape initial movie
+        //esc, to leave initial movie screen
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(SDLK_ESCAPE);
         setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+
+        mInputBinder->buttonReleased(deviceID, arg);
     }
 
     void InputManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg )
     {
-        if (!mControlsDisabled)
-            mInputBinder->axisMoved(deviceID, arg);
+        if(!mJoystickEnabled || mControlsDisabled)
+            return;
+
+        mJoystickLastUsed = true;
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
+        {
+            gamepadToGuiControl(arg);
+        }
+        else
+        {
+            if(mPreviewPOVDelay == 1.f && arg.value) // Preview Mode Gamepad Zooming
+            {
+                if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+                {
+                    mGamepadZoom = static_cast<float>(arg.value / 10000 * 8.5f);
+                    return; // Do not propogate event.
+                }
+                else if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+                {
+                    mGamepadZoom = static_cast<float>(-(arg.value / 10000 * 8.5f));
+                    return; // Do not propogate event.
+                }
+            }
+        }
+        mInputBinder->axisMoved(deviceID, arg);
     }
 
     void InputManager::controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg)
@@ -952,19 +1142,38 @@ namespace MWInput
 
     void InputManager::toggleMainMenu()
     {
-        if (MyGUI::InputManager::getInstance().isModalAny()) {
+        if (MyGUI::InputManager::getInstance().isModalAny())
+        {
             MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             return;
         }
 
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
+        bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
+        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+
+        if ((inGame && mode == MWGui::GM_MainMenu) || mode == MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+
+        if (inGame && mode != MWGui::GM_MainMenu)
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
+    }
+
+    void InputManager::toggleOptionsMenu()
+    {
+        if (MyGUI::InputManager::getInstance().isModalAny())
         {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
+            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
+            return;
         }
-        else //Close current GUI
-        {
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
-        }
+
+        MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+        bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
+
+        if ((inGame && mode == MWGui::GM_MainMenu) || mode == MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->popGuiMode();
+
+        if (inGame && mode != MWGui::GM_Settings)
+            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Settings);
     }
 
     void InputManager::quickLoad() {
@@ -1317,20 +1526,20 @@ namespace MWInput
 
         defaultButtonBindings[A_Activate] = SDL_CONTROLLER_BUTTON_A;
         defaultButtonBindings[A_ToggleWeapon] = SDL_CONTROLLER_BUTTON_X;
-        defaultButtonBindings[A_ToggleSpell] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+        defaultButtonBindings[A_ToggleSpell] = SDL_CONTROLLER_BUTTON_Y;
         //defaultButtonBindings[A_QuickButtonsMenu] = SDL_GetButtonFromScancode(SDL_SCANCODE_F1); // Need to implement, should be ToggleSpell(5) AND Wait(9)
-        defaultButtonBindings[A_Sneak] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-        defaultButtonBindings[A_Jump] = SDL_CONTROLLER_BUTTON_Y;
-        defaultButtonBindings[A_Journal] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-        defaultButtonBindings[A_Rest] = SDL_CONTROLLER_BUTTON_BACK;
-        defaultButtonBindings[A_TogglePOV] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+        defaultButtonBindings[A_Sneak] = SDL_CONTROLLER_BUTTON_LEFTSTICK;
+        defaultButtonBindings[A_Journal] = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
+        defaultButtonBindings[A_Rest] = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
+        defaultButtonBindings[A_TogglePOV] = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
         defaultButtonBindings[A_Inventory] = SDL_CONTROLLER_BUTTON_B;
         defaultButtonBindings[A_GameMenu] = SDL_CONTROLLER_BUTTON_START;
+        defaultButtonBindings[A_OptionsMenu] = SDL_CONTROLLER_BUTTON_BACK;
         defaultButtonBindings[A_QuickSave] = SDL_CONTROLLER_BUTTON_GUIDE;
-        defaultButtonBindings[A_QuickKey1] = SDL_CONTROLLER_BUTTON_DPAD_UP;
-        defaultButtonBindings[A_QuickKey2] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
-        defaultButtonBindings[A_QuickKey3] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
-        defaultButtonBindings[A_QuickKey4] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
+        defaultButtonBindings[A_MoveForward] = SDL_CONTROLLER_BUTTON_DPAD_UP;
+        defaultButtonBindings[A_MoveLeft] = SDL_CONTROLLER_BUTTON_DPAD_LEFT;
+        defaultButtonBindings[A_MoveBackward] = SDL_CONTROLLER_BUTTON_DPAD_DOWN;
+        defaultButtonBindings[A_MoveRight] = SDL_CONTROLLER_BUTTON_DPAD_RIGHT;
 
         std::map<int, int> defaultAxisBindings;
         defaultAxisBindings[A_MoveForwardBackward] = SDL_CONTROLLER_AXIS_LEFTY;
@@ -1338,6 +1547,7 @@ namespace MWInput
         defaultAxisBindings[A_LookUpDown] = SDL_CONTROLLER_AXIS_RIGHTY;
         defaultAxisBindings[A_LookLeftRight] = SDL_CONTROLLER_AXIS_RIGHTX;
         defaultAxisBindings[A_Use] = SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
+        defaultAxisBindings[A_Jump] = SDL_CONTROLLER_AXIS_TRIGGERLEFT;
 
         for (int i = 0; i < A_Last; i++)
         {
@@ -1405,6 +1615,7 @@ namespace MWInput
         descriptions[A_Journal] = "sJournal";
         descriptions[A_Rest] = "sRestKey";
         descriptions[A_Inventory] = "sInventory";
+        descriptions[A_OptionsMenu] = "sPreferences";
         descriptions[A_TogglePOV] = "sTogglePOVCmd";
         descriptions[A_QuickKeysMenu] = "sQuickMenu";
         descriptions[A_QuickKey1] = "sQuick1Cmd";
@@ -1542,6 +1753,7 @@ namespace MWInput
         ret.push_back(A_Inventory);
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
+        ret.push_back(A_OptionsMenu);
         ret.push_back(A_Console);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
@@ -1574,6 +1786,7 @@ namespace MWInput
         ret.push_back(A_Inventory);
         ret.push_back(A_Journal);
         ret.push_back(A_Rest);
+        ret.push_back(A_OptionsMenu);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
         ret.push_back(A_Screenshot);
@@ -1621,6 +1834,17 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
             return;
         }
+
+        // Disallow binding reserved keys
+        if (key == SDL_SCANCODE_F3 || key == SDL_SCANCODE_F4 || key == SDL_SCANCODE_F10 || key == SDL_SCANCODE_F11)
+            return;
+
+        #ifndef __APPLE__
+        // Disallow binding Windows/Meta keys
+        if (key == SDL_SCANCODE_LGUI || key == SDL_SCANCODE_RGUI)
+            return;
+        #endif
+
         if(!mDetectingKeyboard)
             return;
 

@@ -1,7 +1,6 @@
 #include "myguitexture.hpp"
 
 #include <stdexcept>
-#include <iostream>
 
 #include <osg/Texture2D>
 

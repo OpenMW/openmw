@@ -74,6 +74,8 @@ private:
 
     void updateNpcBase();
 
+    NpcType getNpcType();
+
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
                                         const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
 
@@ -117,7 +119,7 @@ public:
     /// 0: the first person meshes follow the camera with a reduced factor, so you can look down at your own hands
     virtual void setAccurateAiming(bool enabled);
 
-    virtual void setWeaponGroup(const std::string& group);
+    virtual void setWeaponGroup(const std::string& group, bool relativeDuration);
 
     virtual osg::Vec3f runAnimation(float timepassed);
 

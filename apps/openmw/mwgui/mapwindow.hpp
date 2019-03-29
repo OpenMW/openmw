@@ -2,6 +2,7 @@
 #define MWGUI_MAPWINDOW_H
 
 #include <stdint.h>
+#include <memory>
 
 #include "windowpinnablebase.hpp"
 
@@ -125,12 +126,17 @@ namespace MWGui
         // Stores markers that were placed by a player. May be shared between multiple map views.
         CustomMarkerCollection& mCustomMarkers;
 
-        std::vector<MyGUI::ImageBox*> mMapWidgets;
-        std::vector<MyGUI::ImageBox*> mFogWidgets;
+        struct MapEntry
+        {
+            MapEntry(MyGUI::ImageBox* mapWidget, MyGUI::ImageBox* fogWidget)
+                : mMapWidget(mapWidget), mFogWidget(fogWidget) {}
 
-        typedef std::vector<std::shared_ptr<MyGUI::ITexture> > TextureVector;
-        TextureVector mMapTextures;
-        TextureVector mFogTextures;
+            MyGUI::ImageBox* mMapWidget;
+            MyGUI::ImageBox* mFogWidget;
+            std::shared_ptr<MyGUI::ITexture> mMapTexture;
+            std::shared_ptr<MyGUI::ITexture> mFogTexture;
+        };
+        std::vector<MapEntry> mMaps;
 
         // Keep track of created marker widgets, just to easily remove them later.
         std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
@@ -259,10 +265,6 @@ namespace MWGui
         // Markers on global map
         typedef std::pair<int, int> CellId;
         std::set<CellId> mMarkers;
-
-        // Cells that should be explored in the next frame (i.e. their map revealed on the global map)
-        // We can't do this immediately, because the map update is not immediate either (see mNeedMapUpdate in scene.cpp)
-        std::vector<CellId> mQueuedToExplore;
 
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;

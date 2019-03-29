@@ -3,8 +3,6 @@
 #include <limits>
 #include <iomanip>
 
-#include <boost/format.hpp>
-
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
@@ -23,7 +21,6 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "npcstats.hpp"
 #include "actorutil.hpp"
@@ -293,17 +290,6 @@ namespace MWMechanics
                     if (castByPlayer)
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInvalidTarget}");
                     return true; // must still apply to get visual effect and have target regard it as attack
-                }
-                break;
-            case ESM::MagicEffect::AlmsiviIntervention:
-            case ESM::MagicEffect::DivineIntervention:
-            case ESM::MagicEffect::Mark:
-            case ESM::MagicEffect::Recall:
-                if (!MWBase::Environment::get().getWorld()->isTeleportingEnabled())
-                {
-                    if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
-                    return false;
                 }
                 break;
             case ESM::MagicEffect::WaterWalking:
@@ -747,21 +733,19 @@ namespace MWMechanics
         else if (target.getClass().isActor() && target == getPlayer())
         {
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+            bool teleportingEnabled = MWBase::Environment::get().getWorld()->isTeleportingEnabled();
 
-            if (effectId == ESM::MagicEffect::DivineIntervention)
+            if (effectId == ESM::MagicEffect::DivineIntervention || effectId == ESM::MagicEffect::AlmsiviIntervention)
             {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "divinemarker");
-                anim->removeEffect(ESM::MagicEffect::DivineIntervention);
-                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                    .search("VFX_Summon_end");
-                if (fx)
-                    anim->addEffect("meshes\\" + fx->mModel, -1);
-                return true;
-            }
-            else if (effectId == ESM::MagicEffect::AlmsiviIntervention)
-            {
-                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, "templemarker");
-                anim->removeEffect(ESM::MagicEffect::AlmsiviIntervention);
+                if (!teleportingEnabled)
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                    return true;
+                }
+                std::string marker = (effectId == ESM::MagicEffect::DivineIntervention) ? "divinemarker" : "templemarker";
+                MWBase::Environment::get().getWorld()->teleportToClosestMarker(target, marker);
+                anim->removeEffect(effectId);
                 const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
                     .search("VFX_Summon_end");
                 if (fx)
@@ -770,12 +754,26 @@ namespace MWMechanics
             }
             else if (effectId == ESM::MagicEffect::Mark)
             {
-                MWBase::Environment::get().getWorld()->getPlayer().markPosition(
-                            target.getCell(), target.getRefData().getPosition());
+                if (teleportingEnabled)
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().markPosition(
+                                target.getCell(), target.getRefData().getPosition());
+                }
+                else if (caster == getPlayer())
+                {
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                }
                 return true;
             }
             else if (effectId == ESM::MagicEffect::Recall)
             {
+                if (!teleportingEnabled)
+                {
+                    if (caster == getPlayer())
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sTeleportDisabled}");
+                    return true;
+                }
+
                 MWWorld::CellStore* markedCell = nullptr;
                 ESM::Position markedPosition;
 
@@ -785,7 +783,7 @@ namespace MWMechanics
                     MWWorld::ActionTeleport action(markedCell->isExterior() ? "" : markedCell->getCell()->mName,
                                             markedPosition, false);
                     action.execute(target);
-                    anim->removeEffect(ESM::MagicEffect::Recall);
+                    anim->removeEffect(effectId);
                 }
                 return true;
             }
@@ -1015,7 +1013,7 @@ namespace MWMechanics
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-            message = boost::str(boost::format(message) % ingredient->mName);
+            Misc::StringUtils::replace(message, "%s", ingredient->mName.c_str(), 2);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }

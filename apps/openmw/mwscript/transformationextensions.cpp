@@ -4,7 +4,6 @@
 
 #include <components/esm/loadcell.hpp>
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -18,7 +17,6 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
-#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 

@@ -7,10 +7,10 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/resource/bulletshape.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/misc/convert.hpp>
 
 #include "../mwworld/class.hpp"
 
-#include "convert.hpp"
 #include "collisiontype.hpp"
 
 namespace MWPhysics
@@ -62,7 +62,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     }
     else
     {
-        mShape.reset(new btBoxShape(toBullet(mHalfExtents)));
+        mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
         mRotationallyInvariant = false;
     }
 
@@ -138,13 +138,13 @@ void Actor::updateCollisionObjectPosition()
     btTransform tr = mCollisionObject->getWorldTransform();
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
     osg::Vec3f newPosition = scaledTranslation + mPosition;
-    tr.setOrigin(toBullet(newPosition));
+    tr.setOrigin(Misc::Convert::toBullet(newPosition));
     mCollisionObject->setWorldTransform(tr);
 }
 
 osg::Vec3f Actor::getCollisionObjectPosition() const
 {
-    return toOsg(mCollisionObject->getWorldTransform().getOrigin());
+    return Misc::Convert::toOsg(mCollisionObject->getWorldTransform().getOrigin());
 }
 
 void Actor::setPosition(const osg::Vec3f &position)
@@ -169,7 +169,7 @@ void Actor::updateRotation ()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
     mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
-    tr.setRotation(toBullet(mRotation));
+    tr.setRotation(Misc::Convert::toBullet(mRotation));
     mCollisionObject->setWorldTransform(tr);
 
     updateCollisionObjectPosition();
@@ -187,7 +187,7 @@ void Actor::updateScale()
 
     mPtr.getClass().adjustScale(mPtr, scaleVec, false);
     mScale = scaleVec;
-    mShape->setLocalScaling(toBullet(mScale));
+    mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
 
     scaleVec = osg::Vec3f(scale,scale,scale);
     mPtr.getClass().adjustScale(mPtr, scaleVec, true);
@@ -199,6 +199,11 @@ void Actor::updateScale()
 osg::Vec3f Actor::getHalfExtents() const
 {
     return osg::componentMultiply(mHalfExtents, mScale);
+}
+
+osg::Vec3f Actor::getOriginalHalfExtents() const
+{
+    return mHalfExtents;
 }
 
 osg::Vec3f Actor::getRenderingHalfExtents() const

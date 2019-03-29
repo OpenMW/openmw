@@ -96,25 +96,25 @@ bool FFmpeg_Decoder::getAVAudioData()
         return false;
 
     do {
-        if(mPacket.size == 0 && !getNextPacket())
-            return false;
-
         /* Decode some data, and check for errors */
-        int ret = 0;
-        ret = avcodec_receive_frame(mCodecCtx, mFrame);
-        if (ret == 0)
-            got_frame = true;
+        int ret = avcodec_receive_frame(mCodecCtx, mFrame);
         if (ret == AVERROR(EAGAIN))
-            ret = 0;
-        if (ret == 0)
+        {
+            if (mPacket.size == 0 && !getNextPacket())
+                return false;
             ret = avcodec_send_packet(mCodecCtx, &mPacket);
-        if (ret < 0 && ret != AVERROR(EAGAIN))
+            av_packet_unref(&mPacket);
+            if (ret == 0)
+                continue;
+        }
+        if (ret != 0)
             return false;
 
         av_packet_unref(&mPacket);
 
-        if (!got_frame || mFrame->nb_samples == 0)
+        if (mFrame->nb_samples == 0)
             continue;
+        got_frame = true;
 
         if(mSwr)
         {
@@ -138,7 +138,7 @@ bool FFmpeg_Decoder::getAVAudioData()
         else
             mFrameData = &mFrame->data[0];
 
-    } while(!got_frame || mFrame->nb_samples == 0);
+    } while(!got_frame);
     mNextPts += (double)mFrame->nb_samples / mCodecCtx->sample_rate;
 
     return true;

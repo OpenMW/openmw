@@ -1,14 +1,25 @@
-#ifndef OPENMW_MWPHYSICS_CONVERT_H
-#define OPENMW_MWPHYSICS_CONVERT_H
+#ifndef OPENMW_COMPONENTS_MISC_CONVERT_H
+#define OPENMW_COMPONENTS_MISC_CONVERT_H
 
+#include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btQuaternion.h>
-
 #include <osg/Vec3f>
 #include <osg/Quat>
 
-namespace MWPhysics
+namespace Misc
 {
+namespace Convert
+{
+    inline osg::Vec3f makeOsgVec3f(const float* values)
+    {
+        return osg::Vec3f(values[0], values[1], values[2]);
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
+    {
+        return osg::Vec3f(value.x(), value.y(), value.z());
+    }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)
     {
@@ -29,7 +40,7 @@ namespace MWPhysics
     {
         return osg::Quat(quat.x(), quat.y(), quat.z(), quat.w());
     }
-
+}
 }
 
 #endif

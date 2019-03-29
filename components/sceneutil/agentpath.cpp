@@ -2,7 +2,6 @@
 #include "detourdebugdraw.hpp"
 
 #include <components/detournavigator/settings.hpp>
-#include <components/esm/loadpgrd.hpp>
 
 #include <algorithm>
 

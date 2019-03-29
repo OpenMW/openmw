@@ -194,15 +194,16 @@ void ActorAnimation::injectWeaponBones()
     }
 }
 
-// To make sure we do not run morph controllers for weapons, i.e. bows
-class EmptyCallback : public osg::NodeCallback
+void ActorAnimation::resetControllers(osg::Node* node)
 {
-    public:
+    if (node == nullptr)
+        return;
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-        }
-};
+    std::shared_ptr<SceneUtil::ControllerSource> src;
+    src.reset(new NullAnimationTime);
+    SceneUtil::AssignControllerSourcesVisitor removeVisitor(src);
+    node->accept(removeVisitor);
+}
 
 void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 {
@@ -230,7 +231,9 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     if (mesh.empty() || boneName.empty())
         return;
 
-    // If the scabbard is not found, use a weapon mesh as fallback
+    // If the scabbard is not found, use a weapon mesh as fallback.
+    // Note: it is unclear how to handle time for controllers attached to bodyparts, so disable them for now.
+    // We use the similar approach for other bodyparts.
     scabbardName = scabbardName.replace(scabbardName.size()-4, 4, "_sh.nif");
     bool isEnchanted = !weapon->getClass().getEnchantment(*weapon).empty();
     if(!mResourceSystem->getVFS()->exists(scabbardName))
@@ -240,7 +243,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
             osg::Vec4f glowColor = getEnchantmentColor(*weapon);
             mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
             if (mScabbard)
-                mScabbard->getNode()->setUpdateCallback(new EmptyCallback);
+                resetControllers(mScabbard->getNode());
         }
 
         return;
@@ -265,7 +268,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         if (!weaponNode->getNumChildren())
         {
             osg::ref_ptr<osg::Node> fallbackNode = mResourceSystem->getSceneManager()->getInstance(mesh, weaponNode);
-            fallbackNode->setUpdateCallback(new EmptyCallback);
+            resetControllers(fallbackNode);
         }
 
         if (isEnchanted)
@@ -328,32 +331,32 @@ void ActorAnimation::updateQuiver()
             suitableAmmo = ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Arrow;
     }
 
-    if (ammoNode && suitableAmmo)
+    if (!suitableAmmo)
+        return;
+
+    // We should not show more ammo than equipped and more than quiver mesh has
+    ammoCount = std::min(ammoCount, ammoNode->getNumChildren());
+
+    // Remove existing ammo nodes
+    for (unsigned int i=0; i<ammoNode->getNumChildren(); ++i)
     {
-        // We should not show more ammo than equipped and more than quiver mesh has
-        ammoCount = std::min(ammoCount, ammoNode->getNumChildren());
+        osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
+        if (!arrowNode->getNumChildren())
+            continue;
 
-        // Remove existing ammo nodes
-        for (unsigned int i=0; i<ammoNode->getNumChildren(); ++i)
-        {
-            osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
-            if (!arrowNode->getNumChildren())
-                continue;
+        osg::ref_ptr<osg::Node> arrowChildNode = arrowNode->getChild(0);
+        arrowNode->removeChild(arrowChildNode);
+    }
 
-            osg::ref_ptr<osg::Node> arrowChildNode = arrowNode->getChild(0);
-            arrowNode->removeChild(arrowChildNode);
-        }
-
-        // Add new ones
-        osg::Vec4f glowColor = getEnchantmentColor(*ammo);
-        std::string model = ammo->getClass().getModel(*ammo);
-        for (unsigned int i=0; i<ammoCount; ++i)
-        {
-            osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
-            osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
-            if (!ammo->getClass().getEnchantment(*ammo).empty())
-                addGlow(arrow, glowColor);
-        }
+    // Add new ones
+    osg::Vec4f glowColor = getEnchantmentColor(*ammo);
+    std::string model = ammo->getClass().getModel(*ammo);
+    for (unsigned int i=0; i<ammoCount; ++i)
+    {
+        osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
+        osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
+        if (!ammo->getClass().getEnchantment(*ammo).empty())
+            addGlow(arrow, glowColor);
     }
 }
 

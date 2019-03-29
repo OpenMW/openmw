@@ -85,6 +85,8 @@ namespace CSVDoc
 
             void setupDebugMenu();
 
+            void setupHelpMenu();
+
             void setupUi();
 
             void setupShortcut(const char* name, QAction* action);
@@ -164,6 +166,10 @@ namespace CSVDoc
             void save();
 
             void exit();
+
+            void infoAbout();
+
+            void infoAboutQt();
 
             void verify();
 

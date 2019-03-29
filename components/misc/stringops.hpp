@@ -1,7 +1,6 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
-#include <cctype>
 #include <cstring>
 #include <string>
 #include <algorithm>
@@ -26,36 +25,7 @@ public:
     /// Don't use tolower(int) because that depends on global locale.
     static char toLower(char c)
     {
-        switch(c)
-        {
-        case 'A':return 'a';
-        case 'B':return 'b';
-        case 'C':return 'c';
-        case 'D':return 'd';
-        case 'E':return 'e';
-        case 'F':return 'f';
-        case 'G':return 'g';
-        case 'H':return 'h';
-        case 'I':return 'i';
-        case 'J':return 'j';
-        case 'K':return 'k';
-        case 'L':return 'l';
-        case 'M':return 'm';
-        case 'N':return 'n';
-        case 'O':return 'o';
-        case 'P':return 'p';
-        case 'Q':return 'q';
-        case 'R':return 'r';
-        case 'S':return 's';
-        case 'T':return 't';
-        case 'U':return 'u';
-        case 'V':return 'v';
-        case 'W':return 'w';
-        case 'X':return 'x';
-        case 'Y':return 'y';
-        case 'Z':return 'z';
-        default:return c;
-        };
+        return (c >= 'A' && c <= 'Z') ? c + 'a' - 'A' : c;
     }
 
     static Utf8Stream::UnicodeChar toLowerUtf8(Utf8Stream::UnicodeChar ch)
@@ -239,6 +209,32 @@ public:
               str.replace(found, whatLen, with, withLen);
               offset = found + withLen;
         }
+        return str;
+    }
+
+    /** @brief Replaces the first occurrence of a string in another string.
+     *
+     * @param str The string to operate on.
+     * @param what The string to replace.
+     * @param with The replacement string.
+     * @param whatLen The length of the string to replace.
+     * @param withLen The length of the replacement string.
+     *
+     * @return A reference to the string passed in @p str.
+     */
+    static std::string &replace(std::string &str, const char *what, const char *with,
+                                std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
+    {
+        if (whatLen == std::string::npos)
+            whatLen = strlen(what);
+
+        if (withLen == std::string::npos)
+            withLen = strlen(with);
+
+        std::size_t found;
+        if ((found = str.find(what)) != std::string::npos)
+            str.replace(found, whatLen, with, withLen);
+
         return str;
     }
 };

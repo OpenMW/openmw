@@ -3,7 +3,6 @@
 #include <iomanip>
 
 #include <osg/PositionAttitudeTransform>
-#include <osg/ComputeBoundsVisitor>
 
 #include <components/debug/debuglog.hpp>
 
@@ -34,7 +33,6 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aipackage.hpp"
 
-#include "../mwrender/effectmanager.hpp"
 #include "../mwrender/animation.hpp"
 #include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"
@@ -204,12 +202,6 @@ namespace MWWorld
         }
 
         osg::ref_ptr<osg::Node> projectile = mResourceSystem->getSceneManager()->getInstance(model, attachTo);
-
-        osg::ref_ptr<osg::ComputeBoundsVisitor> boundVisitor = new osg::ComputeBoundsVisitor();
-        projectile->accept(*boundVisitor.get());
-        osg::BoundingBox bb = boundVisitor->getBoundingBox();
-
-        state.mNode->setPivotPoint(bb.center()); 
 
         if (state.mIdMagic.size() > 1)
             for (size_t iter = 1; iter != state.mIdMagic.size(); ++iter)
@@ -466,24 +458,14 @@ namespace MWWorld
             osg::Vec3f pos(it->mNode->getPosition());
             osg::Vec3f newPos = pos + it->mVelocity * duration;
 
-            osg::Quat orient;
-
-            if (it->mThrown)            
-                orient.set(
-                    osg::Matrixd::rotate(it->mEffectAnimationTime->getTime() * -10.0,osg::Vec3f(0,0,1)) *
-                    osg::Matrixd::rotate(osg::PI / 2.0,osg::Vec3f(0,1,0)) *
-                    osg::Matrixd::rotate(-1 * osg::PI / 2.0,osg::Vec3f(1,0,0)) *
-                    osg::Matrixd::inverse(
-                        osg::Matrixd::lookAt(
-                            osg::Vec3f(0,0,0),
-                            it->mVelocity,
-                            osg::Vec3f(0,0,1))
-                        )
-                    );
-            else
+            // rotation does not work well for throwing projectiles - their roll angle will depend on shooting direction.
+            if (!it->mThrown)
+            {
+                osg::Quat orient;
                 orient.makeRotate(osg::Vec3f(0,1,0), it->mVelocity);
+                it->mNode->setAttitude(orient);
+            }
 
-            it->mNode->setAttitude(orient);
             it->mNode->setPosition(newPos);
 
             update(*it, duration);

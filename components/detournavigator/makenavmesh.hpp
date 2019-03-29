@@ -20,14 +20,6 @@ namespace DetourNavigator
     class RecastMesh;
     struct Settings;
 
-    enum class UpdateNavMeshStatus
-    {
-        ignore,
-        removed,
-        add,
-        replaced
-    };
-
     inline float getLength(const osg::Vec2i& value)
     {
         return std::sqrt(float(osg::square(value.x()) + osg::square(value.y())));
@@ -41,7 +33,7 @@ namespace DetourNavigator
     inline bool shouldAddTile(const TilePosition& changedTile, const TilePosition& playerTile, int maxTiles)
     {
         const auto expectedTilesCount = std::ceil(osg::PI * osg::square(getDistance(changedTile, playerTile)));
-        return expectedTilesCount * 3 <= maxTiles;
+        return expectedTilesCount <= maxTiles;
     }
 
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);

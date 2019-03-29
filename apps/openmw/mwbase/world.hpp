@@ -57,7 +57,7 @@ namespace MWMechanics
 
 namespace DetourNavigator
 {
-    class Navigator;
+    struct Navigator;
 }
 
 namespace MWWorld
@@ -134,6 +134,7 @@ namespace MWBase
 
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
+            virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
             virtual const MWWorld::ESMStore& getStore() const = 0;
 
@@ -587,7 +588,7 @@ namespace MWBase
 
             virtual bool isPlayerInJail() const = 0;
 
-            virtual void rest() = 0;
+            virtual void rest(double hours) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
@@ -615,6 +616,9 @@ namespace MWBase
             virtual void removeActorPath(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual void setNavMeshNumberToRender(const std::size_t value) = 0;
+
+            /// Return physical half extents of the given actor to be used in pathfinding
+            virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
     };
 }
 

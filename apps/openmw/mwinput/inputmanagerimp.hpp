@@ -179,6 +179,7 @@ namespace MWInput
         bool mInvertY;
 
         bool mControlsDisabled;
+        bool mJoystickEnabled;
 
         float mCameraSensitivity;
         float mCameraYMultiplier;
@@ -187,6 +188,7 @@ namespace MWInput
 
         bool mMouseLookEnabled;
         bool mGuiCursorEnabled;
+        bool mGamepadGuiCursorEnabled;
 
         bool mDetectingKeyboard;
 
@@ -195,9 +197,12 @@ namespace MWInput
         float mGuiCursorX;
         float mGuiCursorY;
         int mMouseWheel;
+        float mGamepadZoom;
         bool mUserFileExists;
         bool mAlwaysRunActive;
         bool mSneakToggles;
+        float mSneakToggleShortcutTimer;
+        bool mSneakGamepadShortcut;
         bool mSneaking;
         bool mAttemptJump;
 
@@ -218,6 +223,9 @@ namespace MWInput
 
         void setPlayerControlsEnabled(bool enabled);
         void handleGuiArrowKey(int action);
+        // Return true if GUI consumes input.
+        bool gamepadToGuiControl(const SDL_ControllerButtonEvent &arg, bool release);
+        bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
 
@@ -225,6 +233,7 @@ namespace MWInput
 
     private:
         void toggleMainMenu();
+        void toggleOptionsMenu();
         void toggleSpell();
         void toggleWeapon();
         void toggleInventory();
@@ -316,6 +325,8 @@ namespace MWInput
             A_LookLeftRight,
             A_MoveForwardBackward,
             A_MoveLeftRight,
+
+            A_OptionsMenu,
 
             A_Last            // Marker for the last item
         };

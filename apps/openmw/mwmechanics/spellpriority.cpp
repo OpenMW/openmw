@@ -3,6 +3,7 @@
 
 #include <components/esm/loadench.hpp>
 #include <components/esm/loadmgef.hpp>
+#include <components/esm/loadspel.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -11,12 +12,10 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
-#include "../mwworld/actionequip.hpp"
 #include "../mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
-#include "combat.hpp"
 
 namespace
 {
@@ -171,7 +170,7 @@ namespace MWMechanics
 
             float rating = rateEffects(enchantment->mEffects, actor, enemy);
 
-            rating *= 2; // prefer rechargable magic items over spells
+            rating *= 1.25f; // prefer rechargable magic items over spells
             return rating;
         }
 

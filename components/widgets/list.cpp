@@ -3,7 +3,6 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_ImageBox.h>
-#include <MyGUI_ScrollBar.h>
 
 namespace Gui
 {

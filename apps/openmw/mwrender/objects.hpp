@@ -2,7 +2,6 @@
 #define GAME_RENDER_OBJECTS_H
 
 #include <map>
-#include <memory>
 #include <string>
 
 #include <osg/ref_ptr>

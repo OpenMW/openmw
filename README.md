@@ -105,3 +105,4 @@ Command line options
       --export-fonts [=arg(=1)] (=0)        Export Morrowind .fnt fonts to PNG
                                             image and XML file in current directory
       --activate-dist arg (=-1)             activation distance override
+      --random-seed arg (=<impl defined>)   seed value for random number generator

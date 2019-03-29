@@ -3,8 +3,12 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
-#include "character.hpp"
+namespace osg
+{
+    class Vec3f;
+}
 
 namespace MWWorld
 {
@@ -14,6 +18,8 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    class CharacterController;
+
     class Objects
     {
         typedef std::map<MWWorld::Ptr,CharacterController*> PtrControllerMap;

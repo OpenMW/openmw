@@ -8,11 +8,12 @@
 #include <MyGUI_TabControl.h>
 
 #include <boost/algorithm/string.hpp>
-#include <boost/math/common_factor.hpp>
 
 #include <SDL_video.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
+#include <components/misc/gcd.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
 
@@ -58,7 +59,7 @@ namespace
 
     std::string getAspect (int x, int y)
     {
-        int gcd = boost::math::gcd (x, y);
+        int gcd = Misc::gcd (x, y);
         int xaspect = x / gcd;
         int yaspect = y / gcd;
         // special case: 8 : 5 is usually referred to as 16:10
@@ -125,7 +126,8 @@ namespace MWGui
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
                 std::string valueStr;
-                if (getSettingValueType(current) == "Float")
+                std::string valueType = getSettingValueType(current);
+                if (valueType == "Float" || valueType == "Integer")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
                     float min,max;
@@ -159,7 +161,7 @@ namespace MWGui
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
             std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            boost::algorithm::replace_all(labelCaption, "%s", value);
+            Misc::StringUtils::replaceAll(labelCaption, "%s", value.c_str(), 2);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }
@@ -184,6 +186,7 @@ namespace MWGui
         getWidget(mKeyboardSwitch, "KeyboardButton");
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
+        getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -207,6 +210,7 @@ namespace MWGui
         mResolutionList->eventListChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onResolutionSelected);
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
+        mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -226,11 +230,10 @@ namespace MWGui
             resolutions.push_back(std::make_pair(mode.w, mode.h));
         }
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
-        for (std::vector < std::pair<int, int> >::const_iterator it=resolutions.begin();
-             it!=resolutions.end(); ++it)
+        for (std::pair<int, int>& resolution : resolutions)
         {
-            std::string str = MyGUI::utility::toString(it->first) + " x " + MyGUI::utility::toString(it->second)
-                    + " (" + getAspect(it->first,it->second) + ")";
+            std::string str = MyGUI::utility::toString(resolution.first) + " x " + MyGUI::utility::toString(resolution.second)
+                    + " (" + getAspect(resolution.first, resolution.second) + ")";
 
             if (mResolutionList->findItemIndexWith(str) == MyGUI::ITEM_NONE)
                 mResolutionList->addItem(str);
@@ -240,13 +243,17 @@ namespace MWGui
         std::string tmip = Settings::Manager::getString("texture mipmap", "General");
         mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
 
-        int waterTextureSize = Settings::Manager::getInt ("rtt size", "Water");
+        int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
         if (waterTextureSize >= 512)
             mWaterTextureSize->setIndexSelected(0);
         if (waterTextureSize >= 1024)
             mWaterTextureSize->setIndexSelected(1);
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
+
+        int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        waterReflectionDetail = std::min(4, std::max(0, waterReflectionDetail));
+        mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -324,6 +331,13 @@ namespace MWGui
         else if (pos == 2)
             size = 2048;
         Settings::Manager::setInt("rtt size", "Water", size);
+        apply();
+    }
+
+    void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        unsigned int level = std::min((unsigned int)4, (unsigned int)pos);
+        Settings::Manager::setInt("reflection detail", "Water", level);
         apply();
     }
 
@@ -410,14 +424,18 @@ namespace MWGui
         if (getSettingType(scroller) == "Slider")
         {
             std::string valueStr;
-            if (getSettingValueType(scroller) == "Float")
+            std::string valueType = getSettingValueType(scroller);
+            if (valueType == "Float" || valueType == "Integer")
             {
                 float value = pos / float(scroller->getScrollRange()-1);
 
                 float min,max;
                 getSettingMinMax(scroller, min, max);
                 value = min + (max-min) * value;
-                Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
+                if (valueType == "Float")
+                    Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
+                else
+                    Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), (int)value);
                 valueStr = MyGUI::utility::toString(int(value));
             }
             else
@@ -475,17 +493,17 @@ namespace MWGui
         else
             actions = MWBase::Environment::get().getInputManager()->getActionControllerSorting();
 
-        for (std::vector<int>::const_iterator it = actions.begin(); it != actions.end(); ++it)
+        for (const int& action : actions)
         {
-            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (*it);
+            std::string desc = MWBase::Environment::get().getInputManager()->getActionDescription (action);
             if (desc == "")
                 continue;
 
             std::string binding;
             if(mKeyboardMode)
-                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(*it);
+                binding = MWBase::Environment::get().getInputManager()->getActionKeyBindingName(action);
             else
-                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(*it);
+                binding = MWBase::Environment::get().getInputManager()->getActionControllerBindingName(action);
 
             Gui::SharedStateButton* leftText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(), MyGUI::Align::Default);
             leftText->setCaptionWithReplacing(desc);
@@ -493,7 +511,7 @@ namespace MWGui
             Gui::SharedStateButton* rightText = mControlsBox->createWidget<Gui::SharedStateButton>("SandTextButton", MyGUI::IntCoord(), MyGUI::Align::Default);
             rightText->setCaptionWithReplacing(binding);
             rightText->setTextAlign (MyGUI::Align::Right);
-            rightText->setUserData(*it); // save the action id for callbacks
+            rightText->setUserData(action); // save the action id for callbacks
             rightText->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onRebindAction);
             rightText->eventMouseWheel += MyGUI::newDelegate(this, &SettingsWindow::onInputTabMouseWheel);
 

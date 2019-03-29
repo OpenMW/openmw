@@ -387,6 +387,21 @@ namespace MWWorld
 
         assert(plugin < mStatic.size());
 
+        // Replace texture for records with given ID and index from all plugins.
+        for (unsigned int i=0; i<mStatic.size(); i++)
+        {
+            ESM::LandTexture* tex = const_cast<ESM::LandTexture*>(search(lt.mIndex, i));
+            if (tex)
+            {
+                const std::string texId = Misc::StringUtils::lowerCase(tex->mId);
+                const std::string ltId = Misc::StringUtils::lowerCase(lt.mId);
+                if (texId == ltId)
+                {
+                    tex->mTexture = lt.mTexture;
+                }
+            }
+        }
+
         LandTextureList &ltexl = mStatic[plugin];
         if(lt.mIndex + 1 > (int)ltexl.size())
             ltexl.resize(lt.mIndex+1);
@@ -420,10 +435,9 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::Land>::~Store()
     {
-        for (std::vector<ESM::Land *>::const_iterator it =
-                         mStatic.begin(); it != mStatic.end(); ++it)
+        for (const ESM::Land* staticLand : mStatic)
         {
-            delete *it;
+            delete staticLand;
         }
 
     }
@@ -737,15 +751,16 @@ namespace MWWorld
     }
     const ESM::Cell *Store<ESM::Cell>::searchExtByName(const std::string &id) const
     {
-        ESM::Cell *cell = 0;
-        std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
-        for (; it != mSharedExt.end(); ++it) {
-            if (Misc::StringUtils::ciEqual((*it)->mName, id)) {
-                if ( cell == 0 ||
-                    ( (*it)->mData.mX > cell->mData.mX ) ||
-                    ( (*it)->mData.mX == cell->mData.mX && (*it)->mData.mY > cell->mData.mY ) )
+        const ESM::Cell *cell = nullptr;
+        for (const ESM::Cell *sharedCell : mSharedExt)
+        {
+            if (Misc::StringUtils::ciEqual(sharedCell->mName, id))
+            {
+                if (cell == 0 ||
+                    (sharedCell->mData.mX > cell->mData.mX) ||
+                    (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
                 {
-                    cell = *it;
+                    cell = sharedCell;
                 }
             }
         }
@@ -753,15 +768,16 @@ namespace MWWorld
     }
     const ESM::Cell *Store<ESM::Cell>::searchExtByRegion(const std::string &id) const
     {
-        ESM::Cell *cell = 0;
-        std::vector<ESM::Cell *>::const_iterator it = mSharedExt.begin();
-        for (; it != mSharedExt.end(); ++it) {
-            if (Misc::StringUtils::ciEqual((*it)->mRegion, id)) {
-                if ( cell == 0 ||
-                    ( (*it)->mData.mX > cell->mData.mX ) ||
-                    ( (*it)->mData.mX == cell->mData.mX && (*it)->mData.mY > cell->mData.mY ) )
+        const ESM::Cell *cell = nullptr;
+        for (const ESM::Cell *sharedCell : mSharedExt)
+        {
+            if (Misc::StringUtils::ciEqual(sharedCell->mRegion, id))
+            {
+                if (cell == nullptr ||
+                    (sharedCell->mData.mX > cell->mData.mX) ||
+                    (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
                 {
-                    cell = *it;
+                    cell = sharedCell;
                 }
             }
         }
@@ -775,9 +791,9 @@ namespace MWWorld
     {
         list.reserve(list.size() + mSharedInt.size());
 
-        std::vector<ESM::Cell *>::const_iterator it = mSharedInt.begin();
-        for (; it != mSharedInt.end(); ++it) {
-            list.push_back((*it)->mName);
+        for (const ESM::Cell *sharedCell : mSharedInt)
+        {
+            list.push_back(sharedCell->mName);
         }
     }
     ESM::Cell *Store<ESM::Cell>::insert(const ESM::Cell &cell)

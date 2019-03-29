@@ -1,12 +1,10 @@
 #include "object.hpp"
-#include "convert.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/nifosg/particle.hpp>
 #include <components/resource/bulletshape.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-
-#include <osg/Object>
+#include <components/misc/convert.hpp>
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
@@ -28,7 +26,7 @@ namespace MWPhysics
         mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
         setScale(ptr.getCellRef().getScale());
-        setRotation(toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+        setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
         const float* pos = ptr.getRefData().getPosition().pos;
         setOrigin(btVector3(pos[0], pos[1], pos[2]));
     }
@@ -114,7 +112,7 @@ namespace MWPhysics
             matrix.orthoNormalize(matrix);
 
             btTransform transform;
-            transform.setOrigin(toBullet(matrix.getTrans()) * compound->getLocalScaling());
+            transform.setOrigin(Misc::Convert::toBullet(matrix.getTrans()) * compound->getLocalScaling());
             for (int i=0; i<3; ++i)
                 for (int j=0; j<3; ++j)
                     transform.getBasis()[i][j] = matrix(j,i); // NB column/row major difference

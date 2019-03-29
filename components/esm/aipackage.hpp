@@ -16,10 +16,9 @@ namespace ESM
 
     struct AIData
     {
-        unsigned char mHello;
-        char mU1;
+        unsigned short mHello; // This is the base value for greeting distance [0, 65535]
         unsigned char mFight, mFlee, mAlarm; // These are probabilities [0, 100]
-        char mU2, mU3, mU4; // Unknown values
+        char mU1, mU2, mU3; // Unknown values
         int mServices; // See the Services enum
 
         void blank();

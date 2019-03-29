@@ -173,6 +173,18 @@ namespace Nif
         data.post(nif);
     }
 
+    void NiRollController::read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        data.read(nif);
+    }
+
+    void NiRollController::post(NIFFile *nif)
+    {
+        Controller::post(nif);
+        data.post(nif);
+    }
+
     void NiGeomMorpherController::read(NIFStream *nif)
     {
         Controller::read(nif);

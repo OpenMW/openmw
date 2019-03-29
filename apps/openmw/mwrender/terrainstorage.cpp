@@ -1,7 +1,5 @@
 #include "terrainstorage.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -22,6 +20,15 @@ namespace MWRender
     TerrainStorage::~TerrainStorage()
     {
         mResourceSystem->removeResourceManager(mLandManager.get());
+    }
+
+    bool TerrainStorage::hasData(int cellX, int cellY)
+    {
+        const MWWorld::ESMStore &esmStore =
+             MWBase::Environment::get().getWorld()->getStore();
+
+        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
+        return land != nullptr;
     }
 
     void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)

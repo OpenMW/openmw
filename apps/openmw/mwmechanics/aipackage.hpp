@@ -7,8 +7,6 @@
 #include "obstacle.hpp"
 #include "aistate.hpp"
 
-#include <boost/optional.hpp>
-
 namespace MWWorld
 {
     class Ptr;

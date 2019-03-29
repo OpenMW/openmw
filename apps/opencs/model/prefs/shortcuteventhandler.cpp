@@ -195,7 +195,7 @@ namespace CSMPrefs
         // Only activate the best match; in exact conflicts, this will favor the first shortcut added.
         if (!potentials.empty())
         {
-            std::sort(potentials.begin(), potentials.end(), ShortcutEventHandler::sort);
+            std::stable_sort(potentials.begin(), potentials.end(), ShortcutEventHandler::sort);
             Shortcut* shortcut = potentials.front().second;
 
             if (shortcut->getModifierStatus() && shortcut->getSecondaryMode() == Shortcut::SM_Replace)
@@ -325,7 +325,7 @@ namespace CSMPrefs
         if (left.first == Matches_WithMod && right.first == Matches_NoMod)
             return true;
         else
-            return left.second->getPosition() >= right.second->getPosition();
+            return left.second->getPosition() > right.second->getPosition();
     }
 
     void ShortcutEventHandler::widgetDestroyed()

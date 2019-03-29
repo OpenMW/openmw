@@ -37,9 +37,9 @@ size_t InventoryItemModel::getItemCount()
 ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
 {
     size_t i = 0;
-    for (std::vector<ItemStack>::iterator it = mItems.begin(); it != mItems.end(); ++it)
+    for (ItemStack& itemStack : mItems)
     {
-        if (*it == item)
+        if (itemStack == item)
             return i;
         ++i;
     }

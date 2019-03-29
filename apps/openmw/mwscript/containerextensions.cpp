@@ -2,13 +2,10 @@
 
 #include <stdexcept>
 
-#include <boost/format.hpp>
-
 #include <MyGUI_LanguageManager.h>
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 
 #include <components/interpreter/interpreter.hpp>
@@ -22,14 +19,13 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/actionequip.hpp"
+#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
-#include "interpretercontext.hpp"
 #include "ref.hpp"
 
 namespace MWScript
@@ -64,7 +60,19 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
-                    MWWorld::Ptr itemPtr = *ptr.getClass().getContainerStore (ptr).add (item, count, ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    // Create a Ptr for the first added item to recover the item name later
+                    MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
+                    if (itemPtr.getClass().getScript(itemPtr).empty())
+                    {
+                        store.add (item, count-1, ptr);
+                    }
+                    else
+                    {
+                        // Adding just one item per time to make sure there isn't a stack of scripted items
+                        for (int i = 1; i < count; i++)
+                            store.add (item, 1, ptr);
+                    }
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
@@ -75,13 +83,13 @@ namespace MWScript
                         if (count == 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
-                            msgBox = boost::str(boost::format(msgBox) % itemName);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
-                            msgBox = boost::str(boost::format(msgBox) % count % itemName);
+                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(count).c_str(), 2);
                         }
+                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
@@ -143,8 +151,13 @@ namespace MWScript
 
                     std::string itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
+                    {
                         if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
+                        {
                             itemName = iter->getClass().getName(*iter);
+                            break;
+                        }
+                    }
 
                     int numRemoved = store.remove(item, count, ptr);
 
@@ -155,16 +168,16 @@ namespace MWScript
                         // The two GMST entries below expand to strings informing the player of what, and how many of it has been removed from their inventory
                         std::string msgBox;
 
-                        if(numRemoved > 1)
+                        if (numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
-                            msgBox = boost::str (boost::format(msgBox) % numRemoved % itemName);
+                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(numRemoved).c_str(), 2);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
-                            msgBox = boost::str (boost::format(msgBox) % itemName);
                         }
+                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }

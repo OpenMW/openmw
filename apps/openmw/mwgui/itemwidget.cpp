@@ -156,12 +156,19 @@ namespace MWGui
 
     void SpellWidget::setSpellIcon(const std::string& icon)
     {
-        if (mFrame)
+        if (mFrame && !mCurrentFrame.empty())
+        {
+            mCurrentFrame.clear();
             mFrame->setImageTexture("");
-        if (mItemShadow)
-            mItemShadow->setImageTexture(icon);
-        if (mItem)
-            mItem->setImageTexture(icon);
+        }
+        if (mCurrentIcon != icon)
+        {
+            mCurrentIcon = icon;
+            if (mItemShadow)
+                mItemShadow->setImageTexture(icon);
+            if (mItem)
+                mItem->setImageTexture(icon);
+        }
     }
 
 }

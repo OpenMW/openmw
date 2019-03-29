@@ -234,10 +234,10 @@ namespace MWRender
 
     GlobalMap::~GlobalMap()
     {
-        for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-            removeCamera(*it);
-        for (CameraVector::iterator it = mActiveCameras.begin(); it != mActiveCameras.end(); ++it)
-            removeCamera(*it);
+        for (auto& camera : mCamerasPendingRemoval)
+            removeCamera(camera);
+        for (auto& camera : mActiveCameras)
+            removeCamera(camera);
 
         if (mWorkItem)
             mWorkItem->waitTillDone();
@@ -293,7 +293,7 @@ namespace MWRender
         camera->setViewMatrix(osg::Matrix::identity());
         camera->setProjectionMatrix(osg::Matrix::identity());
         camera->setProjectionResizePolicy(osg::Camera::FIXED);
-        camera->setRenderOrder(osg::Camera::PRE_RENDER);
+        camera->setRenderOrder(osg::Camera::PRE_RENDER, 1); // Make sure the global map is rendered after the local map
         y = mHeight - y - height; // convert top-left origin to bottom-left
         camera->setViewport(x, y, width, height);
 
@@ -581,8 +581,8 @@ namespace MWRender
 
     void GlobalMap::cleanupCameras()
     {
-        for (CameraVector::iterator it = mCamerasPendingRemoval.begin(); it != mCamerasPendingRemoval.end(); ++it)
-            removeCamera(*it);
+        for (auto& camera : mCamerasPendingRemoval)
+            removeCamera(camera);
 
         mCamerasPendingRemoval.clear();
 

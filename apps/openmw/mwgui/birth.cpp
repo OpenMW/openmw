@@ -145,35 +145,35 @@ namespace MWGui
         // sort by name
         std::vector < std::pair<std::string, const ESM::BirthSign*> > birthSigns;
 
-        MWWorld::Store<ESM::BirthSign>::iterator it = signs.begin();
-        for (; it != signs.end(); ++it)
+        for (const ESM::BirthSign& sign : signs)
         {
-            birthSigns.push_back(std::make_pair(it->mId, &(*it)));
+            birthSigns.push_back(std::make_pair(sign.mId, &sign));
         }
         std::sort(birthSigns.begin(), birthSigns.end(), sortBirthSigns);
 
         int index = 0;
-        for (std::vector<std::pair<std::string, const ESM::BirthSign*> >::const_iterator it2 = birthSigns.begin();
-             it2 != birthSigns.end(); ++it2, ++index)
+        for (auto& birthsignPair : birthSigns)
         {
-            mBirthList->addItem(it2->second->mName, it2->first);
+            mBirthList->addItem(birthsignPair.second->mName, birthsignPair.first);
             if (mCurrentBirthId.empty())
             {
                 mBirthList->setIndexSelected(index);
-                mCurrentBirthId = it2->first;
+                mCurrentBirthId = birthsignPair.first;
             }
-            else if (Misc::StringUtils::ciEqual(it2->first, mCurrentBirthId))
+            else if (Misc::StringUtils::ciEqual(birthsignPair.first, mCurrentBirthId))
             {
                 mBirthList->setIndexSelected(index);
             }
+
+            index++;
         }
     }
 
     void BirthDialog::updateSpells()
     {
-        for (std::vector<MyGUI::Widget*>::iterator it = mSpellItems.begin(); it != mSpellItems.end(); ++it)
+        for (MyGUI::Widget* widget : mSpellItems)
         {
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         }
         mSpellItems.clear();
 

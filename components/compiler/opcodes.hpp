@@ -150,6 +150,7 @@ namespace Compiler
     namespace Dialogue
     {
         const int opcodeJournal = 0x2000133;
+        const int opcodeJournalExplicit = 0x200030b;
         const int opcodeSetJournalIndex = 0x2000134;
         const int opcodeGetJournalIndex = 0x2000135;
         const int opcodeAddTopic = 0x200013a;

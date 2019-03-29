@@ -2,12 +2,12 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 
 #include "aicombataction.hpp"
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
 #include "steering.hpp"
 
 MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)

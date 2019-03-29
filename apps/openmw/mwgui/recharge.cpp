@@ -1,7 +1,5 @@
 #include "recharge.hpp"
 
-#include <boost/format.hpp>
-
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 
@@ -179,7 +177,8 @@ void Recharge::onItemClicked(MyGUI::Widget *sender, const MWWorld::Ptr& item)
     if (gem.getRefData().getCount() == 0)
     {
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage51")->mValue.getString();
-        message = boost::str(boost::format(message) % gem.getClass().getName(gem));
+        Misc::StringUtils::replace(message, "%s", gem.getClass().getName(gem).c_str(), 2);
+
         MWBase::Environment::get().getWindowManager()->messageBox(message);
 
         // special case: readd Azura's Star

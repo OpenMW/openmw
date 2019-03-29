@@ -46,10 +46,10 @@ namespace MWMechanics
     }
 
     const float PATHFIND_Z_REACH = 50.0f;
-    //static const float sMaxSlope = 49.0f; // duplicate as in physicssystem
     // distance after which actor (failed previously to shortcut) will try again
     const float PATHFIND_SHORTCUT_RETRY_DIST = 300.0f;
 
+    const float MIN_TOLERANCE = 1.0f;
     const float DEFAULT_TOLERANCE = 32.0f;
 
     // cast up-down ray with some offset from actor position to check for pits/obstacles on the way to target;
@@ -72,8 +72,13 @@ namespace MWMechanics
                 mCell = nullptr;
             }
 
+            void buildStraightPath(const osg::Vec3f& endPoint);
+
             void buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
+
+            void buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags);
 
             void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,

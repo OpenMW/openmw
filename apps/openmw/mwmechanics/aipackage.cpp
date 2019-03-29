@@ -1,7 +1,5 @@
 #include "aipackage.hpp"
 
-#include <cmath>
-
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -137,9 +135,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
             {
-                const osg::Vec3f playerHalfExtents = world->getHalfExtents(getPlayer()); // Using player half extents for better performance
+                const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
-                    playerHalfExtents, getNavigatorFlags(actor));
+                    pathfindingHalfExtents, getNavigatorFlags(actor));
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -169,7 +167,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         mTimer = 0;
     }
 
-    const float pointTolerance = std::min(actor.getClass().getSpeed(actor), DEFAULT_TOLERANCE);
+    const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
+            + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+    const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
     mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE);
 

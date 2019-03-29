@@ -1,7 +1,5 @@
 #include "shadervisitor.hpp"
 
-#include <iostream>
-
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
@@ -23,8 +21,7 @@ namespace Shader
 
     ShaderVisitor::ShaderRequirements::ShaderRequirements()
         : mShaderRequired(false)
-        , mColorMaterial(false)
-        , mVertexColorMode(GL_AMBIENT_AND_DIFFUSE)
+        , mColorMode(0)
         , mMaterialOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
@@ -40,8 +37,6 @@ namespace Shader
     ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
-        , mClampLighting(true)
-        , mForcePerPixelLighting(false)
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
@@ -56,16 +51,6 @@ namespace Shader
     void ShaderVisitor::setForceShaders(bool force)
     {
         mForceShaders = force;
-    }
-
-    void ShaderVisitor::setClampLighting(bool clamp)
-    {
-        mClampLighting = clamp;
-    }
-
-    void ShaderVisitor::setForcePerPixelLighting(bool force)
-    {
-        mForcePerPixelLighting = force;
     }
 
     void ShaderVisitor::apply(osg::Node& node)
@@ -217,6 +202,13 @@ namespace Shader
                     mRequirements.back().mShaderRequired = true;
                 }
             }
+
+            if (diffuseMap)
+            {
+                if (!writableStateSet)
+                    writableStateSet = getWritableStateSet(node);
+                writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
+            }
         }
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
@@ -230,8 +222,29 @@ namespace Shader
                         mRequirements.back().mMaterialOverridden = true;
 
                     const osg::Material* mat = static_cast<const osg::Material*>(it->second.first.get());
-                    mRequirements.back().mColorMaterial = (mat->getColorMode() != osg::Material::OFF);
-                    mRequirements.back().mVertexColorMode = mat->getColorMode();
+
+                    if (!writableStateSet)
+                        writableStateSet = getWritableStateSet(node);
+
+                    int colorMode;
+                    switch (mat->getColorMode())
+                    {
+                    case osg::Material::OFF:
+                        colorMode = 0;
+                        break;
+                    case GL_AMBIENT:
+                        colorMode = 3;
+                        break;
+                    default:
+                    case GL_AMBIENT_AND_DIFFUSE:
+                        colorMode = 2;
+                        break;
+                    case GL_EMISSION:
+                        colorMode = 1;
+                        break;
+                    }
+
+                    mRequirements.back().mColorMode = colorMode;
                 }
             }
         }
@@ -272,29 +285,9 @@ namespace Shader
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
-        if (!reqs.mColorMaterial)
-            defineMap["colorMode"] = "0";
-        else
-        {
-            switch (reqs.mVertexColorMode)
-            {
-            case GL_AMBIENT:
-                defineMap["colorMode"] = "3";
-                break;
-            default:
-            case GL_AMBIENT_AND_DIFFUSE:
-                defineMap["colorMode"] = "2";
-                break;
-            case GL_EMISSION:
-                defineMap["colorMode"] = "1";
-                break;
-            }
-        }
-
-        defineMap["forcePPL"] = mForcePerPixelLighting ? "1" : "0";
-        defineMap["clamp"] = mClampLighting ? "1" : "0";
-
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+
+        writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
 
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));

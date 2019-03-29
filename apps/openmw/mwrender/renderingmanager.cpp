@@ -1,6 +1,5 @@
 #include "renderingmanager.hpp"
 
-#include <stdexcept>
 #include <limits>
 #include <cstdlib>
 
@@ -39,6 +38,7 @@
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
+#include <components/sceneutil/shadow.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 #include <components/terrain/quadtreeworld.hpp>
@@ -219,9 +219,9 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders"));
+        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
+        // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
-        resourceSystem->getSceneManager()->setForcePerPixelLighting(Settings::Manager::getBool("force per pixel lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
         resourceSystem->getSceneManager()->setNormalMapPattern(Settings::Manager::getString("normal map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::Manager::getString("normal height map pattern", "Shaders"));
@@ -233,7 +233,31 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mRootNode->addChild(mSceneRoot);
+        int shadowCastingTraversalMask = Mask_Scene;
+        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Actor;
+        if (Settings::Manager::getBool("player shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Player;
+        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Terrain;
+
+        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
+        if (Settings::Manager::getBool("object shadows", "Shadows"))
+            shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
+
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
+
+        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
+        Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+
+        for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
+            globalDefines[itr->first] = itr->second;
+
+        globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
+        globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
+
+        // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
+        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
@@ -262,17 +286,35 @@ namespace MWRender
 
         mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
         mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        mTerrainStorage = new TerrainStorage(mResourceSystem, Settings::Manager::getString("normal map pattern", "Shaders"), Settings::Manager::getString("normal height map pattern", "Shaders"),
-                                             Settings::Manager::getBool("auto use terrain normal maps", "Shaders"), Settings::Manager::getString("terrain specular map pattern", "Shaders"),
-                                             Settings::Manager::getBool("auto use terrain specular maps", "Shaders"));
+
+        const std::string normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
+        const std::string heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
+        const std::string specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
+        const bool useTerrainNormalMaps = Settings::Manager::getBool("auto use terrain normal maps", "Shaders");
+        const bool useTerrainSpecularMaps = Settings::Manager::getBool("auto use terrain specular maps", "Shaders");
+
+        mTerrainStorage = new TerrainStorage(mResourceSystem, normalMapPattern, heightMapPattern, useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
 
         if (mDistantTerrain)
-            mTerrain.reset(new Terrain::QuadTreeWorld(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+        {
+            const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
+            int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
+            compMapPower = std::max(-3, compMapPower);
+            float compMapLevel = pow(2, compMapPower);
+            const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
+            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
+            float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
+            maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
+            mTerrain.reset(new Terrain::QuadTreeWorld(
+                sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug,
+                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+        }
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
 
         mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        mTerrain->setWorkQueue(mWorkQueue.get());
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -330,8 +372,10 @@ namespace MWRender
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
-        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
+        float fov = Settings::Manager::getFloat("field of view", "Camera");
+        mFieldOfView = std::min(std::max(1.f, fov), 179.f);
+        float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
+        mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
@@ -443,7 +487,7 @@ namespace MWRender
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
         mSunLight->setDiffuse(diffuse);
         mSunLight->setSpecular(diffuse);
-        mSunLight->setDirection(osg::Vec3f(1.f,-1.f,-1.f));
+        mSunLight->setPosition(osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f));
     }
 
     void RenderingManager::setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular)
@@ -491,6 +535,10 @@ namespace MWRender
     void RenderingManager::setSkyEnabled(bool enabled)
     {
         mSky->setEnabled(enabled);
+        if (enabled)
+            mShadowManager->enableOutdoorMode();
+        else
+            mShadowManager->enableIndoorMode();
     }
 
     bool RenderingManager::toggleBorders()
@@ -1153,6 +1201,12 @@ namespace MWRender
 
         mUniformNear->set(mNearClip);
         mUniformFar->set(mViewDistance);
+
+        // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
+        // Limit FOV here just for sure, otherwise viewing distance can be too high.
+        fov = std::min(mFieldOfView, 140.f);
+        float distanceMult = std::cos(osg::DegreesToRadians(fov)/2.f);
+        mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
     }
 
     void RenderingManager::updateTextureFiltering()
@@ -1401,8 +1455,8 @@ namespace MWRender
         {
             try
             {
-                const auto locked = it->second.lockConst();
-                mNavMesh->update(locked->getValue(), mNavMeshNumber, locked->getGeneration(),
+                const auto locked = it->second->lockConst();
+                mNavMesh->update(locked->getImpl(), mNavMeshNumber, locked->getGeneration(),
                                  locked->getNavMeshRevision(), mNavigator.getSettings());
             }
             catch (const std::exception& e)

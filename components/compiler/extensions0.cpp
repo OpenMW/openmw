@@ -175,7 +175,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
-            extensions.registerInstruction ("journal", "cl", opcodeJournal);
+            extensions.registerInstruction ("journal", "cl", opcodeJournal, opcodeJournalExplicit);
             extensions.registerInstruction ("setjournalindex", "cl", opcodeSetJournalIndex);
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);

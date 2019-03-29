@@ -278,11 +278,9 @@ namespace MWGui
         std::set<int> skillSet;
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
-        boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator end = ESM::Skill::sSkillIds.end();
         mMiscSkills.clear();
-        for (boost::array<ESM::Skill::SkillEnum, ESM::Skill::Length>::const_iterator it = ESM::Skill::sSkillIds.begin(); it != end; ++it)
+        for (const int skill : ESM::Skill::sSkillIds)
         {
-            int skill = *it;
             if (skillSet.find(skill) == skillSet.end())
                 mMiscSkills.push_back(skill);
         }
@@ -435,16 +433,11 @@ namespace MWGui
 
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-        SkillList::const_iterator end = skills.end();
-        for (SkillList::const_iterator it = skills.begin(); it != end; ++it)
+        for (const int skillId : skills)
         {
-            int skillId = *it;
             if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
             const std::string &skillNameId = ESM::Skill::sSkillNameIds[skillId];
-            const MWMechanics::SkillValue &stat = mSkillValues.find(skillId)->second;
-            int base = stat.getBase();
-            int modified = stat.getModified();
 
             const MWWorld::ESMStore &esmStore =
                 MWBase::Environment::get().getWorld()->getStore();
@@ -456,13 +449,9 @@ namespace MWGui
             const ESM::Attribute* attr =
                 esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
-            std::string state = "normal";
-            if (modified > base)
-                state = "increased";
-            else if (modified < base)
-                state = "decreased";
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = addValueItem(MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
-                MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
+                "", "normal", coord1, coord2);
+            mSkillWidgetMap[skillId] = widgets;
 
             for (int i=0; i<2; ++i)
             {
@@ -473,27 +462,9 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("ImageTexture_SkillImage", icon);
                 mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Range_SkillProgress", "100");
-                if (base < 100)
-                {
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillMaxed", "false");
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillMaxed", "true");
-
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillProgressVBox", "true");
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillProgressVBox", "false");
-
-                    setSkillProgress(mSkillWidgets[mSkillWidgets.size()-1-i], stat.getProgress(), skillId);
-                }
-                else
-                {
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillMaxed", "true");
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillMaxed", "false");
-
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("Visible_SkillProgressVBox", "false");
-                    mSkillWidgets[mSkillWidgets.size()-1-i]->setUserString("UserData^Hidden_SkillProgressVBox", "true");
-                }
             }
 
-            mSkillWidgetMap[skillId] = widgets;
+            setValue(static_cast<ESM::Skill::SkillEnum>(skillId), mSkillValues.find(skillId)->second);
         }
     }
 
@@ -501,9 +472,9 @@ namespace MWGui
     {
         mChanged = false;
 
-        for (std::vector<MyGUI::Widget*>::iterator it = mSkillWidgets.begin(); it != mSkillWidgets.end(); ++it)
+        for (MyGUI::Widget* widget : mSkillWidgets)
         {
-            MyGUI::Gui::getInstance().destroyWidget(*it);
+            MyGUI::Gui::getInstance().destroyWidget(widget);
         }
         mSkillWidgets.clear();
 
@@ -552,11 +523,11 @@ namespace MWGui
             const std::set<std::string> &expelled = PCstats.getExpelled();
 
             bool firstFaction=true;
-            FactionList::const_iterator end = mFactions.end();
-            for (FactionList::const_iterator it = mFactions.begin(); it != end; ++it)
+            for (auto& factionPair : mFactions)
             {
+                const std::string& factionId = factionPair.first;
                 const ESM::Faction *faction =
-                    store.get<ESM::Faction>().find(it->first);
+                    store.get<ESM::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;
 
@@ -577,11 +548,11 @@ namespace MWGui
 
                 text += std::string("#{fontcolourhtml=header}") + faction->mName;
 
-                if (expelled.find(it->first) != expelled.end())
+                if (expelled.find(factionId) != expelled.end())
                     text += "\n#{fontcolourhtml=normal}#{sExpelled}";
                 else
                 {
-                    int rank = it->second;
+                    int rank = factionPair.second;
                     rank = std::max(0, std::min(9, rank));
                     text += std::string("\n#{fontcolourhtml=normal}") + faction->mRanks[rank];
 

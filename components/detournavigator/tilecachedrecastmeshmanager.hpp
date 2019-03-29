@@ -8,6 +8,7 @@
 
 #include <map>
 #include <mutex>
+#include <set>
 
 namespace DetourNavigator
 {
@@ -19,7 +20,8 @@ namespace DetourNavigator
         bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
+        std::vector<TilePosition> updateObject(const ObjectId id, const btCollisionShape& shape,
+                                               const btTransform& transform, const AreaType areaType);
 
         boost::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
@@ -43,9 +45,19 @@ namespace DetourNavigator
     private:
         const Settings& mSettings;
         Misc::ScopeGuarded<std::map<TilePosition, CachedRecastMeshManager>> mTiles;
-        std::unordered_map<ObjectId, std::vector<TilePosition>> mObjectsTilesPositions;
+        std::unordered_map<ObjectId, std::set<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::size_t mRevision = 0;
+
+        bool addTile(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+                     const AreaType areaType, const TilePosition& tilePosition, float border,
+                     std::map<TilePosition, CachedRecastMeshManager>& tiles);
+
+        bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
+                        const TilePosition& tilePosition, std::map<TilePosition, CachedRecastMeshManager>& tiles);
+
+        boost::optional<RemovedRecastMeshObject> removeTile(const ObjectId id, const TilePosition& tilePosition,
+                                                            std::map<TilePosition, CachedRecastMeshManager>& tiles);
     };
 }
 

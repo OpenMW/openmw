@@ -39,6 +39,7 @@ namespace DetourNavigator
             std::reference_wrapper<const btCollisionShape> mShape;
             btTransform mTransform;
             AreaType mAreaType;
+            btVector3 mLocalScaling;
             std::vector<RecastMeshObject> mChildren;
 
             static bool updateCompoundObject(const btCompoundShape& shape, const AreaType areaType,

@@ -5,6 +5,7 @@
 #include <osg/Group>
 
 #include "chunkmanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace Terrain
 {
@@ -61,6 +62,10 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if (parent)
             parent->addChild(node);
 
+        osg::UserDataContainer* udc = node->getUserDataContainer();
+        if (udc && udc->getUserData())
+            mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));
+
         return node;
     }
 }
@@ -84,7 +89,7 @@ void TerrainGrid::loadCell(int x, int y)
 
 void TerrainGrid::unloadCell(int x, int y)
 {
-    MWRender::CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
+    CellBorder::CellGrid::iterator it = mGrid.find(std::make_pair(x,y));
     if (it == mGrid.end())
         return;
 

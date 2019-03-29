@@ -1,8 +1,5 @@
 #include "riggeometry.hpp"
 
-#include <stdexcept>
-#include <cstdlib>
-
 #include <osg/Version>
 
 #include <components/debug/debuglog.hpp>
@@ -43,8 +40,8 @@ RigGeometry::RigGeometry()
     , mLastFrameNumber(0)
     , mBoundsFirstFrame(true)
 {
-    setUpdateCallback(new osg::Callback); // dummy to make sure getNumChildrenRequiringUpdateTraversal() is correct
-                                          // update done in accept(NodeVisitor&)
+    setNumChildrenRequiringUpdateTraversal(1);
+    // update done in accept(NodeVisitor&)
 }
 
 RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
@@ -57,6 +54,7 @@ RigGeometry::RigGeometry(const RigGeometry &copy, const osg::CopyOp &copyop)
     , mBoundsFirstFrame(true)
 {
     setSourceGeometry(copy.mSourceGeometry);
+    setNumChildrenRequiringUpdateTraversal(1);
 }
 
 void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
@@ -71,6 +69,8 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
         to.setCullingActive(false); // make sure to disable culling since that's handled by this class
+        to.setComputeBoundingBoxCallback(new CopyBoundingBoxCallback());
+        to.setComputeBoundingSphereCallback(new CopyBoundingSphereCallback());
 
         // vertices and normals are modified every frame, so we need to deep copy them.
         // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
@@ -296,6 +296,14 @@ void RigGeometry::updateBounds(osg::NodeVisitor *nv)
         _boundingSphereComputed = true;
         for (unsigned int i=0; i<getNumParents(); ++i)
             getParent(i)->dirtyBound();
+
+        for (unsigned int i = 0; i < 2; ++i)
+        {
+            osg::Geometry& geom = *mGeometry[i];
+            static_cast<CopyBoundingBoxCallback*>(geom.getComputeBoundingBoxCallback())->boundingBox = _boundingBox;
+            static_cast<CopyBoundingSphereCallback*>(geom.getComputeBoundingSphereCallback())->boundingSphere = _boundingSphere;
+            geom.dirtyBound();
+        }
     }
 }
 

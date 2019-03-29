@@ -1,7 +1,10 @@
 #ifndef OPENMW_MECHANICS_TRADING_H
 #define OPENMW_MECHANICS_TRADING_H
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

@@ -141,13 +141,16 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
 
         if (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Preview)
         {
+            const CSMWorld::UniversalId id = getUniversalId(currentRow);
+            const CSMWorld::UniversalId::Type type = id.getType();
+
             QModelIndex index = mModel->index (row,
                 mModel->findColumnIndex (CSMWorld::Columns::ColumnId_Modification));
 
             CSMWorld::RecordBase::State state = static_cast<CSMWorld::RecordBase::State> (
                 mModel->data (index).toInt());
 
-            if (state!=CSMWorld::RecordBase::State_Deleted)
+            if (state!=CSMWorld::RecordBase::State_Deleted && type != CSMWorld::UniversalId::Type_ItemLevelledList)
                 menu.addAction (mPreviewAction);
         }
     }

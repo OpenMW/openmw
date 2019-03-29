@@ -1,7 +1,6 @@
 #include "storage.hpp"
 
 #include <set>
-#include <iostream>
 
 #include <OpenThreads/ScopedLock>
 
@@ -46,19 +45,6 @@ namespace ESMTerrain
     LandObject::~LandObject()
     {
     }
-
-    const ESM::Land::LandData *LandObject::getData(int flags) const
-    {
-        if ((mData.mDataLoaded & flags) != flags)
-            return nullptr;
-        return &mData;
-    }
-
-    int LandObject::getPlugin() const
-    {
-        return mLand->mPlugin;
-    }
-
 
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
@@ -159,7 +145,7 @@ namespace ESMTerrain
         normal.normalize();
     }
 
-    void Storage::fixColour (osg::Vec4f& color, int cellX, int cellY, int col, int row, LandCache& cache)
+    void Storage::fixColour (osg::Vec4ub& color, int cellX, int cellY, int col, int row, LandCache& cache)
     {
         if (col == ESM::Land::LAND_SIZE-1)
         {
@@ -176,22 +162,22 @@ namespace ESMTerrain
         const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : 0;
         if (data)
         {
-            color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3] / 255.f;
-            color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1] / 255.f;
-            color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2] / 255.f;
+            color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3];
+            color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1];
+            color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2];
         }
         else
         {
-            color.r() = 1;
-            color.g() = 1;
-            color.b() = 1;
+            color.r() = 255;
+            color.g() = 255;
+            color.b() = 255;
         }
     }
 
     void Storage::fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                             osg::ref_ptr<osg::Vec3Array> positions,
                                             osg::ref_ptr<osg::Vec3Array> normals,
-                                            osg::ref_ptr<osg::Vec4Array> colours)
+                                            osg::ref_ptr<osg::Vec4ubArray> colours)
     {
         // LOD level n means every 2^n-th vertex is kept
         size_t increment = static_cast<size_t>(1) << lodLevel;
@@ -208,7 +194,7 @@ namespace ESMTerrain
         colours->resize(numVerts*numVerts);
 
         osg::Vec3f normal;
-        osg::Vec4f color;
+        osg::Vec4ub color;
 
         float vertY = 0;
         float vertX = 0;
@@ -296,20 +282,20 @@ namespace ESMTerrain
                         if (colourData)
                         {
                             for (int i=0; i<3; ++i)
-                                color[i] = colourData->mColours[srcArrayIndex+i] / 255.f;
+                                color[i] = colourData->mColours[srcArrayIndex+i];
                         }
                         else
                         {
-                            color.r() = 1;
-                            color.g() = 1;
-                            color.b() = 1;
+                            color.r() = 255;
+                            color.g() = 255;
+                            color.b() = 255;
                         }
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
                         if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
                             fixColour(color, cellX, cellY, col, row, cache);
 
-                        color.a() = 1;
+                        color.a() = 255;
 
                         (*colours)[static_cast<unsigned int>(vertX*numVerts + vertY)] = color;
 
@@ -389,8 +375,7 @@ namespace ESMTerrain
         return texture;
     }
 
-    void Storage::getBlendmaps(float chunkSize, const osg::Vec2f &chunkCenter,
-        bool pack, ImageVector &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
+    void Storage::getBlendmaps(float chunkSize, const osg::Vec2f &chunkCenter, ImageVector &blendmaps, std::vector<Terrain::LayerInfo> &layerList)
     {
         osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize/2.f, chunkSize/2.f);
         int cellX = static_cast<int>(std::floor(origin.x()));
@@ -430,11 +415,8 @@ namespace ESMTerrain
             layerList.push_back(getLayerInfo(getTextureName(*it)));
         }
 
-        int numTextures = textureIndices.size();
-        // numTextures-1 since the base layer doesn't need blending
-        int numBlendmaps = pack ? static_cast<int>(std::ceil((numTextures - 1) / 4.f)) : (numTextures - 1);
-
-        int channels = pack ? 4 : 1;
+        // size-1 since the base layer doesn't need blending
+        int numBlendmaps = textureIndices.size() - 1;
 
         // Second iteration - create and fill in the blend maps
         const int blendmapSize = (realTextureSize-1) * chunkSize + 1;
@@ -444,10 +426,8 @@ namespace ESMTerrain
 
         for (int i=0; i<numBlendmaps; ++i)
         {
-            GLenum format = pack ? GL_RGBA : GL_ALPHA;
-
             osg::ref_ptr<osg::Image> image (new osg::Image);
-            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, format, GL_UNSIGNED_BYTE);
+            image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
             unsigned char* pData = image->data();
 
             for (int y=0; y<blendmapSize; ++y)
@@ -457,18 +437,16 @@ namespace ESMTerrain
                     UniqueTextureId id = getVtexIndexAt(cellX, cellY, x+rowStart, y+colStart, cache);
                     assert(textureIndicesMap.find(id) != textureIndicesMap.end());
                     int layerIndex = textureIndicesMap.find(id)->second;
-                    int blendIndex = (pack ? static_cast<int>(std::floor((layerIndex - 1) / 4.f)) : layerIndex - 1);
-                    int channel = pack ? std::max(0, (layerIndex-1) % 4) : 0;
 
-                    int alpha = (blendIndex == i) ? 255 : 0;
+                    int alpha = (layerIndex == i+1) ? 255 : 0;
 
                     int realY = (blendmapSize - y - 1)*imageScaleFactor;
                     int realX = x*imageScaleFactor;
 
-                    pData[((realY+0)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 0)*channels + channel] = alpha;
-                    pData[((realY+0)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
-                    pData[((realY+1)*blendmapImageSize + realX + 1)*channels + channel] = alpha;
+                    pData[(realY+0)*blendmapImageSize + realX + 0] = alpha;
+                    pData[(realY+1)*blendmapImageSize + realX + 0] = alpha;
+                    pData[(realY+0)*blendmapImageSize + realX + 1] = alpha;
+                    pData[(realY+1)*blendmapImageSize + realX + 1] = alpha;
                 }
             }
             blendmaps.push_back(image);

@@ -14,6 +14,8 @@
 
 #include <LinearMath/btVector3.h>
 
+#include <components/misc/convert.hpp>
+
 #include <boost/optional.hpp>
 
 #include <osg/Vec3f>
@@ -25,16 +27,6 @@ class dtNavMesh;
 namespace DetourNavigator
 {
     struct Settings;
-
-    inline osg::Vec3f makeOsgVec3f(const float* values)
-    {
-        return osg::Vec3f(values[0], values[1], values[2]);
-    }
-
-    inline osg::Vec3f makeOsgVec3f(const btVector3& value)
-    {
-        return osg::Vec3f(value.x(), value.y(), value.z());
-    }
 
     inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r, const float h)
     {
@@ -81,21 +73,28 @@ namespace DetourNavigator
             return *this;
         }
 
-        OutputTransformIterator& operator ++(int)
+        OutputTransformIterator& operator ++()
         {
-            mImpl++;
+            ++mImpl.get();
             return *this;
+        }
+
+        OutputTransformIterator operator ++(int)
+        {
+            const auto copy = *this;
+            ++(*this);
+            return copy;
         }
 
         OutputTransformIterator& operator =(const osg::Vec3f& value)
         {
-            *mImpl = fromNavMeshCoordinates(mSettings, value);
+            *mImpl.get() = fromNavMeshCoordinates(mSettings, value);
             return *this;
         }
 
     private:
-        OutputIterator& mImpl;
-        const Settings& mSettings;
+        std::reference_wrapper<OutputIterator> mImpl;
+        std::reference_wrapper<const Settings> mSettings;
     };
 
     inline void initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
@@ -167,7 +166,7 @@ namespace DetourNavigator
 
     template <class OutputIterator>
     OutputIterator makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery,
-            const dtQueryFilter& filter, const osg::Vec3f& start, const osg::Vec3f& end,
+            const dtQueryFilter& filter, const osg::Vec3f& start, const osg::Vec3f& end, const float stepSize,
             std::vector<dtPolyRef> polygonPath, std::size_t maxSmoothPathSize, OutputIterator out)
     {
         // Iterate over the path to find smooth path on the detail mesh surface.
@@ -177,7 +176,6 @@ namespace DetourNavigator
         osg::Vec3f targetPos;
         navMeshQuery.closestPointOnPoly(polygonPath.back(), end.ptr(), targetPos.ptr(), 0);
 
-        const float STEP_SIZE = 0.5f;
         const float SLOP = 0.01f;
 
         *out++ = iterPos;
@@ -201,10 +199,10 @@ namespace DetourNavigator
             const osg::Vec3f delta = steerTarget->steerPos - iterPos;
             float len = delta.length();
             // If the steer target is end of path or off-mesh link, do not move past the location.
-            if ((endOfPath || offMeshConnection) && len < STEP_SIZE)
+            if ((endOfPath || offMeshConnection) && len < stepSize)
                 len = 1;
             else
-                len = STEP_SIZE / len;
+                len = stepSize / len;
 
             const osg::Vec3f moveTgt = iterPos + delta * len;
             const auto result = moveAlongSurface(navMeshQuery, polygonPath.front(), iterPos, moveTgt, filter, 16);
@@ -274,7 +272,7 @@ namespace DetourNavigator
     }
 
     template <class OutputIterator>
-    OutputIterator findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
+    OutputIterator findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const float stepSize,
             const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
             const Settings& settings, OutputIterator out)
     {
@@ -316,7 +314,7 @@ namespace DetourNavigator
         if (polygonPath.empty() || polygonPath.back() != endRef)
             return out;
 
-        makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, std::move(polygonPath),
+        makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize, std::move(polygonPath),
             settings.mMaxSmoothPathSize, OutputTransformIterator<OutputIterator>(out, settings));
 
         return out;

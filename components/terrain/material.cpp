@@ -1,13 +1,10 @@
 #include "material.hpp"
 
-#include <stdexcept>
-
 #include <osg/Fog>
 #include <osg/Depth>
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 #include <osg/TexMat>
-#include <osg/Material>
 #include <osg/BlendFunc>
 
 #include <components/shader/shadermanager.hpp>
@@ -156,7 +153,7 @@ namespace
 
 namespace Terrain
 {
-    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, bool forcePerPixelLighting, bool clampLighting, Shader::ShaderManager* shaderManager, const std::vector<TextureLayer> &layers,
+    std::vector<osg::ref_ptr<osg::StateSet> > createPasses(bool useShaders, Shader::ShaderManager* shaderManager, const std::vector<TextureLayer> &layers,
                                                            const std::vector<osg::ref_ptr<osg::Texture2D> > &blendmaps, int blendmapScale, float layerTileSize)
     {
         std::vector<osg::ref_ptr<osg::StateSet> > passes;
@@ -214,11 +211,8 @@ namespace Terrain
                 }
 
                 Shader::ShaderManager::DefineMap defineMap;
-                defineMap["forcePPL"] = forcePerPixelLighting ? "1" : "0";
-                defineMap["clamp"] = clampLighting ? "1" : "0";
                 defineMap["normalMap"] = (it->mNormalMap) ? "1" : "0";
                 defineMap["blendMap"] = !firstLayer ? "1" : "0";
-                defineMap["colorMode"] = "2";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = (it->mNormalMap && it->mParallax) ? "1" : "0";
 
@@ -227,10 +221,11 @@ namespace Terrain
                 if (!vertexShader || !fragmentShader)
                 {
                     // Try again without shader. Error already logged by above
-                    return createPasses(false, forcePerPixelLighting, clampLighting, shaderManager, layers, blendmaps, blendmapScale, layerTileSize);
+                    return createPasses(false, shaderManager, layers, blendmaps, blendmapScale, layerTileSize);
                 }
 
                 stateset->setAttributeAndModes(shaderManager->getProgram(vertexShader, fragmentShader));
+                stateset->addUniform(new osg::Uniform("colorMode", 2));
             }
             else
             {

@@ -285,6 +285,7 @@ namespace MWScript
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Dialogue::opcodeJournal, new OpJournal<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Dialogue::opcodeJournalExplicit, new OpJournal<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeSetJournalIndex, new OpSetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeGetJournalIndex, new OpGetJournalIndex);
             interpreter.installSegment5 (Compiler::Dialogue::opcodeAddTopic, new OpAddTopic);

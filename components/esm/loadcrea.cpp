@@ -22,8 +22,9 @@ namespace ESM {
         mTransport.mList.clear();
 
         mScale = 1.f;
-        mHasAI = false;
         mAiData.blank();
+        mAiData.mFight = 90;
+        mAiData.mFlee = 20;
 
         bool hasName = false;
         bool hasNpdt = false;
@@ -68,7 +69,6 @@ namespace ESM {
                     break;
                 case ESM::FourCC<'A','I','D','T'>::value:
                     esm.getHExact(&mAiData, sizeof(mAiData));
-                    mHasAI = true;
                     break;
                 case ESM::FourCC<'D','O','D','T'>::value:
                 case ESM::FourCC<'D','N','A','M'>::value:
@@ -128,14 +128,7 @@ namespace ESM {
 
         mInventory.save(esm);
         mSpells.save(esm);
-        if (mAiData.mHello != 0
-            || mAiData.mFight != 0
-            || mAiData.mFlee != 0
-            || mAiData.mAlarm != 0
-            || mAiData.mServices != 0)
-        {
-            esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
-        }
+        esm.writeHNT("AIDT", mAiData, sizeof(mAiData));
         mTransport.save(esm);
         mAiPackage.save(esm);
     }
@@ -159,8 +152,9 @@ namespace ESM {
         mOriginal.clear();
         mInventory.mList.clear();
         mSpells.mList.clear();
-        mHasAI = false;
         mAiData.blank();
+        mAiData.mFight = 90;
+        mAiData.mFlee = 20;
         mAiPackage.mList.clear();
         mTransport.mList.clear();
     }

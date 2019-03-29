@@ -1,3 +1,6 @@
+#ifndef OPENMW_COMPONENTS_SCENEUTIL_DETOURDEBUGDRAW_H
+#define OPENMW_COMPONENTS_SCENEUTIL_DETOURDEBUGDRAW_H
+
 #include <DebugDraw.h>
 
 #include <osg/Geometry>
@@ -48,3 +51,5 @@ namespace SceneUtil
         void addColor(osg::Vec4f&& value);
     };
 }
+
+#endif

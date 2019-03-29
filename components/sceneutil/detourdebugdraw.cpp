@@ -102,7 +102,6 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
         geometry->setStateSet(stateSet);
-        geometry->setUseDisplayList(false);
         geometry->setVertexArray(mVertices);
         geometry->setColorArray(mColors, osg::Array::BIND_PER_VERTEX);
         geometry->addPrimitiveSet(new osg::DrawArrays(mMode, 0, static_cast<int>(mVertices->size())));

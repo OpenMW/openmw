@@ -1,8 +1,6 @@
 #ifndef OPENMW_MWWORLD_RECORDCMP_H
 #define OPENMW_MWWORLD_RECORDCMP_H
 
-#include <cctype>
-
 #include <components/esm/records.hpp>
 
 #include <components/misc/stringops.hpp>

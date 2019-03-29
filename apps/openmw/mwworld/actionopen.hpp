@@ -2,8 +2,6 @@
 #define GAME_MWWORLD_ACTIONOPEN_H
 
 #include "action.hpp"
-#include "ptr.hpp"
-
 
 namespace MWWorld
 {

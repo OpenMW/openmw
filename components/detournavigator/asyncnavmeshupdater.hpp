@@ -44,17 +44,27 @@ namespace DetourNavigator
 
         void wait();
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+
     private:
         struct Job
         {
             osg::Vec3f mAgentHalfExtents;
-            SharedNavMeshCacheItem mNavMeshCacheItem;
+            std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
             TilePosition mChangedTile;
-            std::tuple<ChangeType, int, int> mPriority;
+            unsigned mTryNumber;
+            ChangeType mChangeType;
+            int mDistanceToPlayer;
+            int mDistanceToOrigin;
+
+            std::tuple<unsigned, ChangeType, int, int> getPriority() const
+            {
+                return std::make_tuple(mTryNumber, mChangeType, mDistanceToPlayer, mDistanceToOrigin);
+            }
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
             {
-                return lhs.mPriority > rhs.mPriority;
+                return lhs.getPriority() > rhs.getPriority();
             }
         };
 
@@ -64,7 +74,7 @@ namespace DetourNavigator
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
         std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
         std::atomic_bool mShouldStop;
-        std::mutex mMutex;
+        mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::condition_variable mDone;
         Jobs mJobs;
@@ -76,13 +86,15 @@ namespace DetourNavigator
 
         void process() throw();
 
-        void processJob(const Job& job);
+        bool processJob(const Job& job);
 
         boost::optional<Job> getNextJob();
 
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
         std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
+
+        void repost(Job&& job);
     };
 }
 

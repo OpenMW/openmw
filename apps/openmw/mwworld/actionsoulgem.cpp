@@ -2,8 +2,7 @@
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
 
 namespace MWWorld

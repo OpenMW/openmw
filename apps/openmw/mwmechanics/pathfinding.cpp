@@ -262,10 +262,18 @@ namespace MWMechanics
         if (mPath.empty())
             return;
 
-        const auto tolerance = mPath.size() > 1 ? pointTolerance : destinationTolerance;
-
-        if (sqrDistanceIgnoreZ(mPath.front(), position) < tolerance * tolerance)
+        while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
             mPath.pop_front();
+
+        if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
+            mPath.pop_front();
+    }
+
+    void PathFinder::buildStraightPath(const osg::Vec3f& endPoint)
+    {
+        mPath.clear();
+        mPath.push_back(endPoint);
+        mConstructed = true;
     }
 
     void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
@@ -279,6 +287,16 @@ namespace MWMechanics
         mConstructed = true;
     }
 
+    void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+        const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags)
+    {
+        mPath.clear();
+
+        buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+
+        mConstructed = true;
+    }
+
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
         const DetourNavigator::Flags flags)
@@ -286,7 +304,8 @@ namespace MWMechanics
         mPath.clear();
         mCell = cell;
 
-        buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+        if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
+            buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
 
         if (mPath.empty())
             buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
@@ -300,8 +319,11 @@ namespace MWMechanics
     {
         try
         {
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-            navigator->findPath(halfExtents, startPoint, endPoint, flags, out);
+            const auto world = MWBase::Environment::get().getWorld();
+            const auto realHalfExtents = world->getHalfExtents(actor); // This may differ from halfExtents argument
+            const auto stepSize = 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
+            const auto navigator = world->getNavigator();
+            navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, out);
         }
         catch (const DetourNavigator::NavigatorException& exception)
         {

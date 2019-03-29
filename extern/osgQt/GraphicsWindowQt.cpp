@@ -18,10 +18,8 @@
 #include <QInputEvent>
 #include <QPointer>
 
-#if (QT_VERSION>=QT_VERSION_CHECK(4, 6, 0))
-# define USE_GESTURES
-# include <QGestureEvent>
-# include <QGesture>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include <QWindow>
 #endif
 
 using namespace osgQt;
@@ -128,6 +126,8 @@ bool GLWidget::event( QEvent* event )
 
 void GLWidget::resizeEvent( QResizeEvent* event )
 {
+    if (_gw == nullptr || !_gw->valid())
+        return;
     const QSize& size = event->size();
 
     int scaled_width = static_cast<int>(size.width()*_devicePixelRatio);
@@ -139,6 +139,8 @@ void GLWidget::resizeEvent( QResizeEvent* event )
 
 void GLWidget::moveEvent( QMoveEvent* event )
 {
+    if (_gw == nullptr || !_gw->valid())
+        return;
     const QPoint& pos = event->pos();
     int scaled_width = static_cast<int>(width()*_devicePixelRatio);
     int scaled_height = static_cast<int>(height()*_devicePixelRatio);
@@ -518,8 +520,11 @@ bool GraphicsWindowQt::releaseContextImplementation()
 
 void GraphicsWindowQt::swapBuffersImplementation()
 {
-    _widget->swapBuffers();
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    // QOpenGLContext complains if we swap on an non-exposed QWindow
+    if (!_widget || !_widget->windowHandle()->isExposed())
+        return;
+#endif
     // FIXME: the processDeferredEvents should really be executed in a GUI (main) thread context but
     // I couln't find any reliable way to do this. For now, lets hope non of *GUI thread only operations* will
     // be executed in a QGLWidget::event handler. On the other hand, calling GUI only operations in the
@@ -529,8 +534,8 @@ void GraphicsWindowQt::swapBuffersImplementation()
 
     // We need to call makeCurrent here to restore our previously current context
     // which may be changed by the processDeferredEvents function.
-    if (QGLContext::currentContext() != _widget->context())
-        _widget->makeCurrent();
+    _widget->makeCurrent();
+    _widget->swapBuffers();
 }
 
 void GraphicsWindowQt::requestWarpPointer( float x, float y )

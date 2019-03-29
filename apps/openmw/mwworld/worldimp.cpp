@@ -24,7 +24,8 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/detournavigator/debug.hpp>
-#include <components/detournavigator/navigator.hpp>
+#include <components/detournavigator/navigatorimpl.hpp>
+#include <components/detournavigator/navigatorstub.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -34,7 +35,6 @@
 #include "../mwbase/scriptmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/levelledlist.hpp"
@@ -47,7 +47,6 @@
 #include "../mwrender/camera.hpp"
 #include "../mwrender/vismask.hpp"
 
-#include "../mwscript/interpretercontext.hpp"
 #include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"
@@ -158,12 +157,12 @@ namespace MWWorld
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
         ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-        int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
-            const std::string& resourcePath, const std::string& userDataPath)
+        int activationDistanceOverride, const std::string& startCell,
+        const std::string& resourcePath, const std::string& userDataPath)
     : mResourceSystem(resourceSystem), mFallback(fallbackMap), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
-      mActivationDistanceOverride (activationDistanceOverride), mStartupScript(startupScript),
+      mActivationDistanceOverride (activationDistanceOverride),
       mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
@@ -198,40 +197,21 @@ namespace MWWorld
 
         mPhysics.reset(new MWPhysics::PhysicsSystem(resourceSystem, rootNode));
 
-        DetourNavigator::Settings navigatorSettings;
-        navigatorSettings.mBorderSize = Settings::Manager::getInt("border size", "Navigator");
-        navigatorSettings.mCellHeight = Settings::Manager::getFloat("cell height", "Navigator");
-        navigatorSettings.mCellSize = Settings::Manager::getFloat("cell size", "Navigator");
-        navigatorSettings.mDetailSampleDist = Settings::Manager::getFloat("detail sample dist", "Navigator");
-        navigatorSettings.mDetailSampleMaxError = Settings::Manager::getFloat("detail sample max error", "Navigator");
-        navigatorSettings.mMaxClimb = MWPhysics::sStepSizeUp;
-        navigatorSettings.mMaxSimplificationError = Settings::Manager::getFloat("max simplification error", "Navigator");
-        navigatorSettings.mMaxSlope = MWPhysics::sMaxSlope;
-        navigatorSettings.mRecastScaleFactor = Settings::Manager::getFloat("recast scale factor", "Navigator");
-        navigatorSettings.mSwimHeightScale = mSwimHeightScale;
-        navigatorSettings.mMaxEdgeLen = Settings::Manager::getInt("max edge len", "Navigator");
-        navigatorSettings.mMaxNavMeshQueryNodes = Settings::Manager::getInt("max nav mesh query nodes", "Navigator");
-        navigatorSettings.mMaxPolys = Settings::Manager::getInt("max polygons per tile", "Navigator");
-        navigatorSettings.mMaxVertsPerPoly = Settings::Manager::getInt("max verts per poly", "Navigator");
-        navigatorSettings.mRegionMergeSize = Settings::Manager::getInt("region merge size", "Navigator");
-        navigatorSettings.mRegionMinSize = Settings::Manager::getInt("region min size", "Navigator");
-        navigatorSettings.mTileSize = Settings::Manager::getInt("tile size", "Navigator");
-        navigatorSettings.mAsyncNavMeshUpdaterThreads = static_cast<std::size_t>(Settings::Manager::getInt("async nav mesh updater threads", "Navigator"));
-        navigatorSettings.mMaxNavMeshTilesCacheSize = static_cast<std::size_t>(Settings::Manager::getInt("max nav mesh tiles cache size", "Navigator"));
-        navigatorSettings.mMaxPolygonPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max polygon path size", "Navigator"));
-        navigatorSettings.mMaxSmoothPathSize = static_cast<std::size_t>(Settings::Manager::getInt("max smooth path size", "Navigator"));
-        navigatorSettings.mTrianglesPerChunk = static_cast<std::size_t>(Settings::Manager::getInt("triangles per chunk", "Navigator"));
-        navigatorSettings.mEnableWriteRecastMeshToFile = Settings::Manager::getBool("enable write recast mesh to file", "Navigator");
-        navigatorSettings.mEnableWriteNavMeshToFile = Settings::Manager::getBool("enable write nav mesh to file", "Navigator");
-        navigatorSettings.mRecastMeshPathPrefix = Settings::Manager::getString("recast mesh path prefix", "Navigator");
-        navigatorSettings.mNavMeshPathPrefix = Settings::Manager::getString("nav mesh path prefix", "Navigator");
-        navigatorSettings.mEnableRecastMeshFileNameRevision = Settings::Manager::getBool("enable recast mesh file name revision", "Navigator");
-        navigatorSettings.mEnableNavMeshFileNameRevision = Settings::Manager::getBool("enable nav mesh file name revision", "Navigator");
-        if (Settings::Manager::getBool("enable log", "Navigator"))
-            DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
-                new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
-        DetourNavigator::RecastGlobalAllocator::init();
-        mNavigator.reset(new DetourNavigator::Navigator(navigatorSettings));
+        if (auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager())
+        {
+            navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
+            navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
+            navigatorSettings->mSwimHeightScale = mSwimHeightScale;
+            if (Settings::Manager::getBool("enable log", "Navigator"))
+                DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
+                    new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
+            DetourNavigator::RecastGlobalAllocator::init();
+            mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
+        }
+        else
+        {
+            mNavigator.reset(new DetourNavigator::NavigatorStub());
+        }
 
         mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
@@ -326,9 +306,6 @@ namespace MWWorld
         // enable collision
         if (!mPhysics->toggleCollisionMode())
             mPhysics->toggleCollisionMode();
-
-        if (!mStartupScript.empty())
-            MWBase::Environment::get().getWindowManager()->executeInConsole(mStartupScript);
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
     }
@@ -429,7 +406,8 @@ namespace MWWorld
                 if (getPlayerPtr().isInCell())
                 {
                     mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
-                    mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                    if (getPlayerPtr().getCell()->isExterior())
+                        mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
                 }
                 break;
             default:
@@ -492,7 +470,7 @@ namespace MWWorld
         gmst["iWereWolfBounty"] = ESM::Variant(1000);
         gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
-        for (const std::pair<std::string, ESM::Variant> &params : gmst)
+        for (const auto &params : gmst)
         {
             if (!mStore.get<ESM::GameSetting>().search(params.first))
             {
@@ -522,7 +500,7 @@ namespace MWWorld
         globals["crimegoldturnin"] = ESM::Variant(0);
         globals["pchasturnin"] = ESM::Variant(0);
 
-        for (const std::pair<std::string, ESM::Variant> &params : globals)
+        for (const auto &params : globals)
         {
             if (!mStore.get<ESM::Global>().search(params.first))
             {
@@ -541,7 +519,7 @@ namespace MWWorld
         statics["templemarker"] = "marker_temple.nif";
         statics["travelmarker"] = "marker_travel.nif";
 
-        for (const std::pair<std::string, std::string> &params : statics)
+        for (const auto &params : statics)
         {
             if (!mStore.get<ESM::Static>().search(params.first))
             {
@@ -555,7 +533,7 @@ namespace MWWorld
         std::map<std::string, std::string> doors;
         doors["prisonmarker"] = "marker_prison.nif";
 
-        for (const std::pair<std::string, std::string> &params : doors)
+        for (const auto &params : doors)
         {
             if (!mStore.get<ESM::Door>().search(params.first))
             {
@@ -1317,6 +1295,9 @@ namespace MWWorld
             {
                 mPhysics->updatePosition(newPtr);
                 mPhysics->updatePtr(ptr, newPtr);
+
+                if (const auto object = mPhysics->getObject(newPtr))
+                    updateNavigatorObject(object);
             }
         }
         if (isPlayer)
@@ -1347,9 +1328,17 @@ namespace MWWorld
 
     void World::scaleObject (const Ptr& ptr, float scale)
     {
+        if (mPhysics->getActor(ptr))
+            mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
+
         ptr.getCellRef().setScale(scale);
 
         mWorldScene->updateObjectScale(ptr);
+
+        if (mPhysics->getActor(ptr))
+            mNavigator->addAgent(getPathfindingHalfExtents(ptr));
+        else if (const auto object = mPhysics->getObject(ptr))
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
     }
 
     void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
@@ -1389,7 +1378,12 @@ namespace MWWorld
         ptr.getRefData().setPosition(pos);
 
         if(ptr.getRefData().getBaseNode() != 0)
+        {
             mWorldScene->updateObjectRotation(ptr, true);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
+        }
     }
 
     void World::adjustPosition(const Ptr &ptr, bool force)
@@ -1583,19 +1577,20 @@ namespace MWWorld
 
     void World::updateNavigator()
     {
-        bool updated = false;
-
         mPhysics->forEachAnimatedObject([&] (const MWPhysics::Object* object)
         {
-            updated = updateNavigatorObject(object) || updated;
+            mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
         });
 
         for (const auto& door : mDoorStates)
             if (const auto object = mPhysics->getObject(door.first))
-                updated = updateNavigatorObject(object) || updated;
+                mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
 
-        if (updated)
+        if (mShouldUpdateNavigator)
+        {
             mNavigator->update(getPlayerPtr().getRefData().getPosition().asVec3());
+            mShouldUpdateNavigator = false;
+        }
     }
 
     bool World::updateNavigatorObject(const MWPhysics::Object* object)
@@ -1651,13 +1646,13 @@ namespace MWWorld
 
                 /// \todo should use convexSweepTest here
                 std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
-                for (std::vector<MWWorld::Ptr>::iterator cit = collisions.begin(); cit != collisions.end(); ++cit)
+                for (MWWorld::Ptr& ptr : collisions)
                 {
-                    MWWorld::Ptr ptr = *cit;
                     if (ptr.getClass().isActor())
                     {
                         // Collided with actor, ask actor to try to avoid door
-                        if(ptr != getPlayerPtr() ) {
+                        if(ptr != getPlayerPtr() )
+                        {
                             MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
                             if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
                                 seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
@@ -2427,7 +2422,7 @@ namespace MWWorld
         {
             // Remove the old CharacterController
             MWBase::Environment::get().getMechanicsManager()->remove(getPlayerPtr());
-            mNavigator->removeAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+            mNavigator->removeAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
             mPhysics->remove(getPlayerPtr());
             mRendering->removePlayer(getPlayerPtr());
 
@@ -2462,7 +2457,8 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mNavigator->addAgent(mPhysics->getHalfExtents(getPlayerPtr()));
+        mDefaultHalfExtents = mPhysics->getOriginalHalfExtents(getPlayerPtr());
+        mNavigator->addAgent(getPathfindingHalfExtents(getPlayerConstPtr()));
     }
 
     World::RestPermitted World::canRest () const
@@ -3284,9 +3280,9 @@ namespace MWWorld
         return closestMarker;
     }
 
-    void World::rest()
+    void World::rest(double hours)
     {
-        mCells.rest();
+        mCells.rest(hours);
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
@@ -3435,6 +3431,11 @@ namespace MWWorld
     MWWorld::Ptr World::getPlayerPtr()
     {
         return mPlayer->getPlayer();
+    }
+
+    MWWorld::ConstPtr World::getPlayerConstPtr() const
+    {
+        return mPlayer->getConstPlayer();
     }
 
     void World::updateDialogueGlobals()
@@ -3602,18 +3603,17 @@ namespace MWWorld
                              const std::string& id, const std::string& sourceName, const bool fromProjectile)
     {
         std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> > toApply;
-        for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = effects.mList.begin();
-             effectIt != effects.mList.end(); ++effectIt)
+        for (const ESM::ENAMstruct& effectInfo : effects.mList)
         {
-            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectIt->mEffectID);
+            const ESM::MagicEffect* effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
 
-            if (effectIt->mRange != rangeType || (effectIt->mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
+            if (effectInfo.mRange != rangeType || (effectInfo.mArea <= 0 && !ignore.isEmpty() && ignore.getClass().isActor()))
                 continue; // Not right range type, or not area effect and hit an actor
 
-            if (fromProjectile && effectIt->mArea <= 0)
+            if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectIt->mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect
@@ -3625,14 +3625,14 @@ namespace MWWorld
 
             std::string texture = effect->mParticle;
 
-            if (effectIt->mArea <= 0)
+            if (effectInfo.mArea <= 0)
             {
-                if (effectIt->mRange == ESM::RT_Target)
+                if (effectInfo.mRange == ESM::RT_Target)
                     mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, 1.0f);
                 continue;
             }
             else
-                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectIt->mArea * 2));
+                mRendering->spawnEffect("meshes\\" + areaStatic->mModel, texture, origin, static_cast<float>(effectInfo.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
             static const std::string schools[] = {
@@ -3648,40 +3648,40 @@ namespace MWWorld
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
             MWBase::Environment::get().getMechanicsManager()->getObjectsInRange(
-                        origin, feetToGameUnits(static_cast<float>(effectIt->mArea)), objects);
+                        origin, feetToGameUnits(static_cast<float>(effectInfo.mArea)), objects);
             for (const Ptr& affected : objects)
             {
                 // Ignore actors without collisions here, otherwise it will be possible to hit actors outside processing range.
                 if (affected.getClass().isActor() && !isActorCollisionEnabled(affected))
                     continue;
 
-                toApply[affected].push_back(*effectIt);
+                toApply[affected].push_back(effectInfo);
             }
         }
 
         // Now apply the appropriate effects to each actor in range
-        for (std::map<MWWorld::Ptr, std::vector<ESM::ENAMstruct> >::iterator apply = toApply.begin(); apply != toApply.end(); ++apply)
+        for (auto& applyPair : toApply)
         {
             MWWorld::Ptr source = caster;
             // Vanilla-compatible behaviour of never applying the spell to the caster
             // (could be changed by mods later)
-            if (apply->first == caster)
+            if (applyPair.first == caster)
                 continue;
 
-            if (apply->first == ignore)
+            if (applyPair.first == ignore)
                 continue;
 
             if (source.isEmpty())
-                source = apply->first;
+                source = applyPair.first;
 
-            MWMechanics::CastSpell cast(source, apply->first);
+            MWMechanics::CastSpell cast(source, applyPair.first);
             cast.mHitPosition = origin;
             cast.mId = id;
             cast.mSourceName = sourceName;
             cast.mStack = false;
             ESM::EffectList effectsToApply;
-            effectsToApply.mList = apply->second;
-            cast.inflict(apply->first, caster, effectsToApply, rangeType, false, true);
+            effectsToApply.mList = applyPair.second;
+            cast.inflict(applyPair.first, caster, effectsToApply, rangeType, false, true);
         }
     }
 
@@ -3765,22 +3765,22 @@ namespace MWWorld
 
     void World::preloadEffects(const ESM::EffectList *effectList)
     {
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = effectList->mList.begin(); it != effectList->mList.end(); ++it)
+        for (const ESM::ENAMstruct& effectInfo : effectList->mList)
         {
-            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(it->mEffectID);
+            const ESM::MagicEffect *effect = mStore.get<ESM::MagicEffect>().find(effectInfo.mEffectID);
 
-            if (MWMechanics::isSummoningEffect(it->mEffectID))
+            if (MWMechanics::isSummoningEffect(effectInfo.mEffectID))
             {
                 preload(mWorldScene.get(), mStore, "VFX_Summon_Start");
-                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(it->mEffectID));
+                preload(mWorldScene.get(), mStore, MWMechanics::getSummonedCreature(effectInfo.mEffectID));
             }
 
             preload(mWorldScene.get(), mStore, effect->mCasting);
             preload(mWorldScene.get(), mStore, effect->mHit);
 
-            if (it->mArea > 0)
+            if (effectInfo.mArea > 0)
                 preload(mWorldScene.get(), mStore, effect->mArea);
-            if (it->mRange == ESM::RT_Target)
+            if (effectInfo.mRange == ESM::RT_Target)
                 preload(mWorldScene.get(), mStore, effect->mBolt);
         }
     }
@@ -3804,6 +3804,14 @@ namespace MWWorld
     void World::setNavMeshNumberToRender(const std::size_t value)
     {
         mRendering->setNavMeshNumber(value);
+    }
+
+    osg::Vec3f World::getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const
+    {
+        if (actor.isInCell() && actor.getCell()->isExterior())
+            return mDefaultHalfExtents; // Using default half extents for better performance
+        else
+            return getHalfExtents(actor);
     }
 
 }

@@ -1,7 +1,10 @@
 #ifndef OPENMW_MWMECHANICS_ACTORUTIL_H
 #define OPENMW_MWMECHANICS_ACTORUTIL_H
 
-#include "../mwworld/ptr.hpp"
+namespace MWWorld
+{
+    class Ptr;
+}
 
 namespace MWMechanics
 {

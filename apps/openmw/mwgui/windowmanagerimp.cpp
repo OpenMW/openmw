@@ -1,13 +1,11 @@
 #include "windowmanagerimp.hpp"
 
 #include <cassert>
-#include <iterator>
 
 #include <osgViewer/Viewer>
 
 #include <MyGUI_UString.h>
 #include <MyGUI_IPointer.h>
-#include <MyGUI_ResourceImageSetPointer.h>
 #include <MyGUI_TextureUtility.h>
 #include <MyGUI_FactoryManager.h>
 #include <MyGUI_LanguageManager.h>
@@ -38,7 +36,6 @@
 #include <components/translation/translation.hpp>
 
 #include <components/myguiplatform/myguiplatform.hpp>
-#include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/myguiplatform/myguirendermanager.hpp>
 #include <components/myguiplatform/additivelayer.hpp>
 #include <components/myguiplatform/scalinglayer.hpp>
@@ -47,13 +44,12 @@
 
 #include <components/widgets/tags.hpp>
 
-#include <components/sdlutil/sdlcursormanager.hpp>
-
 #include <components/misc/resourcehelpers.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwrender/vismask.hpp"
 
@@ -674,9 +670,9 @@ namespace MWGui
         // Delete any dialogs which are no longer in use
         if (!mGarbageDialogs.empty())
         {
-            for (std::vector<Layout*>::iterator it = mGarbageDialogs.begin(); it != mGarbageDialogs.end(); ++it)
+            for (Layout* widget : mGarbageDialogs)
             {
-                delete *it;
+                delete widget;
             }
             mGarbageDialogs.clear();
         }
@@ -1031,9 +1027,6 @@ namespace MWGui
 
         updateMap();
 
-        if (!mMap->isVisible())
-            mMap->onFrame(frameDuration);
-
         mHud->onFrame(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);
@@ -1215,14 +1208,13 @@ namespace MWGui
     {
         mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
 
-        for (Settings::CategorySettingVector::const_iterator it = changed.begin();
-            it != changed.end(); ++it)
+        for (const auto& setting : changed)
         {
-            if (it->first == "HUD" && it->second == "crosshair")
+            if (setting.first == "HUD" && setting.second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool ("crosshair", "HUD");
-            else if (it->first == "GUI" && it->second == "subtitles")
+            else if (setting.first == "GUI" && setting.second == "subtitles")
                 mSubtitlesEnabled = Settings::Manager::getBool ("subtitles", "GUI");
-            else if (it->first == "GUI" && it->second == "menu transparency")
+            else if (setting.first == "GUI" && setting.second == "menu transparency")
                 setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
         }
     }

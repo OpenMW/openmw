@@ -2,14 +2,11 @@
 
 #include <iomanip>
 
-#include <boost/format.hpp>
-
 #include <components/esm/loadclas.hpp>
 #include <components/esm/loadgmst.hpp>
 #include <components/esm/loadfact.hpp>
 #include <components/esm/npcstats.hpp>
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -252,16 +249,14 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
     MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
-    std::stringstream message;
+    std::string message = MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", "");
+    Misc::StringUtils::replace(message, "%s", ("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}").c_str(), 2);
+    Misc::StringUtils::replace(message, "%d", std::to_string(base).c_str(), 2);
 
     if (readBook)
-        message << std::string("#{sBookSkillMessage}\n");
-
-    message << boost::format(MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", ""))
-               % std::string("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}")
-               % static_cast<int> (base);
+        message = "#{sBookSkillMessage}\n" + message;
     
-    MWBase::Environment::get().getWindowManager ()->messageBox(message.str(), MWGui::ShowInDialogueMode_Never);
+    MWBase::Environment::get().getWindowManager ()->messageBox(message, MWGui::ShowInDialogueMode_Never);
 
     if (mLevelProgress >= gmst.find("iLevelUpTotal")->mValue.getInteger())
     {

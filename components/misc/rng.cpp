@@ -8,9 +8,9 @@ namespace Misc
 
     std::mt19937 Rng::generator = std::mt19937();
 
-    void Rng::init()
+    void Rng::init(unsigned int seed)
     {
-        generator.seed(static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count()));
+        generator.seed(seed);
     }
 
     float Rng::rollProbability()
@@ -28,4 +28,8 @@ namespace Misc
         return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(generator) : 0;
     }
 
+    unsigned int Rng::generateDefaultSeed()
+    {
+        return static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+    }
 }

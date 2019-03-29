@@ -1,15 +1,7 @@
 ﻿#include "physicssystem.hpp"
 
-#include <stdexcept>
-#include <unordered_map>
-#include <fstream>
-#include <array>
-
-#include <boost/optional.hpp>
-
 #include <osg/Group>
 
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
 #include <BulletCollision/CollisionShapes/btStaticPlaneShape.h>
@@ -21,12 +13,6 @@
 
 #include <LinearMath/btQuickprof.h>
 
-#include <DetourCommon.h>
-#include <DetourNavMesh.h>
-#include <DetourNavMeshBuilder.h>
-#include <DetourNavMeshQuery.h>
-#include <Recast.h>
-
 #include <components/nifbullet/bulletnifloader.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -35,6 +21,7 @@
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/misc/convert.hpp>
 
 #include <components/nifosg/particle.hpp> // FindRecIndexVisitor
 
@@ -50,14 +37,10 @@
 
 #include "../mwrender/bulletdebugdraw.hpp"
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include "../mwworld/class.hpp"
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
-#include "convert.hpp"
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
@@ -260,7 +243,7 @@ namespace MWPhysics
                 // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
                 // Required for some broken door destinations in Morrowind.esm, where the spawn point
                 // intersects with other geometry if the actor's base is taken into account
-                btVector3 from = toBullet(position);
+                btVector3 from = Misc::Convert::toBullet(position);
                 btVector3 to = from - btVector3(0,0,maxHeight);
 
                 btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
@@ -270,11 +253,11 @@ namespace MWPhysics
                 collisionWorld->rayTest(from, to, resultCallback1);
 
                 if (resultCallback1.hasHit() &&
-                        ( (toOsg(resultCallback1.m_hitPointWorld) - (tracer.mEndPos-offset)).length2() > 35*35
+                        ( (Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) - (tracer.mEndPos-offset)).length2() > 35*35
                         || !isWalkableSlope(tracer.mPlaneNormal)))
                 {
                     actor->setOnSlope(!isWalkableSlope(resultCallback1.m_hitNormalWorld));
-                    return toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, sGroundOffset);
+                    return Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, sGroundOffset);
                 }
                 else
                 {
@@ -713,7 +696,7 @@ namespace MWPhysics
 
         btCollisionObject object;
         object.setCollisionShape(&shape);
-        object.setWorldTransform(btTransform(toBullet(orient), toBullet(center)));
+        object.setWorldTransform(btTransform(Misc::Convert::toBullet(orient), Misc::Convert::toBullet(center)));
 
         const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
@@ -724,15 +707,15 @@ namespace MWPhysics
 
         if (!targets.empty())
         {
-            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            for (MWWorld::Ptr& target : targets)
             {
-                const Actor* physactor2 = getActor(*it);
-                if (physactor2)
-                    targetCollisionObjects.push_back(physactor2->getCollisionObject());
+                const Actor* targetActor = getActor(target);
+                if (targetActor)
+                    targetCollisionObjects.push_back(targetActor->getCollisionObject());
             }
         }
 
-        DeepestNotMeContactTestResultCallback resultCallback(me, targetCollisionObjects, toBullet(origin));
+        DeepestNotMeContactTestResultCallback resultCallback(me, targetCollisionObjects, Misc::Convert::toBullet(origin));
         resultCallback.m_collisionFilterGroup = CollisionType_Actor;
         resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
         mCollisionWorld->contactTest(&object, resultCallback);
@@ -741,7 +724,7 @@ namespace MWPhysics
         {
             PtrHolder* holder = static_cast<PtrHolder*>(resultCallback.mObject->getUserPointer());
             if (holder)
-                return std::make_pair(holder->getPtr(), toOsg(resultCallback.mContactPoint));
+                return std::make_pair(holder->getPtr(), Misc::Convert::toOsg(resultCallback.mContactPoint));
         }
         return std::make_pair(MWWorld::Ptr(), osg::Vec3f());
     }
@@ -757,7 +740,7 @@ namespace MWPhysics
 
         btTransform rayFrom;
         rayFrom.setIdentity();
-        rayFrom.setOrigin(toBullet(point));
+        rayFrom.setOrigin(Misc::Convert::toBullet(point));
 
         // target the collision object's world origin, this should be the center of the collision object
         btTransform rayTo;
@@ -773,7 +756,7 @@ namespace MWPhysics
             return 0.f;
         }
         else
-            return (point - toOsg(cb.m_hitPointWorld)).length();
+            return (point - Misc::Convert::toOsg(cb.m_hitPointWorld)).length();
     }
 
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
@@ -807,8 +790,8 @@ namespace MWPhysics
 
     PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
-        btVector3 btFrom = toBullet(from);
-        btVector3 btTo = toBullet(to);
+        btVector3 btFrom = Misc::Convert::toBullet(from);
+        btVector3 btTo = Misc::Convert::toBullet(to);
 
         const btCollisionObject* me = nullptr;
         std::vector<const btCollisionObject*> targetCollisionObjects;
@@ -828,9 +811,9 @@ namespace MWPhysics
 
         if (!targets.empty())
         {
-            for (std::vector<MWWorld::Ptr>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+            for (MWWorld::Ptr& target : targets)
             {
-                const Actor* actor = getActor(*it);
+                const Actor* actor = getActor(target);
                 if (actor)
                     targetCollisionObjects.push_back(actor->getCollisionObject());
             }
@@ -846,8 +829,8 @@ namespace MWPhysics
         result.mHit = resultCallback.hasHit();
         if (resultCallback.hasHit())
         {
-            result.mHitPos = toOsg(resultCallback.m_hitPointWorld);
-            result.mHitNormal = toOsg(resultCallback.m_hitNormalWorld);
+            result.mHitPos = Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
+            result.mHitNormal = Misc::Convert::toOsg(resultCallback.m_hitNormalWorld);
             if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
                 result.mHitObject = ptrHolder->getPtr();
         }
@@ -856,15 +839,15 @@ namespace MWPhysics
 
     PhysicsSystem::RayResult PhysicsSystem::castSphere(const osg::Vec3f &from, const osg::Vec3f &to, float radius)
     {
-        btCollisionWorld::ClosestConvexResultCallback callback(toBullet(from), toBullet(to));
+        btCollisionWorld::ClosestConvexResultCallback callback(Misc::Convert::toBullet(from), Misc::Convert::toBullet(to));
         callback.m_collisionFilterGroup = 0xff;
         callback.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap|CollisionType_Door;
 
         btSphereShape shape(radius);
         const btQuaternion btrot = btQuaternion::getIdentity();
 
-        btTransform from_ (btrot, toBullet(from));
-        btTransform to_ (btrot, toBullet(to));
+        btTransform from_ (btrot, Misc::Convert::toBullet(from));
+        btTransform to_ (btrot, Misc::Convert::toBullet(to));
 
         mCollisionWorld->convexSweepTest(&shape, from_, to_, callback);
 
@@ -872,8 +855,8 @@ namespace MWPhysics
         result.mHit = callback.hasHit();
         if (result.mHit)
         {
-            result.mHitPos = toOsg(callback.m_hitPointWorld);
-            result.mHitNormal = toOsg(callback.m_hitNormalWorld);
+            result.mHitPos = Misc::Convert::toOsg(callback.m_hitPointWorld);
+            result.mHitNormal = Misc::Convert::toOsg(callback.m_hitNormalWorld);
         }
         return result;
     }
@@ -919,6 +902,14 @@ namespace MWPhysics
         const Actor* physactor = getActor(actor);
         if (physactor)
             return physactor->getHalfExtents();
+        else
+            return osg::Vec3f();
+    }
+
+    osg::Vec3f PhysicsSystem::getOriginalHalfExtents(const MWWorld::ConstPtr &actor) const
+    {
+        if (const Actor* physactor = getActor(actor))
+            return physactor->getOriginalHalfExtents();
         else
             return osg::Vec3f();
     }
@@ -1148,7 +1139,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setRotation(toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+            found->second->setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
             mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
             return;
         }
@@ -1169,7 +1160,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setOrigin(toBullet(ptr.getRefData().getPosition().asVec3()));
+            found->second->setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
             mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
             return;
         }
@@ -1329,8 +1320,8 @@ namespace MWPhysics
 
     void PhysicsSystem::stepSimulation(float dt)
     {
-        for (std::set<Object*>::iterator it = mAnimatedObjects.begin(); it != mAnimatedObjects.end(); ++it)
-            (*it)->animateCollisionShapes(mCollisionWorld);
+        for (Object* animatedObject :  mAnimatedObjects)
+            animatedObject->animateCollisionShapes(mCollisionWorld);
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();

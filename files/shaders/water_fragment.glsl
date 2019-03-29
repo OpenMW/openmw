@@ -147,6 +147,8 @@ uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
+#include "shadows_fragment.glsl"
+
 float frustumDepth;
 
 float linearizeDepth(float depth)  // takes <0,1> non-linear depth value and returns <0,1> linearized value
@@ -163,7 +165,7 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-    float shadow = 1.0;
+    float shadow = unshadowedLightRatio();
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
@@ -288,4 +290,6 @@ void main(void)
 #else
     gl_FragData[0].w = clamp(fresnel*6.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
 #endif
+
+    applyShadowDebugOverlay();
 }

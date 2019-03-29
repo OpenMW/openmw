@@ -6,6 +6,9 @@
 #include <osg/Texture2D>
 #include <osg/RenderInfo>
 
+#include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/workqueue.hpp>
+
 #include <algorithm>
 
 namespace Terrain
@@ -20,7 +23,18 @@ CompositeMapRenderer::CompositeMapRenderer()
 
     mFBO = new osg::FrameBufferObject;
 
+    mUnrefQueue = new SceneUtil::UnrefQueue;
+
     getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+}
+
+CompositeMapRenderer::~CompositeMapRenderer()
+{
+}
+
+void CompositeMapRenderer::setWorkQueue(SceneUtil::WorkQueue* workQueue)
+{
+    mWorkQueue = workQueue;
 }
 
 void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
@@ -33,7 +47,8 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     double availableTime = std::max((targetFrameTime - dt)*conservativeTimeRatio,
                                     mMinimumTimeAvailable);
 
-    mCompiled.clear();
+    if (mWorkQueue)
+        mUnrefQueue->flush(mWorkQueue.get());
 
     OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
 
@@ -42,26 +57,30 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
 
     while (!mImmediateCompileSet.empty())
     {
-        CompositeMap* node = *mImmediateCompileSet.begin();
-        mCompiled.insert(node);
+        osg::ref_ptr<CompositeMap> node = *mImmediateCompileSet.begin();
+        mImmediateCompileSet.erase(node);
 
+        mMutex.unlock();
         compile(*node, renderInfo, nullptr);
-
-        mImmediateCompileSet.erase(mImmediateCompileSet.begin());
+        mMutex.lock();
     }
 
     double timeLeft = availableTime;
 
     while (!mCompileSet.empty() && timeLeft > 0)
     {
-        CompositeMap* node = *mCompileSet.begin();
+        osg::ref_ptr<CompositeMap> node = *mCompileSet.begin();
+        mCompileSet.erase(node);
 
+        mMutex.unlock();
         compile(*node, renderInfo, &timeLeft);
+        mMutex.lock();
 
-        if (node->mCompiled >= node->mDrawables.size())
+        if (node->mCompiled < node->mDrawables.size())
         {
-            mCompiled.insert(node);
-            mCompileSet.erase(mCompileSet.begin());
+            // We did not compile the map fully.
+            // Place it back to queue to continue work in the next time.
+            mCompileSet.insert(node);
         }
     }
     mTimer.setStartTick();
@@ -122,6 +141,12 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
 
         ++compositeMap.mCompiled;
 
+        if (mWorkQueue)
+        {
+            mUnrefQueue->push(compositeMap.mDrawables[i]);
+        }
+        compositeMap.mDrawables[i] = nullptr;
+
         if (timeLeft)
         {
             *timeLeft -= timer.time_s();
@@ -131,6 +156,8 @@ void CompositeMapRenderer::compile(CompositeMap &compositeMap, osg::RenderInfo &
                 break;
         }
     }
+    if (compositeMap.mCompiled == compositeMap.mDrawables.size())
+        compositeMap.mDrawables = std::vector<osg::ref_ptr<osg::Drawable>>();
 
     state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
 

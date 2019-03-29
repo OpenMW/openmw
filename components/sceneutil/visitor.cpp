@@ -61,10 +61,7 @@ namespace SceneUtil
     {
         // Take transformation for first found node in file
         const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
-        if (mMap.find(nodeName) == mMap.end())
-        {
-            mMap[nodeName] = &trans;
-        }
+        mMap.emplace(nodeName, &trans);
 
         traverse(trans);
     }

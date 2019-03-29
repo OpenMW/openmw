@@ -84,6 +84,8 @@ namespace ESSImport
             mGlobalMapState.mBounds.mMaxX = 0;
             mGlobalMapState.mBounds.mMinY = 0;
             mGlobalMapState.mBounds.mMaxY = 0;
+
+            mPlayerBase.blank();
         }
 
         int generateActorId()

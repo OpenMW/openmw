@@ -917,7 +917,10 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             if(mWeaponType != WeapType_None && mWeaponType != WeapType_Spell && mWeaponType != WeapType_HandToHand)
             {
                 mAnimation->showWeapons(true);
-                mAnimation->setWeaponGroup(mCurrentWeapon);
+                // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
+                // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
+                bool useRelativeDuration = mWeaponType == WeapType_BowAndArrow || mWeaponType == WeapType_Crossbow;
+                mAnimation->setWeaponGroup(mCurrentWeapon, useRelativeDuration);
             }
 
             mAnimation->showCarriedLeft(updateCarriedLeftVisible(mWeaponType));
@@ -1375,7 +1378,10 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
                 getWeaponGroup(weaptype, weapgroup);
-                mAnimation->setWeaponGroup(weapgroup);
+                // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
+                // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
+                bool useRelativeDuration = weaptype == WeapType_BowAndArrow || weaptype == WeapType_Crossbow;
+                mAnimation->setWeaponGroup(weapgroup, useRelativeDuration);
 
                 if (!isStillWeapon)
                 {
@@ -1956,6 +1962,23 @@ void CharacterController::update(float duration, bool animationOnly)
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         speed = cls.getSpeed(mPtr);
+        if(isPlayer)
+        {
+            // Joystick anologue movement.
+            float xAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[0]);
+            float yAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[1]);
+            float analogueMovement = ((xAxis > yAxis) ? xAxis : yAxis);
+
+            // If Strafing, our max speed is slower so multiply by X axis instead.
+            if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
+                analogueMovement = xAxis;
+
+            // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
+            if(!isrunning && !sneak && !flying && analogueMovement <= 0.5f)
+                speed *= 2;
+
+            speed *= (analogueMovement);
+        }
 
         vec.x() *= speed;
         vec.y() *= speed;
@@ -2530,6 +2553,13 @@ void CharacterController::forceStateUpdate()
     if(!mAnimation)
         return;
     clearAnimQueue();
+
+    // Make sure we canceled the current attack or spellcasting,
+    // because we disabled attack animations anyway.
+    mCastingManualSpell = false;
+    mAttackingOrSpell = false;
+    if (mUpperBodyState != UpperCharState_Nothing)
+        mUpperBodyState = UpperCharState_WeapEquiped;
 
     refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 

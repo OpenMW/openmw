@@ -27,6 +27,7 @@ ESMReader::ESMReader()
     , mEncoder(nullptr)
     , mFileSize(0)
 {
+    clearCtx();
 }
 
 int ESMReader::getFormat() const
@@ -50,14 +51,19 @@ void ESMReader::restoreContext(const ESM_Context &rc)
 void ESMReader::close()
 {
     mEsm.reset();
-    mCtx.filename.clear();
-    mCtx.leftFile = 0;
-    mCtx.leftRec = 0;
-    mCtx.leftSub = 0;
-    mCtx.subCached = false;
-    mCtx.recName.clear();
-    mCtx.subName.clear();
+    clearCtx();
     mHeader.blank();
+}
+
+void ESMReader::clearCtx() 
+{
+   mCtx.filename.clear();
+   mCtx.leftFile = 0;
+   mCtx.leftRec = 0;
+   mCtx.leftSub = 0;
+   mCtx.subCached = false;
+   mCtx.recName.clear();
+   mCtx.subName.clear();
 }
 
 void ESMReader::openRaw(Files::IStreamPtr _esm, const std::string& name)

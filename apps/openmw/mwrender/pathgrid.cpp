@@ -6,14 +6,12 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Group>
 
-#include <components/esm/loadstat.hpp>
 #include <components/esm/loadpgrd.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
 
 #include "../mwbase/world.hpp" // these includes can be removed once the static-hack is gone
 #include "../mwbase/environment.hpp"
 
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/pathfinding.hpp"
@@ -78,17 +76,17 @@ void Pathgrid::togglePathgrid()
         mPathGridRoot->setNodeMask(Mask_Debug);
         mRootNode->addChild(mPathGridRoot);
 
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
+        for(const MWWorld::CellStore* cell : mActiveCells)
         {
-            enableCellPathgrid(*it);
+            enableCellPathgrid(cell);
         }
     }
     else
     {
         // remove path grid meshes from already loaded cells
-        for(CellList::iterator it = mActiveCells.begin(); it != mActiveCells.end(); ++it)
+        for(const MWWorld::CellStore* cell : mActiveCells)
         {
-            disableCellPathgrid(*it);
+            disableCellPathgrid(cell);
         }
 
         if (mPathGridRoot)

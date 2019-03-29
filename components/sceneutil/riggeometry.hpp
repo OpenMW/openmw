@@ -50,6 +50,20 @@ namespace SceneUtil
         virtual bool supports(const osg::PrimitiveFunctor&) const { return true; }
         virtual void accept(osg::PrimitiveFunctor&) const;
 
+        struct CopyBoundingBoxCallback : osg::Drawable::ComputeBoundingBoxCallback
+        {
+            osg::BoundingBox boundingBox;
+
+            virtual osg::BoundingBox computeBound(const osg::Drawable&) const override { return boundingBox; }
+        };
+
+        struct CopyBoundingSphereCallback : osg::Node::ComputeBoundingSphereCallback
+        {
+            osg::BoundingSphere boundingSphere;
+
+            virtual osg::BoundingSphere computeBound(const osg::Node&) const override { return boundingSphere; }
+        };
+
     private:
         void cull(osg::NodeVisitor* nv);
         void updateBounds(osg::NodeVisitor* nv);

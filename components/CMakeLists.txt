@@ -51,7 +51,7 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
-    actorutil detourdebugdraw navmesh agentpath
+    actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique
     )
 
 add_component_dir (nif
@@ -86,7 +86,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    constants utf8stream stringops resourcehelpers rng messageformatparser weakcache
+    gcd constants utf8stream stringops resourcehelpers rng messageformatparser weakcache
     )
 
 add_component_dir (debug
@@ -164,13 +164,14 @@ add_component_dir(detournavigator
     recastmeshmanager
     cachedrecastmeshmanager
     navmeshmanager
-    navigator
+    navigatorimpl
     asyncnavmeshupdater
     chunkytrimesh
     recastmesh
     tilecachedrecastmeshmanager
     recastmeshobject
     navmeshtilescache
+    settings
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
@@ -227,6 +228,7 @@ target_link_libraries(components
     ${OSGVIEWER_LIBRARIES}
     ${OSGTEXT_LIBRARIES}
     ${OSGGA_LIBRARIES}
+    ${OSGSHADOW_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
     ${Bullet_LIBRARIES}
     ${SDL2_LIBRARIES}

@@ -4,7 +4,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -15,6 +14,7 @@
 #include <components/resource/bulletshape.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
+#include <components/misc/convert.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -29,7 +29,6 @@
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/heightfield.hpp"
-#include "../mwphysics/convert.hpp"
 
 #include "player.hpp"
 #include "localscripts.hpp"
@@ -136,16 +135,16 @@ namespace
 
                 const auto& transform = object->getCollisionObject()->getWorldTransform();
                 const btTransform closedDoorTransform(
-                    MWPhysics::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
+                    Misc::Convert::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
                     transform.getOrigin()
                 );
 
-                const auto start = DetourNavigator::makeOsgVec3f(closedDoorTransform(center + toPoint));
+                const auto start = Misc::Convert::makeOsgVec3f(closedDoorTransform(center + toPoint));
                 const auto startPoint = physics.castRay(start, start - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionStart = startPoint.mHit ? startPoint.mHitPos : start;
 
-                const auto end = DetourNavigator::makeOsgVec3f(closedDoorTransform(center - toPoint));
+                const auto end = Misc::Convert::makeOsgVec3f(closedDoorTransform(center - toPoint));
                 const auto endPoint = physics.castRay(end, end - osg::Vec3f(0, 0, 1000), ptr, {},
                     MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Water);
                 const auto connectionEnd = endPoint.mHit ? endPoint.mHitPos : end;
@@ -173,12 +172,9 @@ namespace
                 );
             }
         }
-        else if (const auto actor = physics.getActor(ptr))
+        else if (physics.getActor(ptr))
         {
-            const auto halfExtents = ptr.getCell()->isExterior()
-                ? physics.getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr())
-                : actor->getHalfExtents();
-            navigator.addAgent(halfExtents);
+            navigator.addAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }
     }
 
@@ -234,9 +230,8 @@ namespace
     template <class AddObject>
     void InsertVisitor::insert(AddObject&& addObject)
     {
-        for (std::vector<MWWorld::Ptr>::iterator it = mToInsert.begin(); it != mToInsert.end(); ++it)
+        for (MWWorld::Ptr& ptr : mToInsert)
         {
-            MWWorld::Ptr ptr = *it;
             if (mRescale)
             {
                 if (ptr.getCellRef().getScale()<0.5)
@@ -338,15 +333,14 @@ namespace MWWorld
         ListAndResetObjectsVisitor visitor;
 
         (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
-        const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-        const auto playerHalfExtents = mPhysics->getHalfExtents(player);
+        const auto world = MWBase::Environment::get().getWorld();
         for (const auto& ptr : visitor.mObjects)
         {
             if (const auto object = mPhysics->getObject(ptr))
                 navigator->removeObject(DetourNavigator::ObjectId(object));
-            else if (const auto actor = mPhysics->getActor(ptr))
+            else if (mPhysics->getActor(ptr))
             {
-                navigator->removeAgent(ptr.getCell()->isExterior() ? playerHalfExtents : actor->getHalfExtents());
+                navigator->removeAgent(world->getPathfindingHalfExtents(ptr));
                 mRendering.removeActorPath(ptr);
             }
             mPhysics->remove(ptr);
@@ -373,6 +367,7 @@ namespace MWWorld
         if ((*iter)->getCell()->hasWater())
             navigator->removeWater(osg::Vec2i(cellX, cellY));
 
+        const auto player = world->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
 
         MWBase::Environment::get().getMechanicsManager()->drop (*iter);
@@ -814,12 +809,9 @@ namespace MWWorld
             const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
             navigator->update(player.getRefData().getPosition().asVec3());
         }
-        else if (const auto actor = mPhysics->getActor(ptr))
+        else if (mPhysics->getActor(ptr))
         {
-            const auto& halfExtents = ptr.getCell()->isExterior()
-                ? mPhysics->getHalfExtents(MWBase::Environment::get().getWorld()->getPlayerPtr())
-                : actor->getHalfExtents();
-            navigator->removeAgent(halfExtents);
+            navigator->removeAgent(MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(ptr));
         }
         mPhysics->remove(ptr);
         mRendering.removeObject (ptr);
@@ -912,24 +904,22 @@ namespace MWWorld
     void Scene::preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<osg::Vec3f>& exteriorPositions)
     {
         std::vector<MWWorld::ConstPtr> teleportDoors;
-        for (CellStoreCollection::const_iterator iter (mActiveCells.begin());
-            iter!=mActiveCells.end(); ++iter)
+        for (const MWWorld::CellStore* cellStore : mActiveCells)
         {
-            const MWWorld::CellStore* cellStore = *iter;
             typedef MWWorld::CellRefList<ESM::Door>::List DoorList;
             const DoorList &doors = cellStore->getReadOnlyDoors().mList;
-            for (DoorList::const_iterator doorIt = doors.begin(); doorIt != doors.end(); ++doorIt)
+            for (auto& door : doors)
             {
-                if (!doorIt->mRef.getTeleport()) {
+                if (!door.mRef.getTeleport())
+                {
                     continue;
                 }
-                teleportDoors.push_back(MWWorld::ConstPtr(&*doorIt, cellStore));
+                teleportDoors.push_back(MWWorld::ConstPtr(&door, cellStore));
             }
         }
 
-        for (std::vector<MWWorld::ConstPtr>::iterator it = teleportDoors.begin(); it != teleportDoors.end(); ++it)
+        for (const MWWorld::ConstPtr& door : teleportDoors)
         {
-            const MWWorld::ConstPtr& door = *it;
             float sqrDistToPlayer = (playerPos - door.getRefData().getPosition().asVec3()).length2();
             sqrDistToPlayer = std::min(sqrDistToPlayer, (predictedPos - door.getRefData().getPosition().asVec3()).length2());
 
@@ -1053,20 +1043,19 @@ namespace MWWorld
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
 
-        for (CellStoreCollection::const_iterator iter (mActiveCells.begin()); iter!=mActiveCells.end(); ++iter)
+        for (MWWorld::CellStore* cellStore : mActiveCells)
         {
-            MWWorld::CellStore* cellStore = *iter;
             cellStore->forEachType<ESM::NPC>(listVisitor);
             cellStore->forEachType<ESM::Creature>(listVisitor);
         }
 
-        for (std::vector<ESM::Transport::Dest>::const_iterator it = listVisitor.mList.begin(); it != listVisitor.mList.end(); ++it)
+        for (ESM::Transport::Dest& dest : listVisitor.mList)
         {
-            if (!it->mCellName.empty())
-                preloadCell(MWBase::Environment::get().getWorld()->getInterior(it->mCellName));
+            if (!dest.mCellName.empty())
+                preloadCell(MWBase::Environment::get().getWorld()->getInterior(dest.mCellName));
             else
             {
-                osg::Vec3f pos = it->mPos.asVec3();
+                osg::Vec3f pos = dest.mPos.asVec3();
                 int x,y;
                 MWBase::Environment::get().getWorld()->positionToIndex( pos.x(), pos.y(), x, y);
                 preloadCell(MWBase::Environment::get().getWorld()->getExterior(x,y), true);

@@ -4,7 +4,6 @@
 #include <string>
 #include <memory>
 #include <vector>
-#include <iostream>
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>

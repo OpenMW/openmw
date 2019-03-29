@@ -5,6 +5,7 @@
 #include <osg/Referenced>
 #include <osg/Vec3f>
 
+#include <atomic>
 #include <memory>
 #include <set>
 
@@ -22,6 +23,11 @@ namespace osg
 namespace Resource
 {
     class ResourceSystem;
+}
+
+namespace SceneUtil
+{
+    class WorkQueue;
 }
 
 namespace Terrain
@@ -59,6 +65,9 @@ namespace Terrain
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
         virtual ~World();
 
+        /// Set a WorkQueue to delete objects in the background thread.
+        void setWorkQueue(SceneUtil::WorkQueue* workQueue);
+
         /// See CompositeMapRenderer::setTargetFrameRate
         void setTargetFrameRate(float rate);
 
@@ -93,12 +102,14 @@ namespace Terrain
         virtual View* createView() { return nullptr; }
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
-        virtual void preload(View* view, const osg::Vec3f& eyePoint) {}
+        virtual void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort) {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
         /// Set the default viewer (usually a Camera), used as viewpoint for any viewers that don't use their own viewpoint.
         virtual void setDefaultViewer(osg::Object* obj) {}
+
+        virtual void setViewDistance(float distance) {}
 
         Storage* getStorage() { return mStorage; }
 
@@ -116,7 +127,7 @@ namespace Terrain
         std::unique_ptr<TextureManager> mTextureManager;
         std::unique_ptr<ChunkManager> mChunkManager;
 
-        std::unique_ptr<MWRender::CellBorder> mCellBorder;
+        std::unique_ptr<CellBorder> mCellBorder;
 
         bool mBorderVisible;
 

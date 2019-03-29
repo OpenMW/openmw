@@ -59,6 +59,7 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
     private:
         void addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight);
         void removeHiddenItemLight(const MWWorld::ConstPtr& item);
+        void resetControllers(osg::Node* node);
 
         typedef std::map<MWWorld::ConstPtr, osg::ref_ptr<SceneUtil::LightSource> > ItemLightMap;
         ItemLightMap mItemLights;

@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include <osg/Image>
-#include <osg/Texture2D>
 
 #include <osgDB/WriteFile>
 

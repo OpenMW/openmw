@@ -1,9 +1,6 @@
 #include "bulletnifloader.hpp"
 
-#include <cstdio>
 #include <vector>
-#include <list>
-#include <stdexcept>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
@@ -15,8 +12,6 @@
 
 #include <components/nif/node.hpp>
 #include <components/nif/data.hpp>
-#include <components/nif/property.hpp>
-#include <components/nif/controller.hpp>
 #include <components/nif/extra.hpp>
 
 namespace

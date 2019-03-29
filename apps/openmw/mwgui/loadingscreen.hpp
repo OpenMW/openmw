@@ -1,6 +1,8 @@
 #ifndef MWGUI_LOADINGSCREEN_H
 #define MWGUI_LOADINGSCREEN_H
 
+#include <memory>
+
 #include <osg/Timer>
 #include <osg/ref_ptr>
 

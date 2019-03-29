@@ -4,8 +4,6 @@
 #include <stdexcept>
 #include <sstream>
 
-#include <components/interpreter/types.hpp>
-
 #include <components/compiler/locals.hpp>
 
 #include <components/esm/cellid.hpp>
@@ -18,6 +16,7 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 
+#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/containerstore.hpp"

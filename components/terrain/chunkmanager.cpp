@@ -22,23 +22,22 @@ namespace Terrain
 {
 
 ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer)
-    : ResourceManager(nullptr)
+    : GenericResourceManager<ChunkId>(nullptr)
     , mStorage(storage)
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)
     , mCompositeMapRenderer(renderer)
     , mCompositeMapSize(512)
+    , mCompositeMapLevel(1.f)
+    , mMaxCompGeometrySize(1.f)
     , mCullingActive(true)
 {
 
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, int lod, unsigned int lodFlags)
+osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags)
 {
-    std::ostringstream stream;
-    stream << size << " " << center.x() << " " << center.y() << " " << lod << " " << lodFlags;
-    std::string id = stream.str();
-
+    ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
     if (obj)
         return obj->asNode();
@@ -57,20 +56,15 @@ void ChunkManager::reportStats(unsigned int frameNumber, osg::Stats *stats) cons
 
 void ChunkManager::clearCache()
 {
-    ResourceManager::clearCache();
+    GenericResourceManager<ChunkId>::clearCache();
 
     mBufferCache.clearCache();
 }
 
 void ChunkManager::releaseGLObjects(osg::State *state)
 {
-    ResourceManager::releaseGLObjects(state);
+    GenericResourceManager<ChunkId>::releaseGLObjects(state);
     mBufferCache.releaseGLObjects(state);
-}
-
-void ChunkManager::setCullingActive(bool active)
-{
-    mCullingActive = active;
 }
 
 osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
@@ -89,7 +83,7 @@ osg::ref_ptr<osg::Texture2D> ChunkManager::createCompositeMapRTT()
 
 void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f& chunkCenter, const osg::Vec4f& texCoords, CompositeMap& compositeMap)
 {
-    if (chunkSize > 1.f)
+    if (chunkSize > mMaxCompGeometrySize)
     {
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x() + texCoords.z()/2.f, texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
         createCompositeMapGeometry(chunkSize/2.f, chunkCenter + osg::Vec2f(-chunkSize/4.f, chunkSize/4.f), osg::Vec4f(texCoords.x(), texCoords.y(), texCoords.z()/2.f, texCoords.w()/2.f), compositeMap);
@@ -122,7 +116,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
 {
     std::vector<LayerInfo> layerList;
     std::vector<osg::ref_ptr<osg::Image> > blendmaps;
-    mStorage->getBlendmaps(chunkSize, chunkCenter, false, blendmaps, layerList);
+    mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList);
 
     bool useShaders = mSceneManager->getForceShaders();
     if (!mSceneManager->getClampLighting())
@@ -164,11 +158,10 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
 
     float blendmapScale = mStorage->getBlendmapScale(chunkSize);
 
-    return ::Terrain::createPasses(useShaders, mSceneManager->getForcePerPixelLighting(),
-                                     mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
+    return ::Terrain::createPasses(useShaders, &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, int lod, unsigned int lodFlags)
+osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags)
 {
     osg::Vec2f worldCenter = chunkCenter*mStorage->getCellWorldSize();
     osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transform (new SceneUtil::PositionAttitudeTransform);
@@ -176,7 +169,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
     osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
-    osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array);
+    osg::ref_ptr<osg::Vec4ubArray> colors (new osg::Vec4ubArray);
+    colors->setNormalize(true);
 
     osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
     positions->setVertexBufferObject(vbo);
@@ -192,14 +186,14 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     geometry->setUseDisplayList(false);
     geometry->setUseVertexBufferObjects(true);
 
-    if (chunkSize <= 2.f)
+    if (chunkSize <= 1.f)
         geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
     unsigned int numVerts = (mStorage->getCellVertices()-1) * chunkSize / (1 << lod) + 1;
 
     geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
-    bool useCompositeMap = chunkSize >= 1.f;
+    bool useCompositeMap = chunkSize >= mCompositeMapLevel;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 
     for (unsigned int i=0; i<numUvSets; ++i)
@@ -220,8 +214,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
         layer.mDiffuseMap = compositeMap->mTexture;
         layer.mParallax = false;
         layer.mSpecular = false;
-        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), mSceneManager->getForcePerPixelLighting(),
-                                                    mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
+        geometry->setPasses(::Terrain::createPasses(mSceneManager->getForceShaders() || !mSceneManager->getClampLighting(), &mSceneManager->getShaderManager(), std::vector<TextureLayer>(1, layer), std::vector<osg::ref_ptr<osg::Texture2D> >(), 1.f, 1.f));
     }
     else
     {
