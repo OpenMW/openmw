@@ -356,7 +356,7 @@ namespace Compiler
                 opcodePlaySound3DExplicit);
             extensions.registerInstruction ("playsound3dvp", "cff", opcodePlaySound3DVP,
                 opcodePlaySound3DVPExplicit);
-            extensions.registerInstruction ("playloopsound3d", "c", opcodePlayLoopSound3D,
+            extensions.registerInstruction ("playloopsound3d", "cXX", opcodePlayLoopSound3D,
                 opcodePlayLoopSound3DExplicit);
             extensions.registerInstruction ("playloopsound3dvp", "cff", opcodePlayLoopSound3DVP,
                 opcodePlayLoopSound3DVPExplicit);
