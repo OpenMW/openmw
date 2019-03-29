@@ -39,6 +39,7 @@
     Bug #4827: NiUVController is handled incorrectly
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
+    Bug #4841: Russian localization ignores implicit keywords    
     Bug #4860: Actors outside of processing range visible for one frame after spawning
     Bug #4867: Arbitrary text after local variable declarations breaks script compilation
     Bug #4876: AI ratings handling inconsistencies
