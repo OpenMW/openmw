@@ -127,7 +127,7 @@ std::string ESMReader::getHString()
     // them. For some reason, they break the rules, and contain a byte
     // (value 0) even if the header says there is no data. If
     // Morrowind accepts it, so should we.
-    if (mCtx.leftSub == 0)
+    if (mCtx.leftSub == 0 && mCtx.leftRec != 0)
     {
         // Skip the following zero byte
         mCtx.leftRec--;
