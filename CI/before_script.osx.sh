@@ -10,6 +10,8 @@ cd build
 
 cmake \
 -D CMAKE_PREFIX_PATH="$DEPENDENCIES_ROOT;$QT_PATH" \
+-D CMAKE_C_COMPILER_LAUNCHER=/usr/local/opt/ccache/bin/ccache \
+-D CMAKE_CXX_COMPILER_LAUNCHER=/usr/local/opt/ccache/bin/ccache \
 -D CMAKE_OSX_DEPLOYMENT_TARGET="10.9" \
 -D CMAKE_OSX_SYSROOT="macosx10.14" \
 -D CMAKE_BUILD_TYPE=Release \

@@ -6,6 +6,7 @@ brew install https://gist.githubusercontent.com/nikolaykasyanov/f36da224bdef4202
 brew switch cmake 3.12.4
 brew outdated pkgconfig || brew upgrade pkgconfig
 brew install qt
+brew install ccache
 
 curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-110f3d3.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
