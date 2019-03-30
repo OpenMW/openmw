@@ -22,7 +22,7 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
         char type = mLocals.getType (name2);
 
         if (type!=' ')
-            getErrorHandler().warning ("ignoring local variable re-declaration", loc);
+            getErrorHandler().warning ("Local variable re-declaration", loc);
         else
             mLocals.declare (mType, name2);
 
@@ -31,7 +31,7 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
     }
     else if (mState==State_End)
     {
-        getErrorHandler().warning ("Ignoring extra text after local variable declaration", loc);
+        getErrorHandler().warning ("Extra text after local variable declaration", loc);
         SkipParser skip (getErrorHandler(), getContext());
         scanner.scan (skip);
         return false;
@@ -65,7 +65,7 @@ bool Compiler::DeclarationParser::parseKeyword (int keyword, const TokenLoc& loc
     }
     else if (mState==State_End)
     {
-        getErrorHandler().warning ("Ignoring extra text after local variable declaration", loc);
+        getErrorHandler().warning ("Extra text after local variable declaration", loc);
         SkipParser skip (getErrorHandler(), getContext());
         scanner.scan (skip);
         return false;
@@ -80,7 +80,7 @@ bool Compiler::DeclarationParser::parseSpecial (int code, const TokenLoc& loc, S
     {
         if (code!=Scanner::S_newline)
         {
-            getErrorHandler().warning ("Ignoring extra text after local variable declaration", loc);
+            getErrorHandler().warning ("Extra text after local variable declaration", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
         }

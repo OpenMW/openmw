@@ -29,7 +29,7 @@ bool Compiler::JunkParser::parseName (const std::string& name, const TokenLoc& l
 bool Compiler::JunkParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
 {
     if (keyword==mIgnoreKeyword)
-        reportWarning ("ignoring found junk", loc);
+        reportWarning ("Ignoring found junk", loc);
     else
         scanner.putbackKeyword (keyword, loc);
 
@@ -39,7 +39,7 @@ bool Compiler::JunkParser::parseKeyword (int keyword, const TokenLoc& loc, Scann
 bool Compiler::JunkParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
 {
     if (code==Scanner::S_member)
-        reportWarning ("ignoring found junk", loc);
+        reportWarning ("Ignoring found junk", loc);
     else
         scanner.putbackSpecial (code, loc);
 

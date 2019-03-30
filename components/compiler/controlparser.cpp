@@ -125,7 +125,7 @@ namespace Compiler
 
             if (loop.size()!=loop2.size())
                 throw std::logic_error (
-                    "internal compiler error: failed to generate a while loop");
+                    "Internal compiler error: failed to generate a while loop");
 
             std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
 
@@ -181,7 +181,7 @@ namespace Compiler
         }
         else if (mState==IfElseJunkState)
         {
-            getErrorHandler().warning ("Ignoring extra text after else", loc);
+            getErrorHandler().warning ("Extra text after else", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             mState = IfElseBodyState;
@@ -227,7 +227,7 @@ namespace Compiler
         }
         else if (mState==IfElseJunkState)
         {
-            getErrorHandler().warning ("Ignoring extra text after else", loc);
+            getErrorHandler().warning ("Extra text after else", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             mState = IfElseBodyState;
@@ -267,7 +267,7 @@ namespace Compiler
         }
         else if (mState==IfElseJunkState)
         {
-            getErrorHandler().warning ("Ignoring extra text after else", loc);
+            getErrorHandler().warning ("Extra text after else", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             mState = IfElseBodyState;

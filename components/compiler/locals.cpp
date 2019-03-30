@@ -18,7 +18,7 @@ namespace Compiler
             case 'f': return mFloats;
         }
 
-        throw std::logic_error ("unknown variable type");
+        throw std::logic_error ("Unknown variable type");
     }
 
     int Locals::searchIndex (char type, const std::string& name) const
@@ -48,7 +48,7 @@ namespace Compiler
             case 'f': return mFloats;
         }
 
-        throw std::logic_error ("unknown variable type");
+        throw std::logic_error ("Unknown variable type");
     }
 
     char Locals::getType (const std::string& name) const

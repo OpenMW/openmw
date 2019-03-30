@@ -158,7 +158,7 @@ namespace Compiler
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
 
-        mErrorHandler.error ("syntax error", loc);
+        mErrorHandler.error ("Syntax error", loc);
         throw SourceException();
     }
 
@@ -521,7 +521,7 @@ namespace Compiler
                 else if (c == '<' || c == '>') // Treat <> and << as <
                 {
                     special = S_cmpLT;
-                    mErrorHandler.warning (std::string("invalid operator <") + c + ", treating it as <", mLoc);
+                    mErrorHandler.warning ("Invalid operator, treating it as <", mLoc);
                 }
                 else
                 {
@@ -549,7 +549,7 @@ namespace Compiler
                 else if (c == '<' || c == '>') // Treat >< and >> as >
                 {
                     special = S_cmpGT;
-                    mErrorHandler.warning (std::string("invalid operator >") + c + ", treating it as >", mLoc);
+                    mErrorHandler.warning ("Invalid operator, treating it as >", mLoc);
                 }
                 else
                 {
