@@ -226,11 +226,11 @@ namespace MWScript
                     MWWorld::Ptr updated = ptr;
                     if(axis == "x")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az,true);
                     }
                     else if(axis == "y")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az,true);
                     }
                     else if(axis == "z")
                     {
@@ -245,7 +245,7 @@ namespace MWScript
                                 pos = terrainHeight;
                         }
 
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos);
+                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos,true);
                     }
                     else
                         throw std::runtime_error ("invalid axis: " + axis);
@@ -388,7 +388,7 @@ namespace MWScript
                     }
                     else
                     {
-                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z);
+                        ptr = MWBase::Environment::get().getWorld()->moveObject(ptr, x, y, z, true);
                     }
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base,ptr);
 

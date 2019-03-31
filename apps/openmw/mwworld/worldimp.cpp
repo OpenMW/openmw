@@ -1307,23 +1307,24 @@ namespace MWWorld
         return newPtr;
     }
 
-    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics, bool moveToActive)
     {
-        CellStore *cell = ptr.getCell();
+        int cellX, cellY;
+        positionToIndex(x, y, cellX, cellY);
 
-        if (cell->isExterior()) {
-            int cellX, cellY;
-            positionToIndex(x, y, cellX, cellY);
+        CellStore* cell = ptr.getCell();
+        CellStore* newCell = getExterior(cellX, cellY);
+        bool isCellActive = getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(*newCell);
 
-            cell = getExterior(cellX, cellY);
-        }
+        if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
+            cell = newCell;
 
         return moveObject(ptr, cell, x, y, z, movePhysics);
     }
 
-    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z, bool moveToActive)
     {
-        return moveObjectImp(ptr, x, y, z);
+        return moveObjectImp(ptr, x, y, z, true, moveToActive);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
