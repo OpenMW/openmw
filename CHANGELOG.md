@@ -49,6 +49,7 @@
     Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4922: Werewolves can not attack if the transformation happens during attack
+    Bug #4938: Strings from subrecords with actually empty headers can't be empty
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
