@@ -4,6 +4,7 @@
     Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
+    Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
     Bug #3623: Fix HiDPI on Windows
     Bug #3733: Normal maps are inverted on mirrored UVs
