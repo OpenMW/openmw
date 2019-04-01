@@ -13,7 +13,7 @@ namespace MWGui
 {
     struct JournalViewModel;
 
-    struct JournalWindow : public WindowBase
+    struct JournalWindow : public BookWindowBase
     {
         JournalWindow();
 

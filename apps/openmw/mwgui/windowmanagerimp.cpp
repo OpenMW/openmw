@@ -13,7 +13,6 @@
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ClipboardManager.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_WidgetManager.h>
 
 #include <SDL_keyboard.h>
@@ -112,6 +111,7 @@
 #include "jailscreen.hpp"
 #include "itemchargeview.hpp"
 #include "keyboardnavigation.hpp"
+#include "resourceskin.hpp"
 
 namespace
 {
@@ -240,6 +240,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
+        MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
         loadUserFonts();
 
@@ -290,14 +291,13 @@ namespace MWGui
 
     void WindowManager::loadFontDelegate(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
     {
-        const std::string templateName = "Journalbook ";
-        MyGUI::xml::ElementEnumerator font = _node->getElementEnumerator();
+        MyGUI::xml::ElementEnumerator resourceNode = _node->getElementEnumerator();
         bool createCopy = false;
-        while (font.next("Resource"))
+        while (resourceNode.next("Resource"))
         {
             std::string type, name;
-            font->findAttribute("type", type);
-            font->findAttribute("name", name);
+            resourceNode->findAttribute("type", type);
+            resourceNode->findAttribute("name", name);
 
             if (name.empty())
                 continue;
@@ -315,18 +315,19 @@ namespace MWGui
                 float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
                 resolution *= uiScale;
 
-                MyGUI::xml::ElementPtr resolutionNode = font->createChild("Property");
+                MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");
                 resolutionNode->addAttribute("value", std::to_string(resolution));
 
-                MyGUI::xml::ElementPtr sizeNode = font->createChild("Property");
+                MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
                 sizeNode->addAttribute("key", "Size");
                 sizeNode->addAttribute("value", std::to_string(mFontHeight));
             }
-            else if (Misc::StringUtils::ciEqual(type, "ResourceSkin"))
+            else if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
+                     Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
             {
                 // We should adjust line height for MyGUI widgets depending on font size
-                MyGUI::xml::ElementPtr heightNode = font->createChild("Property");
+                MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
                 heightNode->addAttribute("key", "HeightLine");
                 heightNode->addAttribute("value", std::to_string(mFontHeight+2));
             }
@@ -2087,6 +2088,9 @@ namespace MWGui
 
     void WindowManager::createCursors()
     {
+        // FIXME: currently we do not scale cursor since it is not a MyGUI widget.
+        // In theory, we can do it manually (rescale the cursor image via osg::Imag::scaleImage() and scale the hotspot position).
+        // Unfortunately, this apploach can lead to driver crashes on some setups (e.g. on laptops with nvidia-prime on Linux).
         MyGUI::ResourceManager::EnumeratorPtr enumerator = MyGUI::ResourceManager::getInstance().getEnumerator();
         while (enumerator.next())
         {

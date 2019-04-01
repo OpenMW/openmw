@@ -50,6 +50,8 @@ namespace MWGui
 
         std::string mCurrentIcon;
         std::string mCurrentFrame;
+
+        static std::map<std::string, float> mScales;
     };
 
     class SpellWidget : public ItemWidget
