@@ -1631,20 +1631,22 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 {
                     if(mPtr == getPlayer())
                     {
-                        if (isWeapon)
+                        if (Settings::Manager::getBool("best attack", "Game"))
                         {
-                            if (Settings::Manager::getBool("best attack", "Game"))
+                            if (isWeapon)
                             {
                                 MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                             }
                             else
-                                setAttackTypeBasedOnMovement();
+                            {
+                                // There is no "best attack" for Hand-to-Hand
+                                setAttackTypeRandomly(mAttackType);
+                            }
                         }
                         else
                         {
-                            // There is no "best attack" for Hand-to-Hand
-                            setAttackTypeRandomly(mAttackType);
+                            setAttackTypeBasedOnMovement();
                         }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
