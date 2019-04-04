@@ -459,8 +459,9 @@ namespace MWBase
             {
                 Rest_Allowed = 0,
                 Rest_OnlyWaiting = 1,
-                Rest_PlayerIsUnderwater = 2,
-                Rest_EnemiesAreNearby = 3
+                Rest_PlayerIsInAir = 2,
+                Rest_PlayerIsUnderwater = 3,
+                Rest_EnemiesAreNearby = 4
             };
 
             /// check if the player is allowed to rest

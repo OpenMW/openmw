@@ -706,6 +706,8 @@ namespace MWClass
         if(name == "left")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
+            if(world->isFlying(ptr))
+                return -1;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return ESM::SoundGenerator::SwimLeft;
@@ -716,6 +718,8 @@ namespace MWClass
         if(name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
+            if(world->isFlying(ptr))
+                return -1;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return ESM::SoundGenerator::SwimRight;
