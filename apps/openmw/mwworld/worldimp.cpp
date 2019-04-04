@@ -2477,8 +2477,11 @@ namespace MWWorld
         if(mPlayer->enemiesNearby())
             return Rest_EnemiesAreNearby;
 
-        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
+        if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return Rest_PlayerIsUnderwater;
+
+        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isFlying(player))
+            return Rest_PlayerIsInAir;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
             return Rest_OnlyWaiting;
