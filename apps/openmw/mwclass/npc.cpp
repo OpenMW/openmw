@@ -1214,6 +1214,8 @@ namespace MWClass
         if(name == "left" || name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
+            if(world->isFlying(ptr))
+                return std::string();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isSwimming(ptr))
                 return (name == "left") ? "Swim Left" : "Swim Right";

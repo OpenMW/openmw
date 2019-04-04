@@ -80,10 +80,17 @@ namespace MWGui
         mTimeAdvancer.eventInterrupted += MyGUI::newDelegate(this, &WaitDialog::onWaitingInterrupted);
         mTimeAdvancer.eventFinished += MyGUI::newDelegate(this, &WaitDialog::onWaitingFinished);
     }
+    
+    void WaitDialog::onReferenceUnavailable ()
+    {
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
+        resetReference();
+    }
 
     void WaitDialog::setPtr(const MWWorld::Ptr &ptr)
     {
-        setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == MWBase::World::Rest_Allowed);
+        mPtr = ptr;
+        setCanRest(!mPtr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == MWBase::World::Rest_Allowed);
 
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
@@ -100,6 +107,7 @@ namespace MWGui
     {
         mSleeping = false;
         mTimeAdvancer.stop();
+        resetReference();
     }
 
     void WaitDialog::onOpen()
@@ -129,7 +137,13 @@ namespace MWGui
         }
         else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
         {
-            // resting underwater or mid-air not allowed
+            // resting underwater not allowed
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
+            MWBase::Environment::get().getWindowManager()->popGuiMode ();
+        }
+        else if (mPtr.isEmpty() && canRest == MWBase::World::Rest_PlayerIsInAir)
+        {
+            // Resting in air is not allowed either, unless you're using a bed
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
@@ -289,6 +303,8 @@ namespace MWGui
 
     void WaitDialog::onFrame(float dt)
     {
+        checkReferenceAvailable();
+
         mTimeAdvancer.onFrame(dt);
 
         if (mFadeTimeRemaining <= 0)
