@@ -319,7 +319,7 @@ namespace MWSound
         if(playlocal)
         {
             sound->init(1.0f, basevol, 1.0f, PlayMode::NoEnv|Type::Voice|Play_2D);
-            played = mOutput->streamSound(decoder, sound);
+            played = mOutput->streamSound(decoder, sound, true);
         }
         else
         {
