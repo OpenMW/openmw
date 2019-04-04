@@ -45,7 +45,7 @@ namespace MWSound
         virtual bool isSoundPlaying(Sound *sound) = 0;
         virtual void updateSound(Sound *sound) = 0;
 
-        virtual bool streamSound(DecoderPtr decoder, Stream *sound) = 0;
+        virtual bool streamSound(DecoderPtr decoder, Stream *sound, bool getLoudnessData=false) = 0;
         virtual bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData) = 0;
         virtual void finishStream(Stream *sound) = 0;
         virtual double getStreamDelay(Stream *sound) = 0;

@@ -52,6 +52,7 @@
     Bug #4922: Werewolves can not attack if the transformation happens during attack
     Bug #4938: Strings from subrecords with actually empty headers can't be empty
     Bug #4942: Hand-to-Hand attack type is chosen randomly when "always use best attack" is turned off
+    Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
