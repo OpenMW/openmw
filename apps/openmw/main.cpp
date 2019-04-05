@@ -192,6 +192,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     cfgMgr.processPaths(dataDirs);
 
+    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -200,8 +201,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         engine.addArchive(*it);
     }
-
-    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
     StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
