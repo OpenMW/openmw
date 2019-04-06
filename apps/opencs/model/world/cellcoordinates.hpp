@@ -7,8 +7,6 @@
 
 #include <QMetaType>
 
-#include <osg/PositionAttitudeTransform>
-
 namespace CSMWorld
 {
     class CellCoordinates
