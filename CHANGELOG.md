@@ -108,6 +108,7 @@
     Feature #4958: Support eight blood types
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
+    Feature #4974: Overridable Resources folder
     Feature #4994: Persistent pinnable windows hiding
     Feature #5000: Compressed BSA format support
     Feature #5010: Native graphics herbalism support

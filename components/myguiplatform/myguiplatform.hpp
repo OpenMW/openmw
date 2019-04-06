@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include <components/vfs/manager.hpp>
+
 namespace osgViewer
 {
     class Viewer;
@@ -34,7 +36,7 @@ namespace osgMyGUI
 
         ~Platform();
 
-        void initialise(const std::string& resourcePath, const std::string& _logName = "MyGUI.log");
+        void initialise(const VFS::Manager* vfs, const std::string& resourcePath, const std::string& _logName = "MyGUI.log");
 
         void shutdown();
 

@@ -196,7 +196,7 @@ namespace MWGui
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
-        mGuiPlatform->initialise(resourcePath, logpath);
+        mGuiPlatform->initialise(resourceSystem->getVFS(), resourcePath, logpath);
 
         mGui = new MyGUI::Gui;
         mGui->initialise("");
@@ -206,7 +206,7 @@ namespace MWGui
         MyGUI::LanguageManager::getInstance().eventRequestTag = MyGUI::newDelegate(this, &WindowManager::onRetrieveTag);
 
         // Load fonts
-        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS(), userDataPath));
+        mFontLoader.reset(new Gui::FontLoader(encoding, resourceSystem->getVFS()));
         mFontLoader->loadBitmapFonts(exportFonts);
 
         //Register own widgets with MyGUI
@@ -242,7 +242,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        loadUserFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation.reset(new KeyboardNavigation());
@@ -379,7 +378,7 @@ namespace MWGui
 
     void WindowManager::loadUserFonts()
     {
-        mFontLoader->loadTrueTypeFonts();
+        MyGUI::ResourceManager::getInstance().load("openmw_font.xml");
     }
 
     void WindowManager::initUI()

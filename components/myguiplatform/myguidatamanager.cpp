@@ -1,6 +1,6 @@
 #include "myguidatamanager.hpp"
 
-#include <MyGUI_DataFileStream.h>
+#include <MyGUI_DataStream.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -15,18 +15,21 @@ void DataManager::setResourcePath(const std::string &path)
     mResourcePath = path;
 }
 
+void DataManager::setVfs(const VFS::Manager* vfs)
+{
+    mVfs = vfs;
+}
+
 MyGUI::IDataStream *DataManager::getData(const std::string &name)
 {
-    std::string fullpath = getDataPath(name);
-    std::unique_ptr<boost::filesystem::ifstream> stream;
-    stream.reset(new boost::filesystem::ifstream);
-    stream->open(fullpath, std::ios::binary);
-    if (stream->fail())
-    {
-        Log(Debug::Error) << "DataManager::getData: Failed to open '" << name << "'";
-        return nullptr;
-    }
-    return new MyGUI::DataFileStream(stream.release());
+    // Note: MyGUI is supposed to read/free input steam itself,
+    // so copy data from VFS stream to the string stream and pass it to MyGUI.
+    Files::IStreamPtr streamPtr = mVfs->get("mygui\\"+name);
+    std::istream* fileStream = streamPtr.get();
+    std::unique_ptr<std::stringstream> dataStream;
+    dataStream.reset(new std::stringstream);
+    *dataStream << fileStream->rdbuf();
+    return new MyGUI::DataStream(dataStream.release());
 }
 
 void DataManager::freeData(MyGUI::IDataStream *data)
@@ -36,8 +39,7 @@ void DataManager::freeData(MyGUI::IDataStream *data)
 
 bool DataManager::isDataExist(const std::string &name)
 {
-    std::string fullpath = mResourcePath + "/" + name;
-    return boost::filesystem::exists(fullpath);
+    return mVfs->exists("mygui\\"+name);
 }
 
 const MyGUI::VectorString &DataManager::getDataListNames(const std::string &pattern)
@@ -51,6 +53,9 @@ const MyGUI::VectorString &DataManager::getDataListNames(const std::string &patt
 
 const std::string &DataManager::getDataPath(const std::string &name)
 {
+    // FIXME: in theory, we should use the VFS here too, but it does not provide the real path to data files.
+    // In some cases there is no real path at all (when the requested MyGUI file is in BSA archive, for example).
+    // Currently it should not matter since we use this virtual function only to setup fonts for profilers.
     static std::string result;
     result.clear();
     if (!isDataExist(name))
