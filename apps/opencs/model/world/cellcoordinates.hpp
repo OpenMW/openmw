@@ -7,6 +7,8 @@
 
 #include <QMetaType>
 
+#include <osg/Vec3d>
+
 namespace CSMWorld
 {
     class CellCoordinates
