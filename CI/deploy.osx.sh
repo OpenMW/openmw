@@ -19,7 +19,7 @@ DATE=$(date +'%d%m%Y')
 SHORT_COMMIT=$(git rev-parse --short "${TRAVIS_COMMIT}")
 TARGET_FILENAME="OpenMW-${DATE}-${SHORT_COMMIT}.dmg"
 
-if ! ssh -p "$OSX_DEPLOY_PORT" -i "$SSH_KEY_PATH" "$OSX_DEPLOY_HOST" sh -c "ls \"$REMOTE_PATH\"" | grep "$SHORT_COMMIT" > /dev/null; then
+if ! ssh -p "$OSX_DEPLOY_PORT" -i "$SSH_KEY_PATH" "$OSX_DEPLOY_HOST" "ls \"$REMOTE_PATH\"" | grep "$SHORT_COMMIT" > /dev/null; then
     scp -P "$OSX_DEPLOY_PORT" -i "$SSH_KEY_PATH" ./*.dmg "$OSX_DEPLOY_HOST:$REMOTE_PATH/$TARGET_FILENAME"
 else
     echo "An existing nightly build for commit ${SHORT_COMMIT} has been found, skipping upload."
