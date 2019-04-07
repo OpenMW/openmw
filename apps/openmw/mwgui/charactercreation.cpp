@@ -33,14 +33,15 @@ namespace
     };
 
     const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
-    Step sGenerateClassSteps(int number) {
+    Step sGenerateClassSteps(int number)
+    {
         number++;
-        const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
-        Step step = {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_Question"),
-        {fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerOne"),
-        fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerTwo"),
-        fallback->getFallbackString("Question_"+MyGUI::utility::toString(number)+"_AnswerThree")},
-        "vo\\misc\\chargen qa"+MyGUI::utility::toString(number)+".wav"
+        Step step = {
+            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_Question"),
+            {Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerOne"),
+            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerTwo"),
+            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerThree")},
+            "vo\\misc\\chargen qa"+MyGUI::utility::toString(number)+".wav"
         };
         return step;
     }

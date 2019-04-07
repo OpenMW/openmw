@@ -195,8 +195,7 @@ namespace MWRender
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                                       const Fallback::Map* fallback, const std::string& resourcePath,
-                                       DetourNavigator::Navigator& navigator)
+                                       const std::string& resourcePath, DetourNavigator::Navigator& navigator)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -207,9 +206,9 @@ namespace MWRender
         , mLandFogEnd(std::numeric_limits<float>::max())
         , mUnderwaterFogStart(0.f)
         , mUnderwaterFogEnd(std::numeric_limits<float>::max())
-        , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
-        , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
-        , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
+        , mUnderwaterColor(Fallback::Map::getColour("Water_UnderwaterColor"))
+        , mUnderwaterWeight(Fallback::Map::getFloat("Water_UnderwaterColorWeight"))
+        , mUnderwaterIndoorFog(Fallback::Map::getFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
@@ -275,7 +274,7 @@ namespace MWRender
 
         mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
 
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
+        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
         DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");

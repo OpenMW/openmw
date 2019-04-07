@@ -21,11 +21,12 @@ using namespace Fallback;
 
 CS::Editor::Editor (int argc, char **argv)
 : mSettingsState (mCfgMgr), mDocumentManager (mCfgMgr),
-  mViewManager (mDocumentManager), mPid(""),
-  mLock(), mMerge (mDocumentManager),
+  mPid(""), mLock(), mMerge (mDocumentManager),
   mIpcServerName ("org.openmw.OpenCS"), mServer(nullptr), mClientSocket(nullptr)
-{    
+{
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
+
+    mViewManager = new CSVDoc::ViewManager(mDocumentManager);
 
     setupDataFiles (config.first);
 
@@ -44,11 +45,11 @@ CS::Editor::Editor (int argc, char **argv)
     connect (&mDocumentManager, SIGNAL (lastDocumentDeleted()),
         this, SLOT (lastDocumentDeleted()));
 
-    connect (&mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
-    connect (&mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
-    connect (&mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
-    connect (&mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
-    connect (&mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
+    connect (mViewManager, SIGNAL (newGameRequest ()), this, SLOT (createGame ()));
+    connect (mViewManager, SIGNAL (newAddonRequest ()), this, SLOT (createAddon ()));
+    connect (mViewManager, SIGNAL (loadDocumentRequest ()), this, SLOT (loadDocument ()));
+    connect (mViewManager, SIGNAL (editSettingsRequest()), this, SLOT (showSettings ()));
+    connect (mViewManager, SIGNAL (mergeDocument (CSMDoc::Document *)), this, SLOT (mergeDocument (CSMDoc::Document *)));
 
     connect (&mStartup, SIGNAL (createGame()), this, SLOT (createGame ()));
     connect (&mStartup, SIGNAL (createAddon()), this, SLOT (createAddon ()));
@@ -69,6 +70,8 @@ CS::Editor::Editor (int argc, char **argv)
 
 CS::Editor::~Editor ()
 {
+    delete mViewManager;
+
     mPidFile.close();
 
     if(mServer && boost::filesystem::exists(mPid))
@@ -107,15 +110,15 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     boost::program_options::notify(variables);
 
-    mCfgMgr.readConfiguration(variables, desc, quiet);
+    mCfgMgr.readConfiguration(variables, desc, false);
+
+    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 
     const std::string encoding = variables["encoding"].as<Files::EscapeHashString>().toStdString();
     mDocumentManager.setEncoding (ToUTF8::calculateEncoding (encoding));
     mFileDialog.setEncoding (QString::fromUtf8(encoding.c_str()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
-
-    mDocumentManager.setFallbackMap (variables["fallback"].as<FallbackMap>().mMap);
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -367,7 +370,7 @@ int CS::Editor::run()
 
 void CS::Editor::documentAdded (CSMDoc::Document *document)
 {
-    mViewManager.addView (document);
+    mViewManager->addView (document);
 }
 
 void CS::Editor::documentAboutToBeRemoved (CSMDoc::Document *document)

@@ -78,8 +78,6 @@ namespace MWWorld
     {
             Resource::ResourceSystem* mResourceSystem;
 
-            Fallback::Map mFallback;
-
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
@@ -198,8 +196,9 @@ namespace MWWorld
                 Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
-                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& resourcePath, const std::string& userDataPath);
+                ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
+                const std::string& startCell, const std::string& startupScript,
+                const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
 
@@ -234,8 +233,6 @@ namespace MWWorld
             bool toggleBorders() override;
 
             void adjustSky() override;
-
-            const Fallback::Map *getFallback() const override;
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;

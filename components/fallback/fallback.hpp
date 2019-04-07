@@ -11,16 +11,15 @@ namespace Fallback
     /// @brief contains settings imported from the Morrowind INI file.
     class Map
     {
-            std::map<std::string,std::string> mFallbackMap;
+            static std::map<std::string,std::string> mFallbackMap;
         public:
-            Map(const std::map<std::string,std::string>& fallback);
-            Map() {}
+            static void init(const std::map<std::string,std::string>& fallback);
 
-            std::string getFallbackString(const std::string& fall) const;
-            float getFallbackFloat(const std::string& fall) const;
-            int getFallbackInt(const std::string& fall) const;
-            bool getFallbackBool(const std::string& fall) const;
-            osg::Vec4f getFallbackColour(const std::string& fall) const;
+            static std::string getString(const std::string& fall);
+            static float getFloat(const std::string& fall);
+            static int getInt(const std::string& fall);
+            static bool getBool(const std::string& fall);
+            static osg::Vec4f getColour(const std::string& fall);
     };
 }
 #endif

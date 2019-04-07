@@ -40,13 +40,13 @@ CSVTools::SearchBox::SearchBox (QWidget *parent)
     mLayout = new QGridLayout (this);
 
     // search panel
-    std::vector<std::string> states =
+    std::vector<std::pair<int,std::string>> states =
         CSMWorld::Columns::getEnums (CSMWorld::Columns::ColumnId_Modification);
     states.resize (states.size()-1); // ignore erased state
 
-    for (std::vector<std::string>::const_iterator iter (states.begin()); iter!=states.end();
+    for (std::vector<std::pair<int,std::string>>::const_iterator iter (states.begin()); iter!=states.end();
         ++iter)
-        mRecordState.addItem (QString::fromUtf8 (iter->c_str()));
+        mRecordState.addItem (QString::fromUtf8 (iter->second.c_str()));
         
     mMode.addItem (tr("Text"));
     mMode.addItem (tr("Text (RegEx)"));

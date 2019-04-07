@@ -400,19 +400,18 @@ public:
     }
 };
 
-Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem, osgUtil::IncrementalCompileOperation *ico,
-             const Fallback::Map* fallback, const std::string& resourcePath)
+Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem *resourceSystem,
+             osgUtil::IncrementalCompileOperation *ico, const std::string& resourcePath)
     : mParent(parent)
     , mSceneRoot(sceneRoot)
     , mResourceSystem(resourceSystem)
-    , mFallback(fallback)
     , mResourcePath(resourcePath)
     , mEnabled(true)
     , mToggled(true)
     , mTop(0)
     , mInterior(false)
 {
-    mSimulation.reset(new RippleSimulation(parent, resourceSystem, fallback));
+    mSimulation.reset(new RippleSimulation(parent, resourceSystem));
 
     mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
@@ -428,7 +427,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
-    createSimpleWaterStateSet(geom2, mFallback->getFallbackFloat("Water_Map_Alpha"));
+    createSimpleWaterStateSet(geom2, Fallback::Map::getFloat("Water_Map_Alpha"));
     geom2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geom2);
  
@@ -479,7 +478,7 @@ void Water::updateWaterMaterial()
         createShaderWaterStateSet(mWaterGeom, mReflection, mRefraction);
     }
     else
-        createSimpleWaterStateSet(mWaterGeom, mFallback->getFallbackFloat("Water_World_Alpha"));
+        createSimpleWaterStateSet(mWaterGeom, Fallback::Map::getFloat("Water_World_Alpha"));
 
     updateVisible();
 }
@@ -502,8 +501,8 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
 
     // Add animated textures
     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
-    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
-    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    int frameCount = Fallback::Map::getInt("Water_SurfaceFrameCount");
+    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;
@@ -517,7 +516,7 @@ void Water::createSimpleWaterStateSet(osg::Node* node, float alpha)
     if (textures.empty())
         return;
 
-    float fps = mFallback->getFallbackFloat("Water_SurfaceFPS");
+    float fps = Fallback::Map::getFloat("Water_SurfaceFPS");
 
     osg::ref_ptr<NifOsg::FlipController> controller (new NifOsg::FlipController(0, 1.f/fps, textures));
     controller->setSource(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
@@ -618,8 +617,8 @@ Water::~Water()
 
 void Water::listAssetsToPreload(std::vector<std::string> &textures)
 {
-    int frameCount = mFallback->getFallbackInt("Water_SurfaceFrameCount");
-    std::string texture = mFallback->getFallbackString("Water_SurfaceTexture");
+    int frameCount = Fallback::Map::getInt("Water_SurfaceFrameCount");
+    const std::string& texture = Fallback::Map::getString("Water_SurfaceTexture");
     for (int i=0; i<frameCount; ++i)
     {
         std::ostringstream texname;

@@ -534,24 +534,24 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string());
     mEnvironment.setWindowManager (window);
 
     // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mFallbackMap, mUseSound));
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mUseSound));
 
     if (!mSkipMenu)
     {
-        std::string logo = mFallbackMap["Movies_Company_Logo"];
+        const std::string& logo = Fallback::Map::getString("Movies_Company_Logo");
         if (!logo.empty())
             window->playVideo(logo, true);
     }
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
-        mFileCollections, mContentFiles, mEncoder, mFallbackMap,
-        mActivationDistanceOverride, mCellName, mResDir.string(), mCfgMgr.getUserDataPath().string()));
+        mFileCollections, mContentFiles, mEncoder, mActivationDistanceOverride, mCellName,
+        mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -712,7 +712,7 @@ void OMW::Engine::go()
         // start in main menu
         mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
         mEnvironment.getSoundManager()->playTitleMusic();
-        std::string logo = mFallbackMap["Movies_Morrowind_Logo"];
+        const std::string& logo = Fallback::Map::getString("Movies_Morrowind_Logo");
         if (!logo.empty())
             mEnvironment.getWindowManager()->playVideo(logo, true);
     }
@@ -783,11 +783,6 @@ void OMW::Engine::setSoundUsage(bool soundUsage)
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
-}
-
-void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
-{
-    mFallbackMap = fallbackMap;
 }
 
 void OMW::Engine::setScriptConsoleMode (bool enabled)

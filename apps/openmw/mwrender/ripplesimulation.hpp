@@ -40,7 +40,7 @@ namespace MWRender
     class RippleSimulation
     {
     public:
-        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem, const Fallback::Map* fallback);
+        RippleSimulation(osg::Group* parent, Resource::ResourceSystem* resourceSystem);
         ~RippleSimulation();
 
         /// @param dt Time since the last frame

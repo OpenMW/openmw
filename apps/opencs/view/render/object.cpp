@@ -140,14 +140,13 @@ void CSVRender::Object::update()
 
     if (light)
     {
-        const Fallback::Map* fallback = mData.getFallbackMap();
-        static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
-        static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
-        static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
-        static float quadraticRadiusMult = fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
-        static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
-        static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
-        static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
+        static bool outQuadInLin = Fallback::Map::getBool("LightAttenuation_OutQuadInLin");
+        static bool useQuadratic = Fallback::Map::getBool("LightAttenuation_UseQuadratic");
+        static float quadraticValue = Fallback::Map::getFloat("LightAttenuation_QuadraticValue");
+        static float quadraticRadiusMult = Fallback::Map::getFloat("LightAttenuation_QuadraticRadiusMult");
+        static bool useLinear = Fallback::Map::getBool("LightAttenuation_UseLinear");
+        static float linearRadiusMult = Fallback::Map::getFloat("LightAttenuation_LinearRadiusMult");
+        static float linearValue = Fallback::Map::getFloat("LightAttenuation_LinearValue");
         bool isExterior = false; // FIXME
         SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior, outQuadInLin, useQuadratic,
                             quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue);

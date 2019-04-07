@@ -112,7 +112,6 @@ namespace CSMWorld
             IdCollection<ESM::Filter> mFilters;
             Collection<MetaData> mMetaData;
             std::unique_ptr<ActorAdapter> mActorAdapter;
-            const Fallback::Map* mFallbackMap;
             std::vector<QAbstractItemModel *> mModels;
             std::map<UniversalId::Type, QAbstractItemModel *> mModelIndex;
             ESM::ESMReader *mReader;
@@ -151,14 +150,11 @@ namespace CSMWorld
         public:
 
             Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-                const std::vector<std::string>& archives, const Fallback::Map* fallback,
-                const boost::filesystem::path& resDir);
+                const std::vector<std::string>& archives, const boost::filesystem::path& resDir);
 
             virtual ~Data();
 
             const VFS::Manager* getVFS() const;
-
-            const Fallback::Map* getFallbackMap() const;
 
             std::shared_ptr<Resource::ResourceSystem> getResourceSystem();
 

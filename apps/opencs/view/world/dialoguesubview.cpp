@@ -76,9 +76,9 @@ void CSVWorld::NotEditableSubDelegate::setEditorData (QWidget* editor, const QMo
     else if (CSMWorld::Columns::hasEnums (columnId))
     {
         int data = v.toInt();
-        std::vector<std::string> enumNames (CSMWorld::Columns::getEnums (columnId));
+        std::vector<std::pair<int,std::string>> enumNames (CSMWorld::Columns::getEnums (columnId));
 
-        label->setText(QString::fromUtf8(enumNames.at(data).c_str()));
+        label->setText(QString::fromUtf8(enumNames.at(data).second.c_str()));
     }
     else
     {

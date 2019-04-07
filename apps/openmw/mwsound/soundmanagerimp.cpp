@@ -33,9 +33,8 @@ namespace MWSound
     // For combining PlayMode and Type flags
     inline int operator|(PlayMode a, Type b) { return static_cast<int>(a) | static_cast<int>(b); }
 
-    SoundManager::SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound)
+    SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
-        , mFallback(fallbackMap)
         , mOutput(new DEFAULT_OUTPUT(*this))
         , mMasterVolume(1.0f)
         , mSFXVolume(1.0f)
@@ -66,12 +65,12 @@ namespace MWSound
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
 
-        mNearWaterRadius = mFallback.getFallbackInt("Water_NearWaterRadius");
-        mNearWaterPoints = mFallback.getFallbackInt("Water_NearWaterPoints");
-        mNearWaterIndoorTolerance = mFallback.getFallbackFloat("Water_NearWaterIndoorTolerance");
-        mNearWaterOutdoorTolerance = mFallback.getFallbackFloat("Water_NearWaterOutdoorTolerance");
-        mNearWaterIndoorID = Misc::StringUtils::lowerCase(mFallback.getFallbackString("Water_NearWaterIndoorID"));
-        mNearWaterOutdoorID = Misc::StringUtils::lowerCase(mFallback.getFallbackString("Water_NearWaterOutdoorID"));
+        mNearWaterRadius = Fallback::Map::getInt("Water_NearWaterRadius");
+        mNearWaterPoints = Fallback::Map::getInt("Water_NearWaterPoints");
+        mNearWaterIndoorTolerance = Fallback::Map::getFloat("Water_NearWaterIndoorTolerance");
+        mNearWaterOutdoorTolerance = Fallback::Map::getFloat("Water_NearWaterOutdoorTolerance");
+        mNearWaterIndoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterIndoorID"));
+        mNearWaterOutdoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterOutdoorID"));
 
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);

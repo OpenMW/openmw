@@ -168,16 +168,15 @@ namespace MWRender
         stateset->setAttributeAndModes(lightmodel, osg::StateAttribute::ON);
 
         osg::ref_ptr<osg::Light> light = new osg::Light;
-        const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
-        float diffuseR = fallback->getFallbackFloat("Inventory_DirectionalDiffuseR");
-        float diffuseG = fallback->getFallbackFloat("Inventory_DirectionalDiffuseG");
-        float diffuseB = fallback->getFallbackFloat("Inventory_DirectionalDiffuseB");
-        float ambientR = fallback->getFallbackFloat("Inventory_DirectionalAmbientR");
-        float ambientG = fallback->getFallbackFloat("Inventory_DirectionalAmbientG");
-        float ambientB = fallback->getFallbackFloat("Inventory_DirectionalAmbientB");
-        float azimuth = osg::DegreesToRadians(180.f - fallback->getFallbackFloat("Inventory_DirectionalRotationX"));
-        float altitude = osg::DegreesToRadians(fallback->getFallbackFloat("Inventory_DirectionalRotationY"));
-        float positionX = std::cos(azimuth) * std::sin(altitude);
+        float diffuseR = Fallback::Map::getFloat("Inventory_DirectionalDiffuseR");
+        float diffuseG = Fallback::Map::getFloat("Inventory_DirectionalDiffuseG");
+        float diffuseB = Fallback::Map::getFloat("Inventory_DirectionalDiffuseB");
+        float ambientR = Fallback::Map::getFloat("Inventory_DirectionalAmbientR");
+        float ambientG = Fallback::Map::getFloat("Inventory_DirectionalAmbientG");
+        float ambientB = Fallback::Map::getFloat("Inventory_DirectionalAmbientB");
+        float azimuth = osg::DegreesToRadians(Fallback::Map::getFloat("Inventory_DirectionalRotationX"));
+        float altitude = osg::DegreesToRadians(Fallback::Map::getFloat("Inventory_DirectionalRotationY"));
+        float positionX = -std::cos(azimuth) * std::sin(altitude);
         float positionY = std::sin(azimuth) * std::sin(altitude);
         float positionZ = std::cos(altitude);
         light->setPosition(osg::Vec4(positionX,positionY,positionZ, 0.0));
