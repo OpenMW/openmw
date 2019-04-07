@@ -110,8 +110,6 @@ namespace CSVRender
             const int landSize {ESM::Land::LAND_SIZE};
             const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 
-            PagedWorldspaceWidget& getPagedWorldspaceWidget();
-
         signals:
             void passBrushTexture(std::string brushTexture);
 

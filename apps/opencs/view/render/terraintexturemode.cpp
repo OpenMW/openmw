@@ -112,7 +112,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
     int index = landtexturesCollection.searchId(mBrushTexture);
 
-    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() &&  hit.hit && hit.tag == 0)
+    if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == 0)
     {
         undoStack.beginMacro ("Edit texture records");
         if(allowLandTextureEditing(mCellId)==true)
@@ -505,25 +505,24 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(std::pair<int, int> te
 
     if (mBrushShape == 1)
     {
-        for(int i = texCoords.first - r; i <= texCoords.first + r; ++i)
+        for (int i = -r; i <= r; i++)
         {
-            for(int j = texCoords.second - r; j <= texCoords.second + r; ++j)
+            for (int j = -r; j <= r; j++)
             {
-                selections.emplace_back(std::make_pair(i, j));
+                selections.emplace_back(i + texCoords.first, j + texCoords.second);
             }
         }
     }
 
     if (mBrushShape == 2)
     {
-        for(int i = texCoords.first - r; i <= texCoords.first + r; ++i)
+        for (int i = -r; i <= r; i++)
         {
-            for(int j = texCoords.second - r; j <= texCoords.second + r; ++j)
+            for (int j = -r; j <= r; j++)
             {
-                int distanceX = abs(i - texCoords.first);
-                int distanceY = abs(j - texCoords.second);
-                int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (distance < r) selections.emplace_back(std::make_pair(i, j));
+                osg::Vec2f coords(i,j);
+                if (std::round(coords.length()) < r)
+                    selections.emplace_back(i + texCoords.first, j + texCoords.second);
             }
         }
     }
@@ -534,7 +533,7 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(std::pair<int, int> te
         {
             for(auto const& value: mCustomBrushShape)
             {
-                selections.emplace_back(std::make_pair(texCoords.first + value.first, texCoords.second + value.second));
+                selections.emplace_back(texCoords.first + value.first, texCoords.second + value.second);
             }
         }
     }
@@ -585,8 +584,7 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
             newId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
             freeIndexFound = true;
         }
-    }
-    while (freeIndexFound == false);
+    } while (freeIndexFound == false);
 
     std::size_t idlocation = textureFileName.find("Texture: ");
     textureFileName = textureFileName.substr (idlocation + 9);
@@ -711,22 +709,12 @@ void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
         selectionCenterY = selectionCenterY / selectionAmount;
 
         mCustomBrushShape.clear();
-        std::pair<int, int> differentialPos {};
-        for(auto const& value: terrainSelection)
-        {
-            differentialPos.first = value.first - selectionCenterX;
-            differentialPos.second = value.second - selectionCenterY;
-            mCustomBrushShape.push_back(differentialPos);
-        }
+        for (auto const& value: terrainSelection)
+            mCustomBrushShape.emplace_back(value.first - selectionCenterX, value.second - selectionCenterY);
     }
 }
 
 void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
 {
     mBrushTexture = brushTexture;
-}
-
-CSVRender::PagedWorldspaceWidget& CSVRender::TerrainTextureMode::getPagedWorldspaceWidget()
-{
-    return dynamic_cast<PagedWorldspaceWidget&>(getWorldspaceWidget());
 }

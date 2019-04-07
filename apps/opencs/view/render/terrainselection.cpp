@@ -66,12 +66,12 @@ void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, 
     {
         for(auto const& localPos: localPositions)
         {
-            auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
-            auto itertemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+            auto iterTemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
             mDraggedOperationFlag = true;
 
-            if (itertemp == mTemporarySelection.end())
+            if (iterTemp == mTemporarySelection.end())
             {
+                auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
                 if (iter != mSelection.end())
                 {
                     mSelection.erase(iter);
