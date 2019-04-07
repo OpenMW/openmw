@@ -493,7 +493,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     }
 }
 
-void CSVRender::TerrainTextureMode::selectTerrainTextures(std::pair<int, int> texCoords, unsigned char selectMode, bool dragOperation)
+void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation)
 {
     int r = mBrushSize / 2;
     std::vector<std::pair<int, int>> selections;

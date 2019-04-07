@@ -56,8 +56,10 @@ void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, in
 void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> localPos)
 {
     if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
-            mSelection.emplace_back(localPos);
-    update();
+    {
+        mSelection.emplace_back(localPos);
+        update();
+    }
 }
 
 void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> localPositions, bool toggleInProgress)
@@ -115,7 +117,7 @@ void CSVRender::TerrainSelection::activate()
 
 void CSVRender::TerrainSelection::deactivate()
 {
-    if (mParentNode->containsNode(mSelectionNode)) mParentNode->removeChild(mSelectionNode);
+    mParentNode->removeChild(mSelectionNode);
 }
 
 void CSVRender::TerrainSelection::update()

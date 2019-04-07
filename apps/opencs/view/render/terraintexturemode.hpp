@@ -6,8 +6,6 @@
 #include <string>
 #include <memory>
 
-#include <osg/Group>
-
 #include <QWidget>
 #include <QEvent>
 
@@ -22,6 +20,11 @@
 #endif
 
 #include "terrainselection.hpp"
+
+namespace osg
+{
+    class Group;
+}
 
 namespace CSVWidget
 {
@@ -82,7 +85,7 @@ namespace CSVRender
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
 
             /// \brief Handle brush mechanics for texture selection
-            void selectTerrainTextures (std::pair<int, int>, unsigned char, bool);
+            void selectTerrainTextures (const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation);
 
             /// \brief Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
