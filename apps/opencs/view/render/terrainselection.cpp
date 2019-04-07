@@ -110,12 +110,12 @@ void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, 
 
 void CSVRender::TerrainSelection::activate()
 {
-    mParentNode->addChild(mSelectionNode);
+    if (!mParentNode->containsNode(mSelectionNode)) mParentNode->addChild(mSelectionNode);
 }
 
 void CSVRender::TerrainSelection::deactivate()
 {
-    mParentNode->removeChild(mSelectionNode);
+    if (mParentNode->containsNode(mSelectionNode)) mParentNode->removeChild(mSelectionNode);
 }
 
 void CSVRender::TerrainSelection::update()

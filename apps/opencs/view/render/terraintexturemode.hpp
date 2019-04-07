@@ -6,6 +6,8 @@
 #include <string>
 #include <memory>
 
+#include <osg/Group>
+
 #include <QWidget>
 #include <QEvent>
 
@@ -28,8 +30,6 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-    class PagedWorldspaceWidget;
-
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
