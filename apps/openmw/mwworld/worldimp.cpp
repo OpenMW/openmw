@@ -202,9 +202,6 @@ namespace MWWorld
             navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
             navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
             navigatorSettings->mSwimHeightScale = mSwimHeightScale;
-            if (Settings::Manager::getBool("enable log", "Navigator"))
-                DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
-                    new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
             DetourNavigator::RecastGlobalAllocator::init();
             mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
         }
