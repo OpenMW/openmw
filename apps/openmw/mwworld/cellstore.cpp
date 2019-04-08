@@ -133,7 +133,7 @@ namespace
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.getRefNum()==state.mRef.mRefNum)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum && iter->mRef.getRefId() == state.mRef.mRefID)
                 {
                     // overwrite existing reference
                     iter->load (state);

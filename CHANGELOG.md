@@ -51,6 +51,7 @@
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4922: Werewolves can not attack if the transformation happens during attack
     Bug #4927: Spell effect having both a skill and an attribute assigned is a fatal error
+    Bug #4932: Invalid records matching when loading save with edited plugin
     Bug #4938: Strings from subrecords with actually empty headers can't be empty
     Bug #4942: Hand-to-Hand attack type is chosen randomly when "always use best attack" is turned off
     Bug #4947: Player character doesn't use lip animation
