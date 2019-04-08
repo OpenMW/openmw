@@ -182,7 +182,6 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
 {
     if (!mSelection.empty())
     {
-
         // Nudge selection by 1/4th of a texture size, similar how blendmaps are nudged
         const float nudgePercentage = 0.25f;
         const int nudgeOffset = (cellSize / landTextureSize) * nudgePercentage;

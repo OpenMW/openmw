@@ -30,7 +30,6 @@ namespace CSVRender
     /// \brief Class handling the terrain selection data and rendering
     class TerrainSelection
     {
-
         public:
 
             TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type);
