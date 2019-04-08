@@ -126,6 +126,18 @@ This is how Morrowind behaves.
 
 This setting can be toggled in Advanced tab of the launcher.
 
+use magic item animations
+-------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	False
+
+If this setting is true, the engine will use casting animations for magic items, including scrolls.
+Otherwise, there will be no casting animations, just as in original engine
+
+This setting can only be configured by editing the settings configuration file.
+
 show effect duration
 --------------------
 

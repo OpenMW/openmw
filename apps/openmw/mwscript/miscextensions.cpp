@@ -1098,7 +1098,7 @@ namespace MWScript
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
-                cast.playSpellCastingEffects(spell->mId);
+                cast.playSpellCastingEffects(spell->mId, false);
                 cast.mHitPosition = target.getRefData().getPosition().asVec3();
                 cast.mAlwaysSucceed = true;
                 cast.cast(spell);

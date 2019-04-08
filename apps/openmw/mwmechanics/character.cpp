@@ -1195,7 +1195,7 @@ bool CharacterController::updateCreatureState()
                 if (!spellid.empty() && canCast)
                 {
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid);
+                    cast.playSpellCastingEffects(spellid, false);
 
                     if (!mAnimation->hasAnimation("spellcast"))
                     {
@@ -1515,23 +1515,53 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
+                bool isMagicItem = false;
                 bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
 
-                if(!spellid.empty() && canCast)
+                if (spellid.empty())
+                {
+                    if (mPtr.getClass().hasInventoryStore(mPtr))
+                    {
+                        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+                        if (inv.getSelectedEnchantItem() != inv.end())
+                        {
+                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
+                            isMagicItem = true;
+                        }
+                    }
+                }
+
+                static const bool useCastingAnimations = Settings::Manager::getBool("use magic item animations", "Game");
+                if (isMagicItem && !useCastingAnimations)
+                {
+                    // Enchanted items by default do not use casting animations
+                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+                    resetIdle = false;
+                }
+                else if(!spellid.empty() && canCast)
                 {
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid);
+                    cast.playSpellCastingEffects(spellid, isMagicItem);
 
+                    std::vector<ESM::ENAMstruct> effects;
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.back();
-                    const ESM::MagicEffect *effect;
+                    if (isMagicItem)
+                    {
+                        const ESM::Enchantment *enchantment = store.get<ESM::Enchantment>().find(spellid);
+                        effects = enchantment->mEffects.mList;
+                    }
+                    else
+                    {
+                        const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+                        effects = spell->mEffects.mList;
+                    }
 
-                    effect = store.get<ESM::MagicEffect>().find(lastEffect.mEffectID); // use last effect of list for color of VFX_Hands
+                    const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
 
-                    for (size_t iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
+                    for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
                     {
                         if (mAnimation->getNode("Bip01 L Hand"))
                             mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
@@ -1540,7 +1570,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                             mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
                     }
 
-                    const ESM::ENAMstruct &firstEffect = spell->mEffects.mList.at(0); // first effect used for casting animation
+                    const ESM::ENAMstruct &firstEffect = effects.at(0); // first effect used for casting animation
 
                     std::string startKey;
                     std::string stopKey;
@@ -1574,17 +1604,6 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 {
                     resetIdle = false;
                 }
-
-                if (mPtr.getClass().hasInventoryStore(mPtr))
-                {
-                    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-                    if (inv.getSelectedEnchantItem() != inv.end())
-                    {
-                        // Enchanted items cast immediately (no animation)
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr);
-                    }
-                }
-
             }
             else if(mWeaponType == WeapType_PickProbe)
             {
