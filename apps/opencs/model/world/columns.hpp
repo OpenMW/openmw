@@ -10,6 +10,8 @@ namespace CSMWorld
 {
     namespace Columns
     {
+        void registerWeaponType(const std::string& type);
+
         enum ColumnId
         {
             ColumnId_Value = 0,

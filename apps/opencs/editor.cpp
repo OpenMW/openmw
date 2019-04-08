@@ -12,6 +12,7 @@
 
 #include "model/doc/document.hpp"
 #include "model/world/data.hpp"
+#include "model/world/columns.hpp"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -106,7 +107,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     ("script-blacklist", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
         ->multitoken(), "exclude specified script from the verifier (if the use of the blacklist is enabled)")
     ("script-blacklist-use", boost::program_options::value<bool>()->implicit_value(true)
-        ->default_value(true), "enable script blacklisting");
+        ->default_value(true), "enable script blacklisting")
+    ("weapon-type", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+        ->multitoken(), "override data for given weapon type");
 
     boost::program_options::notify(variables);
 
@@ -123,6 +126,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
             variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
+
+    const std::vector<std::string>& weaponTypes = variables["weapon-type"].as<Files::EscapeStringVector>().toStdStringVector();
+    for (const std::string& type : weaponTypes)
+        CSMWorld::Columns::registerWeaponType(type);
 
     mFsStrict = variables["fs-strict"].as<bool>();
 

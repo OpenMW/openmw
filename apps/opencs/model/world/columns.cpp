@@ -1,15 +1,56 @@
 #include "columns.hpp"
 
 #include <components/fallback/fallback.hpp>
+#include <components/debug/debuglog.hpp>
+#include <components/esm/loadweap.hpp>
 #include <components/misc/stringops.hpp>
 
-#include "universalid.hpp"
 #include "infoselectwrapper.hpp"
+#include "universalid.hpp"
 
 namespace CSMWorld
 {
     namespace Columns
     {
+        static std::map<int, std::string> sWeaponTypes =
+        {
+            { ESM::Weapon::ShortBladeOneHand, "Short Blade 1H" },
+            { ESM::Weapon::LongBladeOneHand, "Long Blade 1H" },
+            { ESM::Weapon::BluntOneHand, "Blunt 1H" },
+            { ESM::Weapon::AxeOneHand, "Axe 1H" },
+            { ESM::Weapon::LongBladeTwoHand, "Long Blade 2H" },
+            { ESM::Weapon::AxeTwoHand, "Axe 2H" },
+            { ESM::Weapon::BluntTwoClose, "Blunt 2H Close" },
+            { ESM::Weapon::BluntTwoWide, "Blunt 2H Wide" },
+            { ESM::Weapon::SpearTwoWide, "Spear 2H" },
+            { ESM::Weapon::MarksmanBow, "Bow" },
+            { ESM::Weapon::MarksmanCrossbow, "Crossbow" },
+            { ESM::Weapon::MarksmanThrown, "Thrown" },
+            { ESM::Weapon::Arrow, "Arrow" },
+            { ESM::Weapon::Bolt, "Bolt" }
+        };
+
+        void registerWeaponType(const std::string& type)
+        {
+            std::vector<std::string> weaponData;
+            Misc::StringUtils::split(type, ';', weaponData);
+
+            if (weaponData.size() < 11)
+            {
+                Log(Debug::Warning) << "Can not override weapon type info: can not parse string \"" << type << "\", ignore the override";
+                return;
+            }
+
+            try
+            {
+                sWeaponTypes[std::stoi(weaponData[0])] = weaponData[1];
+            }
+            catch(const std::exception& e)
+            {
+                Log(Debug::Warning) << "Can not override weapon type info: can not parse string \"" << type << "\", ignore the override";
+            }
+        }
+
         struct ColumnDesc
         {
             int mId;
@@ -442,13 +483,6 @@ namespace
         "Creature", "Daedra", "Undead", "Humanoid", 0
     };
 
-    static const char *sWeaponTypes[] =
-    {
-        "Short Blade 1H", "Long Blade 1H", "Long Blade 2H", "Blunt 1H", "Blunt 2H Close",
-        "Blunt 2H Wide", "Spear 2H", "Axe 1H", "Axe 2H", "Bow", "Crossbow", "Thrown", "Arrow",
-        "Bolt", 0
-    };
-
     static const char *sModificationEnums[] =
     {
         "Base", "Modified", "Added", "Deleted", "Deleted", 0
@@ -590,7 +624,6 @@ namespace
             case CSMWorld::Columns::ColumnId_ArmorType: return sArmorTypes;
             case CSMWorld::Columns::ColumnId_ClothingType: return sClothingTypes;
             case CSMWorld::Columns::ColumnId_CreatureType: return sCreatureTypes;
-            case CSMWorld::Columns::ColumnId_WeaponType: return sWeaponTypes;
             case CSMWorld::Columns::ColumnId_Modification: return sModificationEnums;
             case CSMWorld::Columns::ColumnId_ValueType: return sVarTypeEnums;
             case CSMWorld::Columns::ColumnId_DialogueType: return sDialogueTypeEnums;
@@ -624,6 +657,13 @@ bool CSMWorld::Columns::hasEnums (ColumnId column)
 std::vector<std::pair<int,std::string>>CSMWorld::Columns::getEnums (ColumnId column)
 {
     std::vector<std::pair<int,std::string>> enums;
+    if (column == CSMWorld::Columns::ColumnId_WeaponType)
+    {
+        for (auto& pair : sWeaponTypes)
+            enums.emplace_back(pair.first, pair.second);
+
+        return enums;
+    }
 
     if (const char **table = getEnumNames (column))
         for (int i=0; table[i]; ++i)
