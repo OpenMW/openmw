@@ -73,6 +73,13 @@ namespace
     {
         return sqrDistance(osg::Vec2f(lhs.x(), lhs.y()), osg::Vec2f(rhs.x(), rhs.y()));
     }
+
+    float getPathStepSize(const MWWorld::ConstPtr& actor)
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        const auto realHalfExtents = world->getHalfExtents(actor);
+        return 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
+    }
 }
 
 namespace MWMechanics
@@ -320,8 +327,7 @@ namespace MWMechanics
         try
         {
             const auto world = MWBase::Environment::get().getWorld();
-            const auto realHalfExtents = world->getHalfExtents(actor); // This may differ from halfExtents argument
-            const auto stepSize = 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
+            const auto stepSize = getPathStepSize(actor);
             const auto navigator = world->getNavigator();
             navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, out);
         }
@@ -330,6 +336,41 @@ namespace MWMechanics
             Log(Debug::Debug) << "Build path by navigator exception: \"" << exception.what()
                 << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
                 << ") from " << startPoint << " to " << endPoint << " with flags ("
+                << DetourNavigator::WriteFlags {flags} << ")";
+        }
+    }
+
+    void PathFinder::buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
+        const DetourNavigator::Flags flags, const float pointTolerance)
+    {
+        if (mPath.empty())
+            return;
+
+        const auto stepSize = getPathStepSize(actor);
+        const auto startPoint = actor.getRefData().getPosition().asVec3();
+
+        if (sqrDistanceIgnoreZ(mPath.front(), startPoint) <= 4 * stepSize * stepSize)
+            return;
+
+        try
+        {
+            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+            std::deque<osg::Vec3f> prePath;
+            navigator->findPath(halfExtents, stepSize, startPoint, mPath.front(), flags, std::back_inserter(prePath));
+
+            while (!prePath.empty() && sqrDistanceIgnoreZ(prePath.front(), startPoint) < stepSize * stepSize)
+                prePath.pop_front();
+
+            while (!prePath.empty() && sqrDistanceIgnoreZ(prePath.back(), mPath.front()) < stepSize * stepSize)
+                prePath.pop_back();
+
+            std::copy(prePath.rbegin(), prePath.rend(), std::front_inserter(mPath));
+        }
+        catch (const DetourNavigator::NavigatorException& exception)
+        {
+            Log(Debug::Debug) << "Build path by navigator exception: \"" << exception.what()
+                << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
+                << ") from " << startPoint << " to " << mPath.front() << " with flags ("
                 << DetourNavigator::WriteFlags {flags} << ")";
         }
     }
