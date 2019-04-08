@@ -159,6 +159,16 @@
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="magicItemAnimationsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use casting animations for magic items, just as for spells.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Use magic item animation</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
