@@ -70,6 +70,7 @@
     Feature #4859: Make water reflections more configurable
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
+    Feature #4962: Add casting animations for magic items
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
 

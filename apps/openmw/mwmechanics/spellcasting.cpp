@@ -971,7 +971,7 @@ namespace MWMechanics
     
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
-            playSpellCastingEffects(mId);
+            playSpellCastingEffects(mId, false);
 
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
@@ -1046,15 +1046,27 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(const std::string &spellid)
+    void CastSpell::playSpellCastingEffects(const std::string &spellid, bool enchantment)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+        if (enchantment)
+        {
+            const ESM::Enchantment *spell = store.get<ESM::Enchantment>().find(spellid);
+            playSpellCastingEffects(spell->mEffects.mList);
 
+        }
+        else
+        {
+            const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+            playSpellCastingEffects(spell->mEffects.mList);
+        }
+    }
+
+    void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects)
+    {
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<std::string> addedEffects;
-
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->mEffects.mList.begin();
-            iter != spell->mEffects.mList.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter = effects.begin(); iter != effects.end(); ++iter)
         {
             const ESM::MagicEffect *effect;
             effect = store.get<ESM::MagicEffect>().find(iter->mEffectID);
