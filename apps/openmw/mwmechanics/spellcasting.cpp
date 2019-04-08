@@ -864,16 +864,15 @@ namespace MWMechanics
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
-        if (enchantment->mData.mType == ESM::Enchantment::CastOnce && !godmode)
+        else if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
-            item.getContainerStore()->remove(item, 1, mCaster);
+            if (!godmode)
+                item.getContainerStore()->remove(item, 1, mCaster);
         }
-        else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
+        else if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
-            {
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
-            }
         }
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
