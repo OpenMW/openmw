@@ -94,7 +94,10 @@ namespace MWMechanics
                 for (unsigned int i=0; i<spell->mEffects.mList.size();++i)
                 {
                     if (spell->mEffects.mList[i].mMagnMin != spell->mEffects.mList[i].mMagnMax)
-                        random[i] = Misc::Rng::rollClosedProbability();
+                    {
+                        int delta = spell->mEffects.mList[i].mMagnMax - spell->mEffects.mList[i].mMagnMin;
+                        random[i] = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
+                    }
                 }
             }
 

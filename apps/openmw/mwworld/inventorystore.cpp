@@ -637,15 +637,15 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
             bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) != mPermanentMagicEffectMagnitudes.end());
             if (!existed)
             {
-                // Roll some dice, one for each effect
                 params.resize(enchantment.mEffects.mList.size());
-                for (unsigned int i=0; i<params.size();++i)
-                    params[i].mRandom = Misc::Rng::rollClosedProbability();
 
-                // Try resisting each effect
                 int i=0;
                 for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
                 {
+                    int delta = effect.mMagnMax - effect.mMagnMin;
+                    // Roll some dice, one for each effect
+                    params[i].mRandom = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
+                    // Try resisting each effect
                     params[i].mMultiplier = MWMechanics::getEffectMultiplier(effect.mEffectID, actor, actor);
                     ++i;
                 }

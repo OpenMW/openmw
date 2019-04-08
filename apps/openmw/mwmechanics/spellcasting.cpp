@@ -534,8 +534,7 @@ namespace MWMechanics
 
             if (magnitudeMult > 0 && !absorbed)
             {
-                float random = Misc::Rng::rollClosedProbability();
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
+                float magnitude = effectIt->mMagnMin + Misc::Rng::rollDice(effectIt->mMagnMax - effectIt->mMagnMin + 1);
                 magnitude *= magnitudeMult;
 
                 if (!target.getClass().isActor())
