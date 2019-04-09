@@ -119,19 +119,13 @@ static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
 
 std::string NIFFile::printVersion(unsigned int version)
 {
-    union ver_quad
-    {
-        uint32_t full;
-        uint8_t quad[4];
-    } version_out;
-
-    version_out.full = version;
+    int major = (version >> 24) & 0xFF;
+    int minor = (version >> 16) & 0xFF;
+    int patch = (version >> 8) & 0xFF;
+    int rev = version & 0xFF;
 
     std::stringstream stream;
-    stream  << version_out.quad[3] << "."
-            << version_out.quad[2] << "."
-            << version_out.quad[1] << "."
-            << version_out.quad[0];
+    stream << major << "." << minor << "." << patch << "." << rev;
     return stream.str();
 }
 
@@ -146,7 +140,9 @@ void NIFFile::parse(Files::IStreamPtr stream)
 
     // Get BCD version
     ver = nif.getUInt();
-    if(ver != VER_MW)
+    // 4.0.0.0 is an older, practically identical version of the format.
+    // It's not used by Morrowind assets but Morrowind supports it.
+    if(ver != 0x04000000 && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
     // Number of records
     size_t recNum = nif.getInt();
