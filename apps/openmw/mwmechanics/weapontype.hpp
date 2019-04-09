@@ -54,7 +54,7 @@ namespace MWMechanics
         { ESM::Weapon::SpearTwoWide, { "Spear 2H", "2w", "weapontwowide", "Item Weapon Spear", "Weapon Bone", "Bip01 SpearTwoWide", ESM::Skill::Spear, WeaponClass::Melee, ESM::Weapon::None, WeaponType::TwoHanded }},
         { ESM::Weapon::MarksmanBow, { "Bow", "1h", "bowandarrow", "Item Weapon Bow", "Weapon Bone", "Bip01 MarksmanBow", ESM::Skill::Marksman, WeaponClass::Ranged, ESM::Weapon::Arrow, WeaponType::TwoHanded }},
         { ESM::Weapon::MarksmanCrossbow, { "Crossbow", "crossbow", "crossbow", "Item Weapon Crossbow", "Weapon Bone", "Bip01 MarksmanCrossbow", ESM::Skill::Marksman, WeaponClass::Ranged, ESM::Weapon::Bolt, WeaponType::TwoHanded }},
-        { ESM::Weapon::MarksmanThrown, { "Thrown", "1h", "throwweapon", "Item Weapon Blunt", "Weapon Bone", "Bip01 MarksmanThrown", ESM::Skill::Marksman, WeaponClass::Thrown, ESM::Weapon::None, WeaponType::TwoHanded }},
+        { ESM::Weapon::MarksmanThrown, { "Thrown", "1h", "throwweapon", "Item Weapon Blunt", "Weapon Bone", "Bip01 MarksmanThrown", ESM::Skill::Marksman, WeaponClass::Thrown, ESM::Weapon::None, 0 }},
         { ESM::Weapon::Arrow, { "Arrow", "", "", "Item Weapon Ammo", "ArrowBone", "", ESM::Skill::Marksman, WeaponClass::Ammo, ESM::Weapon::None, 0 }},
         { ESM::Weapon::Bolt, { "Bolt", "", "", "Item Weapon Ammo", "ArrowBone", "", ESM::Skill::Marksman, WeaponClass::Ammo, ESM::Weapon::None, 0 }}
     };
