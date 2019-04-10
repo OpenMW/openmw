@@ -3,6 +3,7 @@
 #include <osg/UserDataContainer>
 #include <osg/MatrixTransform>
 #include <osg/Depth>
+#include <osg/PolygonOffset>
 
 #include <osgUtil/RenderBin>
 #include <osgUtil/CullVisitor>
@@ -331,28 +332,6 @@ void NpcAnimation::setViewMode(NpcAnimation::ViewMode viewMode)
     setRenderBin();
 }
 
-/// @brief A RenderBin callback to clear the depth buffer before rendering.
-class DepthClearCallback : public osgUtil::RenderBin::DrawCallback
-{
-public:
-    DepthClearCallback()
-    {
-        mDepth = new osg::Depth;
-        mDepth->setWriteMask(true);
-    }
-
-    virtual void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)
-    {
-        renderInfo.getState()->applyAttribute(mDepth);
-
-        glClear(GL_DEPTH_BUFFER_BIT);
-
-        bin->drawImplementation(renderInfo, previous);
-    }
-
-    osg::ref_ptr<osg::Depth> mDepth;
-};
-
 /// Overrides Field of View to given value for rendering the subgraph.
 /// Must be added as cull callback.
 class OverrideFieldOfViewCallback : public osg::NodeCallback
@@ -391,21 +370,18 @@ private:
 
 void NpcAnimation::setRenderBin()
 {
+    osg::StateSet* stoteset = mObjectRoot->getOrCreateStateSet();
+    osg::ref_ptr<osg::PolygonOffset> polyoffset = new osg::PolygonOffset;
+    polyoffset->setFactor(1.0f);
     if (mViewMode == VM_FirstPerson)
     {
-        static bool prototypeAdded = false;
-        if (!prototypeAdded)
-        {
-            osg::ref_ptr<osgUtil::RenderBin> depthClearBin (new osgUtil::RenderBin);
-            depthClearBin->setDrawCallback(new DepthClearCallback);
-            osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
-            prototypeAdded = true;
-        }
-
-        osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
-        stateset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        polyoffset->setUnits(-1000000.0f);
+        stoteset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+        stoteset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
     }
     else
+        polyoffset->setUnits(0.0f);
+        stoteset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
         Animation::setRenderBin();
 }
 
