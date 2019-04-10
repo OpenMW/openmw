@@ -72,6 +72,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
     mVFS.reset(new VFS::Manager(mFsStrict));
+    mDataPaths.insert(mDataPaths.begin(), resDir);
     VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
 
     mResourcesManager.setVFS(mVFS.get());
@@ -84,8 +85,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     for (const auto& define : shadowDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
-
-    mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
     int index = 0;
 

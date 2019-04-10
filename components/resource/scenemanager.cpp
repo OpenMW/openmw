@@ -215,7 +215,7 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
-        , mShaderManager(new Shader::ShaderManager)
+        , mShaderManager(new Shader::ShaderManager(vfs))
         , mForceShaders(false)
         , mClampLighting(true)
         , mAutoUseNormalMaps(false)
@@ -292,11 +292,6 @@ namespace Resource
     Shader::ShaderManager &SceneManager::getShaderManager()
     {
         return *mShaderManager.get();
-    }
-
-    void SceneManager::setShaderPath(const std::string &path)
-    {
-        mShaderManager->setShaderPath(path);
     }
 
     bool SceneManager::checkLoaded(const std::string &name, double timeStamp)

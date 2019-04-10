@@ -12,6 +12,8 @@
 
 #include <OpenThreads/Mutex>
 
+#include <components/vfs/manager.hpp>
+
 namespace Shader
 {
 
@@ -20,7 +22,7 @@ namespace Shader
     class ShaderManager
     {
     public:
-        void setShaderPath(const std::string& path);
+        ShaderManager(const VFS::Manager* vfs);
 
         typedef std::map<std::string, std::string> DefineMap;
 
@@ -45,9 +47,9 @@ namespace Shader
         void releaseGLObjects(osg::State* state);
 
     private:
-        std::string mPath;
-
         DefineMap mGlobalDefines;
+
+        const VFS::Manager* mVfs;
 
         // <name, code>
         typedef std::map<std::string, std::string> TemplateMap;

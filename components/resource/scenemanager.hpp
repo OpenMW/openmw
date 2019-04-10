@@ -72,8 +72,6 @@ namespace Resource
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        void setShaderPath(const std::string& path);
-
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
         bool checkLoaded(const std::string& name, double referenceTime);
 

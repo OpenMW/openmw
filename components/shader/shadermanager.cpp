@@ -15,11 +15,6 @@
 namespace Shader
 {
 
-    void ShaderManager::setShaderPath(const std::string &path)
-    {
-        mPath = path;
-    }
-
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
     {
         for (size_t position = 0; position < source.length(); )
@@ -58,7 +53,7 @@ namespace Shader
         return true;
     }
 
-    bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
+    bool parseIncludes(const VFS::Manager *vfs, std::string& source)
     {
         boost::replace_all(source, "\r\n", "\n");
 
@@ -80,18 +75,19 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start+1, end-(start+1));
-            boost::filesystem::path includePath = shaderPath / includeFilename;
-            boost::filesystem::ifstream includeFstream;
-            includeFstream.open(includePath);
-            if (includeFstream.fail())
+            Files::IStreamPtr streamPtr;
+            try
             {
-                Log(Debug::Error) << "Failed to open " << includePath.string();
+                streamPtr = vfs->get("shaders\\"+includeFilename);
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << e.what();
                 return false;
             }
 
-            std::stringstream buffer;
-            buffer << includeFstream.rdbuf();
-            std::string stringRepresentation = buffer.str();
+            // read data to string
+            std::string stringRepresentation(std::istreambuf_iterator<char>(*streamPtr.get()), {});
             addLineDirectivesAfterConditionalBlocks(stringRepresentation);
 
             // insert #line directives so we get correct line numbers in compiler errors
@@ -118,7 +114,7 @@ namespace Shader
 
             source.replace(foundPos, (end-foundPos+1), toInsert.str());
 
-            if (includedFiles.insert(includePath).second == false)
+            if (includedFiles.insert(includeFilename).second == false)
             {
                 Log(Debug::Error) << "Detected cyclic #includes";
                 return false;
@@ -270,6 +266,11 @@ namespace Shader
         return true;
     }
 
+    ShaderManager::ShaderManager(const VFS::Manager* vfs)
+    {
+        mVfs = vfs;
+    }
+
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &shaderTemplate, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
@@ -278,20 +279,22 @@ namespace Shader
         TemplateMap::iterator templateIt = mShaderTemplates.find(shaderTemplate);
         if (templateIt == mShaderTemplates.end())
         {
-            boost::filesystem::path p = (boost::filesystem::path(mPath) / shaderTemplate);
-            boost::filesystem::ifstream stream;
-            stream.open(p);
-            if (stream.fail())
+            Files::IStreamPtr streamPtr;
+            try
             {
-                Log(Debug::Error) << "Failed to open " << p.string();
+                streamPtr = mVfs->get("shaders\\"+shaderTemplate);
+            }
+            catch (const std::exception& e)
+            {
+                Log(Debug::Error) << e.what();
                 return nullptr;
             }
-            std::stringstream buffer;
-            buffer << stream.rdbuf();
+
+            // read data to string
+            std::string source(std::istreambuf_iterator<char>(*streamPtr.get()), {});
 
             // parse includes
-            std::string source = buffer.str();
-            if (!addLineDirectivesAfterConditionalBlocks(source) || !parseIncludes(boost::filesystem::path(mPath), source))
+            if (!addLineDirectivesAfterConditionalBlocks(source) || !parseIncludes(mVfs, source))
                 return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(shaderTemplate, source)).first;
