@@ -370,18 +370,18 @@ private:
 
 void NpcAnimation::setRenderBin()
 {
-    osg::StateSet* stoteset = mObjectRoot->getOrCreateStateSet();
+    osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
     osg::ref_ptr<osg::PolygonOffset> polyoffset = new osg::PolygonOffset;
     polyoffset->setFactor(1.0f);
     if (mViewMode == VM_FirstPerson)
     {
         polyoffset->setUnits(-1000000.0f);
-        stoteset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-        stoteset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        stateset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+        stateset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
     }
     else
         polyoffset->setUnits(0.0f);
-        stoteset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+        stateset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
         Animation::setRenderBin();
 }
 
