@@ -35,15 +35,15 @@ namespace MWMechanics
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
 
-        MWMechanics::WeaponClass weapclass = MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass;
-        if (type == -1 && weapclass == MWMechanics::WeaponClass::Ammo)
+        ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass;
+        if (type == -1 && weapclass == ESM::WeaponType::Ammo)
             return 0.f;
 
         float rating=0.f;
         static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
         float ratingMult = fAIMeleeWeaponMult;
 
-        if (weapclass != MWMechanics::WeaponClass::Melee)
+        if (weapclass != ESM::WeaponType::Melee)
         {
             // Underwater ranged combat is impossible
             if (world->isUnderwater(MWWorld::ConstPtr(actor), 0.75f)
@@ -61,11 +61,11 @@ namespace MWMechanics
         const float chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
         // We need to account for the fact that thrown weapons have 2x real damage applied to the target
         // as they're both the weapon and the ammo of the hit
-        if (weapclass == MWMechanics::WeaponClass::Thrown)
+        if (weapclass == ESM::WeaponType::Thrown)
         {
             rating = chop * 2;
         }
-        else if (weapclass != MWMechanics::WeaponClass::Melee)
+        else if (weapclass != ESM::WeaponType::Melee)
         {
             rating = chop;
         }
@@ -78,7 +78,7 @@ namespace MWMechanics
 
         adjustWeaponDamage(rating, item, actor);
 
-        if (weapclass != MWMechanics::WeaponClass::Ranged)
+        if (weapclass != ESM::WeaponType::Ranged)
         {
             resistNormalWeapon(enemy, actor, item, rating);
             applyWerewolfDamageMult(enemy, item, rating);
@@ -144,7 +144,7 @@ namespace MWMechanics
         float chance = getHitChance(actor, enemy, value) / 100.f;
         rating *= std::min(1.f, std::max(0.01f, chance));
 
-        if (weapclass != MWMechanics::WeaponClass::Ammo)
+        if (weapclass != ESM::WeaponType::Ammo)
             rating *= weapon->mData.mSpeed;
 
         return rating * ratingMult;
@@ -194,7 +194,7 @@ namespace MWMechanics
 
         const ESM::Weapon* esmWeap = weapon.get<ESM::Weapon>()->mBase;
         int type = esmWeap->mData.mType;
-        if (getWeaponType(type)->mWeaponClass != MWMechanics::WeaponClass::Melee)
+        if (getWeaponType(type)->mWeaponClass != ESM::WeaponType::Melee)
         {
             if (!ammo.isEmpty() && !MWBase::Environment::get().getWorld()->isSwimming(enemy))
             {

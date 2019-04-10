@@ -332,7 +332,7 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
 
             const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
-            if (MWMechanics::getWeaponType(esmWeapon->mData.mType)->mWeaponClass == MWMechanics::WeaponClass::Ammo)
+            if (MWMechanics::getWeaponType(esmWeapon->mData.mType)->mWeaponClass == ESM::WeaponType::Ammo)
                 continue;
 
             if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])

@@ -140,7 +140,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 
     // Since throwing weapons stack themselves, do not show such weapon itself
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-    if (MWMechanics::getWeaponType(type)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         showHolsteredWeapons = false;
 
     std::string mesh = weapon->getClass().getModel(*weapon);
@@ -227,7 +227,7 @@ void ActorAnimation::updateQuiver()
     unsigned int ammoCount = 0;
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
     const auto& weaponType = MWMechanics::getWeaponType(type);
-    if (weaponType->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+    if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
     {
         ammoCount = ammo->getRefData().getCount();
         osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
@@ -301,7 +301,7 @@ void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-    if (MWMechanics::getWeaponType(type)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         ammo = weapon;
     else
         ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
@@ -335,7 +335,7 @@ void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-    if (MWMechanics::getWeaponType(type)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         ammo = weapon;
     else
         ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);

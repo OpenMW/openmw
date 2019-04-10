@@ -126,7 +126,7 @@ namespace MWMechanics
         }
 
         const ESM::Weapon* weapon = mWeapon.get<ESM::Weapon>()->mBase;
-        if (MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass != MWMechanics::WeaponClass::Melee)
+        if (MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass != ESM::WeaponType::Melee)
         {
             isRanged = true;
             return fProjectileMaxSpeed;
@@ -368,7 +368,7 @@ namespace MWMechanics
         else if (!activeWeapon.isEmpty())
         {
             const ESM::Weapon* esmWeap = activeWeapon.get<ESM::Weapon>()->mBase;
-            if (MWMechanics::getWeaponType(esmWeap->mData.mType)->mWeaponClass != MWMechanics::WeaponClass::Melee)
+            if (MWMechanics::getWeaponType(esmWeap->mData.mType)->mWeaponClass != ESM::WeaponType::Melee)
             {
                 static const float fTargetSpellMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
                 dist = fTargetSpellMaxSpeed;

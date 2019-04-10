@@ -882,8 +882,8 @@ namespace MWMechanics
         if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
-            MWMechanics::WeaponClass weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
-            isProjectile = (weapclass == MWMechanics::WeaponClass::Thrown || weapclass == MWMechanics::WeaponClass::Ranged);
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
         }
 
         if (isProjectile || !mTarget.isEmpty())

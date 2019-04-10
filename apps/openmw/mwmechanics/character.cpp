@@ -823,8 +823,8 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
                 mAnimation->showWeapons(true);
                 // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
                 // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
-                MWMechanics::WeaponClass weaponClass = getWeaponType(mWeaponType)->mWeaponClass;
-                bool useRelativeDuration = weaponClass == WeaponClass::Ranged;
+                ESM::WeaponType::Class weaponClass = getWeaponType(mWeaponType)->mWeaponClass;
+                bool useRelativeDuration = weaponClass == ESM::WeaponType::Ranged;
                 mAnimation->setWeaponGroup(mCurrentWeapon, useRelativeDuration);
             }
 
@@ -1154,7 +1154,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     // Shields/torches shouldn't be visible during any operation involving two hands
     // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
     // but they are also present in weapon drawing animation.
-    return !(getWeaponType(weaptype)->mFlags & MWMechanics::WeaponType::TwoHanded);
+    return !(getWeaponType(weaptype)->mFlags & ESM::WeaponType::TwoHanded);
 }
 
 bool CharacterController::updateWeaponState(CharacterState& idle)
@@ -1266,8 +1266,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 getWeaponGroup(weaptype, weapgroup);
                 // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
                 // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
-                MWMechanics::WeaponClass weaponClass = getWeaponType(weaptype)->mWeaponClass;
-                bool useRelativeDuration = weaponClass == WeaponClass::Ranged;
+                ESM::WeaponType::Class weaponClass = getWeaponType(weaptype)->mWeaponClass;
+                bool useRelativeDuration = weaponClass == ESM::WeaponType::Ranged;
                 mAnimation->setWeaponGroup(weapgroup, useRelativeDuration);
 
                 if (!isStillWeapon)
@@ -1369,7 +1369,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
     float complete;
     bool animPlaying;
-    MWMechanics::WeaponClass weapclass = getWeaponType(mWeaponType)->mWeaponClass;
+    ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
     if(mAttackingOrSpell)
     {
         MWWorld::Ptr player = getPlayer();
@@ -1525,7 +1525,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 std::string startKey;
                 std::string stopKey;
 
-                if(weapclass == WeaponClass::Ranged || weapclass == WeaponClass::Thrown)
+                if(weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
                 {
                     mAttackType = "shoot";
                     startKey = mAttackType+" start";
@@ -1597,7 +1597,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 attackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
             }
 
-            if(weapclass != WeaponClass::Ranged && weapclass != WeaponClass::Thrown)
+            if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
             {
                 MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
 
@@ -1633,7 +1633,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
     }
 
     mAnimation->setPitchFactor(0.f);
-    if (weapclass == WeaponClass::Ranged || weapclass == WeaponClass::Thrown)
+    if (weapclass == ESM::WeaponType::Ranged || weapclass == ESM::WeaponType::Thrown)
     {
         switch (mUpperBodyState)
         {

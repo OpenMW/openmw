@@ -66,9 +66,9 @@ namespace MWClass
     bool Weapon::hasItemHealth (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
-        MWMechanics::WeaponClass weapClass = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mWeaponClass;
+        ESM::WeaponType::Class weapClass = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mWeaponClass;
 
-        return (weapClass == MWMechanics::WeaponClass::Melee || weapClass == MWMechanics::WeaponClass::Ranged); // thrown weapons and arrows/bolts don't have health, only quantity
+        return (weapClass == ESM::WeaponType::Melee || weapClass == ESM::WeaponType::Ranged); // thrown weapons and arrows/bolts don't have health, only quantity
     }
 
     int Weapon::getItemMaxHealth (const MWWorld::ConstPtr& ptr) const
@@ -89,17 +89,17 @@ namespace MWClass
     std::pair<std::vector<int>, bool> Weapon::getEquipmentSlots (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
-        MWMechanics::WeaponClass weapClass = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mWeaponClass;
+        ESM::WeaponType::Class weapClass = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mWeaponClass;
 
         std::vector<int> slots_;
         bool stack = false;
 
-        if (weapClass == MWMechanics::WeaponClass::Ammo)
+        if (weapClass == ESM::WeaponType::Ammo)
         {
             slots_.push_back (int (MWWorld::InventoryStore::Slot_Ammunition));
             stack = true;
         }
-        else if (weapClass == MWMechanics::WeaponClass::Thrown)
+        else if (weapClass == ESM::WeaponType::Thrown)
         {
             slots_.push_back (int (MWWorld::InventoryStore::Slot_CarriedRight));
             stack = true;
@@ -165,7 +165,7 @@ namespace MWClass
     MWGui::ToolTipInfo Weapon::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = ptr.get<ESM::Weapon>();
-        const MWMechanics::WeaponType* weaponType = MWMechanics::getWeaponType(ref->mBase->mData.mType);
+        const ESM::WeaponType* weaponType = MWMechanics::getWeaponType(ref->mBase->mData.mType);
 
         MWGui::ToolTipInfo info;
         info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
@@ -176,16 +176,16 @@ namespace MWClass
         std::string text;
 
         // weapon type & damage
-        if (weaponType->mWeaponClass != MWMechanics::WeaponClass::Ammo || Settings::Manager::getBool("show projectile damage", "Game"))
+        if (weaponType->mWeaponClass != ESM::WeaponType::Ammo || Settings::Manager::getBool("show projectile damage", "Game"))
         {
             text += "\n#{sType} ";
 
             int skill = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill;
             const std::string type = ESM::Skill::sSkillNameIds[skill];
             std::string oneOrTwoHanded;
-            if (weaponType->mWeaponClass == MWMechanics::WeaponClass::Melee)
+            if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {
-                if (weaponType->mFlags & MWMechanics::WeaponType::TwoHanded)
+                if (weaponType->mFlags & ESM::WeaponType::TwoHanded)
                     oneOrTwoHanded = "sTwoHanded";
                 else
                     oneOrTwoHanded = "sOneHanded";
@@ -195,7 +195,7 @@ namespace MWClass
                 ((oneOrTwoHanded != "") ? ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString() : "");
 
             // weapon damage
-            if (weaponType->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+            if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
             {
                 // Thrown weapons have 2x real damage applied
                 // as they're both the weapon and the ammo
@@ -203,7 +203,7 @@ namespace MWClass
                     + MWGui::ToolTips::toString(static_cast<int>(ref->mBase->mData.mChop[0] * 2))
                     + " - " + MWGui::ToolTips::toString(static_cast<int>(ref->mBase->mData.mChop[1] * 2));
             }
-            else if (weaponType->mWeaponClass == MWMechanics::WeaponClass::Melee)
+            else if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {
                 // Chop
                 text += "\n#{sChop}: "
@@ -236,7 +236,7 @@ namespace MWClass
 
         const bool verbose = Settings::Manager::getBool("show melee info", "Game");
         // add reach for melee weapon
-        if (weaponType->mWeaponClass == MWMechanics::WeaponClass::Melee && verbose)
+        if (weaponType->mWeaponClass == ESM::WeaponType::Melee && verbose)
         {
             // display value in feet
             const float combatDistance = store.get<ESM::GameSetting>().find("fCombatDistance")->mValue.getFloat() * ref->mBase->mData.mReach;
@@ -245,7 +245,7 @@ namespace MWClass
         }
 
         // add attack speed for any weapon excepts arrows and bolts
-        if (weaponType->mWeaponClass != MWMechanics::WeaponClass::Ammo && verbose)
+        if (weaponType->mWeaponClass != ESM::WeaponType::Ammo && verbose)
         {
             text += MWGui::ToolTips::getPercentString(ref->mBase->mData.mSpeed, "#{sAttributeSpeed}");
         }
@@ -305,7 +305,7 @@ namespace MWClass
             return std::make_pair (0, "");
 
         int type = ptr.get<ESM::Weapon>()->mBase->mData.mType;
-        if(MWMechanics::getWeaponType(type)->mFlags & MWMechanics::WeaponType::TwoHanded)
+        if(MWMechanics::getWeaponType(type)->mFlags & ESM::WeaponType::TwoHanded)
         {
             return std::make_pair (2, "");
         }

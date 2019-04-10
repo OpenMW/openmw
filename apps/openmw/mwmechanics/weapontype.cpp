@@ -39,9 +39,9 @@ namespace MWMechanics
         return inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
     }
 
-    const WeaponType* getWeaponType(const int weaponType)
+    const ESM::WeaponType* getWeaponType(const int weaponType)
     {
-        std::map<int, WeaponType>::const_iterator found = sWeaponTypeList.find(weaponType);
+        std::map<int, ESM::WeaponType>::const_iterator found = sWeaponTypeList.find(weaponType);
         if (found == sWeaponTypeList.end())
         {
             // Use one-handed short blades as fallback
@@ -64,7 +64,7 @@ namespace MWMechanics
 
         try
         {
-            WeaponType weapon;
+            ESM::WeaponType weapon;
             weapon.mDisplayName = weaponData[1];
             weapon.mShortGroup = weaponData[2];
             weapon.mLongGroup = weaponData[3];
@@ -72,7 +72,7 @@ namespace MWMechanics
             weapon.mAttachBone = weaponData[5];
             weapon.mSheathingBone = weaponData[6];
             weapon.mSkill = ESM::Skill::SkillEnum(std::stoi(weaponData[7]));
-            weapon.mWeaponClass = MWMechanics::WeaponClass(std::stoi(weaponData[8]));
+            weapon.mWeaponClass = ESM::WeaponType::Class(std::stoi(weaponData[8]));
             weapon.mAmmoType = std::stoi(weaponData[9]);
             weapon.mFlags = std::stoi(weaponData[10]);
 

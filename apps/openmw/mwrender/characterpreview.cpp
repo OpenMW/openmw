@@ -300,8 +300,8 @@ namespace MWRender
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
                 int type = ref->mBase->mData.mType;
-                const MWMechanics::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
-                showCarriedLeft = !(weaponInfo->mFlags & MWMechanics::WeaponType::TwoHanded);
+                const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
+                showCarriedLeft = !(weaponInfo->mFlags & ESM::WeaponType::TwoHanded);
 
                 std::string inventoryGroup = weaponInfo->mLongGroup;
                 inventoryGroup = "inventory" + inventoryGroup;

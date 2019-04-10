@@ -70,8 +70,8 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
         return;
 
     int type = weaponSlot->get<ESM::Weapon>()->mBase->mData.mType;
-    MWMechanics::WeaponClass weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
-    if (weapclass == MWMechanics::WeaponClass::Thrown)
+    ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+    if (weapclass == ESM::WeaponType::Thrown)
     {
         std::string soundid = weaponSlot->getClass().getUpSoundId(*weaponSlot);
         if(!soundid.empty())
@@ -81,7 +81,7 @@ void WeaponAnimation::attachArrow(MWWorld::Ptr actor)
         }
         showWeapon(true);
     }
-    else if (weapclass == MWMechanics::WeaponClass::Ranged)
+    else if (weapclass == ESM::WeaponType::Ranged)
     {
         osg::Group* parent = getArrowBone();
         if (!parent)
@@ -116,7 +116,7 @@ void WeaponAnimation::releaseArrow(MWWorld::Ptr actor, float attackStrength)
 
     MWMechanics::applyFatigueLoss(actor, *weapon, attackStrength);
 
-    if (MWMechanics::getWeaponType(weapon->get<ESM::Weapon>()->mBase->mData.mType)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+    if (MWMechanics::getWeaponType(weapon->get<ESM::Weapon>()->mBase->mData.mType)->mWeaponClass == ESM::WeaponType::Thrown)
     {
         // Thrown weapons get detached now
         osg::Node* weaponNode = getWeaponNode();

@@ -336,7 +336,7 @@ namespace MWClass
                 if(weapon != invStore.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
                 {
                     const MWWorld::LiveCellRef<ESM::Armor> *ref = ptr.get<ESM::Armor>();
-                    if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & MWMechanics::WeaponType::TwoHanded)
+                    if (MWMechanics::getWeaponType(ref->mBase->mData.mType)->mFlags & ESM::WeaponType::TwoHanded)
                         return std::make_pair(3,"");
                 }
 

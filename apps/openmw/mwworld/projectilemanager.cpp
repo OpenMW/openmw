@@ -321,7 +321,7 @@ namespace MWWorld
         state.mThrown = false;
 
         int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
-        if (MWMechanics::getWeaponType(type)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+        if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
             state.mThrown = true;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
@@ -610,7 +610,7 @@ namespace MWWorld
                 state.mThrown = false;
 
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
-                if (MWMechanics::getWeaponType(weaponType)->mWeaponClass == MWMechanics::WeaponClass::Thrown)
+                if (MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown)
                     state.mThrown = true;
             }
             catch(...)
