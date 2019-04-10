@@ -91,6 +91,7 @@
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
+    Feature #3214: Custom weapon animation groups
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
     Feature #3893: Implicit target for "set" function in console
