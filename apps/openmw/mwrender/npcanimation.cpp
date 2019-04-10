@@ -375,7 +375,7 @@ void NpcAnimation::setRenderBin()
     polyoffset->setFactor(1.0f);
     if (mViewMode == VM_FirstPerson)
     {
-        polyoffset->setUnits(-1000000.0f);
+        polyoffset->setUnits(-5000000.0f);
         stateset->setAttributeAndModes(polyoffset, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
         stateset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
     }
