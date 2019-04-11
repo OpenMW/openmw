@@ -57,6 +57,7 @@
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
     Bug #4963: Enchant skill progress is incorrect
+    Bug #4965: Global light attenuation settings setup is lacking
     Bug #4969: "Miss" sound plays for any actor
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
