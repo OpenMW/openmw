@@ -8,8 +8,8 @@ Morrowind uses a custom ``.fnt`` file format. It is not compatible with the Wind
 To our knowledge, the format is undocumented.
 
 OpenMW can load this format and convert it on the fly into something usable 
-(see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). 
-In OpenMW 0.32, an --export-fonts command line option was added to write the converted font 
+(see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp>`_).
+OpenMW has an --export-fonts command line option was added to write the converted font
 (a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
 
 TrueType fonts
@@ -17,8 +17,24 @@ TrueType fonts
 
 Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts.
 
-0.45.0+ way
+0.46.0+ way
 -----------
+
+Check the "Use TrueType fonts" checkbox on the Advanced page in the launcher, tweak fonts size and resolution. It should be enough in general case.
+If you previously used TrueType fonts in the 0.45, you can remove the `Fonts` folder from your configs folder.
+
+If you do not use launcher for some reason, you can configure fonts manually via settings.cfg::
+
+	[GUI]
+	use ttf = true
+	font size = 16
+	ttf resolution = 96
+
+If you want to use custom fonts, you can copy the ``openmw_font.xml`` from the ``resources\mygui`` folder to the ``Data Files/MyGUI`` (you can use a "separate data folders for mods" feature)
+and tweak it as you want. Your file will override a file from the ``resources\mygui`` folder.
+
+0.45.0 way
+----------
 This is the recommended way to install replacement fonts.
 
 -	To replace the primary "Magic Cards" font:
@@ -46,9 +62,7 @@ This is the recommended way to install replacement fonts.
 				<Property key="TabWidth" value="8"/>
 				<Property key="OffsetHeight" value="0"/>
 				<Codes>
-					<Code range="32"/>
-					<Code range="65 90"/>
-					<Code range="97 122"/>
+					<Code range="32 126"/>
 				</Codes>
 			</Resource>
 
@@ -81,9 +95,7 @@ Pre-0.45.0 way
 				<Property key="TabWidth" value="8"/>
 				<Property key="OffsetHeight" value="0"/>
 				<Codes>
-					<Code range="32"/>
-					<Code range="65 90"/>
-					<Code range="97 122"/>
+					<Code range="32 126"/>
 				</Codes>
 			</Resource>
 

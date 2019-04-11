@@ -35,6 +35,10 @@ void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {
     startDefaultCharacterAtField->setEnabled(state == Qt::Checked);
 }
 
+void Launcher::AdvancedPage::on_useFontsCheckBox_stateChanged(int state) {
+    fontResolutionSpinBox->setEnabled(state == Qt::Checked);
+}
+
 void Launcher::AdvancedPage::on_runScriptAfterStartupBrowseButton_clicked()
 {
     QString scriptFile = QFileDialog::getOpenFileName(
@@ -93,6 +97,10 @@ bool Launcher::AdvancedPage::loadSettings()
     maximumQuicksavesComboBox->setValue(mEngineSettings.getInt("max quicksaves", "Saves"));
 
     // User Interface Settings
+    loadSettingBool(useFontsCheckBox, "use ttf", "GUI");
+    fontResolutionSpinBox->setEnabled(useFontsCheckBox->isChecked());
+    fontResolutionSpinBox->setValue(mEngineSettings.getInt("ttf resolution", "GUI"));
+    fontSizeSpinBox->setValue(mEngineSettings.getInt("font size", "GUI"));
     loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
     loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
@@ -157,6 +165,15 @@ void Launcher::AdvancedPage::saveSettings()
     }
 
     // User Interface Settings
+    int fontResolution = fontResolutionSpinBox->value();
+    if (fontResolution != mEngineSettings.getInt("ttf resolution", "GUI")) {
+        mEngineSettings.setInt("ttf resolution", "GUI", fontResolution);
+    }
+    int fontSize = fontSizeSpinBox->value();
+    if (fontSize != mEngineSettings.getInt("font size", "GUI")) {
+        mEngineSettings.setInt("font size", "GUI", fontSize);
+    }
+    saveSettingBool(useFontsCheckBox, "use ttf", "GUI");
     saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
     saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");

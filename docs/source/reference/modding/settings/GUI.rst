@@ -12,6 +12,16 @@ This setting scales the GUI interface windows.
 A value of 1.0 results in the normal scale. Larger values are useful to increase the scale of the GUI for high resolution displays.
 This setting can only be configured by editing the settings configuration file.
 
+use ttf
+-------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If enabled, OpenMW will use TrueType fonts for ingame text, otherwise it will use TTF only for console and profilers.
+This setting can be toggled in Advanced tab of the launcher.
+
 font size
 ---------
 
@@ -22,6 +32,7 @@ font size
 Allows to specify glyph size for in-game fonts.
 Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
 TrueType fonts do not have this issue.
+This setting can be configured in Advanced tab of the launcher.
 
 ttf resolution
 --------------
@@ -32,6 +43,7 @@ ttf resolution
 
 Allows to specify resolution for in-game TrueType fonts.
 Note: actual resolution depends on "scaling factor" setting value, this value is for 1.0 scaling factor.
+This setting can be configured in Advanced tab of the launcher.
 
 menu transparency
 -----------------

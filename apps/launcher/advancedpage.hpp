@@ -28,6 +28,7 @@ namespace Launcher
 
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);
+        void on_useFontsCheckBox_stateChanged(int state);
         void on_runScriptAfterStartupBrowseButton_clicked();
 
     private:

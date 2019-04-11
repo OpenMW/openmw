@@ -91,6 +91,8 @@ set(MYGUI_FILES
     openmw_debug_window.skin.xml
     openmw_jail_screen.layout
     DejaVuLGCSansMono.ttf
+    Pelagiad.ttf
+    Ayembedt.ttf
     ../launcher/images/openmw.png
     OpenMWResourcePlugin.xml
     skins.xml

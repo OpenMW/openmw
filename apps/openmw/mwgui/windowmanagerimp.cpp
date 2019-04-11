@@ -303,6 +303,14 @@ namespace MWGui
 
             if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
             {
+                // If a player does not want to use TrueType fonts, load only console font.
+                bool useFonts = Settings::Manager::getBool("use ttf", "GUI");
+                if (!useFonts && name != "MonoFont")
+                {
+                    resourceNode->setAttribute("type", "");
+                    continue;
+                }
+
                 createCopy = true;
 
                 // For TrueType fonts we should override Size and Resolution properties

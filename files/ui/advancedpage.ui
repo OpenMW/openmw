@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>AdvancedPage</class>
  <widget class="QWidget" name="AdvancedPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>592</width>
+    <height>420</height>
+   </rect>
+  </property>
   <layout class="QVBoxLayout" name="pageVerticalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
@@ -9,6 +17,14 @@
       <bool>true</bool>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>-635</y>
+        <width>560</width>
+        <height>1087</height>
+       </rect>
+      </property>
       <layout class="QVBoxLayout" name="scrollAreaVerticalLayout">
        <item>
         <widget class="QGroupBox" name="gameGroup">
@@ -103,7 +119,7 @@
             </property>
             <layout class="QHBoxLayout" name="horizontalUnarmedStrengthLayout">
              <property name="spacing">
-              <number>-1</number>
+              <number>6</number>
              </property>
              <property name="leftMargin">
               <number>0</number>
@@ -361,104 +377,241 @@
          <property name="title">
           <string>User Interface</string>
          </property>
-         <layout class="QVBoxLayout" name="userInterfaceVerticalLayout">
-          <item>
-           <widget class="QCheckBox" name="showEffectDurationCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <layout class="QVBoxLayout" name="interfaceLayout">
+            <property name="spacing">
+             <number>2</number>
             </property>
-            <property name="text">
-             <string>Show effect duration</string>
-            </property>
-           </widget>
+            <item>
+             <widget class="QCheckBox" name="showMeleeInfoCheckBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be showed on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Show melee info</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showEffectDurationCheckBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Show the remaining duration of magic effects and lights if this setting is true. The remaining duration is displayed in the tooltip by hovering over the magical effect. &lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Show effect duration</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showEnchantChanceCheckBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Show enchant chance</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="showProjectileDamageCheckBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be showed on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Show projectile damage</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
-          <item>
-           <widget class="QCheckBox" name="showEnchantChanceCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Whether or not the chance of success will be displayed in the enchanting menu.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <item row="0" column="1">
+           <layout class="QVBoxLayout" name="interfaceLayout_2">
+            <property name="spacing">
+             <number>0</number>
             </property>
-            <property name="text">
-             <string>Show enchant chance</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="showMeleeInfoCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, melee weapons reach and speed will be showed on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Show melee info</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="showProjectileDamageCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this setting is true, damage bonus of arrows and bolts will be showed on item tooltip.&lt;/p&gt;&lt;p&gt;The default value is false.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Show projectile damage</string>
-            </property>
-           </widget>
-          </item>
-          <item alignment="Qt::AlignLeft">
-           <widget class="QWidget" name="showOwnedGroup" native="true">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable visual clues for items owned by NPCs when the crosshair is on the object.&lt;/p&gt;&lt;p&gt;The default value is Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item alignment="Qt::AlignRight">
-              <widget class="QLabel" name="showOwnedLabel">
-               <property name="text">
-                <string>Show owned:</string>
+            <item>
+             <widget class="QCheckBox" name="useFontsCheckBox">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled, OpenMW will use TrueType fonts for ingame text, otherwise it will use TTF only for console and profilers.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="text">
+               <string>Use TrueType fonts</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="fontSizeGroup">
+              <property name="contextMenuPolicy">
+               <enum>Qt::DefaultContextMenu</enum>
+              </property>
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows to specify glyph size for in-game fonts.
+Note: default bitmap fonts are supposed to work with 16px size, otherwise glyphs will be blurry.
+TrueType fonts do not have this issue.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="fontSizeLayout">
+               <property name="spacing">
+                <number>0</number>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QComboBox" name="showOwnedComboBox">
-               <property name="currentIndex">
-                <number>1</number>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
                </property>
                <item>
-                <property name="text">
-                 <string>Off</string>
-                </property>
+                <widget class="QLabel" name="fontSizeLabel">
+                 <property name="text">
+                  <string>Font size</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Tool Tip Only</string>
-                </property>
+                <widget class="QSpinBox" name="fontSizeSpinBox">
+                 <property name="minimum">
+                  <number>12</number>
+                 </property>
+                 <property name="maximum">
+                  <number>20</number>
+                 </property>
+                 <property name="value">
+                  <number>16</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="fontResolutionGroup">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows to specify resolution for in-game TrueType fonts.
+Note: actual resolution depends on &quot;scaling factor&quot; setting value, this value is for 1.0 scaling factor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="fontResolutionLayout">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="fontResolutionLabel">
+                 <property name="text">
+                  <string>Font resolution</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Crosshair Only</string>
-                </property>
+                <widget class="QSpinBox" name="fontResolutionSpinBox">
+                 <property name="minimum">
+                  <number>48</number>
+                 </property>
+                 <property name="maximum">
+                  <number>960</number>
+                 </property>
+                 <property name="singleStep">
+                  <number>24</number>
+                 </property>
+                 <property name="value">
+                  <number>96</number>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="Line" name="line">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="showOwnedGroup">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable visual clues for items owned by NPCs when the crosshair is on the object.&lt;/p&gt;&lt;p&gt;The default value is Off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="showOwnedLabel">
+                 <property name="text">
+                  <string>Show owned</string>
+                 </property>
+                </widget>
                </item>
                <item>
-                <property name="text">
-                 <string>Tool Tip and Crosshair</string>
-                </property>
+                <widget class="QComboBox" name="showOwnedComboBox">
+                 <property name="currentIndex">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>Off</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Tool Tip Only</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Crosshair Only</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>Tool Tip and Crosshair</string>
+                  </property>
+                 </item>
+                </widget>
                </item>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+              </layout>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
