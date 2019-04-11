@@ -710,7 +710,8 @@ namespace MWClass
         if (!successful)
         {
             // Missed
-            sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
+                sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
         }
 
