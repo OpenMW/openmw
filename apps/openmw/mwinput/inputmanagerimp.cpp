@@ -1333,7 +1333,7 @@ namespace MWInput
 
     void InputManager::quickKey (int index)
     {
-        if (!mControlSwitch["playercontrols"])
+        if (!mControlSwitch["playercontrols"] || !mControlSwitch["playerfighting"] || !mControlSwitch["playermagic"])
             return;
         if (!checkAllowedToUseItems())
             return;

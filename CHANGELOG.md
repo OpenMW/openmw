@@ -60,6 +60,7 @@
     Bug #4963: Enchant skill progress is incorrect
     Bug #4965: Global light attenuation settings setup is lacking
     Bug #4969: "Miss" sound plays for any actor
+    Bug #4972: Player is able to use quickkeys while disableplayerfighting is active
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
