@@ -92,7 +92,6 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     if (findBoundingBox(node))
     {
         std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
-
         std::unique_ptr<btBoxShape> boxShape(new btBoxShape(getbtVector(mShape->mCollisionBoxHalfExtents)));
         btTransform transform = btTransform::getIdentity();
         transform.setOrigin(getbtVector(mShape->mCollisionBoxTranslate));

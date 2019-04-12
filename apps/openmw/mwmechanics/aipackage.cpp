@@ -261,7 +261,7 @@ const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const
     CacheMap::iterator found = cache.find(id);
     if (found == cache.end())
     {
-        cache.insert(std::make_pair(id, std::unique_ptr<MWMechanics::PathgridGraph>(new MWMechanics::PathgridGraph(cell))));
+        cache.insert(std::make_pair(id, std::make_unique<MWMechanics::PathgridGraph>(MWMechanics::PathgridGraph(cell))));
     }
     return *cache[id].get();
 }

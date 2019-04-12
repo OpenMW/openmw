@@ -10,10 +10,10 @@ BsaArchive::BsaArchive(const std::string &filename)
     Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(filename);
 
     if (bsaVersion == Bsa::BSAVER_COMPRESSED) {
-        mFile = std::unique_ptr<Bsa::CompressedBSAFile>(new Bsa::CompressedBSAFile());
+        mFile = std::make_unique<Bsa::CompressedBSAFile>(Bsa::CompressedBSAFile());
     }
     else {
-        mFile = std::unique_ptr<Bsa::BSAFile>(new Bsa::BSAFile());
+        mFile = std::make_unique<Bsa::BSAFile>(Bsa::BSAFile());
     }
 
     mFile->open(filename);
