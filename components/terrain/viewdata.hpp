@@ -21,11 +21,13 @@ namespace Terrain
 
         void add(QuadTreeNode* node, bool visible);
 
-        void reset(unsigned int frame);
+        void reset();
 
         void clear();
 
         bool contains(QuadTreeNode* node);
+
+        void copyFrom(const ViewData& other);
 
         struct Entry
         {
@@ -44,39 +46,44 @@ namespace Terrain
 
         Entry& getEntry(unsigned int i);
 
-        unsigned int getFrameLastUsed() const { return mFrameLastUsed; }
+        double getLastUsageTimeStamp() const { return mLastUsageTimeStamp; }
+        void setLastUsageTimeStamp(double timeStamp) { mLastUsageTimeStamp = timeStamp; }
 
         /// @return Have any nodes changed since the last frame
         bool hasChanged() const;
+        void markUnchanged() { mChanged = false; }
 
-        bool hasEyePoint() const;
+        bool hasViewPoint() const;
 
-        void setEyePoint(const osg::Vec3f& eye);
-        const osg::Vec3f& getEyePoint() const;
+        void setViewPoint(const osg::Vec3f& viewPoint);
+        const osg::Vec3f& getViewPoint() const;
 
     private:
         std::vector<Entry> mEntries;
         unsigned int mNumEntries;
-        unsigned int mFrameLastUsed;
+        double mLastUsageTimeStamp;
         bool mChanged;
-        osg::Vec3f mEyePoint;
-        bool mHasEyePoint;
+        osg::Vec3f mViewPoint;
+        bool mHasViewPoint;
+        float mReuseDistance;
     };
 
     class ViewDataMap : public osg::Referenced
     {
     public:
-        ViewData* getViewData(osg::Object* viewer);
+        ViewDataMap()
+            : mReuseDistance(300) // large value should be safe because the visibility of each node is still updated individually for each camera even if the base view was reused.
+                                  // this value also serves as a threshold for when a newly loaded LOD gets unloaded again so that if you hover around an LOD transition point the LODs won't keep loading and unloading all the time.
+            , mExpiryDelay(1.f)
+        {}
+
+        ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, bool& needsUpdate);
 
         ViewData* createOrReuseView();
 
-        void clearUnusedViews(unsigned int frame);
+        void clearUnusedViews(double referenceTime);
 
         void clear();
-
-        void setDefaultViewer(osg::Object* viewer);
-
-        ViewData* getDefaultView();
 
     private:
         std::list<ViewData> mViewVector;
@@ -84,9 +91,10 @@ namespace Terrain
         typedef std::map<osg::ref_ptr<osg::Object>, ViewData*> Map;
         Map mViews;
 
-        std::deque<ViewData*> mUnusedViews;
+        float mReuseDistance;
+        float mExpiryDelay; // time in seconds for unused view to be removed
 
-        osg::ref_ptr<osg::Object> mDefaultViewer;
+        std::deque<ViewData*> mUnusedViews;
     };
 
 }

@@ -38,10 +38,9 @@ namespace Terrain
 
         View* createView();
         void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort);
+        void storeView(const View* view, double referenceTime);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
-
-        virtual void setDefaultViewer(osg::Object* obj);
 
     private:
         void ensureQuadTreeBuilt();

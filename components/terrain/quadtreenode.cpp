@@ -114,9 +114,10 @@ void QuadTreeNode::traverse(osg::NodeVisitor &nv)
     if (!hasValidBounds())
         return;
 
-    ViewData* vd = getView(nv);
+    bool needsUpdate = true;
+    ViewData* vd = getView(nv, needsUpdate);
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, distance(vd->getEyePoint()))) || !getNumChildren())
+    if ((mLodCallback && mLodCallback->isSufficientDetail(this, distance(vd->getViewPoint()))) || !getNumChildren())
         vd->add(this, true);
     else
         osg::Group::traverse(nv);
@@ -142,26 +143,22 @@ ViewDataMap *QuadTreeNode::getViewDataMap()
     return mViewDataMap;
 }
 
-ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
+ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv, bool& needsUpdate)
 {
+    ViewData* vd = NULL;
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
-        vd->setEyePoint(nv.getViewPoint());
-        return vd;
+        vd = mViewDataMap->getViewData(cv->getCurrentCamera(), nv.getViewPoint(), needsUpdate);
     }
     else // INTERSECTION_VISITOR
     {
+        osg::Vec3f viewPoint = nv.getViewPoint();
         static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
-        ViewData* vd = mViewDataMap->getViewData(dummyObj.get());
-        ViewData* defaultView = mViewDataMap->getDefaultView();
-        if (defaultView->hasEyePoint())
-            vd->setEyePoint(defaultView->getEyePoint());
-        else
-            vd->setEyePoint(nv.getEyePoint());
-        return vd;
+        vd = mViewDataMap->getViewData(dummyObj.get(), viewPoint, needsUpdate);
+        needsUpdate = true;
     }
+    return vd;
 }
 
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)

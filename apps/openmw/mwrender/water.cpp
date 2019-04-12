@@ -161,6 +161,23 @@ private:
     osg::Plane mPlane;
 };
 
+/// This callback on the Camera has the effect of a RELATIVE_RF_INHERIT_VIEWPOINT transform mode (which does not exist in OSG).
+/// We want to keep the View Point of the parent camera so we will not have to recreate LODs.
+class InheritViewPointCallback : public osg::NodeCallback
+{
+public:
+        InheritViewPointCallback() {}
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
+        osg::ref_ptr<osg::RefMatrix> modelViewMatrix = new osg::RefMatrix(*cv->getModelViewMatrix());
+        cv->popModelViewMatrix();
+        cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::ABSOLUTE_RF_INHERIT_VIEWPOINT);
+        traverse(node, nv);
+    }
+};
+
 /// Moves water mesh away from the camera slightly if the camera gets too close on the Z axis.
 /// The offset works around graphics artifacts that occurred with the GL_DEPTH_CLAMP when the camera gets extremely close to the mesh (seen on NVIDIA at least).
 /// Must be added as a Cull callback.
@@ -224,6 +241,7 @@ public:
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("RefractionCamera");
+        setCullCallback(new InheritViewPointCallback);
 
         setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
@@ -315,6 +333,7 @@ public:
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("ReflectionCamera");
+        setCullCallback(new InheritViewPointCallback);
 
         int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
