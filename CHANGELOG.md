@@ -54,6 +54,7 @@
     Bug #4932: Invalid records matching when loading save with edited plugin
     Bug #4938: Strings from subrecords with actually empty headers can't be empty
     Bug #4942: Hand-to-Hand attack type is chosen randomly when "always use best attack" is turned off
+    Bug #4945: Poor random magic magnitude distribution
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
     Bug #4963: Enchant skill progress is incorrect
