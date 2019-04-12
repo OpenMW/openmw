@@ -16,23 +16,11 @@
 
 #include "formatting.hpp"
 
-namespace
-{
-    void adjustButton (Gui::ImageButton* button)
-    {
-        MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
-        button->setSize(button->getRequestedSize());
-
-        if (button->getAlign().isRight())
-            button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
-    }
-}
-
 namespace MWGui
 {
 
     ScrollWindow::ScrollWindow ()
-        : WindowBase("openmw_scroll.layout")
+        : BookWindowBase("openmw_scroll.layout")
         , mTakeButtonShow(true)
         , mTakeButtonAllowed(true)
     {
@@ -44,8 +32,8 @@ namespace MWGui
         getWidget(mTakeButton, "TakeButton");
         mTakeButton->eventMouseButtonClick += MyGUI::newDelegate(this, &ScrollWindow::onTakeButtonClicked);
 
-        adjustButton(mCloseButton);
-        adjustButton(mTakeButton);
+        adjustButton("CloseButton");
+        adjustButton("TakeButton");
 
         mCloseButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);
         mTakeButton->eventKeyButtonPressed += MyGUI::newDelegate(this, &ScrollWindow::onKeyButtonPressed);

@@ -153,7 +153,7 @@ namespace
             }
 
             adjustButton(PrevPageBTN);
-            adjustButton(NextPageBTN);
+            float nextButtonScale = adjustButton(NextPageBTN);
             adjustButton(CloseBTN);
             adjustButton(CancelBTN);
             adjustButton(JournalBTN);
@@ -168,7 +168,7 @@ namespace
             {
                 // english button has a 7 pixel wide strip of garbage on its right edge
                 nextButton->setSize(64-7, nextButton->getSize().height);
-                nextButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,nextButton->getSize().height));
+                nextButton->setImageCoord(MyGUI::IntCoord(0,0,(64-7)*nextButtonScale,nextButton->getSize().height*nextButtonScale));
             }
 
             if (!questList)
@@ -224,17 +224,6 @@ namespace
             mAllQuests = false;
             mOptionsMode = false;
             mTopicsMode = false;
-        }
-
-        void adjustButton (char const * name)
-        {
-            Gui::ImageButton* button = getWidget<Gui::ImageButton>(name);
-
-            MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
-            button->setSize(button->getRequestedSize());
-
-            if (button->getAlign().isRight())
-                button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
         }
 
         void onOpen()
@@ -665,7 +654,7 @@ MWGui::JournalWindow * MWGui::JournalWindow::create (JournalViewModel::Ptr Model
 }
 
 MWGui::JournalWindow::JournalWindow()
-    :WindowBase("openmw_journal.layout")
+    : BookWindowBase("openmw_journal.layout")
 {
 
 }

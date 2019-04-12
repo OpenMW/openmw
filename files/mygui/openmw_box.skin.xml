@@ -5,60 +5,56 @@ as around the sections of the stats window, or around popup info windows -->
 
 <MyGUI type="Resource" version="1.1">
     <!-- Box borders -->
-    <Resource type="ResourceSkin" name="IB_T" size="512 2" texture="textures\menu_thin_border_top.dds">
-        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
-            <State name="normal" offset="0 0 512 2">
-                <Property key="TileSize" value="512 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_T" texture="textures\menu_thin_border_top.dds">
+        <BasisSkin type="TileRect" align="HStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_B" size="512 2" texture="textures\menu_thin_border_bottom.dds">
-        <BasisSkin type="TileRect" offset="0 0 512 2" align="HStretch">
-            <State name="normal" offset="0 0 512 2">
-                <Property key="TileSize" value="512 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_B" texture="textures\menu_thin_border_bottom.dds">
+        <BasisSkin type="TileRect" align="HStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_L" size="2 512" texture="textures\menu_thin_border_left.dds">
-        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
-            <State name="normal" offset="0 0 2 512">
-                <Property key="TileSize" value="2 512"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_L" texture="textures\menu_thin_border_left.dds">
+        <BasisSkin type="TileRect" align="VStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_R" size="2 512" texture="textures\menu_thin_border_right.dds">
-        <BasisSkin type="TileRect" offset="0 0 2 512" align="VStretch">
-            <State name="normal" offset="0 0 2 512">
-                <Property key="TileSize" value="2 512"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_R" texture="textures\menu_thin_border_right.dds">
+        <BasisSkin type="TileRect" align="VStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_TL" size="2 2" texture="textures\menu_thin_border_top_left_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_TL" texture="textures\menu_thin_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_TR" size="2 2" texture="textures\menu_thin_border_top_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_TR" texture="textures\menu_thin_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_BL" size="2 2" texture="textures\menu_thin_border_bottom_left_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_BL" texture="textures\menu_thin_border_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="IB_BR" size="2 2" texture="textures\menu_thin_border_bottom_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="IB_BR" texture="textures\menu_thin_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 

@@ -82,6 +82,15 @@ namespace MWGui
         DragAndDrop* mDrag;
         bool mTransparent;
     };
+
+    class BookWindowBase : public WindowBase
+    {
+    public:
+        BookWindowBase(const std::string& parLayout);
+
+    protected:
+        float adjustButton (char const * name);
+    };
 }
 
 #endif

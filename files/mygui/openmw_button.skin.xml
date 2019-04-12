@@ -2,68 +2,64 @@
 
 <MyGUI type="Resource" version="1.1">
     <!-- Button graphics -->
-    <Resource type="ResourceSkin" name="BTN_Top" size="128 4" texture="textures\menu_button_frame_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_Top" texture="textures\menu_button_frame_top.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
-            <State name="normal" offset="0 0 128 4">
-                <Property key="TileSize" value="128 4"/>
+        <BasisSkin type="TileRect" align="HStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_Bottom" size="128 4" texture="textures\menu_button_frame_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_Bottom" texture="textures\menu_button_frame_bottom.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="TileRect" offset="0 0 128 4" align="HStretch">
-            <State name="normal" offset="0 0 128 4">
-                <Property key="TileSize" value="128 4"/>
+        <BasisSkin type="TileRect" align="HStretch">
+            <State name="normal" >
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_Left" size="4 16" texture="textures\menu_button_frame_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_Left" texture="textures\menu_button_frame_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
-            <State name="normal" offset="0 0 4 16">
-                <Property key="TileSize" value="4 16"/>
+        <BasisSkin type="TileRect" align="VStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_Right" size="4 16" texture="textures\menu_button_frame_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_Right" texture="textures\menu_button_frame_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="TileRect" offset="0 0 4 16" align="VStretch">
-            <State name="normal" offset="0 0 4 16">
-                <Property key="TileSize" value="4 16"/>
+        <BasisSkin type="TileRect" align="VStretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_TopLeft" size="4 4" texture="textures\menu_button_frame_top_left_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_TopLeft" texture="textures\menu_button_frame_top_left_corner.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_TopRight" size="4 4" texture="textures\menu_button_frame_top_right_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_TopRight" texture="textures\menu_button_frame_top_right_corner.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_BottomLeft" size="4 4" texture="textures\menu_button_frame_bottom_left_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_BottomLeft" texture="textures\menu_button_frame_bottom_left_corner.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="BTN_BottomRight" size="4 4" texture="textures\menu_button_frame_bottom_right_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="BTN_BottomRight" texture="textures\menu_button_frame_bottom_right_corner.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 

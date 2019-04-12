@@ -6,6 +6,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
+#include <components/widgets/imagebutton.hpp>
+
 #include "draganddrop.hpp"
 
 using namespace MWGui;
@@ -119,4 +121,31 @@ void NoDrop::setAlpha(float alpha)
 {
     if (mWidget)
         mWidget->setAlpha(alpha);
+}
+
+BookWindowBase::BookWindowBase(const std::string& parLayout)
+  : WindowBase(parLayout)
+{
+}
+
+float BookWindowBase::adjustButton (char const * name)
+{
+    Gui::ImageButton* button;
+    WindowBase::getWidget (button, name);
+    MyGUI::IntSize requested = button->getRequestedSize();
+    float scale = requested.height / button->getSize().height;
+    MyGUI::IntSize newSize = requested;
+    newSize.width /= scale;
+    newSize.height /= scale;
+    button->setSize(newSize);
+
+    if (button->getAlign().isRight())
+    {
+        MyGUI::IntSize diff = (button->getSize() - requested);
+        diff.width /= scale;
+        diff.height /= scale;
+        button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
+    }
+
+    return scale;
 }
