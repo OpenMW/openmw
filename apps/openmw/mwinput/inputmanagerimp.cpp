@@ -779,7 +779,7 @@ namespace MWInput
         mMouseLookEnabled = !guiMode;
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
-        MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (mJoystickLastUsed && !mGamepadGuiCursorEnabled));
+        MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (!mJoystickLastUsed || mGamepadGuiCursorEnabled));
         // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 
