@@ -65,7 +65,6 @@ namespace Terrain
         bool mChanged;
         osg::Vec3f mViewPoint;
         bool mHasViewPoint;
-        float mReuseDistance;
     };
 
     class ViewDataMap : public osg::Referenced
