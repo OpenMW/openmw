@@ -644,7 +644,8 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
                 {
                     int delta = effect.mMagnMax - effect.mMagnMin;
                     // Roll some dice, one for each effect
-                    params[i].mRandom = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
+                    if (delta)
+                        params[i].mRandom = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
                     // Try resisting each effect
                     params[i].mMultiplier = MWMechanics::getEffectMultiplier(effect.mEffectID, actor, actor);
                     ++i;
