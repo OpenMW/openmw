@@ -62,6 +62,7 @@
     Bug #4969: "Miss" sound plays for any actor
     Bug #4972: Player is able to use quickkeys while disableplayerfighting is active
     Bug #4979: AiTravel maximum range depends on "actors processing range" setting
+    Bug #4980: Drowning mechanics is applied for actors indifferently from distance to player
     Feature #2229: Improve pathfinding AI
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
