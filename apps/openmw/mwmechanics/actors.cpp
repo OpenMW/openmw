@@ -1539,7 +1539,10 @@ namespace MWMechanics
 
                     if(iter->first.getClass().isNpc())
                     {
-                        updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
+                        // We can not update drowning state for actors outside of AI distance - they can not resurface to breathe
+                        if (inProcessingRange)
+                            updateDrowning(iter->first, duration, ctrl->isKnockedOut(), isPlayer);
+
                         calculateNpcStatModifiers(iter->first, duration);
 
                         if (timerUpdateEquippedLight == 0)
