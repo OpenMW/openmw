@@ -109,6 +109,8 @@ actors processing range
 This setting allows to specify a distance from player in game units, in which OpenMW updates actor's state.
 Actor state update includes AI, animations, and physics processing.
 Actors near that border start softly fade out instead of just appearing/disapperaing.
+It is not recommended to change this value from default if you use mods with
+long-range AiTravel packages (e.g. patrols, caravans and travellers).
 
 This setting can be controlled in game with the "Actors processing range slider" in the Prefs panel of the Options menu.
 
