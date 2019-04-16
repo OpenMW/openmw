@@ -1476,22 +1476,24 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
     {
-        if (target == getPlayer() || !attacker.getClass().isActor())
+        const MWWorld::Ptr& player = getPlayer();
+        if (target == player || !attacker.getClass().isActor())
             return false;
 
-        std::set<MWWorld::Ptr> followersAttacker;
-        getActorsSidingWith(attacker, followersAttacker);
-
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-
-        if (followersAttacker.find(target) != followersAttacker.end())
+        if (attacker == player)
         {
-            statsTarget.friendlyHit();
-
-            if (statsTarget.getFriendlyHits() < 4)
+            std::set<MWWorld::Ptr> followersAttacker;
+            getActorsSidingWith(attacker, followersAttacker);
+            if (followersAttacker.find(target) != followersAttacker.end())
             {
-                MWBase::Environment::get().getDialogueManager()->say(target, "hit");
-                return false;
+                statsTarget.friendlyHit();
+
+                if (statsTarget.getFriendlyHits() < 4)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(target, "hit");
+                    return false;
+                }
             }
         }
 
@@ -1500,9 +1502,9 @@ namespace MWMechanics
 
         AiSequence& seq = statsTarget.getAiSequence();
 
-        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
-                                    || attacker == getPlayer())
-                && !seq.isInCombat(attacker))
+        if (!attacker.isEmpty()
+            && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target) || attacker == player)
+            && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
@@ -1512,7 +1514,7 @@ namespace MWMechanics
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
                 bool peaceful = false;
                 std::string script = target.getClass().getScript(target);
-                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == getPlayer())
+                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
                     int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
                     peaceful = (fight == 0);
