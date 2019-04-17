@@ -159,6 +159,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="normaliseRaceSpeedCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Don't use race weight in NPC movement speed calculations.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Normalise race speed</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

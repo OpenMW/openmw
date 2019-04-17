@@ -2372,7 +2372,7 @@ void CharacterController::update(float duration, bool animationOnly)
     moved.x() *= scale;
     moved.y() *= scale;
 
-    if(mPtr.getClass().isNpc())
+    if (mPtr.getClass().isNpc() && !Settings::Manager::getBool("normalise race speed", "Game"))
     {
         const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
         const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);

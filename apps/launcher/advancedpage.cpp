@@ -81,6 +81,7 @@ bool Launcher::AdvancedPage::loadSettings()
         unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
     loadSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
     loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
+    loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
 
     // Input Settings
     loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
@@ -141,6 +142,7 @@ void Launcher::AdvancedPage::saveSettings()
         mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
     saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
     saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
+    saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
 
     // Input Settings
     saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
