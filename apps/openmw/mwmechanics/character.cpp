@@ -2368,6 +2368,19 @@ void CharacterController::update(float duration, bool animationOnly)
     else
         moved = osg::Vec3f(0.f, 0.f, 0.f);
 
+    float scale = mPtr.getCellRef().getScale();
+    moved.x() *= scale;
+    moved.y() *= scale;
+
+    if(mPtr.getClass().isNpc())
+    {
+        const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
+        const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
+        float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+        moved.x() *= weight;
+        moved.y() *= weight;
+    }
+
     // Ensure we're moving in generally the right direction...
     if(speed > 0.f)
     {
