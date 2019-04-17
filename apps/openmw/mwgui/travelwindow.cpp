@@ -71,11 +71,8 @@ namespace MWGui
         std::set<MWWorld::Ptr> followers;
         MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
 
-        // Apply followers cost, in vanilla one follower travels for free
-        if (Settings::Manager::getBool("charge for every follower travelling", "Game"))
-            price *= 1 + static_cast<int>(followers.size());
-        else
-            price *= std::max(1, static_cast<int>(followers.size()));
+        // Apply followers cost, unlike vanilla the first follower doesn't travel for free
+        price *= 1 + static_cast<int>(followers.size());
 
         int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
 

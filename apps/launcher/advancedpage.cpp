@@ -74,7 +74,6 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     loadSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
     loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
-    loadSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
     int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
@@ -135,7 +134,6 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
     saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
     saveSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
-    saveSettingBool(chargeForEveryFollowerCheckBox, "charge for every follower travelling", "Game");
     saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
     saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
     int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
