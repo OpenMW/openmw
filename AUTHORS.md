@@ -126,6 +126,7 @@ Programmers
     Michael Hogan (Xethik)
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)
+    Michael Stopa (Stomy)
     Michał Ściubidło (mike-sc)
     Michał Bień (Glorf)
     Michał Moroz (dragonee)
@@ -183,7 +184,6 @@ Programmers
     Stanislaw Halik (sthalik)
     Star-Demon
     stil-t
-    Stomy
     svaante
     Sylvain Thesnieres (Garvek)
     t6

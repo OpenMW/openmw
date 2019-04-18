@@ -24,6 +24,7 @@
     Bug #4736: LandTexture records overrides do not work
     Bug #4746: Non-solid player can't run or sneak
     Bug #4747: Bones are not read from X.NIF file for NPC animation
+    Bug #4748: Editor: Cloned, moved, added instances re-use RefNum indices
     Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
     Bug #4768: Fallback numerical value recovery chokes on invalid arguments
     Bug #4775: Slowfall effect resets player jumping flag
@@ -41,7 +42,7 @@
     Bug #4827: NiUVController is handled incorrectly
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
-    Bug #4841: Russian localization ignores implicit keywords    
+    Bug #4841: Russian localization ignores implicit keywords
     Bug #4860: Actors outside of processing range visible for one frame after spawning
     Bug #4867: Arbitrary text after local variable declarations breaks script compilation
     Bug #4876: AI ratings handling inconsistencies

@@ -55,7 +55,7 @@ Bug Fixes:
 - Player character's model is no longer scaled in first-person mode to prevent issues with arrows obscuring the crosshair (#4383)
 - Optional: Ranged attacks now bypass normal weapon resistance or weakness if ammunition and/or bow are appropriate (#4384)
 - Fall damage is now also applied when first reloading a savegame and when your character is near the ground in the loaded game (#4411)
-- Rain drops are no longer delayed when your character emerges from water (#4540) 
+- Rain drops are no longer delayed when your character emerges from water (#4540)
 - ESM record for prison markers is now hardcoded like, e.g., door markers or temple markers (#4701)
 - Loading a savegame which includes active messages no longer crashes the game (#4714)
 - An empty pointer actor no longer throws an exception upon exiting the dialogue menu (#4715)
@@ -99,7 +99,7 @@ Editor Bug Fixes:
 - Preview option is now disabled for levelled lists (#4703)
 - Opening the "Scene" view from the "Instances" table now also works for exterior cells (#4705)
 - Colour fields in interior-cell records now also use the colour picker widget (#4745)
-- Cloned, added, or moved instances no longer reuse existing RefNum indices (#4748)
+- Cloned, added, or moved instances no longer disappear at load-time (#4748)
 - "Clear" function in the content selector no longer tries to execute a "Remove" action on an empty file list (#4757)
 - Engine no longer tries to swap buffers of windows which weren't exposed to Qt's window management system (#4911)
 
