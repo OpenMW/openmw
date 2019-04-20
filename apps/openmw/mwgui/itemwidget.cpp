@@ -148,9 +148,9 @@ namespace MWGui
         if (backgroundTex != "")
             backgroundTex += ".dds";
 
+        float scale = 1.f;
         if (!backgroundTex.empty())
         {
-            float scale = 1.f;
             auto found = mScales.find(backgroundTex);
             if (found == mScales.end())
             {
@@ -165,12 +165,12 @@ namespace MWGui
             }
             else
                 scale = found->second;
-
-            if (state == Barter && !isMagic)
-                setFrame(backgroundTex, MyGUI::IntCoord(2*scale,2*scale,44*scale,44*scale));
-            else
-                setFrame(backgroundTex, MyGUI::IntCoord(0,0,44*scale,44*scale));
         }
+
+        if (state == Barter && !isMagic)
+            setFrame(backgroundTex, MyGUI::IntCoord(2*scale,2*scale,44*scale,44*scale));
+        else
+            setFrame(backgroundTex, MyGUI::IntCoord(0,0,44*scale,44*scale));
 
         setIcon(ptr);
     }
