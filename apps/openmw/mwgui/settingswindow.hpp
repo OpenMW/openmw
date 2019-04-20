@@ -13,7 +13,7 @@ namespace MWGui
     class SettingsWindow : public WindowBase
     {
         public:
-            SettingsWindow();
+            SettingsWindow(const bool isGammaSupported);
 
             virtual void onOpen();
 

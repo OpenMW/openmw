@@ -382,7 +382,7 @@ namespace MWGui
         mFontLoader->loadTrueTypeFonts();
     }
 
-    void WindowManager::initUI()
+    void WindowManager::initUI(const bool isGammaSupported)
     {
         // Get size info from the Gui object
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
@@ -497,7 +497,7 @@ namespace MWGui
         mCountDialog = new CountDialog();
         mWindows.push_back(mCountDialog);
 
-        mSettingsWindow = new SettingsWindow();
+        mSettingsWindow = new SettingsWindow(isGammaSupported);
         mWindows.push_back(mSettingsWindow);
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 

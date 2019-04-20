@@ -23,7 +23,7 @@ namespace SDLUtil
 
         void setSyncToVBlank(bool sync);
 
-        void setGammaContrast(float gamma, float contrast);
+        bool setGammaContrast(float gamma, float contrast, bool probe = false);
 
         void setVideoMode(int width, int height, bool fullscreen, bool windowBorder);
 

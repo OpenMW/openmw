@@ -524,7 +524,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    bool isGammaSupported = false;
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, gameControllerdb, mGrab, isGammaSupported);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();
@@ -556,7 +557,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->setStore(mEnvironment.getWorld()->getStore());
-    window->initUI();
+    window->initUI(isGammaSupported);
 
     //Load translation data
     mTranslationDataStorage.setEncoder(mEncoder);

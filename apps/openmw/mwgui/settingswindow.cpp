@@ -166,7 +166,7 @@ namespace MWGui
         }
     }
 
-    SettingsWindow::SettingsWindow() :
+    SettingsWindow::SettingsWindow(const bool isGammaSupported) :
         WindowBase("openmw_settings_window.layout"),
         mKeyboardMode(true)
     {
@@ -188,19 +188,20 @@ namespace MWGui
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
 
-#ifndef WIN32
-        // hide gamma controls since it currently does not work under Linux
-        MyGUI::ScrollBar *gammaSlider;
-        getWidget(gammaSlider, "GammaSlider");
-        gammaSlider->setVisible(false);
-        MyGUI::TextBox *textBox;
-        getWidget(textBox, "GammaText");
-        textBox->setVisible(false);
-        getWidget(textBox, "GammaTextDark");
-        textBox->setVisible(false);
-        getWidget(textBox, "GammaTextLight");
-        textBox->setVisible(false);
-#endif
+        if (!isGammaSupported)
+        {
+            // hide gamma controls since it does not work on a target machine
+            MyGUI::ScrollBar *gammaSlider;
+            getWidget(gammaSlider, "GammaSlider");
+            gammaSlider->setVisible(false);
+            MyGUI::TextBox *textBox;
+            getWidget(textBox, "GammaText");
+            textBox->setVisible(false);
+            getWidget(textBox, "GammaTextDark");
+            textBox->setVisible(false);
+            getWidget(textBox, "GammaTextLight");
+            textBox->setVisible(false);
+        }
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 

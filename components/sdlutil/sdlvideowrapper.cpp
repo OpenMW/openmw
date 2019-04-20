@@ -41,10 +41,10 @@ namespace SDLUtil
         mViewer->startThreading();
     }
 
-    void VideoWrapper::setGammaContrast(float gamma, float contrast)
+    bool VideoWrapper::setGammaContrast(float gamma, float contrast, bool probe)
     {
-        if (gamma == mGamma && contrast == mContrast)
-            return;
+        if (gamma == mGamma && contrast == mContrast && !probe)
+            return true;
 
         mGamma = gamma;
         mContrast = contrast;
@@ -65,7 +65,13 @@ namespace SDLUtil
             red[i] = green[i] = blue[i] = static_cast<Uint16>(value);
         }
         if (SDL_SetWindowGammaRamp(mWindow, red, green, blue) < 0)
-            Log(Debug::Warning) << "Couldn't set gamma: " << SDL_GetError();
+        {
+            if (!probe)
+                Log(Debug::Warning) << "Couldn't set gamma: " << SDL_GetError();
+            return false;
+        }
+
+        return true;
     }
 
     void VideoWrapper::setVideoMode(int width, int height, bool fullscreen, bool windowBorder)

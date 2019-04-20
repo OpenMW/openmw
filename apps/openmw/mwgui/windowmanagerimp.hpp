@@ -138,7 +138,7 @@ namespace MWGui
     /// Set the ESMStore to use for retrieving of GUI-related strings.
     void setStore (const MWWorld::ESMStore& store);
 
-    void initUI();
+    void initUI(const bool isGammaSupported);
     virtual void loadUserFonts();
 
     virtual Loading::Listener* getLoadingScreen();

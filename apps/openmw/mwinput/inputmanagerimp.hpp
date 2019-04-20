@@ -76,7 +76,7 @@ namespace MWInput
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
-            const std::string& controllerBindingsFile, bool grab);
+            const std::string& controllerBindingsFile, bool grab, bool& isGammaSupported);
 
         virtual ~InputManager();
 

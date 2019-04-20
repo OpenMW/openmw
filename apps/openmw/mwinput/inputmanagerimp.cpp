@@ -39,7 +39,7 @@ namespace MWInput
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
-            const std::string& controllerBindingsFile, bool grab)
+            const std::string& controllerBindingsFile, bool grab, bool& isGammaSupported)
         : mWindow(window)
         , mWindowVisible(true)
         , mViewer(viewer)
@@ -86,8 +86,11 @@ namespace MWInput
         mInputManager->setControllerEventCallback(this);
 
         mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
-        mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
-                                        Settings::Manager::getFloat("contrast", "Video"));
+        isGammaSupported = mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
+                                                                Settings::Manager::getFloat("contrast", "Video"));
+
+        if (!isGammaSupported)
+            Log(Debug::Info) << "Setting gamma is not supported. Disable in-game gamma slider.";
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, nullptr, A_Last);
