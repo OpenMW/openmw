@@ -276,7 +276,7 @@ namespace Compiler
             extensions.registerInstruction ("gotojail", "", opcodeGoToJail);
             extensions.registerFunction ("getlocked", 'l', "", opcodeGetLocked, opcodeGetLockedExplicit);
             extensions.registerFunction ("geteffect", 'l', "S", opcodeGetEffect, opcodeGetEffectExplicit);
-            extensions.registerInstruction ("addsoulgem", "ccz", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
+            extensions.registerInstruction ("addsoulgem", "ccX", opcodeAddSoulGem, opcodeAddSoulGemExplicit);
             extensions.registerInstruction ("removesoulgem", "c/l", opcodeRemoveSoulGem, opcodeRemoveSoulGemExplicit);
             extensions.registerInstruction ("drop", "cl", opcodeDrop, opcodeDropExplicit);
             extensions.registerInstruction ("dropsoulgem", "c", opcodeDropSoulGem, opcodeDropSoulGemExplicit);
@@ -540,7 +540,7 @@ namespace Compiler
             extensions.registerInstruction("positioncell","ffffc",opcodePositionCell,opcodePositionCellExplicit);
             extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
             extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
-            extensions.registerInstruction("placeatpc","clfl",opcodePlaceAtPc);
+            extensions.registerInstruction("placeatpc","clflX",opcodePlaceAtPc);
             extensions.registerInstruction("placeatme","clflX",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
             extensions.registerInstruction("rotate","cf",opcodeRotate,opcodeRotateExplicit);
