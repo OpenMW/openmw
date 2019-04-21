@@ -455,10 +455,16 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    // make sure a spell with this ID actually exists.
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
+                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
-                    ptr.getClass().getCreatureStats (ptr).getSpells().add (id);
+                    MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+                    creatureStats.getSpells().add(id);
+                    ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
+                    if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
+                    {
+                        // Apply looping particles immediately for constant effects
+                        MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
+                    }
                 }
         };
 
