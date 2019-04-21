@@ -33,7 +33,6 @@ namespace MWDialogue
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
-            std::ostream mErrorStream;
             Compiler::StreamErrorHandler mErrorHandler;
 
             MWWorld::Ptr mActor;

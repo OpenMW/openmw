@@ -50,8 +50,7 @@ namespace MWDialogue
     DialogueManager::DialogueManager (const Compiler::Extensions& extensions, Translation::Storage& translationDataStorage) :
       mTranslationDataStorage(translationDataStorage)
       , mCompilerContext (MWScript::CompilerContext::Type_Dialogue)
-      , mErrorStream(std::cout.rdbuf())
-      , mErrorHandler(mErrorStream)
+      , mErrorHandler()
       , mTalkedTo(false)
       , mTemporaryDispositionChange(0.f)
       , mPermanentDispositionChange(0.f)
@@ -204,8 +203,7 @@ namespace MWDialogue
 
         if (!success)
         {
-            Log(Debug::Warning)
-                << "Warning: compiling failed (dialogue script)\n" << cmd << "\n\n";
+            Log(Debug::Error) << "Error: compiling failed (dialogue script): \n" << cmd << "\n";
         }
 
         return success;
