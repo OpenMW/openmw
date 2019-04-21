@@ -1286,13 +1286,7 @@ namespace MWClass
 
     int Npc::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-
-        if (ref->mBase->mFlags & ESM::NPC::Skeleton)
-            return 1;
-        if (ref->mBase->mFlags & ESM::NPC::Metal)
-            return 2;
-        return 0;
+        return ptr.get<ESM::NPC>()->mBase->mBloodType;
     }
 
     void Npc::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

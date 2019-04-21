@@ -704,29 +704,25 @@ std::string creatureFlags(int flags)
 {
     std::string properties;
     if (flags == 0) properties += "[None] ";
-    if (flags & ESM::Creature::None) properties += "All ";
+    if (flags & ESM::Creature::Base) properties += "Base ";
     if (flags & ESM::Creature::Walks) properties += "Walks ";
     if (flags & ESM::Creature::Swims) properties += "Swims ";
     if (flags & ESM::Creature::Flies) properties += "Flies ";
     if (flags & ESM::Creature::Bipedal) properties += "Bipedal ";
     if (flags & ESM::Creature::Respawn) properties += "Respawn ";
     if (flags & ESM::Creature::Weapon) properties += "Weapon ";
-    if (flags & ESM::Creature::Skeleton) properties += "Skeleton ";
-    if (flags & ESM::Creature::Metal) properties += "Metal ";
     if (flags & ESM::Creature::Essential) properties += "Essential ";
-    int unused = (0xFFFFFFFF ^
-                  (ESM::Creature::None|
+    int unused = (0xFF ^
+                  (ESM::Creature::Base|
                    ESM::Creature::Walks|
                    ESM::Creature::Swims|
                    ESM::Creature::Flies|
                    ESM::Creature::Bipedal|
                    ESM::Creature::Respawn|
                    ESM::Creature::Weapon|
-                   ESM::Creature::Skeleton|
-                   ESM::Creature::Metal|
                    ESM::Creature::Essential));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += str(boost::format("(0x%02X)") % flags);
     return properties;
 }
 
@@ -828,33 +824,21 @@ std::string npcFlags(int flags)
 {
     std::string properties;
     if (flags == 0) properties += "[None] ";
-    // Mythicmods and the ESM component differ.  Mythicmods says
-    // 0x8=None and 0x10=AutoCalc, while our code previously defined
-    // 0x8 as AutoCalc.  The former seems to be correct.  All Bethesda
-    // records have bit 0x8 set.  Previously, suspiciously large portion
-    // of females had autocalc turned off.
-    if (flags & 0x00000008) properties += "Unknown ";
+    if (flags & ESM::NPC::Base) properties += "Base ";
     if (flags & ESM::NPC::Autocalc) properties += "Autocalc ";
     if (flags & ESM::NPC::Female) properties += "Female ";
     if (flags & ESM::NPC::Respawn) properties += "Respawn ";
     if (flags & ESM::NPC::Essential) properties += "Essential ";
-    // These two flags do not appear on any NPCs and may have been
-    // confused with the flags for creatures.
-    if (flags & ESM::NPC::Skeleton) properties += "Skeleton ";
-    if (flags & ESM::NPC::Metal) properties += "Metal ";
     // Whether corpses persist is a bit that is unaccounted for,
-    // however the only unknown bit occurs on ALL records, and
-    // relatively few NPCs have this bit set.
-    int unused = (0xFFFFFFFF ^
-                  (0x00000008|
+    // however relatively few NPCs have this bit set.
+    int unused = (0xFF ^
+                  (ESM::NPC::Base|
                    ESM::NPC::Autocalc|
                    ESM::NPC::Female|
                    ESM::NPC::Respawn|
-                   ESM::NPC::Essential|
-                   ESM::NPC::Skeleton|
-                   ESM::NPC::Metal));
+                   ESM::NPC::Essential));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += str(boost::format("(0x%02X)") % flags);
     return properties;
 }
 

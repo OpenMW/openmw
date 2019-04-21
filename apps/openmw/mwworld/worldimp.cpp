@@ -3585,7 +3585,11 @@ namespace MWWorld
             return;
 
         std::string texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
+        if (texture.empty())
+            texture = Fallback::Map::getString("Blood_Texture_0");
+
         std::string model = "meshes\\" + Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))); // [0, 2]
+
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }
 

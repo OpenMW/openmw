@@ -230,9 +230,19 @@ MwIniImporter::MwIniImporter()
         "Blood:Texture 0",
         "Blood:Texture 1",
         "Blood:Texture 2",
+        "Blood:Texture 3",
+        "Blood:Texture 4",
+        "Blood:Texture 5",
+        "Blood:Texture 6",
+        "Blood:Texture 7",
         "Blood:Texture Name 0",
         "Blood:Texture Name 1",
         "Blood:Texture Name 2",
+        "Blood:Texture Name 3",
+        "Blood:Texture Name 4",
+        "Blood:Texture Name 5",
+        "Blood:Texture Name 6",
+        "Blood:Texture Name 7",
 
         // movies
         "Movies:Company Logo",
@@ -623,17 +633,6 @@ MwIniImporter::MwIniImporter()
         "Moons:Masser Fade Out Start",
         "Moons:Masser Fade Out Finish",
         "Moons:Script Color",
-
-        // blood
-        "Blood:Model 0",
-        "Blood:Model 1",
-        "Blood:Model 2",
-        "Blood:Texture 0",
-        "Blood:Texture 1",
-        "Blood:Texture 2",
-        "Blood:Texture Name 0",
-        "Blood:Texture Name 1",
-        "Blood:Texture Name 2",
 
         // werewolf (Bloodmoon)
         "General:Werewolf FOV",
