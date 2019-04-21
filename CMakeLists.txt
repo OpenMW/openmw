@@ -312,7 +312,7 @@ if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
 endif()
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-find_package(MyGUI 3.2.1 REQUIRED)
+find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)

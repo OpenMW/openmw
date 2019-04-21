@@ -1,8 +1,6 @@
 #include "box.hpp"
 
-#if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
 #include <MyGUI_EditText.h>
-#endif
 
 namespace Gui
 {
@@ -59,10 +57,8 @@ namespace Gui
     int AutoSizedEditBox::getWidth()
     {
         // If the widget has the one short text line, we can shrink widget to avoid a lot of empty space.
-        // Unfortunately, getLineInfo method is available since MyGUI 3.2.2, so with older MyGUI versions tooltips will just have the fixed width.
         int textWidth = mMaxWidth;
 
-#if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
         if (mShrink)
         {
             // MyGUI needs to know the widget size for wordwrapping, but we will know the widget size only after wordwrapping.
@@ -81,7 +77,6 @@ namespace Gui
                 mWasResized = true;
             }
         }
-#endif
 
         return textWidth;
     }
