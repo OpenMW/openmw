@@ -47,12 +47,14 @@
             <Property key="Padding" value="8"/>
             <Property key="Spacing" value="8"/>
 
-            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="CenteredCaption">
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 0 18" align="Left Top" name="CenteredCaption">
                 <Property key="TextAlign" value="Center"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 430 18" align="Left Top" name="CenteredCaptionText">
                 <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
@@ -80,18 +82,21 @@
             <Property key="Padding" value="8"/>
             <Property key="Spacing" value="8"/>
 
-            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 284 18" align="Left Top" name="ClassName">
+            <Widget type="AutoSizedTextBox" skin="NormalText" position="8 8 0 18" align="Left Top HStretch" name="ClassName">
                 <Property key="TextAlign" value="Center"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="8 30 430 18" align="Left Top" name="ClassDescription">
                 <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
             </Widget>
 
-            <Widget type="AutoSizedEditBox" skin="SandText" position="8 52 284 18" align="Left Bottom" name="ClassSpecialisation">
+            <Widget type="AutoSizedTextBox" skin="SandText" position="8 52 0 18" align="Left Bottom" name="ClassSpecialisation">
                 <Property key="TextAlign" value="Center"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
         </Widget>
 
@@ -125,8 +130,10 @@
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="44 8 392 0" align="Left Top" name="HealthDescription">
                 <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
         </Widget>
 
@@ -137,18 +144,22 @@
             <Property key="Spacing" value="8"/>
 
             <Widget type="HBox">
+                <UserString key="HStretch" value="true"/>
                 <Property key="Spacing" value="8"/>
                 <Widget type="ImageBox" skin="ImageBox" position="8 8 32 32" align="Left Top" name="AttributeImage"/>
 
-                <Widget type="AutoSizedEditBox" skin="NormalText" position="44 8 392 32" align="Left Top" name="AttributeName">
+                <Widget type="AutoSizedTextBox" skin="NormalText" position="44 8 0 32" align="Left Top" name="AttributeName">
                     <Property key="TextAlign" value="Left VCenter"/>
+                    <UserString key="HStretch" value="true"/>
                 </Widget>
             </Widget>
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 436 248" align="Left Top" name="AttributeDescription">
                 <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
         </Widget>
 
@@ -179,19 +190,22 @@
 
             <Widget type="AutoSizedEditBox" skin="SandText" position="8 44 430 0" align="Left Top" name="SkillDescription">
                 <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
                 <Property key="Spacing" value="28"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
 
             <Widget type="Widget" skin="" position="0 0 0 2" align="Left Top" />
 
-            <Widget type="AutoSizedTextBox" skin="SandText" position="8 48 444 18" align="Left Bottom" name="SkillMaxed">
+            <Widget type="AutoSizedTextBox" skin="SandText" position="8 48 200 18" align="Left Bottom" name="SkillMaxed">
                 <Property key="Caption" value="#{sSkillMaxReached}"/>
                 <Property key="TextAlign" value="Center"/>
+                <UserString key="HStretch" value="true"/>
             </Widget>
             <Widget type="VBox" name="SkillProgressVBox">
-                <Widget type="AutoSizedTextBox" skin="NormalText" position="8 48 444 18" align="Left Bottom">
+                <Widget type="AutoSizedTextBox" skin="NormalText" position="8 48 200 18" align="Left Bottom">
                     <Property key="Caption" value="#{sSkillProgress}"/>
                     <Property key="TextAlign" value="Center"/>
                 </Widget>
