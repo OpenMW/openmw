@@ -6,7 +6,7 @@
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
-    Bug #3623: Fix HiDPI on Windows
+    Bug #3623: Display scaling breaks mouse recognition
     Bug #3733: Normal maps are inverted on mirrored UVs
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
@@ -16,16 +16,20 @@
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
     Bug #4701: PrisonMarker record is not hardcoded like other markers
+    Bug #4703: Editor: it's possible to preview levelled list records
+    Bug #4705: Editor: unable to open exterior cell views from Instances table
     Bug #4714: Crash upon game load in the repair menu while the "Your repair failed!" message is active
     Bug #4715: "Cannot get class of an empty object" exception after pressing ESC in the dialogue mode
     Bug #4720: Inventory avatar has shield with two-handed weapon during [un]equipping animation
     Bug #4723: ResetActors command works incorrectly
-    Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
     Bug #4736: LandTexture records overrides do not work
+    Bug #4745: Editor: Interior cell lighting field values are not displayed as colors
     Bug #4746: Non-solid player can't run or sneak
     Bug #4747: Bones are not read from X.NIF file for NPC animation
     Bug #4748: Editor: Cloned, moved, added instances re-use RefNum indices
     Bug #4750: Sneaking doesn't work in first person view if the player is in attack ready state
+    Bug #4756: Animation issues with VAOs
+    Bug #4757: Content selector: files can be cleared when there aren't any files to clear
     Bug #4768: Fallback numerical value recovery chokes on invalid arguments
     Bug #4775: Slowfall effect resets player jumping flag
     Bug #4778: Interiors of Illusion puzzle in Sotha Sil Expanded mod is broken
@@ -39,10 +43,12 @@
     Bug #4815: "Finished" journal entry with lower index doesn't close journal, SetJournalIndex closes journal
     Bug #4820: Spell absorption is broken
     Bug #4823: Jail progress bar works incorrectly
+    Bug #4826: Uninitialized memory in unit test
     Bug #4827: NiUVController is handled incorrectly
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
     Bug #4841: Russian localization ignores implicit keywords
+    Bug #4851: No shadows since switch to OSG
     Bug #4860: Actors outside of processing range visible for one frame after spawning
     Bug #4867: Arbitrary text after local variable declarations breaks script compilation
     Bug #4876: AI ratings handling inconsistencies
@@ -69,12 +75,16 @@
     Bug #4979: AiTravel maximum range depends on "actors processing range" setting
     Bug #4980: Drowning mechanics is applied for actors indifferently from distance to player
     Bug #4984: "Friendly hits" feature should be used only for player's followers
+    Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
+    Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
     Feature #3893: Implicit target for "set" function in console
     Feature #3980: In-game option to disable controller
+    Feature #4001: Toggle sneak controller shortcut
     Feature #4209: Editor: Faction rank sub-table
+    Feature #4360: Improve default controller bindings
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
     Feature #4730: Native animated containers support
@@ -88,6 +98,7 @@
     Feature #4968: Scalable UI widget skins
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
+    Task #4721: Add NMake support to the Windows prebuild script
 
 0.45.0
 ------
