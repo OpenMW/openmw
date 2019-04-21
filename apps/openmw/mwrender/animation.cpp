@@ -1631,7 +1631,7 @@ namespace MWRender
         SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
     }
 
-    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture, float scale)
+    void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
     {
         if (!mObjectRoot.get())
             return;
@@ -1663,7 +1663,12 @@ namespace MWRender
         }
 
         osg::ref_ptr<osg::PositionAttitudeTransform> trans = new osg::PositionAttitudeTransform;
-        trans->setScale(osg::Vec3f(scale, scale, scale));
+        if (!mPtr.getClass().isNpc())
+        {
+            osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mPtr) * 2.f / Constants::UnitsPerFoot);
+            float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
+            trans->setScale(osg::Vec3f(scale, scale, scale));
+        }
         parentNode->addChild(trans);
 
         osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model, trans);

@@ -3,6 +3,7 @@
 #include <limits>
 #include <iomanip>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
@@ -1085,41 +1086,18 @@ namespace MWMechanics
 
             std::string texture = effect->mParticle;
 
-            float scale = 1.0f;
             osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
 
-            if (animation && mCaster.getClass().isNpc())
-            {
-                // For NPC we should take race height as scaling factor
-                const ESM::NPC *npc = mCaster.get<ESM::NPC>()->mBase;
-                const MWWorld::ESMStore &esmStore =
-                    MWBase::Environment::get().getWorld()->getStore();
-
-                const ESM::Race *race =
-                    esmStore.get<ESM::Race>().find(npc->mRace);
-
-                scale = npc->isMale() ? race->mData.mHeight.mMale : race->mData.mHeight.mFemale;
-            }
-            else
-            {
-                osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(mCaster);
-
-                // TODO: take a size of particle or NPC with height and weight = 1.0 as scale = 1.0
-                float scaleX = halfExtents.x() * 2 / 60.f;
-                float scaleY = halfExtents.y() * 2 / 60.f;
-                float scaleZ = halfExtents.z() * 2 / 120.f;
-
-                scale = std::max({ scaleX, scaleY, scaleZ });
-            }
-
-            // If the caster has no animation, add the effect directly to the effectManager
             if (animation)
             {
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture, scale);
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
             else
             {
-                // We should set scale for effect manager manually
+                // If the caster has no animation, add the effect directly to the effectManager
+                // We should scale it manually
+                osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mCaster) * 2.f / Constants::UnitsPerFoot);
+                float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
                 float meshScale = !mCaster.getClass().isActor() ? mCaster.getCellRef().getScale() : 1.0f;
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale * meshScale);
             }
