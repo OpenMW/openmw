@@ -323,36 +323,50 @@ namespace Compiler
                 }
             }
 
-            if (mAllowExpression)
+            if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
             {
-                if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
+                if (mAllowExpression)
                 {
                     scanner.putbackKeyword (keyword, loc);
                     parseExpression (scanner, loc);
-                    mState = EndState;
-                    return true;
                 }
-
-                if (const Extensions *extensions = getContext().getExtensions())
+                else
                 {
-                    char returnType;
-                    std::string argumentType;
+                    getErrorHandler().warning ("Unexpected naked expression", loc);
+                }
+                mState = EndState;
+                return true;
+            }
 
-                    bool hasExplicit = !mExplicit.empty();
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                char returnType;
+                std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
+                bool hasExplicit = mState==ExplicitState;
+
+                if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
+                {
+                    if (!hasExplicit && mState==ExplicitState)
                     {
-                        if (!hasExplicit && !mExplicit.empty())
-                        {
-                            getErrorHandler().warning ("Stray explicit reference", loc);
-                            mExplicit.clear();
-                        }
+                        getErrorHandler().warning ("Stray explicit reference", loc);
+                        mExplicit.clear();
+                    }
 
+                    if (mAllowExpression)
+                    {
                         scanner.putbackKeyword (keyword, loc);
                         parseExpression (scanner, loc);
-                        mState = EndState;
-                        return true;
                     }
+                    else
+                    {
+                        std::vector<Interpreter::Type_Code> code;
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                        mCode.insert(mCode.end(), code.begin(), code.end());
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                    }
+                    mState = EndState;
+                    return true;
                 }
             }
         }

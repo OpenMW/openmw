@@ -7,6 +7,7 @@
     Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
     Bug #3623: Display scaling breaks mouse recognition
+    Bug #3725: Using script function in a non-conditional expression breaks script compilation
     Bug #3733: Normal maps are inverted on mirrored UVs
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
