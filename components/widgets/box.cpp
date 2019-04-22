@@ -1,5 +1,9 @@
 #include "box.hpp"
 
+#if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
+#include <MyGUI_EditText.h>
+#endif
+
 namespace Gui
 {
 
@@ -52,22 +56,54 @@ namespace Gui
         }
     }
 
+    int AutoSizedEditBox::getWidth()
+    {
+        // If the widget has the one short text line, we can shrink widget to avoid a lot of empty space.
+        // Unfortunately, getLineInfo method is available since MyGUI 3.2.2, so with older MyGUI versions tooltips will just have the fixed width.
+        int textWidth = mMaxWidth;
+
+#if (MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3, 2, 2))
+        if (mShrink)
+        {
+            // MyGUI needs to know the widget size for wordwrapping, but we will know the widget size only after wordwrapping.
+            // To solve this issue, use the maximum tooltip width first for wordwrapping, then resize widget to its actual used space.
+            if (mWasResized)
+            {
+                int maxLineWidth = 0;
+                const MyGUI::VectorLineInfo & lines = getSubWidgetText()->castType<MyGUI::EditText>()->getLineInfo();
+                for (unsigned int i = 0; i < lines.size(); ++i)
+                    maxLineWidth = std::max(maxLineWidth, lines[i].width);
+
+                textWidth = std::min(maxLineWidth, textWidth);
+            }
+            else
+            {
+                mWasResized = true;
+            }
+        }
+#endif
+
+        return textWidth;
+    }
+
     MyGUI::IntSize AutoSizedEditBox::getRequestedSize()
     {
         if (getAlign().isHStretch())
             throw std::runtime_error("AutoSizedEditBox can't have HStretch align (" + getName() + ")");
-        return MyGUI::IntSize(getSize().width, getTextSize().height);
+        return MyGUI::IntSize(getWidth(), getTextSize().height);
     }
 
     void AutoSizedEditBox::setCaption(const MyGUI::UString& _value)
     {
         EditBox::setCaption(_value);
+        mWasResized = false;
 
         notifySizeChange (this);
     }
 
     void AutoSizedEditBox::initialiseOverride()
     {
+        mMaxWidth = getSize().width;
         Base::initialiseOverride();
         setNeedKeyFocus(false);
         setEditStatic(true);
@@ -78,6 +114,10 @@ namespace Gui
         if (_key == "ExpandDirection")
         {
             mExpandDirection = MyGUI::Align::parse (_value);
+        }
+        else if (_key == "Shrink")
+        {
+            mShrink = MyGUI::utility::parseValue<bool>(_value);
         }
         else
         {

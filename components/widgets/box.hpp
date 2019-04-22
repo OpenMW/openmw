@@ -65,7 +65,11 @@ namespace Gui
 
     protected:
         virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        virtual int getWidth();
         std::string mFontSize;
+        bool mShrink = false;
+        bool mWasResized = false;
+        int mMaxWidth = 0;
     };
 
     class AutoSizedButton : public AutoSizedWidget, public Button
