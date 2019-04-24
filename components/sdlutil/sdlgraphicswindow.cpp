@@ -99,6 +99,9 @@ void GraphicsWindowSDL2::init()
     if (ver && strcmp(ver, "2") == 0) {
         major = 2;
         minor = 0;
+    } else if (ver && strcmp(ver, "3") == 0) {
+        major = 3;
+        minor = 2;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
