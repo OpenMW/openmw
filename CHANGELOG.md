@@ -76,6 +76,7 @@
     Bug #4979: AiTravel maximum range depends on "actors processing range" setting
     Bug #4980: Drowning mechanics is applied for actors indifferently from distance to player
     Bug #4984: "Friendly hits" feature should be used only for player's followers
+    Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
