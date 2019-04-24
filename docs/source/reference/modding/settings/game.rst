@@ -238,3 +238,34 @@ An enchanted bow with chitin arrows will no longer be enough for the purpose, wh
 This was previously the default engine behavior that diverged from Morrowind design.
 
 This setting can be toggled in Advanced tab of the launcher.
+
+strength influences hand to hand
+--------------------------------
+
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	0
+
+This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage, which is using the formula
+Morrowind Code Patch uses for its equivalent feature: damage is multiplied by its value divided by 40.
+
+0: Strength attribute is ignored
+1: Strength attribute is factored in damage from any actor
+2: Strength attribute is factored in damage from any actor except werewolves
+
+This setting can be controlled in Advanced tab of the launcher.
+
+normalise race speed
+--------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+By default race weight is factored into horizontal movement speed like in Morrowind.
+For example, an NPC which has 1.2 race weight is faster than an NPC with the exact same stats and weight 1.0 by a factor of 120%.
+If this setting is true, race weight is ignored in the calculations which allows for a movement behavior
+equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
+This makes the movement speed behavior more fair between different races.
+
+This setting can be controlled in Advanced tab of the launcher.
