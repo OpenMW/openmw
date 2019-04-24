@@ -382,10 +382,10 @@ namespace MWWorld
     struct SearchVisitor
     {
         PtrType mFound;
-        std::string mIdToFind;
+        const std::string *mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefId() == mIdToFind)
+            if (ptr.getCellRef().getRefId() == *mIdToFind)
             {
                 mFound = ptr;
                 return false;
@@ -397,7 +397,7 @@ namespace MWWorld
     Ptr CellStore::search (const std::string& id)
     {
         SearchVisitor<MWWorld::Ptr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        searchVisitor.mIdToFind = &id;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
@@ -405,7 +405,7 @@ namespace MWWorld
     ConstPtr CellStore::searchConst (const std::string& id) const
     {
         SearchVisitor<MWWorld::ConstPtr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        searchVisitor.mIdToFind = &id;
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
     }
