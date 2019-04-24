@@ -148,6 +148,17 @@ namespace MWGui
         return mSpells.size();
     }
 
+    SpellModel::ModelIndex SpellModel::getSelectedIndex() const
+    {
+        ModelIndex selected = -1;
+        for (SpellModel::ModelIndex i = 0; i<int(getItemCount()); ++i)
+        {
+            if (getItem(i).mSelected)
+                selected = i;
+        }
+        return selected;
+    }
+
     Spell SpellModel::getItem(ModelIndex index) const
     {
         if (index < 0 || index >= int(mSpells.size()))

@@ -48,6 +48,8 @@ namespace MWGui
         ///< throws for invalid index
 
         size_t getItemCount() const;
+        ModelIndex getSelectedIndex() const;
+        ///< returns -1 if nothing is selected
 
     private:
         MWWorld::Ptr mActor;

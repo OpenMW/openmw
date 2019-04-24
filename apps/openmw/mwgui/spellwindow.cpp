@@ -1,5 +1,6 @@
 #include "spellwindow.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 
@@ -36,14 +37,18 @@ namespace MWGui
     {
         mSpellIcons = new SpellIcons();
 
+        MyGUI::Button *deleteSpellBtn = nullptr;
+
         getWidget(mSpellView, "SpellView");
         getWidget(mEffectBox, "EffectsBox");
         getWidget(mFilterEdit, "FilterEdit");
+        getWidget(deleteSpellBtn, "DeleteSpellButton");
 
         mFilterEdit->setUserString("IgnoreTabKey", "y");
 
         mSpellView->eventSpellClicked += MyGUI::newDelegate(this, &SpellWindow::onModelIndexSelected);
         mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &SpellWindow::onFilterChanged);
+        deleteSpellBtn->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
 
         setCoord(498, 300, 302, 300);
     }
@@ -185,6 +190,17 @@ namespace MWGui
         mSpellView->setModel(new SpellModel(MWMechanics::getPlayer(), sender->getCaption()));
     }
 
+    void SpellWindow::onDeleteClicked(MyGUI::Widget *widget)
+    {
+        SpellModel::ModelIndex selected = mSpellView->getModel()->getSelectedIndex();
+        if (selected < 0)
+            return;
+
+        const Spell& spell = mSpellView->getModel()->getItem(selected);
+        if (spell.mType != Spell::Type_EnchantedItem)
+            askDeleteSpell(spell.mId);
+    }
+
     void SpellWindow::onSpellSelected(const std::string& spellId)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -222,12 +238,9 @@ namespace MWGui
 
         mSpellView->setModel(new SpellModel(MWMechanics::getPlayer(), ""));
 
-        SpellModel::ModelIndex selected = 0;
-        for (SpellModel::ModelIndex i = 0; i<int(mSpellView->getModel()->getItemCount()); ++i)
-        {
-            if (mSpellView->getModel()->getItem(i).mSelected)
-                selected = i;
-        }
+        SpellModel::ModelIndex selected = mSpellView->getModel()->getSelectedIndex();
+        if (selected < 0)
+            selected = 0;
 
         selected += next ? 1 : -1;
         int itemcount = mSpellView->getModel()->getItemCount();
