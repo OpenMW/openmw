@@ -50,11 +50,11 @@ namespace MWGui
         mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &SpellWindow::onFilterChanged);
         mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
 
+        setCoord(498, 300, 302, 300);
+
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
         t->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
         onWindowResize(t);
-
-        setCoord(498, 300, 302, 300);
     }
 
     SpellWindow::~SpellWindow()
