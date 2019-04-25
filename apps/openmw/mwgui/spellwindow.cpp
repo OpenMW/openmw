@@ -34,27 +34,28 @@ namespace MWGui
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)
         , mSpellView(nullptr)
-        , mDeleteButton(nullptr)
         , mUpdateTimer(0.0f)
     {
         mSpellIcons = new SpellIcons();
 
+        MyGUI::Widget* deleteButton;
+        getWidget(deleteButton, "DeleteSpellButton");
+
         getWidget(mSpellView, "SpellView");
         getWidget(mEffectBox, "EffectsBox");
         getWidget(mFilterEdit, "FilterEdit");
-        getWidget(mDeleteButton, "DeleteSpellButton");
 
         mFilterEdit->setUserString("IgnoreTabKey", "y");
 
         mSpellView->eventSpellClicked += MyGUI::newDelegate(this, &SpellWindow::onModelIndexSelected);
         mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &SpellWindow::onFilterChanged);
-        mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
+        deleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
 
         setCoord(498, 300, 302, 300);
 
-        MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
-        t->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
-        onWindowResize(t);
+        // Adjust the spell filtering widget size because of MyGUI limitations.
+        int filterWidth = mSpellView->getSize().width - deleteButton->getSize().width - 3;
+        mFilterEdit->setSize(filterWidth, mFilterEdit->getSize().height);
     }
 
     SpellWindow::~SpellWindow()
@@ -257,11 +258,5 @@ namespace MWGui
             onEnchantedItemSelected(spell.mItem, spell.mActive);
         else
             onSpellSelected(spell.mId);
-    }
-
-    void SpellWindow::onWindowResize(MyGUI::Window* window) {
-        MyGUI::IntSize sz = mFilterEdit->getSize();
-        sz.width = window->getSize().width - mDeleteButton->getSize().width - 40;
-        mFilterEdit->setSize(sz);
     }
 }

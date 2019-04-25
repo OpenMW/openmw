@@ -36,7 +36,6 @@ namespace MWGui
         void onDeleteClicked(MyGUI::Widget *widget);
         void onDeleteSpellAccept();
         void askDeleteSpell(const std::string& spellId);
-        void onWindowResize(MyGUI::Window* window);
 
         virtual void onPinToggled();
         virtual void onTitleDoubleClicked();
@@ -45,7 +44,6 @@ namespace MWGui
         SpellView* mSpellView;
         SpellIcons* mSpellIcons;
         MyGUI::EditBox* mFilterEdit;
-        MyGUI::Button* mDeleteButton;
 
     private:
         float mUpdateTimer;
