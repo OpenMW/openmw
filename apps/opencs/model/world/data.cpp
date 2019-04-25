@@ -11,6 +11,7 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/shader/shadermanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
@@ -74,6 +75,11 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
 
     mResourcesManager.setVFS(mVFS.get());
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+
+    Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+    defines["forcePPL"] = "0";
+    defines["clamp"] = "1";
+    mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
