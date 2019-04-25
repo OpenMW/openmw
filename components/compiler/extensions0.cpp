@@ -33,7 +33,7 @@ namespace Compiler
         {
             extensions.registerInstruction ("aiactivate", "c/l", opcodeAIActivate,
                 opcodeAIActivateExplicit);
-            extensions.registerInstruction ("aitravel", "fff/l", opcodeAiTravel,
+            extensions.registerInstruction ("aitravel", "fff/lx", opcodeAiTravel,
                 opcodeAiTravelExplicit);
             extensions.registerInstruction ("aiescort", "cffff/l", opcodeAiEscort,
                 opcodeAiEscortExplicit);
@@ -422,7 +422,7 @@ namespace Compiler
 
             for (int i=0; i<numberOfDynamics; ++i)
             {
-                extensions.registerFunction (get + dynamics[i], 'f', "",
+                extensions.registerFunction (get + dynamics[i], 'f', "x",
                     opcodeGetDynamic+i, opcodeGetDynamicExplicit+i);
 
                 extensions.registerInstruction (set + dynamics[i], "f",
@@ -510,8 +510,8 @@ namespace Compiler
             extensions.registerFunction ("pcexpelled", 'l', "/S", opcodePcExpelled, opcodePcExpelledExplicit);
             extensions.registerInstruction ("pcexpell", "/S", opcodePcExpell, opcodePcExpellExplicit);
             extensions.registerInstruction ("pcclearexpelled", "/S", opcodePcClearExpelled, opcodePcClearExpelledExplicit);
-            extensions.registerInstruction ("raiserank", "", opcodeRaiseRank, opcodeRaiseRankExplicit);
-            extensions.registerInstruction ("lowerrank", "", opcodeLowerRank, opcodeLowerRankExplicit);
+            extensions.registerInstruction ("raiserank", "x", opcodeRaiseRank, opcodeRaiseRankExplicit);
+            extensions.registerInstruction ("lowerrank", "x", opcodeLowerRank, opcodeLowerRankExplicit);
 
             extensions.registerFunction ("ondeath", 'l', "", opcodeOnDeath, opcodeOnDeathExplicit);
             extensions.registerFunction ("onmurder", 'l', "", opcodeOnMurder, opcodeOnMurderExplicit);
