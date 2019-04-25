@@ -180,7 +180,7 @@ namespace Compiler
             extensions.registerFunction ("getjournalindex", 'l', "c", opcodeGetJournalIndex);
             extensions.registerInstruction ("addtopic", "S" , opcodeAddTopic);
             extensions.registerInstruction ("choice", "j/SlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSlSl", opcodeChoice);
-            extensions.registerInstruction("forcegreeting","",opcodeForceGreeting,
+            extensions.registerInstruction("forcegreeting","X",opcodeForceGreeting,
                 opcodeForceGreetingExplicit);
             extensions.registerInstruction("goodbye", "", opcodeGoodbye);
             extensions.registerInstruction("setreputation", "l", opcodeSetReputation,
@@ -536,10 +536,10 @@ namespace Compiler
             extensions.registerInstruction("setpos","cf",opcodeSetPos,opcodeSetPosExplicit);
             extensions.registerFunction("getpos",'f',"c",opcodeGetPos,opcodeGetPosExplicit);
             extensions.registerFunction("getstartingpos",'f',"c",opcodeGetStartingPos,opcodeGetStartingPosExplicit);
-            extensions.registerInstruction("position","ffff",opcodePosition,opcodePositionExplicit);
-            extensions.registerInstruction("positioncell","ffffc",opcodePositionCell,opcodePositionCellExplicit);
-            extensions.registerInstruction("placeitemcell","ccffff",opcodePlaceItemCell);
-            extensions.registerInstruction("placeitem","cffff",opcodePlaceItem);
+            extensions.registerInstruction("position","ffffX",opcodePosition,opcodePositionExplicit);
+            extensions.registerInstruction("positioncell","ffffcX",opcodePositionCell,opcodePositionCellExplicit);
+            extensions.registerInstruction("placeitemcell","ccffffX",opcodePlaceItemCell);
+            extensions.registerInstruction("placeitem","cffffX",opcodePlaceItem);
             extensions.registerInstruction("placeatpc","clflX",opcodePlaceAtPc);
             extensions.registerInstruction("placeatme","clflX",opcodePlaceAtMe,opcodePlaceAtMeExplicit);
             extensions.registerInstruction("modscale","f",opcodeModScale,opcodeModScaleExplicit);
