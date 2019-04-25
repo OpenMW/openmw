@@ -1480,6 +1480,32 @@ namespace MWGui
         if (getMode() != GM_Inventory)
             return;
 
+        std::string settingName;
+        switch (wnd)
+        {
+            case GW_Inventory:
+                settingName = "inventory";
+                break;
+            case GW_Map:
+                settingName = "map";
+                break;
+            case GW_Magic:
+                settingName = "spells";
+                break;
+            case GW_Stats:
+                settingName = "stats";
+                break;
+            default:
+                break;
+        }
+
+        if (!settingName.empty())
+        {
+            settingName += " hidden";
+            bool hidden = Settings::Manager::getBool(settingName, "Windows");
+            Settings::Manager::setBool(settingName, "Windows", !hidden);
+        }
+
         mShown = (GuiWindow)(mShown ^ wnd);
         updateVisible();
     }
@@ -1929,12 +1955,20 @@ namespace MWGui
     void WindowManager::updatePinnedWindows()
     {
         mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
+        if (Settings::Manager::getBool("inventory hidden", "Windows"))
+            mShown = (GuiWindow)(mShown ^ GW_Inventory);
 
         mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
+        if (Settings::Manager::getBool("map hidden", "Windows"))
+            mShown = (GuiWindow)(mShown ^ GW_Map);
 
         mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
+        if (Settings::Manager::getBool("spells hidden", "Windows"))
+            mShown = (GuiWindow)(mShown ^ GW_Magic);
 
         mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
+        if (Settings::Manager::getBool("stats hidden", "Windows"))
+            mShown = (GuiWindow)(mShown ^ GW_Stats);
     }
 
     void WindowManager::pinWindow(GuiWindow window)
