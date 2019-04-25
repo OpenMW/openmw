@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_Window.h>
 
 #include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
@@ -33,22 +34,25 @@ namespace MWGui
         : WindowPinnableBase("openmw_spell_window.layout")
         , NoDrop(drag, mMainWidget)
         , mSpellView(nullptr)
+        , mDeleteButton(nullptr)
         , mUpdateTimer(0.0f)
     {
         mSpellIcons = new SpellIcons();
 
-        MyGUI::Button *deleteSpellBtn = nullptr;
-
         getWidget(mSpellView, "SpellView");
         getWidget(mEffectBox, "EffectsBox");
         getWidget(mFilterEdit, "FilterEdit");
-        getWidget(deleteSpellBtn, "DeleteSpellButton");
+        getWidget(mDeleteButton, "DeleteSpellButton");
 
         mFilterEdit->setUserString("IgnoreTabKey", "y");
 
         mSpellView->eventSpellClicked += MyGUI::newDelegate(this, &SpellWindow::onModelIndexSelected);
         mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &SpellWindow::onFilterChanged);
-        deleteSpellBtn->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
+        mDeleteButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellWindow::onDeleteClicked);
+
+        MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
+        t->eventWindowChangeCoord += MyGUI::newDelegate(this, &SpellWindow::onWindowResize);
+        onWindowResize(t);
 
         setCoord(498, 300, 302, 300);
     }
@@ -253,5 +257,11 @@ namespace MWGui
             onEnchantedItemSelected(spell.mItem, spell.mActive);
         else
             onSpellSelected(spell.mId);
+    }
+
+    void SpellWindow::onWindowResize(MyGUI::Window* window) {
+        MyGUI::IntSize sz = mFilterEdit->getSize();
+        sz.width = window->getSize().width - mDeleteButton->getSize().width - 40;
+        mFilterEdit->setSize(sz);
     }
 }

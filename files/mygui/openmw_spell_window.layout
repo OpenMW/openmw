@@ -15,8 +15,9 @@
 
         <Widget type="Widget" position="8 535 268 23" align="Left Bottom HStretch">
             <!-- Spell deletion button -->
-            <Widget type="Button" skin="MW_Button" align="Right Bottom" position="108 0 160 24" name="DeleteSpellButton">
-                <Property key="Caption" value="#{sDeleteSpell}"/>
+            <Widget type="AutoSizedButton" skin="MW_Button" align="Right Bottom" position="268 0 0 24" name="DeleteSpellButton">
+                <Property key="ExpandDirection" value="Left"/>
+                <Property key="Caption" value="#{sDelete}"/>
                 <Property key="NeedKey" value="false"/>
             </Widget>
 
