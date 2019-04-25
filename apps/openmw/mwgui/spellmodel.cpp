@@ -153,8 +153,10 @@ namespace MWGui
         ModelIndex selected = -1;
         for (SpellModel::ModelIndex i = 0; i<int(getItemCount()); ++i)
         {
-            if (getItem(i).mSelected)
+            if (getItem(i).mSelected) {
                 selected = i;
+                break;
+            }
         }
         return selected;
     }
