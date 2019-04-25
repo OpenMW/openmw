@@ -79,6 +79,13 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
     defines["forcePPL"] = "0";
     defines["clamp"] = "1";
+    defines["shadows_enabled"] = "0";
+    defines["shadow_texture_unit_list"] = "";
+    defines["shadowMapsOverlap"] = "0";
+    defines["useShadowDebugOverlay"] = "0";
+    defines["perspectiveShadowMaps"] = "0";
+    defines["disableNormalOffsetShadows"] = "0";
+    defines["shadowNormalOffset"] = "0.0";
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
