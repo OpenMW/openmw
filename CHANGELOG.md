@@ -73,6 +73,7 @@
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
     Bug #4965: Global light attenuation settings setup is lacking
     Bug #4969: "Miss" sound plays for any actor
+    Bug #4971: OpenMW-CS: Make rotations display as degrees instead of radians
     Bug #4972: Player is able to use quickkeys while disableplayerfighting is active
     Bug #4979: AiTravel maximum range depends on "actors processing range" setting
     Bug #4980: Drowning mechanics is applied for actors indifferently from distance to player
