@@ -397,7 +397,7 @@ namespace MWSound
 
         mNextMusic = filename;
 
-        mMusic->setFadeout(0.5f);
+        mMusic->setFadeout(1.f);
     }
 
     void SoundManager::startRandomTitle()
