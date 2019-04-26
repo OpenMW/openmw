@@ -1376,7 +1376,7 @@ namespace CSMWorld
         virtual QVariant get (const Record<ESXRecordT>& record) const
         {
             const ESM::Position& position = record.get().*mPosition;
-            return position.rot[mIndex];
+            return osg::RadiansToDegrees(position.rot[mIndex]);
         }
 
         virtual void set (Record<ESXRecordT>& record, const QVariant& data)
@@ -1385,7 +1385,7 @@ namespace CSMWorld
 
             ESM::Position& position = record2.*mPosition;
 
-            position.rot[mIndex] = data.toFloat();
+            position.rot[mIndex] = osg::DegreesToRadians(data.toFloat());
 
             record.setModified (record2);
         }
