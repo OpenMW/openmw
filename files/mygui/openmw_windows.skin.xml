@@ -589,6 +589,7 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
         </Child>
     </Resource>
@@ -725,6 +726,7 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
         </Child>
     </Resource>
@@ -860,8 +862,8 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
-            <Property key="HideWindowOnDoubleClick" value="1"/>
         </Child>
 
         <Child type="Button" skin="PinUp" offset="232 4 19 19" align="Right Top" name="Button"/>

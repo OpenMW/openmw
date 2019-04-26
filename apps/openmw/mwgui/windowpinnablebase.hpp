@@ -17,11 +17,9 @@ namespace MWGui
 
     private:
         void onPinButtonPressed(MyGUI::Widget* _sender, int left, int top, MyGUI::MouseButton id);
-        void onDoubleClick(MyGUI::Widget* _sender);
 
     protected:
         virtual void onPinToggled() = 0;
-        virtual void onTitleDoubleClicked() = 0;
 
         MyGUI::Widget* mPinButton;
         bool mPinned;

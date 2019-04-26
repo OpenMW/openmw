@@ -4,6 +4,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_InputManager.h>
 #include <MyGUI_Gui.h>
 
 #include <components/settings/settings.hpp>
@@ -652,7 +653,13 @@ namespace MWGui
 
     void StatsWindow::onTitleDoubleClicked()
     {
-        if (!mPinned)
+        if (MyGUI::InputManager::getInstance().isShiftPressed())
+        {
+            MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
+            MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
+            onWindowResize(t);
+        }
+        else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Stats);
     }
 }

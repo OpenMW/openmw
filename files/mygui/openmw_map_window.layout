@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <MyGUI type="Layout">
-    <Widget type="ExposedWindow" skin="MW_Window_Pinnable" layer="Windows" position="0 0 300 300" name="_Main">
+    <Widget type="Window" skin="MW_Window_Pinnable" layer="Windows" position="0 0 300 300" name="_Main">
         <Property key="MinSize" value="40 40"/>
 
         <!-- Local map -->

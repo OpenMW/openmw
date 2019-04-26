@@ -322,6 +322,7 @@ namespace MWBase
             virtual void removeCurrentModal(MWGui::WindowModal* input) = 0;
 
             virtual void pinWindow (MWGui::GuiWindow window) = 0;
+            virtual void toggleMaximized(MWGui::Layout *layout) = 0;
 
             /// Fade the screen in, over \a time seconds
             virtual void fadeScreenIn(const float time, bool clearQueue=true, float delay=0.f) = 0;

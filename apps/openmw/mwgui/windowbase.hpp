@@ -20,7 +20,7 @@ namespace MWGui
 
     class WindowBase: public Layout
     {
-        public:
+    public:
         WindowBase(const std::string& parLayout);
 
         virtual MyGUI::Widget* getDefaultKeyFocus() { return nullptr; }
@@ -52,8 +52,13 @@ namespace MWGui
 
         /// Called when GUI viewport changes size
         virtual void onResChange(int width, int height) {}
-    };
 
+    protected:
+        virtual void onTitleDoubleClicked();
+
+    private:
+        void onDoubleClick(MyGUI::Widget* _sender);
+    };
 
     /*
      * "Modal" windows cause the rest of the interface to be inaccessible while they are visible
