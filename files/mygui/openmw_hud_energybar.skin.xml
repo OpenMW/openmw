@@ -19,43 +19,43 @@
     </Resource>
 
     <!-- Progress bar track, various colors -->
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Red" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Red" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=health}"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Green" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Green" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=fatigue}"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Blue" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Blue" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic}"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Yellow" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Yellow" size="16 8" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="1 1 0"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
+            <State name="normal" offset="0 0 16 8"/>
         </BasisSkin>
     </Resource>
 
 
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Magic" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Magic" size="16 2" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic_fill}"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 2" align="Stretch">
+            <State name="normal" offset="0 0 16 2"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="AutoSizedResourceSkin" name="MW_BarTrack_Weapon" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_BarTrack_Weapon" size="16 2" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=weapon_fill}"/>
-        <BasisSkin type="MainSkin" align="Stretch">
-            <State name="normal"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 2" align="Stretch">
+            <State name="normal" offset="0 0 16 2"/>
         </BasisSkin>
     </Resource>
 
