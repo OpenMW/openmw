@@ -53,6 +53,8 @@ void getHandToHandDamage (const MWWorld::Ptr& attacker, const MWWorld::Ptr& vict
 void applyFatigueLoss(const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float attackStrength);
 
 float getFightDistanceBias(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2);
+
+bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
 }
 
 #endif

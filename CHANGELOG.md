@@ -60,6 +60,7 @@
     Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4918: Abilities don't play looping VFX when they're initially applied
+    Bug #4920: Combat AI uses incorrect invisibility check
     Bug #4922: Werewolves can not attack if the transformation happens during attack
     Bug #4927: Spell effect having both a skill and an attribute assigned is a fatal error
     Bug #4932: Invalid records matching when loading save with edited plugin
