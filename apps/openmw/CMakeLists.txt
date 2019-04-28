@@ -9,7 +9,7 @@ set(GAME
 
 if (ANDROID)
     set(GAME ${GAME} android_commandLine.cpp)
-    set(GAME ${GAME} android_main.c)
+    set(GAME ${GAME} android_main.cpp)
 endif()
 
 set(GAME_HEADER
