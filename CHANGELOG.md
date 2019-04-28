@@ -104,6 +104,7 @@
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
     Feature #4994: Persistent pinnable windows hiding
+    Feature #5000: Compressed BSA format support
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4721: Add NMake support to the Windows prebuild script
