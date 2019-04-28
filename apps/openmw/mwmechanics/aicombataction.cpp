@@ -403,12 +403,9 @@ namespace MWMechanics
         ESM::Position actorPos = actor.getRefData().getPosition();
         ESM::Position enemyPos = enemy.getRefData().getPosition();
 
-        const CreatureStats& enemyStats = enemy.getClass().getCreatureStats(enemy);
-        if (enemyStats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0
-                || enemyStats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude() > 0)
+        if (isTargetMagicallyHidden(enemy) && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(enemy, actor))
         {
-            if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(enemy, actor))
-                return false;
+            return false;
         }
 
         if (actor.getClass().isPureWaterCreature(actor))

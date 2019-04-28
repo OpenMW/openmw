@@ -485,4 +485,11 @@ namespace MWMechanics
 
         return (iFightDistanceBase - fFightDistanceMultiplier * d);
     }
+
+    bool isTargetMagicallyHidden(const MWWorld::Ptr& target)
+    {
+        const MagicEffects& magicEffects = target.getClass().getCreatureStats(target).getMagicEffects();
+        return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+            || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+    }
 }
