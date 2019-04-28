@@ -350,11 +350,6 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
     if (!force && jump == mJumpState && idle == CharState_None)
         return;
 
-    if (jump == JumpState_InAir)
-    {
-        idle = CharState_None;
-    }
-
     std::string jumpAnimName;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (jump != JumpState_None)
@@ -1686,7 +1681,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
             mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
         {
-            idle = CharState_None;
+            mAnimation->disable(mCurrentIdle);
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
@@ -2138,6 +2133,9 @@ void CharacterController::update(float duration, bool animationOnly)
             forcestateupdate = true;
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
+
+            // We should reset idle animation during landing
+            mAnimation->disable(mCurrentIdle);
 
             float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);
