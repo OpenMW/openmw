@@ -376,17 +376,29 @@
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top">
-                            <Property key="Range" value="4667"/>
-                            <Property key="Page" value="300"/>
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="RenderingDistanceSlider">
+                            <Property key="Range" value="4609"/>
+                            <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Integer"/>
-                            <UserString key="SettingMin" value="2000"/>
-                            <UserString key="SettingMax" value="6666"/>
+                            <UserString key="SettingMin" value="2048"/>
+                            <UserString key="SettingMax" value="6656"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
+                        </Widget>
+                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="LargeRenderingDistanceSlider">
+                            <Property key="Range" value="79873"/>
+                            <Property key="Page" value="2048"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="Camera"/>
+                            <UserString key="SettingName" value="viewing distance"/>
+                            <UserString key="SettingValueType" value="Cell"/>
+                            <UserString key="SettingMin" value="2048"/>
+                            <UserString key="SettingMax" value="81920"/>
+                            <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
+                            <UserString key="SettingLabelCaption" value="#{sRender_Distance} (x%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
