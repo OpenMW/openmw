@@ -493,7 +493,7 @@ void NpcAnimation::updateNpcBase()
     if(!is1stPerson)
     {
         const std::string base = "meshes\\xbase_anim.nif";
-        if (smodel != base)
+        if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
         if (smodel != defaultSkeleton && base != defaultSkeleton)
@@ -507,7 +507,7 @@ void NpcAnimation::updateNpcBase()
     else
     {
         const std::string base = "meshes\\xbase_anim.1st.nif";
-        if (smodel != base)
+        if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
         addAnimSource(smodel, smodel);
