@@ -428,11 +428,11 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
     camera->setGraphicsContext(graphicsWindow);
-    camera->setViewport(0, 0, width, height);
+    camera->setViewport(0, 0, traits->width, traits->height);
 
     mViewer->realize();
 
-    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, width, height);
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, traits->width, traits->height);
 }
 
 void OMW::Engine::setWindowIcon()
