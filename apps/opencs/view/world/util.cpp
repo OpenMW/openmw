@@ -212,6 +212,19 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return sb;
         }
 
+        case CSMWorld::ColumnBase::Display_SignedInteger8:
+        {
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
+            sb->setRange(std::numeric_limits<signed char>::min(), std::numeric_limits<signed char>::max());
+            return sb;
+        }
+        case CSMWorld::ColumnBase::Display_SignedInteger16:
+        {
+            DialogueSpinBox *sb = new DialogueSpinBox(parent);
+            sb->setRange(std::numeric_limits<short>::min(), std::numeric_limits<short>::max());
+            return sb;
+        }
+
         case CSMWorld::ColumnBase::Display_UnsignedInteger8:
         {
             DialogueSpinBox *sb = new DialogueSpinBox(parent);
