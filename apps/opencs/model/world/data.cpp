@@ -11,6 +11,8 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/shadow.hpp>
+#include <components/shader/shadermanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
@@ -74,6 +76,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
 
     mResourcesManager.setVFS(mVFS.get());
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+
+    Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+    Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
+    defines["forcePPL"] = "0";
+    defines["clamp"] = "1";
+    for (const auto& define : shadowDefines)
+        defines[define.first] = define.second;
+    mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
