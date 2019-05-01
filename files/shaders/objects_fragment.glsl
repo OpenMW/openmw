@@ -98,7 +98,7 @@ void main()
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
 #else
-    gl_FragData[0] = vec4(1.0, 1.0, 1.0, 1.0);
+    gl_FragData[0] = vec4(1.0);
 #endif
 
 #if @detailMap
@@ -117,7 +117,13 @@ void main()
     float shadowing = unshadowedLightRatio();
 
 #if !PER_PIXEL_LIGHTING
+
+#if @clamp
+    gl_FragData[0] *= clamp(lighting + vec4(shadowDiffuseLighting * shadowing, 0), vec4(0.0), vec4(1.0));
+#else
     gl_FragData[0] *= lighting + vec4(shadowDiffuseLighting * shadowing, 0);
+#endif
+
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
 #endif
