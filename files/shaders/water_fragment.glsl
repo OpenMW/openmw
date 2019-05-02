@@ -170,7 +170,7 @@ void main(void)
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
 
-    vec2 nCoord = vec2(0.0,0.0);
+    vec2 nCoord = vec2(0.0);
 
     #define waterTimer osg_SimulationTime
 
@@ -186,7 +186,7 @@ void main(void)
     if (rainIntensity > 0.01)
       rainRipple = rainCombined(position.xy / 1000.0,waterTimer) * clamp(rainIntensity,0.0,1.0);
     else
-      rainRipple = vec4(0.0,0.0,0.0,0.0);
+      rainRipple = vec4(0.0);
 
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
