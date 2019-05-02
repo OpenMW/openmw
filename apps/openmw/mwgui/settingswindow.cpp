@@ -584,6 +584,7 @@ namespace MWGui
 
     void SettingsWindow::onOpen()
     {
+        highlightCurrentResolution();
         updateControlsBox();
         resetScrollbars();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
