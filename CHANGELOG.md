@@ -82,6 +82,7 @@
     Bug #4984: "Friendly hits" feature should be used only for player's followers
     Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
+    Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5004: Werewolves shield their eyes during storm
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
