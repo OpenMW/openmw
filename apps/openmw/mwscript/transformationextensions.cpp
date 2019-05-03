@@ -108,8 +108,6 @@ namespace MWScript
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,angle,az);
                     else if (axis == "z")
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,angle);
-                    else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -137,8 +135,6 @@ namespace MWScript
                     {
                         runtime.push(osg::RadiansToDegrees(ptr.getCellRef().getPosition().rot[2]));
                     }
-                    else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -195,8 +191,6 @@ namespace MWScript
                     {
                         runtime.push(ptr.getRefData().getPosition().pos[2]);
                     }
-                    else
-                        throw std::runtime_error ("invalid axis: " + axis);
                 }
         };
 
@@ -248,7 +242,9 @@ namespace MWScript
                         updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos,true);
                     }
                     else
-                        throw std::runtime_error ("invalid axis: " + axis);
+                    {
+                        return;
+                    }
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,updated);
                 }
@@ -278,8 +274,6 @@ namespace MWScript
                     {
                         runtime.push(ptr.getCellRef().getPosition().pos[2]);
                     }
-                    else
-                        throw std::runtime_error ("invalid axis: " + axis);
                 }
         };
 
@@ -570,8 +564,6 @@ namespace MWScript
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay+rotation,az);
                     else if (axis == "z")
                         MWBase::Environment::get().getWorld()->rotateObject(ptr,ax,ay,az+rotation);
-                    else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
@@ -604,7 +596,7 @@ namespace MWScript
                     else if (axis == "z")
                         rot = osg::Quat(rotation, -osg::Z_AXIS);
                     else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
+                        return;
 
                     osg::Quat attitude = ptr.getRefData().getBaseNode()->getAttitude();
                     MWBase::Environment::get().getWorld()->rotateWorldObject(ptr, attitude * rot);
@@ -667,7 +659,7 @@ namespace MWScript
                         posChange=osg::Vec3f(0, 0, movement);
                     }
                     else
-                        throw std::runtime_error ("invalid movement axis: " + axis);
+                        return;
 
                     // is it correct that disabled objects can't be Move-d?
                     if (!ptr.getRefData().getBaseNode())
@@ -711,7 +703,7 @@ namespace MWScript
                     else if (axis == "z")
                         diff.z() += movement;
                     else
-                        throw std::runtime_error ("invalid movement axis: " + axis);
+                        return;
 
                     // We should move actors, standing on moving object, too.
                     // This approach can be used to create elevators.
