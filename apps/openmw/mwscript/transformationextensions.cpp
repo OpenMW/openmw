@@ -162,8 +162,6 @@ namespace MWScript
                     {
                         runtime.push(osg::RadiansToDegrees(ptr.getRefData().getPosition().rot[2]));
                     }
-                    else
-                        throw std::runtime_error ("invalid rotation axis: " + axis);
                 }
         };
 
