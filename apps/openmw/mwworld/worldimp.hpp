@@ -141,9 +141,9 @@ namespace MWWorld
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
     public: // FIXME
+            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
             void removeContainerScripts(const Ptr& reference) override;
     private:
-            void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
             void processDoors(float duration);

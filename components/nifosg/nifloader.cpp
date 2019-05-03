@@ -635,6 +635,8 @@ namespace NifOsg
                 const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
                 if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
                     rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
+                else if (niSwitchNode->name == Constants::HerbalismLabel && !SceneUtil::hasUserDescription(rootNode, Constants::HerbalismLabel))
+                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
             }
 
             return node;
