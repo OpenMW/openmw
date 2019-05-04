@@ -451,12 +451,13 @@ namespace MWGui
 
     void SettingsWindow::apply()
     {
-        const Settings::CategorySettingVector changed = Settings::Manager::apply();
+        const Settings::CategorySettingVector changed = Settings::Manager::getPendingChanges();
         MWBase::Environment::get().getWorld()->processChangedSettings(changed);
         MWBase::Environment::get().getSoundManager()->processChangedSettings(changed);
         MWBase::Environment::get().getWindowManager()->processChangedSettings(changed);
         MWBase::Environment::get().getInputManager()->processChangedSettings(changed);
         MWBase::Environment::get().getMechanicsManager()->processChangedSettings(changed);
+        Settings::Manager::resetPendingChanges();
     }
 
     void SettingsWindow::onKeyboardSwitchClicked(MyGUI::Widget* _sender)
