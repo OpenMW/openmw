@@ -1990,9 +1990,7 @@ namespace MWRender
             mObjectRoot->accept(visitor);
         }
 
-        if (ptr.getTypeName() == typeid(ESM::Container).name() &&
-            SceneUtil::hasUserDescription(mObjectRoot, Constants::HerbalismLabel) &&
-            ptr.getRefData().getCustomData() != nullptr)
+        if (ptr.getRefData().getCustomData() != nullptr && canBeHarvested())
         {
             const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
             if (!store.hasVisibleItems())
