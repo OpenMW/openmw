@@ -27,27 +27,36 @@ namespace MWWorld
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;
 
+        MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
         MWWorld::Ptr target = getTarget();
         MWWorld::ContainerStore& store = target.getClass().getContainerStore (target);
         MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
         std::map<std::string, int> takenMap;
+        int value = 0;
+        MWWorld::Ptr victim;
+        MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+        bool isPlayer = (actor == player);
+        bool triggerCrime = isPlayer && !mechMgr->isAllowedToUse(actor, target, victim);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
             if (!it->getClass().showsInInventory(*it))
                 continue;
 
             int itemCount = it->getRefData().getCount();
-            // Note: it is important to check for crime before move an item from container. Otherwise owner check will not work
-            // for a last item in the container - empty harvested containers are considered as "allowed to use".
-            MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);
+            value += it->getClass().getValue(*it) * itemCount;
+            // It is important to fire this event before transferring the item because harvested containers are considered "allowed to use".
+            mechMgr->itemTaken(actor, *it, target, itemCount, false);
             actorStore.add(*it, itemCount, actor);
             store.remove(*it, itemCount, getTarget());
             takenMap[it->getClass().getName(*it)]+=itemCount;
         }
 
-        // Spawn a messagebox (only for items added to player's inventory)
-        if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())
+        // Spawn a messagebox and trigger potential crime event (only for items added to player's inventory)
+        if (isPlayer)
         {
+            if (!takenMap.empty() && triggerCrime)
+                mechMgr->commitCrime(actor, victim, MWBase::MechanicsManager::OT_Theft, value);
+
             std::ostringstream stream;
             int lineCount = 0;
             const static int maxLines = 10;
