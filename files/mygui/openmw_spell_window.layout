@@ -13,6 +13,15 @@
         <Widget type="SpellView" skin="MW_SpellView" position="8 38 268 490" align="Left Top Stretch" name="SpellView">
         </Widget>
 
+        <Widget type="HBox" position="8 535 268 23" align="Right Bottom HStretch">
+            <Widget type="Spacer"/>
+            <!-- Spell deletion button -->
+            <Widget type="AutoSizedButton" skin="MW_Button" align="Right Bottom" position="8 535 0 23" name="DeleteSpellButton">
+                <Property key="Caption" value="#{sDelete}"/>
+                <Property key="NeedKey" value="false"/>
+            </Widget>
+        </Widget>
+
         <!-- Search box-->
         <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="8 535 268 23" align="Left Bottom HStretch" name="FilterEdit">
         </Widget>
