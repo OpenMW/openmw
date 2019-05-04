@@ -2,12 +2,12 @@
 
 namespace MWGui
 {
-    MyGUI::VectorWidgetPtr ExposedWindow::getSkinWidgetsByName (const std::string &name)
+    MyGUI::VectorWidgetPtr Window::getSkinWidgetsByName (const std::string &name)
     {
         return MyGUI::Widget::getSkinWidgetsByName (name);
     }
 
-    MyGUI::Widget* ExposedWindow::getSkinWidget(const std::string & _name, bool _throw)
+    MyGUI::Widget* Window::getSkinWidget(const std::string & _name, bool _throw)
     {
         MyGUI::VectorWidgetPtr widgets = getSkinWidgetsByName (_name);
 

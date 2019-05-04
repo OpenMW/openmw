@@ -91,6 +91,7 @@
     Feature #3610: Option to invert X axis
     Feature #3893: Implicit target for "set" function in console
     Feature #3980: In-game option to disable controller
+    Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
     Feature #4209: Editor: Faction rank sub-table
     Feature #4360: Improve default controller bindings

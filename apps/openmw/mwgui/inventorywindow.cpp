@@ -162,28 +162,39 @@ namespace MWGui
         mItemView->setModel(nullptr);
     }
 
+    void InventoryWindow::toggleMaximized()
+    {
+        std::string setting = getModeSetting();
+
+        bool maximized = !Settings::Manager::getBool(setting + " maximized", "Windows");
+        if (maximized)
+            setting += " maximized";
+
+        MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
+        float x = Settings::Manager::getFloat(setting + " x", "Windows") * float(viewSize.width);
+        float y = Settings::Manager::getFloat(setting + " y", "Windows") * float(viewSize.height);
+        float w = Settings::Manager::getFloat(setting + " w", "Windows") * float(viewSize.width);
+        float h = Settings::Manager::getFloat(setting + " h", "Windows") * float(viewSize.height);
+        MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
+        window->setCoord(x, y, w, h);
+
+        if (maximized)
+            Settings::Manager::setBool(setting, "Windows", maximized);
+        else
+            Settings::Manager::setBool(setting + " maximized", "Windows", maximized);
+
+        adjustPanes();
+        updatePreviewSize();
+    }
+
     void InventoryWindow::setGuiMode(GuiMode mode)
     {
-        std::string setting = "inventory";
         mGuiMode = mode;
-        switch(mode) {
-            case GM_Container:
-                setPinButtonVisible(false);
-                setting += " container";
-                break;
-            case GM_Companion:
-                setPinButtonVisible(false);
-                setting += " companion";
-                break;
-            case GM_Barter:
-                setPinButtonVisible(false);
-                setting += " barter";
-                break;
-            case GM_Inventory:
-            default:
-                setPinButtonVisible(true);
-                break;
-        }
+        std::string setting = getModeSetting();
+        setPinButtonVisible(mode == GM_Inventory);
+
+        if (Settings::Manager::getBool(setting + " maximized", "Windows"))
+            setting += " maximized";
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width),
@@ -386,11 +397,11 @@ namespace MWGui
         adjustPanes();
     }
 
-    void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
+    std::string InventoryWindow::getModeSetting() const
     {
-        adjustPanes();
         std::string setting = "inventory";
-        switch(mGuiMode) {
+        switch(mGuiMode)
+        {
             case GM_Container:
                 setting += " container";
                 break;
@@ -404,6 +415,14 @@ namespace MWGui
                 break;
         }
 
+        return setting;
+    }
+
+    void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
+    {
+        adjustPanes();
+        std::string setting = getModeSetting();
+
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
         float x = _sender->getPosition().left / float(viewSize.width);
         float y = _sender->getPosition().top / float(viewSize.height);
@@ -413,6 +432,9 @@ namespace MWGui
         Settings::Manager::setFloat(setting + " y", "Windows", y);
         Settings::Manager::setFloat(setting + " w", "Windows", w);
         Settings::Manager::setFloat(setting + " h", "Windows", h);
+        bool maximized = Settings::Manager::getBool(setting + " maximized", "Windows");
+        if (maximized)
+            Settings::Manager::setBool(setting + " maximized", "Windows", false);
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
         {
@@ -476,7 +498,9 @@ namespace MWGui
 
     void InventoryWindow::onTitleDoubleClicked()
     {
-        if (!mPinned)
+        if (MyGUI::InputManager::getInstance().isShiftPressed())
+            toggleMaximized();
+        else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Inventory);
     }
 

@@ -62,7 +62,9 @@ namespace MWGui
 
     void SpellWindow::onTitleDoubleClicked()
     {
-        if (!mPinned)
+        if (MyGUI::InputManager::getInstance().isShiftPressed())
+            MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
+        else if (!mPinned)
             MWBase::Environment::get().getWindowManager()->toggleVisible(GW_Magic);
     }
 
