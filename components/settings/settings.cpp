@@ -414,17 +414,20 @@ void Manager::setBool(const std::string &setting, const std::string &category, c
     setString(setting, category, value ? "true" : "false");
 }
 
-void Manager::apply(const std::string &setting, const std::string &category)
+void Manager::resetPendingChange(const std::string &setting, const std::string &category)
 {
     CategorySettingValueMap::key_type key = std::make_pair(category, setting);
     mChangedSettings.erase(key);
 }
 
-const CategorySettingVector Manager::apply()
+const CategorySettingVector Manager::getPendingChanges()
 {
-    CategorySettingVector vec = mChangedSettings;
+    return mChangedSettings;
+}
+
+void Manager::resetPendingChanges()
+{
     mChangedSettings.clear();
-    return vec;
 }
 
 }

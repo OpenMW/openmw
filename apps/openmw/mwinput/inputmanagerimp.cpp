@@ -1130,8 +1130,8 @@ namespace MWInput
         // There is no need to track these changes.
         Settings::Manager::setInt("resolution x", "Video", x);
         Settings::Manager::setInt("resolution y", "Video", y);
-        Settings::Manager::apply("resolution x", "Video");
-        Settings::Manager::apply("resolution y", "Video");
+        Settings::Manager::resetPendingChange("resolution x", "Video");
+        Settings::Manager::resetPendingChange("resolution y", "Video");
 
         MWBase::Environment::get().getWindowManager()->windowResized(x, y);
 

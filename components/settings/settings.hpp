@@ -35,9 +35,11 @@ namespace Settings
         void saveUser (const std::string& file);
         ///< save user settings to file
 
-        static void apply(const std::string &setting, const std::string &category);
+        static void resetPendingChange(const std::string &setting, const std::string &category);
 
-        static const CategorySettingVector apply();
+        static void resetPendingChanges();
+
+        static const CategorySettingVector getPendingChanges();
         ///< returns the list of changed settings and then clears it
 
         static int getInt (const std::string& setting, const std::string& category);
