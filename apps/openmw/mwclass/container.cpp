@@ -89,6 +89,10 @@ namespace MWClass
             ptr.get<ESM::Container>();
         if (ref->mBase->mFlags & ESM::Container::Respawn)
         {
+            // Container was not touched, there is no need to modify its content.
+            if (ptr.getRefData().getCustomData() == nullptr)
+                return;
+
             MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
             ptr.getRefData().setCustomData(nullptr);
         }

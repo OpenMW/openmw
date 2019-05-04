@@ -3335,9 +3335,13 @@ namespace MWWorld
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
-            if (mType != World::Detect_Creature &&
-                    (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name()))
+            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM::Container).name();
+            if (mType != World::Detect_Creature && (ptr.getClass().isActor() || isContainer))
             {
+                // but ignore containers without resolved content
+                if (isContainer && ptr.getRefData().getCustomData() == nullptr)
+                    return true;
+
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
