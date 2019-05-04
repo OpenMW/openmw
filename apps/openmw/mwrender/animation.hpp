@@ -35,6 +35,7 @@ namespace MWRender
 class ResetAccumRootCallback;
 class RotateController;
 class GlowUpdater;
+class TransparencyUpdater;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
@@ -266,6 +267,7 @@ protected:
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
     osg::ref_ptr<GlowUpdater> mGlowUpdater;
+    osg::ref_ptr<TransparencyUpdater> mTransparencyUpdater;
 
     float mAlpha;
 
