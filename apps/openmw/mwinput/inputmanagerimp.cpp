@@ -826,9 +826,6 @@ namespace MWInput
                                         Settings::Manager::getInt("resolution y", "Video"),
                                         Settings::Manager::getBool("fullscreen", "Video"),
                                         Settings::Manager::getBool("window border", "Video"));
-
-            // We should reload TrueType fonts to fit new resolution
-            MWBase::Environment::get().getWindowManager()->loadUserFonts();
         }
     }
 
@@ -1129,10 +1126,17 @@ namespace MWInput
 
     void InputManager::windowResized(int x, int y)
     {
+        // Note: this is a side effect of resolution change or window resize.
+        // There is no need to track these changes.
         Settings::Manager::setInt("resolution x", "Video", x);
         Settings::Manager::setInt("resolution y", "Video", y);
+        Settings::Manager::apply("resolution x", "Video");
+        Settings::Manager::apply("resolution y", "Video");
 
         MWBase::Environment::get().getWindowManager()->windowResized(x, y);
+
+        // We should reload TrueType fonts to fit new resolution
+        MWBase::Environment::get().getWindowManager()->loadUserFonts();
     }
 
     void InputManager::windowClosed()
