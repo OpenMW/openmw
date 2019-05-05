@@ -86,6 +86,7 @@
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
+    Bug #5018: Spell tooltips don't support purely negative magnitudes
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
