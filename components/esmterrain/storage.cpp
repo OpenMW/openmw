@@ -353,11 +353,11 @@ namespace ESMTerrain
     std::string Storage::getTextureName(UniqueTextureId id)
     {
         // Goes under used terrain blend transitions
-        static const std::string baseTexture = "textures\\tx_black_01.dds";
+        static constexpr char baseTexture[] = "textures\\tx_black_01.dds";
         if (id.first == -1)
             return baseTexture;
 
-        static const std::string defaultTexture = "textures\\_land_default.dds";
+        static constexpr char defaultTexture[] = "textures\\_land_default.dds";
         if (id.first == 0)
             return defaultTexture; // Not sure if the default texture really is hardcoded?
 
