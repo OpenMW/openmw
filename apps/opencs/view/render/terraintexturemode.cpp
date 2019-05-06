@@ -36,7 +36,6 @@
 #include "pagedworldspacewidget.hpp"
 #include "mask.hpp"
 #include "object.hpp" // Something small needed regarding pointers from here ()
-#include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
