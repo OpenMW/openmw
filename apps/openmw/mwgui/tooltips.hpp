@@ -22,6 +22,7 @@ namespace MWGui
             : imageSize(32)
             , remainingEnchantCharge(-1)
             , isPotion(false)
+            , isIngredient(false)
             , wordWrap(true)
         {}
 
@@ -41,6 +42,7 @@ namespace MWGui
         std::vector<std::string> notes;
 
         bool isPotion; // potions do not show target in the tooltip
+        bool isIngredient; // ingredients have no effect magnitude
         bool wordWrap;
     };
 

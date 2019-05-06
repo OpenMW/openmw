@@ -235,6 +235,7 @@ namespace MWGui
                 params.mRange = effectInfo.mRange;
                 params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
+                params.mNoMagnitude = (flags & MWEffectList::EF_NoMagnitude);
                 effect->setSpellEffect(params);
                 effects.push_back(effect);
                 coord.top += effect->getHeight();
@@ -293,6 +294,7 @@ namespace MWGui
                 effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
                 effectInfo.mIsConstant = (flags & EF_Constant) || effectInfo.mIsConstant;
                 effectInfo.mNoTarget = (flags & EF_NoTarget) || effectInfo.mNoTarget;
+                effectInfo.mNoMagnitude = (flags & EF_NoMagnitude) || effectInfo.mNoMagnitude;
                 effect->setSpellEffect(effectInfo);
                 effects.push_back(effect);
                 if (effect->getRequestedWidth() > maxwidth)
@@ -421,7 +423,7 @@ namespace MWGui
 
                     spellLine += formatter.str();
                 }
-                else if ( displayType != ESM::MagicEffect::MDT_None ) {
+                else if ( displayType != ESM::MagicEffect::MDT_None  && !mEffectParams.mNoMagnitude) {
                     spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
                         spellLine += to + MyGUI::utility::toString(mEffectParams.mMagnMax);
