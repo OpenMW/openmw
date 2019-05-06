@@ -37,6 +37,9 @@ namespace
         {
             MWWorld::Ptr container (&*iter, 0);
 
+            if (container.getRefData().getCustomData() == nullptr)
+                continue;
+
             MWWorld::Ptr ptr =
                 container.getClass().getContainerStore (container).search (id);
 
