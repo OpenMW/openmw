@@ -994,7 +994,7 @@ namespace MWMechanics
         }
 
         if (!cellref.getOwner().empty())
-            victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true);
+            victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true, false);
 
         return (!isOwned && !isFactionOwned);
     }
