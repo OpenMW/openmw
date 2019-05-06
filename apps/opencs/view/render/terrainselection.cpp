@@ -60,7 +60,7 @@ void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> &localPos)
 
 void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress)
 {
-    if (toggleInProgress == true)
+    if (toggleInProgress)
     {
         for(auto const& localPos: localPositions)
         {
