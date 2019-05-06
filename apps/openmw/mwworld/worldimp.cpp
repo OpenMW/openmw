@@ -679,7 +679,7 @@ namespace MWWorld
         mLocalScripts.remove (ref);
     }
 
-    Ptr World::searchPtr (const std::string& name, bool activeOnly)
+    Ptr World::searchPtr (const std::string& name, bool activeOnly, bool searchInContainers)
     {
         Ptr ret;
         // the player is always in an active cell.
@@ -706,11 +706,14 @@ namespace MWWorld
                 return ret;
         }
 
-        for (CellStore* cellstore : mWorldScene->getActiveCells())
+        if (searchInContainers)
         {
-            Ptr ptr = cellstore->searchInContainer(lowerCaseName);
-            if (!ptr.isEmpty())
-                return ptr;
+            for (CellStore* cellstore : mWorldScene->getActiveCells())
+            {
+                Ptr ptr = cellstore->searchInContainer(lowerCaseName);
+                if (!ptr.isEmpty())
+                    return ptr;
+            }
         }
 
         Ptr ptr = mPlayer->getPlayer().getClass()
