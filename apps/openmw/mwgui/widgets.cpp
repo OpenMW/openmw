@@ -408,7 +408,7 @@ namespace MWGui
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
 
-            if (mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) {
+            if (mEffectParams.mMagnMin || mEffectParams.mMagnMax) {
                 ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
                 if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
@@ -431,9 +431,9 @@ namespace MWGui
                     else if ( displayType == ESM::MagicEffect::MDT_Feet )
                         spellLine += " " + ft;
                     else if ( displayType == ESM::MagicEffect::MDT_Level )
-                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? lvl : lvls );
+                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? lvl : lvls );
                     else  // ESM::MagicEffect::MDT_Points
-                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
+                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? pt : pts );
                 }
             }
 
