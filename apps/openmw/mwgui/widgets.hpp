@@ -38,6 +38,7 @@ namespace MWGui
             SpellEffectParams()
                 : mNoTarget(false)
                 , mIsConstant(false)
+                , mNoMagnitude(false)
                 , mKnown(true)
                 , mEffectID(-1)
                 , mSkill(-1)
@@ -52,6 +53,7 @@ namespace MWGui
 
             bool mNoTarget; // potion effects for example have no target (target is always the player)
             bool mIsConstant; // constant effect means that duration will not be displayed
+            bool mNoMagnitude; // effect magnitude will not be displayed (e.g ingredients)
 
             bool mKnown; // is this effect known to the player? (If not, will display as a question mark instead)
 
@@ -218,7 +220,9 @@ namespace MWGui
             enum EffectFlags
             {
                 EF_NoTarget = 0x01, // potions have no target (target is always the player)
-                EF_Constant = 0x02 // constant effect means that duration will not be displayed
+                EF_Constant = 0x02, // constant effect means that duration will not be displayed
+                EF_NoMagnitude = 0x04 // ingredients have no magnitude
+
             };
 
             void setEffectList(const SpellEffectList& list);

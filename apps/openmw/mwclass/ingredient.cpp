@@ -156,6 +156,7 @@ namespace MWClass
         info.effects = list;
 
         info.text = text;
+        info.isIngredient = true;
 
         return info;
     }

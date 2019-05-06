@@ -249,6 +249,7 @@ namespace MWGui
                 params.mAttribute = effectKey.mArg;
             params.mIsConstant = true;
             params.mNoTarget = true;
+            params.mNoMagnitude = true;
 
             params.mKnown = mAlchemy->knownEffect(effectIndex, MWBase::Environment::get().getWorld()->getPlayerPtr());
 
