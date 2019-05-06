@@ -35,9 +35,9 @@ namespace CSVRender
             TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget, TerrainSelectionType type);
             ~TerrainSelection();
 
-            void onlySelect(const std::vector<std::pair<int, int>> localPositions);
-            void addSelect(const std::pair<int, int> localPos);
-            void toggleSelect(const std::vector<std::pair<int, int>> localPositions, bool);
+            void onlySelect(const std::vector<std::pair<int, int>> &localPositions);
+            void addSelect(const std::pair<int, int> &localPos);
+            void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool);
 
             void activate();
             void deactivate();

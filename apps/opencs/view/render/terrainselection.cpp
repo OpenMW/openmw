@@ -43,17 +43,13 @@ std::vector<std::pair<int, int>> CSVRender::TerrainSelection::getTerrainSelectio
     return mSelection;
 }
 
-void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, int>> localPositions)
+void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, int>> &localPositions)
 {
-    mSelection.clear();
-    for(auto const& value: localPositions)
-    {
-        mSelection.emplace_back(value);
-    }
+    mSelection = localPositions;
     update();
 }
 
-void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> localPos)
+void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> &localPos)
 {
     if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
     {
@@ -62,7 +58,7 @@ void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> localPos)
     }
 }
 
-void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> localPositions, bool toggleInProgress)
+void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress)
 {
     if (toggleInProgress == true)
     {
@@ -146,7 +142,7 @@ void CSVRender::TerrainSelection::drawShapeSelection(const osg::ref_ptr<osg::Vec
 {
     if (!mSelection.empty())
     {
-        for (std::pair<int, int> localPos : mSelection)
+        for (std::pair<int, int> &localPos : mSelection)
         {
             int x (localPos.first);
             int y (localPos.second);
@@ -189,7 +185,7 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
 
         const int textureSizeToLandSizeModifier = (landSize - 1) / landTextureSize;
 
-        for (std::pair<int, int> localPos : mSelection)
+        for (std::pair<int, int> &localPos : mSelection)
         {
             int x (localPos.first);
             int y (localPos.second);
