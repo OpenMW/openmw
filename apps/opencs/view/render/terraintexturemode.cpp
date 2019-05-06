@@ -493,6 +493,21 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     }
 }
 
+bool CSVRender::TerrainTextureMode::isInCellSelection(const int& globalSelectionX, const int& globalSelectionY)
+{
+    if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+    {
+        CSMWorld::CellSelection selection = paged->getCellSelection();
+        if (selection.has (CSMWorld::CellCoordinates::fromId(
+            CSMWorld::CellCoordinates::textureGlobalToCellId(std::make_pair(globalSelectionX, globalSelectionY))).first))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation)
 {
     int r = mBrushSize / 2;
@@ -500,7 +515,7 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
 
     if (mBrushShape == 0)
     {
-        selections.emplace_back(texCoords);
+        if (isInCellSelection(texCoords.first, texCoords.second)) selections.emplace_back(texCoords);
     }
 
     if (mBrushShape == 1)
@@ -509,7 +524,12 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
         {
             for (int j = -r; j <= r; j++)
             {
-                selections.emplace_back(i + texCoords.first, j + texCoords.second);
+                int x = i + texCoords.first;
+                int y = j + texCoords.second;
+                if (isInCellSelection(x, y))
+                {
+                    selections.emplace_back(x, y);
+                }
             }
         }
     }
@@ -522,7 +542,14 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
             {
                 osg::Vec2f coords(i,j);
                 if (std::round(coords.length()) < r)
-                    selections.emplace_back(i + texCoords.first, j + texCoords.second);
+                {
+                    int x = i + texCoords.first;
+                    int y = j + texCoords.second;
+                    if (isInCellSelection(x, y))
+                    {
+                        selections.emplace_back(x, y);
+                    }
+                }
             }
         }
     }
@@ -533,7 +560,12 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
         {
             for(auto const& value: mCustomBrushShape)
             {
-                selections.emplace_back(texCoords.first + value.first, texCoords.second + value.second);
+                int x = texCoords.first + value.first;
+                int y = texCoords.second + value.second;
+                if (isInCellSelection(x, y))
+                {
+                    selections.emplace_back(x, y);
+                }
             }
         }
     }

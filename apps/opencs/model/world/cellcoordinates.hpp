@@ -63,6 +63,8 @@ namespace CSMWorld
             ///Converts local cell's heightmap coordinates from the global vertex coordinate
             static int vertexSelectionToInCellCoords(int);
 
+            static std::string textureGlobalToCellId(std::pair<int, int>);
+
             ///Converts global vertex coordinates to cell id
             static std::string vertexGlobalToCellId(std::pair<int, int>);
     };

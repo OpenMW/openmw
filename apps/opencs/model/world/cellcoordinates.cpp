@@ -113,6 +113,13 @@ int CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(int pos)
     return static_cast<int>(pos - std::floor(static_cast<float>(pos) / (landSize - 1)) * (landSize - 1));
 }
 
+std::string CSMWorld::CellCoordinates::textureGlobalToCellId(std::pair<int, int> textureGlobal)
+{
+    int x = std::floor(static_cast<float>(textureGlobal.first) / landTextureSize);
+    int y = std::floor(static_cast<float>(textureGlobal.second) / landTextureSize);
+    return generateId(x, y);
+}
+
 std::string CSMWorld::CellCoordinates::vertexGlobalToCellId(std::pair<int, int> vertexGlobal)
 {
     int x = std::floor(static_cast<float>(vertexGlobal.first) / (landSize - 1));
