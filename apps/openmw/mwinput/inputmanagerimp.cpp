@@ -1395,6 +1395,7 @@ namespace MWInput
     void InputManager::toggleSneaking()
     {
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
+        if (!mControlSwitch["playercontrols"]) return;
         mSneaking = !mSneaking;
         mPlayer->setSneak(mSneaking);
     }
