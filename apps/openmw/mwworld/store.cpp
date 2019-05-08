@@ -500,7 +500,12 @@ namespace MWWorld
     }
     void Store<ESM::Land>::setUp()
     {
+        // The land is static for given game session, there is no need to refresh it every load.
+        if (mBuilt)
+            return;
+
         std::sort(mStatic.begin(), mStatic.end(), Compare());
+        mBuilt = true;
     }
 
 
