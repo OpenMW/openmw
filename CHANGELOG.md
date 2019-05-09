@@ -87,6 +87,7 @@
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
     Bug #5018: Spell tooltips don't support purely negative magnitudes
+    Bug #5028: Offered price caps are not trading-specific
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
