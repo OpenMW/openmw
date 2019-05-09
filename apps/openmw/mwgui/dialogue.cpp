@@ -432,26 +432,29 @@ namespace MWGui
         mGoodbye = false;
         mTopicsList->setEnabled(true);
 
-        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(actor, mGreetingCallback.get()))
+        setTitle(mPtr.getClass().getName(mPtr));
+
+        updateDisposition();
+        restock();
+    }
+
+    void DialogueWindow::onOpen()
+    {
+        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(mPtr, mGreetingCallback.get()))
         {
             // No greetings found. The dialogue window should not be shown.
             // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
+            if (isCompanion(mPtr))
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mPtr);
             mPtr = MWWorld::Ptr();
-            if (isCompanion(actor))
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, actor);
             return;
         }
-
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
-
-        setTitle(mPtr.getClass().getName(mPtr));
 
         updateTopics();
         updateTopicsPane(); // force update for new services
 
-        updateDisposition();
-        restock();
     }
 
     void DialogueWindow::restock()
