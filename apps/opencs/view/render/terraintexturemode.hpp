@@ -85,7 +85,7 @@ namespace CSVRender
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
 
             /// \brief Check if global selection coordinate belongs to cell in view
-            bool isInCellSelection(const int& globalSelectionX, const int& globalSelectionY);
+            bool isInCellSelection(int globalSelectionX, int globalSelectionY);
 
             /// \brief Handle brush mechanics for texture selection
             void selectTerrainTextures (const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation);

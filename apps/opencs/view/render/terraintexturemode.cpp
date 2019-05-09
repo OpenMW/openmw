@@ -492,7 +492,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     }
 }
 
-bool CSVRender::TerrainTextureMode::isInCellSelection(const int& globalSelectionX, const int& globalSelectionY)
+bool CSVRender::TerrainTextureMode::isInCellSelection(int globalSelectionX, int globalSelectionY)
 {
     if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
@@ -732,12 +732,12 @@ void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
 
         for(auto const& value: terrainSelection)
         {
-            selectionCenterX = selectionCenterX + value.first;
-            selectionCenterY = selectionCenterY + value.second;
+            selectionCenterX += value.first;
+            selectionCenterY += value.second;
             ++selectionAmount;
         }
-        selectionCenterX = selectionCenterX / selectionAmount;
-        selectionCenterY = selectionCenterY / selectionAmount;
+        selectionCenterX /= selectionAmount;
+        selectionCenterY /= selectionAmount;
 
         mCustomBrushShape.clear();
         for (auto const& value: terrainSelection)

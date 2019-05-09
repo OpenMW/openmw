@@ -46,10 +46,6 @@ namespace CSVRender
 
         protected:
 
-            void addToSelection(osg::Vec3d worldPos);
-            void toggleSelection(osg::Vec3d worldPos);
-            void deselect();
-
             void update();
 
             void drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
