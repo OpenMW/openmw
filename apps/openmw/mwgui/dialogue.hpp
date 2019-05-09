@@ -122,6 +122,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& actor);
 
+        void onOpen();
+
         void setKeywords(std::list<std::string> keyWord);
 
         void addResponse (const std::string& title, const std::string& text, bool needMargin = true);
