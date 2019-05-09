@@ -496,12 +496,9 @@ bool CSVRender::TerrainTextureMode::isInCellSelection(int globalSelectionX, int 
 {
     if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
-        CSMWorld::CellSelection selection = paged->getCellSelection();
-        if (selection.has (CSMWorld::CellCoordinates::fromId(
-            CSMWorld::CellCoordinates::textureGlobalToCellId(std::make_pair(globalSelectionX, globalSelectionY))).first))
-        {
-            return true;
-        }
+        std::pair<int, int> textureCoords = std::make_pair(globalSelectionX, globalSelectionY);
+        std::string cellId = CSMWorld::CellCoordinates::textureGlobalToCellId(textureCoords);
+        return paged->getCellSelection().has(CSMWorld::CellCoordinates::fromId(cellId).first);
     }
     return false;
 }
