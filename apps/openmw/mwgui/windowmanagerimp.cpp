@@ -976,6 +976,12 @@ namespace MWGui
 
     void WindowManager::onFrame (float frameDuration)
     {
+        bool gameRunning = MWBase::Environment::get().getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame;
+
+        if (gameRunning)
+            updateMap();
+
         if (!mGuiModes.empty())
         {
             GuiModeState& state = mGuiModeStates[mGuiModes.back()];
@@ -1019,13 +1025,10 @@ namespace MWGui
         if (mLocalMapRender)
             mLocalMapRender->cleanupCameras();
 
-        if (MWBase::Environment::get().getStateManager()->getState()==
-            MWBase::StateManager::State_NoGame)
+        if (!gameRunning)
             return;
 
         mDragAndDrop->onFrame();
-
-        updateMap();
 
         mHud->onFrame(frameDuration);
 
@@ -2230,6 +2233,11 @@ namespace MWGui
                 *(data++) = static_cast<unsigned char>(value*255);
             }
         tex->unlock();
+    }
+
+    void WindowManager::addCell(MWWorld::CellStore* cell)
+    {
+        mLocalMapRender->addCell(cell);
     }
 
     void WindowManager::removeCell(MWWorld::CellStore *cell)

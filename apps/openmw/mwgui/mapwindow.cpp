@@ -237,9 +237,6 @@ namespace MWGui
         {
             for (int my=0; my<mNumCells; ++my)
             {
-                int x = mCurX + (mx - mCellDistance);
-                int y = mCurY + (-1*(my - mCellDistance));
-
                 MapEntry& entry = mMaps[my + mNumCells*mx];
                 MyGUI::ImageBox* fog = entry.mFogWidget;
 
@@ -248,19 +245,6 @@ namespace MWGui
                     fog->setImageTexture("");
                     entry.mFogTexture.reset();
                     continue;
-                }
-
-                osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(x, y);
-                if (tex)
-                {
-                    entry.mFogTexture.reset(new osgMyGUI::OSGTexture(tex));
-                    fog->setRenderItemTexture(entry.mFogTexture.get());
-                    fog->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
-                }
-                else
-                {
-                    fog->setImageTexture("black");
-                    entry.mFogTexture.reset();
                 }
             }
         }
@@ -366,31 +350,18 @@ namespace MWGui
         mInterior = interior;
         mChanged = false;
 
-        applyFogOfWar();
-
-        // Update the map textures
         for (int mx=0; mx<mNumCells; ++mx)
         {
             for (int my=0; my<mNumCells; ++my)
             {
-                int mapX = x + (mx - mCellDistance);
-                int mapY = y + (-1*(my - mCellDistance));
-
                 MapEntry& entry = mMaps[my + mNumCells*mx];
-                MyGUI::ImageBox* box = entry.mMapWidget;
+                entry.mMapWidget->setRenderItemTexture(nullptr);
+                entry.mFogWidget->setRenderItemTexture(nullptr);
+                entry.mMapTexture.reset();
+                entry.mFogTexture.reset();
 
-                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(mapX, mapY);
-                if (texture)
-                {
-                    entry.mMapTexture.reset(new osgMyGUI::OSGTexture(texture));
-                    box->setRenderItemTexture(entry.mMapTexture.get());
-                    box->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
-                }
-                else
-                {
-                    box->setRenderItemTexture(nullptr);
-                    entry.mMapTexture.reset();
-                }
+                entry.mCellX = x + (mx - mCellDistance);
+                entry.mCellY = y - (my - mCellDistance);
             }
         }
 
@@ -404,22 +375,7 @@ namespace MWGui
 
     void LocalMapBase::requestMapRender(const MWWorld::CellStore *cell)
     {
-        std::set<const MWWorld::CellStore*> cells;
-        if (!cell->isExterior())
-            cells.insert(cell);
-        else
-        {
-            for (int dX=-mCellDistance; dX<=mCellDistance; ++dX)
-            {
-                for (int dY=-mCellDistance; dY<=mCellDistance; ++dY)
-                {
-                    const MWWorld::CellStore* gridCell = MWBase::Environment::get().getWorld()->getExterior (cell->getCell()->getGridX()+dX, cell->getCell()->getGridY()+dY);
-                    cells.insert(gridCell);
-                }
-            }
-        }
-
-        mLocalMapRender->requestMap(cells);
+        mLocalMapRender->requestMap(cell);
     }
 
     void LocalMapBase::redraw()
@@ -522,6 +478,68 @@ namespace MWGui
             mMarkerUpdateTimer = 0;
             updateMagicMarkers();
         }
+
+        updateRequiredMaps();
+    }
+
+    bool widgetCropped(MyGUI::Widget* widget, MyGUI::Widget* cropTo)
+    {
+        MyGUI::IntRect coord = widget->getAbsoluteRect();
+        MyGUI::IntRect croppedCoord = cropTo->getAbsoluteRect();
+        if (coord.left < croppedCoord.left && coord.right < croppedCoord.left)
+            return true;
+        if (coord.left > croppedCoord.right && coord.right > croppedCoord.right)
+            return true;
+        if (coord.top < croppedCoord.top && coord.bottom < croppedCoord.top)
+            return true;
+        if (coord.top > croppedCoord.bottom && coord.bottom > croppedCoord.bottom)
+            return true;
+        return false;
+    }
+
+    void LocalMapBase::updateRequiredMaps()
+    {
+        bool needRedraw = false;
+        for (MapEntry& entry : mMaps)
+        {
+            if (widgetCropped(entry.mMapWidget, mLocalMap))
+                continue;
+
+            if (!entry.mMapTexture)
+            {
+                if (!mInterior)
+                    requestMapRender(MWBase::Environment::get().getWorld()->getExterior (entry.mCellX, entry.mCellY));
+
+                osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
+                if (texture)
+                {
+                    entry.mMapTexture.reset(new osgMyGUI::OSGTexture(texture));
+                    entry.mMapWidget->setRenderItemTexture(entry.mMapTexture.get());
+                    entry.mMapWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
+                    needRedraw = true;
+                }
+                else
+                    entry.mMapTexture.reset(new osgMyGUI::OSGTexture("", nullptr));
+            }
+            if (!entry.mFogTexture && mFogOfWarToggled && mFogOfWarEnabled)
+            {
+                osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(entry.mCellX, entry.mCellY);
+                if (tex)
+                {
+                    entry.mFogTexture.reset(new osgMyGUI::OSGTexture(tex));
+                    entry.mFogWidget->setRenderItemTexture(entry.mFogTexture.get());
+                    entry.mFogWidget->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 1.f, 1.f, 0.f));
+                }
+                else
+                {
+                    entry.mFogWidget->setImageTexture("black");
+                    entry.mFogTexture.reset(new osgMyGUI::OSGTexture("", nullptr));
+                }
+                needRedraw = true;
+            }
+        }
+        if (needRedraw)
+            redraw();
     }
 
     void LocalMapBase::updateDoorMarkers()
