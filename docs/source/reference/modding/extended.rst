@@ -35,13 +35,11 @@ Animated containers support
 
 It is possible to attach opening/closing animations for containers. To do this, you need to create a KF-file for the container with the following groups:
 
-1. ``Idle`` (with ``Start`` and ``Stop`` keys)
+1. ``ContainerOpen`` (with ``Start``, ``Loot`` and ``Stop`` keys)
 
-2. ``ContainerOpen`` (with ``Start``, ``Loot`` and ``Stop`` keys)
+2. ``ContainerClose`` (with ``Start`` and ``Stop`` keys)
 
-3. ``ContainerClose`` (with ``Start`` and ``Stop`` keys)
-
-The ``Idle`` group can have the zero time, the ``Loot`` key for ``ContainerOpen`` allows to play a part of opening animation in the background.
+The ``Loot`` key for ``ContainerOpen`` allows to play a part of opening animation in the background.
 
 For example, with the following setup, the opening animation has 1.0 sec duration and shows the container window in the middle of opening animation:
 
