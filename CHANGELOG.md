@@ -89,6 +89,7 @@
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
     Bug #5018: Spell tooltips don't support purely negative magnitudes
+    Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Feature #1774: Handle AvoidNode
