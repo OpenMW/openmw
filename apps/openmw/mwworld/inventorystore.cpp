@@ -571,8 +571,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    // Note: creatures do not use the armor mitigation and can equip only shields
-    // Use a custom logic for them - select shield based on its health instead of armor rating (since it useless for creatures)
+    // Note: creatures ignore equipment armor rating and only equip shields
+    // Use custom logic for them - select shield based on its health instead of armor rating
     autoEquipWeapon(actor, slots_);
     autoEquipArmor(actor, slots_);
 

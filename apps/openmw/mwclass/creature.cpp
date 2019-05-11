@@ -401,10 +401,10 @@ namespace MWClass
                     stats.setHitRecovery(true); // Is this supposed to always occur?
             }
 
-            damage = std::max(1.f, damage);
-
             if(ishealth)
             {
+                damage *= damage / (damage + getArmorRating(ptr));
+                damage = std::max(1.f, damage);
                 if (!attacker.isEmpty())
                 {
                     damage = scaleDamage(damage, attacker, ptr);
@@ -597,7 +597,7 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        // Note this is currently unused. Creatures do not use armor mitigation.
+        // Equipment armor rating is deliberately ignored.
         return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
     }
 
