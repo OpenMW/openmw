@@ -468,16 +468,26 @@ namespace MWGui
 
         int merchantOffer = 0;
 
+        // The offered price must be capped at 75% of the base price to avoid exploits
+        // connected to buying and selling the same item.
+        // This value has been determined by researching the limitations of the vanilla formula
+        // and may not be sufficient if getBarterOffer behavior has been changed.
         std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : playerBorrowed)
         {
-            merchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), true);
+            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int cap = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Minimum buying price -- 75% of the base
+            const int buyingPrice = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, basePrice, true);
+            merchantOffer -= std::max(cap, buyingPrice);
         }
 
         std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : merchantBorrowed)
         {
-            merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), false);
+            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int cap = static_cast<int>(std::min(1.f, 0.75f * basePrice)); // Maximum selling price -- 75% of the base
+            const int sellingPrice = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, basePrice, false);
+            merchantOffer += std::min(cap, sellingPrice);
         }
 
         int diff = merchantOffer - mCurrentMerchantOffer;

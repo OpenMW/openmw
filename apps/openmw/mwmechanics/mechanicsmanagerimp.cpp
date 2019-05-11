@@ -676,8 +676,8 @@ namespace MWMechanics
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01f * std::max(75.f, (100 - 0.5f * (pcTerm - npcTerm)));
-        float sellTerm = 0.01f * std::min(75.f, (50 - 0.5f * (npcTerm - pcTerm)));
+        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
+        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
         int offerPrice = int(basePrice * (buying ? buyTerm : sellTerm));
         return std::max(1, offerPrice);
     }
