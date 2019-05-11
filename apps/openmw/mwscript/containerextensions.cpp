@@ -354,9 +354,25 @@ namespace MWScript
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (MWWorld::InventoryStore::Slot_CarriedRight);
-                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Weapon).name())
+                    if (it == invStore.end())
                     {
                         runtime.push(-1);
+                        return;
+                    }
+                    else if (it->getTypeName() != typeid(ESM::Weapon).name())
+                    {
+                        if (it->getTypeName() == typeid(ESM::Lockpick).name())
+                        {
+                            runtime.push(-2);
+                        }
+                        else if (it->getTypeName() == typeid(ESM::Probe).name())
+                        {
+                            runtime.push(-3);
+                        }
+                        else
+                        {
+                            runtime.push(-1);
+                        }
                         return;
                     }
 
