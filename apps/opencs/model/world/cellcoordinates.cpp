@@ -91,19 +91,19 @@ std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(const osg::Vec3d& 
     return std::make_pair(x, y);
 }
 
-float CSMWorld::CellCoordinates::textureSelectionToWorldCoords(int pos)
+float CSMWorld::CellCoordinates::textureGlobalToWorldCoords(int textureGlobal)
 {
-    return ESM::Land::REAL_SIZE * static_cast<float>(pos) / ESM::Land::LAND_TEXTURE_SIZE;
+    return ESM::Land::REAL_SIZE * static_cast<float>(textureGlobal) / ESM::Land::LAND_TEXTURE_SIZE;
 }
 
-float CSMWorld::CellCoordinates::vertexSelectionToWorldCoords(int pos)
+float CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(int vertexGlobal)
 {
-    return ESM::Land::REAL_SIZE * static_cast<float>(pos) / (ESM::Land::LAND_SIZE - 1);
+    return ESM::Land::REAL_SIZE * static_cast<float>(vertexGlobal) / (ESM::Land::LAND_SIZE - 1);
 }
 
-int CSMWorld::CellCoordinates::vertexSelectionToInCellCoords(int pos)
+int CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(int vertexGlobal)
 {
-    return static_cast<int>(pos - std::floor(static_cast<float>(pos) / (ESM::Land::LAND_SIZE - 1)) * (ESM::Land::LAND_SIZE - 1));
+    return static_cast<int>(vertexGlobal - std::floor(static_cast<float>(vertexGlobal) / (ESM::Land::LAND_SIZE - 1)) * (ESM::Land::LAND_SIZE - 1));
 }
 
 std::string CSMWorld::CellCoordinates::textureGlobalToCellId(const std::pair<int, int>& textureGlobal)

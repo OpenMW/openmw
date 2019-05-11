@@ -37,7 +37,7 @@ namespace CSVRender
 
             void onlySelect(const std::vector<std::pair<int, int>> &localPositions);
             void addSelect(const std::pair<int, int> &localPos);
-            void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool);
+            void toggleSelect(const std::vector<std::pair<int, int>> &localPositions, bool toggleInProgress);
 
             void activate();
             void deactivate();
