@@ -249,7 +249,7 @@ namespace
         void apply(osg::Node& node)
         {
             if (SceneUtil::hasUserDescription(&node, "CustomBone"))
-                mFoundBones.push_back(std::make_pair(&node, node.getParent(0)));
+                mFoundBones.emplace_back(&node, node.getParent(0));
 
             traverse(node);
         }

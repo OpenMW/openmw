@@ -650,13 +650,6 @@ void CharacterController::refreshCurrentAnims(CharacterState idle, CharacterStat
     refreshIdleAnims(weap, idle, force);
 }
 
-
-void getWeaponGroup(const int weaptype, std::string &group)
-{
-    group = getWeaponType(weaptype)->mLongGroup;
-}
-
-
 void CharacterController::playDeath(float startpoint, CharacterState death)
 {
     // Make sure the character was swimming upon death for forward-compatibility
@@ -815,7 +808,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             if (mWeaponType != ESM::Weapon::None)
             {
                 mUpperBodyState = UpperCharState_WeapEquiped;
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
+                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
             }
 
             if(mWeaponType != ESM::Weapon::None && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::HandToHand)
@@ -1234,7 +1227,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             if (!weaponChanged)
             {
                 // Note: we do not disable unequipping animation automatically to avoid body desync
-                getWeaponGroup(mWeaponType, weapgroup);
+                weapgroup = getWeaponType(mWeaponType)->mLongGroup;
                 mAnimation->play(weapgroup, priorityWeapon,
                                 MWRender::Animation::BlendMask_All, false,
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
@@ -1263,7 +1256,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 forcestateupdate = true;
                 mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
 
-                getWeaponGroup(weaptype, weapgroup);
+                weapgroup = getWeaponType(weaptype)->mLongGroup;
                 // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
                 // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
                 ESM::WeaponType::Class weaponClass = getWeaponType(weaptype)->mWeaponClass;
@@ -1302,7 +1295,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 }
 
                 mWeaponType = weaptype;
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
+                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
 
                 if(!upSoundId.empty() && !isStillWeapon)
                 {
@@ -1317,7 +1310,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 mUpperBodyState = UpperCharState_Nothing;
                 mAnimation->disable(mCurrentWeapon);
                 mWeaponType = ESM::Weapon::None;
-                getWeaponGroup(mWeaponType, mCurrentWeapon);
+                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
             }
         }
     }

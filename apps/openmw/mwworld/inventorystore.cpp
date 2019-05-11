@@ -371,7 +371,7 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
                 else
                     slots_[Slot_Ammunition] = arrow;
             }
-            else if (type == ESM::Weapon::Bolt)
+            else if (ammotype == ESM::Weapon::Bolt)
             {
                 if (bolt == end())
                     hasAmmo = false;
