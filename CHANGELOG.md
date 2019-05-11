@@ -113,6 +113,7 @@
     Feature #4994: Persistent pinnable windows hiding
     Feature #5000: Compressed BSA format support
     Feature #5010: Native graphics herbalism support
+    Feature #5031: Make GetWeaponType function return different values for tools
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4721: Add NMake support to the Windows prebuild script
