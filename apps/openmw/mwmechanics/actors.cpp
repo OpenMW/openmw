@@ -470,7 +470,7 @@ namespace MWMechanics
                     {
                         MWBase::Environment::get().getMechanicsManager()->startCombat(actor1, actor2);
                         // Also have actor1's allies start combat
-                        for (const MWWorld::Ptr ally1 : allies1)
+                        for (const MWWorld::Ptr& ally1 : allies1)
                             MWBase::Environment::get().getMechanicsManager()->startCombat(ally1, actor2);
                         return;
                     }
@@ -2075,7 +2075,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position (actor.getRefData().getPosition().asVec3());
         getObjectsInRange(position, mActorsProcessingRange, neighbors);
-        for(const MWWorld::Ptr neighbor : neighbors)
+        for(const MWWorld::Ptr& neighbor : neighbors)
         {
             if (neighbor == actor)
                 continue;
