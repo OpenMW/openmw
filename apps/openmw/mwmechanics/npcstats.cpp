@@ -85,7 +85,9 @@ void MWMechanics::NpcStats::lowerRank(const std::string &faction)
     std::map<std::string, int>::iterator it = mFactionRank.find(lower);
     if (it != mFactionRank.end())
     {
-        it->second = std::max(0, it->second-1);
+        it->second = it->second-1;
+        if (it->second < 0)
+            mFactionRank.erase(it);
     }
 }
 
