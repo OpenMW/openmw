@@ -73,10 +73,10 @@ Programmers
     Finbar Crago (finbar-crago)
     Florian Weber (Florianjw)
     Gašper Sedej
+    Gijsbert ter Horst (Ghostbird)
     Gohan1989
     gugus/gus
     guidoj
-    Hallfaer Tuilinn
     Haoda Wang (h313)
     hristoast
     Internecine
