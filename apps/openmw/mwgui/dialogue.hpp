@@ -186,6 +186,8 @@ namespace MWGui
 
         std::unique_ptr<ResponseCallback> mCallback;
         std::unique_ptr<ResponseCallback> mGreetingCallback;
+
+        void updateTopicFormat();
     };
 }
 #endif

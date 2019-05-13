@@ -681,15 +681,3 @@ std::vector<const ESM::DialInfo *> MWDialogue::Filter::list (const ESM::Dialogue
 
     return infos;
 }
-
-bool MWDialogue::Filter::responseAvailable (const ESM::Dialogue& dialogue) const
-{
-    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
-        iter!=dialogue.mInfo.end(); ++iter)
-    {
-        if (testActor (*iter) && testPlayer (*iter) && testSelectStructs (*iter))
-            return true;
-    }
-
-    return false;
-}

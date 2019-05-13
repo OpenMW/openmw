@@ -53,6 +53,8 @@ namespace MWBase
 
             virtual bool startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback) = 0;
 
+            virtual bool inJournal (const std::string& topicId, const std::string& infoId) = 0;
+
             virtual void addTopic (const std::string& topic) = 0;
 
             virtual void addChoice (const std::string& text,int choice) = 0;
@@ -68,7 +70,14 @@ namespace MWBase
             virtual void goodbyeSelected() = 0;
             virtual void questionAnswered (int answer, ResponseCallback* callback) = 0;
 
+            enum TopicType
+            {
+                Specific = 1,
+                Exhausted = 2
+            };
+
             virtual std::list<std::string> getAvailableTopics() = 0;
+            virtual int getTopicFlag(const std::string&) = 0;
 
             virtual bool checkServiceRefused (ResponseCallback* callback) = 0;
 
