@@ -485,7 +485,7 @@ namespace MWGui
         for (const ItemStack& itemStack : merchantBorrowed)
         {
             const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
-            const int cap = static_cast<int>(std::min(1.f, 0.75f * basePrice)); // Maximum selling price -- 75% of the base
+            const int cap = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Maximum selling price -- 75% of the base
             const int sellingPrice = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, basePrice, false);
             merchantOffer += std::min(cap, sellingPrice);
         }
