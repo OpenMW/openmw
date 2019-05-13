@@ -87,7 +87,10 @@ void MWMechanics::NpcStats::lowerRank(const std::string &faction)
     {
         it->second = it->second-1;
         if (it->second < 0)
+        {
             mFactionRank.erase(it);
+            mExpelled.erase(lower);
+        }
     }
 }
 
