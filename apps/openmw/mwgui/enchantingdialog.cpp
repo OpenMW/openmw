@@ -366,13 +366,19 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant success");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
         }
         else
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant fail");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getRefData().getCount())
+            {
+                setSoulGem(MWWorld::Ptr());
+                mEnchanting.nextCastStyle();
+                updateLabels();
+                updateEffectsView();
+            }
         }
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 }
