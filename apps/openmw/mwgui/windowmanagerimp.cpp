@@ -1271,8 +1271,6 @@ namespace MWGui
         if (mode==GM_Inventory && mAllowed==GW_None)
             return;
 
-        for (WindowBase* window : mGuiModeStates[mode].mWindows)
-            window->setPtr(arg);
         if (mGuiModes.empty() || mGuiModes.back() != mode)
         {
             // If this mode already exists somewhere in the stack, just bring it to the front.
@@ -1291,6 +1289,8 @@ namespace MWGui
             mGuiModeStates[mode].update(true);
             playSound(mGuiModeStates[mode].mOpenSound);
         }
+        for (WindowBase* window : mGuiModeStates[mode].mWindows)
+            window->setPtr(arg);
 
         mKeyboardNavigation->restoreFocus(mode);
 
