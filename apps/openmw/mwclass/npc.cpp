@@ -1416,6 +1416,19 @@ namespace MWClass
 
     int Npc::getPrimaryFactionRank (const MWWorld::ConstPtr& ptr) const
     {
+        std::string factionID = ptr.getClass().getPrimaryFaction(ptr);
+        if(factionID.empty())
+            return -1;
+
+        // Search in the NPC data first
+        if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
+        {
+            int rank = data->asNpcCustomData().mNpcStats.getFactionRank(factionID);
+            if (rank >= 0)
+                return rank;
+        }
+
+        // Use base NPC record as a fallback
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->getFactionRank();
     }

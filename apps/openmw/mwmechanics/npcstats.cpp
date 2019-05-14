@@ -66,6 +66,16 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
+int MWMechanics::NpcStats::getFactionRank(const std::string &faction) const
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::const_iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+        return it->second;
+
+    return -1;
+}
+
 void MWMechanics::NpcStats::raiseRank(const std::string &faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
