@@ -104,6 +104,7 @@
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
     Feature #4730: Native animated containers support
+    Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4859: Make water reflections more configurable

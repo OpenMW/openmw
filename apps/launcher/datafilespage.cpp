@@ -39,10 +39,13 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager &cfg, Config:
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
-    mProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
+    mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
+    mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
 
-    connect(mProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
-            this, SLOT(updateOkButton(QString)));
+    connect(mNewProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
+            this, SLOT(updateNewProfileOkButton(QString)));
+    connect(mCloneProfileDialog->lineEdit(), SIGNAL(textChanged(QString)),
+            this, SLOT(updateCloneProfileOkButton(QString)));
 
     buildView();
     loadSettings();
@@ -61,6 +64,7 @@ void Launcher::DataFilesPage::buildView()
 
     //tool buttons
     ui.newProfileButton->setToolTip ("Create a new Content List");
+    ui.cloneProfileButton->setToolTip ("Clone the current Content List");
     ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
 
     //combo box
@@ -70,6 +74,7 @@ void Launcher::DataFilesPage::buildView()
 
     // Add the actions to the toolbuttons
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
+    ui.cloneProfileButton->setDefaultAction (ui.cloneProfileAction);
     ui.deleteProfileButton->setDefaultAction (ui.deleteProfileAction);
 
     //establish connections
@@ -246,10 +251,10 @@ void Launcher::DataFilesPage::slotProfileChanged(int index)
 
 void Launcher::DataFilesPage::on_newProfileAction_triggered()
 {
-    if (mProfileDialog->exec() != QDialog::Accepted)
+    if (mNewProfileDialog->exec() != QDialog::Accepted)
         return;
 
-    QString profile = mProfileDialog->lineEdit()->text();
+    QString profile = mNewProfileDialog->lineEdit()->text();
 
     if (profile.isEmpty())
         return;
@@ -271,6 +276,20 @@ void Launcher::DataFilesPage::addProfile (const QString &profile, bool setAsCurr
 
     if (setAsCurrent)
         setProfile (ui.profilesComboBox->findText (profile), false);
+}
+
+void Launcher::DataFilesPage::on_cloneProfileAction_triggered()
+{
+    if (mCloneProfileDialog->exec() != QDialog::Accepted)
+        return;
+
+    QString profile = mCloneProfileDialog->lineEdit()->text();
+
+    if (profile.isEmpty())
+        return;
+
+    mLauncherSettings.setContentList(profile, selectedFilePaths());
+    addProfile(profile, true);
 }
 
 void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
@@ -295,17 +314,16 @@ void Launcher::DataFilesPage::on_deleteProfileAction_triggered()
     checkForDefaultProfile();
 }
 
-void Launcher::DataFilesPage::updateOkButton(const QString &text)
+void Launcher::DataFilesPage::updateNewProfileOkButton(const QString &text)
 {
     // We do this here because we need the profiles combobox text
-    if (text.isEmpty()) {
-         mProfileDialog->setOkButtonEnabled(false);
-         return;
-    }
+    mNewProfileDialog->setOkButtonEnabled(!text.isEmpty() && ui.profilesComboBox->findText(text) == -1);
+}
 
-    (ui.profilesComboBox->findText(text) == -1)
-            ? mProfileDialog->setOkButtonEnabled(true)
-            : mProfileDialog->setOkButtonEnabled(false);
+void Launcher::DataFilesPage::updateCloneProfileOkButton(const QString &text)
+{
+    // We do this here because we need the profiles combobox text
+    mCloneProfileDialog->setOkButtonEnabled(!text.isEmpty() && ui.profilesComboBox->findText(text) == -1);
 }
 
 void Launcher::DataFilesPage::checkForDefaultProfile()
