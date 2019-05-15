@@ -107,20 +107,11 @@ namespace MWGui
 
     void EnchantingDialog::updateLabels()
     {
-        std::stringstream enchantCost;
-        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
-        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + MyGUI::utility::toString(mEnchanting.getMaxEnchantValue()));
-
-        mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
-
-        int successChance = int(mEnchanting.getEnchantChance());
-        mSuccessChance->setCaption(MyGUI::utility::toString(std::max(0, successChance)));
-
-        std::stringstream castCost;
-        castCost << mEnchanting.getEffectiveCastCost();
-        mCastCost->setCaption(castCost.str());
-
-        mPrice->setCaption(MyGUI::utility::toString(mEnchanting.getEnchantPrice()));
+        mEnchantmentPoints->setCaption(std::to_string(static_cast<int>(mEnchanting.getEnchantPoints(false))) + " / " + std::to_string(mEnchanting.getMaxEnchantValue()));
+        mCharge->setCaption(std::to_string(mEnchanting.getGemCharge()));
+        mSuccessChance->setCaption(std::to_string(std::max(0, std::min(100, mEnchanting.getEnchantChance()))));
+        mCastCost->setCaption(std::to_string(mEnchanting.getEffectiveCastCost()));
+        mPrice->setCaption(std::to_string(mEnchanting.getEnchantPrice()));
 
         switch(mEnchanting.getCastStyle())
         {
@@ -322,7 +313,7 @@ namespace MWGui
             return;
         }
 
-        if (mEnchanting.getEnchantPoints() > mEnchanting.getMaxEnchantValue())
+        if (static_cast<int>(mEnchanting.getEnchantPoints(false)) > mEnchanting.getMaxEnchantValue())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
