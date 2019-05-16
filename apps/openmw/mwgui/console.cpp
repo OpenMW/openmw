@@ -2,6 +2,7 @@
 
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_LayerManager.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -151,8 +152,9 @@ namespace MWGui
     void Console::onOpen()
     {
         // Give keyboard focus to the combo box whenever the console is
-        // turned on
+        // turned on and place it over other widgets
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mCommandLine);
+        MyGUI::LayerManager::getInstance().upLayerItem(mMainWidget);
     }
 
     void Console::print(const std::string &msg, const std::string& color)
