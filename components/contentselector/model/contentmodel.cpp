@@ -410,7 +410,7 @@ void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
     for (int row = 0; row < mFiles.size(); row++)
     {
-        if (mFiles.at(row)->fileName() == file->fileName())
+        if (!mFiles.at(row)->fileName().compare(file->fileName(), Qt::CaseInsensitive))
         {
             beginRemoveRows(QModelIndex(), row, row);
                 mFiles.removeAt(row);
