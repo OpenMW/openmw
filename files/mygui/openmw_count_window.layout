@@ -11,7 +11,7 @@
         <Widget type="NumericEditBox" skin="MW_TextEdit" position="535 36 50 24" align="Right Top" name="ItemEdit">
             <Property key="TextAlign" value="Center"/>
         </Widget>
-        <Widget type="MWScrollBar" skin="MW_HScroll" position="7 67 578 18" align="Left Top HStretch" name="CountSlider">
+        <Widget type="ScrollBar" skin="MW_HScroll" position="7 67 578 18" align="Left Top HStretch" name="CountSlider">
             <Property key="MoveToClick" value="true"/>
             <Property key="Page" value="1"/>
             <Property key="WheelPage" value="1"/>

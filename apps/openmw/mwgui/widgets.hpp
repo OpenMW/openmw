@@ -303,33 +303,6 @@ namespace MWGui
             MyGUI::TextBox* mBarTextWidget;
         };
         typedef MWDynamicStat* MWDynamicStatPtr;
-
-        // Should be removed when upgrading to MyGUI 3.2.2 (current git), it has ScrollBar autorepeat support
-        class MWScrollBar : public MyGUI::ScrollBar
-        {
-            MYGUI_RTTI_DERIVED(MWScrollBar)
-
-        public:
-            MWScrollBar();
-            virtual ~MWScrollBar();
-
-            void setRepeat(float trigger, float step);
-
-        protected:
-            virtual void initialiseOverride();
-            void repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller);
-
-            bool mEnableRepeat;
-            float mRepeatTriggerTime;
-            float mRepeatStepTime;
-            bool mIsIncreasing;
-
-        private:
-            void onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-            void onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-            void onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-            void onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
-        };
     }
 }
 
