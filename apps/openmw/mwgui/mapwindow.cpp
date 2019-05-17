@@ -1123,7 +1123,7 @@ namespace MWGui
     {
         WindowModal::onOpen();
         center();
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
     }
 
     void EditNoteDialog::onCancelButtonClicked(MyGUI::Widget *sender)

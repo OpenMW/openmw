@@ -1,6 +1,7 @@
 #include "console.hpp"
 
 #include <MyGUI_EditBox.h>
+#include <MyGUI_InputManager.h>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -151,7 +152,7 @@ namespace MWGui
     {
         // Give keyboard focus to the combo box whenever the console is
         // turned on
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCommandLine);
     }
 
     void Console::print(const std::string &msg, const std::string& color)
@@ -447,7 +448,7 @@ namespace MWGui
                 mPtr = object;
             }
             // User clicked on an object. Restore focus to the console command line.
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCommandLine);
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mCommandLine);
         }
         else
         {

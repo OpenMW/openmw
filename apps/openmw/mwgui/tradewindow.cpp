@@ -136,7 +136,7 @@ namespace MWGui
 
         onFilterChanged(mFilterAll);
 
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mTotalBalance);
     }
 
     void TradeWindow::onFrame(float dt)
