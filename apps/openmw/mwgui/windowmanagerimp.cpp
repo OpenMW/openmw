@@ -235,7 +235,6 @@ namespace MWGui
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = newDelegate(this, &WindowManager::loadFontDelegate);
 
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
