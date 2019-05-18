@@ -4,6 +4,8 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ControllerManager.h>
+#include <MyGUI_ControllerRepeatClick.h>
+#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -26,9 +28,6 @@
 
 namespace MWGui
 {
-    const float AlchemyWindow::sCountChangeInitialPause = 0.5f;
-    const float AlchemyWindow::sCountChangeInterval = 0.1f;
-
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
         , mSortModel(nullptr)
@@ -170,7 +169,7 @@ namespace MWGui
 
         update();
 
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mNameEdit);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)
@@ -282,10 +281,9 @@ namespace MWGui
 
     void AlchemyWindow::addRepeatController(MyGUI::Widget *widget)
     {
-        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatEvent::getClassTypeName());
-        Controllers::ControllerRepeatEvent* controller = item->castType<Controllers::ControllerRepeatEvent>();
-        controller->eventRepeatClick += MyGUI::newDelegate(this, &AlchemyWindow::onRepeatClick);
-        controller->setRepeat(sCountChangeInitialPause, sCountChangeInterval);
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MyGUI::ControllerRepeatClick::getClassTypeName());
+        MyGUI::ControllerRepeatClick* controller = static_cast<MyGUI::ControllerRepeatClick*>(item);
+        controller->eventRepeatClick += newDelegate(this, &AlchemyWindow::onRepeatClick);
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);
     }
 

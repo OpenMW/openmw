@@ -6,7 +6,7 @@
         <Child type="Widget" skin="" offset="0 0 516 516" align="Stretch" name="Client"/>
 
         <!-- invisible scroll bars, needed for setting the view offset -->
-        <Child type="MWScrollBar" skin="" offset="0 0 0 0" align="Default" name="VScroll"/>
-        <Child type="MWScrollBar" skin="" offset="0 0 0 0" align="Default" name="HScroll"/>
+        <Child type="ScrollBar" skin="" offset="0 0 0 0" align="Default" name="VScroll"/>
+        <Child type="ScrollBar" skin="" offset="0 0 0 0" align="Default" name="HScroll"/>
     </Resource>
 </MyGUI>

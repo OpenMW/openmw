@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
+#include <MyGUI_ControllerRepeatClick.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -44,9 +45,6 @@ namespace
 
 namespace MWGui
 {
-    const float TradeWindow::sBalanceChangeInitialPause = 0.5f;
-    const float TradeWindow::sBalanceChangeInterval = 0.1f;
-
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
         , mSortModel(nullptr)
@@ -138,7 +136,7 @@ namespace MWGui
 
         onFilterChanged(mFilterAll);
 
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mTotalBalance);
     }
 
     void TradeWindow::onFrame(float dt)
@@ -382,10 +380,9 @@ namespace MWGui
 
     void TradeWindow::addRepeatController(MyGUI::Widget *widget)
     {
-        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatEvent::getClassTypeName());
-        Controllers::ControllerRepeatEvent* controller = item->castType<Controllers::ControllerRepeatEvent>();
-        controller->eventRepeatClick += MyGUI::newDelegate(this, &TradeWindow::onRepeatClick);
-        controller->setRepeat(sBalanceChangeInitialPause, sBalanceChangeInterval);
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MyGUI::ControllerRepeatClick::getClassTypeName());
+        MyGUI::ControllerRepeatClick* controller = static_cast<MyGUI::ControllerRepeatClick*>(item);
+        controller->eventRepeatClick += newDelegate(this, &TradeWindow::onRepeatClick);
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);
     }
 

@@ -10,7 +10,7 @@
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
                         <Property key="Caption" value="#{sTransparency_Menu}"/>
                     </Widget>
-                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                    <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
                         <Property key="Page" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
@@ -31,7 +31,7 @@
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
                         <Property key="Caption" value="#{sMenu_Help_Delay}"/>
                     </Widget>
-                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                    <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
                         <Property key="Page" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
@@ -52,7 +52,7 @@
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="DifficultyText">
                         <Property key="Caption" value="#{sDifficulty}"/>
                     </Widget>
-                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                    <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="201"/>
                         <Property key="Page" value="1"/>
                         <UserString key="SettingType" value="Slider"/>
@@ -77,7 +77,7 @@
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="ActorProcessingText">
                         <Property key="Caption" value="Actors Processing Range"/>
                     </Widget>
-                    <Widget type="MWScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
+                    <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="3584"/>
                         <Property key="Page" value="300"/>
                         <UserString key="SettingType" value="Slider"/>
@@ -144,7 +144,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMaster}"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 28 352 18" align="HStretch Top">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 28 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -155,7 +155,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 54 352 18" align="Left Top">
                     <Property key="Caption" value="#{sVoice}"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 78 352 18" align="HStretch Top">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 78 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -166,7 +166,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 104 352 18" align="Left Top">
                     <Property key="Caption" value="#{sEffects}"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 128 352 18" align="HStretch Top">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 128 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -177,7 +177,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 154 352 18" align="Left Top">
                     <Property key="Caption" value="#{sFootsteps}"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 178 352 18" align="HStretch Top">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 178 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -188,7 +188,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 204 352 18" align="Left Top">
                     <Property key="Caption" value="#{sMusic}"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 228 352 18" align="HStretch Top">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 228 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -234,7 +234,7 @@
                 <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
                     <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
-                <Widget type="MWScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -308,7 +308,7 @@
 
                         <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -331,7 +331,7 @@
                         <Widget type="TextBox" skin="NormalText" position="0 268 329 18" align="Left Top" name="GammaText">
                             <Property key="Caption" value="#{sGamma_Correction}"/>
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="0 292 329 18" align="HStretch Top" name="GammaSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 292 329 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -363,7 +363,7 @@
                             <Widget type="TextBox" skin="NormalText" position="0 0 300 24" align="Left Top" name="AnisotropyLabel">
                                 <Property key="Caption" value="Anisotropy"/>
                             </Widget>
-                            <Widget type="MWScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top">
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 28 150 18" align="Left Top">
                                 <Property key="Range" value="17"/>
                                 <Property key="Page" value="1"/>
                                 <UserString key="SettingType" value="Slider"/>
@@ -376,7 +376,7 @@
                         <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="RenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4609"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -388,7 +388,7 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
                         </Widget>
-                        <Widget type="MWScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="LargeRenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79873"/>
                             <Property key="Page" value="2048"/>
                             <UserString key="SettingType" value="Slider"/>

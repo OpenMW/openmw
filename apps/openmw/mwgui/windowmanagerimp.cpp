@@ -217,7 +217,6 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWSpellEffect>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWDynamicStat>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Window>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Widgets::MWScrollBar>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<VideoWidget>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<BackgroundImage>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<osgMyGUI::AdditiveLayer>("Layer");
@@ -236,7 +235,6 @@ namespace MWGui
         MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
         MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = newDelegate(this, &WindowManager::loadFontDelegate);
 
-        MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerRepeatEvent>("Controller");
         MyGUI::FactoryManager::getInstance().registerFactory<MWGui::Controllers::ControllerFollowMouse>("Controller");
 
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
@@ -700,7 +698,7 @@ namespace MWGui
             setCursorVisible(!gameMode);
 
         if (gameMode)
-            setKeyFocusWidget (nullptr);
+            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
 
         // Icons of forced hidden windows are displayed
         setMinimapVisibility((mAllowed & GW_Map) && (!mMap->pinned() || (mForceHidden & GW_Map)));
@@ -1672,16 +1670,6 @@ namespace MWGui
         }
     }
 
-    // Remove this method for MyGUI 3.2.2
-    void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
-    {
-        if (widget == nullptr)
-            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
-        else
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(widget);
-        onKeyFocusChanged(widget);
-    }
-
     void WindowManager::onKeyFocusChanged(MyGUI::Widget *widget)
     {
         if (widget && widget->castType<MyGUI::EditBox>(false))
@@ -1874,7 +1862,7 @@ namespace MWGui
         sizeVideo(screenSize.width, screenSize.height);
 
         MyGUI::Widget* oldKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        setKeyFocusWidget(mVideoWidget);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mVideoWidget);
 
         mVideoBackground->setVisible(true);
 
@@ -1912,7 +1900,7 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->resumeSounds();
 
-        setKeyFocusWidget(oldKeyFocus);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(oldKeyFocus);
 
         setCursorVisible(cursorWasVisible);
 

@@ -3,6 +3,7 @@
 #include <MyGUI_ListBox.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
 
 #include <osg/Texture2D>
 
@@ -165,7 +166,7 @@ namespace MWGui
         mHeadRotate->setScrollPosition(initialPos);
         onHeadRotate(mHeadRotate, initialPos);
 
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mRaceList);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mRaceList);
     }
 
     void RaceDialog::setRaceId(const std::string &raceId)

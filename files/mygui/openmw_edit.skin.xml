@@ -37,7 +37,7 @@
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 
     </Resource>
 
@@ -54,7 +54,7 @@
 
         <Child type="TextBox" skin="MW_TextEditClient" offset="2 2 490 18" align="Stretch" name="Client"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="494 3 14 14" align="Right VStretch" name="VScroll"/>
 
     </Resource>
 
