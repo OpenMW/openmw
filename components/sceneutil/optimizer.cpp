@@ -87,13 +87,18 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         RemoveEmptyNodesVisitor renv(this);
         node->accept(renv);
         renv.removeEmptyNodes();
-
-        RemoveRedundantNodesVisitor rrnv(this);
-        node->accept(rrnv);
-        rrnv.removeRedundantNodes();
-
-        MergeGroupsVisitor mgrp(this);
-        node->accept(mgrp);
+        
+        bool repass = true;
+        while(repass)
+        {   
+            RemoveRedundantNodesVisitor rrnv(this);
+            node->accept(rrnv);
+            repass = !rrnv._redundantNodeList.empty();
+            rrnv.removeRedundantNodes();    
+    
+            MergeGroupsVisitor mgrp(this);
+            node->accept(mgrp);
+        }
     }
 
     if (options & MERGE_GEOMETRY)
