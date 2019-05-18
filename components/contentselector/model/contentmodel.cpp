@@ -411,14 +411,9 @@ void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
     for (int row = 0; row < mFiles.size(); row++)
     {
         if (!mFiles.at(row)->fileName().compare(file->fileName(), Qt::CaseInsensitive))
-        {
-            beginRemoveRows(QModelIndex(), row, row);
-                delete mFiles.takeAt(row);
-            endRemoveRows();
-            emit dataChanged(index(row, 0), index(mFiles.size(), 0));
-            break;
-        }
+            return;
     }
+
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
