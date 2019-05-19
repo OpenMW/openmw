@@ -12,7 +12,7 @@
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadweap.hpp>
 
-#include <boost/format.hpp>
+#include <components/misc/stringops.hpp>
 
 std::string bodyPartLabel(int idx)
 {
@@ -659,7 +659,7 @@ std::string bodyPartFlags(int flags)
                   (ESM::BodyPart::BPF_Female|
                    ESM::BodyPart::BPF_NotPlayable));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -680,7 +680,7 @@ std::string cellFlags(int flags)
                    ESM::Cell::QuasiEx|
                    0x00000040));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -696,7 +696,7 @@ std::string containerFlags(int flags)
                    ESM::Container::Organic|
                    ESM::Container::Respawn));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -722,7 +722,7 @@ std::string creatureFlags(int flags)
                    ESM::Creature::Weapon|
                    ESM::Creature::Essential));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%02X)") % flags);
+    properties += Misc::StringUtils::format("(0x%02X)", flags);
     return properties;
 }
 
@@ -737,7 +737,7 @@ std::string landFlags(int flags)
     if (flags & 0x00000004) properties += "Unknown3 ";
     if (flags & 0x00000002) properties += "Unknown2 ";
     if (flags & 0xFFFFFFF8) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -751,7 +751,7 @@ std::string itemListFlags(int flags)
                   (ESM::ItemLevList::AllLevels|
                    ESM::ItemLevList::Each));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -762,7 +762,7 @@ std::string creatureListFlags(int flags)
     if (flags & ESM::CreatureLevList::AllLevels) properties += "AllLevels ";
     int unused = (0xFFFFFFFF ^ ESM::CreatureLevList::AllLevels);
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -790,7 +790,7 @@ std::string lightFlags(int flags)
                    ESM::Light::Negative|
                    ESM::Light::OffDefault));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -816,7 +816,7 @@ std::string magicEffectFlags(int flags)
     if (flags & ESM::MagicEffect::NegativeLight) properties += "NegativeLight ";
 
     if (flags & 0xFFFC0000) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -838,7 +838,7 @@ std::string npcFlags(int flags)
                    ESM::NPC::Respawn|
                    ESM::NPC::Essential));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%02X)") % flags);
+    properties += Misc::StringUtils::format("(0x%02X)", flags);
     return properties;
 }
 
@@ -853,7 +853,7 @@ std::string raceFlags(int flags)
                   (ESM::Race::Playable|
                    ESM::Race::Beast));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -869,7 +869,7 @@ std::string spellFlags(int flags)
                    ESM::Spell::F_PCStart|
                    ESM::Spell::F_Always));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -886,6 +886,6 @@ std::string weaponFlags(int flags)
                   (ESM::Weapon::Magical|
                    ESM::Weapon::Silver));
     if (flags & unused) properties += "Invalid ";
-    properties += str(boost::format("(0x%08X)") % flags);
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }

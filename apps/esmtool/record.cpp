@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/format.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace
 {
@@ -12,7 +12,7 @@ namespace
 void printAIPackage(ESM::AIPackage p)
 {
     std::cout << "  AI Type: " << aiTypeLabel(p.mType)
-              << " (" << boost::format("0x%08X") % p.mType << ")" << std::endl;
+              << " (" << Misc::StringUtils::format("0x%08X", p.mType) << ")" << std::endl;
     if (p.mType == ESM::AI_Wander)
     {
         std::cout << "    Distance: " << p.mWander.mDistance << std::endl;
@@ -46,7 +46,7 @@ void printAIPackage(ESM::AIPackage p)
         std::cout << "    Activate Unknown: " << p.mActivate.mUnk << std::endl;
     }
     else {
-        std::cout << "    BadPackage: " << boost::format("0x%08x") % p.mType << std::endl;
+        std::cout << "    BadPackage: " << Misc::StringUtils::format("0x%08X", p.mType) << std::endl;
     }
 
     if (!p.mCellName.empty())
@@ -64,7 +64,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     char indicator = rule[2];
 
     std::string type_str = "INVALID";
-    std::string func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));
+    std::string func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1,3));
     int func;
     std::istringstream iss(rule.substr(2,2));
     iss >> func;
@@ -104,7 +104,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     // for all types not qual to one.  If this wasn't true, go back to
     // the error message.
     if (type != '1' && rule[3] != 'X')
-        func_str = str(boost::format("INVALID=%s") % rule.substr(1,3));
+        func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1,3));
 
     char oper = rule[4];
     std::string oper_str = "??";
@@ -122,8 +122,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     std::ostringstream stream;
     stream << ss.mValue;
 
-    std::string result = str(boost::format("%-12s %-32s %2s %s")
-                             % type_str % func_str % oper_str % stream.str());
+    std::string result = Misc::StringUtils::format("%-12s %-32s %2s %s", type_str, func_str, oper_str, stream.str());
     return result;
 }
 
@@ -156,13 +155,13 @@ void printTransport(const std::vector<ESM::Transport::Dest>& transport)
     for (const ESM::Transport::Dest& dest : transport)
     {
         std::cout << "  Destination Position: "
-                  << boost::format("%12.3f") % dest.mPos.pos[0] << ","
-                  << boost::format("%12.3f") % dest.mPos.pos[1] << ","
-                  << boost::format("%12.3f") % dest.mPos.pos[2] << ")" << std::endl;
+                  << Misc::StringUtils::format("%12.3f", dest.mPos.pos[0]) << ","
+                  << Misc::StringUtils::format("%12.3f", dest.mPos.pos[1]) << ","
+                  << Misc::StringUtils::format("%12.3f", dest.mPos.pos[2]) << ")" << std::endl;
         std::cout << "  Destination Rotation: "
-                  << boost::format("%9.6f") % dest.mPos.rot[0] << ","
-                  << boost::format("%9.6f") % dest.mPos.rot[1] << ","
-                  << boost::format("%9.6f") % dest.mPos.rot[2] << ")" << std::endl;
+                  << Misc::StringUtils::format("%9.6f", dest.mPos.rot[0]) << ","
+                  << Misc::StringUtils::format("%9.6f", dest.mPos.rot[1]) << ","
+                  << Misc::StringUtils::format("%9.6f", dest.mPos.rot[2]) << ")" << std::endl;
         if (!dest.mCellName.empty())
             std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
     }
@@ -542,7 +541,7 @@ void Record<ESM::Cell>::print()
         std::cout << "  Water Level: " << mData.mWater << std::endl;
     }
     else
-        std::cout << "  Map Color: " << boost::format("0x%08X") % mData.mMapColor << std::endl;
+        std::cout << "  Map Color: " << Misc::StringUtils::format("0x%08X", mData.mMapColor) << std::endl;
     std::cout << "  Water Level Int: " << mData.mWaterInt << std::endl;
     std::cout << "  RefId counter: " << mData.mRefNumCounter << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
@@ -607,7 +606,7 @@ void Record<ESM::Container>::print()
     std::cout << "  Flags: " << containerFlags(mData.mFlags) << std::endl;
     std::cout << "  Weight: " << mData.mWeight << std::endl;
     for (const ESM::ContItem &item : mData.mInventory.mList)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % item.mCount
+        std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem.toString() << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
@@ -653,7 +652,7 @@ void Record<ESM::Creature>::print()
     std::cout << "  Gold: " << mData.mData.mGold << std::endl;
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % item.mCount
+        std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem.toString() << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
@@ -669,7 +668,7 @@ void Record<ESM::Creature>::print()
     std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
-    std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
+    std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
     for (const ESM::AIPackage &package : mData.mAiPackage.mList)
         printAIPackage(package);
@@ -1073,7 +1072,7 @@ void Record<ESM::NPC>::print()
     }
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
-        std::cout << "  Inventory: Count: " << boost::format("%4d") % item.mCount
+        std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
                   << " Item: " << item.mItem.toString() << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
@@ -1089,7 +1088,7 @@ void Record<ESM::NPC>::print()
     std::cout << "    AI U1:" << (int)mData.mAiData.mU1 << std::endl;
     std::cout << "    AI U2:" << (int)mData.mAiData.mU2 << std::endl;
     std::cout << "    AI U3:" << (int)mData.mAiData.mU3 << std::endl;
-    std::cout << "    AI Services:" << boost::format("0x%08X") % mData.mAiData.mServices << std::endl;
+    std::cout << "    AI Services:" << Misc::StringUtils::format("0x%08X", mData.mAiData.mServices) << std::endl;
 
     for (const ESM::AIPackage &package : mData.mAiPackage.mList)
         printAIPackage(package);
@@ -1212,7 +1211,7 @@ void Record<ESM::Script>::print()
 
     std::cout << "  ByteCode: ";
     for (const unsigned char &byte : mData.mScriptData)
-        std::cout << boost::format("%02X") % (int)(byte);
+        std::cout << Misc::StringUtils::format("%02X", (int)(byte));
     std::cout << std::endl;
 
     if (mPrintPlain)
