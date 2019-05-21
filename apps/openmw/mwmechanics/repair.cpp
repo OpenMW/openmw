@@ -83,7 +83,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
         std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                 .find("sNotifyMessage51")->mValue.getString();
-        Misc::StringUtils::replace(message, "%s", mTool.getClass().getName(mTool).c_str(), 2);
+        message = Misc::StringUtils::format(message, mTool.getClass().getName(mTool));
 
         MWBase::Environment::get().getWindowManager()->messageBox(message);
 

@@ -66,13 +66,12 @@ namespace MWWorld
                 if (itemCount == 1)
                 {
                     msgBox = MyGUI::LanguageManager::getInstance().replaceTags("\n#{sNotifyMessage60}");
-                    Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
+                    msgBox = Misc::StringUtils::format(msgBox, itemName);
                 }
                 else
                 {
                     msgBox = MyGUI::LanguageManager::getInstance().replaceTags("\n#{sNotifyMessage61}");
-                    Misc::StringUtils::replace(msgBox, "%d", std::to_string(itemCount).c_str(), 2);
-                    Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
+                    msgBox = Misc::StringUtils::format(msgBox, itemCount, itemName);
                 }
 
                 stream << msgBox;

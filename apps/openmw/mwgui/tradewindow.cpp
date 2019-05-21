@@ -309,7 +309,7 @@ namespace MWGui
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(itemStack.mBase.getCellRef().getRefId(), mPtr))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->mValue.getString();
-                Misc::StringUtils::replace(msg, "%s", itemStack.mBase.getClass().getName(itemStack.mBase).c_str(), 2);
+                msg = Misc::StringUtils::format(msg, itemStack.mBase.getClass().getName(itemStack.mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
                 MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, itemStack.mBase, mPtr, itemStack.mCount);

@@ -175,7 +175,7 @@ namespace MWGui
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
             std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            Misc::StringUtils::replaceAll(labelCaption, "%s", value.c_str(), 2);
+            labelCaption = Misc::StringUtils::format(labelCaption, value);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }
