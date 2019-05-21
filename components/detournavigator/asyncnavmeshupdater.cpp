@@ -1,4 +1,4 @@
-﻿#include "asyncnavmeshupdater.hpp"
+#include "asyncnavmeshupdater.hpp"
 #include "debug.hpp"
 #include "makenavmesh.hpp"
 #include "settings.hpp"
