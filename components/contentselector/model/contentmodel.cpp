@@ -408,12 +408,6 @@ bool ContentSelectorModel::ContentModel::dropMimeData(const QMimeData *data, Qt:
 
 void ContentSelectorModel::ContentModel::addFile(EsmFile *file)
 {
-    for (int row = 0; row < mFiles.size(); row++)
-    {
-        if (!mFiles.at(row)->fileName().compare(file->fileName(), Qt::CaseInsensitive))
-            return;
-    }
-
     beginInsertRows(QModelIndex(), mFiles.count(), mFiles.count());
         mFiles.append(file);
     endInsertRows();
@@ -434,7 +428,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     {
         QFileInfo info(dir.absoluteFilePath(path2));
 
-        if (item(info.absoluteFilePath()) != 0)
+        if (item(info.fileName()))
             continue;
 
         try {
