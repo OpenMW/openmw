@@ -703,7 +703,7 @@ namespace MWInput
                     mOverencumberedMessageDelay = 0.f;
                 }
 
-                if (mAlwaysRunActive || isRunning)
+                if ((mAlwaysRunActive && !mJoystickLastUsed) || isRunning)
                     mPlayer->setRunState(!actionIsActive(A_Run));
                 else
                     mPlayer->setRunState(actionIsActive(A_Run));
