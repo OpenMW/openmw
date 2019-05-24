@@ -51,6 +51,7 @@
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
     Bug #4841: Russian localization ignores implicit keywords
+    Bug #4844: Data race in savegame loading / GlobalMap render
     Bug #4847: Idle animation reset oddities
     Bug #4851: No shadows since switch to OSG
     Bug #4860: Actors outside of processing range visible for one frame after spawning
@@ -88,6 +89,7 @@
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
     Bug #5018: Spell tooltips don't support purely negative magnitudes
+    Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Feature #1774: Handle AvoidNode

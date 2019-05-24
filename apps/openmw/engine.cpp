@@ -257,9 +257,9 @@ OMW::Engine::~Engine()
 
     mWorkQueue = nullptr;
 
-    mResourceSystem.reset();
-
     mViewer = nullptr;
+
+    mResourceSystem.reset();
 
     delete mEncoder;
     mEncoder = nullptr;
