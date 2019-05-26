@@ -13,6 +13,7 @@
 #include <osg/ComputeBoundsVisitor>
 #include <osg/ShapeDrawable>
 #include <osg/TextureCubeMap>
+#include <osg/OcclusionQueryNode>
 
 #include <osgUtil/LineSegmentIntersector>
 #include <osgUtil/IncrementalCompileOperation>
@@ -908,6 +909,25 @@ namespace MWRender
         return true;
     }
 
+    class OQNSwitchVisitor : public osg::NodeVisitor
+    {
+    public:
+        bool mActive;
+        OQNSwitchVisitor(bool activ)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+            , mActive(activ)
+        { }
+
+        virtual void apply(osg::OcclusionQueryNode &oq)
+        {
+            if(!mActive)
+                oq.getQueryGeometry()->setNodeMask(0);
+            else
+                oq.getQueryGeometry()->setNodeMask(0xffffffff);
+            traverse(oq);
+        }
+    };
+
     void RenderingManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
     {
         camera->setNodeMask(Mask_RenderToTexture);
@@ -957,7 +977,11 @@ namespace MWRender
         rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
         rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
-        rttCamera->setUpdateCallback(new NoTraverseCallback);
+        rttCamera->setUpdateCallback(new NoTraverseCallback);        
+
+        OQNSwitchVisitor oqnvis(false);
+        mSceneRoot->accept(oqnvis);
+
         rttCamera->addChild(mSceneRoot);
 
         rttCamera->addChild(mWater->getReflectionCamera());
@@ -968,6 +992,9 @@ namespace MWRender
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         renderCameraToImage(rttCamera.get(),image,w,h);
+
+        oqnvis.mActive=true;
+        mSceneRoot->accept(oqnvis);
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)

@@ -55,6 +55,19 @@ public:
     MWWorld::Ptr mPtr;
 };
 
+struct OcclusionQuerySettings
+{
+    bool enable;
+    bool debugDisplay;
+    float maxCellSize;
+    unsigned int querypixelcount;
+    unsigned int queryframecount;
+    ///subdivision criterions
+    float minOQNSize;
+    unsigned int maxDrawablePerOQN;
+
+};
+
 class Objects{
     typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
 
@@ -68,7 +81,10 @@ class Objects{
 
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-    void insertBegin(const MWWorld::Ptr& ptr);
+    OcclusionQuerySettings mOQNSettings;
+
+    /// @return pointer to cell root
+    osg::Group *insertBegin(const MWWorld::Ptr& ptr);
 
 public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
