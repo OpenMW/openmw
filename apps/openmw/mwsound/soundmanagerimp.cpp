@@ -994,6 +994,15 @@ namespace MWSound
 
     void SoundManager::updateSounds(float duration)
     {
+        // We update active say sounds map for specific actors here
+        // because for vanilla compatibility we can't do it immediately.
+        SaySoundMap::iterator queuesayiter = mSaySoundsQueue.begin();
+        while (queuesayiter != mSaySoundsQueue.end())
+        {
+            mActiveSaySounds[queuesayiter->first] = queuesayiter->second;
+            mSaySoundsQueue.erase(queuesayiter++);
+        }
+
         static float timePassed = 0.0;
 
         timePassed += duration;
@@ -1076,14 +1085,7 @@ namespace MWSound
                 ++snditer;
         }
 
-        SaySoundMap::iterator sayiter = mSaySoundsQueue.begin();
-        while (sayiter != mSaySoundsQueue.end())
-        {
-            mActiveSaySounds[sayiter->first] = sayiter->second;
-            mSaySoundsQueue.erase(sayiter++);
-        }
-
-        sayiter = mActiveSaySounds.begin();
+        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
         while (sayiter != mActiveSaySounds.end())
         {
             MWWorld::ConstPtr ptr = sayiter->first;
