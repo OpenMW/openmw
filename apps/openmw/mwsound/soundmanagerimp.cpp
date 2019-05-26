@@ -769,7 +769,10 @@ namespace MWSound
             for(SoundBufferRefPair &snd : snditer->second)
                 mOutput->finishSound(snd.first);
         }
-        SaySoundMap::iterator sayiter = mActiveSaySounds.find(ptr);
+        SaySoundMap::iterator sayiter = mSaySoundsQueue.find(ptr);
+        if(sayiter != mSaySoundsQueue.end())
+            mOutput->finishStream(sayiter->second);
+        sayiter = mActiveSaySounds.find(ptr);
         if(sayiter != mActiveSaySounds.end())
             mOutput->finishStream(sayiter->second);
     }
@@ -783,6 +786,12 @@ namespace MWSound
                 for(SoundBufferRefPair &sndbuf : snd.second)
                     mOutput->finishSound(sndbuf.first);
             }
+        }
+
+        for(SaySoundMap::value_type &snd : mSaySoundsQueue)
+        {
+            if(!snd.first.isEmpty() && snd.first != MWMechanics::getPlayer() && snd.first.getCell() == cell)
+                mOutput->finishStream(snd.second);
         }
 
         for(SaySoundMap::value_type &snd : mActiveSaySounds)
@@ -1086,7 +1095,7 @@ namespace MWSound
         }
 
         SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
-        while (sayiter != mActiveSaySounds.end())
+        while(sayiter != mActiveSaySounds.end())
         {
             MWWorld::ConstPtr ptr = sayiter->first;
             Stream *sound = sayiter->second;
