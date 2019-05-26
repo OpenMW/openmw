@@ -520,7 +520,7 @@ namespace MWSound
         Stream *sound = playVoice(decoder, pos, (ptr == MWMechanics::getPlayer()));
         if(!sound) return;
 
-        mActiveSaySounds.insert(std::make_pair(ptr, sound));
+        mSaySoundsQueue.emplace(ptr, sound);
     }
 
     float SoundManager::getSaySoundLoudness(const MWWorld::ConstPtr &ptr) const
@@ -568,7 +568,15 @@ namespace MWSound
 
     void SoundManager::stopSay(const MWWorld::ConstPtr &ptr)
     {
-        SaySoundMap::iterator snditer = mActiveSaySounds.find(ptr);
+        SaySoundMap::iterator snditer = mSaySoundsQueue.find(ptr);
+        if(snditer != mSaySoundsQueue.end())
+        {
+            mOutput->finishStream(snditer->second);
+            mUnusedStreams.push_back(snditer->second);
+            mSaySoundsQueue.erase(snditer);
+        }
+
+        snditer = mActiveSaySounds.find(ptr);
         if(snditer != mActiveSaySounds.end())
         {
             mOutput->finishStream(snditer->second);
@@ -1068,8 +1076,15 @@ namespace MWSound
                 ++snditer;
         }
 
-        SaySoundMap::iterator sayiter = mActiveSaySounds.begin();
-        while(sayiter != mActiveSaySounds.end())
+        SaySoundMap::iterator sayiter = mSaySoundsQueue.begin();
+        while (sayiter != mSaySoundsQueue.end())
+        {
+            mActiveSaySounds[sayiter->first] = sayiter->second;
+            mSaySoundsQueue.erase(sayiter++);
+        }
+
+        sayiter = mActiveSaySounds.begin();
+        while (sayiter != mActiveSaySounds.end())
         {
             MWWorld::ConstPtr ptr = sayiter->first;
             Stream *sound = sayiter->second;
@@ -1187,6 +1202,12 @@ namespace MWSound
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
             mOutput->updateStream(sound);
         }
+        for(SaySoundMap::value_type &snd : mSaySoundsQueue)
+        {
+            Stream *sound = snd.second;
+            sound->setBaseVolume(volumeFromType(sound->getPlayType()));
+            mOutput->updateStream(sound);
+        }
         for(Stream *sound : mActiveTracks)
         {
             sound->setBaseVolume(volumeFromType(sound->getPlayType()));
@@ -1218,7 +1239,16 @@ namespace MWSound
             mActiveSounds.erase(snditer);
             mActiveSounds.emplace(updated, std::move(sndlist));
         }
-        SaySoundMap::iterator sayiter = mActiveSaySounds.find(old);
+
+        SaySoundMap::iterator sayiter = mSaySoundsQueue.find(old);
+        if(sayiter != mSaySoundsQueue.end())
+        {
+            Stream *stream = sayiter->second;
+            mSaySoundsQueue.erase(sayiter);
+            mSaySoundsQueue.emplace(updated, stream);
+        }
+
+        sayiter = mActiveSaySounds.find(old);
         if(sayiter != mActiveSaySounds.end())
         {
             Stream *stream = sayiter->second;
@@ -1310,6 +1340,13 @@ namespace MWSound
         mActiveSounds.clear();
         mUnderwaterSound = nullptr;
         mNearWaterSound = nullptr;
+
+        for(SaySoundMap::value_type &snd : mSaySoundsQueue)
+        {
+            mOutput->finishStream(snd.second);
+            mUnusedStreams.push_back(snd.second);
+        }
+        mSaySoundsQueue.clear();
 
         for(SaySoundMap::value_type &snd : mActiveSaySounds)
         {
