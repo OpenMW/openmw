@@ -120,18 +120,27 @@ void CSMTools::PathgridCheckStage::perform (int stage, CSMDoc::Messages& message
         }
     }
 
+    std::vector<int> orphanList;
     // check pathgrid points that are not connected to anything
     for (unsigned int i = 0; i < pointList.size(); ++i)
     {
         if (pointList[i].mConnectionNum == 0)
+            orphanList.emplace_back(i);
+    }
+
+    if (!orphanList.empty())
+    {
+        std::string message;
+        if (orphanList.size() == 1)
+            message = "Point #" + std::to_string(orphanList.front()) + " is not connected to any other point";
+        else
         {
-            std::ostringstream ss;
-            ss << "Point #" << i << " ("
-            << pathgrid.mPoints[i].mX << ", "
-            << pathgrid.mPoints[i].mY << ", "
-            << pathgrid.mPoints[i].mZ << ") is disconnected from other points";
-            messages.add (id, ss.str(), "", CSMDoc::Message::Severity_Warning);
+            message = "Points #" + std::to_string(orphanList.front());
+            for (std::vector<int>::const_iterator i = orphanList.begin()+1; i != orphanList.end(); i++)
+                message += ", #" + std::to_string(*i);
+            message += " are not connected to any other point";
         }
+        messages.add (id, message, "", CSMDoc::Message::Severity_Warning);
     }
 
     // TODO: check whether there are disconnected graphs
