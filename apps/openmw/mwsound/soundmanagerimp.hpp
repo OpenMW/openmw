@@ -93,6 +93,7 @@ namespace MWSound
         SoundMap mActiveSounds;
 
         typedef std::map<MWWorld::ConstPtr,Stream*> SaySoundMap;
+        SaySoundMap mSaySoundsQueue;
         SaySoundMap mActiveSaySounds;
 
         typedef std::vector<Stream*> TrackList;
