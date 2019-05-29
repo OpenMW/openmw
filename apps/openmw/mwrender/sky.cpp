@@ -164,7 +164,7 @@ protected:
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
     {
         osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-        texEnv->setConstantColor(mColor);
+        if (texEnv) texEnv->setConstantColor(mColor);
     }
 
     osg::ref_ptr<osg::Texture2D> mTexture;
@@ -234,7 +234,7 @@ protected:
         mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
 
         osg::TexEnvCombine* texEnvCombine = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-        texEnvCombine->setConstantColor(osg::Vec4f(1,1,1,mOpacity));
+        if (texEnvCombine) texEnvCombine->setConstantColor(osg::Vec4f(1,1,1,mOpacity));
     }
 
 private:
@@ -1042,10 +1042,10 @@ private:
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
         {
             osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
-            texEnv->setConstantColor(mMoonColor * mShadowBlend);
+            if (texEnv) texEnv->setConstantColor(mMoonColor * mShadowBlend);
 
             osg::TexEnvCombine* texEnv2 = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
-            texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
+            if (texEnv2) texEnv2->setConstantColor(osg::Vec4f(mAtmosphereColor.x(), mAtmosphereColor.y(), mAtmosphereColor.z(), mTransparency));
         }
 
         void setTextures(const std::string& phaseTex, const std::string& circleTex)
