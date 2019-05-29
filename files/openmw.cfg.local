@@ -1,6 +1,6 @@
 # This is the local openmw.cfg file. Do not modify!
 # Modifications should be done on the user openmw.cfg file instead
-# (see: https://wiki.openmw.org/index.php?title=Paths)
+# (see: https://openmw.readthedocs.io/en/master/reference/modding/paths.html)
 
 data="?global?data"
 data=./data
