@@ -158,7 +158,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     if (evt.type == SDL_FINGERDOWN)
                         mMouseListener->mousePressed(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
                     else if (evt.type == SDL_FINGERUP)
-                        mMouseListener->mousePressed(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
+                        mMouseListener->mouseReleased(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
                     break;
 #endif
                 case SDL_FINGERMOTION:
