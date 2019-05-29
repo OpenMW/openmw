@@ -432,7 +432,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mTop(0)
     , mInterior(false)
 {
-    mSimulation.reset(new RippleSimulation(parent, resourceSystem));
+    mSimulation.reset(new RippleSimulation(mSceneRoot, resourceSystem));
 
     mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
