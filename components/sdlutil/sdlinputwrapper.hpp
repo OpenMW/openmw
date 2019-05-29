@@ -51,6 +51,10 @@ namespace SDLUtil
         bool _handleWarpMotion(const SDL_MouseMotionEvent& evt);
         void _wrapMousePointer(const SDL_MouseMotionEvent &evt);
         MouseMotionEvent _packageMouseMotion(const SDL_Event& evt);
+#ifdef __SWITCH__
+        MouseMotionEvent _packageTouchMouseMotion(const SDL_Event& evt);
+        SDL_MouseButtonEvent _packageTouchMouseButton(const SDL_Event& evt);
+#endif
 
         void _setupOISKeys();
 

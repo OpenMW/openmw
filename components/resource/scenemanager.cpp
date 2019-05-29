@@ -515,9 +515,13 @@ namespace Resource
             // share state
             // do this before optimizing so the optimizer will be able to combine nodes more aggressively
             // note, because StateSets will be shared at this point, StateSets can not be modified inside the optimizer
-            mSharedStateMutex.lock();
-            mSharedStateManager->share(loaded.get());
-            mSharedStateMutex.unlock();
+             static bool allowOptimizations = false;
+             if (allowOptimizations)
+             {
+                 mSharedStateMutex.lock();
+                 mSharedStateManager->share(loaded.get());
+                 mSharedStateMutex.unlock();
+             }
 
             if (canOptimize(normalized))
             {
@@ -529,7 +533,7 @@ namespace Resource
                 optimizer.optimize(loaded, options);
             }
 
-            if (mIncrementalCompileOperation)
+            if (allowOptimizations && mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
             else
                 loaded->getBound();

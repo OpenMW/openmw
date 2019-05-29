@@ -20,7 +20,7 @@
 
 #include "imagetosurface.hpp"
 
-#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID)
+#if defined(OSG_LIBRARY_STATIC) && !defined(ANDROID) && !defined(__SWITCH__)
 // Sets the default windowing system interface according to the OS.
 // Necessary for OpenSceneGraph to do some things, like decompression.
 USE_GRAPHICSWINDOW()

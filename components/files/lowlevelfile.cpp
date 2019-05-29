@@ -70,6 +70,10 @@ size_t LowLevelFile::size ()
     if (Size == -1)
         throw std::runtime_error ("A query operation on a file failed.");
 
+#ifdef __SWITCH__
+    fseek (mHandle, 0, SEEK_SET);
+#endif
+
     if (fseek (mHandle, oldPosition, SEEK_SET) != 0)
         throw std::runtime_error ("A query operation on a file failed.");
 
@@ -79,6 +83,10 @@ size_t LowLevelFile::size ()
 void LowLevelFile::seek (size_t Position)
 {
     assert (mHandle != nullptr);
+
+#ifdef __SWITCH__
+    fseek (mHandle, 0, SEEK_SET);
+#endif
 
     if (fseek (mHandle, Position, SEEK_SET) != 0)
         throw std::runtime_error ("A seek operation on a file failed.");

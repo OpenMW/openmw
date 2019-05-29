@@ -368,15 +368,16 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
-    checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
-
+    checkSDLError(SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8));
+#ifndef __SWITCH__
     if (antialiasing > 0)
     {
         checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1));
         checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
     }
-
+#endif
     while (!mWindow)
     {
         mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
@@ -416,7 +417,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     traits->red = 8;
     traits->green = 8;
     traits->blue = 8;
-    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
+    traits->alpha = 8;
     traits->depth = 24;
     traits->stencil = 8;
     traits->vsync = vsync;
@@ -437,6 +438,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
 void OMW::Engine::setWindowIcon()
 {
+#ifndef __SWITCH__
     boost::filesystem::ifstream windowIconStream;
     std::string windowIcon = (mResDir / "mygui" / "openmw.png").string();
     windowIconStream.open(windowIcon, std::ios_base::in | std::ios_base::binary);
@@ -457,6 +459,7 @@ void OMW::Engine::setWindowIcon()
         auto surface = SDLUtil::imageToSurface(image, true);
         SDL_SetWindowIcon(mWindow, surface.get());
     }
+#endif
 }
 
 void OMW::Engine::prepareEngine (Settings::Manager & settings)

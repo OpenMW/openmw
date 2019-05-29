@@ -7,7 +7,7 @@
 #define FILE_API_POSIX  1
 #define FILE_API_WIN32  2
 
-#if defined(__linux) || defined(__unix) || defined(__posix)
+#if (defined(__linux) || defined(__unix) || defined(__posix)) && !defined(__SWITCH__)
 #define FILE_API    FILE_API_POSIX
 #elif defined(_WIN32)
 #define FILE_API    FILE_API_WIN32

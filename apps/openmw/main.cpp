@@ -243,6 +243,24 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
+#ifdef __SWITCH__
+#include <switch.h>
+
+static int nxlinkSock = -1;
+
+extern "C" void userAppInit(void)
+{
+    if (R_SUCCEEDED(socketInitializeDefault()))
+        nxlinkSock = nxlinkStdio();
+}
+
+extern "C" void userAppExit(void)
+{
+    if (nxlinkSock >= 0) close(nxlinkSock);
+    socketExit();
+}
+#endif
+
 int runApplication(int argc, char *argv[])
 {
 #ifdef __APPLE__

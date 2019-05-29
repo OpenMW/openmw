@@ -152,6 +152,15 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
                 case SDL_FINGERDOWN:
                 case SDL_FINGERUP:
+#ifdef __SWITCH__
+                    // simulate mouse
+                    mMouseListener->mouseMoved(_packageTouchMouseMotion(evt));
+                    if (evt.type == SDL_FINGERDOWN)
+                        mMouseListener->mousePressed(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
+                    else if (evt.type == SDL_FINGERUP)
+                        mMouseListener->mousePressed(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
+                    break;
+#endif
                 case SDL_FINGERMOTION:
                 case SDL_DOLLARGESTURE:
                 case SDL_DOLLARRECORD:
@@ -373,6 +382,58 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
         return pack_evt;
     }
+
+#ifdef __SWITCH__
+    /// \brief Package touch events into a single mouse event
+    MouseMotionEvent InputWrapper::_packageTouchMouseMotion(const SDL_Event &evt)
+    {
+        MouseMotionEvent pack_evt;
+        pack_evt.x = mMouseX;
+        pack_evt.xrel = 0;
+        pack_evt.y = mMouseY;
+        pack_evt.yrel = 0;
+        pack_evt.z = mMouseZ;
+        pack_evt.zrel = 0;
+
+        if(evt.type == SDL_FINGERDOWN || evt.type == SDL_FINGERUP || evt.type == SDL_FINGERMOTION)
+        {
+            int width = 0;
+            int height = 0;
+            SDL_GetWindowSize(mSDLWindow, &width, &height);
+
+            int nx = evt.tfinger.x * width;
+            int ny = evt.tfinger.y * height;
+
+            pack_evt.xrel = nx - mMouseX;
+            pack_evt.yrel = ny - mMouseY;
+            pack_evt.x = mMouseX = nx;
+            pack_evt.y = mMouseY = ny;
+            if (mFirstMouseMove)
+            {
+                // first event should be treated as non-relative, since there's no point of reference
+                // SDL then (incorrectly) uses (0,0) as point of reference, on Linux at least...
+                pack_evt.xrel = pack_evt.yrel = 0;
+                mFirstMouseMove = false;
+            }
+        }
+
+        return pack_evt;
+    }
+
+    SDL_MouseButtonEvent InputWrapper::_packageTouchMouseButton(const SDL_Event &evt)
+    {
+        SDL_MouseButtonEvent pack_evt;
+        pack_evt.x = mMouseX;
+        pack_evt.y = mMouseY;
+        pack_evt.type = (evt.type == SDL_FINGERDOWN) ? SDL_MOUSEBUTTONDOWN : SDL_MOUSEBUTTONUP;
+        pack_evt.timestamp = evt.tfinger.timestamp;
+        pack_evt.which = SDL_TOUCH_MOUSEID;
+        pack_evt.button = SDL_BUTTON_LEFT;
+        pack_evt.state = (evt.type == SDL_FINGERDOWN) ? SDL_PRESSED : SDL_RELEASED;
+        pack_evt.clicks = 1;
+        return pack_evt;
+    }
+#endif
 
     OIS::KeyCode InputWrapper::sdl2OISKeyCode(SDL_Keycode code)
     {

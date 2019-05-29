@@ -108,7 +108,11 @@ void GraphicsWindowSDL2::init()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
 #endif
-    
+
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
     mContext = SDL_GL_CreateContext(mWindow);
     if(!mContext)
     {
@@ -116,10 +120,20 @@ void GraphicsWindowSDL2::init()
         return;
     }
 
+#ifdef USE_GLAD
+    if (!gladLoadGLLoader(SDL_GL_GetProcAddress))
+    {
+        OSG_FATAL<< "Error: Unable to load OpenGL function pointers: "<<SDL_GetError() <<std::endl;
+        return;
+    }
+#endif
+
     setSwapInterval(_traits->vsync);
-
+#ifdef __SWITCH__
+    OSG_WARN << "SDL error: " << SDL_GetError() << std::endl;
+#else
     SDL_GL_MakeCurrent(oldWin, oldCtx);
-
+#endif
     mValid = true;
 
     getEventQueue()->syncWindowRectangleWithGraphicsContext();

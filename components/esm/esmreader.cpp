@@ -383,7 +383,13 @@ size_t ESMReader::getFileOffset()
 
 void ESMReader::skip(int bytes)
 {
+#ifdef __SWITCH__
+    size_t old = getFileOffset();
+    mEsm->seekg(0);
+    mEsm->seekg(old + bytes);
+#else
     mEsm->seekg(getFileOffset()+bytes);
+#endif
 }
 
 }

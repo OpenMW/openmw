@@ -2,10 +2,15 @@
 set(GAME
     main.cpp
     engine.cpp
-
-    ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc
-    ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest
 )
+
+if (SWITCH_LIBNX)
+    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/extern/switch/glad_nx/glad.c ${CMAKE_SOURCE_DIR}/extern/switch/stubs.c)
+endif()
+
+if (WIN32)
+    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/files/windows/openmw.rc ${CMAKE_SOURCE_DIR}/files/windows/openmw.exe.manifest)
+endif()
 
 if (ANDROID)
     set(GAME ${GAME} android_main.cpp)
@@ -165,6 +170,35 @@ if (ANDROID)
     )
 endif (ANDROID)
 
+if (SWITCH_LIBNX)
+    set (OSG_PLUGINS
+        -Wl,--whole-archive
+    )
+
+    foreach(PLUGIN_NAME ${USED_OSG_PLUGINS})
+        set(OSG_PLUGINS ${OSG_PLUGINS} ${OSG_PLUGINS_DIR}/lib${PLUGIN_NAME}.a)
+    endforeach()
+
+    set (OSG_PLUGINS
+        ${OSG_PLUGINS} -Wl,--no-whole-archive
+    )
+
+    target_link_libraries(openmw
+        ${OSG_PLUGINS}
+        ${OPENSCENEGRAPH_LIBRARIES}
+        EGL
+        glapi
+        drm_nouveau
+        freetype
+        jpeg
+        png
+        bz2
+        z
+        nx
+        m
+    )
+endif (SWITCH_LIBNX)
+
 if (USE_SYSTEM_TINYXML)
     target_link_libraries(openmw ${TinyXML_LIBRARIES})
 endif()
@@ -174,7 +208,7 @@ target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
-if (UNIX AND NOT APPLE)
+if (UNIX AND NOT APPLE AND NOT SWITCH_LIBNX)
 target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
 

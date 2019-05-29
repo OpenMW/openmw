@@ -120,6 +120,13 @@ endif()
 if (APPLE)
     set(MORROWIND_DATA_FILES "./data" CACHE PATH "location of Morrowind data files")
     set(OPENMW_RESOURCE_FILES "../Resources/resources" CACHE PATH "location of OpenMW resources files")
+elseif(SWITCH_LIBNX)
+    set(MORROWIND_DATA_FILES "data" CACHE PATH "location of Morrowind data files")
+    set(OPENMW_RESOURCE_FILES "resources" CACHE PATH "location of OpenMW resources files")
+    set(OSG_PLUGINS_DIR CACHE STRING "")
+    add_definitions(-D__SWITCH__ -Wfatal-errors)
+    include_directories(SYSTEM "$ENV{DEVKITPRO}/libnx/include")
+    include_directories("${PROJECT_SOURCE_DIR}/extern/switch")
 elseif(UNIX)
     # Paths
     SET(BINDIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Where to install binaries")
@@ -148,7 +155,12 @@ if (WIN32)
 endif()
 
 # Dependencies
-find_package(OpenGL REQUIRED)
+if (SWITCH_LIBNX)
+    set(OPENGL_opengl_LIBRARY EGL glapi drm_nouveau)
+    add_definitions(-DUSE_GLAD=1)
+else()
+    find_package(OpenGL REQUIRED)
+endif()
 
 if (USE_QT)
     message(STATUS "Using Qt${DESIRED_QT_VERSION}")
@@ -220,7 +232,7 @@ option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if (USE_SYSTEM_TINYXML)
     find_package(TinyXML REQUIRED)
     add_definitions (-DTIXML_USE_STL)
-    include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
+    include_directories(${TinyXML_INCLUDE_DIRS})
 endif()
 
 # Platform specific
@@ -255,9 +267,8 @@ if(NOT HAVE_STDINT_H)
     message(FATAL_ERROR "stdint.h was not found" )
 endif()
 
-
 find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX osgShadow)
-include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
+include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
                     osgdb_bmp
@@ -281,8 +292,15 @@ endforeach(OSGDB_LIB)
 
 if(OSG_STATIC)
     add_definitions(-DOSG_LIBRARY_STATIC)
-
-    find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+    if(NOT SWITCH_LIBNX)
+        find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
+    else()
+        # foreach(OSGPLUG ${USED_OSG_PLUGINS})
+        #   list(APPEND OPENSCENEGRAPH_LIBRARIES "${OSGPlugins_LIB_DIR}/lib${OSGPLUG}.a")
+        # endforeach(OSGPLUG)
+        set(OSG_PLUGINS_DIR ${OSGPlugins_LIB_DIR})
+        message("OSG Plugins are in ${OSG_PLUGINS_DIR}")
+    endif()
     list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
 endif()
 
@@ -318,7 +336,6 @@ find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
 include_directories("."
-    SYSTEM
     ${SDL2_INCLUDE_DIR}
     ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
@@ -436,7 +453,7 @@ elseif (MSVC)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
-IF(NOT WIN32 AND NOT APPLE)
+IF(NOT WIN32 AND NOT APPLE AND NOT SWITCH_LIBNX)
     # Linux installation
 
     # Install binaries
@@ -498,7 +515,7 @@ IF(NOT WIN32 AND NOT APPLE)
     # Install resources
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
     INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
-ENDIF(NOT WIN32 AND NOT APPLE)
+ENDIF(NOT WIN32 AND NOT APPLE AND NOT SWITCH_LIBNX)
 
 if(WIN32)
     FILE(GLOB dll_files_debug "${OpenMW_BINARY_DIR}/Debug/*.dll")
