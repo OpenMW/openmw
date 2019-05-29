@@ -13,6 +13,7 @@
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #4329: Removed birthsign abilities are restored after reloading the save
+    Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
