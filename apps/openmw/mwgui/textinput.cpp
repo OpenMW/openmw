@@ -7,6 +7,32 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 
+#ifdef __SWITCH__
+#include <switch.h>
+static std::string OnScreenKeyboard(std::string title, std::string init)
+{
+    SwkbdConfig kbd;
+    Result rc;
+    static char tmp_out[4096];
+
+    tmp_out[0] = 0;
+
+    rc = swkbdCreate(&kbd, 0);
+    if (R_SUCCEEDED(rc))
+    {
+      swkbdConfigMakePresetDefault(&kbd);
+      swkbdConfigSetInitialText(&kbd, init.c_str());
+      swkbdConfigSetGuideText(&kbd, title.c_str());
+      rc = swkbdShow(&kbd, tmp_out, sizeof(tmp_out));
+      swkbdClose(&kbd);
+      if (R_SUCCEEDED(rc))
+        return std::string(tmp_out);
+    }
+
+    return std::string("");
+}
+#endif
+
 namespace MWGui
 {
 
@@ -48,6 +74,16 @@ namespace MWGui
         WindowModal::onOpen();
         // Make sure the edit box has focus
         MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
+#ifdef __SWITCH__
+        MyGUI::Widget* pt = nullptr;
+        std::string s;
+        getWidget(pt, "LabelT");
+        if (pt)
+            s = OnScreenKeyboard(static_cast<MyGUI::TextBox*>(pt)->getCaption(), mTextEdit->getCaption());
+        else
+            s = OnScreenKeyboard("", mTextEdit->getCaption());
+        setTextInput(s);
+#endif
     }
 
     // widget controls
