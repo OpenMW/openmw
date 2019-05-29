@@ -58,6 +58,7 @@
     Bug #4867: Arbitrary text after local variable declarations breaks script compilation
     Bug #4876: AI ratings handling inconsistencies
     Bug #4877: Startup script executes only on a new game start
+    Bug #4879: SayDone returns 0 on the frame Say is called
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Bug #4896: Title screen music doesn't loop
     Bug #4902: Using scrollbars in settings causes resolution to change
