@@ -257,3 +257,15 @@ endif (MSVC)
 if (WIN32)
     INSTALL(TARGETS openmw RUNTIME DESTINATION ".")
 endif (WIN32)
+
+if (SWITCH_LIBNX)
+    add_custom_command(
+        TARGET openmw POST_BUILD
+        COMMAND
+            aarch64-none-elf-strip -o ${CMAKE_BINARY_DIR}/openmw_stripped ${CMAKE_BINARY_DIR}/openmw
+        COMMAND
+            elf2nro ${CMAKE_BINARY_DIR}/openmw_stripped ${CMAKE_BINARY_DIR}/openmw.nro
+            --icon=${CMAKE_SOURCE_DIR}/files/switch/openmw.jpg
+            --nacp=${CMAKE_SOURCE_DIR}/files/switch/openmw.nacp
+    )
+endif()
