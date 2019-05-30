@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #1515: Opening console masks dialogue, inventory menu
     Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
