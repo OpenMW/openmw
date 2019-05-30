@@ -128,10 +128,6 @@ bool Launcher::GraphicsPage::loadSettings()
         framerateLimitCheckBox->setCheckState(Qt::Checked);
         framerateLimitSpinBox->setValue(fpsLimit);
     }
-    else
-    {
-        framerateLimitSpinBox->setEnabled(false);
-    }
 
     return true;
 }
