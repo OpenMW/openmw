@@ -5,7 +5,7 @@ set(GAME
 )
 
 if (SWITCH_LIBNX)
-    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/extern/switch/glad_nx/glad.c ${CMAKE_SOURCE_DIR}/extern/switch/stubs.c)
+    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/extern/switch/stubs.c)
 endif()
 
 if (WIN32)
@@ -186,6 +186,7 @@ if (SWITCH_LIBNX)
     target_link_libraries(openmw
         ${OSG_PLUGINS}
         ${OPENSCENEGRAPH_LIBRARIES}
+        ${OSG_LIB_DIR}/libglad_osg.a
         EGL
         glapi
         drm_nouveau
