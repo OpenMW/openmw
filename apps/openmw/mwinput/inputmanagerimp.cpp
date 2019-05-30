@@ -274,6 +274,12 @@ namespace MWInput
                 mGamepadGuiCursorEnabled = !mGamepadGuiCursorEnabled;
                 MWBase::Environment::get().getWindowManager()->setCursorActive(mGamepadGuiCursorEnabled);
                 return true;
+#ifdef __SWITCH__
+            case SDL_CONTROLLER_BUTTON_BACK:
+                key = MyGUI::KeyCode::F1; // this causes the OSK to pop out in edit fields
+                MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
+                return true;
+#endif
             default:
                 return false;
         }
