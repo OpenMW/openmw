@@ -249,6 +249,11 @@ namespace MWGui
             SDL_GetDisplayMode(screen, i, &mode);
             resolutions.push_back(std::make_pair(mode.w, mode.h));
         }
+#ifdef __SWITCH__
+        // additional resolutions for upscaling/performance purposes, since SDL only reports 720p and 1080p
+        resolutions.push_back(std::make_pair(960, 540));
+        resolutions.push_back(std::make_pair(640, 360));
+#endif
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)
         {
