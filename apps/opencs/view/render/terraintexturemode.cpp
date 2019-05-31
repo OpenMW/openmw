@@ -235,7 +235,7 @@ void CSVRender::TerrainTextureMode::drag (const QPoint& pos, int diffX, int diff
 
 void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
 {
-    if (mDragMode == InteractionType_PrimaryEdit)
+    if (mDragMode == InteractionType_PrimaryEdit && mIsEditing)
     {
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
         QUndoStack& undoStack = document.getUndoStack();
@@ -245,11 +245,8 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
-             if (mIsEditing)
-             {
-                 undoStack.endMacro();
-                 mIsEditing = false;
-             }
+             undoStack.endMacro();
+             mIsEditing = false;
         }
     }
 }
