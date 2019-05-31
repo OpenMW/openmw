@@ -525,7 +525,11 @@ namespace MWPhysics
         mCollisionWorld->setForceUpdateAllAabbs(false);
 
         // Check if a user decided to override a physics system FPS
+#       ifdef __SWITCH__
+        const char* env = "15";
+#       else
         const char* env = getenv("OPENMW_PHYSICS_FPS");
+#       endif /*__SWITCH__ */
         if (env)
         {
             float physFramerate = std::atof(env);
