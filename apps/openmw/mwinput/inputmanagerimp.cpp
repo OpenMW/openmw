@@ -62,7 +62,7 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
-        , mGamepadGuiCursorEnabled(true)
+        , mGamepadGuiCursorEnabled(false)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
         , mGuiCursorX(0)
@@ -250,7 +250,7 @@ namespace MWInput
                 // If we are using the joystick as a GUI mouse, A must be handled via mouse.
                 if (mGamepadGuiCursorEnabled)
                     return false;
-                key = MyGUI::KeyCode::Space;
+                key = MyGUI::KeyCode::Return;
                 break;
             case SDL_CONTROLLER_BUTTON_B:
                 if (MyGUI::InputManager::getInstance().isModalAny())
@@ -259,7 +259,7 @@ namespace MWInput
                     MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
                 return true;
             case SDL_CONTROLLER_BUTTON_X:
-                key = MyGUI::KeyCode::Semicolon;
+                key = MyGUI::KeyCode::Tab;
                 break;
             case SDL_CONTROLLER_BUTTON_Y:
                 key = MyGUI::KeyCode::Apostrophe;
