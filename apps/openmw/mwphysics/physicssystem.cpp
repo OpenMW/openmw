@@ -510,7 +510,11 @@ namespace MWPhysics
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
+        #ifdef __SWITCH__
+        , mPhysicsDt(1.f / 15.f)
+        #else
         , mPhysicsDt(1.f / 60.f)
+        #endif // __SWITCH__
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 
