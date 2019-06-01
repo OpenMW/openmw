@@ -510,7 +510,11 @@ namespace MWPhysics
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
+        #ifdef __SWITCH__
+        , mPhysicsDt(1.f / 15.f)
+        #else
         , mPhysicsDt(1.f / 60.f)
+        #endif // __SWITCH__
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 
@@ -525,11 +529,7 @@ namespace MWPhysics
         mCollisionWorld->setForceUpdateAllAabbs(false);
 
         // Check if a user decided to override a physics system FPS
-#       ifdef __SWITCH__
-        const char* env = "15";
-#       else
         const char* env = getenv("OPENMW_PHYSICS_FPS");
-#       endif /*__SWITCH__ */
         if (env)
         {
             float physFramerate = std::atof(env);
