@@ -125,6 +125,7 @@
     Feature #5033: Magic armor mitigation for creatures
     Feature #5034: Make enchanting window stay open after a failed attempt
     Feature #5036: Allow scripted faction leaving
+    Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4721: Add NMake support to the Windows prebuild script
