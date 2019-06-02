@@ -345,7 +345,7 @@ namespace MWClass
                     store.get<ESM::Region>().find(cell->mRegion);
 
                 //name as is, not a token
-                return region->mName;
+                return MyGUI::TextIterator::toTagsString(region->mName);
             }
         }
 
