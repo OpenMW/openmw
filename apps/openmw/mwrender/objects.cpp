@@ -1,13 +1,8 @@
 #include "objects.hpp"
 
-#include <osg/Depth>
-#include <osg/PolygonMode>
+#include "occlusionquerynode.hpp"
 
-#include <osg/OcclusionQueryNode>
-#include <osg/Geode>
 #include <osg/UserDataContainer>
-#include <osgUtil/MeshOptimizers>
-#include <osgUtil/CullVisitor>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
@@ -20,42 +15,9 @@
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include "vismask.hpp"
-#include "renderbin.hpp"
 
 namespace MWRender
 {
-
-static osg::ref_ptr< osg::StateSet > OQStateSet;
-
-class HierarchicalBoundingOcclusionQueryNode : public osg::OcclusionQueryNode
-{
-    osg::StateSet* initMWOQState()
-    {
-        if(OQStateSet.valid()) return OQStateSet;
-        OQStateSet= new osg::StateSet;
-
-        OQStateSet->setRenderBinDetails( MWRender::RenderBin_OcclusionQuery, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
-
-        OQStateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
-        OQStateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
-        OQStateSet->setMode( GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
-
-        osg::ColorMask* cm = new osg::ColorMask( false, false, false, false );
-        OQStateSet->setAttributeAndModes( cm, osg::StateAttribute::ON |osg:: StateAttribute::PROTECTED);
-
-        osg::Depth* d = new osg::Depth( osg::Depth::LESS, 0.f, 1.f, false );
-        OQStateSet->setAttributeAndModes( d, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
-
-        return OQStateSet;
-    }
-
-public:
-    HierarchicalBoundingOcclusionQueryNode():osg::OcclusionQueryNode(){
-        getQueryGeometry()->setUseVertexBufferObjects(true);
-        setQueryStateSet(initMWOQState());
-    }
-
-};
 
 Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
     : mRootNode(rootNode)
@@ -69,6 +31,8 @@ Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Gro
     mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
     mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
     mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
+    mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
+    mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
 }
 
 Objects::~Objects()
@@ -92,12 +56,13 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
         cellnode = new osg::Group;
         if(mOQNSettings.enable)
         {
-            osg::OcclusionQueryNode* qnode = new HierarchicalBoundingOcclusionQueryNode;
+            StaticOcclusionQueryNode* qnode = new StaticOcclusionQueryNode;
             for(unsigned int i=0; i<8; ++i)
                 qnode->addChild(new osg::Group());
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setQueryMargin(mOQNSettings.querymargin);
             cellnode = qnode;
         }
         cellnode->setName("Cell Root");
@@ -130,7 +95,7 @@ struct OctreeAddRemove
     OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
     const OcclusionQuerySettings & mSettings;
 
-    void recursivCellAddStaticObject(osg::BoundingSphere&bs, osg::OcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
+    void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
     {
         osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
                                      childbs.center()[1]<bs.center()[1]?0:1,
@@ -139,44 +104,62 @@ struct OctreeAddRemove
         osg::Vec3 indexf = osg::Vec3(index[0]*2-1, index[1]*2-1, index[2]*2-1);
         osg::BoundingSphere bsi;
         bsi.radius() = bs.radius() * 0.5f;
-        bsi.center() = bs.center() + indexf*bsi.radius();
-        osg::ref_ptr<osg::OcclusionQueryNode> qnode;
+        bsi.center() = bs.center() + indexf * bsi.radius();
+        osg::ref_ptr<StaticOcclusionQueryNode> qnode;
         osg::ref_ptr<osg::Group> target = parent.getChild(ind)->asGroup();
 
-        osgUtil::GeometryCollector geomcollector(0, osgUtil::Optimizer::ALL_OPTIMIZATIONS);
-        target->accept(geomcollector);
-
-        if( target->getBound().radius() > mSettings.minOQNSize
+        osg::BoundingSphere bst (target->getBound());
+        if( bst.valid()
+            && bst.radius() > mSettings.minOQNSize
             && bsi.radius() > mSettings.minOQNSize
-            && geomcollector.getGeometryList().size() > mSettings.maxDrawablePerOQN
+            && target->getNumChildren()> mSettings.maxDrawablePerOQN
           )
         {
-            qnode=dynamic_cast<osg::OcclusionQueryNode*>(target.get());
+            qnode=dynamic_cast<StaticOcclusionQueryNode*>(target.get());
             if(!qnode.valid())
             {
                 OSG_INFO<<"new OcclusionQueryNode with radius "<<bs.radius()<<std::endl;
-                qnode= new HierarchicalBoundingOcclusionQueryNode;
+                qnode= new StaticOcclusionQueryNode;
                 for(unsigned int i=0; i<8; ++i)
                     qnode->addChild(new osg::Group);
 
+                qnode->setQueryMargin(mSettings.querymargin);
                 qnode->setVisibilityThreshold(mSettings.querypixelcount);
                 qnode->setDebugDisplay(mSettings.debugDisplay);
                 qnode->setQueryFrameCount(mSettings.queryframecount);
 
                 for(unsigned int i=0; i<target->getNumChildren(); ++i)
                 {
-                    osg::Group * child = target->getChild(i)->asGroup();
-                    osg::BoundingSphere bschild = child->getBound();
-                    recursivCellAddStaticObject(bsi, *qnode, child, bschild);
+                    osg::Group * childi = target->getChild(i)->asGroup();
+                    osg::BoundingSphere bschild (childi->getBound());
+                    recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
                 }
                 parent.setChild(ind, qnode);
+                //disable not terminal query
+                float powlev = float(1<<mSettings.maxBVHOQLevelCount);
+                if(powlev>1)
+                    if(bsi.radius() <powlev*mSettings.minOQNSize)
+                    {
+                        OSG_INFO<<"masking high level OQN"<<std::endl;
+                        parent.getQueryGeometry()->setNodeMask(0);
+                        parent.getDebugGeometry()->setNodeMask(0);
+                        parent.setQueriesEnabled(false);
+                        qnode->getQueryGeometry()->setNodeMask(0);
+                        qnode->getDebugGeometry()->setNodeMask(0);
+                        qnode->setQueriesEnabled(false);
+                    }
             }
             recursivCellAddStaticObject(bsi, *qnode, child, childbs);
+            qnode->invalidateQueryGeometry();
 
         }
         else
         {
             target->addChild(child);
+            unsigned int nodemask = VisMask::Mask_RenderToTexture;
+            parent.getQueryGeometry()->setNodeMask(nodemask);
+            parent.getDebugGeometry()->setNodeMask(nodemask);
+            parent.setQueriesEnabled(true);
         }
     }
 
@@ -213,7 +196,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     basenode->setNodeMask(Mask_Object);
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
-    osg::OcclusionQueryNode *ocq = dynamic_cast<osg::OcclusionQueryNode*>(cellroot);
+    StaticOcclusionQueryNode *ocq = dynamic_cast<StaticOcclusionQueryNode*>(cellroot);
     if(ocq)
     {
         // TO FIX Hacky way to retrieve cell bounds

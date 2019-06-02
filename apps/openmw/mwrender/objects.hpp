@@ -62,6 +62,8 @@ struct OcclusionQuerySettings
     float maxCellSize;
     unsigned int querypixelcount;
     unsigned int queryframecount;
+    float querymargin;
+    unsigned int maxBVHOQLevelCount;
     ///subdivision criterions
     float minOQNSize;
     unsigned int maxDrawablePerOQN;
