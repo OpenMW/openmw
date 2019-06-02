@@ -1119,41 +1119,36 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::updateIdleStormState(bool inwater)
 {
-    bool inStormDirection = false;
+    if (!mAnimation->hasAnimation("idlestorm") || mUpperBodyState != UpperCharState_Nothing || inwater)
+    {
+        mAnimation->disable("idlestorm");
+        return;
+    }
+
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
-        inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
-                > osg::DegreesToRadians(120.f);
-    }
-    if (inStormDirection && !inwater && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
-    {
-        float complete = 0;
-        mAnimation->getInfo("idlestorm", &complete);
-
-        if (complete == 0)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "start", "loop start", 0.0f, 0);
-        else if (complete == 1)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "loop start", "loop stop", 0.0f, ~0ul);
-    }
-    else
-    {
-        if (mUpperBodyState == UpperCharState_Nothing)
+        stormDirection.normalize();
+        characterDirection.normalize();
+        if (stormDirection * characterDirection < -0.5f)
         {
-            if (mAnimation->isPlaying("idlestorm"))
+            if (!mAnimation->isPlaying("idlestorm"))
             {
-                if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
-                {
-                    mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
-                                     1.0f, "loop stop", "stop", 0.0f, 0);
-                }
+                mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
+                                1.0f, "start", "stop", 0.0f, ~0ul);
             }
+            else
+            {
+                mAnimation->setLoopingEnabled("idlestorm", true);
+            }
+            return;
         }
-        else
-            mAnimation->disable("idlestorm");
+    }
+
+    if (mAnimation->isPlaying("idlestorm"))
+    {
+        mAnimation->setLoopingEnabled("idlestorm", false);
     }
 }
 
