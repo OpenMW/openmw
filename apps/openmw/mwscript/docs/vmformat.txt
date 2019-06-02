@@ -459,5 +459,7 @@ op 0x2000308: ToggleNavMesh
 op 0x2000309: ToggleActorsPaths
 op 0x200030a: SetNavMeshNumber
 op 0x200030b: Journal, explicit
+op 0x200030c: RepairedOnMe
+op 0x200030d: RepairedOnMe, explicit
 
 opcodes 0x200030c-0x3ffffff unused
