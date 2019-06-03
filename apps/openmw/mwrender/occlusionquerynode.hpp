@@ -1,5 +1,5 @@
 
-#include <osg/CopyOp>
+#include <osg/Version>
 #include <osg/Group>
 #include <osg/Geometry>
 #include <osg/Geode>
@@ -8,16 +8,15 @@
 
 namespace MWRender{
 
-class StaticOcclusionQueryNode : public osg:: OcclusionQueryNode
+class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
-protected:
-    static osg::ref_ptr< osg::StateSet > OQStateSet;
-    static osg::ref_ptr< osg::StateSet > OQDebugStateSet;
-    osg::StateSet *initMWOQState();
-    osg::StateSet *initMWOQDebugState();
-    float _margin;
 public:
-    StaticOcclusionQueryNode():osg::OcclusionQueryNode(),_margin(0.0f){
+
+    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f)
+#if  OSG_VERSION_LESS_THAN(3,6,4)
+      , _validQueryGeometry(false)
+#endif
+    {
         createSupportNodes();
         getQueryGeometry()->setUseVertexBufferObjects(true);
         setDataVariance(osg::Object::STATIC);
@@ -30,6 +29,15 @@ public:
     virtual void createSupportNodes();
     virtual osg::BoundingSphere computeBound() const;
 
+protected:
+    static osg::ref_ptr< osg::StateSet > OQStateSet;
+    static osg::ref_ptr< osg::StateSet > OQDebugStateSet;
+    osg::StateSet *initMWOQState();
+    osg::StateSet *initMWOQDebugState();
+    float _margin;
+#if  OSG_VERSION_LESS_THAN(3,6,4)
+    mutable bool _validQueryGeometry;
+#endif
 
 };
 
