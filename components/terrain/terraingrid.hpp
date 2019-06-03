@@ -6,6 +6,7 @@
 #include <osg/Vec2f>
 
 #include "world.hpp"
+#include "components/sceneutil/occlusionquerynode.hpp"
 
 namespace Terrain
 {
@@ -34,6 +35,7 @@ namespace Terrain
         unsigned int mNumSplits;
 
         CellBorder::CellGrid mGrid;
+        SceneUtil::OcclusionQuerySettings mOQNSettings;
     };
 }
 

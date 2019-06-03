@@ -6,6 +6,7 @@
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "components/settings/settings.hpp"
 
 namespace Terrain
 {
@@ -22,6 +23,15 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mNumSplits(4)
 {
+    mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
+    mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
+    mOQNSettings.querypixelcount = Settings::Manager::getInt("visibility threshold", "OcclusionQueries");
+    mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
+    mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
+    mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
+    mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
+    mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
+    mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
 }
 
 TerrainGrid::~TerrainGrid()
@@ -59,6 +69,17 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0);
         if (!node)
             return nullptr;
+        bool isOQter=Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
+        if(mOQNSettings.enable && isOQter){
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->addChild(node);
+            node=qnode;
+        }
+
         if (parent)
             parent->addChild(node);
 
