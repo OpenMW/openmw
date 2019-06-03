@@ -106,6 +106,7 @@
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
     Feature #4209: Editor: Faction rank sub-table
+    Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly
     Feature #4360: Improve default controller bindings
     Feature #4673: Weapon sheathing
