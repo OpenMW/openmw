@@ -96,6 +96,7 @@
     Bug #5028: Offered price caps are not trading-specific
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Bug #5047: # in cell names sets color
+    Bug #5050: Invalid spell effects are not handled gracefully
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
