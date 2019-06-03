@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #1515: Opening console masks dialogue, inventory menu
     Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
@@ -12,6 +13,7 @@
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
+    Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
@@ -93,6 +95,7 @@
     Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
     Bug #5038: Enchanting success chance calculations are blatantly wrong
+    Bug #5047: # in cell names sets color
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

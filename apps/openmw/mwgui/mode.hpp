@@ -12,7 +12,6 @@ namespace MWGui
       GM_Companion,
       GM_MainMenu,      // Main menu mode
 
-      GM_Console,       // Console mode
       GM_Journal,       // Journal mode
 
       GM_Scroll,        // Read scroll

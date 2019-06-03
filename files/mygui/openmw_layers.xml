@@ -10,7 +10,6 @@
     <Layer name="JournalBooks" type="ScalingLayer" pick="true">
         <Property key="Size" value="600 520"/>
     </Layer>
-    <Layer name="Console" overlapped="false" pick="true"/>
     <Layer name="Debug" overlapped="true" pick="true"/>
     <Layer name="Notification" overlapped="false" pick="false"/>
     <Layer name="Popup" overlapped="true" pick="true"/>

@@ -9,7 +9,7 @@ To our knowledge, the format is undocumented.
 
 OpenMW can load this format and convert it on the fly into something usable 
 (see font loader `source code <https://github.com/OpenMW/openmw/blob/master/components/fontloader/fontloader.cpp#L210>`_). 
-In OpenMW 0.32, an --export-fonts command line option was added to write the converted font 
+You can use --export-fonts command line option to write the converted font
 (a PNG image and an XML file describing the position of each glyph in the image) to the current directory.
 
 TrueType fonts
@@ -17,107 +17,26 @@ TrueType fonts
 
 Unlike vanilla Morrowind, OpenMW directly supports TrueType (``.ttf``) fonts.
 
-0.45.0+ way
------------
 This is the recommended way to install replacement fonts.
 
--	To replace the primary "Magic Cards" font:
+	1.	Download `TrueType fonts for OpenMW <https://www.nexusmods.com/morrowind/mods/46854>`_
+	2.	Place the ``Fonts`` folder from archive to the configuration folder. Use :doc:`paths` article to find the folder.
 
-	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
-	2.	Create ``Fonts`` folder at the location of your ``openmw.cfg``.
-	3.	Copy ``openmw_font.xml`` and ``Pelagiad.ttf`` files into the folder.
-	4.	Either remove the ``MonoFont`` entry from the created ``openmw_font.xml`` or copy the ``DejaVuLGCSansMono.ttf`` to the ``Fonts`` folder (prefer latter option on Windows).
-	5.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
-	6.	Pelagiad glyphs may appear to be pretty small, so open ``settings.cfg`` and adjust the following settings as you deem necessary::
+Now Fonts folder should include ``openmw_font.xml`` file and three ``.ttf`` files.
+
+If desired, you can now delete the ``Data Files/Fonts`` directory.
+
+It is also possible to adjust the font size and resolution::
 
 			[GUI]
-			font size = 17
+			font size = 16
 			ttf resolution = 96
 
--	You can also replace the Daedric font:
+The ``font size`` setting accepts clamped values in range from 12 to 20 while ``ttf resolution`` setting accepts values from 48 to 960.
 
-	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
-	2.	Install ``OMWAyembedt.otf`` into the ``Fonts`` folder.
-	3.	Add the following lines into ``openmw_font.xml``::
-
-			<Resource type="ResourceTrueTypeFont" name="Daedric">
-				<Property key="Source" value="OMWAyembedt.otf"/>
-				<Property key="Antialias" value="false"/>
-				<Property key="TabWidth" value="8"/>
-				<Property key="OffsetHeight" value="0"/>
-				<Codes>
-					<Code range="32"/>
-					<Code range="65 90"/>
-					<Code range="97 122"/>
-				</Codes>
-			</Resource>
-
-	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
-
-Any Resolution or Size properties in the file have no effect because the engine settings override them.
+Any Resolution or Size properties in the XML file have no effect because the engine settings override them.
 
 The engine automatically takes UI scaling factor into account, so don't account for it when tweaking the settings.
-
-Pre-0.45.0 way
---------------
-
--	To replace the primary "Magic Cards" font:
-
-	1.	Download `Pelagiad <https://isaskar.github.io/Pelagiad/>`_ by Isak Larborn (aka Isaskar).
-	2.	Install the ``openmw_font.xml`` file into ``resources/mygui/openmw_font.xml`` in your OpenMW installation.
-	3.	Copy ``Pelagiad.ttf`` into ``resources/mygui/`` as well.
-	4.	If desired, you can now delete the original ``Magic_Cards.*`` files from your ``Data Files/Fonts`` directory.
--	You can also replace the Daedric font:
-
-	1.	Download `Ayembedt <https://github.com/georgd/OpenMW-Fonts>`_ by Georg Duffner.
-	2.	Install ``OMWAyembedt.otf`` into ``/resources/mygui/`` folder in your OpenMW installation.
-	3.	Add the following lines to ``openmw_font.xml``::
-
-			<Resource type="ResourceTrueTypeFont" name="Daedric">
-				<Property key="Source" value="OMWAyembedt.otf"/>
-				<Property key="Size" value="24"/>
-				<Property key="Resolution" value="50"/>
-				<Property key="Antialias" value="false"/>
-				<Property key="TabWidth" value="8"/>
-				<Property key="OffsetHeight" value="0"/>
-				<Codes>
-					<Code range="32"/>
-					<Code range="65 90"/>
-					<Code range="97 122"/>
-				</Codes>
-			</Resource>
-
-	4.	This font is missing a few glyphs (mostly punctuation), but it has all the primary glyphs. If desired, you can now delete the original ``daedric.*`` files from your ``Data Files/Fonts`` directory.
-
--	Another replacement for the Daedric font is `Oblivion <http://www.uesp.net/wiki/File:Obliviontt.zip>`_ by Dongle.
-
-	1.	Install the ``Oblivion.ttf`` file into ``resources/mygui/``.
-	2.	The ``openmw_font.xml`` entry is::
-
-			<Resource type="ResourceTrueTypeFont" name="Daedric">
-				<Property key="Source" value="Oblivion.ttf"/>
-				<Property key="Size" value="30"/>
-				<Property key="Resolution" value="50"/>
-				<Property key="Antialias" value="false"/>
-				<Property key="TabWidth" value="8"/>
-				<Property key="OffsetHeight" value="0"/>
-				<Codes>
-					<Code range="32 34"/>
-					<Code range="39"/>
-					<Code range="44 46"/>
-					<Code range="48 59"/>
-					<Code range="63"/>
-					<Code range="65 90"/>
-					<Code range="97 122"/>
-					<Code range="172 173"/>
-					<Code range="255"/>
-					<Code range="376"/>
-					<Code range="894"/>
-					<Code range="8211 8212"/>
-					<Code range="8216 8217"/>
-					<Code range="8220 8221"/>
-				</Codes>
-			</Resource>
 
 Bitmap fonts
 ------------

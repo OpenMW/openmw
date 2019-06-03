@@ -111,6 +111,24 @@ namespace
         }
     };
 
+    class BlendFuncFirst
+    {
+    public:
+        static const osg::ref_ptr<osg::BlendFunc>& value()
+        {
+            static BlendFuncFirst instance;
+            return instance.mValue;
+        }
+
+    private:
+        osg::ref_ptr<osg::BlendFunc> mValue;
+
+        BlendFuncFirst()
+            : mValue(new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ZERO))
+        {
+        }
+    };
+
     class BlendFunc
     {
     public:
@@ -124,9 +142,8 @@ namespace
         osg::ref_ptr<osg::BlendFunc> mValue;
 
         BlendFunc()
-            : mValue(new osg::BlendFunc)
+            : mValue(new osg::BlendFunc(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE))
         {
-            mValue->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE);
         }
     };
 
@@ -166,19 +183,16 @@ namespace Terrain
 
             osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
+            stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+
             if (!firstLayer)
             {
-                stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
                 stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
                 stateset->setAttributeAndModes(EqualDepth::value(), osg::StateAttribute::ON);
             }
-            // disable fog if we're the first layer of several - supposed to be completely black
-            if (firstLayer && blendmaps.size() > 0)
+            else
             {
-                osg::ref_ptr<osg::Fog> fog (new osg::Fog);
-                fog->setStart(10000000);
-                fog->setEnd(10000000);
-                stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(BlendFuncFirst::value(), osg::StateAttribute::ON);
                 stateset->setAttributeAndModes(LequalDepth::value(), osg::StateAttribute::ON);
             }
 
@@ -193,7 +207,7 @@ namespace Terrain
 
                 stateset->addUniform(new osg::Uniform("diffuseMap", texunit));
 
-                if(!firstLayer)
+                if (!blendmaps.empty())
                 {
                     ++texunit;
                     osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
@@ -212,7 +226,7 @@ namespace Terrain
 
                 Shader::ShaderManager::DefineMap defineMap;
                 defineMap["normalMap"] = (it->mNormalMap) ? "1" : "0";
-                defineMap["blendMap"] = !firstLayer ? "1" : "0";
+                defineMap["blendMap"] = (!blendmaps.empty()) ? "1" : "0";
                 defineMap["specularMap"] = it->mSpecular ? "1" : "0";
                 defineMap["parallax"] = (it->mNormalMap && it->mParallax) ? "1" : "0";
 
@@ -229,7 +243,17 @@ namespace Terrain
             }
             else
             {
-                if(!firstLayer)
+                // Add the actual layer texture
+                osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
+                stateset->setTextureAttributeAndModes(texunit, tex.get());
+
+                if (layerTileSize != 1.f)
+                    stateset->setTextureAttributeAndModes(texunit, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+
+                ++texunit;
+
+                // Multiply by the alpha map
+                if (!blendmaps.empty())
                 {
                     osg::ref_ptr<osg::Texture2D> blendmap = blendmaps.at(blendmapIndex++);
 
@@ -242,12 +266,6 @@ namespace Terrain
                     ++texunit;
                 }
 
-                // Add the actual layer texture multiplied by the alpha map.
-                osg::ref_ptr<osg::Texture2D> tex = it->mDiffuseMap;
-                stateset->setTextureAttributeAndModes(texunit, tex.get());
-
-                if (layerTileSize != 1.f)
-                    stateset->setTextureAttributeAndModes(texunit, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
             }
 
             stateset->setRenderBinDetails(passIndex++, "RenderBin");
