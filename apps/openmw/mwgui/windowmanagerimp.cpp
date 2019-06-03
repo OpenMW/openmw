@@ -1156,6 +1156,10 @@ namespace MWGui
         mCursorVisible = visible;
         if (!visible)
             mCursorActive = false;
+#ifdef __SWITCH__ // the Switch does not have a system/SDL cursor, so we make do with MyGUI's
+        MyGUI::PointerManager::getInstance().setVisible(visible);
+#endif
+
     }
 
     void WindowManager::setCursorActive(bool active)

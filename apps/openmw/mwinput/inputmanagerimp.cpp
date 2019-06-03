@@ -62,7 +62,7 @@ namespace MWInput
         , mTimeIdle(0.f)
         , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
-        , mGamepadGuiCursorEnabled(false)
+        , mGamepadGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
         , mGuiCursorX(0)
@@ -564,8 +564,8 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor;
-            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor;
+            float xmove = xAxis * dt * 1000.0f * mInvUiScalingFactor;
+            float ymove = yAxis * dt * 1000.0f * mInvUiScalingFactor;
             if (xmove != 0|| ymove != 0)
             {
                 mGuiCursorX += xmove;
