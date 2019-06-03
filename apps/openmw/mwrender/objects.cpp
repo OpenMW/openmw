@@ -54,7 +54,7 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
         cellnode = new osg::Group;
         if(mOQNSettings.enable)
         {
-            StaticOcclusionQueryNode* qnode = new StaticOcclusionQueryNode;
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
             for(unsigned int i=0; i<8; ++i)
                 qnode->addChild(new osg::Group());
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
@@ -97,7 +97,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     basenode->setNodeMask(Mask_Object);
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
-    StaticOcclusionQueryNode *ocq = dynamic_cast<StaticOcclusionQueryNode*>(cellroot);
+    SceneUtil::StaticOcclusionQueryNode *ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellroot);
     if(ocq)
     {
         // TO FIX Hacky way to retrieve cell bounds
@@ -114,7 +114,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         osg::BoundingSphere bsi = basenode->getBound();
         if(bs.valid() && bsi.valid() )
         {
-            OctreeAddRemove adder(mOQNSettings);
+            SceneUtil::OctreeAddRemove adder(mOQNSettings);
             adder.recursivCellAddStaticObject(bs, *ocq, basenode, bsi);
         }
     }
@@ -184,7 +184,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         osg::OcclusionQueryNode* ocq = dynamic_cast<osg::OcclusionQueryNode*>(cellroot);
         if(ocq)
         {
-            OctreeAddRemove remover(mOQNSettings);
+            SceneUtil::OctreeAddRemove remover(mOQNSettings);
             if(!remover.recursivCellRemoveStaticObject(*ocq, ptr.getRefData().getBaseNode()))
                 OSG_WARN<<"removal failed"<<std::endl;
         }

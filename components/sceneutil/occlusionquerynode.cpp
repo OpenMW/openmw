@@ -9,12 +9,12 @@
 #include <osg/PolygonOffset>
 #include <osg/Depth>
 
-#include "renderbin.hpp"
-#include "vismask.hpp"
+#include "apps/openmw/mwrender/renderbin.hpp"
+#include "apps/openmw/mwrender/vismask.hpp"
 
 using namespace osg;
 
-namespace MWRender
+namespace SceneUtil
 {
 
 GLushort cubeindices[] = { 0, 1, 2, 3,  4, 5, 6, 7,
@@ -218,7 +218,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     else
     {
         target->addChild(child);
-        unsigned int nodemask = VisMask::Mask_RenderToTexture;
+        unsigned int nodemask = MWRender::VisMask::Mask_RenderToTexture;
         parent.getQueryGeometry()->setNodeMask(nodemask);
         parent.getDebugGeometry()->setNodeMask(nodemask);
         parent.setQueriesEnabled(true);

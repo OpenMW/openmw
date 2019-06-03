@@ -8,7 +8,7 @@
 #include <osg/Object>
 
 #include "../mwworld/ptr.hpp"
-#include "occlusionquerynode.hpp"
+#include "components/sceneutil/occlusionquerynode.hpp"
 
 namespace osg
 {
@@ -71,7 +71,7 @@ class Objects{
 
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-    OcclusionQuerySettings mOQNSettings;
+    SceneUtil::OcclusionQuerySettings mOQNSettings;
 
     /// @return pointer to cell root
     osg::Group *insertBegin(const MWWorld::Ptr& ptr);

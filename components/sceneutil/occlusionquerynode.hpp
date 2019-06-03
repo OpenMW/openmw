@@ -8,7 +8,7 @@
 
 #include <osg/OcclusionQueryNode>
 
-namespace MWRender{
+namespace SceneUtil{
 
 class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
