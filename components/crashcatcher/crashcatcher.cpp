@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #ifdef __SWITCH__
-/*
+
 #include <switch.h>
 
 extern "C" {
@@ -35,7 +35,7 @@ void __libnx_exception_handler(ThreadExceptionDump *ctx)
 }
 
 }
-*/
+
 #else
 
 #include <sys/types.h>
