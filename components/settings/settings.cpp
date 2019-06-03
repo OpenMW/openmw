@@ -355,8 +355,8 @@ float Manager::getFloat (const std::string& setting, const std::string& category
     const std::string value = getString(setting, category);
     try
     {
-        // We have to rely on Boost because std::stof from C++11
-        // uses the current locale for separators which we don't want and often silently ignores parsing errors.
+        // We have to rely on Boost because std::stof from C++11 uses the current locale
+        // for separators (which is undesired) and it often silently ignores parsing errors.
         return boost::lexical_cast<float>(value);
     }
     catch (boost::bad_lexical_cast&)
