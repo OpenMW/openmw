@@ -1,3 +1,5 @@
+#ifndef OCCLUSION_QUERY_OBJECTS_H
+#define OCCLUSION_QUERY_OBJECTS_H
 
 #include <osg/Version>
 #include <osg/Group>
@@ -41,5 +43,28 @@ protected:
 
 };
 
-}
+struct OcclusionQuerySettings
+{
+    bool enable;
+    bool debugDisplay;
+    float maxCellSize;
+    unsigned int querypixelcount;
+    unsigned int queryframecount;
+    float querymargin;
+    unsigned int maxBVHOQLevelCount;
+    ///subdivision criterions
+    float minOQNSize;
+    unsigned int maxDrawablePerOQN;
 
+};
+struct OctreeAddRemove
+{
+    OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
+    const OcclusionQuerySettings & mSettings;
+
+    void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);
+
+    bool recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
+};
+}
+#endif

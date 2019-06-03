@@ -10,6 +10,7 @@
 #include <osg/Depth>
 
 #include "renderbin.hpp"
+#include "vismask.hpp"
 
 using namespace osg;
 
@@ -153,6 +154,99 @@ void StaticOcclusionQueryNode::createSupportNodes()
     //   between all OQNs for efficiency.
     setQueryStateSet( initMWOQState() );
     setDebugStateSet( initMWOQDebugState() );
+}
+
+
+void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
+{
+    osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
+                                 childbs.center()[1]<bs.center()[1]?0:1,
+                                 childbs.center()[2]<bs.center()[2]?0:1);
+    unsigned int ind = index[0] + index[1]*2 + index[2]*4;
+    osg::Vec3 indexf = osg::Vec3(index[0]*2-1, index[1]*2-1, index[2]*2-1);
+    osg::BoundingSphere bsi;
+    bsi.radius() = bs.radius() * 0.5f;
+    bsi.center() = bs.center() + indexf * bsi.radius();
+    osg::ref_ptr<StaticOcclusionQueryNode> qnode;
+    osg::ref_ptr<osg::Group> target = parent.getChild(ind)->asGroup();
+
+    osg::BoundingSphere bst (target->getBound());
+    if( bst.valid()
+        && bst.radius() > mSettings.minOQNSize
+        && bsi.radius() > mSettings.minOQNSize
+        && target->getNumChildren()> mSettings.maxDrawablePerOQN
+      )
+    {
+        qnode=dynamic_cast<StaticOcclusionQueryNode*>(target.get());
+        if(!qnode.valid())
+        {
+            OSG_INFO<<"new OcclusionQueryNode with radius "<<bs.radius()<<std::endl;
+            qnode= new StaticOcclusionQueryNode;
+            for(unsigned int i=0; i<8; ++i)
+                qnode->addChild(new osg::Group);
+
+            qnode->setQueryMargin(mSettings.querymargin);
+            qnode->setVisibilityThreshold(mSettings.querypixelcount);
+            qnode->setDebugDisplay(mSettings.debugDisplay);
+            qnode->setQueryFrameCount(mSettings.queryframecount);
+
+            for(unsigned int i=0; i<target->getNumChildren(); ++i)
+            {
+                osg::Group * childi = target->getChild(i)->asGroup();
+                osg::BoundingSphere bschild (childi->getBound());
+                recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
+            }
+            parent.setChild(ind, qnode);
+            //disable not terminal query
+            float powlev = float(1<<mSettings.maxBVHOQLevelCount);
+            if(powlev>1)
+                if(bsi.radius() <powlev*mSettings.minOQNSize)
+                {
+                    OSG_INFO<<"masking high level OQN"<<std::endl;
+                    parent.getQueryGeometry()->setNodeMask(0);
+                    parent.getDebugGeometry()->setNodeMask(0);
+                    parent.setQueriesEnabled(false);
+                    qnode->getQueryGeometry()->setNodeMask(0);
+                    qnode->getDebugGeometry()->setNodeMask(0);
+                    qnode->setQueriesEnabled(false);
+                }
+        }
+        recursivCellAddStaticObject(bsi, *qnode, child, childbs);
+        qnode->invalidateQueryGeometry();
+
+    }
+    else
+    {
+        target->addChild(child);
+        unsigned int nodemask = VisMask::Mask_RenderToTexture;
+        parent.getQueryGeometry()->setNodeMask(nodemask);
+        parent.getDebugGeometry()->setNodeMask(nodemask);
+        parent.setQueriesEnabled(true);
+    }
+}
+
+bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
+{
+    osg::Group * pchild; bool removed=false;
+    for(unsigned int i=0; i< parent.getNumChildren(); ++i)
+    {
+        pchild = parent.getChild(i)->asGroup();
+        if((removed = pchild->removeChild(childtoremove))) break;
+    }
+    //TODO check criterion for parent splitting
+
+    if(removed)
+        return true;
+    else
+    {
+        for(unsigned int i=0; i< parent.getNumChildren(); ++i)
+        {
+            osg::OcclusionQueryNode * child = dynamic_cast<osg::OcclusionQueryNode*>(parent.getChild(i));
+            if(child && recursivCellRemoveStaticObject(*child, childtoremove))
+                return true;
+        }
+    }
+    return false;
 }
 
 }

@@ -8,6 +8,7 @@
 #include <osg/Object>
 
 #include "../mwworld/ptr.hpp"
+#include "occlusionquerynode.hpp"
 
 namespace osg
 {
@@ -55,20 +56,7 @@ public:
     MWWorld::Ptr mPtr;
 };
 
-struct OcclusionQuerySettings
-{
-    bool enable;
-    bool debugDisplay;
-    float maxCellSize;
-    unsigned int querypixelcount;
-    unsigned int queryframecount;
-    float querymargin;
-    unsigned int maxBVHOQLevelCount;
-    ///subdivision criterions
-    float minOQNSize;
-    unsigned int maxDrawablePerOQN;
 
-};
 
 class Objects{
     typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
