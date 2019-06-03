@@ -19,6 +19,7 @@
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
+    Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
     Bug #4705: Editor: unable to open exterior cell views from Instances table
