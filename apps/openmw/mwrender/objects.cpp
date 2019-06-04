@@ -115,7 +115,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         if(bs.valid() && bsi.valid() )
         {
             SceneUtil::OctreeAddRemove adder(mOQNSettings);
-            adder.recursivCellAddStaticObject(bs, *ocq, basenode, bsi);
+            adder.addStaticObject(bs, *ocq, basenode);
         }
     }
     else cellroot->addChild(basenode);
@@ -185,7 +185,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         if(ocq)
         {
             SceneUtil::OctreeAddRemove remover(mOQNSettings);
-            if(!remover.recursivCellRemoveStaticObject(*ocq, ptr.getRefData().getBaseNode()))
+            if(!remover.removeStaticObject(*ocq, ptr.getRefData().getBaseNode()))
                 OSG_WARN<<"removal failed"<<std::endl;
         }
         else cellroot->removeChild(ptr.getRefData().getBaseNode());

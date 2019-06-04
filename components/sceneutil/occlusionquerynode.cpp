@@ -155,7 +155,31 @@ void StaticOcclusionQueryNode::createSupportNodes()
     setDebugStateSet( initMWOQDebugState() );
 }
 
+class InvalidateOQboundsVisitor : public osg::NodeVisitor
+{
+public:
+    InvalidateOQboundsVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) { }
+    virtual void apply(osg::OcclusionQueryNode& dr)
+    {
+        StaticOcclusionQueryNode* qnode = dynamic_cast<StaticOcclusionQueryNode*>(&dr);
+        if(qnode){
+            qnode->invalidateQueryGeometry();
+        }
+        traverse(dr);
+    }
+};
 
+void OctreeAddRemove::addStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child)
+{
+    osg::BoundingSphere bsc = child->getBound();
+    recursivCellAddStaticObject(bs, parent, child, bsc);
+    invalidateOQbounds(parent);
+}
+void OctreeAddRemove::invalidateOQbounds(StaticOcclusionQueryNode &parent)
+{
+    InvalidateOQboundsVisitor vis;
+    parent.accept(vis);
+}
 void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
 {
     osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
@@ -199,7 +223,6 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
 
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
-        qnode->invalidateQueryGeometry();
 
         //disable high BVH queries level
         float powlev = float(1<<mSettings.maxBVHOQLevelCount);
@@ -225,7 +248,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     }
 }
 
-bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
+bool OctreeAddRemove::removeStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
 {
     osg::Group * pchild; bool removed=false;
     for(unsigned int i=0; i< parent.getNumChildren(); ++i)
@@ -242,7 +265,7 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
         for(unsigned int i=0; i< parent.getNumChildren(); ++i)
         {
             osg::OcclusionQueryNode * child = dynamic_cast<osg::OcclusionQueryNode*>(parent.getChild(i));
-            if(child && recursivCellRemoveStaticObject(*child, childtoremove))
+            if(child && removeStaticObject(*child, childtoremove))
                 return true;
         }
     }

@@ -26,7 +26,7 @@ public:
     inline osg::Geometry* getDebugGeometry() { return static_cast<osg::Geometry*>(_debugGeode->getChild(0)); }
     inline void setQueryMargin(float m) { _margin = m; }
     inline float getQueryMargin() const { return _margin; }
-    inline void invalidateQueryGeometry() {  _validQueryGeometry = false;  }
+    inline void invalidateQueryGeometry() {  _validQueryGeometry = _boundingSphereComputed = false;  }
 
     virtual void createSupportNodes();
     virtual osg::BoundingSphere computeBound() const;
@@ -61,10 +61,12 @@ struct OctreeAddRemove
 {
     OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
     const OcclusionQuerySettings & mSettings;
-
+    bool removeStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
+    void addStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child);
+protected:
+    void invalidateOQbounds(StaticOcclusionQueryNode &parent);
     void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);
 
-    bool recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
 };
 }
 #endif
