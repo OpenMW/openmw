@@ -10,7 +10,6 @@
 #include <osg/Material>
 #include <osg/TexEnvCombine>
 #include <osg/TexMat>
-#include <osg/OcclusionQueryNode>
 #include <osg/ColorMask>
 #include <osg/PositionAttitudeTransform>
 #include <osg/BlendFunc>
@@ -29,7 +28,7 @@
 #include <osgParticle/ModularProgram>
 
 #include <components/misc/rng.hpp>
-
+#include <components/sceneutil/occlusionquerynode.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/scenemanager.hpp>
@@ -555,13 +554,18 @@ private:
     /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
     osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
     {
-        osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;
-        oqn->setQueriesEnabled(true);
+        osg::ref_ptr<osg::OcclusionQueryNode> oqn = new SceneUtil::StaticOcclusionQueryNode;
 
         // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
         // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
         // is only called once.
         // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
+
+        //hack to force validity of query geometry
+        oqn->addChild(mGeom);
+        oqn->getBound();
+        oqn->removeChildren(0,1);
+
         oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
 
         // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't originally intended to allow this,
@@ -573,7 +577,7 @@ private:
         queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
         queryGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
-        // Hack to disable unwanted awful code inside OcclusionQueryNode::computeBound.
+        // don't update querygeometry
         oqn->setComputeBoundingSphereCallback(new DummyComputeBoundCallback);
         // Still need a proper bounding sphere.
         oqn->setInitialBound(queryGeom->getBound());
@@ -715,8 +719,8 @@ private:
     protected:
         float getVisibleRatio (osg::Camera* camera)
         {
-            int visible = mOcclusionQueryVisiblePixels->getQueryGeometry()->getNumPixels(camera);
-            int total = mOcclusionQueryTotalPixels->getQueryGeometry()->getNumPixels(camera);
+            int visible = static_cast<SceneUtil::MWQueryGeometry*>(mOcclusionQueryVisiblePixels->getQueryGeometry())->getNumPixels(camera);
+            int total = static_cast<SceneUtil::MWQueryGeometry*>(mOcclusionQueryTotalPixels->getQueryGeometry())->getNumPixels(camera);
 
             float visibleRatio = 0.f;
             if (total > 0)
