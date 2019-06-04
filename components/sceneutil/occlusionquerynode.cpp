@@ -492,7 +492,7 @@ void MWQueryGeometry::releaseGLObjects( osg::State* state ) const
             if (tr->_contextID == contextID)
             {
 #if OSG_VERSION_LESS_THAN(3,6,0)
-                MWQueryGeometry::deleteQueryObject( contextID, tr._id );
+                MWQueryGeometry::deleteQueryObject( contextID, tr->_id );
 #else
                 osg::get<QueryObjectManager>(contextID)->scheduleGLObjectForDeletion(tr->_id );
 #endif
