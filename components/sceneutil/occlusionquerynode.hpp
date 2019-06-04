@@ -69,7 +69,7 @@ class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
 public:
 
-    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f)
+    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _isgetpassedearlyexitenable(true)
 #if  OSG_VERSION_LESS_THAN(3,6,4)
       , _validQueryGeometry(false)
 #endif
@@ -81,6 +81,12 @@ public:
     inline osg::Geometry* getDebugGeometry() { return static_cast<osg::Geometry*>(_debugGeode->getChild(0)); }
     inline void setQueryMargin(float m) { _margin = m; }
     inline float getQueryMargin() const { return _margin; }
+
+    //enable or disable early exit for not continuous OQN (under a lod or switch)
+    //NB: disable it for hierarchical OQN
+    inline void setEarlyExitOn(bool m) { _isgetpassedearlyexitenable = m; }
+    inline float getEarlyExit() const { return _isgetpassedearlyexitenable; }
+
     inline void invalidateQueryGeometry() {  _validQueryGeometry = _boundingSphereComputed = false;  }
 
     virtual void createSupportNodes();
@@ -93,6 +99,7 @@ protected:
     osg::StateSet *initMWOQState();
     osg::StateSet *initMWOQDebugState();
     float _margin;
+    bool _isgetpassedearlyexitenable;
 #if  OSG_VERSION_LESS_THAN(3,6,4)
     mutable bool _validQueryGeometry;
 #endif

@@ -89,15 +89,16 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         return _passed;
     }
 
-    {
+    //seems to bug (flickering) if OQN is not the last one in the tre
+    if(_isgetpassedearlyexitenable){
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
         //  2) we haven't rendered for an abnormally long time (probably because we're an out-of-range LOD child)
         // In these cases, assume we're visible to avoid blinking.
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
         const unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
-        if( ( lastQueryFrame == 0 )
-             ||( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount + 1) )
+        if( //( lastQueryFrame == 0 ) ||
+            ( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount+1 ) )
                 )
         {
             _passed = true;
@@ -643,14 +644,14 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     if( bst.valid()
         && bst.radius() > mSettings.minOQNSize
         && bsi.radius() > mSettings.minOQNSize
-        && target->getNumChildren()> mSettings.maxDrawablePerOQN
+        && target->getNumChildren() > mSettings.maxDrawablePerOQN
       )
     {
-        qnode=dynamic_cast<StaticOcclusionQueryNode*>(target.get());
+        qnode = dynamic_cast<StaticOcclusionQueryNode*>(target.get());
         if(!qnode.valid())
         {
             OSG_INFO<<"new OcclusionQueryNode with radius "<<bs.radius()<<std::endl;
-            qnode= new StaticOcclusionQueryNode;
+            qnode = new StaticOcclusionQueryNode;
             for(unsigned int i=0; i<8; ++i)
                 qnode->addChild(new osg::Group);
 
@@ -666,6 +667,12 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
             }
             parent.setChild(ind, qnode);
+            //avoid flickering when OQN goes hierarchical
+            if(mSettings.maxBVHOQLevelCount > 1)
+            {
+                parent.setEarlyExitOn(false);
+                qnode->setEarlyExitOn(false);
+            }
 
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
