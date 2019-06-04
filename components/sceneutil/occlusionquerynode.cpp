@@ -9,6 +9,10 @@
 #include <osg/PolygonOffset>
 #include <osg/Depth>
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3,6,0)
+#include <osg/ContextData>
+#endif
+
 #include "apps/openmw/mwrender/renderbin.hpp"
 
 using namespace osg;
@@ -60,6 +64,80 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
     return OQDebugStateSet;
 }
 
+bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv )
+{
+    if ( !_enabled )
+    {
+        // Queries are not enabled. The caller should be osgUtil::CullVisitor,
+        //   return true to traverse the subgraphs.
+        _passed = true;
+        return _passed;
+    }
+
+    MWQueryGeometry* qg = static_cast< MWQueryGeometry* >( _queryGeode->getDrawable( 0 ) );
+
+    if ( !_validQueryGeometry )
+    {
+        // There're cases that the occlusion test result has been retrieved
+        // after the query geometry has been changed, it's the result of the
+        // geometry before the change.
+        qg->reset();
+
+        // The box of the query geometry is invalid, return false to not traverse
+        // the subgraphs.
+        _passed = false;
+        return _passed;
+    }
+
+    {
+        // Two situations where we want to simply do a regular traversal:
+        //  1) it's the first frame for this camera
+        //  2) we haven't rendered for an abnormally long time (probably because we're an out-of-range LOD child)
+        // In these cases, assume we're visible to avoid blinking.
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
+        const unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
+        if( ( lastQueryFrame == 0 )
+             ||( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount + 1) )
+                )
+        {
+            _passed = true;
+            return _passed;
+        }
+    }
+
+
+    // Get the near plane for the upcoming distance calculation.
+    osg::Matrix::value_type nearPlane;
+    const osg::Matrix& proj( camera->getProjectionMatrix() );
+    if( ( proj(3,3) != 1. ) || ( proj(2,3) != 0. ) || ( proj(1,3) != 0. ) || ( proj(0,3) != 0.) )
+        nearPlane = proj(3,2) / (proj(2,2)-1.);  // frustum / perspective
+    else
+        nearPlane = (proj(3,2)+1.) / proj(2,2);  // ortho
+
+    // If the distance from the near plane to the bounding sphere shell is positive, retrieve
+    //   the results. Otherwise (near plane inside the BS shell) we are considered
+    //   to have passed and don't need to retrieve the query.
+    const osg::BoundingSphere& bs ( qg->getInitialBound());
+    osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
+
+    osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
+    _passed =  ( distance <= 0.0 );
+    if (!_passed)
+    {
+        MWQueryGeometry::QueryResult result = qg->getMWQueryResult( camera );
+        if (!result.valid)
+        {
+           // The query hasn't finished yet and the result still
+           // isn't available, return true to traverse the subgraphs.
+           _passed = true;
+           return _passed;
+        }
+
+        _passed = ( result.numPixels >  _visThreshold );
+    }
+
+    return _passed;
+}
 osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
 {
     if(!_validQueryGeometry)
@@ -123,8 +201,8 @@ void StaticOcclusionQueryNode::createSupportNodes()
         _queryGeode->setName( "OQTest" );
         _queryGeode->setDataVariance( Object::STATIC );
 
-        osg::ref_ptr<osg::QueryGeometry > geom = new osg::QueryGeometry( /*this,*/getName() );
-       geom->setDataVariance( Object::STATIC );
+        osg::ref_ptr<MWQueryGeometry > geom = new MWQueryGeometry( /*this,*/getName() );
+        geom->setDataVariance( Object::STATIC );
         geom->addPrimitiveSet(  dr);
         _queryGeode->addDrawable( geom.get() );
     }
@@ -155,6 +233,374 @@ void StaticOcclusionQueryNode::createSupportNodes()
     setDebugStateSet( initMWOQDebugState() );
 }
 
+
+struct RetrieveQueriesCallback : public osg::Camera::DrawCallback
+{
+    typedef std::vector<osg::ref_ptr<SceneUtil::TestResult> > ResultsVector;
+    ResultsVector _results;
+
+    RetrieveQueriesCallback( osg::GLExtensions* ext=NULL )  :
+        _extensionsFallback( ext )
+    {
+    }
+
+    RetrieveQueriesCallback( const RetrieveQueriesCallback& rqc, const osg::CopyOp& ) :
+        _extensionsFallback( rqc._extensionsFallback )
+    {
+    }
+
+    META_Object( osgMWOQ, RetrieveQueriesCallback )
+
+    virtual void operator() (const osg::Camera& camera) const
+    {
+        if (_results.empty())
+            return;
+
+        const osg::Timer& timer = *osg::Timer::instance();
+        osg::Timer_t start_tick = timer.tick();
+        double elapsedTime( 0. );
+        int count( 0 );
+
+        const osg::GLExtensions* ext=0;
+        if (camera.getGraphicsContext())
+        {
+            // The typical path, for osgViewer-based applications or any
+            //   app that has set up a valid GraphicsCOntext for the Camera.
+            ext = camera.getGraphicsContext()->getState()->get<osg::GLExtensions>();
+        }
+        else
+        {
+            // No valid GraphicsContext in the Camera. This might happen in
+            //   SceneView-based apps. Rely on the creating code to have passed
+            //   in a valid GLExtensions pointer, and hope it's valid for any
+            //   context that might be current.
+            OSG_DEBUG << "osgOQ: RQCB: Using fallback path to obtain GLExtensions pointer." << std::endl;
+            ext = _extensionsFallback;
+            if (!ext)
+            {
+                OSG_FATAL << "osgOQ: RQCB: GLExtensions pointer fallback is NULL." << std::endl;
+                return;
+            }
+        }
+
+        ResultsVector::const_iterator it = _results.begin();
+        while (it != _results.end())
+        {
+            SceneUtil::TestResult* tr = const_cast<SceneUtil::TestResult*>( (*it).get() );
+
+            if (!tr->_active || !tr->_init)
+            {
+                // This test wasn't executed last frame. This is probably because
+                //   a parent node failed the OQ test, this node is outside the
+                //   view volume, or we didn't run the test because we had not
+                //   exceeded visibleQueryFrameCount.
+                // Do not obtain results from OpenGL.
+                it++;
+                continue;
+            }
+
+            OSG_DEBUG <<
+                "osgOQ: RQCB: Retrieving..." << std::endl;
+
+            GLint ready = 0;
+            ext->glGetQueryObjectiv( tr->_id, GL_QUERY_RESULT_AVAILABLE, &ready );
+            if (ready)
+            {
+                ext->glGetQueryObjectiv( tr->_id, GL_QUERY_RESULT, &(tr->_numPixels) );
+                if (tr->_numPixels < 0)
+                    OSG_WARN << "osgOQ: RQCB: " <<
+                    "glGetQueryObjectiv returned negative value (" << tr->_numPixels << ")." << std::endl;
+
+                // Either retrieve last frame's results, or ignore it because the
+                //   camera is inside the view. In either case, _active is now false.
+                tr->_active = false;
+                tr->_lastresultavailable = true;
+
+            }
+            // else: query result not available yet, try again next frame
+
+            it++;
+            count++;
+        }
+
+        elapsedTime = timer.delta_s(start_tick,timer.tick());
+        OSG_INFO << "osgOQ: RQCB: " << "Retrieved " << count <<
+            " queries in " << elapsedTime << " seconds." << std::endl;
+    }
+
+    void reset()
+    {
+        for (ResultsVector::iterator it = _results.begin(); it != _results.end();)
+        {
+            if (!(*it)->_active || !(*it)->_init) // remove results that have already been retrieved or their query objects deleted.
+                it = _results.erase(it);
+            else
+                ++it;
+        }
+    }
+
+    void add( SceneUtil::TestResult* tr )
+    {
+        _results.push_back( tr );
+    }
+
+    osg::GLExtensions* _extensionsFallback;
+};
+
+
+
+// PreDraw callback; clears the list of Results from the PostDrawCallback (above).
+struct ClearQueriesCallback : public osg::Camera::DrawCallback
+{
+    ClearQueriesCallback() : _rqcb( NULL ) {}
+    ClearQueriesCallback( const ClearQueriesCallback& rhs, const osg::CopyOp& copyop) : osg::Camera::DrawCallback(rhs, copyop), _rqcb(rhs._rqcb) {}
+    META_Object( osgMWOQ, ClearQueriesCallback )
+
+    virtual void operator() (const osg::Camera&) const
+    {
+        if (!_rqcb)
+        {
+            OSG_FATAL << "osgOQ: CQCB: Invalid RQCB." << std::endl;
+            return;
+        }
+        _rqcb->reset();
+    }
+
+    RetrieveQueriesCallback* _rqcb;
+};
+
+
+MWQueryGeometry::MWQueryGeometry(  const std::string& oqnName )
+  : osg::QueryGeometry(oqnName)
+{
+    setUseDisplayList( false );
+    setUseVertexBufferObjects( true );
+}
+MWQueryGeometry::~MWQueryGeometry()
+{
+    reset();
+}
+
+unsigned int
+MWQueryGeometry::getNumPixels( const osg::Camera* cam )
+{
+    return getMWQueryResult(cam).numPixels;
+}
+
+#if OSG_VERSION_LESS_THAN(3,6,0)
+typedef std::list< GLuint > QueryObjectList;
+typedef osg::buffered_object< QueryObjectList > DeletedQueryObjectCache;
+
+static OpenThreads::Mutex s_mutex_deletedQueryObjectCache;
+static DeletedQueryObjectCache s_deletedQueryObjectCache;
+#else
+class QueryObjectManager : public GLObjectManager
+{
+public:
+    QueryObjectManager(unsigned int contextID) : GLObjectManager("QueryObjectManager", contextID) {}
+
+    virtual void deleteGLObject(GLuint globj)
+    {
+        const GLExtensions* extensions = GLExtensions::Get(_contextID,true);
+        if (extensions->isOcclusionQuerySupported || extensions->isARBOcclusionQuerySupported) extensions->glDeleteQueries( 1L, &globj );
+    }
+};
+#endif
+
+void
+MWQueryGeometry::deleteQueryObject( unsigned int contextID, GLuint handle )
+{
+#if OSG_VERSION_LESS_THAN(3,6,0)
+    if (handle!=0)
+      {
+          OpenThreads::ScopedLock< OpenThreads::Mutex > lock( s_mutex_deletedQueryObjectCache );
+
+          // insert the handle into the cache for the appropriate context.
+          s_deletedQueryObjectCache[contextID].push_back( handle );
+  }
+#else
+    osg::get<QueryObjectManager>(contextID)->scheduleGLObjectForDeletion(handle);
+#endif
+}
+
+
+void
+MWQueryGeometry::flushDeletedQueryObjects( unsigned int contextID, double currentTime, double& availableTime )
+{
+#if OSG_VERSION_LESS_THAN(3,6,0)
+    // if no time available don't try to flush objects.
+        if (availableTime<=0.0) return;
+
+        const osg::Timer& timer = *osg::Timer::instance();
+        osg::Timer_t start_tick = timer.tick();
+        double elapsedTime = 0.0;
+
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(s_mutex_deletedQueryObjectCache);
+
+            const osg::GLExtensions* extensions = osg::GLExtensions::Get( contextID, true );
+
+            QueryObjectList& qol = s_deletedQueryObjectCache[contextID];
+
+            for(QueryObjectList::iterator titr=qol.begin();
+                titr!=qol.end() && elapsedTime<availableTime;
+                )
+            {
+                extensions->glDeleteQueries( 1L, &(*titr ) );
+                titr = qol.erase(titr);
+                elapsedTime = timer.delta_s(start_tick,timer.tick());
+            }
+        }
+
+    availableTime -= elapsedTime;
+#else
+    osg::get<QueryObjectManager>(contextID)->flushDeletedGLObjects(currentTime, availableTime);
+#endif
+}
+
+void
+MWQueryGeometry::discardDeletedQueryObjects( unsigned int contextID )
+{
+#if OSG_VERSION_LESS_THAN(3,6,0)
+    OpenThreads::ScopedLock< OpenThreads::Mutex > lock( s_mutex_deletedQueryObjectCache );
+       QueryObjectList& qol = s_deletedQueryObjectCache[ contextID ];
+   qol.clear();
+#else
+   osg::get<QueryObjectManager>(contextID)->discardAllGLObjects();
+#endif
+}
+
+void MWQueryGeometry::releaseGLObjects( osg::State* state ) const
+{
+    Geometry::releaseGLObjects(state);
+
+    if (!state)
+    {
+        // delete all query IDs for all contexts.
+        const_cast<MWQueryGeometry*>(this)->reset();
+    }
+    else
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _mapMutex );
+
+        // Delete all query IDs for the specified context.
+        unsigned int contextID = state->getContextID();
+        ResultMap::iterator it = _mwresults.begin();
+        while (it != _mwresults.end())
+        {
+            osg::ref_ptr<SceneUtil::TestResult> tr = it->second;
+            if (tr->_contextID == contextID)
+            {
+#if OSG_VERSION_LESS_THAN(3,6,0)
+                MWQueryGeometry::deleteQueryObject( contextID, tr._id );
+#else
+                osg::get<QueryObjectManager>(contextID)->scheduleGLObjectForDeletion(tr->_id );
+#endif
+                tr->_init = false;
+            }
+            it++;
+        }
+    }
+}
+MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camera* cam )
+{
+    osg::ref_ptr<SceneUtil::TestResult> tr;
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _mapMutex );
+        tr =  _mwresults[ cam ];
+        if (!tr.valid())
+        {
+            tr = new SceneUtil::TestResult;
+            _mwresults[ cam ] = tr;
+        }
+
+    }
+    return QueryResult((tr->_init && (!tr->_active || tr->_lastresultavailable) ), tr->_numPixels);
+}
+void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
+{
+    unsigned int contextID = renderInfo.getState()->getContextID();
+    osg::GLExtensions* ext = renderInfo.getState()->get<GLExtensions>();
+
+    if (!ext->isARBOcclusionQuerySupported && !ext->isOcclusionQuerySupported)
+        return;
+
+    osg::Camera* cam = renderInfo.getCurrentCamera();
+
+    // Add callbacks if necessary.
+    if (!cam->getPostDrawCallback())
+    {
+        RetrieveQueriesCallback* rqcb = new RetrieveQueriesCallback( ext );
+        cam->setPostDrawCallback( rqcb );
+
+        ClearQueriesCallback* cqcb = new ClearQueriesCallback;
+        cqcb->_rqcb = rqcb;
+        rqcb->reset();
+        cam->setPreDrawCallback( cqcb );
+    }
+
+    // Get TestResult from Camera map
+    osg::ref_ptr<SceneUtil::TestResult> tr;
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _mapMutex );
+        tr = ( _mwresults[ cam ] );
+        if (!tr.valid())
+        {
+            tr = new SceneUtil::TestResult;
+            _mwresults[ cam ] = tr;
+        }
+    }
+
+
+    // Issue query
+    if (!tr->_init)
+    {
+        ext->glGenQueries( 1, &(tr->_id) );
+        tr->_contextID = contextID;
+        tr->_init = true;
+    }
+
+    if (tr->_active)
+    {
+        // last query hasn't been retrieved yet
+        return;
+    }
+
+    // Add TestResult to RQCB.
+    RetrieveQueriesCallback* rqcb = dynamic_cast<
+        RetrieveQueriesCallback* >( cam->getPostDrawCallback() );
+    if (!rqcb)
+    {
+        OSG_FATAL << "osgOQ: QG: Invalid RQCB." << std::endl;
+        return;
+    }
+    rqcb->add( tr.get() );
+
+    OSG_DEBUG <<
+        "osgOQ: QG: Querying for: " << _oqnName << std::endl;
+
+    ext->glBeginQuery( GL_SAMPLES_PASSED_ARB, tr->_id );
+    osg::Geometry::drawImplementation( renderInfo );
+    ext->glEndQuery( GL_SAMPLES_PASSED_ARB );
+    tr->_active = true;
+
+
+    OSG_DEBUG <<
+        "osgOQ: QG. OQNName: " << _oqnName <<
+        ", Ctx: " << contextID <<
+        ", ID: " << tr->_id << std::endl;
+#ifdef _DEBUG
+    {
+        GLenum err;
+        if ((err = glGetError()) != GL_NO_ERROR)
+        {
+            OSG_FATAL << "osgOQ: QG: OpenGL error: " << err << "." << std::endl;
+        }
+    }
+#endif
+
+
+}
 class InvalidateOQboundsVisitor : public osg::NodeVisitor
 {
 public:
