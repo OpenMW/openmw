@@ -10,7 +10,6 @@
 #include <osg/Depth>
 
 #include "apps/openmw/mwrender/renderbin.hpp"
-#include "apps/openmw/mwrender/vismask.hpp"
 
 using namespace osg;
 
@@ -197,28 +196,29 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
             }
             parent.setChild(ind, qnode);
-            //disable not terminal query
-            float powlev = float(1<<mSettings.maxBVHOQLevelCount);
-            if(powlev>1)
-                if(bsi.radius() <powlev*mSettings.minOQNSize)
-                {
-                    OSG_INFO<<"masking high level OQN"<<std::endl;
-                    parent.getQueryGeometry()->setNodeMask(0);
-                    parent.getDebugGeometry()->setNodeMask(0);
-                    parent.setQueriesEnabled(false);
-                    qnode->getQueryGeometry()->setNodeMask(0);
-                    qnode->getDebugGeometry()->setNodeMask(0);
-                    qnode->setQueriesEnabled(false);
-                }
+
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
         qnode->invalidateQueryGeometry();
+
+        //disable high BVH queries level
+        float powlev = float(1<<mSettings.maxBVHOQLevelCount);
+        if(bsi.radius() > powlev*mSettings.minOQNSize)
+        {
+            OSG_INFO<<"masking high level OQN"<<std::endl;
+            parent.getQueryGeometry()->setNodeMask(0);
+            parent.getDebugGeometry()->setNodeMask(0);
+            parent.setQueriesEnabled(false);
+            qnode->getQueryGeometry()->setNodeMask(0);
+            qnode->getDebugGeometry()->setNodeMask(0);
+            qnode->setQueriesEnabled(false);
+        }
 
     }
     else
     {
         target->addChild(child);
-        unsigned int nodemask = MWRender::VisMask::Mask_RenderToTexture;
+        unsigned int nodemask = 0xffffffff;// TOFIX make it customizable
         parent.getQueryGeometry()->setNodeMask(nodemask);
         parent.getDebugGeometry()->setNodeMask(nodemask);
         parent.setQueriesEnabled(true);
@@ -233,7 +233,7 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
         pchild = parent.getChild(i)->asGroup();
         if((removed = pchild->removeChild(childtoremove))) break;
     }
-    //TODO check criterion for parent splitting
+    //TODO check criterion for parent collapse
 
     if(removed)
         return true;
