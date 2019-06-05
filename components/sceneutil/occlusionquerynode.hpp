@@ -78,6 +78,11 @@ public:
         getQueryGeometry()->setUseVertexBufferObjects(true);
         setDataVariance(osg::Object::STATIC);
     }
+
+    //set MainCamera (from which passed is updated)
+    void setMainViewCamera(osg::Camera*cam){ _maincam = cam;}
+    const osg::Camera* getMainViewCamera() const { return _maincam; }
+
     inline osg::Geometry* getDebugGeometry() { return static_cast<osg::Geometry*>(_debugGeode->getChild(0)); }
     inline void setQueryMargin(float m) { _margin = m; }
     inline float getQueryMargin() const { return _margin; }
@@ -101,6 +106,7 @@ protected:
     osg::StateSet *initMWOQDebugState();
     float _margin;
     bool _isgetpassedearlyexitenable;
+    osg::ref_ptr< osg::Camera > _maincam;
 #if  OSG_VERSION_LESS_THAN(3,6,4)
     mutable bool _validQueryGeometry;
 #endif

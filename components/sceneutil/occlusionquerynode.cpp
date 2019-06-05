@@ -66,12 +66,18 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
 
 bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv )
 {
+    ///stat only main camera
+    bool ret;
+    bool & passed = ret;
+    if(camera==_maincam)
+        passed=_passed;
+
     if ( !_enabled )
     {
         // Queries are not enabled. The caller should be osgUtil::CullVisitor,
         //   return true to traverse the subgraphs.
-        _passed = true;
-        return _passed;
+        passed = true;
+        return passed;
     }
 
     MWQueryGeometry* qg = static_cast< MWQueryGeometry* >( _queryGeode->getDrawable( 0 ) );
@@ -85,8 +91,8 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
         // The box of the query geometry is invalid, return false to not traverse
         // the subgraphs.
-        _passed = false;
-        return _passed;
+        passed = false;
+        return passed;
     }
 
     //seems to bug (flickering) if OQN is not the last one in the tre
@@ -102,8 +108,8 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
             ( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount+1 ) )
                 )
         {
-            _passed = true;
-            return _passed;
+            passed = true;
+            return passed;
         }
     }
 
@@ -123,23 +129,23 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
-    _passed =  ( distance <= 0.0 );
+    passed =  ( distance <= 0.0 );
 
-    if (!_passed)
+    if (!passed)
     {
         MWQueryGeometry::QueryResult result = qg->getMWQueryResult( camera );
         if (!result.valid)
         {
            // The query hasn't finished yet and the result still
            // isn't available, return true to traverse the subgraphs.
-           _passed = true;
-           return _passed;
+           passed = true;
+           return passed;
         }
 
-        _passed = ( result.numPixels >  _visThreshold );
+        passed = ( result.numPixels >  _visThreshold );
     }
 
-    return _passed;
+    return passed;
 }
 osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
 {
