@@ -14,10 +14,10 @@ u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
 void __libnx_exception_handler(ThreadExceptionDump *ctx)
 {
     FILE *f = fopen("exception.log", "w");
-    if (f == NULL) return;
+    if (!f) return;
 
     fprintf(f, "error_desc: 0x%x\n", ctx->error_desc);
-    for(int i = 0; i < 29; i++)
+    for (int i = 0; i < 29; i++)
         fprintf(f, "[X%d]: 0x%lx\n", i, ctx->cpu_gprs[i].x);
     fprintf(f, "fp: 0x%lx\n", ctx->fp.x);
     fprintf(f, "lr: 0x%lx\n", ctx->lr.x);
