@@ -129,9 +129,7 @@ void GraphicsWindowSDL2::init()
 #endif
 
     setSwapInterval(_traits->vsync);
-#ifndef __SWITCH__
     SDL_GL_MakeCurrent(oldWin, oldCtx);
-#endif
     mValid = true;
 
     getEventQueue()->syncWindowRectangleWithGraphicsContext();
