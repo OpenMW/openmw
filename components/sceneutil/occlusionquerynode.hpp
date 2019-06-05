@@ -87,7 +87,8 @@ public:
     inline void setEarlyExitOn(bool m) { _isgetpassedearlyexitenable = m; }
     inline float getEarlyExit() const { return _isgetpassedearlyexitenable; }
 
-    inline void invalidateQueryGeometry() {  _validQueryGeometry = _boundingSphereComputed = false;  }
+    inline void invalidateQueryGeometry() {  _validQueryGeometry = false;  }
+
 
     virtual void createSupportNodes();
     virtual osg::BoundingSphere computeBound() const;
@@ -124,12 +125,10 @@ struct OctreeAddRemove
 {
     OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
     const OcclusionQuerySettings & mSettings;
-    bool removeStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
-    void addStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child);
-protected:
-    void invalidateOQbounds(StaticOcclusionQueryNode &parent);
+
     void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);
 
+    bool recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
 };
 }
 #endif

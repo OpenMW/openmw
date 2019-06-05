@@ -90,7 +90,8 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     }
 
     //seems to bug (flickering) if OQN is not the last one in the tre
-    if(_isgetpassedearlyexitenable){
+    if(_isgetpassedearlyexitenable)
+    {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
         //  2) we haven't rendered for an abnormally long time (probably because we're an out-of-range LOD child)
@@ -118,11 +119,12 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     // If the distance from the near plane to the bounding sphere shell is positive, retrieve
     //   the results. Otherwise (near plane inside the BS shell) we are considered
     //   to have passed and don't need to retrieve the query.
-    const osg::BoundingSphere& bs ( qg->getInitialBound());
+    const osg::BoundingSphere& bs = getBound();
     osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
     _passed =  ( distance <= 0.0 );
+
     if (!_passed)
     {
         MWQueryGeometry::QueryResult result = qg->getMWQueryResult( camera );
@@ -602,31 +604,7 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 
 
 }
-class InvalidateOQboundsVisitor : public osg::NodeVisitor
-{
-public:
-    InvalidateOQboundsVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) { }
-    virtual void apply(osg::OcclusionQueryNode& dr)
-    {
-        StaticOcclusionQueryNode* qnode = dynamic_cast<StaticOcclusionQueryNode*>(&dr);
-        if(qnode){
-            qnode->invalidateQueryGeometry();
-        }
-        traverse(dr);
-    }
-};
 
-void OctreeAddRemove::addStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child)
-{
-    osg::BoundingSphere bsc = child->getBound();
-    recursivCellAddStaticObject(bs, parent, child, bsc);
-    invalidateOQbounds(parent);
-}
-void OctreeAddRemove::invalidateOQbounds(StaticOcclusionQueryNode &parent)
-{
-    InvalidateOQboundsVisitor vis;
-    parent.accept(vis);
-}
 void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
 {
     osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
@@ -676,6 +654,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
 
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
+        qnode->invalidateQueryGeometry();
 
         //disable high BVH queries level
         float powlev = float(1<<mSettings.maxBVHOQLevelCount);
@@ -701,7 +680,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     }
 }
 
-bool OctreeAddRemove::removeStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
+bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
 {
     osg::Group * pchild; bool removed=false;
     for(unsigned int i=0; i< parent.getNumChildren(); ++i)
@@ -718,7 +697,7 @@ bool OctreeAddRemove::removeStaticObject(osg::OcclusionQueryNode & parent, osg::
         for(unsigned int i=0; i< parent.getNumChildren(); ++i)
         {
             osg::OcclusionQueryNode * child = dynamic_cast<osg::OcclusionQueryNode*>(parent.getChild(i));
-            if(child && removeStaticObject(*child, childtoremove))
+            if(child && recursivCellRemoveStaticObject(*child, childtoremove))
                 return true;
         }
     }
