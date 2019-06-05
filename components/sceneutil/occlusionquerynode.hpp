@@ -78,8 +78,10 @@ public:
 #endif
     {
         createSupportNodes();
+        _maincam = defaultMainCamera;
     }
 
+    static osg::Camera * defaultMainCamera;
     //set MainCamera (from which passed is updated)
     void setMainViewCamera(osg::Camera*cam){ _maincam = cam;}
     const osg::Camera* getMainViewCamera() const { return _maincam; }

@@ -25,6 +25,7 @@ GLushort cubeindices[] = { 0, 1, 2, 3,  4, 5, 6, 7,
 
 osg::ref_ptr< osg::StateSet > StaticOcclusionQueryNode::OQDebugStateSet = 0;
 osg::ref_ptr< osg::StateSet > StaticOcclusionQueryNode::OQStateSet = 0;
+osg::Camera * StaticOcclusionQueryNode::defaultMainCamera = 0;
 
 osg::StateSet* StaticOcclusionQueryNode::initMWOQState()
 {

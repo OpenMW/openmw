@@ -369,6 +369,8 @@ namespace MWRender
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
 
+        SceneUtil::StaticOcclusionQueryNode::defaultMainCamera =  mViewer->getCamera();
+
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         float fov = Settings::Manager::getFloat("field of view", "Camera");
