@@ -3,7 +3,6 @@
 #include <OpenThreads/ScopedLock>
 #include <osg/Timer>
 #include <osg/Notify>
-#include <osg/ComputeBoundsVisitor>
 #include <osg/PolygonMode>
 #include <osg/ColorMask>
 #include <osg/PolygonOffset>

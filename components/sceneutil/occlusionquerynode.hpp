@@ -7,6 +7,7 @@
 #include <osg/Geode>
 
 #include <osg/OcclusionQueryNode>
+#include <osg/ComputeBoundsVisitor>
 
 namespace SceneUtil{
 
@@ -111,6 +112,18 @@ protected:
     mutable bool _validQueryGeometry;
 #endif
 
+};
+
+/// get scene bounding box based on StaticOcclusionQueryNode::getMainViewCamera occlusions result
+class OQComputeBoundsVisitor : public osg::ComputeBoundsVisitor
+{
+public:
+    OQComputeBoundsVisitor(): osg::ComputeBoundsVisitor() { }
+    virtual void apply(osg::OcclusionQueryNode& oq)
+    {
+        if(oq.getPassed())
+            traverse(oq);
+    }
 };
 
 struct OcclusionQuerySettings
