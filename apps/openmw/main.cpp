@@ -287,6 +287,16 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
+#ifdef __SWITCH__
+    // some env vars for optimization purposes
+    setenv("__GL_THREADED_OPTIMIZATIONS", "1", 1);
+    setenv("__GL_ALLOW_UNOFFICIAL_PROTOCOL", "0", 1);
+    setenv("__GL_NextGenCompiler", "0", 1);
+    setenv("MESA_NO_ERROR", "1", 1);
+    setenv("OPENMW_OPTIMIZE", "MERGE_GEOMETRY", 1);
+    setenv("OPENMW_DONT_PRECOMPILE", "1", 1);
+    setenv("OPENMW_DECOMPRESS_TEXTURES", "1", 1);
+#endif
     return wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
