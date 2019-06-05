@@ -66,18 +66,12 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
 
 bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv )
 {
-    ///stat only main camera
-    bool ret;
-    bool & passed = ret;
-    if(camera==_maincam)
-        passed=_passed;
-
     if ( !_enabled )
     {
         // Queries are not enabled. The caller should be osgUtil::CullVisitor,
         //   return true to traverse the subgraphs.
-        passed = true;
-        return passed;
+        _passed = true;
+        return _passed;
     }
 
     MWQueryGeometry* qg = static_cast< MWQueryGeometry* >( _queryGeode->getDrawable( 0 ) );
@@ -91,9 +85,15 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
         // The box of the query geometry is invalid, return false to not traverse
         // the subgraphs.
-        passed = false;
-        return passed;
+        _passed = false;
+        return _passed;
     }
+
+    ///stat only main camera
+    bool ret;
+    bool & passed = ret;
+    if(camera == _maincam)
+        passed = _passed;
 
     //seems to bug (flickering) if OQN is not the last one in the tre
     if(_isgetpassedearlyexitenable)
@@ -112,7 +112,6 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
             return passed;
         }
     }
-
 
     // Get the near plane for the upcoming distance calculation.
     osg::Matrix::value_type nearPlane;
@@ -167,14 +166,13 @@ osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
             const bool bbValid = bb.valid();
             _validQueryGeometry = bbValid;
 
-            osg::ref_ptr<osg::Vec3Array> v = new osg::Vec3Array( 8 );
-            Vec3Array::iterator itv = v->begin();
+            osg::Geometry* geom = static_cast<osg:: Geometry* >( nonConstThis->_queryGeode->getDrawable( 0 ) );
+            osg::ref_ptr<osg::Vec3Array> vert = static_cast<osg::Vec3Array*>(geom->getVertexArray());
             // Having (0,0,0) as vertices for the case of the invalid query geometry
             // still isn't quite the right thing. But the query geometry is public
             // accessible and therefore a user might expect eight vertices, so
             // it seems safer to keep eight vertices in the geometry.
-
-            osg::Geometry* geom = static_cast<osg:: Geometry* >( nonConstThis->_queryGeode->getDrawable( 0 ) );
+            Vec3Array::iterator itv = vert->begin();
             if (bbValid)
             {
                 bb._max+=osg::Vec3(_margin,_margin,_margin);
@@ -188,10 +186,7 @@ osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
                 (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._min.z() );
                 (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._max.z() );
                 (*itv++) = osg::Vec3( bb._max.x(), bb._max.y(), bb._max.z() );
-                geom->setVertexArray( v.get() );
-
-                geom = static_cast< osg::Geometry* >( nonConstThis->_debugGeode->getDrawable( 0 ) );
-                geom->setVertexArray( v.get() );
+                vert->dirty();
             }
 
     }
@@ -202,8 +197,16 @@ osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
 
 void StaticOcclusionQueryNode::createSupportNodes()
 {
+    setDataVariance(osg::Object::STATIC);
+
     osg::DrawElementsUShort * dr = new osg::DrawElementsUShort( osg::PrimitiveSet::QUADS, 24,  cubeindices );
-    dr->setElementBufferObject(new osg::ElementBufferObject());
+    dr->setDataVariance(Object::STATIC);
+
+    osg::Vec3Array * vert = new osg::Vec3Array(8);
+    vert->setDataVariance(Object::STATIC);
+
+    _validQueryGeometry = false;
+
     {
         // Add the test geometry Geode
         _queryGeode = new osg::Geode;
@@ -212,7 +215,9 @@ void StaticOcclusionQueryNode::createSupportNodes()
 
         osg::ref_ptr<MWQueryGeometry > geom = new MWQueryGeometry( /*this,*/getName() );
         geom->setDataVariance( Object::STATIC );
-        geom->addPrimitiveSet(  dr);
+        geom->setVertexArray(vert);
+        geom->addPrimitiveSet(dr);
+
         _queryGeode->addDrawable( geom.get() );
     }
 
@@ -221,16 +226,16 @@ void StaticOcclusionQueryNode::createSupportNodes()
         //   test geometry for debugging purposes
         _debugGeode = new osg::Geode;
         _debugGeode->setName( "Debug" );
-         _debugGeode->setDataVariance( Object::STATIC );
+        _debugGeode->setDataVariance( Object::STATIC );
 
         osg::ref_ptr<osg::Geometry> geom = new osg::Geometry;
-         geom->setDataVariance( Object::STATIC );
+        geom->setDataVariance( Object::STATIC );
+        geom->setVertexArray(vert);
+        geom->addPrimitiveSet(dr);
 
         osg::ref_ptr<osg::Vec4Array> ca = new osg::Vec4Array;
         ca->push_back( osg::Vec4( 1.f, 1.f, 1.f, 1.f ) );
         geom->setColorArray( ca.get(), osg::Array::BIND_OVERALL );
-
-        geom->addPrimitiveSet(dr );
 
         _debugGeode->addDrawable( geom.get() );
     }
@@ -583,7 +588,6 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
         OSG_FATAL << "osgOQ: QG: Invalid RQCB." << std::endl;
         return;
     }
-    rqcb->add( tr.get() );
 
     OSG_DEBUG <<
         "osgOQ: QG: Querying for: " << _oqnName << std::endl;
@@ -592,6 +596,7 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
     osg::Geometry::drawImplementation( renderInfo );
     ext->glEndQuery( GL_SAMPLES_PASSED_ARB );
     tr->_active = true;
+    rqcb->add( tr.get() );
 
 
     OSG_DEBUG <<

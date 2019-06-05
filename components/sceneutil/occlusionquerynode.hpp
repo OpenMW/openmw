@@ -26,6 +26,7 @@ public:
     // Set to true when a query gets issued and set to
     //   false when the result is retrieved.
     mutable bool _active;
+    // avoid blinking when querygeometry screen size decreases
     mutable bool _lastresultavailable;
     // Result of last query.
     GLint _numPixels;
@@ -34,7 +35,7 @@ public:
 // QueryGeometry -- A Drawable that performs an occlusion query,
 //   using its geometric data as the query geometry.
 class StaticOcclusionQueryNode;
-class  MWQueryGeometry : public osg::QueryGeometry
+class MWQueryGeometry : public osg::QueryGeometry
 {
 public:
     MWQueryGeometry(const std::string& oqnName=std::string(""));
@@ -65,6 +66,7 @@ protected:
     typedef std::map< const osg::Camera*, osg::ref_ptr<TestResult> > ResultMap;
     mutable ResultMap _mwresults;
 };
+
 class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
 public:
@@ -75,8 +77,6 @@ public:
 #endif
     {
         createSupportNodes();
-        getQueryGeometry()->setUseVertexBufferObjects(true);
-        setDataVariance(osg::Object::STATIC);
     }
 
     //set MainCamera (from which passed is updated)

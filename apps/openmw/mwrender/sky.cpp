@@ -552,16 +552,16 @@ private:
     };
 
     /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
-    osg::ref_ptr<osg::OcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
+    osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> createOcclusionQueryNode(osg::Group* parent, bool queryVisible)
     {
-        osg::ref_ptr<osg::OcclusionQueryNode> oqn = new SceneUtil::StaticOcclusionQueryNode;
+        osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> oqn = new SceneUtil::StaticOcclusionQueryNode;
 
         // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
         // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
         // is only called once.
         // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
 
-        //hack to force validity of query geometry
+        //force validity of query geometry
         oqn->addChild(mGeom);
         oqn->getBound();
         oqn->removeChildren(0,1);
@@ -572,10 +572,16 @@ private:
         // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
         // circumvent this.
         osg::Geometry* queryGeom = oqn->getQueryGeometry();
+        osg::Geometry* debugGeom = oqn->getQueryGeometry();
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
         queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
         queryGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
+
+        debugGeom->setVertexArray(mGeom->getVertexArray());
+        debugGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
+        debugGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
+        debugGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
         // don't update querygeometry
         oqn->setComputeBoundingSphereCallback(new DummyComputeBoundCallback);
@@ -710,7 +716,7 @@ private:
     class OcclusionCallback : public osg::NodeCallback
     {
     public:
-        OcclusionCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
+        OcclusionCallback(SceneUtil::StaticOcclusionQueryNode* oqnVisible, SceneUtil::StaticOcclusionQueryNode* oqnTotal)
             : mOcclusionQueryVisiblePixels(oqnVisible)
             , mOcclusionQueryTotalPixels(oqnTotal)
         {
@@ -743,8 +749,8 @@ private:
         }
 
     private:
-        osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
-        osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
+        osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> mOcclusionQueryVisiblePixels;
+        osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> mOcclusionQueryTotalPixels;
 
         std::map<osg::observer_ptr<osg::Camera>, float> mLastRatio;
     };
@@ -753,7 +759,7 @@ private:
     class SunFlashCallback : public OcclusionCallback
     {
     public:
-        SunFlashCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
+        SunFlashCallback(SceneUtil::StaticOcclusionQueryNode* oqnVisible, SceneUtil::StaticOcclusionQueryNode* oqnTotal)
             : OcclusionCallback(oqnVisible, oqnTotal)
             , mGlareView(1.f)
         {
@@ -825,7 +831,7 @@ private:
     class SunGlareCallback : public OcclusionCallback
     {
     public:
-        SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal,
+        SunGlareCallback(SceneUtil::StaticOcclusionQueryNode* oqnVisible, SceneUtil::StaticOcclusionQueryNode* oqnTotal,
                          osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
             : OcclusionCallback(oqnVisible, oqnTotal)
             , mSunTransform(sunTransform)
@@ -918,8 +924,8 @@ private:
     osg::ref_ptr<osg::Node> mSunFlashNode;
     osg::ref_ptr<SunGlareCallback> mSunGlareCallback;
     osg::ref_ptr<osg::Node> mSunGlareNode;
-    osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryVisiblePixels;
-    osg::ref_ptr<osg::OcclusionQueryNode> mOcclusionQueryTotalPixels;
+    osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> mOcclusionQueryVisiblePixels;
+    osg::ref_ptr<SceneUtil::StaticOcclusionQueryNode> mOcclusionQueryTotalPixels;
 };
 
 class Moon : public CelestialBody
