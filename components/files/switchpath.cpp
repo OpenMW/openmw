@@ -2,10 +2,14 @@
 
 #if defined(__SWITCH__)
 
+#include <switch.h>
+
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/misc/stringops.hpp>
+
+#include <apps/openmw/switch_startup.hpp>
 
 /**
  * \namespace Files
@@ -24,8 +28,8 @@ boost::filesystem::path SwitchPath::getUserConfigPath() const
 }
 
 boost::filesystem::path SwitchPath::getUserDataPath() const
-{
-    return boost::filesystem::path("./data");
+{   
+    return boost::filesystem::path("./data/" + Switch::getUsername());
 }
 
 boost::filesystem::path SwitchPath::getCachePath() const
