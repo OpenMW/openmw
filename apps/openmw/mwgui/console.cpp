@@ -229,7 +229,27 @@ namespace MWGui
                   MyGUI::KeyCode key,
                   MyGUI::Char _char)
     {
-        if( key == MyGUI::KeyCode::Tab)
+        if(MyGUI::InputManager::getInstance().isControlPressed())
+        {
+            if(key == MyGUI::KeyCode::W)
+            {
+                std::string text = mCommandLine->getCaption();
+                if(text.empty())
+                    return;
+                size_t max = text.size();
+                while(max > 0 && (text[max - 1] == ' ' || text[max - 1] == '\t' || text[max - 1] == '>'))
+                    max--;
+                while(max > 0 && text[max - 1] != ' ' && text[max - 1] != '\t' && text[max - 1] != '>')
+                    max--;
+                text.resize(max);
+                mCommandLine->setCaption(text);
+            }
+            else if(key == MyGUI::KeyCode::U)
+            {
+                mCommandLine->setCaption("");
+            }
+        }
+        else if(key == MyGUI::KeyCode::Tab)
         {
             std::vector<std::string> matches;
             listNames();
