@@ -132,7 +132,7 @@ void Switch::startup()
 
 std::string Switch::getUsername() {
     // get the name of the current user
-    accountIntialize();
+    accountInitialize();
     
     u128 userId = 0;
     bool accountSelected = 0;
