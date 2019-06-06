@@ -511,7 +511,7 @@ namespace MWPhysics
         , mWaterEnabled(false)
         , mParentNode(parentNode)
         #ifdef __SWITCH__
-        , mPhysicsDt(1.f / 15.f)
+        , mPhysicsDt(1.f / 30.f)
         #else
         , mPhysicsDt(1.f / 60.f)
         #endif // __SWITCH__
