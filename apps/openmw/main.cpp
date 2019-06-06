@@ -363,8 +363,9 @@ int runApplication(int argc, char *argv[])
 #endif
 
     Files::ConfigurationManager cfgMgr;
-#if defined(__SWITCH__)
+#ifdef __SWITCH__
     switchStartup(cfgMgr);
+    appletLockExit();
 #endif
     std::unique_ptr<OMW::Engine> engine;
     engine.reset(new OMW::Engine(cfgMgr));
@@ -374,6 +375,9 @@ int runApplication(int argc, char *argv[])
         engine->go();
     }
 
+#ifdef __SWITCH__
+    appletUnlockExit();
+#endif
     return 0;
 }
 
