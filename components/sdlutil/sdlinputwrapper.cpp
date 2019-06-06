@@ -152,6 +152,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
 
                 case SDL_FINGERDOWN:
                 case SDL_FINGERUP:
+                case SDL_FINGERMOTION:
 #ifdef __SWITCH__
                     // simulate mouse
                     mMouseListener->mouseMoved(_packageTouchMouseMotion(evt));
@@ -161,7 +162,6 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                         mMouseListener->mouseReleased(_packageTouchMouseButton(evt), SDL_BUTTON_LEFT);
                     break;
 #endif
-                case SDL_FINGERMOTION:
                 case SDL_DOLLARGESTURE:
                 case SDL_DOLLARRECORD:
                 case SDL_MULTIGESTURE:
