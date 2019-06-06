@@ -221,6 +221,14 @@ namespace MWGui
         getWidget(textBox, "GammaTextLight");
         textBox->setVisible(false);
 #endif
+#ifdef __SWITCH__
+        MyGUI::Button *vsyncButton;
+        getWidget(vsyncButton, "VSyncButton");
+        vsyncButton->setVisible(false); // vsync is "automatically" enforced by the GPU for the switch
+        MyGUI::TextBox *vsyncText;
+        getWidget(vsyncText, "VSyncText");
+        vsyncText->setVisible(false);
+#endif
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
 

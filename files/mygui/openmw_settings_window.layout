@@ -286,7 +286,7 @@
                                 <UserString key="SettingName" value="vsync"/>
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
+                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top" name="VSyncText">
                                 <Property key="Caption" value="VSync"/>
                             </Widget>
                         </Widget>
