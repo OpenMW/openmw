@@ -28,7 +28,35 @@ extern "C" void userAppExit(void)
 
 #endif
 
-void Switch::fatal(const char *fmt, ...)
+namespace Switch
+{
+
+std::string username = "global";
+
+void readUsername()
+{
+    // get the name of the current user
+    accountInitialize();
+
+    u128 userId = 0;
+    bool accountSelected = 0;
+
+    accountGetActiveUser(&userId, &accountSelected);
+
+    if (accountSelected)
+    {
+        AccountProfile profile;
+        accountGetProfile(&profile, userId);
+        AccountProfileBase profilebase;
+        accountProfileGet(&profile, nullptr, &profilebase); 
+        username = std::string(profilebase.username);
+        accountProfileClose(&profile);
+    }
+
+    accountExit();
+}
+
+void fatal(const char *fmt, ...)
 {
     FILE *f = fopen("fatal.log", "w");
 
@@ -46,7 +74,7 @@ void Switch::fatal(const char *fmt, ...)
     exit(1);
 }
 
-void Switch::importIni(Files::ConfigurationManager& cfgMgr)
+void importIni(Files::ConfigurationManager& cfgMgr)
 {
     // if the cfg already exists, we don't need to perform conversion
     auto cfgPath = cfgMgr.getUserConfigPath() / "openmw.cfg";
@@ -105,7 +133,7 @@ void Switch::importIni(Files::ConfigurationManager& cfgMgr)
     Log(Debug::Info) << "INI conversion done.";
 }
 
-void Switch::startup()
+void startup()
 {
     // some env vars for optimization purposes
     setenv("__GL_THREADED_OPTIMIZATIONS", "1", 1);
@@ -126,38 +154,21 @@ void Switch::startup()
         "start:b10,x:b2,y:b3"
     );
 
-    // unlocked in Switch::shutdown()
+    // get and save the username for getUserDataPath
+    readUsername();
+
+    // unlocked in shutdown()
     appletLockExit();
 }
 
-std::string Switch::getUsername() {
-    // get the name of the current user
-    accountInitialize();
-    
-    u128 userId = 0;
-    bool accountSelected = 0;
-    
-    std::string username = "Global"; // as fallback, just use Global if there's no current profile available
-    
-    accountGetActiveUser(&userId, &accountSelected);
-    
-    if (accountSelected) {
-        AccountProfile profile;
-        accountGetProfile(&profile, userId);
-        
-        AccountProfileBase profilebase;
-        accountProfileGet(&profile, nullptr, &profilebase);
-        
-        username = std::string(profilebase.username);
-        
-        accountProfileClose(&profile);
-    }
-    accountExit();
-    
+std::string getUsername()
+{
     return username;
 }
 
-void Switch::shutdown()
+void shutdown()
 {
     appletUnlockExit();
 }
+
+} /* namespace Switch */

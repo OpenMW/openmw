@@ -257,7 +257,6 @@ int runApplication(int argc, char *argv[])
 
     Files::ConfigurationManager cfgMgr;
 #ifdef __SWITCH__
-    Switch::startup();
     Switch::importIni(cfgMgr);
 #endif
     std::unique_ptr<OMW::Engine> engine;
@@ -280,6 +279,9 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
+#ifdef __SWITCH__
+    Switch::startup();
+#endif
     return wrapApplication(&runApplication, argc, argv, "OpenMW");
 }
 
