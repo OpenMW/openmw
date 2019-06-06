@@ -4,12 +4,10 @@
 
 #include <components/sceneutil/lightmanager.hpp>
 
+#include "compositemaprenderer.hpp"
+
 namespace Terrain
 {
-
-TerrainDrawable::TerrainDrawable()
-{
-}
 
 TerrainDrawable::TerrainDrawable(const TerrainDrawable &copy, const osg::CopyOp &copyop)
     : osg::Geometry(copy, copyop)
@@ -61,6 +59,12 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
     {
         cv->addDrawableAndDepth(this, &matrix, depth);
         return;
+    }
+
+    if (mCompositeMap)
+    {
+        mCompositeMapRenderer->setImmediate(mCompositeMap);
+        mCompositeMap = nullptr;
     }
 
     bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);

@@ -30,7 +30,6 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mCompositeMapSize(512)
     , mCompositeMapLevel(1.f)
     , mMaxCompGeometrySize(1.f)
-    , mCullingActive(true)
 {
 
 }
@@ -208,7 +207,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
         mCompositeMapRenderer->addCompositeMap(compositeMap.get(), false);
 
-        transform->getOrCreateUserDataContainer()->setUserData(compositeMap);
+        geometry->setCompositeMap(compositeMap);
+        geometry->setCompositeMapRenderer(mCompositeMapRenderer);
 
         TextureLayer layer;
         layer.mDiffuseMap = compositeMap->mTexture;
@@ -222,14 +222,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     }
 
     transform->addChild(geometry);
-
-    if (!mCullingActive)
-    {
-        transform->setCullingActive(false);
-        geometry->setCullingActive(false);
-    }
-    else
-        transform->getBound();
+    transform->getBound();
 
     if (mSceneManager->getIncrementalCompileOperation())
     {
