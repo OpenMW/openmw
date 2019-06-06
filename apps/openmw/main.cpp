@@ -21,6 +21,10 @@
 #include <unistd.h>
 #endif
 
+#if defined(__SWITCH__)
+#include "switch_startup.hpp"
+#endif
+
 /**
  * Workaround for problems with whitespaces in paths in older versions of Boost library
  */
@@ -243,117 +247,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
-#ifdef __SWITCH__
-
-// TODO: separate this into a component maybe
-#include <apps/mwiniimporter/importer.hpp>
-
-#include <switch.h>
-#include <stdarg.h>
-
-static int nxlinkSock = -1;
-
-extern "C" void userAppInit(void)
-{
-    if (R_SUCCEEDED(socketInitializeDefault()))
-        nxlinkSock = nxlinkStdio();
-}
-
-extern "C" void userAppExit(void)
-{
-    if (nxlinkSock >= 0)
-        close(nxlinkSock);
-    socketExit();
-}
-
-static void switchFatal(const char *fmt, ...)
-{
-    FILE *f = fopen("fatal.log", "w");
-
-    if (f)
-    {
-        fprintf(f, "FATAL ERROR:\n");
-        va_list args;
-        va_start(args, fmt);
-        vfprintf(f, fmt, args);
-        va_end(args);
-        fclose(f);
-    }
-
-    std::cout << "FATAL ERROR! Check fatal.log" << std::endl;
-    exit(1);
-}
-
-static void switchStartup(Files::ConfigurationManager& cfgMgr)
-{
-    // some env vars for optimization purposes
-    setenv("__GL_THREADED_OPTIMIZATIONS", "1", 1);
-    setenv("__GL_ALLOW_UNOFFICIAL_PROTOCOL", "0", 1);
-    setenv("__GL_NextGenCompiler", "0", 1);
-    setenv("MESA_NO_ERROR", "1", 1);
-    setenv("OPENMW_OPTIMIZE", "MERGE_GEOMETRY", 1);
-    setenv("OPENMW_DONT_PRECOMPILE", "1", 1);
-    setenv("OPENMW_DECOMPRESS_TEXTURES", "1", 1);
-
-    // if the cfg already exists, we don't need to perform conversion
-    auto cfgPath = cfgMgr.getUserConfigPath() / "openmw.cfg";
-    if (boost::filesystem::exists(cfgPath))
-        return;
-
-    // if the ini does not exist, we have nothing to convert
-    auto dataPath = cfgMgr.getUserDataPath();
-    auto iniPath = dataPath / "Morrowind.ini";
-    if (!boost::filesystem::exists(iniPath))
-        switchFatal(
-            "Could not find `%s` or `%s`.\n"
-            "Either manually place your data files into `%s` and your `openmw.cfg` into `%s`,\n"
-            "or copy the `Data Files` directory and `Morrowind.ini` from your TES3 installation\n"
-            "into `%s`.\n",
-            cfgPath.c_str(),
-            iniPath.c_str(),
-            dataPath.c_str(),
-            cfgMgr.getUserConfigPath().c_str(),
-            dataPath.c_str()
-        );
-
-    std::cout << "Found Morrowind.ini, converting" << std::endl;
-
-    // perform ini => cfg conversion and save the cfg
-    try
-    {
-        MwIniImporter importer;
-        // TODO: figure out how to detect this
-        importer.setInputEncoding(ToUTF8::WINDOWS_1252);
-
-        MwIniImporter::multistrmap ini = importer.loadIniFile(iniPath);
-        MwIniImporter::multistrmap cfg;
-
-        // add a default searchpath for the importer just in case
-        cfg.insert( std::make_pair( "data", std::vector<std::string>{"\"" + dataPath.string() + "\""} ) );
-
-        importer.merge(cfg, ini);
-        importer.mergeFallback(cfg, ini);
-        importer.importGameFiles(cfg, ini, iniPath);
-        importer.importArchives(cfg, ini);
-
-        // add the Data Files folder if it exists
-        auto dataDir = dataPath / "Data Files";
-        if (boost::filesystem::is_directory(dataDir))
-            cfg["data"].push_back("\"" + dataDir.string() + "\"");
-
-        boost::filesystem::ofstream file(cfgPath);
-        importer.writeToFile(file, cfg);
-    }
-    catch (std::exception& e)
-    {
-        switchFatal("While converting INI file:\n%s\n", e.what());
-    }
-
-    std::cout << "INI conversion done" << std::endl;
-}
-
-#endif
-
 int runApplication(int argc, char *argv[])
 {
 #ifdef __APPLE__
@@ -364,8 +257,8 @@ int runApplication(int argc, char *argv[])
 
     Files::ConfigurationManager cfgMgr;
 #ifdef __SWITCH__
-    switchStartup(cfgMgr);
-    appletLockExit();
+    Switch::startup();
+    Switch::importIni(cfgMgr);
 #endif
     std::unique_ptr<OMW::Engine> engine;
     engine.reset(new OMW::Engine(cfgMgr));
@@ -376,7 +269,7 @@ int runApplication(int argc, char *argv[])
     }
 
 #ifdef __SWITCH__
-    appletUnlockExit();
+    Switch::shutdown();
 #endif
     return 0;
 }
