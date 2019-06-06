@@ -612,6 +612,7 @@ namespace MWInput
             {
                 bool triedToMove = false;
                 bool isRunning = false;
+                bool alwaysRunAllowed = false;
 
                 // joystick movement
                 float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
@@ -640,31 +641,23 @@ namespace MWInput
                 isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
                 if(triedToMove) resetIdleTime();
 
-                if (actionIsActive(A_MoveLeft) && !actionIsActive(A_MoveRight))
+                if (actionIsActive(A_MoveLeft) != actionIsActive(A_MoveRight))
                 {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
-                    mPlayer->setLeftRight (-1);
-                }
-                else if (actionIsActive(A_MoveRight) && !actionIsActive(A_MoveLeft))
-                {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (1);
+                    mPlayer->setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
                 }
 
-                if (actionIsActive(A_MoveForward) && !actionIsActive(A_MoveBackward))
+                if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
                 {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (1);
-                }
-                else if (actionIsActive(A_MoveBackward) && !actionIsActive(A_MoveForward))
-                {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (-1);
+                    mPlayer->setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
                 }
                 else if(mPlayer->getAutoMove())
                 {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
                     mPlayer->setForwardBackward (1);
                 }
@@ -709,7 +702,7 @@ namespace MWInput
                     mOverencumberedMessageDelay = 0.f;
                 }
 
-                if ((mAlwaysRunActive && !mJoystickLastUsed) || isRunning)
+                if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
                     mPlayer->setRunState(!actionIsActive(A_Run));
                 else
                     mPlayer->setRunState(actionIsActive(A_Run));

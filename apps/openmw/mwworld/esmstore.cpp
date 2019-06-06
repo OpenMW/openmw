@@ -205,40 +205,48 @@ void ESMStore::validate()
             continue;
 
         bool changed = false;
-        for (ESM::ENAMstruct& effect : spell.mEffects.mList)
+        auto iter = spell.mEffects.mList.begin();
+        while (iter != spell.mEffects.mList.end())
         {
-            const ESM::MagicEffect* mgef = mMagicEffects.search(effect.mEffectID);
-            if (!mgef) // Do nothing for now
+            const ESM::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
+            if (!mgef)
+            {
+                Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an an invalid effect (index " << iter->mEffectID << ") present, dropping it.";
+                iter = spell.mEffects.mList.erase(iter);
+                changed = true;
                 continue;
+            }
 
             if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
             {
-                if (effect.mAttribute != -1)
+                if (iter->mAttribute != -1)
                 {
-                    effect.mAttribute = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(effect.mEffectID) <<
+                    iter->mAttribute = -1;
+                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
                         " effect of spell '" << spell.mId << "'  has an attribute argument present, dropping it.";
                     changed = true;
                 }
             }
             else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
             {
-                if (effect.mSkill != -1)
+                if (iter->mSkill != -1)
                 {
-                    effect.mSkill = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(effect.mEffectID) <<
+                    iter->mSkill = -1;
+                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
                         " effect of spell '" << spell.mId << "' has a skill argument present, dropping it.";
                     changed = true;
                 }
             }
-            else if (effect.mSkill != -1 || effect.mAttribute != -1)
+            else if (iter->mSkill != -1 || iter->mAttribute != -1)
             {
-                effect.mSkill = -1;
-                effect.mAttribute = -1;
-                Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(effect.mEffectID) <<
+                iter->mSkill = -1;
+                iter->mAttribute = -1;
+                Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
                     " effect of spell '" << spell.mId << "' has argument(s) present, dropping them.";
                 changed = true;
             }
+
+            ++iter;
         }
 
         if (changed)
