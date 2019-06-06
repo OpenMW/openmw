@@ -77,6 +77,7 @@
     Bug #4945: Poor random magic magnitude distribution
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
+    Bug #4961: Flying creature combat engagement takes z-axis into account
     Bug #4963: Enchant skill progress is incorrect
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
     Bug #4965: Global light attenuation settings setup is lacking
