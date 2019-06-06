@@ -61,7 +61,7 @@ void readUsername()
                 // otherwise throw it out for the time being, since fs seems
                 // allergic to certain UTF-8 characters 
                 bool clean = true;
-                for (int i = 0; i < sizeof(pb.username) && pb.username[i]; ++i)
+                for (size_t i = 0; i < sizeof(pb.username) && pb.username[i]; ++i)
                 {
                     if (!std::isprint(pb.username[i]))
                     {
