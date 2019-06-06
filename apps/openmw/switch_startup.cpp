@@ -130,7 +130,7 @@ void Switch::startup()
     appletLockExit();
 }
 
-void Switch::getUsername() {
+std::string Switch::getUsername() {
     // get the name of the current user
     accountIntialize();
     
