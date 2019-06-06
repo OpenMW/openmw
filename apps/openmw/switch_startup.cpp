@@ -36,21 +36,46 @@ std::string username = "global";
 void readUsername()
 {
     // get the name of the current user
-    accountInitialize();
+    auto rc = accountInitialize();
+    if (R_FAILED(rc))
+        return;
 
     u128 userId = 0;
     bool accountSelected = 0;
 
-    accountGetActiveUser(&userId, &accountSelected);
+    rc = accountGetActiveUser(&userId, &accountSelected);
 
-    if (accountSelected)
+    if (R_SUCCEEDED(rc) && accountSelected)
     {
         AccountProfile profile;
-        accountGetProfile(&profile, userId);
-        AccountProfileBase profilebase;
-        accountProfileGet(&profile, nullptr, &profilebase); 
-        username = std::string(profilebase.username);
-        accountProfileClose(&profile);
+        rc = accountGetProfile(&profile, userId);
+
+        if (R_SUCCEEDED(rc))
+        {
+            AccountProfileBase pb;
+            rc = accountProfileGet(&profile, nullptr, &pb);
+
+            if (R_SUCCEEDED(rc))
+            {
+                // HACK: check if the username is printable ascii
+                // otherwise throw it out for the time being, since fs seems
+                // allergic to certain UTF-8 characters 
+                bool clean = true;
+                for (int i = 0; i < sizeof(pb.username) && pb.username[i]; ++i)
+                {
+                    if (!std::isprint(pb.username[i]))
+                    {
+                        clean = false;
+                        break;
+                    }
+                }
+
+                if (clean)
+                    username = std::string(pb.username);
+            }
+
+            accountProfileClose(&profile);
+        }
     }
 
     accountExit();
