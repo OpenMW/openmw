@@ -2,6 +2,8 @@
 
 #if defined(__SWITCH__)
 
+#include <switch.h>
+
 #include <unistd.h>
 #include <boost/filesystem/fstream.hpp>
 
@@ -25,7 +27,32 @@ boost::filesystem::path SwitchPath::getUserConfigPath() const
 
 boost::filesystem::path SwitchPath::getUserDataPath() const
 {
-    return boost::filesystem::path("./data");
+    // get the name of the current user
+    accountIntialize();
+    
+    u128 userId = 0;
+    bool accountSelected = 0;
+    
+    char username[0x21] = "Global";
+    
+    accountGetActiveUser(&userId, &accountSelected);
+    
+    if (!accountSelected) {
+        username = "Global"; // if there's no account, just assume that it's a global profile
+    } else {
+        AccountProfile profile;
+        accountGetProfile(&profile, userId);
+        
+        AccountProfileBase profilebase;
+        accountProfileGet(&profile, nullptr, &profilebase);
+        
+        username = profilebase.username;
+        
+        accountProfileClose(&profile);
+    }
+    accountExit();
+    
+    return boost::filesystem::path("./data/" + std::string(username));
 }
 
 boost::filesystem::path SwitchPath::getCachePath() const
