@@ -1,3 +1,18 @@
+# Building for the Switch
+
+You need latest versions of devkitA64 and libnx installed.
+
+## Building dependencies
+
+See [this repo](https://github.com/fgsfdsfgs/openmw-switch-deps).
+
+The rest of the dependencies can be acquired using `dkp-pacman`.
+
+## Building OpenMW
+
+```
+source $DEVKITPRO/switchvars.sh
+mkdir switchbuild && cd switchbuild
 cmake \
 -G"Unix Makefiles" \
 -DCMAKE_TOOLCHAIN_FILE="$DEVKITPRO/switch.cmake" \
@@ -16,3 +31,4 @@ cmake \
 -DBUILD_MYGUI_PLUGIN=OFF \
 -DOSG_STATIC=TRUE \
 ..
+```
