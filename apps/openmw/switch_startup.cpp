@@ -1,12 +1,14 @@
 #include <switch.h>
 #include <stdarg.h>
-#include <iostream>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/debug/debuglog.hpp>
 // TODO: separate this into a component maybe
 #include <apps/mwiniimporter/importer.hpp> 
 
 #include "switch_startup.hpp"
+
+#ifdef _DEBUG
 
 static int nxlinkSock = -1;
 
@@ -23,6 +25,8 @@ extern "C" void userAppExit(void)
     socketExit();
 }
 
+#endif
+
 void Switch::fatal(const char *fmt, ...)
 {
     FILE *f = fopen("fatal.log", "w");
@@ -37,7 +41,7 @@ void Switch::fatal(const char *fmt, ...)
         fclose(f);
     }
 
-    std::cout << "FATAL ERROR! Check fatal.log" << std::endl;
+    Log(Debug::Error) << "FATAL ERROR! Check fatal.log.";
     exit(1);
 }
 
@@ -64,7 +68,7 @@ void Switch::importIni(Files::ConfigurationManager& cfgMgr)
             dataPath.c_str()
         );
 
-    std::cout << "Found Morrowind.ini, converting" << std::endl;
+    Log(Debug::Info) << "Found Morrowind.ini, converting.";
 
     // perform ini => cfg conversion and save the cfg
     try
@@ -97,10 +101,10 @@ void Switch::importIni(Files::ConfigurationManager& cfgMgr)
         fatal("While converting INI file:\n%s\n", e.what());
     }
 
-    std::cout << "INI conversion done" << std::endl;
+    Log(Debug::Info) << "INI conversion done.";
 }
 
-void Switch::startup(void)
+void Switch::startup()
 {
     // some env vars for optimization purposes
     setenv("__GL_THREADED_OPTIMIZATIONS", "1", 1);
@@ -115,7 +119,7 @@ void Switch::startup(void)
     appletLockExit();
 }
 
-void Switch::shutdown(void)
+void Switch::shutdown()
 {
     appletUnlockExit();
 }

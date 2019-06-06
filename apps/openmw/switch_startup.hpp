@@ -5,8 +5,8 @@
 
 namespace Switch
 {
-    void startup(void);
-    void shutdown(void);
+    void startup();
+    void shutdown();
     void importIni(Files::ConfigurationManager& cfgMgr);
     void fatal(const char *fmt, ...);
 }
