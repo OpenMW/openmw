@@ -9,6 +9,8 @@
 
 #include <components/misc/stringops.hpp>
 
+#include <apps/openmw/switch_startup.hpp>
+
 /**
  * \namespace Files
  */
@@ -26,33 +28,8 @@ boost::filesystem::path SwitchPath::getUserConfigPath() const
 }
 
 boost::filesystem::path SwitchPath::getUserDataPath() const
-{
-    // get the name of the current user
-    accountIntialize();
-    
-    u128 userId = 0;
-    bool accountSelected = 0;
-    
-    char username[0x21] = "Global";
-    
-    accountGetActiveUser(&userId, &accountSelected);
-    
-    if (!accountSelected) {
-        username = "Global"; // if there's no account, just assume that it's a global profile
-    } else {
-        AccountProfile profile;
-        accountGetProfile(&profile, userId);
-        
-        AccountProfileBase profilebase;
-        accountProfileGet(&profile, nullptr, &profilebase);
-        
-        username = profilebase.username;
-        
-        accountProfileClose(&profile);
-    }
-    accountExit();
-    
-    return boost::filesystem::path("./data/" + std::string(username));
+{   
+    return boost::filesystem::path("./data/" + Switch::getUsername());
 }
 
 boost::filesystem::path SwitchPath::getCachePath() const

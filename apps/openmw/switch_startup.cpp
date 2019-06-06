@@ -130,6 +130,33 @@ void Switch::startup()
     appletLockExit();
 }
 
+void Switch::getUsername() {
+    // get the name of the current user
+    accountIntialize();
+    
+    u128 userId = 0;
+    bool accountSelected = 0;
+    
+    std::string username = "Global"; // as fallback, just use Global if there's no current profile available
+    
+    accountGetActiveUser(&userId, &accountSelected);
+    
+    if (accountSelected) {
+        AccountProfile profile;
+        accountGetProfile(&profile, userId);
+        
+        AccountProfileBase profilebase;
+        accountProfileGet(&profile, nullptr, &profilebase);
+        
+        username = std::string(profilebase.username);
+        
+        accountProfileClose(&profile);
+    }
+    accountExit();
+    
+    return username;
+}
+
 void Switch::shutdown()
 {
     appletUnlockExit();
