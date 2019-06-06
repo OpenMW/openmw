@@ -222,12 +222,18 @@ namespace MWGui
         textBox->setVisible(false);
 #endif
 #ifdef __SWITCH__
-        MyGUI::Button *vsyncButton;
-        getWidget(vsyncButton, "VSyncButton");
-        vsyncButton->setVisible(false); // vsync is "automatically" enforced by the GPU for the switch
-        MyGUI::TextBox *vsyncText;
-        getWidget(vsyncText, "VSyncText");
-        vsyncText->setVisible(false);
+        // vsync is "automatically" enforced by the GPU for the switch, hide the button
+        MyGUI::Button *hideButton;
+        getWidget(hideButton, "VSyncButton");
+        hideButton->setVisible(false);
+        MyGUI::TextBox *hideText;
+        getWidget(hideText, "VSyncText");
+        hideText->setVisible(false);
+        // window border also has no effect
+        getWidget(hideButton, "WindowBorderButton");
+        hideButton->setVisible(false);
+        getWidget(hideText, "WindowBorderText");
+        hideText->setVisible(false);
 #endif
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
