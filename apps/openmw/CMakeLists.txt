@@ -5,7 +5,7 @@ set(GAME
 )
 
 if (SWITCH_LIBNX)
-    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/extern/switch/stubs.c)
+    set(GAME ${GAME} ${CMAKE_SOURCE_DIR}/extern/switch/stubs.c ${CMAKE_SOURCE_DIR}/apps/mwiniimporter/importer.cpp)
 endif()
 
 if (WIN32)

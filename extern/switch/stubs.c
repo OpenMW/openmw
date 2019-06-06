@@ -27,6 +27,7 @@ char *realpath(const char *path, char *resolved_path)
 
     if (resolved_path)
     {
+        resolved_path[0] = 0;
         strncpy(resolved_path, path, PATH_MAX-1);
         return resolved_path;
     }

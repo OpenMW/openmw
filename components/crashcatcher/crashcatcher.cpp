@@ -13,7 +13,7 @@ u64 __nx_exception_stack_size = sizeof(__nx_exception_stack);
 
 void __libnx_exception_handler(ThreadExceptionDump *ctx)
 {
-    FILE *f = fopen("exception.log", "w");
+    FILE *f = fopen("fatal.log", "w");
     if (!f) return;
 
     fprintf(f, "error_desc: 0x%x\n", ctx->error_desc);
