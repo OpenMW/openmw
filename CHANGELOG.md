@@ -15,6 +15,7 @@
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4329: Removed birthsign abilities are restored after reloading the save
+    Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
@@ -130,6 +131,7 @@
     Feature #5033: Magic armor mitigation for creatures
     Feature #5034: Make enchanting window stay open after a failed attempt
     Feature #5036: Allow scripted faction leaving
+    Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4721: Add NMake support to the Windows prebuild script

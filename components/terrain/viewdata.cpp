@@ -26,7 +26,7 @@ void ViewData::copyFrom(const ViewData& other)
     mViewPoint = other.mViewPoint;
 }
 
-void ViewData::add(QuadTreeNode *node, bool visible)
+void ViewData::add(QuadTreeNode *node)
 {
     unsigned int index = mNumEntries++;
 
@@ -34,7 +34,7 @@ void ViewData::add(QuadTreeNode *node, bool visible)
         mEntries.resize(index+1);
 
     Entry& entry = mEntries[index];
-    if (entry.set(node, visible))
+    if (entry.set(node))
         mChanged = true;
 }
 
@@ -73,7 +73,7 @@ void ViewData::reset()
 {
     // clear any unused entries
     for (unsigned int i=mNumEntries; i<mEntries.size(); ++i)
-        mEntries[i].set(nullptr, false);
+        mEntries[i].set(nullptr);
 
     // reset index for next frame
     mNumEntries = 0;
@@ -83,7 +83,7 @@ void ViewData::reset()
 void ViewData::clear()
 {
     for (unsigned int i=0; i<mEntries.size(); ++i)
-        mEntries[i].set(nullptr, false);
+        mEntries[i].set(nullptr);
     mNumEntries = 0;
     mLastUsageTimeStamp = 0;
     mChanged = false;
@@ -100,15 +100,13 @@ bool ViewData::contains(QuadTreeNode *node)
 
 ViewData::Entry::Entry()
     : mNode(nullptr)
-    , mVisible(true)
     , mLodFlags(0)
 {
 
 }
 
-bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
+bool ViewData::Entry::set(QuadTreeNode *node)
 {
-    mVisible = visible;
     if (node == mNode)
         return false;
     else
