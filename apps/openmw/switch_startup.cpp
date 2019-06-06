@@ -107,7 +107,7 @@ void importIni(Files::ConfigurationManager& cfgMgr)
         return;
 
     // if the ini does not exist, we have nothing to convert
-    auto dataPath = cfgMgr.getUserDataPath();
+    auto dataPath = cfgMgr.getGlobalDataPath();
     auto iniPath = dataPath / "Morrowind.ini";
     if (!boost::filesystem::exists(iniPath))
         fatal(
