@@ -93,7 +93,6 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
-
     bool isOQter=Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
     if(mOQNSettings.enable && isOQter){
         SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
@@ -102,8 +101,9 @@ void TerrainGrid::loadCell(int x, int y)
         qnode->setQueryFrameCount(mOQNSettings.queryframecount);
         qnode->setQueryMargin(mOQNSettings.querymargin);
         qnode->addChild(terrainNode);
-        qnode->getQueryGeometry()->setNodeMask(MWRender::VisMask::Mask_Terrain);
-        terrainNode=qnode;
+        qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+        qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+        terrainNode = qnode;
     }
 
     TerrainGrid::World::loadCell(x,y);
