@@ -75,7 +75,11 @@ class Objects{
 
     /// @return pointer to cell root
     osg::Group *insertBegin(const MWWorld::Ptr& ptr);
+    osg::Group *getOrCreateCell(const MWWorld::Ptr &ptr);
 
+    ///helpers
+    void cellAddStaticObject(osg::Group* cellnode, osg::Group* child);
+    void cellRemoveObject(osg::Group* cellnode, osg::Group* objectNode);
 public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();

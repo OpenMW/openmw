@@ -42,26 +42,32 @@ Objects::~Objects()
     mCellSceneNodes.clear();
 }
 
-osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
+osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
 {
-    assert(mObjects.find(ptr) == mObjects.end());
 
     osg::ref_ptr<osg::Group> cellnode;
-
     CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
     if (found == mCellSceneNodes.end())
     {
         cellnode = new osg::Group;
         if(mOQNSettings.enable)
         {
-            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            SceneUtil::StaticOcclusionQueryNode* ocnode = new SceneUtil::StaticOcclusionQueryNode;
             for(unsigned int i=0; i<8; ++i)
-                qnode->addChild(new osg::Group());
+                ocnode->addChild(new osg::Group());
+            ocnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            ocnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            ocnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            ocnode->setQueryMargin(mOQNSettings.querymargin);
+
+            SceneUtil::StaticOcclusionQueryNode*qnode = new SceneUtil::StaticOcclusionQueryNode;
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
             qnode->setQueryMargin(mOQNSettings.querymargin);
             cellnode = qnode;
+            cellnode->addChild(ocnode);
+
         }
         cellnode->setName("Cell Root");
         cellnode->setDataVariance(osg::Object::DYNAMIC);
@@ -70,6 +76,56 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
     }
     else
         cellnode = found->second;
+    return cellnode;
+}
+
+void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
+    ///could be static casted but leave a way to make occlusion query a runtime controlled
+    SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
+    if(ocq)
+    {
+        // TO FIX Hacky way to retrieve cell bounds
+        // the first child center considered as cell center
+        // cellsize is set statically in settings.cfg
+        ocq=static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
+        osg::Node * center = dynamic_cast<osg::Node*>(ocq->getUserData());
+        osg::BoundingSphere bs;
+        if(!center)
+        {
+            bs = objectNode->getBound();
+            osg::Node * n=new osg::Node();
+            n->setInitialBound(bs);
+            ocq->setUserData(n);
+        }else bs.center()=center->getInitialBound().center();
+
+        bs.radius() = mOQNSettings.maxCellSize;
+
+        osg::BoundingSphere bsi = objectNode->getBound();
+        if(bs.valid() && bsi.valid() )
+        {
+            SceneUtil::OctreeAddRemove adder(mOQNSettings, VisMask::Mask_OcclusionQuery);
+            adder.recursivCellAddStaticObject(bs, *ocq, objectNode, bsi);
+        }
+    }
+    else cellnode->addChild(objectNode);
+}
+
+void Objects::cellRemoveObject(osg::Group* cellnode, osg::Group* objectNode){
+    ///could be static casted but leave a way to make occlusion query a runtime controlled
+    SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
+    if(ocq)
+    {
+        SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
+        if(!remover.recursivCellRemoveStaticObject(*ocq, objectNode))
+            OSG_WARN<<"removal failed"<<std::endl;
+    }else cellnode->removeChild(objectNode);
+}
+
+osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
+{
+    assert(mObjects.find(ptr) == mObjects.end());
+
+    osg::ref_ptr<osg::Group> cellnode = getOrCreateCell(ptr);
 
     SceneUtil::PositionAttitudeTransform* insert = new SceneUtil::PositionAttitudeTransform;
 
@@ -97,32 +153,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     basenode->setNodeMask(Mask_Object);
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
-    SceneUtil::StaticOcclusionQueryNode *ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellroot);
-    if(ocq)
-    {
-        // TO FIX Hacky way to retrieve cell bounds
-        // the first child center considered as cell center
-        // cellsize is set statically in settings.cfg
-        osg::Node * center = dynamic_cast<osg::Node*>(ocq->getUserData());
-        osg::BoundingSphere bs;
-        if(!center)
-        {
-            bs = basenode->getBound();
-            osg::Node * n=new osg::Node();
-            n->setInitialBound(bs);
-            ocq->setUserData(n);
-        }else bs.center()=center->getInitialBound().center();
-
-        bs.radius() = mOQNSettings.maxCellSize;
-
-        osg::BoundingSphere bsi = basenode->getBound();
-        if(bs.valid() && bsi.valid() )
-        {
-            SceneUtil::OctreeAddRemove adder(mOQNSettings, VisMask::Mask_OcclusionQuery);
-            adder.recursivCellAddStaticObject(bs, *ocq, basenode, bsi);
-        }
-    }
-    else cellroot->addChild(basenode);
+    cellAddStaticObject(cellroot, basenode);
 
     mObjects.insert(std::make_pair(ptr, anim));
 }
@@ -141,7 +172,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
 
-    cellroot->addChild(basenode);
+     cellroot->addChild(basenode);
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
         ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
@@ -153,9 +184,11 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
     ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
-    osg::ref_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+    osg::ref_ptr<NpcAnimation> anim ;
 
+    anim = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem);
     cellroot->addChild(basenode);
+
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
     {
@@ -185,14 +218,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
             ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
         osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
-        osg::OcclusionQueryNode* ocq = dynamic_cast<osg::OcclusionQueryNode*>(cellroot);
-        if(ocq)
-        {
-            SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
-            if(!remover.recursivCellRemoveStaticObject(*ocq, ptr.getRefData().getBaseNode()))
-                OSG_WARN<<"removal failed"<<std::endl;
-        }
-        else cellroot->removeChild(ptr.getRefData().getBaseNode());
+        cellRemoveObject(cellroot, ptr.getRefData().getBaseNode());
 
         ptr.getRefData().setBaseNode(nullptr);
         return true;
@@ -236,20 +262,11 @@ void Objects::removeCell(const MWWorld::CellStore* store)
 
 void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    osg::Node* objectNode = cur.getRefData().getBaseNode();
+    osg::Group* objectNode = cur.getRefData().getBaseNode()->asGroup();
     if (!objectNode)
         return;
 
-    MWWorld::CellStore *newCell = cur.getCell();
-
-    osg::Group* cellnode;
-    if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        cellnode = new osg::Group;
-        mRootNode->addChild(cellnode);
-        mCellSceneNodes[newCell] = cellnode;
-    } else {
-        cellnode = mCellSceneNodes[newCell];
-    }
+    osg::Group* cellnode=getOrCreateCell(cur);
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)
@@ -262,7 +279,12 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     if (objectNode->getNumParents())
         objectNode->getParent(0)->removeChild(objectNode);
     cellnode->addChild(objectNode);
+ if (objectNode->getNumParents()){
+    osg::Group * par= objectNode->getParent(0);
+    cellRemoveObject(par,objectNode);
+ }
 
+ cellAddStaticObject(cellnode,objectNode);
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {
