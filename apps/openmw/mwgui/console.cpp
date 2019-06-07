@@ -225,6 +225,11 @@ namespace MWGui
         resetReference();
     }
 
+    bool isWhitespace(char c)
+    {
+        return c == ' ' || c == '\t';
+    }
+
     void Console::keyPress(MyGUI::Widget* _sender,
                   MyGUI::KeyCode key,
                   MyGUI::Char _char)
@@ -233,20 +238,52 @@ namespace MWGui
         {
             if(key == MyGUI::KeyCode::W)
             {
-                std::string text = mCommandLine->getCaption();
-                if(text.empty())
+                const auto& caption = mCommandLine->getCaption();
+                if(caption.empty())
                     return;
-                size_t max = text.size();
-                while(max > 0 && (text[max - 1] == ' ' || text[max - 1] == '\t' || text[max - 1] == '>'))
+                size_t max = mCommandLine->getTextCursor();
+                while(max > 0 && (isWhitespace(caption[max - 1]) || caption[max - 1] == '>'))
                     max--;
-                while(max > 0 && text[max - 1] != ' ' && text[max - 1] != '\t' && text[max - 1] != '>')
+                while(max > 0 && !isWhitespace(caption[max - 1]) && caption[max - 1] != '>')
                     max--;
-                text.resize(max);
-                mCommandLine->setCaption(text);
+                size_t length = mCommandLine->getTextCursor() - max;
+                if(length > 0)
+                {
+                    std::string text = caption;
+                    text.erase(max, length);
+                    mCommandLine->setCaption(text);
+                    mCommandLine->setTextCursor(max);
+                }
             }
             else if(key == MyGUI::KeyCode::U)
             {
-                mCommandLine->setCaption("");
+                if(mCommandLine->getTextCursor() > 0)
+                {
+                    std::string text = mCommandLine->getCaption();
+                    text.erase(0, mCommandLine->getTextCursor());
+                    mCommandLine->setCaption(text);
+                    mCommandLine->setTextCursor(0);
+                }
+            }
+            else if(key == MyGUI::KeyCode::ArrowRight)
+            {
+                const auto& caption = mCommandLine->getCaption();
+                size_t pos = mCommandLine->getTextCursor();
+                while(pos < caption.size() && (isWhitespace(caption[pos]) || caption[pos] == '-'))
+                    pos++;
+                while(pos < caption.size() && !isWhitespace(caption[pos]) && caption[pos] != '-')
+                    pos++;
+                mCommandLine->setTextCursor(pos);
+            }
+            else if(key == MyGUI::KeyCode::ArrowLeft)
+            {
+                const auto& caption = mCommandLine->getCaption();
+                size_t pos = mCommandLine->getTextCursor();
+                while(pos > 0 && (isWhitespace(caption[pos - 1]) || caption[pos - 1] == '>'))
+                    pos--;
+                while(pos > 0 && !isWhitespace(caption[pos - 1]) && caption[pos - 1] != '>')
+                    pos--;
+                mCommandLine->setTextCursor(pos);
             }
         }
         else if(key == MyGUI::KeyCode::Tab)
