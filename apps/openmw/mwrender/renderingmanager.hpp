@@ -247,7 +247,9 @@ namespace MWRender
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
 
-        osg::ref_ptr<osgViewer::Viewer> mViewer;
+        osg::ref_ptr<osgViewer::Viewer> mViewer;        
+        osg::ref_ptr<osg::Camera> mRttCamera;
+        osg::ref_ptr<osg::Camera> mScreenshotCamera;
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mSceneRoot;
         Resource::ResourceSystem* mResourceSystem;
