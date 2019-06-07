@@ -128,7 +128,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
-    passed =  ( distance <= 0.0 );
+    passed =  ( distance <= _securepopdistance );
 
     if (!passed)
     {
@@ -648,6 +648,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             qnode->setVisibilityThreshold(mSettings.querypixelcount);
             qnode->setDebugDisplay(mSettings.debugDisplay);
             qnode->setQueryFrameCount(mSettings.queryframecount);
+            qnode->setDistancePreventingPopin(mSettings.securepopdistance);
 
             for(unsigned int i=0; i<target->getNumChildren(); ++i)
             {

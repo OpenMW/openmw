@@ -72,7 +72,7 @@ class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
 public:
 
-    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _isgetpassedearlyexitenable(true)
+    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _securepopdistance(0.0f), _isgetpassedearlyexitenable(true)
 #if  OSG_VERSION_LESS_THAN(3,6,4)
       , _validQueryGeometry(false)
 #endif
@@ -94,6 +94,9 @@ public:
     //NB: disable it for hierarchical OQN
     inline void setEarlyExitOn(bool m) { _isgetpassedearlyexitenable = m; }
     inline float getEarlyExit() const { return _isgetpassedearlyexitenable; }
+    inline void setDistancePreventingPopin(bool m) { _securepopdistance = m; }
+    inline float getDistancePreventingPopin() const { return _securepopdistance; }
+
 
     inline void invalidateQueryGeometry() {  _validQueryGeometry = false;  }
 
@@ -108,6 +111,7 @@ protected:
     osg::StateSet *initMWOQState();
     osg::StateSet *initMWOQDebugState();
     float _margin;
+    osg::Matrix::value_type _securepopdistance;
     bool _isgetpassedearlyexitenable;
     osg::ref_ptr< osg::Camera > _maincam;
 #if  OSG_VERSION_LESS_THAN(3,6,4)
@@ -115,7 +119,13 @@ protected:
 #endif
 
 };
-
+struct InvalidateOQNBound : public osg::NodeCallback
+{
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv){
+        static_cast<StaticOcclusionQueryNode*>(node)->invalidateQueryGeometry();
+        node->dirtyBound();
+    }
+};
 /// get scene bounding box based on StaticOcclusionQueryNode::getMainViewCamera occlusions result
 class OQComputeBoundsVisitor : public osg::ComputeBoundsVisitor
 {
@@ -140,6 +150,7 @@ struct OcclusionQuerySettings
     ///subdivision criterions
     float minOQNSize;
     unsigned int maxDrawablePerOQN;
+    float securepopdistance;
 
 };
 struct OctreeAddRemove

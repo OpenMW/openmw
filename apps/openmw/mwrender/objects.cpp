@@ -31,6 +31,7 @@ Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Gro
     mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
+    mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
 }
 
 Objects::~Objects()

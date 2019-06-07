@@ -33,6 +33,7 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
     mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
+    mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
 }
 
 TerrainGrid::~TerrainGrid()
@@ -100,6 +101,8 @@ void TerrainGrid::loadCell(int x, int y)
         qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
         qnode->setQueryFrameCount(mOQNSettings.queryframecount);
         qnode->setQueryMargin(mOQNSettings.querymargin);
+        qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
+
         qnode->addChild(terrainNode);
         qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
         qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
