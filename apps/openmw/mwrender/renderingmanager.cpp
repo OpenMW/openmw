@@ -233,6 +233,8 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
+        bool enableOQN=Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
+
         int shadowCastingTraversalMask = Mask_Scene;
         if (Settings::Manager::getBool("actor shadows", "Shadows"))
             shadowCastingTraversalMask |= Mask_Actor;
@@ -246,7 +248,12 @@ namespace MWRender
             shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
 
         mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
-
+        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
+        mShadowManager->getShadowTechnique()->setComputeFarMask(Mask_ParticleSystem| ///require to be in first cv pass
+                                                                  //|Mask_Terrain doesn't narrow enough far plane
+                                                                  Mask_Object|Mask_Static);
+        if(enableOQN)
+            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
 

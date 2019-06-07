@@ -28,6 +28,8 @@ namespace SceneUtil
         virtual void enableIndoorMode();
 
         virtual void enableOutdoorMode();
+
+        MWShadowTechnique * getShadowTechnique() { return mShadowTechnique; }
     protected:
         bool mEnableShadows;
 

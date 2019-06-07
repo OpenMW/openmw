@@ -25,6 +25,8 @@
 
 #include <sstream>
 
+#include "apps/openmw/mwrender/vismask.hpp"
+
 namespace {
 
 using namespace osgShadow;
@@ -954,11 +956,26 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     }
 
     // 1. Traverse main scene graph
+    /// OQNs culling
+    if(_OQMask != 0)
+    {
+        unsigned int traversalMask=cv.getTraversalMask();
+
+        cv.setTraversalMask( traversalMask &  (_sceneMask | _OQMask) );
+
+        _shadowedScene->osg::Group::traverse(cv);
+
+        cv.setTraversalMask( traversalMask );
+        //OSG_WARN<<" occlusion geometries ZFar "<<cv.getCalculatedFarPlane()<<std::endl;
+    }
+
     cv.pushStateSet( _shadowRecievingPlaceholderStateSet.get() );
 
     osg::ref_ptr<osgUtil::StateGraph> decoratorStateGraph = cv.getCurrentStateGraph();
 
     cullShadowReceivingScene(&cv);
+
+    maxZFar = cv.getCalculatedFarPlane();
 
     cv.popStateSet();
 
@@ -2925,15 +2942,25 @@ void MWShadowTechnique::cullShadowReceivingScene(osgUtil::CullVisitor* cv) const
 {
     OSG_INFO<<"cullShadowReceivingScene()"<<std::endl;
 
+    // compute far plane with OQN unculled scene
+    cv->setCalculatedFarPlane(0);
+
     // record the traversal mask on entry so we can reapply it later.
     unsigned int traversalMask = cv->getTraversalMask();
 
-    cv->setTraversalMask( traversalMask & _shadowedScene->getShadowSettings()->getReceivesShadowTraversalMask() );
+    cv->setTraversalMask( traversalMask & ((_sceneMask | _computeFarMask) & (~_OQMask) ));
+
+    _shadowedScene->osg::Group::traverse(*cv);
+
+    double maxZFar = osg::maximum<double>(cv->getCalculatedNearPlane(), cv->getCalculatedFarPlane());
+
+    cv->setTraversalMask( traversalMask & _shadowedScene->getShadowSettings()->getReceivesShadowTraversalMask() & ~_computeFarMask & ~_OQMask );
 
     _shadowedScene->osg::Group::traverse(*cv);
 
     cv->setTraversalMask( traversalMask );
 
+    cv->setCalculatedFarPlane(maxZFar);
     return;
 }
 
