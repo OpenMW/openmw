@@ -684,9 +684,8 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     else
     {
         target->addChild(child);
-        unsigned int nodemask = 0xffffffff;// TOFIX make it customizable
-        parent.getQueryGeometry()->setNodeMask(nodemask);
-        parent.getDebugGeometry()->setNodeMask(nodemask);
+        parent.getQueryGeometry()->setNodeMask(_OQGmask);
+        parent.getDebugGeometry()->setNodeMask(_OQGmask);
         parent.setQueriesEnabled(true);
     }
 }

@@ -103,18 +103,22 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
         // TO FIX Hacky way to retrieve cell bounds
         // the first child center considered as cell center
         // cellsize is set statically in settings.cfg
-        osg::BoundingSphere bs = ocq->getInitialBound();
-        if(!bs.valid())
+        osg::Node * center = dynamic_cast<osg::Node*>(ocq->getUserData());
+        osg::BoundingSphere bs;
+        if(!center)
         {
             bs = basenode->getBound();
-            bs.radius() = mOQNSettings.maxCellSize;
-            ocq->setInitialBound(bs);
-        }
+            osg::Node * n=new osg::Node();
+            n->setInitialBound(bs);
+            ocq->setUserData(n);
+        }else bs.center()=center->getInitialBound().center();
+
+        bs.radius() = mOQNSettings.maxCellSize;
 
         osg::BoundingSphere bsi = basenode->getBound();
         if(bs.valid() && bsi.valid() )
         {
-            SceneUtil::OctreeAddRemove adder(mOQNSettings);
+            SceneUtil::OctreeAddRemove adder(mOQNSettings, VisMask::Mask_OcclusionQuery);
             adder.recursivCellAddStaticObject(bs, *ocq, basenode, bsi);
         }
     }
@@ -184,7 +188,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         osg::OcclusionQueryNode* ocq = dynamic_cast<osg::OcclusionQueryNode*>(cellroot);
         if(ocq)
         {
-            SceneUtil::OctreeAddRemove remover(mOQNSettings);
+            SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
             if(!remover.recursivCellRemoveStaticObject(*ocq, ptr.getRefData().getBaseNode()))
                 OSG_WARN<<"removal failed"<<std::endl;
         }

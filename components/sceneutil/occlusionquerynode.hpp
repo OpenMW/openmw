@@ -144,8 +144,9 @@ struct OcclusionQuerySettings
 };
 struct OctreeAddRemove
 {
-    OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
+    OctreeAddRemove(const OcclusionQuerySettings & settings,unsigned int OQGmask): mSettings(settings), _OQGmask(OQGmask) {}
     const OcclusionQuerySettings & mSettings;
+    unsigned int _OQGmask;
 
     void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);
 
