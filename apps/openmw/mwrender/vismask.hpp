@@ -53,7 +53,10 @@ namespace MWRender
         Mask_PreCompile = (1<<18),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<19)
+        Mask_Lighting = (1<<19),
+
+        // set on Occlusion Query Geometry to filter them during cull traversal
+        Mask_OcclusionQuery = (1<<20)
     };
 
 }
