@@ -83,7 +83,7 @@ void KeyboardNavigation::restoreFocus(int mode)
     {
         MyGUI::Widget* w = found->second;
         if (w && w->getVisible() && w->getEnabled())
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(found->second);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(found->second);
     }
 }
 
@@ -130,7 +130,7 @@ void KeyboardNavigation::onFrame()
     // workaround incorrect key focus resets (fix in MyGUI TBD)
     if (!shouldAcceptKeyFocus(focus) && shouldAcceptKeyFocus(mCurrentFocus) && (!mModalWindow || isRootParent(mCurrentFocus, mModalWindow)))
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCurrentFocus);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCurrentFocus);
         focus = mCurrentFocus;
     }
 
@@ -154,12 +154,12 @@ void KeyboardNavigation::setDefaultFocus(MyGUI::Widget *window, MyGUI::Widget *d
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
     if (!focus || !shouldAcceptKeyFocus(focus))
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(defaultFocus);
     }
     else
     {
         if (!isRootParent(focus, window))
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(defaultFocus);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(defaultFocus);
     }
 }
 
@@ -276,7 +276,7 @@ bool KeyboardNavigation::switchFocus(int direction, bool wrap)
     else if (direction == D_Up && (vertdiff >= 0 || !isVertical))
         return false;
 
-    MyGUI::InputManager::getInstance().setKeyFocusWidget(keyFocusList[index]);
+    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[index]);
     return true;
 }
 
@@ -291,7 +291,7 @@ bool KeyboardNavigation::selectFirstWidget()
 
     if (!keyFocusList.empty())
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(keyFocusList[0]);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(keyFocusList[0]);
         return true;
     }
     return false;

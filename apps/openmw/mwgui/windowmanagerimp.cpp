@@ -697,7 +697,7 @@ namespace MWGui
             setCursorVisible(!gameMode);
 
         if (gameMode)
-            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+            setKeyFocusWidget (nullptr);
 
         // Icons of forced hidden windows are displayed
         setMinimapVisibility((mAllowed & GW_Map) && (!mMap->pinned() || (mForceHidden & GW_Map)));
@@ -1675,6 +1675,13 @@ namespace MWGui
         }
     }
 
+    // Remove this wrapper once onKeyFocusChanged call is rendered unnecessary
+    void WindowManager::setKeyFocusWidget(MyGUI::Widget *widget)
+    {
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(widget);
+        onKeyFocusChanged(widget);
+    }
+
     void WindowManager::onKeyFocusChanged(MyGUI::Widget *widget)
     {
         if (widget && widget->castType<MyGUI::EditBox>(false))
@@ -1868,7 +1875,7 @@ namespace MWGui
         sizeVideo(screenSize.width, screenSize.height);
 
         MyGUI::Widget* oldKeyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mVideoWidget);
+        setKeyFocusWidget(mVideoWidget);
 
         mVideoBackground->setVisible(true);
 
@@ -1906,7 +1913,7 @@ namespace MWGui
 
         MWBase::Environment::get().getSoundManager()->resumeSounds();
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(oldKeyFocus);
+        setKeyFocusWidget(oldKeyFocus);
 
         setCursorVisible(cursorWasVisible);
 

@@ -93,9 +93,9 @@ namespace MWGui
         }
             
         if (mUntilHealedButton->getVisible())
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mUntilHealedButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
         else
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mWaitButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
     }
 
     bool WaitDialog::exit()
@@ -222,7 +222,7 @@ namespace MWGui
     {
         mHourText->setCaptionWithReplacing (MyGUI::utility::toString(position+1) + " #{sRestMenu2}");
         mManualHours = position+1;
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mWaitButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mWaitButton);
     }
 
     void WaitDialog::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)

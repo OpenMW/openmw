@@ -4,7 +4,6 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ScrollView.h>
-#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -72,7 +71,7 @@ namespace MWGui
         WindowModal::onOpen();
         updateBirths();
         updateSpells();
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mBirthList);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mBirthList);
 
         // Show the current birthsign by default
         const std::string &signId =

@@ -5,7 +5,6 @@
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Button.h>
-#include <MyGUI_InputManager.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/widgets/list.hpp>
@@ -381,7 +380,7 @@ namespace MWGui
         {
             onTopicActivated(topic);
             if (mGoodbyeButton->getEnabled())
-                MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
         }
         else if (topic == sPersuasion)
             mPersuasionDialog.setVisible(true);
@@ -444,7 +443,7 @@ namespace MWGui
             return;
         }
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
         setTitle(mPtr.getClass().getName(mPtr));
 
@@ -623,7 +622,7 @@ namespace MWGui
         bool goodbyeWasEnabled = mGoodbyeButton->getEnabled();
         mGoodbyeButton->setEnabled(goodbyeEnabled);
         if (goodbyeEnabled && !goodbyeWasEnabled)
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
 
         bool topicsEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye;
         mTopicsList->setEnabled(topicsEnabled);
