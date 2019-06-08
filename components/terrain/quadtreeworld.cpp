@@ -13,6 +13,8 @@
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
 
+#include "apps/openmw/mwrender/vismask.hpp"
+
 namespace
 {
 
@@ -233,13 +235,18 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mVertexLodMod(vertexLodMod)
     , mViewDistance(std::numeric_limits<float>::max())
 {
+    resetSettings();
+
     // No need for culling on the Drawable / Transform level as the quad tree performs the culling already.
     mChunkManager->setCullingActive(false);
 
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
     mChunkManager->setMaxCompositeGeometrySize(maxCompGeometrySize);
+
 }
+
+
 
 QuadTreeWorld::~QuadTreeWorld()
 {
@@ -343,7 +350,7 @@ unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, ViewD
     return lodFlags;
 }
 
-void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, ChunkManager* chunkManager)
+void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, ChunkManager* chunkManager)
 {
     if (!vd->hasChanged() && entry.mRenderingNode)
         return;
@@ -361,8 +368,24 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, C
         }
     }
 
-    if (!entry.mRenderingNode)
+    if (!entry.mRenderingNode){
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
+
+        if(mOQNSettings.enable&&entry.mRenderingNode.valid() ){
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
+
+            qnode->addChild(entry.mRenderingNode);
+            //qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            //qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getBound();
+            entry.mRenderingNode = qnode;
+        }
+    }
 }
 
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
@@ -417,7 +440,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             entry.set(entry.mNode, !static_cast<osgUtil::CullVisitor*>(&nv)->isCulled(entry.mNode->getBoundingBox()));
         }
     }
-
+    osg::Node *chunknode;
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
@@ -426,7 +449,10 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
         if (entry.mVisible)
         {
-            osg::UserDataContainer* udc = entry.mRenderingNode->getUserDataContainer();
+            if(mOQNSettings.enable)
+                chunknode = entry.mRenderingNode->asGroup()->getChild(0);
+            else chunknode = entry.mRenderingNode;
+            osg::UserDataContainer* udc=chunknode->getUserDataContainer();
             if (udc && udc->getUserData())
             {
                 mCompositeMapRenderer->setImmediate(static_cast<CompositeMap*>(udc->getUserData()));

@@ -29,7 +29,7 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
 
 void TerrainGrid::resetSettings()
 {
-    mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
+    mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries") && Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
     mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
     mOQNSettings.querypixelcount = Settings::Manager::getInt("visibility threshold", "OcclusionQueries");
     mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
@@ -77,6 +77,23 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if (!node)
             return nullptr;
 
+
+        if(mOQNSettings.enable){
+
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
+
+            qnode->addChild(node);
+            qnode->getBound();
+            //TOFIX: with a mask occlusion test never happen...find why
+            //qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+         //  qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            node = qnode;
+        }
         if (parent)
             parent->addChild(node);
 
@@ -98,20 +115,6 @@ void TerrainGrid::loadCell(int x, int y)
     if (!terrainNode)
         return; // no terrain defined
 
-    bool isOQter=Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
-    if(mOQNSettings.enable && isOQter){
-        SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
-        qnode->setDebugDisplay(mOQNSettings.debugDisplay);
-        qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
-        qnode->setQueryFrameCount(mOQNSettings.queryframecount);
-        qnode->setQueryMargin(mOQNSettings.querymargin);
-        qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
-
-        qnode->addChild(terrainNode);
-        qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-        qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-        terrainNode = qnode;
-    }
 
     TerrainGrid::World::loadCell(x,y);
 

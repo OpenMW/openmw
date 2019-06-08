@@ -3,6 +3,7 @@
 
 #include "world.hpp"
 #include "terraingrid.hpp"
+#include "viewdata.hpp"
 
 #include <OpenThreads/Mutex>
 
@@ -45,6 +46,7 @@ namespace Terrain
     private:
         void ensureQuadTreeBuilt();
 
+        void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, ChunkManager* chunkManager);
         osg::ref_ptr<RootNode> mRootNode;
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
