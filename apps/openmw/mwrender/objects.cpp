@@ -16,6 +16,15 @@
 
 namespace MWRender
 {
+
+Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
+    : mRootNode(rootNode)
+    , mResourceSystem(resourceSystem)
+    , mUnrefQueue(unrefQueue)
+{
+    resetSettings();
+}
+
 void Objects::resetSettings()
 {
     mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
@@ -28,13 +37,6 @@ void Objects::resetSettings()
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
-}
-Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
-    : mRootNode(rootNode)
-    , mResourceSystem(resourceSystem)
-    , mUnrefQueue(unrefQueue)
-{
-    resetSettings();
 }
 
 Objects::~Objects()
@@ -186,11 +188,9 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
-    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
+    basenode->setNodeMask(Mask_Actor);
 
-    osg::ref_ptr<NpcAnimation> anim ;
-
-    anim = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem);
+    osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
     cellroot->addChild(basenode);
 
 
@@ -280,15 +280,13 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
                 userDataContainer->setUserObject(i, new PtrHolder(cur));
         }
 
-    if (objectNode->getNumParents())
-        objectNode->getParent(0)->removeChild(objectNode);
-    cellnode->addChild(objectNode);
- if (objectNode->getNumParents()){
-    osg::Group * par= objectNode->getParent(0);
-    cellRemoveObject(par,objectNode);
- }
+    if (objectNode->getNumParents()){
+        osg::Group * par= objectNode->getParent(0);
+        cellRemoveObject(par,objectNode);
+    }
 
- cellAddStaticObject(cellnode,objectNode);
+    cellAddStaticObject(cellnode,objectNode);
+
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
     {

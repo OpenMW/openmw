@@ -367,7 +367,6 @@ namespace MWBase
             /// \return pointer to created record
 
             virtual void update (float duration, bool paused) = 0;
-
             virtual void updatePhysics (float duration, bool paused) = 0;
 
             virtual void updateWindowManager () = 0;

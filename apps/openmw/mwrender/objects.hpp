@@ -56,8 +56,6 @@ public:
     MWWorld::Ptr mPtr;
 };
 
-
-
 class Objects{
     typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
 

@@ -197,8 +197,6 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mFullscreenButton, "FullscreenButton");
-        getWidget(mOQNButton, "OQNButton");
-        getWidget(mDebugOQNButton, "DebugOQNButton");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
         getWidget(mAnisotropyBox, "AnisotropyBox");

@@ -26,6 +26,7 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
 {
     resetSettings();
 }
+
 void TerrainGrid::resetSettings()
 {
     mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");

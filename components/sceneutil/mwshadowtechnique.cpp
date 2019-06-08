@@ -864,7 +864,6 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
-
     _castingProgram = new osg::Program();
 
     _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
