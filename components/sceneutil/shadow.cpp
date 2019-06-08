@@ -10,6 +10,8 @@ namespace SceneUtil
 
     void ShadowManager::setupShadowSettings()
     {
+        mShadowTechnique= new MWShadowTechnique;
+        mShadowedScene->setShadowTechnique(mShadowTechnique);
         mEnableShadows = Settings::Manager::getBool("enable shadows", "Shadows");
 
         if (!mEnableShadows)
@@ -55,6 +57,8 @@ namespace SceneUtil
             mShadowTechnique->enableDebugHUD();
         else
             mShadowTechnique->disableDebugHUD();
+
+        mShadowTechnique->setupCastingShader(mShaderManager);
     }
 
     void ShadowManager::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
@@ -76,20 +80,18 @@ namespace SceneUtil
         }
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
-        mShadowTechnique(new MWShadowTechnique),
-        mOutdoorShadowCastingMask(outdoorShadowCastingMask),
-        mIndoorShadowCastingMask(indoorShadowCastingMask)
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
+        mOutdoorShadowCastingMask(~0),
+        mIndoorShadowCastingMask(~0),
+        mShaderManager(shaderManager)
     {
-        mShadowedScene->setShadowTechnique(mShadowTechnique);
 
         mShadowedScene->addChild(sceneRoot);
         rootNode->addChild(mShadowedScene);
 
         mShadowSettings = mShadowedScene->getShadowSettings();
-        setupShadowSettings();
 
-        mShadowTechnique->setupCastingShader(shaderManager);
+        setupShadowSettings();
 
         enableOutdoorMode();
     }

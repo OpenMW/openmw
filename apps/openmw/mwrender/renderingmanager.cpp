@@ -194,6 +194,56 @@ namespace MWRender
         Resource::ResourceSystem* mResourceSystem;
     };
 
+    void RenderingManager::resetShadowSettings(){
+        bool enableOQN=Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
+
+        int shadowCastingTraversalMask = Mask_Scene;
+        if (enableOQN && Settings::Manager::getBool("shadow cams OQN enable", "OcclusionQueries"))
+            shadowCastingTraversalMask |= Mask_OcclusionQuery;
+        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Actor;
+        if (Settings::Manager::getBool("player shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Player;
+        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+            shadowCastingTraversalMask |= Mask_Terrain;
+
+        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
+        if (Settings::Manager::getBool("object shadows", "Shadows"))
+            shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
+
+        bool isIndoor=mShadowManager->getShadowSettings()->getCastsShadowTraversalMask()==mShadowManager->getIndoorShadowCastingMask();
+        mShadowManager->setIndoorShadowCastingMask(indoorShadowCastingTraversalMask);
+        mShadowManager->setOutdoorShadowCastingMask(shadowCastingTraversalMask);
+        mShadowManager->setupShadowSettings();
+
+        if(isIndoor) { mShadowManager->enableOutdoorMode(); mShadowManager->enableIndoorMode();}
+        else { mShadowManager->enableIndoorMode(); mShadowManager->enableOutdoorMode(); }
+
+        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
+        if(enableOQN)
+        {
+            mShadowManager->getShadowTechnique()->setComputeFarMask(Mask_ParticleSystem| ///require to be in first cv pass
+                                                                    //|Mask_Terrain doesn't narrow enough far plane
+                                                                    Mask_Object|Mask_Static);
+            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
+        }else
+        {
+
+            mShadowManager->getShadowTechnique()->setComputeFarMask(~0);
+            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(0);
+        }
+        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
+        Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+
+        for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
+            globalDefines[itr->first] = itr->second;
+
+        globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
+        globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
+
+        // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
+        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
+    }
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                                        const std::string& resourcePath, DetourNavigator::Navigator& navigator)
@@ -233,42 +283,10 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        bool enableOQN=Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, mResourceSystem->getSceneManager()->getShaderManager()));
+        resetShadowSettings();
 
-        int shadowCastingTraversalMask = Mask_Scene;
-        if (enableOQN && Settings::Manager::getBool("shadow cams OQN enable", "OcclusionQueries"))
-            shadowCastingTraversalMask |= Mask_OcclusionQuery;
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Actor;
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Player;
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Terrain;
 
-        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
-            shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
-
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
-        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
-        if(enableOQN)
-        {
-            mShadowManager->getShadowTechnique()->setComputeFarMask(Mask_ParticleSystem| ///require to be in first cv pass
-                                                                    //|Mask_Terrain doesn't narrow enough far plane
-                                                                    Mask_Object|Mask_Static);
-            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
-        }
-        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
-        Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
-
-        for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
-            globalDefines[itr->first] = itr->second;
-
-        globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
-        globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
-
-        // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
-        mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
@@ -1295,6 +1313,8 @@ namespace MWRender
         }
         mObjects->resetSettings();
         mTerrain->resetSettings();
+
+        resetShadowSettings();
     }
 
     float RenderingManager::getNearClipDistance() const

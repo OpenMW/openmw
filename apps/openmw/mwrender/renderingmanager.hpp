@@ -232,6 +232,7 @@ namespace MWRender
         void setNavMeshNumber(const std::size_t value);
 
     private:
+        void resetShadowSettings();
         void updateProjectionMatrix();
         void updateTextureFiltering();
         void updateAmbient();

@@ -265,10 +265,10 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sVideo}  "/>
-                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
+                <Widget type="TabControl" skin="TabControlInner" position="4 4 372 390" align="Stretch">
                     <Property key="ButtonAutoWidth" value="true"/>
-                    <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
-                        <Property key="Caption" value="  Video  "/>
+                    <Widget type="TabItem" skin="" position="0 28 372 268" align="Stretch">
+                        <Property key="Caption" value=" Video "/>
                         <Widget type="ListBox" skin="MW_List" position="0 4 170 170" align="Left Top" name="ResolutionList"/>
                         <Widget type="HBox" skin="" position="182 4 300 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="FullscreenButton">
@@ -350,7 +350,7 @@
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                     </Widget>
-                    <Widget type="TabItem" skin="" position="0 28 352 268">
+                    <Widget type="TabItem" skin="" position="0 28 372 268">
                         <Property key="Caption" value="  Detail  "/>
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
                             <Property key="Caption" value="Texture Filtering"/>
@@ -409,7 +409,7 @@
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                     </Widget>
-                    <Widget type="TabItem" skin="" position="0 28 352 268">
+                    <Widget type="TabItem" skin="" position="0 28 372 268">
                         <Property key="Caption" value=" Occlusion "/>
                         <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
                             <Property key="Caption" value="Enable Occlusion Queries"/>
@@ -432,8 +432,61 @@
                             </Widget>
                         </Widget>
                     </Widget>
-                    <Widget type="TabItem" skin="" position="0 28 352 268">
-                        <Property key="Caption" value="  Water  "/>
+                    <Widget type="TabItem" skin="" position="0 28 372 268">
+                        <Property key="Caption" value=" Shadow "/>
+                        <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
+                            <Property key="Caption" value="Enable Shadows"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 4 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowEnableButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="enable shadows"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 28 300 24" align="Left Top">
+                            <Property key="Caption" value="Objects cast shadows"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 28 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowObjectButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="object shadows"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 52 300 24" align="Left Top">
+                            <Property key="Caption" value="Actor cast shadows"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 52 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowActorButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="actor shadows"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 76 300 24" align="Left Top">
+                            <Property key="Caption" value="Player cast shadows"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 76 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowPlayerButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="player shadows"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 100 300 24" align="Left Top">
+                            <Property key="Caption" value="Terrain cast shadows"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 100 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowTerraintButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="terrain shadows"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                    </Widget>
+                    <Widget type="TabItem" skin="" position="0 28 372 268">
+                        <Property key="Caption" value=" Water "/>
                         <Widget type="HBox" skin="" position="4 4 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">
                                 <UserString key="SettingCategory" value="Water"/>
