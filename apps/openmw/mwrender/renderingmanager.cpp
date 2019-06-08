@@ -251,7 +251,6 @@ namespace MWRender
 
         mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
         mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
-        mShadowManager->getShadowTechnique()->setComputeFarMask(~0);
         if(enableOQN)
         {
             mShadowManager->getShadowTechnique()->setComputeFarMask(Mask_ParticleSystem| ///require to be in first cv pass

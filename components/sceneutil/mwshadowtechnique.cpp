@@ -770,7 +770,7 @@ void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) c
 MWShadowTechnique::MWShadowTechnique():
     ShadowTechnique(),
     _enableShadows(false),
-    _debugHud(nullptr)
+    _sceneMask(~0), _OQMask(0), _computeFarMask(~0), _debugHud(nullptr)
 {
     _shadowRecievingPlaceholderStateSet = new osg::StateSet;
 }
