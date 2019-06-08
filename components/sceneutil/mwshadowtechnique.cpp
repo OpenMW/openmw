@@ -864,7 +864,7 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
-    
+
     _castingProgram = new osg::Program();
 
     _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
@@ -967,15 +967,28 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         cv.setTraversalMask( traversalMask );
         //OSG_WARN<<" occlusion geometries ZFar "<<cv.getCalculatedFarPlane()<<std::endl;
+        cv.setCalculatedFarPlane(0);
     }
 
     cv.pushStateSet( _shadowRecievingPlaceholderStateSet.get() );
 
     osg::ref_ptr<osgUtil::StateGraph> decoratorStateGraph = cv.getCurrentStateGraph();
 
-    cullShadowReceivingScene(&cv);
+    OSG_INFO<<"cullShadowReceivingScene()"<<std::endl;
 
-    maxZFar = cv.getCalculatedFarPlane();
+    // compute far plane with OQN unculled scene
+
+    unsigned int traversalMask = cv.getTraversalMask();
+
+    cv.setTraversalMask( traversalMask & _shadowedScene->getShadowSettings()->getReceivesShadowTraversalMask() &((_sceneMask | _computeFarMask) & (~_OQMask) ));
+
+    _shadowedScene->osg::Group::traverse(cv);
+
+    cv.setTraversalMask( traversalMask );
+
+    if(_OQMask) maxZFar = osg::minimum<double>(maxZFar, cv.getCalculatedFarPlane());
+
+    cullShadowReceivingScene(&cv);
 
     cv.popStateSet();
 
@@ -1251,7 +1264,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     double ciUniform = n + (f - n) * (i + 1) / m;
                     double ci = _splitPointUniformLogRatio * ciLog + (1.0 - _splitPointUniformLogRatio) * ciUniform + _splitPointDeltaBias;
                     cascadeFar = ci;
-                    
+
                     // work out where this is in light space
                     osg::Vec3d worldSpacePos = frustum.eye + frustum.frustumCenterLine * ci;
                     osg::Vec3d lightSpacePos = worldSpacePos * viewMatrix * projectionMatrix;
@@ -1310,7 +1323,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                         camera->getProjectionMatrix() *
                         osg::Matrixd::translate(osg::Vec3d(0.0,-mid_r,0.0)) *
                         osg::Matrixd::scale(osg::Vec3d(1.0,2.0/range_r,1.0)));
-                    
+
                 }
             }
 
@@ -2496,7 +2509,7 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
     osg::Matrixd light_v = camera->getViewMatrix();
     osg::Matrixd light_vp = light_v * light_p;
     osg::Matrixd oldLightP = light_p;
-    
+
     ConvexHull convexHull;
     convexHull.setToFrustum(frustum);
 
@@ -2940,27 +2953,15 @@ bool MWShadowTechnique::assignTexGenSettings(osgUtil::CullVisitor* cv, osg::Came
 
 void MWShadowTechnique::cullShadowReceivingScene(osgUtil::CullVisitor* cv) const
 {
-    OSG_INFO<<"cullShadowReceivingScene()"<<std::endl;
-
-    // compute far plane with OQN unculled scene
-    cv->setCalculatedFarPlane(0);
-
     // record the traversal mask on entry so we can reapply it later.
     unsigned int traversalMask = cv->getTraversalMask();
 
-    cv->setTraversalMask( traversalMask & ((_sceneMask | _computeFarMask) & (~_OQMask) ));
-
-    _shadowedScene->osg::Group::traverse(*cv);
-
-    double maxZFar = osg::maximum<double>(cv->getCalculatedNearPlane(), cv->getCalculatedFarPlane());
-
-    cv->setTraversalMask( traversalMask & _shadowedScene->getShadowSettings()->getReceivesShadowTraversalMask() & ~_computeFarMask & ~_OQMask );
+    cv->setTraversalMask( traversalMask & _shadowedScene->getShadowSettings()->getReceivesShadowTraversalMask() & (_sceneMask| ~_computeFarMask) & ~_OQMask );
 
     _shadowedScene->osg::Group::traverse(*cv);
 
     cv->setTraversalMask( traversalMask );
 
-    cv->setCalculatedFarPlane(maxZFar);
     return;
 }
 
@@ -3153,7 +3154,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> t
         addAnotherShadowMap();
 
     mFrustumUniforms[shadowMapNumber]->set(matrix);
-    
+
     osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
     stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
 
