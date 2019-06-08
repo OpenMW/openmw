@@ -1012,7 +1012,7 @@ namespace MWMechanics
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-            Misc::StringUtils::replace(message, "%s", ingredient->mName.c_str(), 2);
+            message = Misc::StringUtils::format(message, ingredient->mName);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }

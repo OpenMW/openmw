@@ -3,6 +3,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_ListBox.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -135,7 +136,7 @@ namespace MWGui
         WindowModal::onOpen ();
         updateClasses();
         updateStats();
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mClassList);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mClassList);
 
         // Show the current class by default
         MWWorld::Ptr player = MWMechanics::getPlayer();
@@ -436,7 +437,7 @@ namespace MWGui
         getWidget(mEditName, "EditName");
 
         // Make sure the edit box has focus
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mEditName);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mEditName);
 
         MyGUI::Button* descriptionButton;
         getWidget(descriptionButton, "DescriptionButton");
@@ -902,7 +903,7 @@ namespace MWGui
         okButton->setCaption(MWBase::Environment::get().getWindowManager()->getGameSettingString("sInputMenu1", ""));
 
         // Make sure the edit box has focus
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTextEdit);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mTextEdit);
     }
 
     DescriptionDialog::~DescriptionDialog()

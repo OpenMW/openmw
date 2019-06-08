@@ -10,6 +10,7 @@ namespace MWMechanics
 {
     MWWorld::Ptr getPlayer();
     bool isPlayerInCombat();
+    bool canActorMoveByZAxis(const MWWorld::Ptr& actor);
 }
 
 #endif

@@ -2,20 +2,6 @@
 <ui version="4.0">
  <class>DataFilesPage</class>
  <widget class="QWidget" name="DataFilesPage">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>518</width>
-    <height>108</height>
-   </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
   <property name="contextMenuPolicy">
    <enum>Qt::DefaultContextMenu</enum>
   </property>
@@ -80,15 +66,25 @@
        </widget>
       </item>
       <item>
+       <widget class="QToolButton" name="cloneProfileButton">
+        <property name="toolTip">
+         <string>Clone Content List</string>
+        </property>
+        <property name="text">
+         <string>Clone Content List</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="deleteProfileButton">
         <property name="toolTip">
          <string>Delete Content List</string>
         </property>
         <property name="text">
          <string>Delete Content List</string>
-        </property>
-        <property name="shortcut">
-         <string>Ctrl+D</string>
         </property>
         <property name="autoRaise">
          <bool>true</bool>
@@ -115,6 +111,22 @@
     <string>Ctrl+N</string>
    </property>
   </action>
+  <action name="cloneProfileAction">
+   <property name="icon">
+    <iconset theme="edit-copy">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Clone Content List</string>
+   </property>
+   <property name="toolTip">
+    <string>Clone Content List</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
   <action name="deleteProfileAction">
    <property name="enabled">
     <bool>false</bool>
@@ -129,6 +141,9 @@
    </property>
    <property name="toolTip">
     <string>Delete Content List</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
   <action name="checkAction">

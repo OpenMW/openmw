@@ -247,6 +247,8 @@ namespace MWWorld
 
         RecordId load(ESM::ESMReader &esm);
         void setUp();
+    private:
+        bool mBuilt = false;
     };
 
     template <>

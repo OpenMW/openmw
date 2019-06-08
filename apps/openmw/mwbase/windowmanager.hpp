@@ -289,9 +289,6 @@ namespace MWBase
 
             virtual const Translation::Storage& getTranslationDataStorage() const = 0;
 
-            /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
-            virtual void setKeyFocusWidget (MyGUI::Widget* widget) = 0;
-
             virtual void loadUserFonts() = 0;
 
             virtual Loading::Listener* getLoadingScreen() = 0;
@@ -336,6 +333,7 @@ namespace MWBase
             virtual void activateHitOverlay(bool interrupt=true) = 0;
             virtual void setWerewolfOverlay(bool set) = 0;
 
+            virtual void toggleConsole() = 0;
             virtual void toggleDebugWindow() = 0;
 
             /// Cycle to next or previous spell

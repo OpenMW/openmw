@@ -5,6 +5,7 @@
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/widgets/list.hpp>
@@ -380,7 +381,7 @@ namespace MWGui
         {
             onTopicActivated(topic);
             if (mGoodbyeButton->getEnabled())
-                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+                MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
         }
         else if (topic == sPersuasion)
             mPersuasionDialog.setVisible(true);
@@ -432,29 +433,26 @@ namespace MWGui
         mGoodbye = false;
         mTopicsList->setEnabled(true);
 
-        setTitle(mPtr.getClass().getName(mPtr));
-
-        updateDisposition();
-        restock();
-    }
-
-    void DialogueWindow::onOpen()
-    {
-        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(mPtr, mGreetingCallback.get()))
+        if (!MWBase::Environment::get().getDialogueManager()->startDialogue(actor, mGreetingCallback.get()))
         {
             // No greetings found. The dialogue window should not be shown.
             // If this is a companion, we must show the companion window directly (used by BM_bear_be_unique).
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
-            if (isCompanion(mPtr))
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, mPtr);
             mPtr = MWWorld::Ptr();
+            if (isCompanion(actor))
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Companion, actor);
             return;
         }
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
+
+        setTitle(mPtr.getClass().getName(mPtr));
 
         updateTopics();
         updateTopicsPane(); // force update for new services
 
+        updateDisposition();
+        restock();
     }
 
     void DialogueWindow::restock()
@@ -625,7 +623,7 @@ namespace MWGui
         bool goodbyeWasEnabled = mGoodbyeButton->getEnabled();
         mGoodbyeButton->setEnabled(goodbyeEnabled);
         if (goodbyeEnabled && !goodbyeWasEnabled)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mGoodbyeButton);
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mGoodbyeButton);
 
         bool topicsEnabled = !MWBase::Environment::get().getDialogueManager()->isInChoice() && !mGoodbye;
         mTopicsList->setEnabled(topicsEnabled);

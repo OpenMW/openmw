@@ -101,7 +101,7 @@ namespace MWGui
 
         setTakeButtonShow(showTakeButton);
 
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
     }
 
     void BookWindow::setTakeButtonShow(bool show)
@@ -161,9 +161,9 @@ namespace MWGui
         mPrevPageButton->setVisible(prevPageVisible);
 
         if (focus == mNextPageButton && !nextPageVisible && prevPageVisible)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mPrevPageButton);
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mPrevPageButton);
         else if (focus == mPrevPageButton && !prevPageVisible && nextPageVisible)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNextPageButton);
+            MyGUI::InputManager::getInstance().setKeyFocusWidget(mNextPageButton);
 
         if (mPages.empty())
             return;

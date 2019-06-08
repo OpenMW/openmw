@@ -5,6 +5,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_InputManager.h>
 
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
@@ -67,7 +68,7 @@ namespace MWGui
     void EnchantingDialog::onOpen()
     {
         center();
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mName);
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)
@@ -107,20 +108,11 @@ namespace MWGui
 
     void EnchantingDialog::updateLabels()
     {
-        std::stringstream enchantCost;
-        enchantCost << std::setprecision(1) << std::fixed << mEnchanting.getEnchantPoints();
-        mEnchantmentPoints->setCaption(enchantCost.str() + " / " + MyGUI::utility::toString(mEnchanting.getMaxEnchantValue()));
-
-        mCharge->setCaption(MyGUI::utility::toString(mEnchanting.getGemCharge()));
-
-        int successChance = int(mEnchanting.getEnchantChance());
-        mSuccessChance->setCaption(MyGUI::utility::toString(std::max(0, successChance)));
-
-        std::stringstream castCost;
-        castCost << mEnchanting.getEffectiveCastCost();
-        mCastCost->setCaption(castCost.str());
-
-        mPrice->setCaption(MyGUI::utility::toString(mEnchanting.getEnchantPrice()));
+        mEnchantmentPoints->setCaption(std::to_string(static_cast<int>(mEnchanting.getEnchantPoints(false))) + " / " + std::to_string(mEnchanting.getMaxEnchantValue()));
+        mCharge->setCaption(std::to_string(mEnchanting.getGemCharge()));
+        mSuccessChance->setCaption(std::to_string(std::max(0, std::min(100, mEnchanting.getEnchantChance()))));
+        mCastCost->setCaption(std::to_string(mEnchanting.getEffectiveCastCost()));
+        mPrice->setCaption(std::to_string(mEnchanting.getEnchantPrice()));
 
         switch(mEnchanting.getCastStyle())
         {
@@ -322,7 +314,7 @@ namespace MWGui
             return;
         }
 
-        if (mEnchanting.getEnchantPoints() > mEnchanting.getMaxEnchantValue())
+        if (static_cast<int>(mEnchanting.getEnchantPoints(false)) > mEnchanting.getMaxEnchantValue())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage29}");
             return;
@@ -348,7 +340,7 @@ namespace MWGui
                 if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(item.getCellRef().getRefId(), mPtr))
                 {
                     std::string msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage49")->mValue.getString();
-                    Misc::StringUtils::replace(msg, "%s", item.getClass().getName(item).c_str(), 2);
+                    msg = Misc::StringUtils::format(msg, item.getClass().getName(item));
                     MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
                     MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, item, mPtr, 1);
@@ -366,13 +358,19 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant success");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sEnchantmentMenu12}");
+            MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
         }
         else
         {
             MWBase::Environment::get().getWindowManager()->playSound("enchant fail");
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage34}");
+            if (!mEnchanting.getGem().isEmpty() && !mEnchanting.getGem().getRefData().getCount())
+            {
+                setSoulGem(MWWorld::Ptr());
+                mEnchanting.nextCastStyle();
+                updateLabels();
+                updateEffectsView();
+            }
         }
-
-        MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Enchanting);
     }
 }

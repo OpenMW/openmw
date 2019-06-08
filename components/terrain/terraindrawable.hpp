@@ -16,6 +16,9 @@ namespace SceneUtil
 namespace Terrain
 {
 
+    class CompositeMap;
+    class CompositeMapRenderer;
+
     /**
      * Subclass of Geometry that supports built in multi-pass rendering and built in LightListCallback.
      */
@@ -28,7 +31,8 @@ namespace Terrain
         virtual const char* className() const { return "TerrainDrawable"; }
         virtual const char* libraryName() const { return "Terrain"; }
 
-        TerrainDrawable();
+        TerrainDrawable() = default;
+        ~TerrainDrawable() = default;
         TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop);
 
         virtual void accept(osg::NodeVisitor &nv);
@@ -41,10 +45,15 @@ namespace Terrain
 
         virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
 
+        void setCompositeMap(CompositeMap* map) { mCompositeMap = map; }
+        void setCompositeMapRenderer(CompositeMapRenderer* renderer) { mCompositeMapRenderer = renderer; }
+
     private:
         PassVector mPasses;
 
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
+        osg::ref_ptr<CompositeMap> mCompositeMap;
+        osg::ref_ptr<CompositeMapRenderer> mCompositeMapRenderer;
     };
 
 }

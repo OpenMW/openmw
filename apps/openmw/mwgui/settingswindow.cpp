@@ -6,6 +6,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_InputManager.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -174,7 +175,7 @@ namespace MWGui
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
             std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            Misc::StringUtils::replaceAll(labelCaption, "%s", value.c_str(), 2);
+            labelCaption = Misc::StringUtils::format(labelCaption, value);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }
@@ -615,7 +616,7 @@ namespace MWGui
         highlightCurrentResolution();
         updateControlsBox();
         resetScrollbars();
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
+        MyGUI::InputManager::getInstance().setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)

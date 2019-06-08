@@ -336,14 +336,7 @@ public:
         setName("ReflectionCamera");
         setCullCallback(new InheritViewPointCallback);
 
-        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
-        unsigned int extraMask = 0;
-        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
-        if(reflectionDetail >= 2) extraMask |= Mask_Static;
-        if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
-        if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
-        setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
+        setInterior(isInterior);
         setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
@@ -372,6 +365,18 @@ public:
         addChild(mClipCullNode);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
+    }
+
+    void setInterior(bool isInterior)
+    {
+        int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
+        unsigned int extraMask = 0;
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
     }
 
     void setWaterLevel(float waterLevel)
@@ -432,7 +437,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mTop(0)
     , mInterior(false)
 {
-    mSimulation.reset(new RippleSimulation(parent, resourceSystem));
+    mSimulation.reset(new RippleSimulation(mSceneRoot, resourceSystem));
 
     mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
@@ -668,8 +673,8 @@ void Water::changeCell(const MWWorld::CellStore* store)
         mWaterNode->setPosition(osg::Vec3f(0,0,mTop));
         mInterior = true;
     }
-    if(mInterior != wasInterior)
-        updateWaterMaterial();
+    if(mInterior != wasInterior && mReflection)
+        mReflection->setInterior(mInterior);
 
     // create a new StateSet to prevent threading issues
     osg::ref_ptr<osg::StateSet> nodeStateSet (new osg::StateSet);

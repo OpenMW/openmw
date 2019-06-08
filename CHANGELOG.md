@@ -1,6 +1,7 @@
 0.46.0
 ------
 
+    Bug #1515: Opening console masks dialogue, inventory menu
     Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
@@ -12,7 +13,9 @@
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
+    Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4329: Removed birthsign abilities are restored after reloading the save
+    Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
@@ -35,6 +38,7 @@
     Bug #4768: Fallback numerical value recovery chokes on invalid arguments
     Bug #4775: Slowfall effect resets player jumping flag
     Bug #4778: Interiors of Illusion puzzle in Sotha Sil Expanded mod is broken
+    Bug #4787: Sneaking makes 1st person walking/bobbing animation super-slow
     Bug #4797: Player sneaking and running stances are not accounted for when in air
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
     Bug #4803: Stray special characters before begin statement break script compilation
@@ -50,12 +54,14 @@
     Bug #4828: Potion looping effects VFX are not shown for NPCs
     Bug #4837: CTD when a mesh with NiLODNode root node with particles is loaded
     Bug #4841: Russian localization ignores implicit keywords
+    Bug #4844: Data race in savegame loading / GlobalMap render
     Bug #4847: Idle animation reset oddities
     Bug #4851: No shadows since switch to OSG
     Bug #4860: Actors outside of processing range visible for one frame after spawning
     Bug #4867: Arbitrary text after local variable declarations breaks script compilation
     Bug #4876: AI ratings handling inconsistencies
     Bug #4877: Startup script executes only on a new game start
+    Bug #4879: SayDone returns 0 on the frame Say is called
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Bug #4896: Title screen music doesn't loop
     Bug #4902: Using scrollbars in settings causes resolution to change
@@ -72,6 +78,7 @@
     Bug #4945: Poor random magic magnitude distribution
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
+    Bug #4961: Flying creature combat engagement takes z-axis into account
     Bug #4963: Enchant skill progress is incorrect
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
     Bug #4965: Global light attenuation settings setup is lacking
@@ -87,7 +94,11 @@
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
     Bug #5018: Spell tooltips don't support purely negative magnitudes
+    Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
+    Bug #5038: Enchanting success chance calculations are blatantly wrong
+    Bug #5047: # in cell names sets color
+    Bug #5050: Invalid spell effects are not handled gracefully
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -98,10 +109,13 @@
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
     Feature #4209: Editor: Faction rank sub-table
+    Feature #4255: Handle broken RepairedOnMe script function
+    Feature #4316: Implement RaiseRank/LowerRank functions properly
     Feature #4360: Improve default controller bindings
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
     Feature #4730: Native animated containers support
+    Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4859: Make water reflections more configurable
@@ -115,6 +129,9 @@
     Feature #5010: Native graphics herbalism support
     Feature #5031: Make GetWeaponType function return different values for tools
     Feature #5033: Magic armor mitigation for creatures
+    Feature #5034: Make enchanting window stay open after a failed attempt
+    Feature #5036: Allow scripted faction leaving
+    Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4721: Add NMake support to the Windows prebuild script

@@ -215,11 +215,7 @@ namespace MWMechanics
             getAllowedNodes(actor, currentCell->getCell(), storage);
         }
 
-        bool actorCanMoveByZ = (actor.getClass().canSwim(actor) && MWBase::Environment::get().getWorld()->isSwimming(actor))
-            || MWBase::Environment::get().getWorld()->isFlying(actor)
-            || !MWBase::Environment::get().getWorld()->isActorCollisionEnabled(actor);
-
-        if(actorCanMoveByZ && mDistance > 0) {
+        if (canActorMoveByZAxis(actor) && mDistance > 0) {
             // Typically want to idle for a short time before the next wander
             if (Misc::Rng::rollDice(100) >= 92 && storage.mState != AiWanderStorage::Wander_Walking) {
                 wanderNearStart(actor, storage, mDistance);

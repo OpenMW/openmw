@@ -14,42 +14,42 @@
 
         <!-- Sliders -->
         <!-- Rotation of head -->
-        <Widget type="MWScrollBar" skin="MW_HScroll" position="8 270 241 14" name="HeadRotate"/>
+        <Widget type="ScrollBar" skin="MW_HScroll" position="8 270 241 14" name="HeadRotate"/>
 
         <!-- Gender choice -->
 
         <Widget type="Widget" skin="MW_Box" position="8 298 15 14">
-            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevGenderButton"/>
+            <Widget type="Button" skin="MW_ArrowLeft" position="2 2 10 10" align="Left VStretch" name="PrevGenderButton"/>
         </Widget>
 
         <Widget type="TextBox" skin="HeaderText" position="25 294 205 18" name="GenderChoiceT"/>
 
         <Widget type="Widget" skin="MW_Box" position="234 298 15 14">
-            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextGenderButton"/>
+            <Widget type="Button" skin="MW_ArrowRight" position="2 2 10 10" align="Right VStretch" name="NextGenderButton"/>
         </Widget>
 
         <!-- Face choice -->
 
         <Widget type="Widget" skin="MW_Box" position="8 320 15 14">
-            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevFaceButton"/>
+            <Widget type="Button" skin="MW_ArrowLeft" position="2 2 10 10" align="Left VStretch" name="PrevFaceButton"/>
         </Widget>
 
         <Widget type="TextBox" skin="HeaderText" position="25 316 205 18" name="FaceChoiceT"/>
 
         <Widget type="Widget" skin="MW_Box" position="234 320 15 14">
-            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextFaceButton"/>
+            <Widget type="Button" skin="MW_ArrowRight" position="2 2 10 10" align="Right VStretch" name="NextFaceButton"/>
         </Widget>
 
         <!-- Hair choice -->
 
         <Widget type="Widget" skin="MW_Box" position="8 342 15 14">
-            <Widget type="Button" skin="MW_ArrowLeft" position="3 2 10 10" align="Left VStretch" name="PrevHairButton"/>
+            <Widget type="Button" skin="MW_ArrowLeft" position="2 2 10 10" align="Left VStretch" name="PrevHairButton"/>
         </Widget>
 
         <Widget type="TextBox" skin="HeaderText" position="25 338 205 18" name="HairChoiceT"/>
 
         <Widget type="Widget" skin="MW_Box" position="234 342 15 14">
-            <Widget type="Button" skin="MW_ArrowRight" position="1 2 10 10" align="Right VStretch" name="NextHairButton"/>
+            <Widget type="Button" skin="MW_ArrowRight" position="2 2 10 10" align="Right VStretch" name="NextHairButton"/>
         </Widget>
 
         <!-- Race -->

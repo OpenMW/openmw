@@ -68,8 +68,8 @@ namespace
 
         osg::ref_ptr<osg::Material> mat (new osg::Material);
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 1.f));
         mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         mat->setColorMode(osg::Material::DIFFUSE);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
@@ -101,11 +101,14 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
     updater->addParticleSystem(mParticleSystem);
 
     mParticleNode = new osg::PositionAttitudeTransform;
+    mParticleNode->setName("Ripple Root");
     mParticleNode->addChild(updater);
     mParticleNode->addChild(mParticleSystem);
-    mParticleNode->setNodeMask(Mask_Effect);
+    mParticleNode->setNodeMask(Mask_Water);
 
     createWaterRippleStateSet(resourceSystem, mParticleNode);
+
+    resourceSystem->getSceneManager()->recreateShaders(mParticleNode);
 
     mParent->addChild(mParticleNode);
 }

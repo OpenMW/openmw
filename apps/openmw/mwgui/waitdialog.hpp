@@ -4,7 +4,6 @@
 #include "timeadvancer.hpp"
 
 #include "windowbase.hpp"
-#include "referenceinterface.hpp"
 
 namespace MWGui
 {
@@ -23,7 +22,7 @@ namespace MWGui
         MyGUI::TextBox* mProgressText;
     };
 
-    class WaitDialog : public WindowBase, public ReferenceInterface
+    class WaitDialog : public WindowBase
     {
     public:
         WaitDialog();
@@ -63,8 +62,6 @@ namespace MWGui
         std::string mInterruptCreatureList;
 
         WaitDialogProgressBar mProgressBar;
-
-        virtual void onReferenceUnavailable();
 
         void onUntilHealedButtonClicked(MyGUI::Widget* sender);
         void onWaitButtonClicked(MyGUI::Widget* sender);

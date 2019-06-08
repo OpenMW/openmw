@@ -176,7 +176,8 @@ static void gdb_info(pid_t pid)
         int ret = system(cmd_buf);
 
         if (ret != 0)
-            printf("\nFailed to create a crash report. Please install 'gdb' and crash again!\n");
+            printf("\nFailed to create a crash report. Please make sure that 'gdb' is installed and present in PATH then crash again."
+                   "\nCurrent PATH: %s\n", getenv("PATH"));
         fflush(stdout);
 
         /* Clean up */

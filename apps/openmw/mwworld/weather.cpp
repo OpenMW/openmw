@@ -710,10 +710,9 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     if (mIsStorm)
     {
         osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
-        osg::Vec3f redMountainPos (19950, 72032, 27831);
-
+        playerPos.z() = 0;
+        osg::Vec3f redMountainPos (25000, 70000, 0);
         mStormDirection = (playerPos - redMountainPos);
-        mStormDirection.z() = 0;
         mStormDirection.normalize();
         mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }

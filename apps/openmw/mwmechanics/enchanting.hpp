@@ -37,13 +37,13 @@ namespace MWMechanics
             bool create(); //Return true if created, false if failed.
             void nextCastStyle(); //Set enchant type to next possible type (for mOldItemPtr object)
             int getCastStyle() const;
-            int getEnchantPoints() const;
+            float getEnchantPoints(bool precise = true) const;
             int getBaseCastCost() const; // To be saved in the enchantment's record
             int getEffectiveCastCost() const; // Effective cost taking player Enchant skill into account, used for preview purposes in the UI
             int getEnchantPrice() const;
             int getMaxEnchantValue() const;
             int getGemCharge() const;
-            float getEnchantChance() const;
+            int getEnchantChance() const;
             bool soulEmpty() const; //Return true if empty
             bool itemEmpty() const; //Return true if empty
             void payForEnchantment() const;
