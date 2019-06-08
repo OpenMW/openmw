@@ -1293,6 +1293,8 @@ namespace MWRender
             else if (it->first == "Water")
                 mWater->processChangedSettings(changed);
         }
+        mObjects->resetSettings();
+        mTerrain->resetSettings();
     }
 
     float RenderingManager::getNearClipDistance() const

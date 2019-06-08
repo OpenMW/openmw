@@ -410,6 +410,29 @@
                         </Widget>
                     </Widget>
                     <Widget type="TabItem" skin="" position="0 28 352 268">
+                        <Property key="Caption" value=" Occlusion "/>
+                        <Widget type="TextBox" skin="NormalText" position="4 4 300 24" align="Left Top">
+                            <Property key="Caption" value="Enable Occlusion Queries"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 4 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="OQNButton">
+                                <UserString key="SettingCategory" value="OcclusionQueries"/>
+                                <UserString key="SettingName" value="octree occlusion queries enable"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 28 300 24" align="Left Top">
+                            <Property key="Caption" value="Debug Occlusion Queries"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 28 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="DebugOQNButton">
+                                <UserString key="SettingCategory" value="OcclusionQueries"/>
+                                <UserString key="SettingName" value="debug occlusion queries"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
+                    </Widget>
+                    <Widget type="TabItem" skin="" position="0 28 352 268">
                         <Property key="Caption" value="  Water  "/>
                         <Widget type="HBox" skin="" position="4 4 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top">

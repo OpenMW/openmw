@@ -16,11 +16,7 @@
 
 namespace MWRender
 {
-
-Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
-    : mRootNode(rootNode)
-    , mResourceSystem(resourceSystem)
-    , mUnrefQueue(unrefQueue)
+void Objects::resetSettings()
 {
     mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries");
     mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
@@ -32,6 +28,13 @@ Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Gro
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
+}
+Objects::Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue)
+    : mRootNode(rootNode)
+    , mResourceSystem(resourceSystem)
+    , mUnrefQueue(unrefQueue)
+{
+    resetSettings();
 }
 
 Objects::~Objects()

@@ -102,6 +102,8 @@ public:
     /// Updates containing cell for object rendering data
     void updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur);
 
+    void resetSettings();
+
 private:
     void operator = (const Objects&);
     Objects(const Objects&);

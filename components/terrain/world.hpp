@@ -95,6 +95,7 @@ namespace Terrain
         virtual void unloadCell(int x, int y);
 
         virtual void enable(bool enabled) {}
+        virtual void resetSettings() {}
 
         virtual void setBordersVisible(bool visible);
 
