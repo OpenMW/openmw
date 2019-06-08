@@ -629,11 +629,7 @@ namespace MWInput
                     mPlayer->setAutoMove (false);
                     mPlayer->setForwardBackward((yAxis - 0.5f) * 2 * -1);
                 }
-                else if(mPlayer->getAutoMove())
-                {
-                    triedToMove = true;
-                    mPlayer->setForwardBackward (1);
-                }
+
                 if (triedToMove)
                     mJoystickLastUsed = true;
 
@@ -655,7 +651,8 @@ namespace MWInput
                     mPlayer->setAutoMove (false);
                     mPlayer->setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
                 }
-                else if(mPlayer->getAutoMove())
+
+                if (mPlayer->getAutoMove())
                 {
                     alwaysRunAllowed = true;
                     triedToMove = true;
