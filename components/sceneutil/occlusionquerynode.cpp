@@ -328,7 +328,6 @@ struct RetrieveQueriesCallback : public osg::Camera::DrawCallback
                 // Either retrieve last frame's results, or ignore it because the
                 //   camera is inside the view. In either case, _active is now false.
                 tr->_active = false;
-                tr->_lastresultavailable = true;
 
             }
             // else: query result not available yet, try again next frame
@@ -529,7 +528,7 @@ MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camer
         }
 
     }
-    return QueryResult((tr->_init && (!tr->_active || tr->_lastresultavailable) ), tr->_numPixels);
+    return QueryResult(tr->_init && !tr->_active, tr->_numPixels);
 }
 void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 {
