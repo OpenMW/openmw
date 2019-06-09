@@ -699,10 +699,28 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
         pchild = parent.getChild(i)->asGroup();
         if((removed = pchild->removeChild(childtoremove))) break;
     }
-    //TODO check criterion for parent collapse
 
-    if(removed)
+    if(removed){
+
+        osg::OcclusionQueryNode* curpar = &parent;
+
+        while(curpar &&curpar->getParent(0))
+        {
+            unsigned int capacity = 0;
+            for(unsigned int i=0; i<8; ++i)
+                capacity += parent.getChild(i)->asGroup()->getNumChildren();
+            /// TODO check other criterion for parent collapse
+            if(capacity==0){
+                ///collapse parent
+                OSG_WARN<<"collapse empty OQN"<<std::endl;
+                osg::Group *paparent=curpar->getParent(0);
+                paparent->setChild(paparent->getChildIndex(curpar), new osg::Group);
+                curpar=dynamic_cast<osg::OcclusionQueryNode*>(paparent);
+            }
+            else break;
+        }
         return true;
+    }
     else
     {
         for(unsigned int i=0; i< parent.getNumChildren(); ++i)

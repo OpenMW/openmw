@@ -119,12 +119,13 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
 void Objects::cellRemoveObject(osg::Group* cellnode, osg::Group* objectNode){
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
-    if(ocq)
+    if(ocq && objectNode->getDataVariance()==osg::Object::STATIC)
     {
         SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
         if(!remover.recursivCellRemoveStaticObject(*ocq, objectNode))
             OSG_WARN<<"removal failed"<<std::endl;
-    }else cellnode->removeChild(objectNode);
+    }else if(!cellnode->removeChild(objectNode))
+        OSG_WARN<<"removal failed"<<std::endl;
 }
 
 osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
@@ -155,7 +156,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 {
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
-
+    basenode->setDataVariance(osg::Object::STATIC);
     basenode->setNodeMask(Mask_Object);
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
@@ -169,6 +170,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
     basenode->setNodeMask(Mask_Actor);
+    basenode->setDataVariance(osg::Object::DYNAMIC);
 
     // CreatureAnimation
     osg::ref_ptr<Animation> anim;
@@ -189,6 +191,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
     basenode->setNodeMask(Mask_Actor);
+    basenode->setDataVariance(osg::Object::DYNAMIC);
 
     osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
     cellroot->addChild(basenode);
@@ -284,8 +287,9 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         osg::Group * par= objectNode->getParent(0);
         cellRemoveObject(par,objectNode);
     }
-
-    cellAddStaticObject(cellnode,objectNode);
+    if(objectNode->getDataVariance()==osg::Object::STATIC)
+        cellAddStaticObject(cellnode,objectNode);
+    else cellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
