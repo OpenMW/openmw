@@ -629,10 +629,8 @@ namespace NifOsg
 
             if (nifNode->recType == Nif::RC_NiSwitchNode)
             {
-                // show only first child by default
-                node->asSwitch()->setSingleChildOn(0);
-
                 const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                node->asSwitch()->setSingleChildOn(niSwitchNode->initialIndex);
                 if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
                     rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
                 else if (niSwitchNode->name == Constants::HerbalismLabel && !SceneUtil::hasUserDescription(rootNode, Constants::HerbalismLabel))
