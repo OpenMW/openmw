@@ -3,7 +3,6 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_RenderManager.h>
-#include <MyGUI_InputManager.h>
 
 #include <components/widgets/imagebutton.hpp>
 #include <components/settings/settings.hpp>
@@ -68,12 +67,12 @@ namespace MWGui
             if (isMainMenu)
             {
                 if (mButtons["loadgame"]->getVisible())
-                    MyGUI::InputManager::getInstance().setKeyFocusWidget(mButtons["loadgame"]);
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["loadgame"]);
                 else
-                    MyGUI::InputManager::getInstance().setKeyFocusWidget(mButtons["newgame"]);
+                    MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["newgame"]);
             }
             else
-                MyGUI::InputManager::getInstance().setKeyFocusWidget(mButtons["return"]);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mButtons["return"]);
         }
 
         Layout::setVisible (visible);

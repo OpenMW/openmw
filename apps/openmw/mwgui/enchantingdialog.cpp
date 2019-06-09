@@ -5,7 +5,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_EditBox.h>
-#include <MyGUI_InputManager.h>
 
 #include <components/widgets/list.hpp>
 #include <components/settings/settings.hpp>
@@ -68,7 +67,7 @@ namespace MWGui
     void EnchantingDialog::onOpen()
     {
         center();
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mName);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mName);
     }
 
     void EnchantingDialog::setSoulGem(const MWWorld::Ptr &gem)

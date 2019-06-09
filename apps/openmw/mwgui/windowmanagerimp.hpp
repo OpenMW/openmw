@@ -147,6 +147,9 @@ namespace MWGui
     /// (and will continually update the window while doing so)
     virtual void playVideo(const std::string& name, bool allowSkipping);
 
+    /// Warning: do not use MyGUI::InputManager::setKeyFocusWidget directly. Instead use this.
+    virtual void setKeyFocusWidget (MyGUI::Widget* widget);
+
     virtual void setNewGame(bool newgame);
 
     virtual void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg);

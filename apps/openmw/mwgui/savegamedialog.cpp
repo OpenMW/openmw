@@ -94,7 +94,7 @@ namespace MWGui
         MWBase::Environment::get().getStateManager()->deleteGame (mCurrentCharacter, mCurrentSlot);
         mSaveList->removeItemAt(mSaveList->getIndexSelected());
         onSlotSelected(mSaveList, mSaveList->getIndexSelected());
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveList);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
 
         if (mSaveList->getItemCount() == 0)
         {
@@ -114,7 +114,7 @@ namespace MWGui
 
     void SaveGameDialog::onDeleteSlotCancel()
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveList);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
     }
 
     void SaveGameDialog::onSaveNameChanged(MyGUI::EditBox *sender)
@@ -138,9 +138,9 @@ namespace MWGui
 
         mSaveNameEdit->setCaption ("");
         if (mSaving)
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveNameEdit);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
         else
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveList);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
 
         center();
 
@@ -244,7 +244,7 @@ namespace MWGui
 
     void SaveGameDialog::onConfirmationCancel()
     {
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveList);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
     }
 
     void SaveGameDialog::accept(bool reallySure)
@@ -331,7 +331,7 @@ namespace MWGui
     void SaveGameDialog::onCharacterAccept(MyGUI::ComboBox* sender, size_t pos)
     {
         // Give key focus to save list so we can confirm the selection with Enter
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mSaveList);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveList);
     }
 
     void SaveGameDialog::fillSaveList()
