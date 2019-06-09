@@ -1802,12 +1802,11 @@ bool Optimizer::MergeGeometryVisitor::mergePrimitive(osg::DrawElementsUInt& lhs,
 
 bool Optimizer::MergeGroupsVisitor::isOperationPermissible(osg::Group& node)
 {
-    return !node.asSwitch() &&
-           !node.asTransform() &&
-           !node.getCullCallback() &&
+    return !node.getCullCallback() &&
            !node.getEventCallback() &&
            !node.getUpdateCallback() &&
-            isOperationPermissibleForObject(&node);
+            isOperationPermissibleForObject(&node) &&
+           typeid(node)==typeid(osg::Group);
 }
 
 void Optimizer::MergeGroupsVisitor::apply(osg::LOD &lod)
