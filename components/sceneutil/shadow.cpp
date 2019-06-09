@@ -17,6 +17,7 @@ namespace SceneUtil
         if (!mEnableShadows)
         {
             mShadowTechnique->disableShadows();
+            mShadowTechnique->setupCastingShader(mShaderManager);
             return;
         }
         
