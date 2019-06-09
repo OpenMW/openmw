@@ -77,7 +77,7 @@ class Objects{
 
     ///helpers
     void cellAddStaticObject(osg::Group* cellnode, osg::Group* child);
-    void cellRemoveObject(osg::Group* cellnode, osg::Group* objectNode);
+    void cellRemoveStaticObject(osg::Group* cellnode, osg::Group* objectNode);
 public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();
@@ -102,6 +102,7 @@ public:
 
     void resetSettings();
 
+    inline osg::Group* getRootNode() { return mRootNode; }
 private:
     void operator = (const Objects&);
     Objects(const Objects&);

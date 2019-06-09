@@ -116,10 +116,10 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
     else cellnode->addChild(objectNode);
 }
 
-void Objects::cellRemoveObject(osg::Group* cellnode, osg::Group* objectNode){
+void Objects::cellRemoveStaticObject(osg::Group* cellnode, osg::Group* objectNode){
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
-    if(ocq && objectNode->getDataVariance()==osg::Object::STATIC)
+    if(ocq)
     {
         SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
         if(!remover.recursivCellRemoveStaticObject(*ocq, objectNode))
@@ -206,7 +206,8 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 
 bool Objects::removeObject (const MWWorld::Ptr& ptr)
 {
-    if(!ptr.getRefData().getBaseNode())
+    SceneUtil::PositionAttitudeTransform *basenode = ptr.getRefData().getBaseNode();
+    if(!basenode)
         return true;
 
     PtrAnimationMap::iterator iter = mObjects.find(ptr);
@@ -225,7 +226,10 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
             ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
         osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
-        cellRemoveObject(cellroot, ptr.getRefData().getBaseNode());
+
+        if(basenode->getNodeMask() & (Mask_Object | Mask_Static) )
+            cellRemoveStaticObject(cellroot, ptr.getRefData().getBaseNode());
+        else basenode->getParent(0)->removeChild(basenode);
 
         ptr.getRefData().setBaseNode(nullptr);
         return true;
@@ -282,14 +286,17 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
             if (dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
                 userDataContainer->setUserObject(i, new PtrHolder(cur));
         }
-
-    if (objectNode->getNumParents()){
-        osg::Group * par= objectNode->getParent(0);
-        cellRemoveObject(par,objectNode);
-    }
-    if(objectNode->getDataVariance()==osg::Object::STATIC)
+    if(objectNode->getNodeMask() & (Mask_Object | Mask_Static) )
+    {
+        if (objectNode->getNumParents())
+            cellRemoveStaticObject(objectNode->getParent(0),objectNode);
         cellAddStaticObject(cellnode,objectNode);
-    else cellnode->addChild(objectNode);
+    }
+    else {
+        if (objectNode->getNumParents())
+            objectNode->getParent(0)->removeChild(objectNode);
+        cellnode->addChild(objectNode);
+    }
 
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())
