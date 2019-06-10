@@ -70,7 +70,7 @@ class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 {
 public:
 
-    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _securepopdistance(0.0f), _isgetpassedearlyexitenable(true)
+    StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _securepopdistance(0.0f)
 #if  OSG_VERSION_LESS_THAN(3,6,4)
       , _validQueryGeometry(false)
 #endif
@@ -90,8 +90,6 @@ public:
 
     //enable or disable early exit for not continuous OQN (under a lod or switch)
     //NB: disable it for hierarchical OQN
-    inline void setEarlyExitOn(bool m) { _isgetpassedearlyexitenable = m; }
-    inline float getEarlyExit() const { return _isgetpassedearlyexitenable; }
     inline void setDistancePreventingPopin(bool m) { _securepopdistance = m; }
     inline float getDistancePreventingPopin() const { return _securepopdistance; }
 
@@ -110,7 +108,6 @@ protected:
     osg::StateSet *initMWOQDebugState();
     float _margin;
     osg::Matrix::value_type _securepopdistance;
-    bool _isgetpassedearlyexitenable;
     osg::ref_ptr< osg::Camera > _maincam;
 #if  OSG_VERSION_LESS_THAN(3,6,4)
     mutable bool _validQueryGeometry;

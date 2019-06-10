@@ -95,8 +95,6 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     if(camera == _maincam)
         passed = _passed;
 
-    //seems to bug (flickering) if OQN is not the last one in the tre
-    if(_isgetpassedearlyexitenable)
     {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
@@ -656,13 +654,6 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
             }
             parent.setChild(ind, qnode);
-            //avoid flickering when OQN goes hierarchical
-            if(mSettings.maxBVHOQLevelCount > 1)
-            {
-                parent.setEarlyExitOn(false);
-                qnode->setEarlyExitOn(false);
-            }
-
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
         qnode->invalidateQueryGeometry();
