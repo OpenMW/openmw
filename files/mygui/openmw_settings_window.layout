@@ -517,7 +517,7 @@
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="OcclusionQueries"/>
-                            <UserString key="SettingName" value="max node drawables"/>
+                            <UserString key="SettingName" value="max node capacity"/>
                             <UserString key="SettingValueType" value="Integer"/>
                             <UserString key="SettingMin" value="0"/>
                             <UserString key="SettingMax" value="100"/>

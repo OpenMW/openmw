@@ -25,8 +25,6 @@
 
 #include <sstream>
 
-#include "apps/openmw/mwrender/vismask.hpp"
-
 namespace {
 
 using namespace osgShadow;

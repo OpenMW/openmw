@@ -5,6 +5,7 @@
 #include <osg/Camera>
 
 #include <components/resource/resourcesystem.hpp>
+#include "components/settings/settings.hpp"
 
 #include "storage.hpp"
 #include "texturemanager.hpp"
@@ -13,14 +14,29 @@
 
 namespace Terrain
 {
-
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,unsigned int nodeMask, int preCompileMask, int borderMask)
+void World::resetSettings()
+{
+    mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries") && Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
+    mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
+    mOQNSettings.querypixelcount = Settings::Manager::getInt("visibility threshold", "OcclusionQueries");
+    mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
+    mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
+    mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
+    mOQNSettings.maxOQNCapacity = Settings::Manager::getInt("max node capacity", "OcclusionQueries");
+    mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
+    mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
+    mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
+}
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
+             unsigned int nodeMask,const SceneUtil::OcclusionQuerySettings& oqsettings, unsigned  int preCompileMask, unsigned  int borderMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
     , mTerrainNodeMask(nodeMask)
+    , mOQNSettings(oqsettings)
 {
+    resetSettings();
     mTerrainRoot = new osg::Group;
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     osg::ref_ptr<osg::Material> material (new osg::Material);

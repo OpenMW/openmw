@@ -13,8 +13,6 @@
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
 
-#include "apps/openmw/mwrender/vismask.hpp"
-
 namespace
 {
 
@@ -220,8 +218,10 @@ private:
     osg::ref_ptr<LodCallback> mLodCallback;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage,
+                             unsigned int nodeMask, const SceneUtil::OcclusionQuerySettings& oqsettings,unsigned  int preCompileMask,unsigned  int borderMask,
+                             unsigned int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, oqsettings, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
@@ -319,7 +319,8 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
 
         if(mOQNSettings.enable&&entry.mRenderingNode.valid())
         {
-            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;            
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
@@ -327,8 +328,8 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
             qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
 
             qnode->addChild(entry.mRenderingNode);
-            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
             qnode->getBound();
             entry.mRenderingNode = qnode;
         }

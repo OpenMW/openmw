@@ -102,6 +102,8 @@ public:
 
     void resetSettings();
 
+    inline SceneUtil::OcclusionQuerySettings & getOcclusionSettings() { return mOQNSettings; }
+
     inline osg::Group* getRootNode() { return mRootNode; }
 private:
     void operator = (const Objects&);

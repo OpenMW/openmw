@@ -12,8 +12,6 @@
 #include <osg/ContextData>
 #endif
 
-#include "apps/openmw/mwrender/renderbin.hpp"
-
 using namespace osg;
 
 namespace SceneUtil
@@ -31,8 +29,6 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQState()
 {
     if(OQStateSet.valid()) return OQStateSet;
     OQStateSet= new osg::StateSet;
-
-    OQStateSet->setRenderBinDetails( MWRender::RenderBin_OcclusionQuery, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
 
     OQStateSet->setMode( GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
     OQStateSet->setTextureMode( 0, GL_TEXTURE_2D, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
@@ -630,7 +626,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     if( bst.valid()
         && bst.radius() > mSettings.minOQNSize
         && bsi.radius() > mSettings.minOQNSize
-        && target->getNumChildren() > mSettings.maxDrawablePerOQN
+        && target->getNumChildren() > mSettings.maxOQNCapacity
       )
     {
         qnode = dynamic_cast<StaticOcclusionQueryNode*>(target.get());

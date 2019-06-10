@@ -135,19 +135,27 @@ public:
 
 struct OcclusionQuerySettings
 {
+    /// OQN settings
     bool enable;
     bool debugDisplay;
-    float maxCellSize;
     unsigned int querypixelcount;
     unsigned int queryframecount;
     float querymargin;
-    unsigned int maxBVHOQLevelCount;
-    ///subdivision criterions
-    float minOQNSize;
-    unsigned int maxDrawablePerOQN;
     float securepopdistance;
 
+    ///RenderBin and Mask
+    unsigned int OQMask;
+    unsigned int OQRenderBin;
+
+    ///Octree parameters
+    float maxCellSize;
+    unsigned int maxBVHOQLevelCount;
+
+    ///subdivision criterions
+    float minOQNSize;
+    unsigned int maxOQNCapacity;
 };
+
 struct OctreeAddRemove
 {
     OctreeAddRemove(const OcclusionQuerySettings & settings,unsigned int OQGmask): mSettings(settings), _OQGmask(OQGmask) {}

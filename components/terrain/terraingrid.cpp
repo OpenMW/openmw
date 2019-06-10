@@ -6,8 +6,6 @@
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
-#include "components/settings/settings.hpp"
-#include "apps/openmw/mwrender/vismask.hpp"
 
 namespace Terrain
 {
@@ -20,26 +18,14 @@ public:
     virtual void reset() {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,unsigned int nodeMask, int preCompileMask, int borderMask)
-    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
+                         unsigned int nodeMask, const SceneUtil::OcclusionQuerySettings& qsettings, unsigned int preCompileMask, unsigned int borderMask)
+    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, qsettings, preCompileMask, borderMask)
     , mNumSplits(4)
 {
     resetSettings();
 }
 
-void TerrainGrid::resetSettings()
-{
-    mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries") && Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
-    mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
-    mOQNSettings.querypixelcount = Settings::Manager::getInt("visibility threshold", "OcclusionQueries");
-    mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
-    mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
-    mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
-    mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
-    mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
-    mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
-    mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
-}
 TerrainGrid::~TerrainGrid()
 {
     while (!mGrid.empty())
@@ -64,13 +50,14 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
             qnode->setQueryMargin(mOQNSettings.querymargin);
             qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
-            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
             group = qnode;
         }
         else group = new osg::Group;
@@ -96,6 +83,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
@@ -103,8 +91,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
             qnode->addChild(node);
 
-            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
             node = qnode;
         }
         if (parent)

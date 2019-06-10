@@ -14,6 +14,7 @@
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include "vismask.hpp"
+#include "renderbin.hpp"
 
 namespace MWRender
 {
@@ -34,10 +35,12 @@ void Objects::resetSettings()
     mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
     mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
     mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
-    mOQNSettings.maxDrawablePerOQN = Settings::Manager::getInt("max node drawables", "OcclusionQueries");
+    mOQNSettings.maxOQNCapacity = Settings::Manager::getInt("max node capacity", "OcclusionQueries");
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
+    mOQNSettings.OQMask = Mask_OcclusionQuery;
+    mOQNSettings.OQRenderBin = RenderBin_OcclusionQuery;
 }
 
 Objects::~Objects()
@@ -60,18 +63,24 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* ocnode = new SceneUtil::StaticOcclusionQueryNode;
+            ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQMask, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             for(unsigned int i=0; i<8; ++i)
                 ocnode->addChild(new osg::Group());
             ocnode->setDebugDisplay(mOQNSettings.debugDisplay);
             ocnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             ocnode->setQueryFrameCount(mOQNSettings.queryframecount);
-            ocnode->setQueryMargin(mOQNSettings.querymargin);
+            ocnode->setQueryMargin(mOQNSettings.querymargin);            
+            ocnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            ocnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
 
             SceneUtil::StaticOcclusionQueryNode*qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQMask, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
             qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
             cellnode = qnode;
             cellnode->addChild(ocnode);
 

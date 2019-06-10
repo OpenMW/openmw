@@ -117,6 +117,9 @@ void CSVRender::Cell::updateLand()
         return;
     }
 
+    //TODO
+    SceneUtil::OcclusionQuerySettings OQsettings;
+    OQsettings.enable=false;
     // Setup land if available
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);
@@ -134,7 +137,7 @@ void CSVRender::Cell::updateLand()
             else
             {
                 mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
-                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain, OQsettings));
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
