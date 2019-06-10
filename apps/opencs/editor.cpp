@@ -28,8 +28,6 @@ CS::Editor::Editor (int argc, char **argv)
 
     mViewManager = new CSVDoc::ViewManager(mDocumentManager);
 
-    setupDataFiles (config.first);
-
     NifOsg::Loader::setShowMarkers(true);
 
     mDocumentManager.setFileData(mFsStrict, config.first, config.second);
@@ -77,15 +75,6 @@ CS::Editor::~Editor ()
     if(mServer && boost::filesystem::exists(mPid))
         static_cast<void> ( // silence coverity warning
         remove(mPid.string().c_str())); // ignore any error
-}
-
-void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
-{
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        QString path = QString::fromUtf8 (iter->string().c_str());
-        mFileDialog.addFiles(path);
-    }
 }
 
 std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
@@ -160,7 +149,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     //iterate the data directories and add them to the file dialog for loading
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    for (Files::PathContainer::const_reverse_iterator iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
     {
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
@@ -199,8 +188,7 @@ void CS::Editor::createAddon()
     mStartup.hide();
 
     mFileDialog.clearFiles();
-    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
-    setupDataFiles (config.first);
+    readConfig(/*quiet*/true);
 
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
@@ -224,8 +212,7 @@ void CS::Editor::loadDocument()
     mStartup.hide();
 
     mFileDialog.clearFiles();
-    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
-    setupDataFiles (config.first);
+    readConfig(/*quiet*/true);
 
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
