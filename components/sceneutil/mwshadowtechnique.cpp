@@ -966,8 +966,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
         cv.setTraversalMask( traversalMask );
         //OSG_WARN<<" occlusion geometries ZFar "<<cv.getCalculatedFarPlane()<<std::endl;
-        cv.setCalculatedFarPlane(0);
+
     }
+
+    cv.setCalculatedFarPlane(0);
 
     cv.pushStateSet( _shadowRecievingPlaceholderStateSet.get() );
 
@@ -985,7 +987,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     cv.setTraversalMask( traversalMask );
 
-    if(_OQMask) maxZFar = osg::minimum<double>(maxZFar, cv.getCalculatedFarPlane());
+    maxZFar = osg::minimum<double>(maxZFar, cv.getCalculatedFarPlane());
 
     cullShadowReceivingScene(&cv);
 
