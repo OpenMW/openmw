@@ -60,7 +60,21 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     if (chunkSize * mNumSplits > 1.f)
     {
         // keep splitting
-        osg::ref_ptr<osg::Group> group (new osg::Group);
+        osg::ref_ptr<osg::Group> group;
+        if(mOQNSettings.enable)
+        {
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
+            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            group = qnode;
+        }
+        else group = new osg::Group;
+
         if (parent)
             parent->addChild(group);
 
@@ -79,17 +93,15 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
         node->setNodeMask(mTerrainNodeMask);
 
-        if(mOQNSettings.enable){
-
+        if(mOQNSettings.enable)
+        {
             SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
             qnode->setQueryMargin(mOQNSettings.querymargin);
             qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
-
             qnode->addChild(node);
-            qnode->getBound();
 
             qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
             qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
@@ -108,6 +120,7 @@ void TerrainGrid::loadCell(int x, int y)
 
     osg::Vec2f center(x+0.5f, y+0.5f);
     osg::ref_ptr<osg::Node> terrainNode = buildTerrain(nullptr, 1.f, center);
+
     if (!terrainNode)
         return; // no terrain defined
 
