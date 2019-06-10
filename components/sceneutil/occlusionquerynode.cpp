@@ -96,7 +96,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         passed = _passed;
 
     //seems to bug (flickering) if OQN is not the last one in the tre
-    if(false&&_isgetpassedearlyexitenable)
+    if(_isgetpassedearlyexitenable)
     {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
@@ -153,7 +153,7 @@ osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
             // Need to make this routine thread-safe. Typically called by the update
             //   Visitor, or just after the update traversal, but could be called by
             //   an application thread or by a non-osgViewer application.
-            //no update in OpenMW OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _computeBoundMutex )  ;
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _computeBoundMutex )  ;
 
             // This is the logical place to put this code, but the method is const. Cast
             //   away constness to compute the bounding box and modify the query geometry.
@@ -656,6 +656,13 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
             }
             parent.setChild(ind, qnode);
+            //avoid flickering when OQN goes hierarchical
+            if(mSettings.maxBVHOQLevelCount > 1)
+            {
+                parent.setEarlyExitOn(false);
+                qnode->setEarlyExitOn(false);
+            }
+
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
         qnode->invalidateQueryGeometry();
@@ -693,8 +700,10 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
     }
 
     if(removed){
+
         osg::OcclusionQueryNode* curpar = &parent;
-        while(curpar && curpar->getParent(0))
+
+        while(curpar &&curpar->getParent(0))
         {
             unsigned int capacity = 0;
             for(unsigned int i=0; i<8; ++i)
@@ -702,10 +711,10 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
             /// TODO check other criterion for parent collapse
             if(capacity==0){
                 ///collapse parent
-                OSG_WARN<<"collapse empty OQN but should never happens cause OQN Octree only for static meshes for now"<<std::endl;
+                OSG_WARN<<"collapse empty OQN"<<std::endl;
                 osg::Group *paparent=curpar->getParent(0);
                 paparent->setChild(paparent->getChildIndex(curpar), new osg::Group);
-                curpar = dynamic_cast<osg::OcclusionQueryNode*>(paparent);
+                curpar=dynamic_cast<osg::OcclusionQueryNode*>(paparent);
             }
             else break;
         }
