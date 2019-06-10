@@ -1,6 +1,7 @@
 #include "objects.hpp"
 
 #include <osg/UserDataContainer>
+#include <osg/ValueObject>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
