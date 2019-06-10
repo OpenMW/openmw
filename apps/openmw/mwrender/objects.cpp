@@ -94,15 +94,15 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
         // the first child center considered as cell center
         // cellsize is set statically in settings.cfg
         ocq=static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
-        osg::Node * center = dynamic_cast<osg::Node*>(ocq->getUserData());
+        osg::Vec3dValueObject * center = dynamic_cast<osg::Vec3dValueObject*>(ocq->getUserData());
         osg::BoundingSphere bs;
         if(!center)
         {
             bs = objectNode->getBound();
-            osg::Node * n=new osg::Node();
-            n->setInitialBound(bs);
+            osg::Vec3dValueObject * n=new osg::Vec3dValueObject();
+            n->setValue(bs.center());
             ocq->setUserData(n);
-        }else bs.center()=center->getInitialBound().center();
+        }else bs.center() = center->getValue();
 
         bs.radius() = mOQNSettings.maxCellSize;
 
