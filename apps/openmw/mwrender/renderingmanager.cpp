@@ -220,16 +220,18 @@ namespace MWRender
         else { mShadowManager->enableIndoorMode(); mShadowManager->enableOutdoorMode(); }
 
         mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
+        unsigned int computefarmask = Mask_ParticleSystem| ///require to be in first cv pass
+                    Mask_Object|Mask_Static;
+
+        if (Settings::Manager::getBool("include terrain in far plane computation", "Shadows"))
+            computefarmask |= Mask_Terrain;// doesn't narrow enough far plane
+        mShadowManager->getShadowTechnique()->setComputeFarMask(computefarmask);
+
         if(enableOQN)
         {
-            mShadowManager->getShadowTechnique()->setComputeFarMask(Mask_ParticleSystem| ///require to be in first cv pass
-                                                                    //|Mask_Terrain doesn't narrow enough far plane
-                                                                    Mask_Object|Mask_Static);
             mShadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
         }else
         {
-
-            mShadowManager->getShadowTechnique()->setComputeFarMask(~0);
             mShadowManager->getShadowTechnique()->setOcclusionQueryMask(0);
         }
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
