@@ -20,7 +20,7 @@ public:
     virtual void reset() {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,unsigned int nodeMask, int preCompileMask, int borderMask)
     : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mNumSplits(4)
 {
@@ -77,6 +77,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if (!node)
             return nullptr;
 
+        node->setNodeMask(mTerrainNodeMask);
 
         if(mOQNSettings.enable){
 
@@ -89,9 +90,9 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
 
             qnode->addChild(node);
             qnode->getBound();
-            //TOFIX: with a mask occlusion test never happen...find why
-            //qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-         //  qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+
+            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
             node = qnode;
         }
         if (parent)

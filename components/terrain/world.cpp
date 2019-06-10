@@ -14,14 +14,14 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,unsigned int nodeMask, int preCompileMask, int borderMask)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
+    , mTerrainNodeMask(nodeMask)
 {
     mTerrainRoot = new osg::Group;
-    mTerrainRoot->setNodeMask(nodeMask);
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);

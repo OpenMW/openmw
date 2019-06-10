@@ -315,7 +315,10 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
     if (!entry.mRenderingNode){
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
 
-        if(mOQNSettings.enable&&entry.mRenderingNode.valid() ){
+        entry.mRenderingNode->setNodeMask(mTerrainNodeMask);
+
+        if(mOQNSettings.enable&&entry.mRenderingNode.valid())
+        {
             SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
@@ -324,8 +327,8 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
             qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
 
             qnode->addChild(entry.mRenderingNode);
-            //qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
-            //qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getQueryGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
+            qnode->getDebugGeometry()->setNodeMask(MWRender::Mask_OcclusionQuery);
             qnode->getBound();
             entry.mRenderingNode = qnode;
         }
