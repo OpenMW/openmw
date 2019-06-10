@@ -134,6 +134,7 @@
     Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
+    Task #4789: Optimize cell transitions
     Task #4721: Add NMake support to the Windows prebuild script
 
 0.45.0
