@@ -37,7 +37,6 @@ void Objects::resetSettings()
     mOQNSettings.debugDisplay = Settings::Manager::getBool("debug occlusion queries", "OcclusionQueries");
     mOQNSettings.querypixelcount = Settings::Manager::getInt("visibility threshold", "OcclusionQueries");
     mOQNSettings.queryframecount = Settings::Manager::getInt("queries frame count", "OcclusionQueries");
-    mOQNSettings.maxCellSize = Settings::Manager::getFloat("max cell size", "OcclusionQueries");
     mOQNSettings.minOQNSize = Settings::Manager::getFloat("min node size", "OcclusionQueries");
     mOQNSettings.maxOQNCapacity = Settings::Manager::getInt("max node capacity", "OcclusionQueries");
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");

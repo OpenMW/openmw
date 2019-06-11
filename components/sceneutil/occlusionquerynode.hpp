@@ -148,7 +148,6 @@ struct OcclusionQuerySettings
     unsigned int OQRenderBin;
 
     ///Octree parameters
-    float maxCellSize;
     unsigned int maxBVHOQLevelCount;
 
     ///subdivision criterions
