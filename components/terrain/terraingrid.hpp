@@ -36,7 +36,6 @@ namespace Terrain
         unsigned int mNumSplits;
 
         CellBorder::CellGrid mGrid;
-
     };
 }
 

@@ -68,7 +68,7 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
         {
             SceneUtil::StaticOcclusionQueryNode* ocnode = new SceneUtil::StaticOcclusionQueryNode;
             ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQMask, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
-            for(unsigned int i=0; i<8; ++i)
+            for(unsigned int i = 0; i<8; ++i)
                 ocnode->addChild(new osg::Group());
             ocnode->setDebugDisplay(mOQNSettings.debugDisplay);
             ocnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
@@ -100,21 +100,19 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
 }
 
 void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr ){
-    SceneUtil::PositionAttitudeTransform *objectNode=ptr.getRefData().getBaseNode();
+    SceneUtil::PositionAttitudeTransform *objectNode = ptr.getRefData().getBaseNode();
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
     if(ocq)
     {
         ocq = static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
 
-        const ESM::Cell * esmcell=ptr.getCell()->getCell();
+        const ESM::Cell * esmcell = ptr.getCell()->getCell();
         float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 
-        osg::Vec3 cellcenter = osg::Vec3( (static_cast<float>(esmcell->getGridX())+0.5f) * cellSize,
-                                          (static_cast<float>(esmcell->getGridY())+0.5f) * cellSize, 0);
-
-        osg::BoundingSphere bs;       
-        bs.center() = cellcenter;
+        osg::BoundingSphere bs;
+        bs.center() = osg::Vec3( (static_cast<float>(esmcell->getGridX())+0.5f) * cellSize,
+                                 (static_cast<float>(esmcell->getGridY())+0.5f) * cellSize, 0);
         bs.radius() = 0.5f * cellSize;
 
         osg::BoundingSphere bsi = objectNode->getBound();
@@ -128,7 +126,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
 }
 
 void Objects::cellRemoveStaticObject(osg::Group* cellnode,const MWWorld::Ptr &ptr){
-    SceneUtil::PositionAttitudeTransform *objectNode=ptr.getRefData().getBaseNode();
+    SceneUtil::PositionAttitudeTransform *objectNode = ptr.getRefData().getBaseNode();
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
     if(ocq)
@@ -168,8 +166,10 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 {
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
+
     basenode->setDataVariance(osg::Object::STATIC);
     basenode->setNodeMask(Mask_Object);
+
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
     cellAddStaticObject(cellroot, ptr);
@@ -181,8 +181,9 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 {
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
-    basenode->setNodeMask(Mask_Actor);
+
     basenode->setDataVariance(osg::Object::DYNAMIC);
+    basenode->setNodeMask(Mask_Actor);
 
     // CreatureAnimation
     osg::ref_ptr<Animation> anim;
@@ -202,12 +203,12 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
-    basenode->setNodeMask(Mask_Actor);
+
     basenode->setDataVariance(osg::Object::DYNAMIC);
+    basenode->setNodeMask(Mask_Actor);
 
     osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
     cellroot->addChild(basenode);
-
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
     {
@@ -289,7 +290,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     if (!objectNode)
         return;
 
-    osg::Group* cellnode=getOrCreateCell(cur);
+    osg::Group* cellnode = getOrCreateCell(cur);
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)
