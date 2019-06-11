@@ -29,7 +29,7 @@ boost::filesystem::path SwitchPath::getUserConfigPath() const
 
 boost::filesystem::path SwitchPath::getUserDataPath() const
 {   
-    return boost::filesystem::path("./data/" + Switch::getUsername());
+    return boost::filesystem::path("./data/" + (Switch::getUsername() == "" ? "global" : Switch::getUsername()));
 }
 
 boost::filesystem::path SwitchPath::getCachePath() const
