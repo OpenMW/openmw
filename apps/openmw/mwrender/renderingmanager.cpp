@@ -243,9 +243,9 @@ namespace MWRender
         globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
 
-        // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
     }
+
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                                        const std::string& resourcePath, DetourNavigator::Navigator& navigator)
@@ -287,8 +287,6 @@ namespace MWRender
 
         mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, mResourceSystem->getSceneManager()->getShaderManager()));
         resetShadowSettings();
-
-
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
@@ -381,6 +379,8 @@ namespace MWRender
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
+
+
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
@@ -417,6 +417,10 @@ namespace MWRender
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
         updateProjectionMatrix();
+
+        /// force update of unshadowed stateset
+        resetShadowSettings();
+
     }
 
     RenderingManager::~RenderingManager()
