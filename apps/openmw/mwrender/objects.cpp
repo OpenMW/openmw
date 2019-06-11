@@ -10,6 +10,10 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 
+#include "../mwworld/cellstore.hpp"
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadland.hpp>
+
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
@@ -95,29 +99,26 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
     return cellnode;
 }
 
-void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
+void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr ){
+    SceneUtil::PositionAttitudeTransform *objectNode=ptr.getRefData().getBaseNode();
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
     if(ocq)
     {
-        // TO FIX Hacky way to retrieve cell bounds
-        // the first child center considered as cell center
-        // cellsize is set statically in settings.cfg
-        ocq=static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
-        osg::Vec3dValueObject * center = dynamic_cast<osg::Vec3dValueObject*>(ocq->getUserData());
-        osg::BoundingSphere bs;
-        if(!center)
-        {
-            bs = objectNode->getBound();
-            osg::Vec3dValueObject * n=new osg::Vec3dValueObject();
-            n->setValue(bs.center());
-            ocq->setUserData(n);
-        }else bs.center() = center->getValue();
+        ocq = static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
 
-        bs.radius() = mOQNSettings.maxCellSize;
+        const ESM::Cell * esmcell=ptr.getCell()->getCell();
+        float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
+
+        osg::Vec3 cellcenter = osg::Vec3( (static_cast<float>(esmcell->getGridX())+0.5f) * cellSize,
+                                          (static_cast<float>(esmcell->getGridY())+0.5f) * cellSize, 0);
+
+        osg::BoundingSphere bs;       
+        bs.center() = cellcenter;
+        bs.radius() = 0.5f * cellSize;
 
         osg::BoundingSphere bsi = objectNode->getBound();
-        if(bs.valid() && bsi.valid() )
+        if(bsi.valid() )
         {
             SceneUtil::OctreeAddRemove adder(mOQNSettings, VisMask::Mask_OcclusionQuery);
             adder.recursivCellAddStaticObject(bs, *ocq, objectNode, bsi);
@@ -126,7 +127,8 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, osg::Group* objectNode){
     else cellnode->addChild(objectNode);
 }
 
-void Objects::cellRemoveStaticObject(osg::Group* cellnode, osg::Group* objectNode){
+void Objects::cellRemoveStaticObject(osg::Group* cellnode,const MWWorld::Ptr &ptr){
+    SceneUtil::PositionAttitudeTransform *objectNode=ptr.getRefData().getBaseNode();
     ///could be static casted but leave a way to make occlusion query a runtime controlled
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
     if(ocq)
@@ -170,7 +172,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     basenode->setNodeMask(Mask_Object);
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
-    cellAddStaticObject(cellroot, basenode);
+    cellAddStaticObject(cellroot, ptr);
 
     mObjects.insert(std::make_pair(ptr, anim));
 }
@@ -238,7 +240,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
 
         if(basenode->getNodeMask() & (Mask_Object | Mask_Static) )
-            cellRemoveStaticObject(cellroot, ptr.getRefData().getBaseNode());
+            cellRemoveStaticObject(cellroot, ptr);
         else basenode->getParent(0)->removeChild(basenode);
 
         ptr.getRefData().setBaseNode(nullptr);
@@ -299,8 +301,8 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     if(objectNode->getNodeMask() & (Mask_Object | Mask_Static) )
     {
         if (objectNode->getNumParents())
-            cellRemoveStaticObject(objectNode->getParent(0),objectNode);
-        cellAddStaticObject(cellnode,objectNode);
+            cellRemoveStaticObject(objectNode->getParent(0),cur);
+        cellAddStaticObject(cellnode,cur);
     }
     else {
         if (objectNode->getNumParents())

@@ -468,19 +468,19 @@
                             <UserString key="SettingLabelWidget" value="QcountText"/>
                             <UserString key="SettingLabelCaption" value="Queries frame count (%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="4 150 329 18" align="Left Top" name="OCmaxCellSizeText">
+                        <Widget type="TextBox" skin="NormalText" position="4 150 329 18" align="Left Top" name="OCminpopCellSizeText">
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 176 329 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="OcclusionQueries"/>
-                            <UserString key="SettingName" value="max cell size"/>
+                            <UserString key="SettingName" value="min pop in distance"/>
                             <UserString key="SettingValueType" value="Float"/>
-                            <UserString key="SettingMin" value="1000.0"/>
-                            <UserString key="SettingMax" value="500000.0"/>
-                            <UserString key="SettingLabelWidget" value="OCmaxCellSizeText"/>
-                            <UserString key="SettingLabelCaption" value="octree maximum cell size (%s)"/>
+                            <UserString key="SettingMin" value="0.0"/>
+                            <UserString key="SettingMax" value="5000.0"/>
+                            <UserString key="SettingLabelWidget" value="OCminpopCellSizeText"/>
+                            <UserString key="SettingLabelCaption" value="mindist from popin (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="4 200 329 18" align="Left Top" name="OCMaxLevelText">
                         </Widget>
