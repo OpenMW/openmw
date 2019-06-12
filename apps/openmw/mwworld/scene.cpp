@@ -71,7 +71,7 @@ namespace
     {
         if (!ptr.getRefData().getBaseNode())
             return;
-        if(//ptr.getRefData().getBaseNode()->getNodeMask()==Mask_Static&&
+        if(ptr.getRefData().getBaseNode()->getNodeMask()== (1<<11)&&//Mask_Static&&
                 !ptr.getClass().isMobile(ptr)
                 &&!ptr.getClass().isActivator()
                 )
