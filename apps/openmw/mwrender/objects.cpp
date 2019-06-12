@@ -1,19 +1,26 @@
 #include "objects.hpp"
 
-#include <osg/Group>
 #include <osg/UserDataContainer>
+#include <osg/ValueObject>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <osg/PositionAttitudeTransform>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+
+#include "../mwworld/cellstore.hpp"
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadland.hpp>
 
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
 #include "vismask.hpp"
-
+#include "renderbin.hpp"
+#include "components/sceneutil/optimizer.hpp"
 
 namespace MWRender
 {
@@ -34,25 +41,31 @@ Objects::~Objects()
     mCellSceneNodes.clear();
 }
 
-void Objects::insertBegin(const MWWorld::Ptr& ptr)
+osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
 {
-    assert(mObjects.find(ptr) == mObjects.end());
 
     osg::ref_ptr<osg::Group> cellnode;
-
     CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
     if (found == mCellSceneNodes.end())
     {
         cellnode = new osg::Group;
         cellnode->setName("Cell Root");
+        cellnode->setDataVariance(osg::Object::DYNAMIC);
         mRootNode->addChild(cellnode);
         mCellSceneNodes[ptr.getCell()] = cellnode;
     }
     else
         cellnode = found->second;
+    return cellnode;
+}
 
-    osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert (new SceneUtil::PositionAttitudeTransform);
-    cellnode->addChild(insert);
+osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
+{
+    assert(mObjects.find(ptr) == mObjects.end());
+
+    osg::ref_ptr<osg::Group> cellnode = getOrCreateCell(ptr);
+
+    SceneUtil::PositionAttitudeTransform* insert = new SceneUtil::PositionAttitudeTransform;
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
@@ -66,22 +79,74 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     insert->setScale(scaleVec);
 
     ptr.getRefData().setBaseNode(insert);
+    return cellnode;
 }
 
-void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
-{
-    insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Object);
 
-    osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
+void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, unsigned int mask, bool animated, bool allowLight)
+{
+    osg::Group *cellroot = insertBegin(ptr);
+    osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transbasenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
+    osg::Group * basenode=transbasenode;
+    osg::ref_ptr<ObjectAnimation> anim;
+    if(mask==Mask_Static&&!ptr.getClass().isMobile(ptr)&&!ptr.getClass().isActivator())
+    {
+        osg::PositionAttitudeTransform* insert = new osg::PositionAttitudeTransform;
+        osg::ref_ptr<osg::Group> sub=new osg::Group;
+        ptr.getRefData().setBaseNode(sub);
+        anim =new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight);
+        osg::Group* optimgr=new osg::Group;
+        optimgr->addChild(insert);
+        const float *f = ptr.getRefData().getPosition().pos;
+        insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
+        const float scale = ptr.getCellRef().getScale();
+        osg::Vec3f scaleVec(scale, scale, scale);
+        ptr.getClass().adjustScale(ptr, scaleVec, true);
+        insert->setScale(scaleVec);
+        ESM::Position position = ptr.getRefData().getPosition();
+        const float xr = position.rot[0];
+        const float yr = position.rot[1];
+        const float zr = position.rot[2];
+
+        insert->setAttitude( osg::Quat(zr, osg::Vec3(0, 0, -1))        * osg::Quat(yr, osg::Vec3(0, -1, 0))        * osg::Quat(xr, osg::Vec3(-1, 0, 0)));
+        transbasenode->setAttitude(insert->getAttitude());
+        insert->setDataVariance(osg::Object::STATIC);
+        insert->addChild(sub->getChild(0));
+        if(sub->getNumChildren()>1)OSG_WARN<<"arg"<<std::endl;
+        sub->removeChild(0,1);
+        if(sub->getNumParents()>0){
+            osg::ref_ptr<osg::Group> par=sub->getParent(0);
+            par->removeChild(sub);
+            par->addChild(optimgr);
+        }
+        SceneUtil::Optimizer optim;
+        optim.optimize(optimgr,SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS_DUPLICATING_SHARED_SUBGRAPHS);
+
+        optimgr->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
+        optimgr->setUserData(transbasenode);
+        sub->addChild(optimgr);
+        basenode=sub;
+        basenode->setDataVariance(osg::Object::STATIC);
+    }else
+        anim =new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight);
+
+    basenode->setNodeMask(mask);
+
+
+    cellroot->addChild(basenode);
 
     mObjects.insert(std::make_pair(ptr, anim));
 }
 
 void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
 {
-    insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
+    osg::Group *cellroot = insertBegin(ptr);
+    SceneUtil::PositionAttitudeTransform* basenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
+
+    if(!ptr.getClass().isMobile(ptr))
+        OSG_FATAL<<"unmobile creature"<<std::endl;
+    basenode->setDataVariance(osg::Object::DYNAMIC);
+    basenode->setNodeMask(Mask_Actor);
 
     // CreatureAnimation
     osg::ref_ptr<Animation> anim;
@@ -91,16 +156,24 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
 
+     cellroot->addChild(basenode);
+
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
         ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
 }
 
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
-    insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
+    osg::Group *cellroot = insertBegin(ptr);
+    SceneUtil::PositionAttitudeTransform* basenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
 
-    osg::ref_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+    if(!ptr.getClass().isMobile(ptr))
+        OSG_FATAL<<"unmobile NPC"<<std::endl;
+    basenode->setDataVariance(osg::Object::DYNAMIC);
+    basenode->setNodeMask(Mask_Actor);
+
+    osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
+    cellroot->addChild(basenode);
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
     {
@@ -111,7 +184,8 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 
 bool Objects::removeObject (const MWWorld::Ptr& ptr)
 {
-    if(!ptr.getRefData().getBaseNode())
+    SceneUtil::PositionAttitudeTransform *basenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
+    if(!basenode)
         return true;
 
     PtrAnimationMap::iterator iter = mObjects.find(ptr);
@@ -129,8 +203,9 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
 
             ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
+        osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
 
-        ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
+        cellroot->removeChild(basenode);
 
         ptr.getRefData().setBaseNode(nullptr);
         return true;
@@ -174,20 +249,11 @@ void Objects::removeCell(const MWWorld::CellStore* store)
 
 void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 {
-    osg::Node* objectNode = cur.getRefData().getBaseNode();
+    osg::Group* objectNode = cur.getRefData().getBaseNode()->asGroup();
     if (!objectNode)
         return;
 
-    MWWorld::CellStore *newCell = cur.getCell();
-
-    osg::Group* cellnode;
-    if(mCellSceneNodes.find(newCell) == mCellSceneNodes.end()) {
-        cellnode = new osg::Group;
-        mRootNode->addChild(cellnode);
-        mCellSceneNodes[newCell] = cellnode;
-    } else {
-        cellnode = mCellSceneNodes[newCell];
-    }
+    osg::Group* cellnode = getOrCreateCell(cur);
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)

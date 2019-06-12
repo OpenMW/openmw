@@ -596,7 +596,7 @@ namespace MWScript
                     else
                         return;
 
-                    osg::Quat attitude = ptr.getRefData().getBaseNode()->getAttitude();
+                    osg::Quat attitude =   static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude();
                     MWBase::Environment::get().getWorld()->rotateWorldObject(ptr, attitude * rot);
                 }
         };
@@ -663,7 +663,7 @@ namespace MWScript
                     if (!ptr.getRefData().getBaseNode())
                         return;
 
-                    osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
+                    osg::Vec3f diff =   static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude() * posChange;
                     osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
 

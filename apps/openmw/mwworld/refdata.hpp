@@ -8,9 +8,9 @@
 
 #include <string>
 
-namespace SceneUtil
+namespace osg
 {
-    class PositionAttitudeTransform;
+    class Group;
 }
 
 namespace ESM
@@ -27,7 +27,7 @@ namespace MWWorld
 
     class RefData
     {
-            SceneUtil::PositionAttitudeTransform* mBaseNode;
+            osg::Group* mBaseNode;
 
             MWScript::Locals mLocals;
 
@@ -78,13 +78,13 @@ namespace MWWorld
             RefData& operator= (const RefData& refData);
 
             /// Return base node (can be a null pointer).
-            SceneUtil::PositionAttitudeTransform* getBaseNode();
+            osg::Group* getBaseNode();
 
             /// Return base node (can be a null pointer).
-            const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
+            const osg::Group* getBaseNode() const;
 
             /// Set base node (can be a null pointer).
-            void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
+            void setBaseNode (osg::Group* base);
 
             int getCount() const;
 

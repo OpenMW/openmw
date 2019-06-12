@@ -1139,7 +1139,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+            found->second->setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude()));
             mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
             return;
         }

@@ -16,6 +16,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwrender/vismask.hpp"
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
@@ -25,7 +26,7 @@ namespace MWClass
     void Clothing::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model);
+            renderingInterface.getObjects().insertModel(ptr, model, MWRender::Mask_Object);
         }
     }
 

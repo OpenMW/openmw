@@ -12,6 +12,8 @@
 
 #include <LinearMath/btTransform.h>
 
+#include "apps/openmw/mwworld/class.hpp"
+
 namespace MWPhysics
 {
     Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance)
@@ -26,7 +28,20 @@ namespace MWPhysics
         mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
         setScale(ptr.getCellRef().getScale());
-        setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+        /*if(ptr.getClass().isMobile(ptr))
+
+        setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude()));
+        else
+            setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())->getAttitude()));
+*/
+        ESM::Position position = ptr.getRefData().getPosition();
+        const float xr = position.rot[0];
+        const float yr = position.rot[1];
+        const float zr = position.rot[2];
+
+       setRotation(Misc::Convert::toBullet( osg::Quat(zr, osg::Vec3(0, 0, -1))        * osg::Quat(yr, osg::Vec3(0, -1, 0))        * osg::Quat(xr, osg::Vec3(-1, 0, 0))));
+
+
         const float* pos = ptr.getRefData().getPosition().pos;
         setOrigin(btVector3(pos[0], pos[1], pos[2]));
     }

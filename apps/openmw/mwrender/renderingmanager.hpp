@@ -6,6 +6,7 @@
 #include <osg/Camera>
 
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "objects.hpp"
 

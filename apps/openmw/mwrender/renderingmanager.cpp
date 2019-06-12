@@ -690,18 +690,18 @@ namespace MWRender
         {
             mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
         }
-
-        ptr.getRefData().getBaseNode()->setAttitude(rot);
+        //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
+        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setAttitude(rot);
     }
 
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
-    {
-        ptr.getRefData().getBaseNode()->setPosition(pos);
+    {   //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
+        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setPosition(pos);
     }
 
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
-    {
-        ptr.getRefData().getBaseNode()->setScale(scale);
+    {   //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
+        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setScale(scale);
 
         if (ptr == mCamera->getTrackingPtr()) // update height of camera
             mCamera->processViewChange();

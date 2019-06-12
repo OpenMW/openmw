@@ -68,7 +68,8 @@ class Objects{
 
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-    void insertBegin(const MWWorld::Ptr& ptr);
+    osg::Group* insertBegin(const MWWorld::Ptr& ptr);
+    osg::Group * getOrCreateCell(const MWWorld::Ptr& ptr);
 
 public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
@@ -76,7 +77,7 @@ public:
 
     /// @param animated Attempt to load separate keyframes from a .kf file matching the model file?
     /// @param allowLight If false, no lights will be created, and particles systems will be removed.
-    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, bool animated=false, bool allowLight=true);
+    void insertModel(const MWWorld::Ptr& ptr, const std::string &model, unsigned int mask, bool animated=false, bool allowLight=true);
 
     void insertNPC(const MWWorld::Ptr& ptr);
     void insertCreature (const MWWorld::Ptr& ptr, const std::string& model, bool weaponsShields);

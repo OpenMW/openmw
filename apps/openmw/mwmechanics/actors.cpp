@@ -354,7 +354,7 @@ namespace MWMechanics
             return;
 
         // stop tracking when target is behind the actor
-        osg::Vec3f actorDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        osg::Vec3f actorDirection = static_cast<SceneUtil::PositionAttitudeTransform*>(actor.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0);
         osg::Vec3f targetDirection(actor2Pos - actor1Pos);
         actorDirection.z() = 0;
         targetDirection.z() = 0;

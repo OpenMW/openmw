@@ -43,7 +43,7 @@ namespace MWMechanics
         osg::Vec3f pos(actor.getRefData().getPosition().asVec3());
         pos.z() = 0;
 
-        osg::Vec3f actorDir = (actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0));
+        osg::Vec3f actorDir = (static_cast<SceneUtil::PositionAttitudeTransform*>(actor.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0));
 
         for (; it != refList.end(); ++it)
         {

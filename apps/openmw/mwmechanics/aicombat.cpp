@@ -479,7 +479,7 @@ namespace MWMechanics
             osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
             osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
             osg::Vec3f source = pos + osg::Vec3f(0, 0, 0.75f * halfExtents.z());
-            osg::Vec3f fallbackDirection = actor.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,-1,0);
+            osg::Vec3f fallbackDirection = static_cast<SceneUtil::PositionAttitudeTransform*>(actor.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,-1,0);
             osg::Vec3f destination = source + fallbackDirection * (halfExtents.y() + 16);
 
             bool isObstacleDetected = MWBase::Environment::get().getWorld()->castRay(source.x(), source.y(), source.z(), destination.x(), destination.y(), destination.z(), mask);

@@ -78,7 +78,7 @@ namespace MWMechanics
         float angleDegrees = osg::RadiansToDegrees(
                     signedAngleRadians (
                     (attacker.getRefData().getPosition().asVec3() - blocker.getRefData().getPosition().asVec3()),
-                    blocker.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0),
+                    static_cast<SceneUtil::PositionAttitudeTransform*>(blocker.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0),
                     osg::Vec3f(0,0,1)));
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

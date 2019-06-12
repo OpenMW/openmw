@@ -1128,7 +1128,7 @@ void CharacterController::updateIdleStormState(bool inwater)
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
-        osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        osg::Vec3f characterDirection = static_cast<SceneUtil::PositionAttitudeTransform*>(mPtr.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0);
         stormDirection.normalize();
         characterDirection.normalize();
         if (stormDirection * characterDirection < -0.5f)
@@ -2891,7 +2891,7 @@ void CharacterController::updateHeadTracking(float duration)
 
         if (!mPtr.getRefData().getBaseNode())
             return;
-        const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
+        const osg::Vec3f actorDirection = static_cast<SceneUtil::PositionAttitudeTransform*>(mPtr.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0);
 
         zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
         xAngleRadians = -std::asin(direction.z());

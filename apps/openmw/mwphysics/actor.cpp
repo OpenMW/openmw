@@ -168,7 +168,7 @@ osg::Vec3f Actor::getPreviousPosition() const
 void Actor::updateRotation ()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
-    mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
+    mRotation = static_cast<SceneUtil::PositionAttitudeTransform*>(mPtr.getRefData().getBaseNode())->getAttitude();
     tr.setRotation(Misc::Convert::toBullet(mRotation));
     mCollisionObject->setWorldTransform(tr);
 

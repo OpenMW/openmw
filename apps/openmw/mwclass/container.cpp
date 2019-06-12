@@ -23,6 +23,7 @@
 
 #include "../mwgui/tooltips.hpp"
 
+#include "../mwrender/vismask.hpp"
 #include "../mwrender/animation.hpp"
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -112,7 +113,7 @@ namespace MWClass
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
-            renderingInterface.getObjects().insertModel(ptr, model, true);
+            renderingInterface.getObjects().insertModel(ptr, model, MWRender::Mask_Object, true);
         }
     }
 
