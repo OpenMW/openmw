@@ -148,6 +148,7 @@ namespace MWWorld
             const ESM::AnimationState& getAnimationState() const;
             ESM::AnimationState& getAnimationState();
     };
+
 }
 
 #endif

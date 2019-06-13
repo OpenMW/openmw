@@ -690,35 +690,57 @@ namespace MWRender
         {
             mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
         }
-        //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
         if(!ptr.getRefData().isBaseNodeFlatten())
         static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setAttitude(rot);
         else {
             //need reflatten
 
             static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())->setAttitude(rot);
-             //ptr.getRefData().flattenTransform();
+             ptr.getRefData().flattenTransform();
 
         }
     }
 
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
-    {   //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
+    {
+
+        SceneUtil::getCellOrigin(ptr.getCell()->getCell());
 
         osg::Vec3 cellorigin(0,0,0);
-        SceneUtil::PositionAttitudeTransform* ptrans, *trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
-        if(trans->getNumParents()>0)
+        SceneUtil::PositionAttitudeTransform* trans;
+        if(ptr.getRefData().isBaseNodeFlatten())
+            trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
+        else trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+
+;
+        SceneUtil::PositionAttitudeTransform* ptrans;
+        if(ptr.getRefData().getBaseNode()->getNumParents()>0)
         {
-            ptrans=dynamic_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
-            if(ptrans)cellorigin=ptrans->getPosition();
+            ptrans=dynamic_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getParent(0));
+            if(ptrans)
+                cellorigin=SceneUtil::getCellOrigin(ptr.getCell()->getCell());
+            else
+            {
+                if(!ptr.getClass().isNpc())
+                    OSG_WARN<<"fuck"<<std::endl;
+            }
+            //if(ptrans)cellorigin=ptrans->getPosition();
         }
+        //OSG_WARN<<"moveobject"<<ptr.getRefData().std::endl;
         trans->setPosition(pos-cellorigin);
+        if(ptr.getRefData().isBaseNodeFlatten())
+            ptr.getRefData().flattenTransform();
     }
 
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
-    {   //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
-        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setScale(scale);
-
+    {
+        SceneUtil::PositionAttitudeTransform* trans;
+        if(ptr.getRefData().isBaseNodeFlatten())
+            trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
+        else trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+        trans->setScale(scale);
+        if(ptr.getRefData().isBaseNodeFlatten())
+            ptr.getRefData().flattenTransform();
         if (ptr == mCamera->getTrackingPtr()) // update height of camera
             mCamera->processViewChange();
     }

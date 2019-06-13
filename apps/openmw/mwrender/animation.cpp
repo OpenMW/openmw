@@ -1686,8 +1686,7 @@ namespace MWRender
     void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
-
-        SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
+        SceneUtil::addLight(parent, mPtr.getCell()->getCell(), esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)

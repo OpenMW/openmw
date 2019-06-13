@@ -178,8 +178,8 @@ namespace MWWorld
         TransVisitor tv( m);
         osg::ref_ptr<osg::Group> cloneoptim=(osg::Group*)transbasenode->getChild(0)->clone(osg::CopyOp::DEEP_COPY_DRAWABLES|
                                                                                            osg::CopyOp::DEEP_COPY_ARRAYS|
-                                                                          //                 osg::CopyOp::DEEP_COPY_CALLBACKS|
-                                                                        //osg::CopyOp::DEEP_COPY_ALL|
+                                                                                          // osg::CopyOp::DEEP_COPY_CALLBACKS|
+                                                                         //osg::CopyOp::DEEP_COPY_ALL|
                                                                         osg::CopyOp::DEEP_COPY_NODES);
         cloneoptim->accept(tv);
 

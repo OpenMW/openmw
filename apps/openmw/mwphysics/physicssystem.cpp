@@ -1136,10 +1136,15 @@ namespace MWPhysics
 
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
     {
+        SceneUtil::PositionAttitudeTransform* trans;
+        if(ptr.getRefData().isBaseNodeFlatten())
+            trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
+        else trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude()));
+            found->second->setRotation(Misc::Convert::toBullet(trans->getAttitude()));
             mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
             return;
         }

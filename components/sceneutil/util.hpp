@@ -4,6 +4,9 @@
 #include <osg/Matrix>
 #include <osg/BoundingSphere>
 #include <osg/Vec4f>
+#include <osg/Vec3f>
+
+#include <components/esm/loadcell.hpp>
 
 namespace SceneUtil
 {
@@ -20,6 +23,8 @@ namespace SceneUtil
     float makeOsgColorComponent (unsigned int value, unsigned int shift);
 
     bool hasUserDescription(const osg::Node* node, const std::string pattern);
+
+    osg::Vec3f getCellOrigin(const ESM::Cell *);
 }
 
 #endif
