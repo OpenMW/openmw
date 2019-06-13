@@ -691,7 +691,15 @@ namespace MWRender
             mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
         }
         //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
+        if(!ptr.getRefData().isBaseNodeFlatten())
         static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setAttitude(rot);
+        else {
+            //need reflatten
+
+            static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())->setAttitude(rot);
+             //ptr.getRefData().flattenTransform();
+
+        }
     }
 
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)

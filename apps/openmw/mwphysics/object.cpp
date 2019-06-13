@@ -29,7 +29,7 @@ namespace MWPhysics
 
         setScale(ptr.getCellRef().getScale());
         /*if(ptr.getClass().isMobile(ptr))
-
+actorDirection
         setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude()));
         else
             setRotation(Misc::Convert::toBullet(static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())->getAttitude()));

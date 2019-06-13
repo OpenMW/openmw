@@ -54,6 +54,8 @@ namespace MWWorld
 
             unsigned int mFlags;
 
+            bool mFlatten;
+
         public:
 
             RefData();
@@ -85,6 +87,14 @@ namespace MWWorld
 
             /// Set base node (can be a null pointer).
             void setBaseNode (osg::Group* base);
+
+            /// Do we flatten basenode transform
+            ///  (if so we store unflatten in basenode->getChild(0)->getUserData())
+            inline void setBaseNodeFlatten (bool b) { mFlatten = b; }
+
+            inline bool isBaseNodeFlatten() const { return mFlatten; }
+
+            void flattenTransform();
 
             int getCount() const;
 

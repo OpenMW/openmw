@@ -1,6 +1,9 @@
 #include "refdata.hpp"
 
 #include <components/esm/objectstate.hpp>
+#include <components/sceneutil/optimizer.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
+#include <osgUtil/TransformAttributeFunctor>
 
 #include "customdata.hpp"
 #include "cellstore.hpp"
@@ -46,7 +49,7 @@ namespace MWWorld
     }
 
     RefData::RefData()
-    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mFlags(0)
+    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mFlags(0), mFlatten(false)
     {
         for (int i=0; i<3; ++i)
         {
@@ -59,7 +62,7 @@ namespace MWWorld
     : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
       mCustomData (0),
-      mChanged(false), mFlags(0) // Loading from ESM/ESP files -> assume unchanged
+      mChanged(false), mFlags(0), mFlatten(false) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
@@ -70,7 +73,7 @@ namespace MWWorld
       mPosition (objectState.mPosition),
       mAnimationState(objectState.mAnimationState),
       mCustomData (0),
-      mChanged(true), mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
+      mChanged(true), mFlags(objectState.mFlags), mFlatten(false)// Loading from a savegame -> assume changed
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
         // which will result in permanently suppressed activation if the reference script is removed.
@@ -79,7 +82,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const RefData& refData)
-    : mBaseNode(0), mCustomData (0)
+    : mBaseNode(0), mCustomData (0), mFlatten(false)
     {
         try
         {
@@ -146,6 +149,44 @@ namespace MWWorld
         return mBaseNode;
     }
 
+    class TransVisitor : public osg::NodeVisitor
+    {
+    public:
+        osg::Matrix _m;
+        TransVisitor(osg::Matrix&m )
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),_m(m)
+        {}
+
+        virtual void apply(osg::Drawable &dr)
+        {
+            osgUtil::TransformAttributeFunctor tf(_m);
+            dr.accept(tf);
+            dr.dirtyBound();
+            dr.dirtyDisplayList();
+            traverse(dr);
+        }
+    };
+
+    void RefData::flattenTransform()
+    {
+
+        osg::Group* sub = mBaseNode;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform >transbasenode = static_cast<SceneUtil::PositionAttitudeTransform *>(sub->getChild(0)->getUserData());
+
+        osg::Matrix m=osg::Matrix::scale(transbasenode->getScale())*osg::Matrix::rotate(transbasenode->getAttitude())*osg::Matrix::translate(transbasenode->getPosition());
+
+        TransVisitor tv( m);
+        osg::ref_ptr<osg::Group> cloneoptim=(osg::Group*)transbasenode->getChild(0)->clone(osg::CopyOp::DEEP_COPY_DRAWABLES|
+                                                                                           osg::CopyOp::DEEP_COPY_ARRAYS|
+                                                                          //                 osg::CopyOp::DEEP_COPY_CALLBACKS|
+                                                                        //osg::CopyOp::DEEP_COPY_ALL|
+                                                                        osg::CopyOp::DEEP_COPY_NODES);
+        cloneoptim->accept(tv);
+
+        cloneoptim->setUserData(transbasenode);
+
+        sub->setChild(0,cloneoptim);
+    }
     int RefData::getCount() const
     {
         return mCount;

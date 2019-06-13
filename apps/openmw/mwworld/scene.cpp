@@ -71,14 +71,14 @@ namespace
     {
         if (!ptr.getRefData().getBaseNode())
             return;
-        if(ptr.getRefData().getBaseNode()->getNodeMask()== (1<<11)&&//Mask_Static&&
+      /*  if(ptr.getRefData().getBaseNode()->getNodeMask()== (1<<11)&&//Mask_Static&&
                 !ptr.getClass().isMobile(ptr)
                 &&!ptr.getClass().isActivator() &&!ptr.getClass().isDoor()
                 )
         {
             OSG_WARN<<"updating immobile trans"<<std::endl;
             return;
-        }
+        }*/
         rendering.rotateObject(ptr,
             ptr.getClass().isActor()
             ? makeActorOsgQuat(ptr.getRefData().getPosition())
@@ -108,7 +108,7 @@ namespace
 
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
 
-        if(ptr.getClass().isMobile(ptr)||ptr.getClass().isActivator() ||ptr.getClass().isDoor())setNodeRotation(ptr, rendering, false);
+        setNodeRotation(ptr, rendering, false);
 
         ptr.getClass().insertObject (ptr, model, physics);
 

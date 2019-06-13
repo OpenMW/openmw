@@ -101,21 +101,23 @@ public:
     osg::Matrix _m;
     TransVisitor(osg::Matrix&m )
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN),_m(m)
-    { }
+    {
+        //OSG_WARN<<"traversing not matrix Transform"<<std::endl;
+    }
     virtual void apply(osg::Transform &dr)
     {
         //OSG_WARN<<"traversing not matrix Transform"<<std::endl;
-        osg::Matrix m = dr.getWorldMatrices().front();
-        _m.postMult(m);
+      //  osg::Matrix m = dr.getWorldMatrices().front();
+      //  _m.postMult(m);
         traverse(dr);
-        _m.postMult(osg::Matrix::inverse(m));
+     //   _m.postMult(osg::Matrix::inverse(m));
     }
     virtual void apply(osg::MatrixTransform &dr)
     {
         //OSG_WARN<<"traversing  matrix Transform"<<std::endl;
-        _m.postMult(dr.getMatrix());
+       // _m.postMult(dr.getMatrix());
         traverse(dr);
-        _m.postMult(osg::Matrix::inverse(dr.getMatrix()));
+      //  _m.postMult(osg::Matrix::inverse(dr.getMatrix()));
     }
 
     virtual void apply(osg::Drawable &dr)
@@ -133,8 +135,9 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, unsi
     osg::ref_ptr<SceneUtil::PositionAttitudeTransform> transbasenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
     osg::Group * basenode = transbasenode;
     osg::ref_ptr<ObjectAnimation> anim;
-    if(mask==Mask_Static&&!ptr.getClass().isMobile(ptr)&&!ptr.getClass().isActivator()&&!ptr.getClass().isDoor())
+    if(Settings::Manager::getBool("juval","General")&&!ptr.getClass().isMobile(ptr)&&!ptr.getClass().isActivator()&&!ptr.getClass().isDoor())
     {
+        ptr.getRefData().setBaseNodeFlatten(true);
         osg::ref_ptr<osg::Group> sub = new osg::Group;
         sub->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
@@ -151,19 +154,27 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, unsi
         const float zr = objpos.rot[2];
 
         transbasenode->setAttitude( osg::Quat(zr, osg::Vec3(0, 0, -1))        * osg::Quat(yr, osg::Vec3(0, -1, 0))        * osg::Quat(xr, osg::Vec3(-1, 0, 0)));
-
-        osg::Matrix m=osg::Matrix::scale(transbasenode->getScale())*osg::Matrix::rotate(transbasenode->getAttitude())*osg::Matrix::translate(transbasenode->getPosition());
+        sub->getChild(0)->setUserData(transbasenode);
+        transbasenode->addChild(sub->getChild(0));
+        ptr.getRefData().flattenTransform();
+       /* osg::Matrix m=osg::Matrix::scale(transbasenode->getScale())*osg::Matrix::rotate(transbasenode->getAttitude())*osg::Matrix::translate(transbasenode->getPosition());
 
         TransVisitor tv( m);
         osg::ref_ptr<osg::Group> cloneoptim=(osg::Group*)sub->getChild(0)->clone(osg::CopyOp::DEEP_COPY_DRAWABLES|
                                                                         osg::CopyOp::DEEP_COPY_ARRAYS|
                                                                         //osg::CopyOp::DEEP_COPY_USERDATA|
                                                                         osg::CopyOp::DEEP_COPY_NODES);
-        sub->removeChild(0,sub->getNumChildren());
-
         cloneoptim->accept(tv);
+        SceneUtil::Optimizer opt;
+        //opt.optimize(cloneoptim,SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS);
+        ///keep untransformed original meshes
+        transbasenode->addChild(sub->getChild(0));
+        sub->removeChild(0,sub->getNumChildren());
+        cloneoptim->setUserData(transbasenode);*/
 
-        sub->addChild(cloneoptim);
+
+
+        //sub->addChild(cloneoptim);
 
         basenode = sub;
         basenode->setDataVariance(osg::Object::STATIC);
