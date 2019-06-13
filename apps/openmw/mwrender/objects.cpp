@@ -44,6 +44,13 @@ Objects::~Objects()
     mCellSceneNodes.clear();
 }
 
+const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
+
+inline osg::Vec3 getCellOrigin(const MWWorld::Ptr& ptr){
+    const ESM::CellId::CellIndex &cellid = ptr.getCell()->getCell()->getCellId().mIndex;
+    return osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
+                         (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
+}
 osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
 {
 
@@ -51,7 +58,16 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
     CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
     if (found == mCellSceneNodes.end())
     {
-        cellnode = new osg::Group;
+        SceneUtil::PositionAttitudeTransform *cell=new SceneUtil::PositionAttitudeTransform;
+
+
+        cell->setPosition(getCellOrigin(ptr));
+   /*     cell->setMatrix(//osg::Matrix::scale( ptr.getCellRef().getScale(),ptr.getCellRef().getScale(),ptr.getCellRef().getScale())*
+                       //osg::Matrix( osg::Quat(zr, osg::Vec3(0, 0, -1))        * osg::Quat(yr, osg::Vec3(0, -1, 0))        * osg::Quat(xr, osg::Vec3(-1, 0, 0))) *
+                      osg::Matrix::translate(osg::Vec3(p.pos[0],p.pos[1],p.pos[2]))
+                        );*/
+
+        cellnode = cell;
         cellnode->setName("Cell Root");
         cellnode->setDataVariance(osg::Object::DYNAMIC);
         mRootNode->addChild(cellnode);
@@ -72,11 +88,12 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
-    const float *f = ptr.getRefData().getPosition().pos;
-
-    insert->setPosition(osg::Vec3(f[0], f[1], f[2]));
+    osg::Vec3 fc = getCellOrigin(ptr);
 
     const float scale = ptr.getCellRef().getScale();
+    const float *f = ptr.getRefData().getPosition().pos;
+    insert->setPosition(osg::Vec3(f[0]-fc[0], f[1]-fc[1], f[2]-fc[2]));
+
     osg::Vec3f scaleVec(scale, scale, scale);
     ptr.getClass().adjustScale(ptr, scaleVec, true);
     insert->setScale(scaleVec);
@@ -99,7 +116,7 @@ public:
     }
     virtual void apply(osg::MatrixTransform &dr)
     {
-        OSG_WARN<<"traversing  matrix Transform"<<std::endl;
+        //OSG_WARN<<"traversing  matrix Transform"<<std::endl;
         _m.postMult(dr.getMatrix());
         traverse(dr);
         _m.postMult(osg::Matrix::inverse(dr.getMatrix()));
@@ -127,7 +144,7 @@ public:
     dr.dirtyDisplayList();
     //dr.getVertexArray()->dirty();
 
-    dr.getBound();
+    //dr.getBound();
     traverse(dr);
 }
 };
@@ -151,7 +168,8 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, unsi
     osg::Group * basenode=transbasenode;
     osg::ref_ptr<ObjectAnimation> anim;
     osg::ref_ptr<osg::Group> sub=new osg::Group;
-    if(mask==Mask_Static&&!ptr.getClass().isMobile(ptr)&&!ptr.getClass().isActivator())
+    if(mask==Mask_Static&&!ptr.getClass().isMobile(ptr)&&!ptr.getClass().isActivator()&&!ptr.getClass().isDoor()
+            )
     {
         osg::MatrixTransform* insert = new osg::MatrixTransform;
         sub->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
@@ -159,22 +177,26 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, unsi
         anim =new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight);
         osg::Group* optimgr=new osg::Group;
         optimgr->addChild(insert);
-        const float *f = ptr.getRefData().getPosition().pos;
-        transbasenode->setPosition(osg::Vec3(f[0], f[1], f[2]));
-        const float scale = ptr.getCellRef().getScale();
-        osg::Vec3f scaleVec(scale, scale, scale);
-        ptr.getClass().adjustScale(ptr, scaleVec, true);
-        transbasenode->setScale(scaleVec);
-        ESM::Position position = ptr.getRefData().getPosition();
-        const float xr = position.rot[0];
-        const float yr = position.rot[1];
-        const float zr = position.rot[2];
+        MWWorld::RefData &objref =ptr.getRefData();
+        const ESM::Position &objpos=objref.getPosition();
+
+        osg::Vec3 fc(getCellOrigin(ptr));
+        const float *f = objpos.pos;
+        const float s  =ptr.getCellRef().getScale();
+        transbasenode->setPosition( osg::Vec3(f[0] , f[1] , f[2] ) -osg::Vec3(fc[0] , fc[1] , fc[2] ) );
+        //transbasenode->setPosition(osg::Vec3(f[0], f[1], f[2]));
+        osg::Vec3f scaleVec(s,s, s);
+        //ptr.getClass().adjustScale(ptr, scaleVec, true);
+        //transbasenode->setScale(scaleVec);
+        const float xr = objpos.rot[0];
+        const float yr = objpos.rot[1];
+        const float zr = objpos.rot[2];
 
         transbasenode->setAttitude( osg::Quat(zr, osg::Vec3(0, 0, -1))        * osg::Quat(yr, osg::Vec3(0, -1, 0))        * osg::Quat(xr, osg::Vec3(-1, 0, 0)));
         //transbasenode->setAttitude(insert->getAttitude());
         insert->setDataVariance(osg::Object::STATIC);
         insert->addChild(sub->getChild(0));
-        insert->setMatrix( osg::Matrix::scale(transbasenode->getScale())*osg::Matrix::rotate(transbasenode->getAttitude())*osg::Matrix::translate(transbasenode->getPosition()));
+        insert->setMatrix(osg::Matrix::scale(transbasenode->getScale())*osg::Matrix::rotate(transbasenode->getAttitude())*osg::Matrix::translate(transbasenode->getPosition()));
         if(sub->getNumChildren()>1)OSG_WARN<<"arg"<<std::endl;
         sub->removeChild(0,sub->getNumChildren());
         if(transbasenode->getNumParents()>0){
@@ -188,7 +210,7 @@ osg::Matrix m=insert->getMatrix();
 
        // optimgr->accept(hv);
         SceneUtil::Optimizer optim;
-        optim.optimize(optimgr,SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS_DUPLICATING_SHARED_SUBGRAPHS  );
+        //optim.optimize(optimgr,SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS_DUPLICATING_SHARED_SUBGRAPHS  );
         //optim.optimize(optimgr,osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS  );
         //optim.optimize(optimgr,osgUtil::Optimizer::DEFAULT_OPTIMIZATIONS  );
 
@@ -204,19 +226,19 @@ osg::Matrix m=insert->getMatrix();
             sub->addChild(optimgr);
         }else
         {
-            OSG_WARN<<"not flatten"<<optimgr->getChild(0)->asTransform()->getWorldMatrices(optimgr).size()<<" "<<
+            OSG_INFO<<"not flatten"<<optimgr->getChild(0)->asTransform()->getWorldMatrices(optimgr).size()<<" "<<
             //((osg::PositionAttitudeTransform*)optimgr->getChild(0))->getPosition()[0]<<
             std::endl;
             m=((osg::MatrixTransform*)optimgr->getChild(0))->getMatrix();
             TransVisitor tv( m);
             osg::ref_ptr<osg::Group> cloneoptim=(osg::Group*)optimgr->clone(osg::CopyOp::DEEP_COPY_DRAWABLES|
                                                                             osg::CopyOp::DEEP_COPY_ARRAYS|
+                                                                            //osg::CopyOp::DEEP_COPY_USERDATA|
                                                                             osg::CopyOp::DEEP_COPY_NODES);
 
             cloneoptim->getChild(0)->asGroup()->getChild(0)->accept(tv);
 
             //optimgr->getChild(0)->asTransform()->getChild(0)->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
-            //optimgr->setUserData(transbasenode);
 
             sub->addChild(cloneoptim->getChild(0)->asTransform()->getChild(0));
         }
@@ -360,6 +382,11 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 
     if (objectNode->getNumParents())
         objectNode->getParent(0)->removeChild(objectNode);
+
+
+    SceneUtil::PositionAttitudeTransform* trans=static_cast<SceneUtil::PositionAttitudeTransform*>(objectNode);
+
+    trans->setPosition( trans->getPosition()-getCellOrigin(old)+getCellOrigin(cur));
     cellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);

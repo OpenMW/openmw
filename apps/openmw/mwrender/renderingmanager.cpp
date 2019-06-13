@@ -696,7 +696,15 @@ namespace MWRender
 
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
     {   //assert(ptr.getRefData().getBaseNode()->getNodeMask()!=MWRender::Mask_Static && ptr.getClass()->isMobile(ptr));
-        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setPosition(pos);
+
+        osg::Vec3 cellorigin(0,0,0);
+        SceneUtil::PositionAttitudeTransform* ptrans, *trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+        if(trans->getNumParents()>0)
+        {
+            ptrans=dynamic_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
+            if(ptrans)cellorigin=ptrans->getPosition();
+        }
+        trans->setPosition(pos-cellorigin);
     }
 
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
