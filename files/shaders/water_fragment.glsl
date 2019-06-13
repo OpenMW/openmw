@@ -6,7 +6,7 @@
 
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-const float VISIBILITY = 2.5;
+const float VISIBILITY = 2500.0;
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -36,7 +36,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
-const float BUMP_SUPPRESS_DEPTH = 0.3;             // at what water depth bumpmap will be supressed for reflections and refractions (prevents artifacts at shores)
+const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be supressed for reflections and refractions (prevents artifacts at shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -151,11 +151,11 @@ uniform float rainIntensity;
 
 float frustumDepth;
 
-float linearizeDepth(float depth)  // takes <0,1> non-linear depth value and returns <0,1> linearized value
+float linearizeDepth(float depth)
   {
     float z_n = 2.0 * depth - 1.0;
     depth = 2.0 * near * far / (far + near - z_n * frustumDepth);
-    return depth / frustumDepth;
+    return depth;
   }
 
 void main(void)
@@ -170,7 +170,7 @@ void main(void)
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
 
-    vec2 nCoord = vec2(0.0,0.0);
+    vec2 nCoord = vec2(0.0);
 
     #define waterTimer osg_SimulationTime
 
@@ -186,7 +186,7 @@ void main(void)
     if (rainIntensity > 0.01)
       rainRipple = rainCombined(position.xy / 1000.0,waterTimer) * clamp(rainIntensity,0.0,1.0);
     else
-      rainRipple = vec4(0.0,0.0,0.0,0.0);
+      rainRipple = vec4(0.0);
 
     vec3 rippleAdd = rainRipple.xyz * rainRipple.w * 10.0;
 
@@ -239,10 +239,9 @@ void main(void)
     fresnel = clamp(fresnel, 0.0, 1.0);
 
 #if REFRACTION
-    float normalization = frustumDepth / 1000;
-    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * normalization;
-    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x) * normalization;
-    float surfaceDepth = linearizeDepth(gl_FragCoord.z) * normalization;
+    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x);
+    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x);
+    float surfaceDepth = linearizeDepth(gl_FragCoord.z);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
     float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #else

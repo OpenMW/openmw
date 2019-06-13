@@ -165,11 +165,6 @@ namespace MWGui
         if (mMainWidget->getVisible())
             return;
 
-        if (mViewer->getIncrementalCompileOperation())
-        {
-            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
-        }
-
         // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);

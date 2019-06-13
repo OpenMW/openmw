@@ -195,8 +195,7 @@ namespace MWRender
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                                       const Fallback::Map* fallback, const std::string& resourcePath,
-                                       DetourNavigator::Navigator& navigator)
+                                       const std::string& resourcePath, DetourNavigator::Navigator& navigator)
         : mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -207,9 +206,9 @@ namespace MWRender
         , mLandFogEnd(std::numeric_limits<float>::max())
         , mUnderwaterFogStart(0.f)
         , mUnderwaterFogEnd(std::numeric_limits<float>::max())
-        , mUnderwaterColor(fallback->getFallbackColour("Water_UnderwaterColor"))
-        , mUnderwaterWeight(fallback->getFallbackFloat("Water_UnderwaterColorWeight"))
-        , mUnderwaterIndoorFog(fallback->getFallbackFloat("Water_UnderwaterIndoorFog"))
+        , mUnderwaterColor(Fallback::Map::getColour("Water_UnderwaterColor"))
+        , mUnderwaterWeight(Fallback::Map::getFloat("Water_UnderwaterColorWeight"))
+        , mUnderwaterIndoorFog(Fallback::Map::getFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
         , mDistantTerrain(false)
@@ -269,13 +268,14 @@ namespace MWRender
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
         }
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
 
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), fallback, resourcePath));
+        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
         DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
@@ -312,8 +312,8 @@ namespace MWRender
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
 
-        mTerrain->setDefaultViewer(mViewer->getCamera());
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        mTerrain->setWorkQueue(mWorkQueue.get());
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -371,8 +371,10 @@ namespace MWRender
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-        mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
-        mFirstPersonFieldOfView = Settings::Manager::getFloat("first person field of view", "Camera");
+        float fov = Settings::Manager::getFloat("field of view", "Camera");
+        mFieldOfView = std::min(std::max(1.f, fov), 179.f);
+        float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
+        mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
@@ -1198,6 +1200,12 @@ namespace MWRender
 
         mUniformNear->set(mNearClip);
         mUniformFar->set(mViewDistance);
+
+        // Since our fog is not radial yet, we should take FOV in account, otherwise terrain near viewing distance may disappear.
+        // Limit FOV here just for sure, otherwise viewing distance can be too high.
+        fov = std::min(mFieldOfView, 140.f);
+        float distanceMult = std::cos(osg::DegreesToRadians(fov)/2.f);
+        mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f/distanceMult : 1.f));
     }
 
     void RenderingManager::updateTextureFiltering()

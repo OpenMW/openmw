@@ -85,6 +85,13 @@ namespace MWGui
     {
         setCanRest(!ptr.isEmpty() || MWBase::Environment::get().getWorld ()->canRest () == MWBase::World::Rest_Allowed);
 
+        if (ptr.isEmpty() && MWBase::Environment::get().getWorld ()->canRest() == MWBase::World::Rest_PlayerIsInAir)
+        {
+            // Resting in air is not allowed unless you're using a bed
+            MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
+            MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Rest);
+        }
+            
         if (mUntilHealedButton->getVisible())
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mUntilHealedButton);
         else
@@ -129,7 +136,7 @@ namespace MWGui
         }
         else if (canRest == MWBase::World::Rest_PlayerIsUnderwater)
         {
-            // resting underwater or mid-air not allowed
+            // resting underwater not allowed
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage1}");
             MWBase::Environment::get().getWindowManager()->popGuiMode ();
         }
@@ -232,7 +239,7 @@ namespace MWGui
     void WaitDialog::onWaitingProgressChanged(int cur, int total)
     {
         mProgressBar.setProgress(cur, total);
-        MWBase::Environment::get().getMechanicsManager()->rest(mSleeping);
+        MWBase::Environment::get().getMechanicsManager()->rest(1, mSleeping);
         MWBase::Environment::get().getWorld()->advanceTime(1);
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();

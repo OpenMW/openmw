@@ -327,7 +327,6 @@ namespace MWWorld
     void Scene::unloadCell (CellStoreCollection::iterator iter)
     {
         Log(Debug::Info) << "Unloading cell " << (*iter)->getCell()->getDescription();
-        DetourNavigator::log("unload cell ", (*iter)->getCell()->getDescription());
 
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
@@ -388,7 +387,6 @@ namespace MWWorld
         if(result.second)
         {
             Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
-            DetourNavigator::log("load cell ", cell->getCell()->getDescription());
 
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
@@ -431,6 +429,7 @@ namespace MWWorld
             insertCell (*cell, true, loadingListener);
 
             mRendering.addCell(cell);
+            MWBase::Environment::get().getWindowManager()->addCell(cell);
             bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
             float waterLevel = cell->getWaterLevel();
             mRendering.setWaterEnabled(waterEnabled);

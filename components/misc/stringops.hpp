@@ -1,7 +1,6 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
-#include <cstring>
 #include <string>
 #include <algorithm>
 
@@ -17,6 +16,19 @@ class StringUtils
             return toLower(x) < toLower(y);
         }
     };
+
+    // Allow to convert complex arguments to C-style strings for format() function
+    template <typename T>
+    static T argument(T value) noexcept
+    {
+        return value;
+    }
+
+    template <typename T>
+    static T const * argument(std::basic_string<T> const & value) noexcept
+    {
+        return value.c_str();
+    }
 
 public:
 
@@ -212,30 +224,26 @@ public:
         return str;
     }
 
-    /** @brief Replaces the first occurrence of a string in another string.
-     *
-     * @param str The string to operate on.
-     * @param what The string to replace.
-     * @param with The replacement string.
-     * @param whatLen The length of the string to replace.
-     * @param withLen The length of the replacement string.
-     *
-     * @return A reference to the string passed in @p str.
-     */
-    static std::string &replace(std::string &str, const char *what, const char *with,
-                                std::size_t whatLen=std::string::npos, std::size_t withLen=std::string::npos)
+    // Requires some C++11 features:
+    // 1. std::string needs to be contiguous
+    // 2. std::snprintf with zero size (second argument) returns an output string size
+    // 3. variadic templates support
+    template <typename ... Args>
+    static std::string format(const char* fmt, Args const & ... args)
     {
-        if (whatLen == std::string::npos)
-            whatLen = strlen(what);
+        auto size = std::snprintf(nullptr, 0, fmt, argument(args) ...);
+        // Note: sprintf also writes a trailing null character. We should remove it.
+        std::string ret(size+1, '\0');
+        std::sprintf(&ret[0], fmt, argument(args) ...);
+        ret.erase(size);
 
-        if (withLen == std::string::npos)
-            withLen = strlen(with);
+        return ret;
+    }
 
-        std::size_t found;
-        if ((found = str.find(what)) != std::string::npos)
-            str.replace(found, whatLen, with, withLen);
-
-        return str;
+    template <typename ... Args>
+    static std::string format(const std::string& fmt, Args const & ... args)
+    {
+        return format(fmt.c_str(), args ...);
     }
 };
 

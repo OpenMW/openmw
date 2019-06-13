@@ -73,10 +73,10 @@ Programmers
     Finbar Crago (finbar-crago)
     Florian Weber (Florianjw)
     Gašper Sedej
+    Gijsbert ter Horst (Ghostbird)
     Gohan1989
     gugus/gus
     guidoj
-    Hallfaer Tuilinn
     Haoda Wang (h313)
     hristoast
     Internecine
@@ -126,6 +126,7 @@ Programmers
     Michael Hogan (Xethik)
     Michael Mc Donnell
     Michael Papageorgiou (werdanith)
+    Michael Stopa (Stomy)
     Michał Ściubidło (mike-sc)
     Michał Bień (Glorf)
     Michał Moroz (dragonee)
@@ -135,6 +136,7 @@ Programmers
     Mitchell Schwitzer (schwitzerm)
     naclander
     Narmo
+    Nat Meo (Utopium)
     Nathan Jeffords (blunted2night)
     NeveHanter
     Nialsy
@@ -182,7 +184,6 @@ Programmers
     Stanislaw Halik (sthalik)
     Star-Demon
     stil-t
-    Stomy
     svaante
     Sylvain Thesnieres (Garvek)
     t6

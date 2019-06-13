@@ -1,5 +1,6 @@
 #include "columns.hpp"
 
+#include <components/fallback/fallback.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "universalid.hpp"
@@ -573,11 +574,6 @@ namespace
         "Book", "Scroll", 0
     };
 
-    static const char *sBloodType[] =
-    {
-        "Default (Red)", "Skeleton Blood (White)", "Metal Blood (Golden)", 0
-    };
-
     static const char *sEmitterType[] =
     {
         "<None>", "Flickering", "Flickering (Slow)", "Pulsing", "Pulsing (Slow)", 0
@@ -613,7 +609,6 @@ namespace
             case CSMWorld::Columns::ColumnId_InfoCondFunc: return CSMWorld::ConstInfoSelectWrapper::FunctionEnumStrings;
             case CSMWorld::Columns::ColumnId_InfoCondComp: return CSMWorld::ConstInfoSelectWrapper::RelationEnumStrings;
             case CSMWorld::Columns::ColumnId_BookType: return sBookType;
-            case CSMWorld::Columns::ColumnId_BloodType: return sBloodType;
             case CSMWorld::Columns::ColumnId_EmitterType: return sEmitterType;
 
             default: return 0;
@@ -626,19 +621,28 @@ bool CSMWorld::Columns::hasEnums (ColumnId column)
     return getEnumNames (column)!=0 || column==ColumnId_RecordType;
 }
 
-std::vector<std::string> CSMWorld::Columns::getEnums (ColumnId column)
+std::vector<std::pair<int,std::string>>CSMWorld::Columns::getEnums (ColumnId column)
 {
-    std::vector<std::string> enums;
+    std::vector<std::pair<int,std::string>> enums;
 
     if (const char **table = getEnumNames (column))
         for (int i=0; table[i]; ++i)
-            enums.push_back (table[i]);
+            enums.emplace_back(i, table[i]);
+    else if (column==ColumnId_BloodType)
+    {
+        for (int i=0; i<8; i++)
+        {
+            const std::string& bloodName = Fallback::Map::getString("Blood_Texture_Name_" + std::to_string(i));
+            if (!bloodName.empty())
+                enums.emplace_back(i, bloodName);
+        }
+    }
     else if (column==ColumnId_RecordType)
     {
-        enums.push_back (""); // none
+        enums.emplace_back(UniversalId::Type_None, ""); // none
 
         for (int i=UniversalId::Type_None+1; i<UniversalId::NumberOfTypes; ++i)
-            enums.push_back (UniversalId (static_cast<UniversalId::Type> (i)).getTypeName());
+            enums.emplace_back (i, UniversalId (static_cast<UniversalId::Type> (i)).getTypeName());
     }
 
     return enums;

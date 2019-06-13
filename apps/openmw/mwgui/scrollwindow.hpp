@@ -12,7 +12,7 @@ namespace Gui
 
 namespace MWGui
 {
-    class ScrollWindow : public WindowBase
+    class ScrollWindow : public BookWindowBase
     {
         public:
             ScrollWindow ();

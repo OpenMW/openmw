@@ -83,6 +83,7 @@ namespace Debug
             mColors[Warning] = Yellow;
             mColors[Info] = Reset;
             mColors[Verbose] = DarkGray;
+            mColors[Debug] = DarkGray;
             mColors[NoLevel] = Reset;
         }
 

@@ -5,13 +5,13 @@
     <Resource type="ResourceSkin" name="MW_ScrollView" size="516 516">
         <Property key="NeedKey" value="false"/>
         <Child type="Widget" skin="" offset="0 0 502 516" align="Stretch" name="Client"/>
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 513" align="Right Top VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 513" align="Right Top VStretch" name="VScroll"/>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ScrollViewH" size="516 516">
         <Property key="NeedKey" value="false"/>
         <Child type="Widget" skin="" offset="0 0 516 502" align="Stretch" name="Client"/>
-        <Child type="MWScrollBar" skin="MW_HScroll" offset="3 498 513 14" align="Left Bottom HStretch" name="HScroll"/>
+        <Child type="ScrollBar" skin="MW_HScroll" offset="3 498 513 14" align="Left Bottom HStretch" name="HScroll"/>
     </Resource>
 
 </MyGUI>

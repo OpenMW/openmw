@@ -14,8 +14,6 @@
 #ifndef OSGVIEWER_GRAPHICSWINDOWQT
 #define OSGVIEWER_GRAPHICSWINDOWQT
 
-#include <QGLWidget>
-
 #include <osgViewer/GraphicsWindow>
 
 #include <QMutex>

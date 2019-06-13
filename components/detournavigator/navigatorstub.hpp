@@ -79,6 +79,8 @@ namespace DetourNavigator
             return mDefaultSettings;
         }
 
+        void reportStats(unsigned int /*frameNumber*/, osg::Stats& /*stats*/) const override {}
+
     private:
         Settings mDefaultSettings {};
         SharedNavMeshCacheItem mEmptyNavMeshCacheItem;

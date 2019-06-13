@@ -3,6 +3,7 @@
 
 #include <osg/Object>
 
+#include <components/resource/objectcache.hpp>
 #include <components/resource/resourcemanager.hpp>
 #include <components/esmterrain/storage.hpp>
 
@@ -14,7 +15,7 @@ namespace ESM
 namespace MWRender
 {
 
-    class LandManager : public Resource::ResourceManager
+    class LandManager : public Resource::GenericResourceManager<std::pair<int, int> >
     {
     public:
         LandManager(int loadFlags);

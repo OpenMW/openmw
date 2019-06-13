@@ -55,19 +55,19 @@
         <Child type="Widget" skin="MW_Box" offset="0 0 40 40" align="Left Stretch"/>
 
     </Resource>
-    
+
     <!-- Defines crosshair color -->
-    <Resource type="ResourceSkin" name="HUD_Crosshair" size="32 32" texture="textures\target.dds">
-        <BasisSkin type="MainSkin" offset="0 0 32 32">
-            <State name="normal" offset="0 0 32 32"/>
+    <Resource type="AutoSizedResourceSkin" name="HUD_Crosshair" texture="textures\target.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    
+
     <!-- Defines owned crosshair color -->
-    <Resource type="ResourceSkin" name="HUD_Crosshair_Owned" size="32 32" texture="textures\target.dds">
+    <Resource type="AutoSizedResourceSkin" name="HUD_Crosshair_Owned" texture="textures\target.dds">
         <Property key="Colour" value="#{setting=GUI,color crosshair owned}"/>
-        <BasisSkin type="MainSkin" offset="0 0 32 32">
-            <State name="normal" offset="0 0 32 32"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 

@@ -16,8 +16,6 @@
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
 
-#include <components/fallback/fallback.hpp>
-
 #include <components/misc/stringops.hpp>
 
 #include <components/settings/settings.hpp>
@@ -428,19 +426,10 @@ void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM
     if (mItemLights.find(item) != mItemLights.end())
         return;
 
-    const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
-    static bool outQuadInLin = fallback->getFallbackBool("LightAttenuation_OutQuadInLin");
-    static bool useQuadratic = fallback->getFallbackBool("LightAttenuation_UseQuadratic");
-    static float quadraticValue = fallback->getFallbackFloat("LightAttenuation_QuadraticValue");
-    static float quadraticRadiusMult = fallback->getFallbackFloat("LightAttenuation_QuadraticRadiusMult");
-    static bool useLinear = fallback->getFallbackBool("LightAttenuation_UseLinear");
-    static float linearRadiusMult = fallback->getFallbackFloat("LightAttenuation_LinearRadiusMult");
-    static float linearValue = fallback->getFallbackFloat("LightAttenuation_LinearValue");
     bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
     osg::Vec4f ambient(1,1,1,1);
-    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, outQuadInLin,
-                                 useQuadratic, quadraticValue, quadraticRadiusMult, useLinear, linearRadiusMult, linearValue, ambient);
+    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, ambient);
 
     mInsert->addChild(lightSource);
 

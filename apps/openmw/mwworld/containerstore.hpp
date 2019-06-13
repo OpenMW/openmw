@@ -128,6 +128,8 @@ namespace MWWorld
             ContainerStoreIterator begin (int mask = Type_All);
             ContainerStoreIterator end();
 
+            bool hasVisibleItems() const;
+
             virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///

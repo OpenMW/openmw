@@ -6,10 +6,14 @@
 
 namespace Fallback
 {
-    Map::Map(const std::map<std::string,std::string>& fallback):mFallbackMap(fallback)
-    {}
+    std::map<std::string,std::string> Map::mFallbackMap;
 
-    std::string Map::getFallbackString(const std::string& fall) const
+    void Map::init(const std::map<std::string,std::string>& fallback)
+    {
+        mFallbackMap = fallback;
+    }
+
+    std::string Map::getString(const std::string& fall)
     {
         std::map<std::string,std::string>::const_iterator it;
         if ((it = mFallbackMap.find(fall)) == mFallbackMap.end())
@@ -19,9 +23,9 @@ namespace Fallback
         return it->second;
     }
 
-    float Map::getFallbackFloat(const std::string& fall) const
+    float Map::getFloat(const std::string& fall)
     {
-        std::string fallback = getFallbackString(fall);
+        const std::string& fallback = getString(fall);
         if (!fallback.empty())
         {
             try
@@ -39,9 +43,9 @@ namespace Fallback
         return 0;
     }
 
-    int Map::getFallbackInt(const std::string& fall) const
+    int Map::getInt(const std::string& fall)
     {
-        std::string fallback = getFallbackString(fall);
+        const std::string& fallback = getString(fall);
         if (!fallback.empty())
         {
             try
@@ -61,15 +65,15 @@ namespace Fallback
         return 0;
     }
 
-    bool Map::getFallbackBool(const std::string& fall) const
+    bool Map::getBool(const std::string& fall)
     {
-        std::string fallback = getFallbackString(fall);
+        const std::string& fallback = getString(fall);
         return !fallback.empty() && fallback != "0";
     }
 
-    osg::Vec4f Map::getFallbackColour(const std::string& fall) const
+    osg::Vec4f Map::getColour(const std::string& fall)
     {
-        std::string sum = getFallbackString(fall);
+        const std::string& sum = getString(fall);
         if (!sum.empty())
         {
             try

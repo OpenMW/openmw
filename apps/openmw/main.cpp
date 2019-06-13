@@ -1,6 +1,7 @@
 #include <components/version/version.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/escape.hpp>
+#include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
 #include <components/debug/debugging.hpp>
 #include <components/misc/rng.hpp>
@@ -191,6 +192,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     cfgMgr.processPaths(dataDirs);
 
+    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -199,8 +201,6 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         engine.addArchive(*it);
     }
-
-    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
 
     StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
@@ -233,8 +233,8 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapeHashString>().toStdString());
 
     // other settings
+    Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
     engine.setSoundUsage(!variables["no-sound"].as<bool>());
-    engine.setFallbackValues(variables["fallback"].as<FallbackMap>().mMap);
     engine.setActivationDistanceOverride (variables["activate-dist"].as<int>());
     engine.enableFontExport(variables["export-fonts"].as<bool>());
     engine.setRandomSeed(variables["random-seed"].as<unsigned int>());

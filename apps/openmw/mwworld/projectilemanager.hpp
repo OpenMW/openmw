@@ -102,7 +102,7 @@ namespace MWWorld
             float mSpeed;
 
             std::vector<MWBase::Sound*> mSounds;
-            std::vector<std::string> mSoundIds;
+            std::set<std::string> mSoundIds;
         };
 
         struct ProjectileState : public State

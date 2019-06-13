@@ -86,8 +86,7 @@ namespace MWRender
     public:
         RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-                         const Fallback::Map* fallback, const std::string& resourcePath,
-                         DetourNavigator::Navigator& navigator);
+                         const std::string& resourcePath, DetourNavigator::Navigator& navigator);
         ~RenderingManager();
 
         MWRender::Objects& getObjects();

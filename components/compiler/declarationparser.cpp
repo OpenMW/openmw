@@ -22,19 +22,19 @@ bool Compiler::DeclarationParser::parseName (const std::string& name, const Toke
         char type = mLocals.getType (name2);
 
         if (type!=' ')
-        {
-            /// \todo add option to make re-declared local variables an error
-            getErrorHandler().warning ("ignoring local variable re-declaration",
-                loc);
-
-            mState = State_End;
-            return true;
-        }
-
-        mLocals.declare (mType, name2);
+            getErrorHandler().warning ("Local variable re-declaration", loc);
+        else
+            mLocals.declare (mType, name2);
 
         mState = State_End;
         return true;
+    }
+    else if (mState==State_End)
+    {
+        getErrorHandler().warning ("Extra text after local variable declaration", loc);
+        SkipParser skip (getErrorHandler(), getContext());
+        scanner.scan (skip);
+        return false;
     }
 
     return Parser::parseName (name, loc, scanner);
@@ -61,8 +61,14 @@ bool Compiler::DeclarationParser::parseKeyword (int keyword, const TokenLoc& loc
     else if (mState==State_Name)
     {
         // allow keywords to be used as local variable names. MW script compiler, you suck!
-        /// \todo option to disable this atrocity.
         return parseName (loc.mLiteral, loc, scanner);
+    }
+    else if (mState==State_End)
+    {
+        getErrorHandler().warning ("Extra text after local variable declaration", loc);
+        SkipParser skip (getErrorHandler(), getContext());
+        scanner.scan (skip);
+        return false;
     }
 
     return Parser::parseKeyword (keyword, loc, scanner);
@@ -70,8 +76,16 @@ bool Compiler::DeclarationParser::parseKeyword (int keyword, const TokenLoc& loc
 
 bool Compiler::DeclarationParser::parseSpecial (int code, const TokenLoc& loc, Scanner& scanner)
 {
-    if (code==Scanner::S_newline && mState==State_End)
+    if (mState==State_End)
+    {
+        if (code!=Scanner::S_newline)
+        {
+            getErrorHandler().warning ("Extra text after local variable declaration", loc);
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+        }
         return false;
+    }
 
     return Parser::parseSpecial (code, loc, scanner);
 }

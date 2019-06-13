@@ -10,7 +10,7 @@
     </Resource>
     <Resource type="ResourceSkin" name="MW_Track_Blue" size="2 14" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="#{fontcolour=magic}"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 16" align="Stretch">
+        <BasisSkin type="MainSkin" offset="0 0 16 16">
             <State name="normal" offset="0 0 16 16"/>
         </BasisSkin>
     </Resource>
@@ -20,41 +20,22 @@
             <State name="normal" offset="0 0 16 16"/>
         </BasisSkin>
     </Resource>
-    <!-- Lighter variants (only uses top half of the gradient) -->
-    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Red_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full_Small" size="16 2" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="0.235 0.745 0.745"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 2" align="Stretch">
+            <State name="normal" offset="0 0 16 2"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Small" size="16 2" texture="textures\menu_bar_gray.dds" >
         <Property key="Colour" value="1 0 0"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 2" align="Stretch">
+            <State name="normal" offset="0 0 16 2"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Blue_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="0.3 0.3 1"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
-        </BasisSkin>
-    </Resource>
-    <Resource type="ResourceSkin" name="MW_BigTrack_Progress_Green_Small" size="16 8" texture="textures\menu_bar_gray.dds" >
-        <Property key="Colour" value="0.298 0.784 0.780"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
-        </BasisSkin>
-    </Resource>
-    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full_Small" size="16 8" texture="white" >
-        <Property key="Colour" value="0.035 0.545 0.545"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
-        </BasisSkin>
-    </Resource>
-    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Small" size="16 8" texture="white" >
-        <Property key="Colour" value="0.785 0 0"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
-        </BasisSkin>
-    </Resource>
-    <Resource type="ResourceSkin" name="MW_Progress_Loading_Small" size="16 8" texture="white" >
-        <Property key="Colour" value="0 0.615 0.620"/>
-        <BasisSkin type="MainSkin" offset="0 0 16 8" align="Stretch">
-            <State name="normal" offset="0 0 16 8"/>
+    <Resource type="ResourceSkin" name="MW_Progress_Loading_Small" size="16 2" texture="textures\menu_bar_gray.dds" >
+        <Property key="Colour" value="0 0.815 0.820"/>
+        <BasisSkin type="MainSkin" offset="0 0 16 2" align="Stretch">
+            <State name="normal" offset="0 0 16 2"/>
         </BasisSkin>
     </Resource>
     <Resource type="ResourceSkin" name="ProgressText" size="16 16">

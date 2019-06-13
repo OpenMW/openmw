@@ -16,7 +16,7 @@
         <Widget type="AutoSizedTextBox" skin="SandText" name="HourText">
         </Widget>
 
-        <Widget type="MWScrollBar" skin="MW_HScroll" name="HourSlider" position="0 0 0 18">
+        <Widget type="ScrollBar" skin="MW_HScroll" name="HourSlider" position="0 0 0 18">
             <Property key="MoveToClick" value="true"/>
             <Property key="Range" value="24"/>
             <Property key="Page" value="1"/>

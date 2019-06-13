@@ -76,6 +76,8 @@ namespace Debug
                 CurrentDebugLevel = Info;
             else if (value == "VERBOSE")
                 CurrentDebugLevel = Verbose;
+            else if (value == "DEBUG")
+                CurrentDebugLevel = Debug;
 
             return;
         }

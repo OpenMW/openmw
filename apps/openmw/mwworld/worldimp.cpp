@@ -156,10 +156,10 @@ namespace MWWorld
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
-        ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-        int activationDistanceOverride, const std::string& startCell,
+        ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
+        const std::string& startCell, const std::string& startupScript,
         const std::string& resourcePath, const std::string& userDataPath)
-    : mResourceSystem(resourceSystem), mFallback(fallbackMap), mLocalScripts (mStore),
+    : mResourceSystem(resourceSystem), mLocalScripts (mStore),
       mSky (true), mCells (mStore, mEsm),
       mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
       mActivationDistanceOverride (activationDistanceOverride),
@@ -202,9 +202,6 @@ namespace MWWorld
             navigatorSettings->mMaxClimb = MWPhysics::sStepSizeUp;
             navigatorSettings->mMaxSlope = MWPhysics::sMaxSlope;
             navigatorSettings->mSwimHeightScale = mSwimHeightScale;
-            if (Settings::Manager::getBool("enable log", "Navigator"))
-                DetourNavigator::Log::instance().setSink(std::unique_ptr<DetourNavigator::FileSink>(
-                    new DetourNavigator::FileSink(Settings::Manager::getString("log path", "Navigator"))));
             DetourNavigator::RecastGlobalAllocator::init();
             mNavigator.reset(new DetourNavigator::NavigatorImpl(*navigatorSettings));
         }
@@ -213,11 +210,11 @@ namespace MWWorld
             mNavigator.reset(new DetourNavigator::NavigatorStub());
         }
 
-        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, &mFallback, resourcePath, *mNavigator));
+        mRendering.reset(new MWRender::RenderingManager(viewer, rootNode, resourceSystem, workQueue, resourcePath, *mNavigator));
         mProjectileManager.reset(new ProjectileManager(mRendering->getLightRoot(), resourceSystem, mRendering.get(), mPhysics.get()));
         mRendering->preloadCommonAssets();
 
-        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mFallback, mStore));
+        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering, mStore));
 
         mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get(), *mNavigator));
     }
@@ -253,7 +250,7 @@ namespace MWWorld
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
         mWeatherManager.reset();
-        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering.get(), mFallback, mStore));
+        mWeatherManager.reset(new MWWorld::WeatherManager(*mRendering.get(), mStore));
 
         if (!bypass)
         {
@@ -298,7 +295,7 @@ namespace MWWorld
 
         if (!bypass)
         {
-            std::string video = mFallback.getFallbackString("Movies_New_Game");
+            const std::string& video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
         }
@@ -470,7 +467,7 @@ namespace MWWorld
         gmst["iWereWolfBounty"] = ESM::Variant(1000);
         gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
 
-        for (const std::pair<std::string, ESM::Variant> &params : gmst)
+        for (const auto &params : gmst)
         {
             if (!mStore.get<ESM::GameSetting>().search(params.first))
             {
@@ -500,7 +497,7 @@ namespace MWWorld
         globals["crimegoldturnin"] = ESM::Variant(0);
         globals["pchasturnin"] = ESM::Variant(0);
 
-        for (const std::pair<std::string, ESM::Variant> &params : globals)
+        for (const auto &params : globals)
         {
             if (!mStore.get<ESM::Global>().search(params.first))
             {
@@ -519,7 +516,7 @@ namespace MWWorld
         statics["templemarker"] = "marker_temple.nif";
         statics["travelmarker"] = "marker_travel.nif";
 
-        for (const std::pair<std::string, std::string> &params : statics)
+        for (const auto &params : statics)
         {
             if (!mStore.get<ESM::Static>().search(params.first))
             {
@@ -533,7 +530,7 @@ namespace MWWorld
         std::map<std::string, std::string> doors;
         doors["prisonmarker"] = "marker_prison.nif";
 
-        for (const std::pair<std::string, std::string> &params : doors)
+        for (const auto &params : doors)
         {
             if (!mStore.get<ESM::Door>().search(params.first))
             {
@@ -568,11 +565,6 @@ namespace MWWorld
         }
 
         return nullptr;
-    }
-
-    const Fallback::Map *World::getFallback() const
-    {
-        return &mFallback;
     }
 
     CellStore *World::getExterior (int x, int y)
@@ -687,7 +679,7 @@ namespace MWWorld
         mLocalScripts.remove (ref);
     }
 
-    Ptr World::searchPtr (const std::string& name, bool activeOnly)
+    Ptr World::searchPtr (const std::string& name, bool activeOnly, bool searchInContainers)
     {
         Ptr ret;
         // the player is always in an active cell.
@@ -714,11 +706,14 @@ namespace MWWorld
                 return ret;
         }
 
-        for (CellStore* cellstore : mWorldScene->getActiveCells())
+        if (searchInContainers)
         {
-            Ptr ptr = cellstore->searchInContainer(lowerCaseName);
-            if (!ptr.isEmpty())
-                return ptr;
+            for (CellStore* cellstore : mWorldScene->getActiveCells())
+            {
+                Ptr ptr = cellstore->searchInContainer(lowerCaseName);
+                if (!ptr.isEmpty())
+                    return ptr;
+            }
         }
 
         Ptr ptr = mPlayer->getPlayer().getClass()
@@ -1307,23 +1302,24 @@ namespace MWWorld
         return newPtr;
     }
 
-    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics)
+    MWWorld::Ptr World::moveObjectImp(const Ptr& ptr, float x, float y, float z, bool movePhysics, bool moveToActive)
     {
-        CellStore *cell = ptr.getCell();
+        int cellX, cellY;
+        positionToIndex(x, y, cellX, cellY);
 
-        if (cell->isExterior()) {
-            int cellX, cellY;
-            positionToIndex(x, y, cellX, cellY);
+        CellStore* cell = ptr.getCell();
+        CellStore* newCell = getExterior(cellX, cellY);
+        bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(*newCell);
 
-            cell = getExterior(cellX, cellY);
-        }
+        if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
+            cell = newCell;
 
         return moveObject(ptr, cell, x, y, z, movePhysics);
     }
 
-    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z)
+    MWWorld::Ptr World::moveObject (const Ptr& ptr, float x, float y, float z, bool moveToActive)
     {
-        return moveObjectImp(ptr, x, y, z);
+        return moveObjectImp(ptr, x, y, z, true, moveToActive);
     }
 
     void World::scaleObject (const Ptr& ptr, float scale)
@@ -1854,7 +1850,7 @@ namespace MWWorld
         bool isFirstPerson = mRendering->getCamera()->isFirstPerson();
         if (isWerewolf && isFirstPerson)
         {
-            float werewolfFov = mFallback.getFallbackFloat("General_Werewolf_FOV");
+            float werewolfFov = Fallback::Map::getFloat("General_Werewolf_FOV");
             if (werewolfFov != 0)
                 mRendering->overrideFieldOfView(werewolfFov);
             MWBase::Environment::get().getWindowManager()->setWerewolfOverlay(true);
@@ -2476,8 +2472,11 @@ namespace MWWorld
         if(mPlayer->enemiesNearby())
             return Rest_EnemiesAreNearby;
 
-        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
+        if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return Rest_PlayerIsUnderwater;
+
+        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isFlying(player))
+            return Rest_PlayerIsInAir;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
             return Rest_OnlyWaiting;
@@ -3280,9 +3279,9 @@ namespace MWWorld
         return closestMarker;
     }
 
-    void World::rest()
+    void World::rest(double hours)
     {
-        mCells.rest();
+        mCells.rest(hours);
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
@@ -3339,9 +3338,13 @@ namespace MWWorld
                 return true;
 
             // Consider references inside containers as well (except if we are looking for a Creature, they cannot be in containers)
-            if (mType != World::Detect_Creature &&
-                    (ptr.getClass().isActor() || ptr.getClass().getTypeName() == typeid(ESM::Container).name()))
+            bool isContainer = ptr.getClass().getTypeName() == typeid(ESM::Container).name();
+            if (mType != World::Detect_Creature && (ptr.getClass().isActor() || isContainer))
             {
+                // but ignore containers without resolved content
+                if (isContainer && ptr.getRefData().getCustomData() == nullptr)
+                    return true;
+
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 {
                     for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
@@ -3588,8 +3591,11 @@ namespace MWWorld
         if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
             return;
 
-        std::string texture = getFallback()->getFallbackString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
-        std::string model = "meshes\\" + getFallback()->getFallbackString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))); // [0, 2]
+        std::string texture = Fallback::Map::getString("Blood_Texture_" + std::to_string(ptr.getClass().getBloodTexture(ptr)));
+        if (texture.empty())
+            texture = Fallback::Map::getString("Blood_Texture_0");
+
+        std::string model = "meshes\\" + Fallback::Map::getString("Blood_Model_" + std::to_string(Misc::Rng::rollDice(3))); // [0, 2]
 
         mRendering->spawnEffect(model, texture, worldPosition, 1.0f, false);
     }

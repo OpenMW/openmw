@@ -104,7 +104,7 @@ namespace ESM
                     }
 
                     mScriptData.resize(subSize);
-                    esm.getExact(&mScriptData[0], mScriptData.size());
+                    esm.getExact(mScriptData.data(), mScriptData.size());
                     break;
                 }
                 case ESM::FourCC<'S','C','T','X'>::value:
@@ -156,7 +156,7 @@ namespace ESM
         }
 
         esm.startSubRecord("SCDT");
-        esm.write(reinterpret_cast<const char * >(&mScriptData[0]), mData.mScriptDataSize);
+        esm.write(reinterpret_cast<const char *>(mScriptData.data()), mData.mScriptDataSize);
         esm.endRecord("SCDT");
 
         esm.writeHNOString("SCTX", mScriptText);

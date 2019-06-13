@@ -20,7 +20,7 @@ namespace MWGui
 {
 
     BookWindow::BookWindow ()
-        : WindowBase("openmw_book.layout")
+        : BookWindowBase("openmw_book.layout")
         , mCurrentPage(0)
         , mTakeButtonShow(true)
         , mTakeButtonAllowed(true)
@@ -43,10 +43,10 @@ namespace MWGui
         getWidget(mLeftPage, "LeftPage");
         getWidget(mRightPage, "RightPage");
 
-        adjustButton(mCloseButton);
-        adjustButton(mTakeButton);
-        adjustButton(mNextPageButton);
-        adjustButton(mPrevPageButton);
+        adjustButton("CloseButton");
+        adjustButton("TakeButton");
+        adjustButton("PrevPageBTN");
+        float scale = adjustButton("NextPageBTN");
 
         mLeftPage->setNeedMouseFocus(true);
         mLeftPage->eventMouseWheel += MyGUI::newDelegate(this, &BookWindow::onMouseWheel);
@@ -62,7 +62,7 @@ namespace MWGui
         {
             // english button has a 7 pixel wide strip of garbage on its right edge
             mNextPageButton->setSize(64-7, mNextPageButton->getSize().height);
-            mNextPageButton->setImageCoord(MyGUI::IntCoord(0,0,64-7,mNextPageButton->getSize().height));
+            mNextPageButton->setImageCoord(MyGUI::IntCoord(0,0,(64-7)*scale,mNextPageButton->getSize().height*scale));
         }
 
         center();
@@ -185,15 +185,6 @@ namespace MWGui
         {
             paper->setVisible(false);
         }
-    }
-
-    void BookWindow::adjustButton (Gui::ImageButton* button)
-    {
-        MyGUI::IntSize diff = button->getSize() - button->getRequestedSize();
-        button->setSize(button->getRequestedSize());
-
-        if (button->getAlign().isRight())
-            button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
     }
 
     void BookWindow::nextPage()

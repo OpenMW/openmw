@@ -3,6 +3,7 @@
 #include <limits>
 #include <iomanip>
 
+#include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
 
@@ -534,8 +535,7 @@ namespace MWMechanics
 
             if (magnitudeMult > 0 && !absorbed)
             {
-                float random = Misc::Rng::rollClosedProbability();
-                float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * random;
+                float magnitude = effectIt->mMagnMin + Misc::Rng::rollDice(effectIt->mMagnMax - effectIt->mMagnMin + 1);
                 magnitude *= magnitudeMult;
 
                 if (!target.getClass().isActor())
@@ -864,16 +864,15 @@ namespace MWMechanics
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
-        if (enchantment->mData.mType == ESM::Enchantment::CastOnce && !godmode)
+        else if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
         {
-            item.getContainerStore()->remove(item, 1, mCaster);
+            if (!godmode)
+                item.getContainerStore()->remove(item, 1, mCaster);
         }
-        else if (enchantment->mData.mType != ESM::Enchantment::WhenStrikes)
+        else if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
-            {
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
-            }
         }
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
@@ -972,7 +971,7 @@ namespace MWMechanics
     
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
-            playSpellCastingEffects(mId);
+            playSpellCastingEffects(mId, false);
 
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
@@ -1013,7 +1012,7 @@ namespace MWMechanics
         {
             // "X has no effect on you"
             std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
-            Misc::StringUtils::replace(message, "%s", ingredient->mName.c_str(), 2);
+            message = Misc::StringUtils::format(message, ingredient->mName);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
         }
@@ -1047,15 +1046,27 @@ namespace MWMechanics
         return true;
     }
 
-    void CastSpell::playSpellCastingEffects(const std::string &spellid)
+    void CastSpell::playSpellCastingEffects(const std::string &spellid, bool enchantment)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-        const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+        if (enchantment)
+        {
+            const ESM::Enchantment *spell = store.get<ESM::Enchantment>().find(spellid);
+            playSpellCastingEffects(spell->mEffects.mList);
 
+        }
+        else
+        {
+            const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+            playSpellCastingEffects(spell->mEffects.mList);
+        }
+    }
+
+    void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects)
+    {
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<std::string> addedEffects;
-
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter = spell->mEffects.mList.begin();
-            iter != spell->mEffects.mList.end(); ++iter)
+        for (std::vector<ESM::ENAMstruct>::const_iterator iter = effects.begin(); iter != effects.end(); ++iter)
         {
             const ESM::MagicEffect *effect;
             effect = store.get<ESM::MagicEffect>().find(iter->mEffectID);
@@ -1075,41 +1086,18 @@ namespace MWMechanics
 
             std::string texture = effect->mParticle;
 
-            float scale = 1.0f;
             osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
 
-            if (animation && mCaster.getClass().isNpc())
-            {
-                // For NPC we should take race height as scaling factor
-                const ESM::NPC *npc = mCaster.get<ESM::NPC>()->mBase;
-                const MWWorld::ESMStore &esmStore =
-                    MWBase::Environment::get().getWorld()->getStore();
-
-                const ESM::Race *race =
-                    esmStore.get<ESM::Race>().find(npc->mRace);
-
-                scale = npc->isMale() ? race->mData.mHeight.mMale : race->mData.mHeight.mFemale;
-            }
-            else
-            {
-                osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(mCaster);
-
-                // TODO: take a size of particle or NPC with height and weight = 1.0 as scale = 1.0
-                float scaleX = halfExtents.x() * 2 / 60.f;
-                float scaleY = halfExtents.y() * 2 / 60.f;
-                float scaleZ = halfExtents.z() * 2 / 120.f;
-
-                scale = std::max({ scaleX, scaleY, scaleZ });
-            }
-
-            // If the caster has no animation, add the effect directly to the effectManager
             if (animation)
             {
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture, scale);
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
             }
             else
             {
-                // We should set scale for effect manager manually
+                // If the caster has no animation, add the effect directly to the effectManager
+                // We should scale it manually
+                osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mCaster) * 2.f / Constants::UnitsPerFoot);
+                float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
                 float meshScale = !mCaster.getClass().isActor() ? mCaster.getCellRef().getScale() : 1.0f;
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale * meshScale);
             }

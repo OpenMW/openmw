@@ -108,12 +108,6 @@ namespace MWMechanics
             }
         }
 
-        if (enemy.getClass().isNpc())
-        {
-            static const float fCombatArmorMinMult = gmst.find("fCombatArmorMinMult")->mValue.getFloat();
-            rating *= std::max(fCombatArmorMinMult, rating / (rating + enemy.getClass().getArmorRating(enemy)));
-        }
-
         int value = 50.f;
         if (actor.getClass().isNpc())
         {

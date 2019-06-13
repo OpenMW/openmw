@@ -17,115 +17,128 @@
     </Resource>
 
     <!-- Defines a non-transparent background -->
-    <Resource type="ResourceSkin" name="TransparentBG" size="8 8" texture="transparent">
+     <Resource type="ResourceSkin" name="TransparentBG" size="8 8" texture="transparent">
         <Property key="Colour" value="#{fontcolour=background}"/>
     </Resource>
 
     <!-- Define the borders for pin button (up) -->
-    <Resource type="ResourceSkin" name="PU_B" size="12 2" texture="textures\menu_rightbuttonup_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_B" texture="textures\menu_rightbuttonup_bottom.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 12 2">
-            <State name="normal" offset="0 0 12 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_BR" size="2 2" texture="textures\menu_rightbuttonup_bottom_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_BR" texture="textures\menu_rightbuttonup_bottom_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_R" size="2 12" texture="textures\menu_rightbuttonup_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_R" texture="textures\menu_rightbuttonup_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 12">
-            <State name="normal" offset="0 0 2 12"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_TR" size="2 2" texture="textures\menu_rightbuttonup_top_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_TR" texture="textures\menu_rightbuttonup_top_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_T" size="12 2" texture="textures\menu_rightbuttonup_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_T" texture="textures\menu_rightbuttonup_top.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 12 2">
-            <State name="normal" offset="0 0 12 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_TL" size="2 2" texture="textures\menu_rightbuttonup_top_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_TL" texture="textures\menu_rightbuttonup_top_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_L" size="2 12" texture="textures\menu_rightbuttonup_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_L" texture="textures\menu_rightbuttonup_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 12">
-            <State name="normal" offset="0 0 2 12"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PU_BL" size="2 2" texture="textures\menu_rightbuttonup_bottom_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PU_BL" texture="textures\menu_rightbuttonup_bottom_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PU_С" texture="textures\menu_rightbuttonup_center.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
     <!-- Define the borders for pin button (down) -->
-    <Resource type="ResourceSkin" name="PD_B" size="12 2" texture="textures\menu_rightbuttondown_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_B" texture="textures\menu_rightbuttondown_bottom.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 12 2">
-            <State name="normal" offset="0 0 12 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_BR" size="2 2" texture="textures\menu_rightbuttondown_bottom_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_BR" texture="textures\menu_rightbuttondown_bottom_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_R" size="2 12" texture="textures\menu_rightbuttondown_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_R" texture="textures\menu_rightbuttondown_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 12">
-            <State name="normal" offset="0 0 2 12"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_TR" size="2 2" texture="textures\menu_rightbuttondown_top_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_TR" texture="textures\menu_rightbuttondown_top_right.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_T" size="12 2" texture="textures\menu_rightbuttondown_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_T" texture="textures\menu_rightbuttondown_top.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 12 2">
-            <State name="normal" offset="0 0 12 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_TL" size="2 2" texture="textures\menu_rightbuttondown_top_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_TL" texture="textures\menu_rightbuttondown_top_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_L" size="2 12" texture="textures\menu_rightbuttondown_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_L" texture="textures\menu_rightbuttondown_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 12">
-            <State name="normal" offset="0 0 2 12"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="PD_BL" size="2 2" texture="textures\menu_rightbuttondown_bottom_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="PD_BL" texture="textures\menu_rightbuttondown_bottom_left.dds">
         <Property key="NeedMouse" value="false"/>
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
+        </BasisSkin>
+    </Resource>
+    <Resource type="AutoSizedResourceSkin" name="PD_С" texture="textures\menu_rightbuttondown_center.dds">
+        <Property key="NeedMouse" value="false"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
     <!-- Define the pin button skin -->
-    <Resource type="ResourceSkin" name="PinUp" size="19 19" texture="textures\menu_rightbuttonup_center.dds">
-        <BasisSkin type="MainSkin" offset="0 0 19 19">
-            <State name="normal" offset="0 0 19 19"/>
+    <Resource type="ResourceSkin" name="PinUp" size="19 19">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
+        <Child type="Widget" skin="PU_С" offset="2 2 15 15" align="Stretch"/>
         <Child type="Widget" skin="PU_B" offset="2 17 15 2" align="Stretch"/>
         <Child type="Widget" skin="PU_BR" offset="17 17 2 2" align="Stretch"/>
         <Child type="Widget" skin="PU_R" offset="17 2 2 15" align="Stretch"/>
@@ -135,10 +148,11 @@
         <Child type="Widget" skin="PU_L" offset="0 2 2 15" align="Stretch"/>
         <Child type="Widget" skin="PU_BL" offset="0 17 2 2" align="Stretch"/>
     </Resource>
-    <Resource type="ResourceSkin" name="PinDown" size="19 19" texture="textures\menu_rightbuttondown_center.dds">
-        <BasisSkin type="MainSkin" offset="0 0 19 19">
-            <State name="normal" offset="0 0 19 19"/>
+    <Resource type="ResourceSkin" name="PinDown" size="19 19">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
+        <Child type="Widget" skin="PD_С" offset="2 2 15 15" align="Stretch"/>
         <Child type="Widget" skin="PD_B" offset="2 17 15 2" align="Stretch"/>
         <Child type="Widget" skin="PD_BR" offset="17 17 2 2" align="Stretch"/>
         <Child type="Widget" skin="PD_R" offset="17 2 2 15" align="Stretch"/>
@@ -173,40 +187,36 @@
     </Resource>
 
     <!-- These define the dialog borders -->
-    <Resource type="ResourceSkin" name="DB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
-        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
-            <State name="normal" offset="0 0 512 4">
-                <Property key="TileSize" value="512 4"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_B" texture="textures\menu_thick_border_bottom.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="DB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
-        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
-            <State name="normal" offset="0 0 4 512">
-                <Property key="TileSize" value="4 512"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_R" texture="textures\menu_thick_border_right.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="DB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
-        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
-            <State name="normal" offset="0 0 512 4">
-                <Property key="TileSize" value="512 4"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_T" texture="textures\menu_thick_border_top.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="DB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
-        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
-            <State name="normal" offset="0 0 4 512">
-                <Property key="TileSize" value="4 512"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_L" texture="textures\menu_thick_border_left.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
@@ -214,67 +224,63 @@
     </Resource>
 
     <!-- Dialog border corners -->
-    <Resource type="ResourceSkin" name="DB_BR" size="4 4" texture="textures\menu_thick_border_bottom_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_BR" texture="textures\menu_thick_border_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="DB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="DB_BL" texture="textures\menu_thick_border_bottom_left_corner.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="DB_TR" size="4 4" texture="textures\menu_thick_border_top_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_TR" texture="textures\menu_thick_border_top_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="DB_TL" size="4 4" texture="textures\menu_thick_border_top_left_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+    <Resource type="AutoSizedResourceSkin" name="DB_TL" texture="textures\menu_thick_border_top_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
     <!-- These define the window borders -->
-    <Resource type="ResourceSkin" name="TB_B" size="512 4" texture="textures\menu_thick_border_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_B" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value="vresize"/>
-        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
-            <State name="normal" offset="0 0 512 4">
-                <Property key="TileSize" value="512 4"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_R" size="4 512" texture="textures\menu_thick_border_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_R" texture="textures\menu_thick_border_right.dds">
         <Property key="Pointer" value="hresize"/>
-        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
-            <State name="normal" offset="0 0 4 512">
-                <Property key="TileSize" value="4 512"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_T" size="512 4" texture="textures\menu_thick_border_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_T" texture="textures\menu_thick_border_top.dds">
         <Property key="Pointer" value="vresize"/>
-        <BasisSkin type="TileRect" offset="0 0 512 4" align="Stretch">
-            <State name="normal" offset="0 0 512 4">
-                <Property key="TileSize" value="512 4"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_L" size="4 512" texture="textures\menu_thick_border_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_L" texture="textures\menu_thick_border_left.dds">
         <Property key="Pointer" value="hresize"/>
-        <BasisSkin type="TileRect" offset="0 0 4 512" align="Stretch">
-            <State name="normal" offset="0 0 4 512">
-                <Property key="TileSize" value="4 512"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
@@ -282,149 +288,146 @@
     </Resource>
 
     <!-- Window border corners -->
-    <Resource type="ResourceSkin" name="TB_BR" size="4 4" texture="textures\menu_thick_border_bottom_right_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BR" texture="textures\menu_thick_border_bottom_right_corner.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="TB_BL" size="4 4" texture="textures\menu_thick_border_bottom_left_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BL" texture="textures\menu_thick_border_bottom_left_corner.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="TB_TR" size="4 4" texture="textures\menu_thick_border_top_right_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TR" texture="textures\menu_thick_border_top_right_corner.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="TB_TL" size="4 4" texture="textures\menu_thick_border_top_left_corner.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TL" texture="textures\menu_thick_border_top_left_corner.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 4">
-            <State name="normal" offset="0 0 4 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
     <!-- Expanded border corners, to get larger diagonal corner pointer area -->
-    <Resource type="ResourceSkin" name="TB_TL_T" size="10 4" texture="textures\menu_thick_border_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TL_T" texture="textures\menu_thick_border_top.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 10 4">
-            <State name="normal" offset="0 0 10 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_TL_B" size="4 10" texture="textures\menu_thick_border_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TL_B" texture="textures\menu_thick_border_left.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 10">
-            <State name="normal" offset="0 0 4 10"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_TR_T" size="10 4" texture="textures\menu_thick_border_top.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TR_T" texture="textures\menu_thick_border_top.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 10 4">
-            <State name="normal" offset="0 0 10 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_TR_B" size="4 10" texture="textures\menu_thick_border_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_TR_B" texture="textures\menu_thick_border_right.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 10">
-            <State name="normal" offset="0 0 4 10"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_BL_T" size="4 10" texture="textures\menu_thick_border_left.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BL_T" texture="textures\menu_thick_border_left.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 10">
-            <State name="normal" offset="0 0 4 10"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_BL_B" size="10 4" texture="textures\menu_thick_border_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BL_B" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value="dresize2"/>
-        <BasisSkin type="MainSkin" offset="0 0 10 4">
-            <State name="normal" offset="0 0 10 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_BR_T" size="4 10" texture="textures\menu_thick_border_right.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BR_T" texture="textures\menu_thick_border_right.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 4 10">
-            <State name="normal" offset="0 0 4 10"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="TB_BR_B" size="10 4" texture="textures\menu_thick_border_bottom.dds">
+    <Resource type="AutoSizedResourceSkin" name="TB_BR_B" texture="textures\menu_thick_border_bottom.dds">
         <Property key="Pointer" value="dresize"/>
-        <BasisSkin type="MainSkin" offset="0 0 10 4">
-            <State name="normal" offset="0 0 10 4"/>
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
     <!-- These parts defines the 'blocks' to the left and right of the caption -->
-    <Resource type="ResourceSkin" name="HB_MID" size="256 16" texture="textures\menu_head_block_middle.dds">
-        <BasisSkin type="TileRect" offset="0 0 256 16" align="Stretch">
-            <State name="normal" offset="0 0 256 16">
-                <Property key="TileSize" value="256 16"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_MID" texture="textures\menu_head_block_middle.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="HB_TOP" size="256 2" texture="textures\menu_head_block_top.dds">
-        <BasisSkin type="TileRect" offset="0 0 256 2" align="Stretch">
-            <State name="normal" offset="0 0 256 2">
-                <Property key="TileSize" value="256 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_TOP" texture="textures\menu_head_block_top.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="HB_BOTTOM" size="256 2" texture="textures\menu_head_block_bottom.dds">
-        <BasisSkin type="TileRect" offset="0 0 256 2" align="Stretch">
-            <State name="normal" offset="0 0 256 2">
-                <Property key="TileSize" value="256 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_BOTTOM" texture="textures\menu_head_block_bottom.dds">
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="HB_LEFT" size="2 16" texture="textures\menu_head_block_left.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 16">
-            <State name="normal" offset="0 0 2 16"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_LEFT" texture="textures\menu_head_block_left.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="HB_RIGHT" size="2 16" texture="textures\menu_head_block_right.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 16">
-            <State name="normal" offset="0 0 2 16"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_RIGHT" texture="textures\menu_head_block_right.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="HB_TR" size="2 2" texture="textures\menu_head_block_top_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_TR" texture="textures\menu_head_block_top_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="HB_TL" size="2 2" texture="textures\menu_head_block_top_left_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_TL" texture="textures\menu_head_block_top_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="HB_BR" size="2 2" texture="textures\menu_head_block_bottom_right_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_BR" texture="textures\menu_head_block_bottom_right_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
-    <Resource type="ResourceSkin" name="HB_BL" size="2 2" texture="textures\menu_head_block_bottom_left_corner.dds">
-        <BasisSkin type="MainSkin" offset="0 0 2 2">
-            <State name="normal" offset="0 0 2 2"/>
+    <Resource type="AutoSizedResourceSkin" name="HB_BL" texture="textures\menu_head_block_bottom_left_corner.dds">
+        <BasisSkin type="MainSkin">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
@@ -586,6 +589,7 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
         </Child>
     </Resource>
@@ -722,6 +726,7 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
         </Child>
     </Resource>
@@ -857,8 +862,8 @@
         <!-- This invisible button makes it possible to move the
              window by dragging the caption. -->
         <Child type="Button" offset="4 4 248 20" align="HStretch Top" name="Action">
+            <Property key="SupportDoubleClick" value="1"/>
             <Property key="Scale" value="1 1 0 0"/>
-            <Property key="HideWindowOnDoubleClick" value="1"/>
         </Child>
 
         <Child type="Button" skin="PinUp" offset="232 4 19 19" align="Right Top" name="Button"/>

@@ -350,11 +350,6 @@ void CharacterController::refreshJumpAnims(const WeaponInfo* weap, JumpingState 
     if (!force && jump == mJumpState && idle == CharState_None)
         return;
 
-    if (jump == JumpState_InAir)
-    {
-        idle = CharState_None;
-    }
-
     std::string jumpAnimName;
     MWRender::Animation::BlendMask jumpmask = MWRender::Animation::BlendMask_All;
     if (jump != JumpState_None)
@@ -554,8 +549,9 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
-            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
-                    && !MWBase::Environment::get().getWorld()->isFlying(mPtr);
+            bool isflying = MWBase::Environment::get().getWorld()->isFlying(mPtr);
+            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !isflying;
+            bool issneaking = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !isflying;
 
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
@@ -589,7 +585,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
                     // We use the third person velocities instead.
                     // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    mMovementAnimSpeed = (isrunning ? 222.857f : 154.064f);
+                    mMovementAnimSpeed = (issneaking ? 33.5452f : (isrunning ? 222.857f : 154.064f));
                     mMovementAnimationControlled = false;
                 }
             }
@@ -1123,41 +1119,36 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::updateIdleStormState(bool inwater)
 {
-    bool inStormDirection = false;
+    if (!mAnimation->hasAnimation("idlestorm") || mUpperBodyState != UpperCharState_Nothing || inwater)
+    {
+        mAnimation->disable("idlestorm");
+        return;
+    }
+
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
-        inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
-                > osg::DegreesToRadians(120.f);
-    }
-    if (inStormDirection && !inwater && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
-    {
-        float complete = 0;
-        mAnimation->getInfo("idlestorm", &complete);
-
-        if (complete == 0)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "start", "loop start", 0.0f, 0);
-        else if (complete == 1)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "loop start", "loop stop", 0.0f, ~0ul);
-    }
-    else
-    {
-        if (mUpperBodyState == UpperCharState_Nothing)
+        stormDirection.normalize();
+        characterDirection.normalize();
+        if (stormDirection * characterDirection < -0.5f)
         {
-            if (mAnimation->isPlaying("idlestorm"))
+            if (!mAnimation->isPlaying("idlestorm"))
             {
-                if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
-                {
-                    mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
-                                     1.0f, "loop stop", "stop", 0.0f, 0);
-                }
+                mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
+                                1.0f, "start", "stop", 0.0f, ~0ul);
             }
+            else
+            {
+                mAnimation->setLoopingEnabled("idlestorm", true);
+            }
+            return;
         }
-        else
-            mAnimation->disable("idlestorm");
+    }
+
+    if (mAnimation->isPlaying("idlestorm"))
+    {
+        mAnimation->setLoopingEnabled("idlestorm", false);
     }
 }
 
@@ -1195,7 +1186,7 @@ bool CharacterController::updateCreatureState()
                 if (!spellid.empty() && canCast)
                 {
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid);
+                    cast.playSpellCastingEffects(spellid, false);
 
                     if (!mAnimation->hasAnimation("spellcast"))
                     {
@@ -1515,23 +1506,53 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                     stats.getSpells().setSelectedSpell(selectedSpell);
                 }
                 std::string spellid = stats.getSpells().getSelectedSpell();
+                bool isMagicItem = false;
                 bool canCast = mCastingManualSpell || MWBase::Environment::get().getWorld()->startSpellCast(mPtr);
 
-                if(!spellid.empty() && canCast)
+                if (spellid.empty())
+                {
+                    if (mPtr.getClass().hasInventoryStore(mPtr))
+                    {
+                        MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+                        if (inv.getSelectedEnchantItem() != inv.end())
+                        {
+                            const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
+                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
+                            isMagicItem = true;
+                        }
+                    }
+                }
+
+                static const bool useCastingAnimations = Settings::Manager::getBool("use magic item animations", "Game");
+                if (isMagicItem && !useCastingAnimations)
+                {
+                    // Enchanted items by default do not use casting animations
+                    MWBase::Environment::get().getWorld()->castSpell(mPtr);
+                    resetIdle = false;
+                }
+                else if(!spellid.empty() && canCast)
                 {
                     MWMechanics::CastSpell cast(mPtr, nullptr, false, mCastingManualSpell);
-                    cast.playSpellCastingEffects(spellid);
+                    cast.playSpellCastingEffects(spellid, isMagicItem);
 
+                    std::vector<ESM::ENAMstruct> effects;
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
-                    const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-                    const ESM::ENAMstruct &lastEffect = spell->mEffects.mList.back();
-                    const ESM::MagicEffect *effect;
+                    if (isMagicItem)
+                    {
+                        const ESM::Enchantment *enchantment = store.get<ESM::Enchantment>().find(spellid);
+                        effects = enchantment->mEffects.mList;
+                    }
+                    else
+                    {
+                        const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
+                        effects = spell->mEffects.mList;
+                    }
 
-                    effect = store.get<ESM::MagicEffect>().find(lastEffect.mEffectID); // use last effect of list for color of VFX_Hands
+                    const ESM::MagicEffect *effect = store.get<ESM::MagicEffect>().find(effects.back().mEffectID); // use last effect of list for color of VFX_Hands
 
                     const ESM::Static* castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Hands");
 
-                    for (size_t iter = 0; iter < spell->mEffects.mList.size(); ++iter) // play hands vfx for each effect
+                    for (size_t iter = 0; iter < effects.size(); ++iter) // play hands vfx for each effect
                     {
                         if (mAnimation->getNode("Bip01 L Hand"))
                             mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 L Hand", effect->mParticle);
@@ -1540,7 +1561,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                             mAnimation->addEffect("meshes\\" + castStatic->mModel, -1, false, "Bip01 R Hand", effect->mParticle);
                     }
 
-                    const ESM::ENAMstruct &firstEffect = spell->mEffects.mList.at(0); // first effect used for casting animation
+                    const ESM::ENAMstruct &firstEffect = effects.at(0); // first effect used for casting animation
 
                     std::string startKey;
                     std::string stopKey;
@@ -1574,17 +1595,6 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 {
                     resetIdle = false;
                 }
-
-                if (mPtr.getClass().hasInventoryStore(mPtr))
-                {
-                    MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
-                    if (inv.getSelectedEnchantItem() != inv.end())
-                    {
-                        // Enchanted items cast immediately (no animation)
-                        MWBase::Environment::get().getWorld()->castSpell(mPtr);
-                    }
-                }
-
             }
             else if(mWeaponType == WeapType_PickProbe)
             {
@@ -1631,20 +1641,22 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 {
                     if(mPtr == getPlayer())
                     {
-                        if (isWeapon)
+                        if (Settings::Manager::getBool("best attack", "Game"))
                         {
-                            if (Settings::Manager::getBool("best attack", "Game"))
+                            if (isWeapon)
                             {
                                 MWWorld::ConstContainerStoreIterator weapon = mPtr.getClass().getInventoryStore(mPtr).getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                                 mAttackType = getBestAttack(weapon->get<ESM::Weapon>()->mBase);
                             }
                             else
-                                setAttackTypeBasedOnMovement();
+                            {
+                                // There is no "best attack" for Hand-to-Hand
+                                setAttackTypeRandomly(mAttackType);
+                            }
                         }
                         else
                         {
-                            // There is no "best attack" for Hand-to-Hand
-                            setAttackTypeRandomly(mAttackType);
+                            setAttackTypeBasedOnMovement();
                         }
                     }
                     // else if (mPtr != getPlayer()) use mAttackType set by AiCombat
@@ -1665,7 +1677,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             idle != CharState_IdleSneak && idle != CharState_IdleSwim &&
             mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
         {
-            idle = CharState_None;
+            mAnimation->disable(mCurrentIdle);
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
@@ -1962,24 +1974,24 @@ void CharacterController::update(float duration, bool animationOnly)
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         speed = cls.getSpeed(mPtr);
+        float analogueMult = 1.f;
         if(isPlayer)
         {
-            // Joystick anologue movement.
+            // Joystick analogue movement.
             float xAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[0]);
             float yAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[1]);
-            float analogueMovement = ((xAxis > yAxis) ? xAxis : yAxis);
+            analogueMult = ((xAxis > yAxis) ? xAxis : yAxis);
 
             // If Strafing, our max speed is slower so multiply by X axis instead.
             if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
-                analogueMovement = xAxis;
+                analogueMult = xAxis;
 
             // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
-            if(!isrunning && !sneak && !flying && analogueMovement <= 0.5f)
-                speed *= 2;
-
-            speed *= (analogueMovement);
+            if(!isrunning && !sneak && !flying && analogueMult <= 0.5f)
+                analogueMult *= 2.f;
         }
 
+        speed *= analogueMult;
         vec.x() *= speed;
         vec.y() *= speed;
 
@@ -2046,6 +2058,7 @@ void CharacterController::update(float duration, bool animationOnly)
             }
         }
         fatigueLoss *= duration;
+        fatigueLoss *= analogueMult;
         DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
 
         if (!godmode)
@@ -2117,6 +2130,9 @@ void CharacterController::update(float duration, bool animationOnly)
             forcestateupdate = true;
             jumpstate = JumpState_Landing;
             vec.z() = 0.0f;
+
+            // We should reset idle animation during landing
+            mAnimation->disable(mCurrentIdle);
 
             float height = cls.getCreatureStats(mPtr).land(isPlayer);
             float healthLost = getFallDamage(mPtr, height);
@@ -2347,6 +2363,20 @@ void CharacterController::update(float duration, bool animationOnly)
     else
         moved = osg::Vec3f(0.f, 0.f, 0.f);
 
+    float scale = mPtr.getCellRef().getScale();
+    moved.x() *= scale;
+    moved.y() *= scale;
+
+    static const bool normalizeSpeed = Settings::Manager::getBool("normalise race speed", "Game");
+    if (mPtr.getClass().isNpc() && !normalizeSpeed)
+    {
+        const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
+        const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
+        float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+        moved.x() *= weight;
+        moved.y() *= weight;
+    }
+
     // Ensure we're moving in generally the right direction...
     if(speed > 0.f)
     {
@@ -2553,6 +2583,13 @@ void CharacterController::forceStateUpdate()
     if(!mAnimation)
         return;
     clearAnimQueue();
+
+    // Make sure we canceled the current attack or spellcasting,
+    // because we disabled attack animations anyway.
+    mCastingManualSpell = false;
+    mAttackingOrSpell = false;
+    if (mUpperBodyState != UpperCharState_Nothing)
+        mUpperBodyState = UpperCharState_WeapEquiped;
 
     refreshCurrentAnims(mIdleState, mMovementState, mJumpState, true);
 

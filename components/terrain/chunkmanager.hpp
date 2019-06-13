@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_TERRAIN_CHUNKMANAGER_H
 #define OPENMW_COMPONENTS_TERRAIN_CHUNKMANAGER_H
 
+#include <tuple>
+
 #include <components/resource/resourcemanager.hpp>
 
 #include "buffercache.hpp"
@@ -24,13 +26,15 @@ namespace Terrain
     class Storage;
     class CompositeMap;
 
+    typedef std::tuple<osg::Vec2f, unsigned char, unsigned int> ChunkId; // Center, Lod, Lod Flags
+
     /// @brief Handles loading and caching of terrain chunks
-    class ChunkManager : public Resource::ResourceManager
+    class ChunkManager : public Resource::GenericResourceManager<ChunkId>
     {
     public:
         ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer);
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags);
 
         void setCullingActive(bool active) { mCullingActive = active; }
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
@@ -44,7 +48,7 @@ namespace Terrain
         void releaseGLObjects(osg::State* state) override;
 
     private:
-        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, int lod, unsigned int lodFlags);
+        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags);
 
         osg::ref_ptr<osg::Texture2D> createCompositeMapRTT();
 

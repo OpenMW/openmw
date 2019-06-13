@@ -78,8 +78,6 @@ namespace MWWorld
     {
             Resource::ResourceSystem* mResourceSystem;
 
-            Fallback::Map mFallback;
-
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
@@ -130,7 +128,7 @@ namespace MWWorld
 
             void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust);
 
-            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z, bool movePhysics=true);
+            Ptr moveObjectImp (const Ptr& ptr, float x, float y, float z, bool movePhysics=true, bool moveToActive=false);
             ///< @return an updated Ptr in case the Ptr's cell changes
 
             Ptr copyObjectToCell(const ConstPtr &ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
@@ -143,9 +141,9 @@ namespace MWWorld
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
     public: // FIXME
+            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
             void removeContainerScripts(const Ptr& reference) override;
     private:
-            void addContainerScripts(const Ptr& reference, CellStore* cell);
             void PCDropped (const Ptr& item);
 
             void processDoors(float duration);
@@ -198,8 +196,9 @@ namespace MWWorld
                 Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                 const Files::Collections& fileCollections,
                 const std::vector<std::string>& contentFiles,
-                ToUTF8::Utf8Encoder* encoder, const std::map<std::string,std::string>& fallbackMap,
-                int activationDistanceOverride, const std::string& startCell, const std::string& resourcePath, const std::string& userDataPath);
+                ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
+                const std::string& startCell, const std::string& startupScript,
+                const std::string& resourcePath, const std::string& userDataPath);
 
             virtual ~World();
 
@@ -234,8 +233,6 @@ namespace MWWorld
             bool toggleBorders() override;
 
             void adjustSky() override;
-
-            const Fallback::Map *getFallback() const override;
 
             Player& getPlayer() override;
             MWWorld::Ptr getPlayerPtr() override;
@@ -288,7 +285,7 @@ namespace MWWorld
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            Ptr searchPtr (const std::string& name, bool activeOnly) override;
+            Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = true) override;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -382,7 +379,7 @@ namespace MWWorld
 
             void undeleteObject (const Ptr& ptr) override;
 
-            MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z) override;
+            MWWorld::Ptr moveObject (const Ptr& ptr, float x, float y, float z, bool moveToActive=false) override;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
             MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z, bool movePhysics=true) override;
@@ -576,7 +573,7 @@ namespace MWWorld
             RestPermitted canRest() const override;
             ///< check if the player is allowed to rest
 
-            void rest() override;
+            void rest(double hours) override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;

@@ -42,6 +42,11 @@ namespace
 
         bool operator()(const MWWorld::Ptr& containerPtr)
         {
+            // Ignore containers without generated content
+            if (containerPtr.getTypeName() == typeid(ESM::Container).name() &&
+                containerPtr.getRefData().getCustomData() == nullptr)
+                return false;
+
             MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {

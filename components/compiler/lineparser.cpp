@@ -48,7 +48,7 @@ namespace Compiler
 
             default:
 
-                throw std::runtime_error ("unknown expression result type");
+                throw std::runtime_error ("Unknown expression result type");
         }
     }
 
@@ -88,7 +88,7 @@ namespace Compiler
     {
         if (mState==PotentialEndState)
         {
-            getErrorHandler().warning ("ignoring stray string argument", loc);
+            getErrorHandler().warning ("Stray string argument", loc);
             mState = EndState;
             return true;
         }
@@ -132,7 +132,7 @@ namespace Compiler
                 return true;
             }
 
-            getErrorHandler().error ("unknown variable", loc);
+            getErrorHandler().error ("Unknown variable", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             return false;
@@ -233,7 +233,7 @@ namespace Compiler
 
         if (mState==SetPotentialMemberVarState && keyword==Scanner::K_to)
         {
-            getErrorHandler().warning ("unknown variable, ignoring set instruction", loc);
+            getErrorHandler().warning ("Unknown variable", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             return false;
@@ -286,7 +286,7 @@ namespace Compiler
                 {
                     if (!hasExplicit && mState==ExplicitState)
                     {
-                        getErrorHandler().warning ("ignoring stray explicit reference", loc);
+                        getErrorHandler().warning ("Stray explicit reference", loc);
                         mExplicit.clear();
                     }
 
@@ -323,36 +323,50 @@ namespace Compiler
                 }
             }
 
-            if (mAllowExpression)
+            if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
             {
-                if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
+                if (mAllowExpression)
                 {
                     scanner.putbackKeyword (keyword, loc);
                     parseExpression (scanner, loc);
-                    mState = EndState;
-                    return true;
                 }
-
-                if (const Extensions *extensions = getContext().getExtensions())
+                else
                 {
-                    char returnType;
-                    std::string argumentType;
+                    getErrorHandler().warning ("Unexpected naked expression", loc);
+                }
+                mState = EndState;
+                return true;
+            }
 
-                    bool hasExplicit = !mExplicit.empty();
+            if (const Extensions *extensions = getContext().getExtensions())
+            {
+                char returnType;
+                std::string argumentType;
 
-                    if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
+                bool hasExplicit = mState==ExplicitState;
+
+                if (extensions->isFunction (keyword, returnType, argumentType, hasExplicit))
+                {
+                    if (!hasExplicit && mState==ExplicitState)
                     {
-                        if (!hasExplicit && !mExplicit.empty())
-                        {
-                            getErrorHandler().warning ("ignoring stray explicit reference", loc);
-                            mExplicit.clear();
-                        }
+                        getErrorHandler().warning ("Stray explicit reference", loc);
+                        mExplicit.clear();
+                    }
 
+                    if (mAllowExpression)
+                    {
                         scanner.putbackKeyword (keyword, loc);
                         parseExpression (scanner, loc);
-                        mState = EndState;
-                        return true;
                     }
+                    else
+                    {
+                        std::vector<Interpreter::Type_Code> code;
+                        int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);
+                        mCode.insert(mCode.end(), code.begin(), code.end());
+                        extensions->generateFunctionCode (keyword, mCode, mLiterals, mExplicit, optionals);
+                    }
+                    mState = EndState;
+                    return true;
                 }
             }
         }
@@ -360,7 +374,7 @@ namespace Compiler
         if (mState==ExplicitState)
         {
             // drop stray explicit reference
-            getErrorHandler().warning ("ignoring stray explicit reference", loc);
+            getErrorHandler().warning ("Stray explicit reference", loc);
             mState = BeginState;
             mExplicit.clear();
         }
@@ -375,8 +389,7 @@ namespace Compiler
                 {
                     if (!getContext().canDeclareLocals())
                     {
-                        getErrorHandler().error (
-                            "local variables can't be declared in this context", loc);
+                        getErrorHandler().error("Local variables cannot be declared in this context", loc);
                         SkipParser skip (getErrorHandler(), getContext());
                         scanner.scan (skip);
                         return true;
@@ -412,19 +425,19 @@ namespace Compiler
 
                 case Scanner::K_else:
 
-                    getErrorHandler().warning ("ignoring stray else", loc);
+                    getErrorHandler().warning ("Stray else", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_endif:
 
-                    getErrorHandler().warning ("ignoring stray endif", loc);
+                    getErrorHandler().warning ("Stray endif", loc);
                     mState = EndState;
                     return true;
 
                 case Scanner::K_begin:
 
-                    getErrorHandler().warning ("ignoring stray begin", loc);
+                    getErrorHandler().warning ("Stray begin", loc);
                     mState = EndState;
                     return true;
             }
@@ -491,7 +504,7 @@ namespace Compiler
     {
         if (mState==EndState && code==Scanner::S_open)
         {
-            getErrorHandler().warning ("ignoring stray '[' or '(' at the end of the line",
+            getErrorHandler().warning ("Stray '[' or '(' at the end of the line",
                 loc);
             return true;
         }
@@ -508,7 +521,7 @@ namespace Compiler
 
         if (code==Scanner::S_ref && mState==SetPotentialMemberVarState)
         {
-            getErrorHandler().warning ("Ignoring stray explicit reference", loc);
+            getErrorHandler().warning ("Stray explicit reference", loc);
             mState = SetState;
             return true;
         }

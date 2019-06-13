@@ -30,6 +30,7 @@ namespace MWWorld
             virtual const MWClass::NpcCustomData& asNpcCustomData() const;
 
             virtual MWClass::ContainerCustomData& asContainerCustomData();
+            virtual const MWClass::ContainerCustomData& asContainerCustomData() const;
 
             virtual MWClass::DoorCustomData& asDoorCustomData();
             virtual const MWClass::DoorCustomData& asDoorCustomData() const;

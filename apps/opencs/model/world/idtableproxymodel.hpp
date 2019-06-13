@@ -22,7 +22,7 @@ namespace CSMWorld
 
             // Cache of enum values for enum columns (e.g. Modified, Record Type).
             // Used to speed up comparisons during the sort by such columns.
-            typedef std::map<Columns::ColumnId, std::vector<std::string> > EnumColumnCache;
+            typedef std::map<Columns::ColumnId, std::vector<std::pair<int,std::string>> > EnumColumnCache;
             mutable EnumColumnCache mEnumColumnCache;
 
         protected:

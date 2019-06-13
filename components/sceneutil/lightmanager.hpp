@@ -140,6 +140,8 @@ namespace SceneUtil
         typedef std::map<size_t, osg::ref_ptr<osg::StateSet> > LightStateSetMap;
         LightStateSetMap mStateSetCache[2];
 
+        std::vector<osg::ref_ptr<osg::StateAttribute>> mDummies;
+
         int mStartLight;
 
         unsigned int mLightingMask;

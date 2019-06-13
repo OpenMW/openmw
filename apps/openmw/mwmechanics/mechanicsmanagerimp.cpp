@@ -480,17 +480,17 @@ namespace MWMechanics
         return mActors.isSneaking(ptr);
     }
 
-    void MechanicsManager::rest(bool sleep)
+    void MechanicsManager::rest(double hours, bool sleep)
     {
         if (sleep)
-            MWBase::Environment::get().getWorld()->rest();
+            MWBase::Environment::get().getWorld()->rest(hours);
 
-        mActors.rest(sleep);
+        mActors.rest(hours, sleep);
     }
 
-    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, bool sleep)
+    void MechanicsManager::restoreDynamicStats(MWWorld::Ptr actor, double hours, bool sleep)
     {
-        mActors.restoreDynamicStats(actor, sleep);
+        mActors.restoreDynamicStats(actor, hours, sleep);
     }
 
     int MechanicsManager::getHoursToRest() const
@@ -676,8 +676,8 @@ namespace MWMechanics
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
         float npcTerm = (d + e + f) * sellerStats.getFatigueTerm();
-        float buyTerm = 0.01f * std::max(75.f, (100 - 0.5f * (pcTerm - npcTerm)));
-        float sellTerm = 0.01f * std::min(75.f, (50 - 0.5f * (npcTerm - pcTerm)));
+        float buyTerm = 0.01f * (100 - 0.5f * (pcTerm - npcTerm));
+        float sellTerm = 0.01f * (50 - 0.5f * (npcTerm - pcTerm));
         int offerPrice = int(basePrice * (buying ? buyTerm : sellTerm));
         return std::max(1, offerPrice);
     }
@@ -949,6 +949,9 @@ namespace MWMechanics
             return true;
         }
 
+        if (!target.getClass().canBeActivated(target))
+            return true;
+
         // TODO: implement a better check to check if target is owned bed
         if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)
             return true;
@@ -991,7 +994,7 @@ namespace MWMechanics
         }
 
         if (!cellref.getOwner().empty())
-            victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true);
+            victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true, false);
 
         return (!isOwned && !isFactionOwned);
     }
@@ -1476,22 +1479,24 @@ namespace MWMechanics
 
     bool MechanicsManager::actorAttacked(const MWWorld::Ptr &target, const MWWorld::Ptr &attacker)
     {
-        if (target == getPlayer() || !attacker.getClass().isActor())
+        const MWWorld::Ptr& player = getPlayer();
+        if (target == player || !attacker.getClass().isActor())
             return false;
 
-        std::set<MWWorld::Ptr> followersAttacker;
-        getActorsSidingWith(attacker, followersAttacker);
-
         MWMechanics::CreatureStats& statsTarget = target.getClass().getCreatureStats(target);
-
-        if (followersAttacker.find(target) != followersAttacker.end())
+        if (attacker == player)
         {
-            statsTarget.friendlyHit();
-
-            if (statsTarget.getFriendlyHits() < 4)
+            std::set<MWWorld::Ptr> followersAttacker;
+            getActorsSidingWith(attacker, followersAttacker);
+            if (followersAttacker.find(target) != followersAttacker.end())
             {
-                MWBase::Environment::get().getDialogueManager()->say(target, "hit");
-                return false;
+                statsTarget.friendlyHit();
+
+                if (statsTarget.getFriendlyHits() < 4)
+                {
+                    MWBase::Environment::get().getDialogueManager()->say(target, "hit");
+                    return false;
+                }
             }
         }
 
@@ -1500,9 +1505,9 @@ namespace MWMechanics
 
         AiSequence& seq = statsTarget.getAiSequence();
 
-        if (!attacker.isEmpty() && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target)
-                                    || attacker == getPlayer())
-                && !seq.isInCombat(attacker))
+        if (!attacker.isEmpty()
+            && (attacker.getClass().getCreatureStats(attacker).getAiSequence().isInCombat(target) || attacker == player)
+            && !seq.isInCombat(attacker))
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
@@ -1512,7 +1517,7 @@ namespace MWMechanics
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
                 bool peaceful = false;
                 std::string script = target.getClass().getScript(target);
-                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == getPlayer())
+                if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme") && attacker == player)
                 {
                     int fight = std::max(0, target.getClass().getCreatureStats(target).getAiSetting(CreatureStats::AI_Fight).getModified());
                     peaceful = (fight == 0);

@@ -46,7 +46,6 @@ namespace MWSound
     {
         const VFS::Manager* mVFS;
 
-        Fallback::Map mFallback;
         std::unique_ptr<Sound_Output> mOutput;
 
         // Caches available music tracks by <playlist name, (sound files) >
@@ -94,6 +93,7 @@ namespace MWSound
         SoundMap mActiveSounds;
 
         typedef std::map<MWWorld::ConstPtr,Stream*> SaySoundMap;
+        SaySoundMap mSaySoundsQueue;
         SaySoundMap mActiveSaySounds;
 
         typedef std::vector<Stream*> TrackList;
@@ -149,7 +149,7 @@ namespace MWSound
         ///< Stop the given object from playing given sound buffer.
 
     public:
-        SoundManager(const VFS::Manager* vfs, const std::map<std::string, std::string>& fallbackMap, bool useSound);
+        SoundManager(const VFS::Manager* vfs, bool useSound);
         virtual ~SoundManager();
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
@@ -167,6 +167,9 @@ namespace MWSound
         virtual void playPlaylist(const std::string &playlist);
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
+
+        virtual void playTitleMusic();
+        ///< Start playing title music
 
         virtual void say(const MWWorld::ConstPtr &reference, const std::string& filename);
         ///< Make an actor say some text.

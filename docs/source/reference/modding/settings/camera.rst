@@ -46,7 +46,7 @@ viewing distance
 
 :Type:		floating point
 :Range:		> 0
-:Default:	6666.0
+:Default:	6656.0
 
 This value controls the maximum visible distance (also called the far clipping plane).
 Larger values significantly improve rendering in exterior spaces,
@@ -87,14 +87,14 @@ Enabling the distant terrain setting is an alternative to increasing exterior ce
 Note that the distant land setting does not include rendering of distant static objects,
 so the resulting visual effect is not the same.
 
-This setting can be adjusted in game from the ridiculously low value of 2000.0 to a maximum of 6666.0
+This setting can be adjusted in game from the ridiculously low value of 2048.0 to a maximum of 81920.0
 using the View Distance slider in the Detail tab of the Video panel of the Options menu.
 
 field of view
 -------------
 
 :Type:		floating point
-:Range:		0-360
+:Range:		1-179
 :Default:	55.0
 
 Sets the camera field of view in degrees. Recommended values range from 30 degrees to 110 degrees.
@@ -109,7 +109,7 @@ first person field of view
 --------------------------
 
 :Type:		floating point
-:Range:		0-360
+:Range:		1-179
 :Default:	55.0
 
 This setting controls the field of view for first person meshes such as the player's hands and held objects.

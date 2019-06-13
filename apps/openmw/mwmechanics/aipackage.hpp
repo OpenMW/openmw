@@ -102,8 +102,6 @@ namespace MWMechanics
             /// Reset pathfinding state
             void reset();
 
-            bool isTargetMagicallyHidden(const MWWorld::Ptr& target);
-
             /// Return if actor's rotation speed is sufficient to rotate to the destination pathpoint on the run. Otherwise actor should rotate while standing.
             static bool isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest);
 
@@ -131,8 +129,6 @@ namespace MWMechanics
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
             DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
-
-            bool canActorMoveByZAxis(const MWWorld::Ptr& actor) const;
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

@@ -61,7 +61,6 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mValidBounds(false)
     , mSize(size)
     , mCenter(center)
-    , mViewDataMap(nullptr)
 {
     for (unsigned int i=0; i<4; ++i)
         mNeighbours[i] = 0;
@@ -76,6 +75,30 @@ QuadTreeNode *QuadTreeNode::getNeighbour(Direction dir)
     return mNeighbours[dir];
 }
 
+float QuadTreeNode::distance(const osg::Vec3f& v) const
+{
+    const osg::BoundingBox& box = getBoundingBox();
+    if (box.contains(v))
+        return 0;
+    else
+    {
+        osg::Vec3f maxDist(0,0,0);
+        if (v.x() < box.xMin())
+            maxDist.x() = box.xMin() - v.x();
+        else if (v.x() > box.xMax())
+            maxDist.x() = v.x() - box.xMax();
+        if (v.y() < box.yMin())
+            maxDist.y() = box.yMin() - v.y();
+        else if (v.y() > box.yMax())
+            maxDist.y() = v.y() - box.yMax();
+        if (v.z() < box.zMin())
+            maxDist.z() = box.zMin() - v.z();
+        else if (v.z() > box.zMax())
+            maxDist.z() = v.z() - box.zMax();
+        return maxDist.length();
+    }
+}
+
 void QuadTreeNode::initNeighbours()
 {
     for (int i=0; i<4; ++i)
@@ -85,58 +108,62 @@ void QuadTreeNode::initNeighbours()
         getChild(i)->initNeighbours();
 }
 
-void QuadTreeNode::traverse(osg::NodeVisitor &nv)
+void QuadTreeNode::traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist)
 {
     if (!hasValidBounds())
         return;
 
-    ViewData* vd = getView(nv);
+    float dist = distance(viewPoint);
+    if (dist > maxDist)
+        return;
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, vd->getEyePoint())) || !getNumChildren())
-        vd->add(this, true);
+    bool stopTraversal = (lodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
+
+    if (stopTraversal)
+        vd->add(this);
     else
-        osg::Group::traverse(nv);
-}
-
-void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
-{
-    mLodCallback = lodCallback;
-}
-
-LodCallback *QuadTreeNode::getLodCallback()
-{
-    return mLodCallback;
-}
-
-void QuadTreeNode::setViewDataMap(ViewDataMap *map)
-{
-    mViewDataMap = map;
-}
-
-ViewDataMap *QuadTreeNode::getViewDataMap()
-{
-    return mViewDataMap;
-}
-
-ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv)
-{
-    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        ViewData* vd = mViewDataMap->getViewData(cv->getCurrentCamera());
-        vd->setEyePoint(nv.getViewPoint());
-        return vd;
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverse(vd, viewPoint, lodCallback, maxDist);
     }
-    else // INTERSECTION_VISITOR
+}
+
+void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (getCenter().x() + getSize()/2.f <= center.x() - size/2.f
+            || getCenter().x() - getSize()/2.f >= center.x() + size/2.f
+            || getCenter().y() + getSize()/2.f <= center.y() - size/2.f
+            || getCenter().y() - getSize()/2.f >= center.y() + size/2.f)
+        return;
+
+    bool stopTraversal = (getSize() == size);
+
+    if (stopTraversal)
+        vd->add(this);
+    else
     {
-        static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
-        ViewData* vd = mViewDataMap->getViewData(dummyObj.get());
-        ViewData* defaultView = mViewDataMap->getDefaultView();
-        if (defaultView->hasEyePoint())
-            vd->setEyePoint(defaultView->getEyePoint());
-        else
-            vd->setEyePoint(nv.getEyePoint());
-        return vd;
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverseTo(vd, size, center);
+    }
+}
+
+void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector* intersector)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (!intersector->intersectAndClip(getBoundingBox()))
+        return;
+
+    if (getNumChildren() == 0)
+        vd->add(this);
+    else
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->intersect(vd, intersector);
     }
 }
 

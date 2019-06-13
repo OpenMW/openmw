@@ -69,7 +69,6 @@ namespace CSMDoc
             Saving mSavingOperation;
             OperationHolder mSaving;
             boost::filesystem::path mResDir;
-            const Fallback::Map* mFallbackMap;
             Blacklist mBlacklist;
             Runner mRunner;
             bool mDirty;
@@ -105,8 +104,7 @@ namespace CSMDoc
             Document (const Files::ConfigurationManager& configuration,
                 const std::vector< boost::filesystem::path >& files, bool new_,
                 const boost::filesystem::path& savePath, const boost::filesystem::path& resDir,
-                const Fallback::Map* fallback, ToUTF8::FromType encoding,
-                const std::vector<std::string>& blacklistedScripts,
+                ToUTF8::FromType encoding, const std::vector<std::string>& blacklistedScripts,
                 bool fsStrict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
             ~Document();

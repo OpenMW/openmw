@@ -269,6 +269,13 @@ namespace MWMechanics
             mPath.pop_front();
     }
 
+    void PathFinder::buildStraightPath(const osg::Vec3f& endPoint)
+    {
+        mPath.clear();
+        mPath.push_back(endPoint);
+        mConstructed = true;
+    }
+
     void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
         const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph)
     {
@@ -276,6 +283,16 @@ namespace MWMechanics
         mCell = cell;
 
         buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
+
+        mConstructed = true;
+    }
+
+    void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+        const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags)
+    {
+        mPath.clear();
+
+        buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
 
         mConstructed = true;
     }
@@ -310,8 +327,7 @@ namespace MWMechanics
         }
         catch (const DetourNavigator::NavigatorException& exception)
         {
-            DetourNavigator::log("PathFinder::buildPathByNavigator navigator exception: ", exception.what());
-            Log(Debug::Verbose) << "Build path by navigator exception: \"" << exception.what()
+            Log(Debug::Debug) << "Build path by navigator exception: \"" << exception.what()
                 << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
                 << ") from " << startPoint << " to " << endPoint << " with flags ("
                 << DetourNavigator::WriteFlags {flags} << ")";

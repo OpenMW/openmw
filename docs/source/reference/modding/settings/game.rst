@@ -109,6 +109,8 @@ actors processing range
 This setting allows to specify a distance from player in game units, in which OpenMW updates actor's state.
 Actor state update includes AI, animations, and physics processing.
 Actors near that border start softly fade out instead of just appearing/disapperaing.
+It is not recommended to change this value from default if you use mods with
+long-range AiTravel packages (e.g. patrols, caravans and travellers).
 
 This setting can be controlled in game with the "Actors processing range slider" in the Prefs panel of the Options menu.
 
@@ -125,6 +127,18 @@ This makes the gameplay as a mage easier, but these spells become imbalanced.
 This is how Morrowind behaves.
 
 This setting can be toggled in Advanced tab of the launcher.
+
+use magic item animations
+-------------------------
+
+:Type:		boolean
+:Range: 	True/False
+:Default:	False
+
+If this setting is true, the engine will use casting animations for magic items, including scrolls.
+Otherwise, there will be no casting animations, just as in original engine
+
+This setting can only be configured by editing the settings configuration file.
 
 show effect duration
 --------------------
@@ -224,3 +238,34 @@ An enchanted bow with chitin arrows will no longer be enough for the purpose, wh
 This was previously the default engine behavior that diverged from Morrowind design.
 
 This setting can be toggled in Advanced tab of the launcher.
+
+strength influences hand to hand
+--------------------------------
+
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	0
+
+This setting controls the behavior of factoring of Strength attribute into hand-to-hand damage, which is using the formula
+Morrowind Code Patch uses for its equivalent feature: damage is multiplied by its value divided by 40.
+
+0: Strength attribute is ignored
+1: Strength attribute is factored in damage from any actor
+2: Strength attribute is factored in damage from any actor except werewolves
+
+This setting can be controlled in Advanced tab of the launcher.
+
+normalise race speed
+--------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+By default race weight is factored into horizontal movement speed like in Morrowind.
+For example, an NPC which has 1.2 race weight is faster than an NPC with the exact same stats and weight 1.0 by a factor of 120%.
+If this setting is true, race weight is ignored in the calculations which allows for a movement behavior
+equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
+This makes the movement speed behavior more fair between different races.
+
+This setting can be controlled in Advanced tab of the launcher.

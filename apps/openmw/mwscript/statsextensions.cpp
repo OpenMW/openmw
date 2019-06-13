@@ -455,10 +455,16 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    // make sure a spell with this ID actually exists.
-                    MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
+                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (id);
 
-                    ptr.getClass().getCreatureStats (ptr).getSpells().add (id);
+                    MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+                    creatureStats.getSpells().add(id);
+                    ESM::Spell::SpellType type = static_cast<ESM::Spell::SpellType>(spell->mData.mType);
+                    if (type != ESM::Spell::ST_Spell && type != ESM::Spell::ST_Power)
+                    {
+                        // Apply looping particles immediately for constant effects
+                        MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
+                    }
                 }
         };
 
@@ -1013,7 +1019,19 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    // If we already changed rank for this NPC, modify current rank in the NPC stats.
+                    // Otherwise take rank from base NPC record, increase it and put it to NPC data.
+                    int currentRank = ptr.getClass().getNpcStats(ptr).getFactionRank(factionID);
+                    if (currentRank >= 0)
+                        ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    else
+                    {
+                        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+                        rank++;
+                        ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
+                        for (int i=0; i<rank; i++)
+                            ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    }
                 }
         };
 
@@ -1036,7 +1054,21 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
+                    // If we already changed rank for this NPC, modify current rank in the NPC stats.
+                    // Otherwise take rank from base NPC record, decrease it and put it to NPC data.
+                    int currentRank = ptr.getClass().getNpcStats(ptr).getFactionRank(factionID);
+                    if (currentRank == 0)
+                        return;
+                    else if (currentRank > 0)
+                        ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
+                    else
+                    {
+                        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+                        rank--;
+                        ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
+                        for (int i=0; i<rank; i++)
+                            ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    }
                 }
         };
 

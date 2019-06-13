@@ -5,6 +5,7 @@
 #include <osg/Group>
 
 #include "chunkmanager.hpp"
+#include "compositemaprenderer.hpp"
 
 namespace Terrain
 {
@@ -14,7 +15,7 @@ class MyView : public View
 public:
     osg::ref_ptr<osg::Node> mLoaded;
 
-    virtual void reset(unsigned int frame) {}
+    virtual void reset() {}
 };
 
 TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
@@ -60,7 +61,6 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
             return nullptr;
         if (parent)
             parent->addChild(node);
-
         return node;
     }
 }

@@ -9,9 +9,9 @@ namespace MWGui
     /**
      * @brief subclass to provide access to some Widget internals.
      */
-    class ExposedWindow : public MyGUI::Window
+    class Window : public MyGUI::Window
     {
-        MYGUI_RTTI_DERIVED(ExposedWindow)
+        MYGUI_RTTI_DERIVED(Window)
 
     public:
         MyGUI::VectorWidgetPtr getSkinWidgetsByName (const std::string &name);

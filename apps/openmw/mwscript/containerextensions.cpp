@@ -83,13 +83,13 @@ namespace MWScript
                         if (count == 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage60}");
+                            msgBox = ::Misc::StringUtils::format(msgBox, itemName);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage61}");
-                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(count).c_str(), 2);
+                            msgBox = ::Misc::StringUtils::format(msgBox, count, itemName);
                         }
-                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
@@ -171,13 +171,13 @@ namespace MWScript
                         if (numRemoved > 1)
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage63}");
-                            ::Misc::StringUtils::replace(msgBox, "%d", std::to_string(numRemoved).c_str(), 2);
+                            msgBox = ::Misc::StringUtils::format(msgBox, numRemoved, itemName);
                         }
                         else
                         {
                             msgBox = MyGUI::LanguageManager::getInstance().replaceTags("#{sNotifyMessage62}");
+                            msgBox = ::Misc::StringUtils::format(msgBox, itemName);
                         }
-                        ::Misc::StringUtils::replace(msgBox, "%s", itemName.c_str(), 2);
                         MWBase::Environment::get().getWindowManager()->messageBox(msgBox, MWGui::ShowInDialogueMode_Only);
                     }
                 }
@@ -354,9 +354,25 @@ namespace MWScript
 
                     const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore (ptr);
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot (MWWorld::InventoryStore::Slot_CarriedRight);
-                    if (it == invStore.end() || it->getTypeName () != typeid(ESM::Weapon).name())
+                    if (it == invStore.end())
                     {
                         runtime.push(-1);
+                        return;
+                    }
+                    else if (it->getTypeName() != typeid(ESM::Weapon).name())
+                    {
+                        if (it->getTypeName() == typeid(ESM::Lockpick).name())
+                        {
+                            runtime.push(-2);
+                        }
+                        else if (it->getTypeName() == typeid(ESM::Probe).name())
+                        {
+                            runtime.push(-3);
+                        }
+                        else
+                        {
+                            runtime.push(-1);
+                        }
                         return;
                     }
 

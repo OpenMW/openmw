@@ -11,6 +11,8 @@
 #include <components/esm/cellref.hpp>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/shadow.hpp>
+#include <components/shader/shadermanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/registerarchives.hpp>
 
@@ -64,9 +66,9 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 }
 
 CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-    const std::vector<std::string>& archives, const Fallback::Map* fallback, const boost::filesystem::path& resDir)
+    const std::vector<std::string>& archives, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mFallbackMap(fallback), mReader (0), mDialogue (0), mReaderIndex(1),
+  mReader (0), mDialogue (0), mReaderIndex(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
     mVFS.reset(new VFS::Manager(mFsStrict));
@@ -74,6 +76,14 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
 
     mResourcesManager.setVFS(mVFS.get());
     mResourceSystem.reset(new Resource::ResourceSystem(mVFS.get()));
+
+    Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
+    Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
+    defines["forcePPL"] = "0";
+    defines["clamp"] = "1";
+    for (const auto& define : shadowDefines)
+        defines[define.first] = define.second;
+    mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
 
     mResourceSystem->getSceneManager()->setShaderPath((resDir / "shaders").string());
 
@@ -1006,7 +1016,7 @@ void CSMWorld::Data::loadFallbackEntries()
         std::make_pair("PrisonMarker", "marker_prison.nif")
     };
 
-    for (const std::pair<std::string, std::string> &marker : staticMarkers)
+    for (const auto &marker : staticMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
@@ -1020,7 +1030,7 @@ void CSMWorld::Data::loadFallbackEntries()
         }
     }
 
-    for (const std::pair<std::string, std::string> &marker : doorMarkers)
+    for (const auto &marker : doorMarkers)
     {
         if (mReferenceables.searchId (marker.first)==-1)
         {
@@ -1359,9 +1369,4 @@ void CSMWorld::Data::rowsChanged (const QModelIndex& parent, int start, int end)
 const VFS::Manager* CSMWorld::Data::getVFS() const
 {
     return mVFS.get();
-}
-
-const Fallback::Map* CSMWorld::Data::getFallbackMap() const
-{
-    return mFallbackMap;
 }

@@ -256,36 +256,30 @@ bool needUpdate(std::set<std::pair<int, int> >& renderedGrid, std::set<std::pair
     return false;
 }
 
-void LocalMap::requestMap(std::set<const MWWorld::CellStore*> cells)
+void LocalMap::requestMap(const MWWorld::CellStore* cell)
 {
-    std::set<std::pair<int, int> > grid;
-    for (const MWWorld::CellStore* cell : cells)
+    if (cell->isExterior())
     {
-        if (cell->isExterior())
-            grid.insert(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
-    }
+        int cellX = cell->getCell()->getGridX();
+        int cellY = cell->getCell()->getGridY();
 
-    for (const MWWorld::CellStore* cell : cells)
-    {
-        if (cell->isExterior())
-        {
-            int cellX = cell->getCell()->getGridX();
-            int cellY = cell->getCell()->getGridY();
-
-            MapSegment& segment = mSegments[std::make_pair(cellX, cellY)];
-            if (!needUpdate(segment.mGrid, grid, cellX, cellY))
-            {
-                continue;
-            }
-            else
-            {
-                segment.mGrid = grid;
-                requestExteriorMap(cell);
-            }
-        }
+        MapSegment& segment = mSegments[std::make_pair(cellX, cellY)];
+        if (!needUpdate(segment.mGrid, mCurrentGrid, cellX, cellY))
+            return;
         else
-            requestInteriorMap(cell);
+        {
+            segment.mGrid = mCurrentGrid;
+            requestExteriorMap(cell);
+        }
     }
+    else
+        requestInteriorMap(cell);
+}
+
+void LocalMap::addCell(MWWorld::CellStore *cell)
+{
+    if (cell->isExterior())
+        mCurrentGrid.emplace(cell->getCell()->getGridX(), cell->getCell()->getGridY());
 }
 
 void LocalMap::removeCell(MWWorld::CellStore *cell)
@@ -293,7 +287,11 @@ void LocalMap::removeCell(MWWorld::CellStore *cell)
     saveFogOfWar(cell);
 
     if (cell->isExterior())
-        mSegments.erase(std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()));
+    {
+        std::pair<int, int> coords = std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY());
+        mSegments.erase(coords);
+        mCurrentGrid.erase(coords);
+    }
     else
         mSegments.clear();
 }
@@ -613,7 +611,8 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
             if (!segment.mFogOfWarImage || !segment.mMapTexture)
                 continue;
 
-            unsigned char* data = segment.mFogOfWarImage->data();
+            uint32_t* data = (uint32_t*)segment.mFogOfWarImage->data();
+            bool changed = false;
             for (int texV = 0; texV<sFogOfWarResolution; ++texV)
             {
                 for (int texU = 0; texU<sFogOfWarResolution; ++texU)
@@ -625,14 +624,22 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
                     uint8_t alpha = (clr >> 24);
 
                     alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                    *(uint32_t*)data = (uint32_t) (alpha << 24);
+                    uint32_t val = (uint32_t) (alpha << 24);
+                    if ( *data != val)
+                    {
+                        *data = val;
+                        changed = true;
+                    }
 
-                    data += 4;
+                    ++data;
                 }
             }
 
-            segment.mHasFogState = true;
-            segment.mFogOfWarImage->dirty();
+            if (changed)
+            {
+                segment.mHasFogState = true;
+                segment.mFogOfWarImage->dirty();
+            }
         }
     }
 }

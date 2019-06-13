@@ -79,27 +79,6 @@ Developer's settings
 
 This section is for developers or anyone who wants to investigate how nav mesh system works in OpenMW.
 
-enable log
-----------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	False
-
-Enable debug log.
-Detournavigator module will write own debug log into separate file.
-Potentially decreases performance.
-
-log path
---------
-
-:Type:		string
-:Range:		file system path
-:Default:	detournavigator.log
-
-Write debug log to this file.
-Try use tmpfs or any other in-memory file system to reduce performance impact.
-
 enable write recast mesh to file
 --------------------------------
 

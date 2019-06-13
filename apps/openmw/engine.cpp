@@ -32,6 +32,8 @@
 
 #include <components/version/version.hpp>
 
+#include <components/detournavigator/navigator.hpp>
+
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
@@ -198,6 +200,8 @@ bool OMW::Engine::frame(float frametime)
 
             stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
             stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
+
+            mEnvironment.getWorld()->getNavigator()->reportStats(frameNumber, *stats);
         }
 
     }
@@ -222,6 +226,7 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
   , mActivationDistanceOverride(-1)
   , mGrab(true)
   , mExportFonts(false)
+  , mRandomSeed(0)
   , mScriptContext (0)
   , mFSStrict (false)
   , mScriptBlacklistUse (true)
@@ -252,9 +257,9 @@ OMW::Engine::~Engine()
 
     mWorkQueue = nullptr;
 
-    mResourceSystem.reset();
-
     mViewer = nullptr;
+
+    mResourceSystem.reset();
 
     delete mEncoder;
     mEncoder = nullptr;
@@ -278,7 +283,8 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
-    mFileCollections = Files::Collections (dataDirs, !mFSStrict);
+    mDataDirs.insert(mDataDirs.begin(), (mResDir / "vfs"));
+    mFileCollections = Files::Collections (mDataDirs, !mFSStrict);
 }
 
 // Add BSA archive
@@ -423,11 +429,11 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
 
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
     camera->setGraphicsContext(graphicsWindow);
-    camera->setViewport(0, 0, width, height);
+    camera->setViewport(0, 0, traits->width, traits->height);
 
     mViewer->realize();
 
-    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, width, height);
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, traits->width, traits->height);
 }
 
 void OMW::Engine::setWindowIcon()
@@ -529,24 +535,24 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
-                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts, mFallbackMap,
+                mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string());
     mEnvironment.setWindowManager (window);
 
     // Create sound system
-    mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mFallbackMap, mUseSound));
+    mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mUseSound));
 
     if (!mSkipMenu)
     {
-        std::string logo = mFallbackMap["Movies_Company_Logo"];
+        const std::string& logo = Fallback::Map::getString("Movies_Company_Logo");
         if (!logo.empty())
             window->playVideo(logo, true);
     }
 
     // Create the world
     mEnvironment.setWorld( new MWWorld::World (mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(),
-        mFileCollections, mContentFiles, mEncoder, mFallbackMap,
-        mActivationDistanceOverride, mCellName, mResDir.string(), mCfgMgr.getUserDataPath().string()));
+        mFileCollections, mContentFiles, mEncoder, mActivationDistanceOverride, mCellName,
+        mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
     input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
@@ -651,6 +657,9 @@ void OMW::Engine::go()
     assert (!mContentFiles.empty());
 
     Log(Debug::Info) << "OSG version: " << osgGetVersion();
+    SDL_version sdlVersion;
+    SDL_GetVersion(&sdlVersion);
+    Log(Debug::Info) << "SDL version: " << (int)sdlVersion.major << "." << (int)sdlVersion.minor << "." << (int)sdlVersion.patch;
 
     Misc::Rng::init(mRandomSeed);
 
@@ -665,6 +674,11 @@ void OMW::Engine::go()
     // Setup viewer
     mViewer = new osgViewer::Viewer;
     mViewer->setReleaseContextAtEndOfFrameHint(false);
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
+    // Do not try to outsmart the OS thread scheduler (see bug #4785).
+    mViewer->setUseConfigureAffinity(false);
+#endif
 
     mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
         Settings::Manager::getString("screenshot format", "General"));
@@ -703,16 +717,10 @@ void OMW::Engine::go()
     {
         // start in main menu
         mEnvironment.getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        try
-        {
-            // Is there an ini setting for this filename or something?
-            mEnvironment.getSoundManager()->streamMusic("Special/morrowind title.mp3");
-
-            std::string logo = mFallbackMap["Movies_Morrowind_Logo"];
-            if (!logo.empty())
-                mEnvironment.getWindowManager()->playVideo(logo, true);
-        }
-        catch (...) {}
+        mEnvironment.getSoundManager()->playTitleMusic();
+        const std::string& logo = Fallback::Map::getString("Movies_Morrowind_Logo");
+        if (!logo.empty())
+            mEnvironment.getWindowManager()->playVideo(logo, true);
     }
     else
     {
@@ -781,11 +789,6 @@ void OMW::Engine::setSoundUsage(bool soundUsage)
 void OMW::Engine::setEncoding(const ToUTF8::FromType& encoding)
 {
     mEncoding = encoding;
-}
-
-void OMW::Engine::setFallbackValues(std::map<std::string,std::string> fallbackMap)
-{
-    mFallbackMap = fallbackMap;
 }
 
 void OMW::Engine::setScriptConsoleMode (bool enabled)

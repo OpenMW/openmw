@@ -235,6 +235,7 @@ namespace MWGui
                 params.mRange = effectInfo.mRange;
                 params.mIsConstant = (flags & MWEffectList::EF_Constant) != 0;
                 params.mNoTarget = (flags & MWEffectList::EF_NoTarget);
+                params.mNoMagnitude = (flags & MWEffectList::EF_NoMagnitude);
                 effect->setSpellEffect(params);
                 effects.push_back(effect);
                 coord.top += effect->getHeight();
@@ -293,6 +294,7 @@ namespace MWGui
                 effect = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
                 effectInfo.mIsConstant = (flags & EF_Constant) || effectInfo.mIsConstant;
                 effectInfo.mNoTarget = (flags & EF_NoTarget) || effectInfo.mNoTarget;
+                effectInfo.mNoMagnitude = (flags & EF_NoMagnitude) || effectInfo.mNoMagnitude;
                 effect->setSpellEffect(effectInfo);
                 effects.push_back(effect);
                 if (effect->getRequestedWidth() > maxwidth)
@@ -408,7 +410,7 @@ namespace MWGui
                 spellLine += " " + MWBase::Environment::get().getWindowManager()->getGameSettingString(ESM::Attribute::sGmstAttributeIds[mEffectParams.mAttribute], "");
             }
 
-            if (mEffectParams.mMagnMin >= 0 || mEffectParams.mMagnMax >= 0) {
+            if (mEffectParams.mMagnMin || mEffectParams.mMagnMax) {
                 ESM::MagicEffect::MagnitudeDisplayType displayType = magicEffect->getMagnitudeDisplayType();
                 if ( displayType == ESM::MagicEffect::MDT_TimesInt ) {
                     std::string timesInt =  MWBase::Environment::get().getWindowManager()->getGameSettingString("sXTimesINT", "");
@@ -421,7 +423,7 @@ namespace MWGui
 
                     spellLine += formatter.str();
                 }
-                else if ( displayType != ESM::MagicEffect::MDT_None ) {
+                else if ( displayType != ESM::MagicEffect::MDT_None  && !mEffectParams.mNoMagnitude) {
                     spellLine += " " + MyGUI::utility::toString(mEffectParams.mMagnMin);
                     if (mEffectParams.mMagnMin != mEffectParams.mMagnMax)
                         spellLine += to + MyGUI::utility::toString(mEffectParams.mMagnMax);
@@ -431,9 +433,9 @@ namespace MWGui
                     else if ( displayType == ESM::MagicEffect::MDT_Feet )
                         spellLine += " " + ft;
                     else if ( displayType == ESM::MagicEffect::MDT_Level )
-                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? lvl : lvls );
+                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? lvl : lvls );
                     else  // ESM::MagicEffect::MDT_Points
-                        spellLine += " " + ((mEffectParams.mMagnMin == 1 && mEffectParams.mMagnMax == 1) ? pt : pts );
+                        spellLine += " " + ((mEffectParams.mMagnMin == mEffectParams.mMagnMax && std::abs(mEffectParams.mMagnMin) == 1) ? pt : pts );
                 }
             }
 
@@ -527,102 +529,6 @@ namespace MWGui
             assignWidget(mTextWidget, "Text");
             assignWidget(mBarWidget, "Bar");
             assignWidget(mBarTextWidget, "BarText");
-        }
-
-        MWScrollBar::MWScrollBar()
-          : mEnableRepeat(true)
-          , mRepeatTriggerTime(0.5f)
-          , mRepeatStepTime(0.1f)
-          , mIsIncreasing(true)
-        {
-#if MYGUI_VERSION >= MYGUI_DEFINE_VERSION(3,2,2)
-            ScrollBar::setRepeatEnabled(false);
-#endif
-        }
-
-        MWScrollBar::~MWScrollBar()
-        {
-        }
-
-        void MWScrollBar::initialiseOverride()
-        {
-            ScrollBar::initialiseOverride();
-
-            if(mWidgetStart)
-            {
-                mWidgetStart->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonPressed);
-                mWidgetStart->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onDecreaseButtonReleased);
-            }
-            if(mWidgetEnd)
-            {
-                mWidgetEnd->eventMouseButtonPressed += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonPressed);
-                mWidgetEnd->eventMouseButtonReleased += MyGUI::newDelegate(this, &MWScrollBar::onIncreaseButtonReleased);
-            }
-        }
-
-        void MWScrollBar::setRepeat(float trigger, float step)
-        {
-            mRepeatTriggerTime = trigger;
-            mRepeatStepTime = step;
-        }
-
-        void MWScrollBar::repeatClick(MyGUI::Widget* _widget, MyGUI::ControllerItem* _controller)
-        {
-            int stepSize = mScrollPage;
-
-            if(mIsIncreasing && mScrollPosition < mScrollRange-1)
-            {
-                if(mScrollPosition + stepSize > mScrollRange-1)
-                    mScrollPosition = mScrollRange-1;
-                else
-                    mScrollPosition += stepSize;
-
-                eventScrollChangePosition(this, mScrollPosition);
-                updateTrack();
-            }
-            else if(!mIsIncreasing && mScrollPosition > 0)
-            {
-                int newPos = mScrollPosition - stepSize;
-                if(newPos < 0)
-                    mScrollPosition = 0;
-                else
-                    mScrollPosition -= stepSize;
-
-                eventScrollChangePosition(this, mScrollPosition);
-                updateTrack();
-            }
-        }
-
-        void MWScrollBar::onDecreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-        {
-            mIsIncreasing = false;
-            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatEvent::getClassTypeName());
-            MWGui::Controllers::ControllerRepeatEvent* controller = item->castType<MWGui::Controllers::ControllerRepeatEvent>();
-            controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
-            controller->setEnabled(mEnableRepeat);
-            controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-            MyGUI::ControllerManager::getInstance().addItem(this, controller);
-        }
-
-        void MWScrollBar::onDecreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-        {
-            MyGUI::ControllerManager::getInstance().removeItem(this);
-        }
-
-        void MWScrollBar::onIncreaseButtonPressed(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-        {
-            mIsIncreasing = true;
-            MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MWGui::Controllers::ControllerRepeatEvent::getClassTypeName());
-            MWGui::Controllers::ControllerRepeatEvent* controller = item->castType<MWGui::Controllers::ControllerRepeatEvent>();
-            controller->eventRepeatClick += newDelegate(this, &MWScrollBar::repeatClick);
-            controller->setEnabled(mEnableRepeat);
-            controller->setRepeat(mRepeatTriggerTime, mRepeatStepTime);
-            MyGUI::ControllerManager::getInstance().addItem(this, controller);
-        }
-
-        void MWScrollBar::onIncreaseButtonReleased(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id)
-        {
-            MyGUI::ControllerManager::getInstance().removeItem(this);
         }
     }
 }

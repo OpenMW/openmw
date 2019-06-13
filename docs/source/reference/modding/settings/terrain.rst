@@ -68,7 +68,7 @@ composite map level
 
 :Type:		integer
 :Range:		>= -3
-:Default:	0
+:Default:	-2
 
 Controls at which minimum size (in 2^value cell units) terrain chunks will start to use a composite map instead of the high-detail textures.
 With value -3 composite maps are used everywhere.

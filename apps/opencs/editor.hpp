@@ -42,7 +42,6 @@ namespace CS
             Files::ConfigurationManager mCfgMgr;
             CSMPrefs::State mSettingsState;
             CSMDoc::DocumentManager mDocumentManager;
-            CSVDoc::ViewManager mViewManager;
             CSVDoc::StartupDialogue mStartup;
             CSVDoc::NewGameDialogue mNewGame;
             CSVPrefs::Dialogue mSettings;
@@ -54,8 +53,7 @@ namespace CS
             boost::filesystem::ofstream mPidFile;
             bool mFsStrict;
             CSVTools::Merge mMerge;
-
-            void setupDataFiles (const Files::PathContainer& dataDirs);
+            CSVDoc::ViewManager* mViewManager;
 
             std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths

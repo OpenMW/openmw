@@ -157,7 +157,7 @@ void ESMStore::validate()
 
     // Validate NPCs for non-existing class and faction.
     // We will replace invalid entries by fixed ones
-    std::vector<ESM::NPC> entitiesToReplace;
+    std::vector<ESM::NPC> npcsToReplace;
     for (ESM::NPC npc : mNpcs)
     {
         bool changed = false;
@@ -188,13 +188,75 @@ void ESMStore::validate()
         }
 
         if (changed)
-            entitiesToReplace.push_back(npc);
+            npcsToReplace.push_back(npc);
     }
 
-    for (const ESM::NPC &npc : entitiesToReplace)
+    for (const ESM::NPC &npc : npcsToReplace)
     {
         mNpcs.eraseStatic(npc.mId);
         mNpcs.insertStatic(npc);
+    }
+
+    // Validate spell effects for invalid arguments
+    std::vector<ESM::Spell> spellsToReplace;
+    for (ESM::Spell spell : mSpells)
+    {
+        if (spell.mEffects.mList.empty())
+            continue;
+
+        bool changed = false;
+        auto iter = spell.mEffects.mList.begin();
+        while (iter != spell.mEffects.mList.end())
+        {
+            const ESM::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
+            if (!mgef)
+            {
+                Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an an invalid effect (index " << iter->mEffectID << ") present, dropping it.";
+                iter = spell.mEffects.mList.erase(iter);
+                changed = true;
+                continue;
+            }
+
+            if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
+            {
+                if (iter->mAttribute != -1)
+                {
+                    iter->mAttribute = -1;
+                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                        " effect of spell '" << spell.mId << "'  has an attribute argument present, dropping it.";
+                    changed = true;
+                }
+            }
+            else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
+            {
+                if (iter->mSkill != -1)
+                {
+                    iter->mSkill = -1;
+                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                        " effect of spell '" << spell.mId << "' has a skill argument present, dropping it.";
+                    changed = true;
+                }
+            }
+            else if (iter->mSkill != -1 || iter->mAttribute != -1)
+            {
+                iter->mSkill = -1;
+                iter->mAttribute = -1;
+                Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
+                    " effect of spell '" << spell.mId << "' has argument(s) present, dropping them.";
+                changed = true;
+            }
+
+            ++iter;
+        }
+
+        if (changed)
+            spellsToReplace.emplace_back(spell);
+    }
+
+    for (const ESM::Spell &spell : spellsToReplace)
+    {
+        mSpells.eraseStatic(spell.mId);
+        mSpells.insertStatic(spell);
     }
 }
 

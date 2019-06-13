@@ -9,20 +9,50 @@ The following describes the locations for the various OpenMW file paths for diff
 Configuration files and log files
 ---------------------------------
 
-:Linux:		``$HOME/.config/openmw``
-:Mac:		``$HOME/Library/Preferences/openmw``
-:Windows:	``C:\Users\Username\Documents\my games\openmw``
++--------------+-----------------------------------------------------------------------------------------------+
+| OS           | Location                                                                                      |
++==============+===============================================================================================+
+| Linux        | ``$HOME/.config/openmw``                                                                      |
++--------------+-----------------------------------------------------------------------------------------------+
+| Mac          | ``$HOME/Library/Preferences/openmw``                                                          |
++--------------+---------------+-------------------------------------------------------------------------------+
+| Windows      | File Explorer | ``Documents\My Games\OpenMW``                                                 |
+|              |               |                                                                               |
+|              | PowerShell    | ``Join-Path ([environment]::GetFolderPath("mydocuments")) "My Games\OpenMW"`` |
+|              |               |                                                                               |
+|              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW``                               |
++--------------+---------------+-------------------------------------------------------------------------------+
 
 Savegames
 ---------
 
-:Linux:		``$HOME/.local/share/openmw/saves``
-:Mac:		``$HOME/Library/Application Support/openmw/saves``
-:Windows:	``C:\Users\Username\Documents\my games\openmw\saves``
++--------------+-----------------------------------------------------------------------------------------------------+
+| OS           | Location                                                                                            |
++==============+=====================================================================================================+
+| Linux        | ``$HOME/.config/openmw/saves``                                                                      |
++--------------+-----------------------------------------------------------------------------------------------------+
+| Mac          | ``$HOME/Library/Application\ Support/openmw/saves``                                                 |
++--------------+---------------+-------------------------------------------------------------------------------------+
+| Windows      | File Explorer | ``Documents\My Games\OpenMW\saves``                                                 |
+|              |               |                                                                                     |
+|              | PowerShell    | ``Join-Path ([environment]::GetFolderPath("mydocuments")) "My Games\OpenMW\saves"`` |
+|              |               |                                                                                     |
+|              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW\saves``                               |
++--------------+---------------+-------------------------------------------------------------------------------------+
 
 Screenshots
 -----------
 
-:Linux:		``$HOME/.local/share/openmw``
-:Mac:		``$HOME/Library/Application Support/openmw``
-:Windows:	``C:\Users\Username\Documents\my games\openmw``
++--------------+-----------------------------------------------------------------------------------------------+
+| OS           | Location                                                                                      |
++==============+===============================================================================================+
+| Linux        | ``$HOME/.local/share/openmw``                                                                 |
++--------------+-----------------------------------------------------------------------------------------------+
+| Mac          | ``$HOME/Library/Application\ Support/openmw``                                                 |
++--------------+---------------+-------------------------------------------------------------------------------+
+| Windows      | File Explorer | ``Documents\My Games\OpenMW``                                                 |
+|              |               |                                                                               |
+|              | PowerShell    | ``Join-Path ([environment]::GetFolderPath("mydocuments")) "My Games\OpenMW"`` |
+|              |               |                                                                               |
+|              | Example       | ``C:\Users\Username\Documents\My Games\OpenMW``                               |
++--------------+---------------+-------------------------------------------------------------------------------+

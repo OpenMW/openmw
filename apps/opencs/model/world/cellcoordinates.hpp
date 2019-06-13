@@ -7,6 +7,8 @@
 
 #include <QMetaType>
 
+#include <osg/Vec3d>
+
 namespace CSMWorld
 {
     class CellCoordinates
@@ -29,6 +31,9 @@ namespace CSMWorld
             CellCoordinates move (int x, int y) const;
             ///< Return a copy of *this, moved by the given offset.
 
+            ///Generate cell id string from x and y coordinates
+            static std::string generateId (int x, int y);
+
             std::string getId (const std::string& worldspace) const;
             ///< Return the ID for the cell at these coordinates.
 
@@ -42,6 +47,24 @@ namespace CSMWorld
 
             /// \return cell coordinates such that given world coordinates are in it.
             static std::pair<int, int> coordinatesToCellIndex (float x, float y);
+
+            ///Converts worldspace coordinates to global texture selection, taking in account the texture offset.
+            static std::pair<int, int> toTextureCoords(osg::Vec3d worldPos);
+
+            ///Converts worldspace coordinates to global vertex selection.
+            static std::pair<int, int> toVertexCoords(osg::Vec3d worldPos);
+
+            ///Converts global texture coordinate to worldspace coordinate that is at the upper left corner of the selected texture.
+            static float textureSelectionToWorldCoords(int);
+
+            ///Converts global vertex coordinate to worldspace coordinate
+            static float vertexSelectionToWorldCoords(int);
+
+            ///Converts local cell's heightmap coordinates from the global vertex coordinate
+            static int vertexSelectionToInCellCoords(int);
+
+            ///Converts global vertex coordinates to cell id
+            static std::string vertexGlobalToCellId(std::pair<int, int>);
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);

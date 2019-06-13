@@ -312,7 +312,7 @@ if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
 endif()
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
-find_package(MyGUI 3.2.1 REQUIRED)
+find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
@@ -405,9 +405,9 @@ if (NOT WIN32 AND NOT APPLE)
 endif()
 
 # CXX Compiler settings
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++11 -pedantic -Wno-long-long")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++14 -pedantic -Wno-long-long")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)
@@ -796,8 +796,8 @@ endif()
 
 # Apple bundling
 if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
-    if (${CMAKE_MAJOR_VERSION} STREQUAL "3" AND ${CMAKE_MINOR_VERSION} STREQUAL "13")
-        message(FATAL_ERROR "macOS packaging is broken in CMake 3.13.*, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use an older version like 3.12.4")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND CMAKE_VERSION VERSION_LESS 3.13.4)
+        message(FATAL_ERROR "macOS packaging is broken in early CMake 3.13 releases, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use at least 3.13.4 or an older version like 3.12.4")
     endif ()
 
     get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)

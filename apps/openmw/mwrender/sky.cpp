@@ -266,16 +266,16 @@ public:
 
     META_Node(MWRender, CameraRelativeTransform)
 
-    const osg::Vec3f& getLastEyePoint() const
+    const osg::Vec3f& getLastViewPoint() const
     {
-        return mEyePoint;
+        return mViewPoint;
     }
 
     virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const
     {
         if (nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         {
-            mEyePoint = static_cast<osgUtil::CullVisitor*>(nv)->getEyePoint();
+            mViewPoint = static_cast<osgUtil::CullVisitor*>(nv)->getViewPoint();
         }
 
         if (_referenceFrame==RELATIVE_RF)
@@ -337,8 +337,8 @@ public:
         }
     };
 private:
-    // eyePoint for the current frame
-    mutable osg::Vec3f mEyePoint;
+    // viewPoint for the current frame
+    mutable osg::Vec3f mViewPoint;
 };
 
 class ModVertexAlphaVisitor : public osg::NodeVisitor
@@ -391,7 +391,7 @@ private:
 /// @brief Hides the node subgraph if the eye point is below water.
 /// @note Must be added as cull callback.
 /// @note Meant to be used on a node that is child of a CameraRelativeTransform.
-/// The current eye point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
+/// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
 class UnderwaterSwitchCallback : public osg::NodeCallback
 {
 public:
@@ -404,8 +404,8 @@ public:
 
     bool isUnderwater()
     {
-        osg::Vec3f eyePoint = mCameraRelativeTransform->getLastEyePoint();
-        return mEnabled && eyePoint.z() < mWaterLevel;
+        osg::Vec3f viewPoint = mCameraRelativeTransform->getLastViewPoint();
+        return mEnabled && viewPoint.z() < mWaterLevel;
     }
 
     virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
@@ -828,10 +828,9 @@ private:
             , mTimeOfDayFade(1.f)
             , mGlareView(1.f)
         {
-            const Fallback::Map* fallback = MWBase::Environment::get().getWorld()->getFallback();
-            mColor = fallback->getFallbackColour("Weather_Sun_Glare_Fader_Color");
-            mSunGlareFaderMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Max");
-            mSunGlareFaderAngleMax = fallback->getFallbackFloat("Weather_Sun_Glare_Fader_Angle_Max");
+            mColor = Fallback::Map::getColour("Weather_Sun_Glare_Fader_Color");
+            mSunGlareFaderMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Max");
+            mSunGlareFaderAngleMax = Fallback::Map::getFloat("Weather_Sun_Glare_Fader_Angle_Max");
 
             // Replicating a design flaw in MW. The color was being set on both ambient and emissive properties, which multiplies the result by two,
             // then finally gets clamped by the fixed function pipeline. With the default INI settings, only the red component gets clamped,
@@ -1179,9 +1178,8 @@ void SkyManager::create()
 
     mSun.reset(new Sun(mEarlyRenderBinRoot, *mSceneManager->getImageManager()));
 
-    const Fallback::Map* fallback=MWBase::Environment::get().getWorld()->getFallback();
-    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
-    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), fallback->getFallbackFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
+    mMasser.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Masser_Size")/125, Moon::Type_Masser));
+    mSecunda.reset(new Moon(mEarlyRenderBinRoot, *mSceneManager->getImageManager(), Fallback::Map::getFloat("Moons_Secunda_Size")/125, Moon::Type_Secunda));
 
     mCloudNode = new osg::PositionAttitudeTransform;
     mEarlyRenderBinRoot->addChild(mCloudNode);
@@ -1205,7 +1203,7 @@ void SkyManager::create()
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_BLEND, osg::StateAttribute::ON);
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_FOG, osg::StateAttribute::OFF);
 
-    mMoonScriptColor = fallback->getFallbackColour("Moons_Script_Color");
+    mMoonScriptColor = Fallback::Map::getColour("Moons_Script_Color");
 
     mCreated = true;
 }

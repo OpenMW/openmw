@@ -27,6 +27,9 @@ const int CellSizeInUnits = 8192;
 // A label to mark night/day visual switches
 const std::string NightDayLabel = "NightDaySwitch";
 
+// A label to mark visual switches for herbalism feature
+const std::string HerbalismLabel = "HerbalismSwitch";
+
 }
 
 #endif

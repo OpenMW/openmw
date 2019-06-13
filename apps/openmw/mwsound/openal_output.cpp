@@ -1247,7 +1247,7 @@ void OpenAL_Output::updateSound(Sound *sound)
 }
 
 
-bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound)
+bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound, bool getLoudnessData)
 {
     if(mFreeSources.empty())
     {
@@ -1265,7 +1265,7 @@ bool OpenAL_Output::streamSound(DecoderPtr decoder, Stream *sound)
         return false;
 
     OpenAL_SoundStream *stream = new OpenAL_SoundStream(source, std::move(decoder));
-    if(!stream->init())
+    if(!stream->init(getLoudnessData))
     {
         delete stream;
         return false;

@@ -4,9 +4,10 @@
 #include <memory>
 #include <vector>
 
+#include <MyGUI_ControllerItem.h>
+
 #include <components/widgets/numericeditbox.hpp>
 
-#include "controllers.hpp"
 #include "windowbase.hpp"
 
 namespace MWMechanics

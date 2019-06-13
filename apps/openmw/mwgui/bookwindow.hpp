@@ -9,7 +9,7 @@
 
 namespace MWGui
 {
-    class BookWindow : public WindowBase
+    class BookWindow : public BookWindowBase
     {
         public:
             BookWindow();
@@ -34,7 +34,6 @@ namespace MWGui
 
             void updatePages();
             void clearPages();
-            void adjustButton(Gui::ImageButton* button);
 
         private:
             typedef std::pair<int, int> Page;

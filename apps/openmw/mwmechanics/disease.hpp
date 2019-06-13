@@ -57,10 +57,11 @@ namespace MWMechanics
             {
                 // Contracted disease!
                 actor.getClass().getCreatureStats(actor).getSpells().add(it->first);
+                MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = "sMagicContractDisease";
                 msg = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(msg)->mValue.getString();
-                Misc::StringUtils::replace(msg, "%s", spell->mName.c_str(), 2);
+                msg = Misc::StringUtils::format(msg, spell->mName);
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
             }
         }

@@ -571,8 +571,8 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 
     // Autoequip clothing, armor and weapons.
     // Equipping lights is handled in Actors::updateEquippedLight based on environment light.
-    // Note: creatures do not use the armor mitigation and can equip only shields
-    // Use a custom logic for them - select shield based on its health instead of armor rating (since it useless for creatures)
+    // Note: creatures ignore equipment armor rating and only equip shields
+    // Use custom logic for them - select shield based on its health instead of armor rating
     autoEquipWeapon(actor, slots_);
     autoEquipArmor(actor, slots_);
 
@@ -637,15 +637,16 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
             bool existed = (mPermanentMagicEffectMagnitudes.find((**iter).getCellRef().getRefId()) != mPermanentMagicEffectMagnitudes.end());
             if (!existed)
             {
-                // Roll some dice, one for each effect
                 params.resize(enchantment.mEffects.mList.size());
-                for (unsigned int i=0; i<params.size();++i)
-                    params[i].mRandom = Misc::Rng::rollClosedProbability();
 
-                // Try resisting each effect
                 int i=0;
                 for (const ESM::ENAMstruct& effect : enchantment.mEffects.mList)
                 {
+                    int delta = effect.mMagnMax - effect.mMagnMin;
+                    // Roll some dice, one for each effect
+                    if (delta)
+                        params[i].mRandom = Misc::Rng::rollDice(delta + 1) / static_cast<float>(delta);
+                    // Try resisting each effect
                     params[i].mMultiplier = MWMechanics::getEffectMultiplier(effect.mEffectID, actor, actor);
                     ++i;
                 }

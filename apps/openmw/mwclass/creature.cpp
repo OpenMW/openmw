@@ -376,7 +376,8 @@ namespace MWClass
         if (!successful)
         {
             // Missed
-            MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+            if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
             return;
         }
 
@@ -400,10 +401,10 @@ namespace MWClass
                     stats.setHitRecovery(true); // Is this supposed to always occur?
             }
 
-            damage = std::max(1.f, damage);
-
             if(ishealth)
             {
+                damage *= damage / (damage + getArmorRating(ptr));
+                damage = std::max(1.f, damage);
                 if (!attacker.isEmpty())
                 {
                     damage = scaleDamage(damage, attacker, ptr);
@@ -596,7 +597,7 @@ namespace MWClass
 
     float Creature::getArmorRating (const MWWorld::Ptr& ptr) const
     {
-        // Note this is currently unused. Creatures do not use armor mitigation.
+        // Equipment armor rating is deliberately ignored.
         return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
     }
 
@@ -706,6 +707,8 @@ namespace MWClass
         if(name == "left")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
+            if(world->isFlying(ptr))
+                return -1;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return ESM::SoundGenerator::SwimLeft;
@@ -716,6 +719,8 @@ namespace MWClass
         if(name == "right")
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
+            if(world->isFlying(ptr))
+                return -1;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if(world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
                 return ESM::SoundGenerator::SwimRight;
@@ -761,13 +766,7 @@ namespace MWClass
 
     int Creature::getBloodTexture(const MWWorld::ConstPtr &ptr) const
     {
-        int flags = ptr.get<ESM::Creature>()->mBase->mFlags;
-
-        if (flags & ESM::Creature::Skeleton)
-            return 1;
-        if (flags & ESM::Creature::Metal)
-            return 2;
-        return 0;
+        return ptr.get<ESM::Creature>()->mBase->mBloodType;
     }
 
     void Creature::readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

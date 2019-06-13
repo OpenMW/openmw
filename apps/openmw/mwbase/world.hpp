@@ -72,11 +72,6 @@ namespace MWWorld
     typedef std::vector<std::pair<MWWorld::Ptr,MWMechanics::Movement> > PtrMovementList;
 }
 
-namespace Fallback
-{
-    class Map;
-}
-
 namespace MWBase
 {
     /// \brief Interface for the World (implemented in MWWorld)
@@ -130,8 +125,6 @@ namespace MWBase
 
             virtual void adjustSky() = 0;
 
-            virtual const Fallback::Map *getFallback () const = 0;
-
             virtual MWWorld::Player& getPlayer() = 0;
             virtual MWWorld::Ptr getPlayerPtr() = 0;
             virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
@@ -183,7 +176,7 @@ namespace MWBase
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly) = 0;
+            virtual MWWorld::Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = true) = 0;
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
@@ -278,7 +271,7 @@ namespace MWBase
             virtual void deleteObject (const MWWorld::Ptr& ptr) = 0;
             virtual void undeleteObject (const MWWorld::Ptr& ptr) = 0;
 
-            virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, float x, float y, float z) = 0;
+            virtual MWWorld::Ptr moveObject (const MWWorld::Ptr& ptr, float x, float y, float z, bool moveToActive=false) = 0;
             ///< @return an updated Ptr in case the Ptr's cell changes
 
             virtual MWWorld::Ptr moveObject(const MWWorld::Ptr &ptr, MWWorld::CellStore* newCell, float x, float y, float z, bool movePhysics=true) = 0;
@@ -459,8 +452,9 @@ namespace MWBase
             {
                 Rest_Allowed = 0,
                 Rest_OnlyWaiting = 1,
-                Rest_PlayerIsUnderwater = 2,
-                Rest_EnemiesAreNearby = 3
+                Rest_PlayerIsInAir = 2,
+                Rest_PlayerIsUnderwater = 3,
+                Rest_EnemiesAreNearby = 4
             };
 
             /// check if the player is allowed to rest
@@ -584,11 +578,12 @@ namespace MWBase
             /// Return the distance between actor's weapon and target's collision box.
             virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
+            virtual void addContainerScripts(const MWWorld::Ptr& reference, MWWorld::CellStore* cell) = 0;
             virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;
 
             virtual bool isPlayerInJail() const = 0;
 
-            virtual void rest() = 0;
+            virtual void rest(double hours) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;

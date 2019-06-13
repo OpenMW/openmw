@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_ControllerManager.h>
+#include <MyGUI_ControllerRepeatClick.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -44,9 +45,6 @@ namespace
 
 namespace MWGui
 {
-    const float TradeWindow::sBalanceChangeInitialPause = 0.5f;
-    const float TradeWindow::sBalanceChangeInterval = 0.1f;
-
     TradeWindow::TradeWindow()
         : WindowBase("openmw_trade_window.layout")
         , mSortModel(nullptr)
@@ -311,7 +309,7 @@ namespace MWGui
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(itemStack.mBase.getCellRef().getRefId(), mPtr))
             {
                 std::string msg = gmst.find("sNotifyMessage49")->mValue.getString();
-                Misc::StringUtils::replace(msg, "%s", itemStack.mBase.getClass().getName(itemStack.mBase).c_str(), 2);
+                msg = Misc::StringUtils::format(msg, itemStack.mBase.getClass().getName(itemStack.mBase));
                 MWBase::Environment::get().getWindowManager()->messageBox(msg);
 
                 MWBase::Environment::get().getMechanicsManager()->confiscateStolenItemToOwner(player, itemStack.mBase, mPtr, itemStack.mCount);
@@ -382,10 +380,9 @@ namespace MWGui
 
     void TradeWindow::addRepeatController(MyGUI::Widget *widget)
     {
-        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(Controllers::ControllerRepeatEvent::getClassTypeName());
-        Controllers::ControllerRepeatEvent* controller = item->castType<Controllers::ControllerRepeatEvent>();
-        controller->eventRepeatClick += MyGUI::newDelegate(this, &TradeWindow::onRepeatClick);
-        controller->setRepeat(sBalanceChangeInitialPause, sBalanceChangeInterval);
+        MyGUI::ControllerItem* item = MyGUI::ControllerManager::getInstance().createItem(MyGUI::ControllerRepeatClick::getClassTypeName());
+        MyGUI::ControllerRepeatClick* controller = static_cast<MyGUI::ControllerRepeatClick*>(item);
+        controller->eventRepeatClick += newDelegate(this, &TradeWindow::onRepeatClick);
         MyGUI::ControllerManager::getInstance().addItem(widget, controller);
     }
 
@@ -468,16 +465,26 @@ namespace MWGui
 
         int merchantOffer = 0;
 
+        // The offered price must be capped at 75% of the base price to avoid exploits
+        // connected to buying and selling the same item.
+        // This value has been determined by researching the limitations of the vanilla formula
+        // and may not be sufficient if getBarterOffer behavior has been changed.
         std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : playerBorrowed)
         {
-            merchantOffer -= MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), true);
+            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int cap = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Minimum buying price -- 75% of the base
+            const int buyingPrice = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, basePrice, true);
+            merchantOffer -= std::max(cap, buyingPrice);
         }
 
         std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : merchantBorrowed)
         {
-            merchantOffer += MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, getEffectiveValue(itemStack.mBase, itemStack.mCount), false);
+            const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
+            const int cap = static_cast<int>(std::max(1.f, 0.75f * basePrice)); // Maximum selling price -- 75% of the base
+            const int sellingPrice = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, basePrice, false);
+            merchantOffer += mPtr.getClass().isNpc() ? std::min(cap, sellingPrice) : sellingPrice;
         }
 
         int diff = merchantOffer - mCurrentMerchantOffer;

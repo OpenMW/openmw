@@ -57,13 +57,13 @@
     </Widget>
 
     <!-- "options" -->
-    <Widget type="ImageBox" skin="ImageBox" position="293 0 242 350" name="OptionsOverlay">
+    <Widget type="ImageBox" skin="ImageBox" position="293 0 386 350" name="OptionsOverlay">
       <Property key="ImageTexture" value="textures\tx_menubook_bookmark.dds"/>
-      <Property key="ImageCoord" value="0 0 164 256"/>
 
-      <Widget type="BookPage" skin="MW_BookPage" position="10 10 92 260" name="LeftTopicIndex"/>
-      <Widget type="BookPage" skin="MW_BookPage" position="66 10 92 260" name="CenterTopicIndex"/>
-      <Widget type="BookPage" skin="MW_BookPage" position="122 10 92 260" name="RightTopicIndex"/>
+
+      <Widget type="BookPage" skin="MW_BookPage" position="20 10 92 260" name="LeftTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="75 10 92 260" name="CenterTopicIndex"/>
+      <Widget type="BookPage" skin="MW_BookPage" position="130 10 92 260" name="RightTopicIndex"/>
 
       <Widget type="ImageButton" skin="ImageBox" position="71 15 100 20" Align="Top|Left" name="ShowActiveBTN">
         <!-- Image set at runtime since it may not be available in all versions of the game -->

@@ -86,7 +86,10 @@ namespace ESM
                     break;
                 case ESM::FourCC<'F','L','A','G'>::value:
                     hasFlags = true;
-                    esm.getHT(mFlags);
+                    int flags;
+                    esm.getHT(flags);
+                    mFlags = flags & 0xFF;
+                    mBloodType = ((flags >> 8) & 0xFF) >> 2;
                     break;
                 case ESM::FourCC<'N','P','C','S'>::value:
                     mSpells.add(esm);
@@ -160,7 +163,7 @@ namespace ESM
             esm.writeHNT("NPDT", npdt12, 12);
         }
 
-        esm.writeHNT("FLAG", mFlags);
+        esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
 
         mInventory.save(esm);
         mSpells.save(esm);
@@ -186,6 +189,7 @@ namespace ESM
     {
         mNpdtType = NPC_DEFAULT;
         blankNpdt();
+        mBloodType = 0;
         mFlags = 0;
         mInventory.mList.clear();
         mSpells.mList.clear();

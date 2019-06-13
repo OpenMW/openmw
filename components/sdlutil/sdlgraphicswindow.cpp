@@ -99,6 +99,9 @@ void GraphicsWindowSDL2::init()
     if (ver && strcmp(ver, "2") == 0) {
         major = 2;
         minor = 0;
+    } else if (ver && strcmp(ver, "3") == 0) {
+        major = 3;
+        minor = 2;
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -113,7 +116,7 @@ void GraphicsWindowSDL2::init()
         return;
     }
 
-    SDL_GL_SetSwapInterval(_traits->vsync ? 1 : 0);
+    setSwapInterval(_traits->vsync);
 
     SDL_GL_MakeCurrent(oldWin, oldCtx);
 
@@ -194,9 +197,29 @@ void GraphicsWindowSDL2::setSyncToVBlank(bool on)
 
     SDL_GL_MakeCurrent(mWindow, mContext);
 
-    SDL_GL_SetSwapInterval(on ? 1 : 0);
+    setSwapInterval(on);
 
     SDL_GL_MakeCurrent(oldWin, oldCtx);
+}
+
+void GraphicsWindowSDL2::setSwapInterval(bool enable)
+{
+    if (enable)
+    {
+        if (SDL_GL_SetSwapInterval(-1) == -1)
+        {
+            OSG_NOTICE << "Adaptive vsync unsupported" << std::endl;
+            if (SDL_GL_SetSwapInterval(1) == -1)
+            {
+                OSG_NOTICE << "Vertical synchronization unsupported, disabling" << std::endl;
+                SDL_GL_SetSwapInterval(0);
+            }
+        }
+    }
+    else
+    {
+        SDL_GL_SetSwapInterval(0);
+    }
 }
 
 void GraphicsWindowSDL2::raiseWindow()

@@ -35,6 +35,7 @@ namespace MWRender
 class ResetAccumRootCallback;
 class RotateController;
 class GlowUpdater;
+class TransparencyUpdater;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
 {
@@ -266,6 +267,7 @@ protected:
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
     osg::ref_ptr<GlowUpdater> mGlowUpdater;
+    osg::ref_ptr<TransparencyUpdater> mTransparencyUpdater;
 
     float mAlpha;
 
@@ -365,7 +367,7 @@ public:
      * @param texture override the texture specified in the model's materials - if empty, do not override
      * @note Will not add an effect twice.
      */
-    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "", float scale = 1.0f);
+    void addEffect (const std::string& model, int effectId, bool loop = false, const std::string& bonename = "", const std::string& texture = "");
     void removeEffect (int effectId);
     void removeEffects ();
     void getLoopingEffects (std::vector<int>& out) const;
@@ -475,6 +477,7 @@ public:
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
     virtual void setAccurateAiming(bool enabled) {}
+    virtual bool canBeHarvested() const { return false; }
 
 private:
     Animation(const Animation&);
@@ -484,6 +487,8 @@ private:
 class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
+
+    bool canBeHarvested() const;
 };
 
 class UpdateVfxCallback : public osg::NodeCallback

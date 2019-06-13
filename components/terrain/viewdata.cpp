@@ -5,9 +5,9 @@ namespace Terrain
 
 ViewData::ViewData()
     : mNumEntries(0)
-    , mFrameLastUsed(0)
+    , mLastUsageTimeStamp(0.0)
     , mChanged(false)
-    , mHasEyePoint(false)
+    , mHasViewPoint(false)
 {
 
 }
@@ -17,7 +17,16 @@ ViewData::~ViewData()
 
 }
 
-void ViewData::add(QuadTreeNode *node, bool visible)
+void ViewData::copyFrom(const ViewData& other)
+{
+    mNumEntries = other.mNumEntries;
+    mEntries = other.mEntries;
+    mChanged = other.mChanged;
+    mHasViewPoint = other.mHasViewPoint;
+    mViewPoint = other.mViewPoint;
+}
+
+void ViewData::add(QuadTreeNode *node)
 {
     unsigned int index = mNumEntries++;
 
@@ -25,7 +34,7 @@ void ViewData::add(QuadTreeNode *node, bool visible)
         mEntries.resize(index+1);
 
     Entry& entry = mEntries[index];
-    if (entry.set(node, visible))
+    if (entry.set(node))
         mChanged = true;
 }
 
@@ -44,42 +53,41 @@ bool ViewData::hasChanged() const
     return mChanged;
 }
 
-bool ViewData::hasEyePoint() const
+bool ViewData::hasViewPoint() const
 {
-    return mHasEyePoint;
+    return mHasViewPoint;
 }
 
-void ViewData::setEyePoint(const osg::Vec3f &eye)
+void ViewData::setViewPoint(const osg::Vec3f &viewPoint)
 {
-    mEyePoint = eye;
-    mHasEyePoint = true;
+    mViewPoint = viewPoint;
+    mHasViewPoint = true;
 }
 
-const osg::Vec3f& ViewData::getEyePoint() const
+const osg::Vec3f& ViewData::getViewPoint() const
 {
-    return mEyePoint;
+    return mViewPoint;
 }
 
-void ViewData::reset(unsigned int frame)
+void ViewData::reset()
 {
     // clear any unused entries
     for (unsigned int i=mNumEntries; i<mEntries.size(); ++i)
-        mEntries[i].set(nullptr, false);
+        mEntries[i].set(nullptr);
 
     // reset index for next frame
     mNumEntries = 0;
     mChanged = false;
-
-    mFrameLastUsed = frame;
 }
 
 void ViewData::clear()
 {
     for (unsigned int i=0; i<mEntries.size(); ++i)
-        mEntries[i].set(nullptr, false);
+        mEntries[i].set(nullptr);
     mNumEntries = 0;
-    mFrameLastUsed = 0;
+    mLastUsageTimeStamp = 0;
     mChanged = false;
+    mHasViewPoint = false;
 }
 
 bool ViewData::contains(QuadTreeNode *node)
@@ -92,15 +100,13 @@ bool ViewData::contains(QuadTreeNode *node)
 
 ViewData::Entry::Entry()
     : mNode(nullptr)
-    , mVisible(true)
     , mLodFlags(0)
 {
 
 }
 
-bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
+bool ViewData::Entry::set(QuadTreeNode *node)
 {
-    mVisible = visible;
     if (node == mNode)
         return false;
     else
@@ -112,18 +118,41 @@ bool ViewData::Entry::set(QuadTreeNode *node, bool visible)
     }
 }
 
-ViewData *ViewDataMap::getViewData(osg::Object *viewer)
+bool suitable(ViewData* vd, const osg::Vec3f& viewPoint, float& maxDist)
+{
+    return vd->hasViewPoint() && (vd->getViewPoint() - viewPoint).length2() < maxDist*maxDist;
+}
+
+ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPoint, bool& needsUpdate)
 {
     Map::const_iterator found = mViews.find(viewer);
+    ViewData* vd = nullptr;
     if (found == mViews.end())
     {
-        ViewData* vd = createOrReuseView();
-        vd->setViewer(viewer);
+        vd = createOrReuseView();
         mViews[viewer] = vd;
-        return vd;
     }
     else
-        return found->second;
+        vd = found->second;
+
+    if (!suitable(vd, viewPoint, mReuseDistance))
+    {
+        for (Map::const_iterator other = mViews.begin(); other != mViews.end(); ++other)
+        {
+            if (suitable(other->second, viewPoint, mReuseDistance) && other->second->getNumEntries())
+            {
+                vd->copyFrom(*other->second);
+                needsUpdate = false;
+                return vd;
+            }
+        }
+        vd->setViewPoint(viewPoint);
+        needsUpdate = true;
+    }
+    else
+        needsUpdate = false;
+
+    return vd;
 }
 
 ViewData *ViewDataMap::createOrReuseView()
@@ -141,14 +170,13 @@ ViewData *ViewDataMap::createOrReuseView()
     }
 }
 
-void ViewDataMap::clearUnusedViews(unsigned int frame)
+void ViewDataMap::clearUnusedViews(double referenceTime)
 {
     for (Map::iterator it = mViews.begin(); it != mViews.end(); )
     {
         ViewData* vd = it->second;
-        if (vd->getFrameLastUsed() + 2 < frame)
+        if (vd->getLastUsageTimeStamp() + mExpiryDelay < referenceTime)
         {
-            vd->setViewer(nullptr);
             vd->clear();
             mUnusedViews.push_back(vd);
             mViews.erase(it++);
@@ -164,16 +192,5 @@ void ViewDataMap::clear()
     mUnusedViews.clear();
     mViewVector.clear();
 }
-
-void ViewDataMap::setDefaultViewer(osg::Object *viewer)
-{
-    mDefaultViewer = viewer;
-}
-
-ViewData* ViewDataMap::getDefaultView()
-{
-    return getViewData(mDefaultViewer);
-}
-
 
 }

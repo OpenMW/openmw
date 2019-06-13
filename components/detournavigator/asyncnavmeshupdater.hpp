@@ -44,6 +44,8 @@ namespace DetourNavigator
 
         void wait();
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+
     private:
         struct Job
         {
@@ -67,12 +69,21 @@ namespace DetourNavigator
         };
 
         using Jobs = std::priority_queue<Job, std::deque<Job>>;
+        using Pushed = std::map<osg::Vec3f, std::set<TilePosition>>;
+
+        struct Queue
+        {
+            Jobs mJobs;
+            Pushed mPushed;
+
+            Queue() = default;
+        };
 
         std::reference_wrapper<const Settings> mSettings;
         std::reference_wrapper<TileCachedRecastMeshManager> mRecastMeshManager;
         std::reference_wrapper<OffMeshConnectionsManager> mOffMeshConnectionsManager;
         std::atomic_bool mShouldStop;
-        std::mutex mMutex;
+        mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::condition_variable mDone;
         Jobs mJobs;
@@ -80,6 +91,8 @@ namespace DetourNavigator
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         Misc::ScopeGuarded<boost::optional<std::chrono::steady_clock::time_point>> mFirstStart;
         NavMeshTilesCache mNavMeshTilesCache;
+        Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
+        std::map<std::thread::id, Queue> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
         void process() throw();
@@ -88,11 +101,19 @@ namespace DetourNavigator
 
         boost::optional<Job> getNextJob();
 
+        static Job getJob(Jobs& jobs, Pushed& pushed);
+
+        void postThreadJob(Job&& job, Queue& queue);
+
         void writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const;
 
         std::chrono::steady_clock::time_point setFirstStart(const std::chrono::steady_clock::time_point& value);
 
         void repost(Job&& job);
+
+        std::thread::id lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
+
+        void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
     };
 }
 

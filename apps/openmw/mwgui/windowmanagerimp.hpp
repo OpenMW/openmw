@@ -132,7 +132,7 @@ namespace MWGui
 
     WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-                  ToUTF8::FromType encoding, bool exportFonts, const std::map<std::string,std::string>& fallbackMap, const std::string& versionDescription, const std::string& localPath);
+                  ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& localPath);
     virtual ~WindowManager();
 
     /// Set the ESMStore to use for retrieving of GUI-related strings.
@@ -350,6 +350,7 @@ namespace MWGui
     virtual void removeCurrentModal(WindowModal* input);
 
     virtual void pinWindow (MWGui::GuiWindow window);
+    virtual void toggleMaximized(Layout *layout);
 
     /// Fade the screen in, over \a time seconds
     virtual void fadeScreenIn(const float time, bool clearQueue, float delay);
@@ -363,6 +364,7 @@ namespace MWGui
     virtual void activateHitOverlay(bool interrupt);
     virtual void setWerewolfOverlay(bool set);
 
+    virtual void toggleConsole();
     virtual void toggleDebugWindow();
 
     /// Cycle to next or previous spell
@@ -378,6 +380,7 @@ namespace MWGui
     virtual std::string correctTexturePath(const std::string& path);
     virtual bool textureExists(const std::string& path);
 
+    void addCell(MWWorld::CellStore* cell);
     void removeCell(MWWorld::CellStore* cell);
     void writeFog(MWWorld::CellStore* cell);
 
@@ -514,8 +517,6 @@ namespace MWGui
 
     void updateMap();
 
-    std::map<std::string, std::string> mFallbackMap;
-    
     int mShowOwned;
 
     ToUTF8::FromType mEncoding;

@@ -125,7 +125,7 @@ namespace Compiler
 
             if (loop.size()!=loop2.size())
                 throw std::logic_error (
-                    "internal compiler error: failed to generate a while loop");
+                    "Internal compiler error: failed to generate a while loop");
 
             std::copy (loop2.begin(), loop2.end(), std::back_inserter (mCode));
 
@@ -179,6 +179,14 @@ namespace Compiler
             scanner.scan (mLineParser);
             return true;
         }
+        else if (mState==IfElseJunkState)
+        {
+            getErrorHandler().warning ("Extra text after else", loc);
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+            mState = IfElseBodyState;
+            return true;
+        }
 
         return Parser::parseName (name, loc, scanner);
     }
@@ -207,8 +215,7 @@ namespace Compiler
                 return true;
             }
         }
-        else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState ||
-            mState==IfElseJunkState)
+        else if (mState==IfBodyState || mState==IfElseifBodyState || mState==IfElseBodyState)
         {
             if (parseIfBody (keyword, loc, scanner))
                 return true;
@@ -217,6 +224,14 @@ namespace Compiler
         {
             if ( parseWhileBody (keyword, loc, scanner))
                 return true;
+        }
+        else if (mState==IfElseJunkState)
+        {
+            getErrorHandler().warning ("Extra text after else", loc);
+            SkipParser skip (getErrorHandler(), getContext());
+            scanner.scan (skip);
+            mState = IfElseBodyState;
+            return true;
         }
 
         return Parser::parseKeyword (keyword, loc, scanner);
@@ -250,8 +265,9 @@ namespace Compiler
                 default: ;
             }
         }
-        else if (code==Scanner::S_open && mState==IfElseJunkState)
+        else if (mState==IfElseJunkState)
         {
+            getErrorHandler().warning ("Extra text after else", loc);
             SkipParser skip (getErrorHandler(), getContext());
             scanner.scan (skip);
             mState = IfElseBodyState;

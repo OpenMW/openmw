@@ -17,6 +17,8 @@
 #include <Recast.h>
 #include <RecastAlloc.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <algorithm>
 #include <iomanip>
 #include <limits>
@@ -486,23 +488,21 @@ namespace DetourNavigator
         const std::vector<OffMeshConnection>& offMeshConnections, const Settings& settings,
         const SharedNavMeshCacheItem& navMeshCacheItem, NavMeshTilesCache& navMeshTilesCache)
     {
-        log("update NavMesh with mutiple tiles:",
-            " agentHeight=", std::setprecision(std::numeric_limits<float>::max_exponent10),
-            getHeight(settings, agentHalfExtents),
-            " agentMaxClimb=", std::setprecision(std::numeric_limits<float>::max_exponent10),
-            getMaxClimb(settings),
-            " agentRadius=", std::setprecision(std::numeric_limits<float>::max_exponent10),
-            getRadius(settings, agentHalfExtents),
-            " changedTile=", changedTile,
-            " playerTile=", playerTile,
-            " changedTileDistance=", getDistance(changedTile, playerTile));
+        Log(Debug::Debug) << std::fixed << std::setprecision(2) <<
+            "Update NavMesh with multiple tiles:" <<
+            " agentHeight=" << getHeight(settings, agentHalfExtents) <<
+            " agentMaxClimb=" << getMaxClimb(settings) <<
+            " agentRadius=" << getRadius(settings, agentHalfExtents) <<
+            " changedTile=(" << changedTile << ")" <<
+            " playerTile=(" << playerTile << ")" <<
+            " changedTileDistance=" << getDistance(changedTile, playerTile);
 
         const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
         const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         if (!recastMesh)
         {
-            log("ignore add tile: recastMesh is null");
+            Log(Debug::Debug) << "Ignore add tile: recastMesh is null";
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
@@ -517,13 +517,13 @@ namespace DetourNavigator
 
         if (isEmpty(recastMeshBounds))
         {
-            log("ignore add tile: recastMesh is empty");
+            Log(Debug::Debug) << "Ignore add tile: recastMesh is empty";
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
         if (!shouldAddTile(changedTile, playerTile, std::min(settings.mMaxTilesNumber, params.maxTiles)))
         {
-            log("ignore add tile: too far from player");
+            Log(Debug::Debug) << "Ignore add tile: too far from player";
             return navMeshCacheItem->lock()->removeTile(changedTile);
         }
 
@@ -540,7 +540,7 @@ namespace DetourNavigator
 
             if (!navMeshData.mValue)
             {
-                log("ignore add tile: NavMeshData is null");
+                Log(Debug::Debug) << "Ignore add tile: NavMeshData is null";
                 return navMeshCacheItem->lock()->removeTile(changedTile);
             }
 
@@ -557,7 +557,7 @@ namespace DetourNavigator
 
             if (!cachedNavMeshData)
             {
-                log("cache overflow");
+                Log(Debug::Debug) << "Navigator cache overflow";
                 return navMeshCacheItem->lock()->updateTile(changedTile, std::move(navMeshData));
             }
         }

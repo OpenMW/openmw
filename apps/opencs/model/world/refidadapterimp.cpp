@@ -491,17 +491,7 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData (const RefIdColumn *column, con
         return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     if (column == mColumns.mBloodType)
-    {
-        int mask = ESM::Creature::Skeleton | ESM::Creature::Metal;
-
-        if ((record.get().mFlags & mask) == ESM::Creature::Skeleton)
-            return 1;
-
-        if ((record.get().mFlags & mask) == ESM::Creature::Metal)
-            return 2;
-
-        return 0;
-    }
+        return record.get().mBloodType;
 
     std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
         mColumns.mFlags.find (column);
@@ -527,16 +517,7 @@ void CSMWorld::CreatureRefIdAdapter::setData (const RefIdColumn *column, RefIdDa
     else if (column==mColumns.mOriginal)
         creature.mOriginal = value.toString().toUtf8().constData();
     else if (column == mColumns.mBloodType)
-    {
-        int mask = ~(ESM::Creature::Skeleton | ESM::Creature::Metal);
-
-        if (value.toInt() == 1)
-            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Skeleton;
-        else if (value.toInt() == 2)
-            creature.mFlags = (creature.mFlags & mask) | ESM::Creature::Metal;
-        else
-            creature.mFlags = creature.mFlags & mask;
-    }
+        creature.mBloodType = value.toInt();
     else
     {
         std::map<const RefIdColumn *, unsigned int>::const_iterator iter =
@@ -797,17 +778,7 @@ QVariant CSMWorld::NpcRefIdAdapter::getData (const RefIdColumn *column, const Re
         return QVariant::fromValue(ColumnBase::TableEdit_Full);
 
     if (column == mColumns.mBloodType)
-    {
-        int mask = ESM::NPC::Skeleton | ESM::NPC::Metal;
-
-        if ((record.get().mFlags & mask) == ESM::NPC::Skeleton)
-            return 1;
-
-        if ((record.get().mFlags & mask) == ESM::NPC::Metal)
-            return 2;
-
-        return 0;
-    }
+        return record.get().mBloodType;
 
     if (column == mColumns.mGender)
     {
@@ -846,16 +817,7 @@ void CSMWorld::NpcRefIdAdapter::setData (const RefIdColumn *column, RefIdData& d
     else if (column==mColumns.mHead)
         npc.mHead = value.toString().toUtf8().constData();
     else if (column == mColumns.mBloodType)
-    {
-        int mask = ~(ESM::NPC::Skeleton | ESM::NPC::Metal);
-
-        if (value.toInt() == 1)
-            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Skeleton;
-        else if (value.toInt() == 2)
-            npc.mFlags = (npc.mFlags & mask) | ESM::NPC::Metal;
-        else
-            npc.mFlags = npc.mFlags & mask;
-    }
+        npc.mBloodType = value.toInt();
     else if (column == mColumns.mGender)
     {
         // Implemented this way to allow additional gender types in the future.

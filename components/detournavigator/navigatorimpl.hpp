@@ -48,6 +48,8 @@ namespace DetourNavigator
 
         const Settings& getSettings() const override;
 
+        void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
+
     private:
         Settings mSettings;
         NavMeshManager mNavMeshManager;

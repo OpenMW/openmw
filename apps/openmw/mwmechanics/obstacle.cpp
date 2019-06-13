@@ -2,6 +2,8 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -121,17 +123,19 @@ namespace MWMechanics
      * u = how long to move sideways
      *
      */
-    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration, float scaleMinimumDistance)
+    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration)
     {
-        const MWWorld::Class& cls = actor.getClass();
-        ESM::Position pos = actor.getRefData().getPosition();
+        const ESM::Position pos = actor.getRefData().getPosition();
 
-        if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor) * scaleMinimumDistance;
+        if (mDistSameSpot == -1)
+        {
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor) + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+        }
 
-        float distSameSpot = mDistSameSpot * duration;
-
-        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
+        const float distSameSpot = mDistSameSpot * duration;
+        const float squaredMovedDistance = (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2();
+        const bool samePosition = squaredMovedDistance < distSameSpot * distSameSpot;
 
         // update position
         mPrevX = pos.pos[0];

@@ -1,12 +1,16 @@
 #include "windowbase.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/environment.hpp"
 
+#include <components/widgets/imagebutton.hpp>
+
 #include "draganddrop.hpp"
+#include "exposedwindow.hpp"
 
 using namespace MWGui;
 
@@ -14,6 +18,32 @@ WindowBase::WindowBase(const std::string& parLayout)
   : Layout(parLayout)
 {
     mMainWidget->setVisible(false);
+
+    Window* window = mMainWidget->castType<Window>(false);
+    if (!window)
+        return;
+
+    MyGUI::Button* button = nullptr;
+    MyGUI::VectorWidgetPtr widgets = window->getSkinWidgetsByName("Action");
+    for (MyGUI::Widget* widget : widgets)
+    {
+        if (widget->isUserString("SupportDoubleClick"))
+            button = widget->castType<MyGUI::Button>();
+    }
+
+    if (button)
+        button->eventMouseButtonDoubleClick += MyGUI::newDelegate(this, &WindowBase::onDoubleClick);
+}
+
+void WindowBase::onTitleDoubleClicked()
+{
+    if (MyGUI::InputManager::getInstance().isShiftPressed())
+        MWBase::Environment::get().getWindowManager()->toggleMaximized(this);
+}
+
+void WindowBase::onDoubleClick(MyGUI::Widget *_sender)
+{
+    onTitleDoubleClicked();
 }
 
 void WindowBase::setVisible(bool visible)
@@ -25,18 +55,6 @@ void WindowBase::setVisible(bool visible)
         onOpen();
     else if (wasVisible)
         onClose();
-
-    // This is needed as invisible widgets can retain key focus.
-    // Remove for MyGUI 3.2.2
-    if (!visible)
-    {
-        MyGUI::Widget* keyFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
-        while (keyFocus != mMainWidget && keyFocus != nullptr)
-            keyFocus = keyFocus->getParent();
-
-        if (keyFocus == mMainWidget)
-            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
-    }
 }
 
 bool WindowBase::isVisible()
@@ -119,4 +137,31 @@ void NoDrop::setAlpha(float alpha)
 {
     if (mWidget)
         mWidget->setAlpha(alpha);
+}
+
+BookWindowBase::BookWindowBase(const std::string& parLayout)
+  : WindowBase(parLayout)
+{
+}
+
+float BookWindowBase::adjustButton (char const * name)
+{
+    Gui::ImageButton* button;
+    WindowBase::getWidget (button, name);
+    MyGUI::IntSize requested = button->getRequestedSize();
+    float scale = requested.height / button->getSize().height;
+    MyGUI::IntSize newSize = requested;
+    newSize.width /= scale;
+    newSize.height /= scale;
+    button->setSize(newSize);
+
+    if (button->getAlign().isRight())
+    {
+        MyGUI::IntSize diff = (button->getSize() - requested);
+        diff.width /= scale;
+        diff.height /= scale;
+        button->setPosition(button->getPosition() + MyGUI::IntPoint(diff.width,0));
+    }
+
+    return scale;
 }

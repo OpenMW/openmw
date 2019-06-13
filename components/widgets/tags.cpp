@@ -1,11 +1,13 @@
 #include "tags.hpp"
 
+#include <components/fallback/fallback.hpp>
+
 #include <MyGUI_Colour.h>
 
 namespace Gui
 {
 
-bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out, const std::map<std::string,std::string>& fallbackSettings)
+bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out)
 {
     std::string fontcolour = "fontcolour=";
     size_t fontcolourLength = fontcolour.length();
@@ -16,14 +18,14 @@ bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out, const std::map<s
     if (tag.compare(0, fontcolourLength, fontcolour) == 0)
     {
         std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
-        std::map<std::string, std::string>::const_iterator it = fallbackSettings.find(fallbackName);
-        if (it == fallbackSettings.end())
+        std::string str = Fallback::Map::getString(fallbackName);
+        if (str.empty())
             throw std::runtime_error("Unknown fallback name: " + fallbackName);
-        std::string str = it->second;
 
         std::string ret[3];
         unsigned int j=0;
-        for(unsigned int i=0;i<str.length();++i){
+        for(unsigned int i=0;i<str.length();++i)
+        {
             if(str[i]==',') j++;
             else if (str[i] != ' ') ret[j]+=str[i];
         }
@@ -34,14 +36,14 @@ bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out, const std::map<s
     else if (tag.compare(0, fontcolourhtmlLength, fontcolourhtml) == 0)
     {
         std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourhtmlLength);
-        std::map<std::string, std::string>::const_iterator it = fallbackSettings.find(fallbackName);
-        if (it == fallbackSettings.end())
+        std::string str = Fallback::Map::getString(fallbackName);
+        if (str.empty())
             throw std::runtime_error("Unknown fallback name: " + fallbackName);
-        std::string str = it->second;
 
         std::string ret[3];
         unsigned int j=0;
-        for(unsigned int i=0;i<str.length();++i){
+        for(unsigned int i=0;i<str.length();++i)
+        {
             if(str[i]==',') j++;
             else if (str[i] != ' ') ret[j]+=str[i];
         }

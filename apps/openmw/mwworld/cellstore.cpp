@@ -37,6 +37,9 @@ namespace
         {
             MWWorld::Ptr container (&*iter, 0);
 
+            if (container.getRefData().getCustomData() == nullptr)
+                continue;
+
             MWWorld::Ptr ptr =
                 container.getClass().getContainerStore (container).search (id);
 
@@ -133,7 +136,7 @@ namespace
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.getRefNum()==state.mRef.mRefNum)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum && iter->mRef.getRefId() == state.mRef.mRefID)
                 {
                     // overwrite existing reference
                     iter->load (state);
@@ -382,10 +385,10 @@ namespace MWWorld
     struct SearchVisitor
     {
         PtrType mFound;
-        std::string mIdToFind;
+        const std::string *mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefId() == mIdToFind)
+            if (ptr.getCellRef().getRefId() == *mIdToFind)
             {
                 mFound = ptr;
                 return false;
@@ -397,7 +400,7 @@ namespace MWWorld
     Ptr CellStore::search (const std::string& id)
     {
         SearchVisitor<MWWorld::Ptr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        searchVisitor.mIdToFind = &id;
         forEach(searchVisitor);
         return searchVisitor.mFound;
     }
@@ -405,7 +408,7 @@ namespace MWWorld
     ConstPtr CellStore::searchConst (const std::string& id) const
     {
         SearchVisitor<MWWorld::ConstPtr> searchVisitor;
-        searchVisitor.mIdToFind = id;
+        searchVisitor.mIdToFind = &id;
         forEachConst(searchVisitor);
         return searchVisitor.mFound;
     }
@@ -966,7 +969,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::rest()
+    void CellStore::rest(double hours)
     {
         if (mState == State_Loaded)
         {
@@ -975,7 +978,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
             for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
@@ -983,7 +986,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, true);
+                    MWBase::Environment::get().getMechanicsManager()->restoreDynamicStats(ptr, hours, true);
                 }
             }
         }

@@ -57,7 +57,6 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mWaterNode;
         osg::ref_ptr<osg::Geometry> mWaterGeom;
         Resource::ResourceSystem* mResourceSystem;
-        const Fallback::Map* mFallback;
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         std::unique_ptr<RippleSimulation> mSimulation;
@@ -85,7 +84,7 @@ namespace MWRender
 
     public:
         Water(osg::Group* parent, osg::Group* sceneRoot,
-              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico, const Fallback::Map* fallback,
+              Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
               const std::string& resourcePath);
         ~Water();
 

@@ -71,11 +71,8 @@ namespace MWGui
         std::set<MWWorld::Ptr> followers;
         MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
 
-        // Apply followers cost, in vanilla one follower travels for free
-        if (Settings::Manager::getBool("charge for every follower travelling", "Game"))
-            price *= 1 + static_cast<int>(followers.size());
-        else
-            price *= std::max(1, static_cast<int>(followers.size()));
+        // Apply followers cost, unlike vanilla the first follower doesn't travel for free
+        price *= 1 + static_cast<int>(followers.size());
 
         int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
 
@@ -174,10 +171,7 @@ namespace MWGui
             ESM::Position playerPos = player.getRefData().getPosition();
             float d = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
             int hours = static_cast<int>(d /MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fTravelTimeMult")->mValue.getFloat());
-            for(int i = 0;i < hours;i++)
-            {
-                MWBase::Environment::get().getMechanicsManager ()->rest (true);
-            }
+            MWBase::Environment::get().getMechanicsManager ()->rest (hours, true);
             MWBase::Environment::get().getWorld()->advanceTime(hours);
         }
 

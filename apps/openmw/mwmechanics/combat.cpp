@@ -475,6 +475,11 @@ namespace MWMechanics
     {
         osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
         osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
+        if (canActorMoveByZAxis(actor2))
+        {
+            pos1.z() = 0.f;
+            pos2.z() = 0.f;
+        }
 
         float d = (pos1 - pos2).length();
 
@@ -484,5 +489,12 @@ namespace MWMechanics
                     "fFightDistanceMultiplier")->mValue.getFloat();
 
         return (iFightDistanceBase - fFightDistanceMultiplier * d);
+    }
+
+    bool isTargetMagicallyHidden(const MWWorld::Ptr& target)
+    {
+        const MagicEffects& magicEffects = target.getClass().getCreatureStats(target).getMagicEffects();
+        return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+            || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
     }
 }
