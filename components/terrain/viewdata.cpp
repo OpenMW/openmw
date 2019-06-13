@@ -24,6 +24,7 @@ void ViewData::copyFrom(const ViewData& other)
     mChanged = other.mChanged;
     mHasViewPoint = other.mHasViewPoint;
     mViewPoint = other.mViewPoint;
+    mActiveGrid = other.mActiveGrid;
 }
 
 void ViewData::add(QuadTreeNode *node)
@@ -118,12 +119,12 @@ bool ViewData::Entry::set(QuadTreeNode *node)
     }
 }
 
-bool suitable(ViewData* vd, const osg::Vec3f& viewPoint, float& maxDist)
+bool suitable(ViewData* vd, const osg::Vec3f& viewPoint, float& maxDist, const osg::Vec4i& activeGrid)
 {
-    return vd->hasViewPoint() && (vd->getViewPoint() - viewPoint).length2() < maxDist*maxDist;
+    return vd->hasViewPoint() && (vd->getViewPoint() - viewPoint).length2() < maxDist*maxDist && vd->getActiveGrid() == activeGrid;
 }
 
-ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPoint, bool& needsUpdate)
+ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPoint, const osg::Vec4i &activeGrid, bool& needsUpdate)
 {
     Map::const_iterator found = mViews.find(viewer);
     ViewData* vd = nullptr;
@@ -135,11 +136,11 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
     else
         vd = found->second;
 
-    if (!suitable(vd, viewPoint, mReuseDistance))
+    if (!suitable(vd, viewPoint, mReuseDistance, activeGrid))
     {
         for (Map::const_iterator other = mViews.begin(); other != mViews.end(); ++other)
         {
-            if (suitable(other->second, viewPoint, mReuseDistance) && other->second->getNumEntries())
+            if (suitable(other->second, viewPoint, mReuseDistance, activeGrid) && other->second->getNumEntries())
             {
                 vd->copyFrom(*other->second);
                 needsUpdate = false;
@@ -147,6 +148,7 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
             }
         }
         vd->setViewPoint(viewPoint);
+        vd->setActiveGrid(activeGrid);
         needsUpdate = true;
     }
     else

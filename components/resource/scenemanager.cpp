@@ -466,7 +466,7 @@ namespace Resource
         return options;
     }
 
-    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name)
+    osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string &name, bool compile)
     {
         std::string normalized = name;
         mVFS->normalizeFilename(normalized);
@@ -529,7 +529,7 @@ namespace Resource
                 optimizer.optimize(loaded, options);
             }
 
-            if (mIncrementalCompileOperation)
+            if (compile && mIncrementalCompileOperation)
                 mIncrementalCompileOperation->add(loaded);
             else
                 loaded->getBound();
@@ -713,6 +713,13 @@ namespace Resource
         mSharedStateMutex.lock();
         mSharedStateManager->prune();
         mSharedStateMutex.unlock();
+
+        if (mIncrementalCompileOperation)
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
+            while (mIncrementalCompileOperation->getToCompile().size() > 1000)
+                mIncrementalCompileOperation->getToCompile().pop_front();
+        }
     }
 
     void SceneManager::clearCache()

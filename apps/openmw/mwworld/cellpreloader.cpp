@@ -172,7 +172,7 @@ namespace MWWorld
     class TerrainPreloadItem : public SceneUtil::WorkItem
     {
     public:
-        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<osg::Vec3f>& preloadPositions)
+        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View> >& views, Terrain::World* world, const std::vector<CellPreloader::PositionCellGrid>& preloadPositions)
             : mAbort(false)
             , mTerrainViews(views)
             , mWorld(world)
@@ -191,7 +191,7 @@ namespace MWWorld
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
                 mTerrainViews[i]->reset();
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i], mAbort);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort);
             }
         }
 
@@ -204,7 +204,7 @@ namespace MWWorld
         std::atomic<bool> mAbort;
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
         Terrain::World* mWorld;
-        std::vector<osg::Vec3f> mPreloadPositions;
+        std::vector<CellPreloader::PositionCellGrid> mPreloadPositions;
     };
 
     /// Worker thread item: update the resource system's cache, effectively deleting unused entries.
@@ -415,7 +415,7 @@ namespace MWWorld
         mUnrefQueue = unrefQueue;
     }
 
-    void CellPreloader::setTerrainPreloadPositions(const std::vector<osg::Vec3f> &positions)
+    void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid> &positions)
     {
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;

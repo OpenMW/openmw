@@ -167,6 +167,7 @@ namespace MWWorld
         void setUp();
 
         const T *search(const std::string &id) const;
+        const T *searchStatic(const std::string &id) const;
 
         /**
          * Does the record with this ID come from the dynamic store?
@@ -297,6 +298,7 @@ namespace MWWorld
 
         const ESM::Cell *search(const std::string &id) const;
         const ESM::Cell *search(int x, int y) const;
+        const ESM::Cell *searchStatic(int x, int y) const;
         const ESM::Cell *searchOrCreate(int x, int y);
 
         const ESM::Cell *find(const std::string &id) const;

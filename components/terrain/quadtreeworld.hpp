@@ -38,10 +38,19 @@ namespace Terrain
         virtual void unloadCell(int x, int y);
 
         View* createView();
-        void preload(View* view, const osg::Vec3f& eyePoint, std::atomic<bool>& abort);
+        void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort);
         void storeView(const View* view, double referenceTime);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
+
+        class ChunkManager
+        {
+        public:
+            virtual ~ChunkManager(){}
+            virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint) = 0;
+            virtual unsigned int getNodeMask() { return 0; }
+        };
+        void addChunkManager(ChunkManager*);
 
     private:
         void ensureQuadTreeBuilt();
@@ -50,6 +59,8 @@ namespace Terrain
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
         osg::ref_ptr<LodCallback> mLodCallback;
+
+        std::vector<ChunkManager*> mChunkManagers;
 
         OpenThreads::Mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;

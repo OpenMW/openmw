@@ -152,6 +152,19 @@ namespace MWWorld
         return 0;
     }
     template<typename T>
+    const T *Store<T>::searchStatic(const std::string &id) const
+    {
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
+
+        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+            return &(it->second);
+        }
+
+        return 0;
+    }
+
+    template<typename T>
     bool Store<T>::isDynamic(const std::string &id) const
     {
         typename Dynamic::const_iterator dit = mDynamic.find(id);
@@ -580,6 +593,18 @@ namespace MWWorld
             return &dit->second;
         }
 
+        return 0;
+    }
+    const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
+    {
+        ESM::Cell cell;
+        cell.mData.mX = x, cell.mData.mY = y;
+
+        std::pair<int, int> key(x, y);
+        DynamicExt::const_iterator it = mExt.find(key);
+        if (it != mExt.end()) {
+            return &(it->second);
+        }
         return 0;
     }
     const ESM::Cell *Store<ESM::Cell>::searchOrCreate(int x, int y)

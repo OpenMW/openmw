@@ -106,7 +106,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
     }
 }
 
-osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry()
+osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry() const
 {
     return mSourceGeometry;
 }

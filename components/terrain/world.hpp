@@ -147,7 +147,7 @@ namespace Terrain
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
 
-        virtual void preload(View* view, const osg::Vec3f& viewPoint, std::atomic<bool>& abort) {}
+        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort) {}
 
         /// Store a preloaded view into the cache with the intent that the next rendering traversal can use it.
         /// @note Not thread safe.
@@ -160,6 +160,8 @@ namespace Terrain
         Storage* getStorage() { return mStorage; }
 
         osg::Callback* getHeightCullCallback(float highz, unsigned int mask);
+
+        void setActiveGrid(const osg::Vec4i &grid) { mActiveGrid = grid; }
 
     protected:
         Storage* mStorage;
@@ -181,6 +183,8 @@ namespace Terrain
 
         std::set<std::pair<int,int>> mLoadedCells;
         osg::ref_ptr<HeightCullCallback> mHeightCullCallback;
+
+        osg::Vec4i mActiveGrid;
     };
 }
 

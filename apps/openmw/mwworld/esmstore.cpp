@@ -136,6 +136,10 @@ void ESMStore::setUp(bool validateRecords)
                 mIds[*record] = storeIt->first;
         }
     }
+
+    if (mStaticIds.empty())
+        mStaticIds = mIds;
+
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();

@@ -103,7 +103,9 @@ void Optimizer::optimize(osg::Node* node, unsigned int options)
         osg::Timer_t startTick = osg::Timer::instance()->tick();
 
         MergeGeometryVisitor mgv(this);
-        mgv.setTargetMaximumNumberOfVertices(10000);
+        mgv.setTargetMaximumNumberOfVertices(1000000);
+        mgv.setMergeAlphaBlending(_mergeAlphaBlending);
+        mgv.setViewPoint(_viewPoint);
         node->accept(mgv);
 
         osg::Timer_t endTick = osg::Timer::instance()->tick();
@@ -988,6 +990,17 @@ struct LessGeometry
     }
 };
 
+struct LessGeometryViewPoint
+{
+    osg::Vec3f _viewPoint;
+    bool operator() (const osg::ref_ptr<osg::Geometry>& lhs,const osg::ref_ptr<osg::Geometry>& rhs) const
+    {
+        float len1 = (lhs->getBoundingBox().center() - _viewPoint).length2();
+        float len2 = (rhs->getBoundingBox().center() - _viewPoint).length2();
+        return len2 < len1;
+    }
+};
+
 struct LessGeometryPrimitiveType
 {
     bool operator() (const osg::ref_ptr<osg::Geometry>& lhs,const osg::ref_ptr<osg::Geometry>& rhs) const
@@ -1055,16 +1068,16 @@ bool isAbleToMerge(const osg::Geometry& g1, const osg::Geometry& g2)
 void Optimizer::MergeGeometryVisitor::pushStateSet(osg::StateSet *stateSet)
 {
     _stateSetStack.push_back(stateSet);
-    checkAllowedToMerge();
+    checkAlphaBlendingActive();
 }
 
 void Optimizer::MergeGeometryVisitor::popStateSet()
 {
     _stateSetStack.pop_back();
-    checkAllowedToMerge();
+    checkAlphaBlendingActive();
 }
 
-void Optimizer::MergeGeometryVisitor::checkAllowedToMerge()
+void Optimizer::MergeGeometryVisitor::checkAlphaBlendingActive()
 {
     int renderingHint = 0;
     bool override = false;
@@ -1080,7 +1093,7 @@ void Optimizer::MergeGeometryVisitor::checkAllowedToMerge()
             override = true;
     }
     // Can't merge Geometry that are using a transparent sorting bin as that would cause the sorting to break.
-    _allowedToMerge = renderingHint != osg::StateSet::TRANSPARENT_BIN;
+    _alphaBlendingActive = renderingHint == osg::StateSet::TRANSPARENT_BIN;
 }
 
 void Optimizer::MergeGeometryVisitor::apply(osg::Group &group)
@@ -1088,13 +1101,21 @@ void Optimizer::MergeGeometryVisitor::apply(osg::Group &group)
     if (group.getStateSet())
         pushStateSet(group.getStateSet());
 
-    if (_allowedToMerge)
+    if (!_alphaBlendingActive || _mergeAlphaBlending)
         mergeGroup(group);
 
     traverse(group);
 
     if (group.getStateSet())
         popStateSet();
+}
+
+osg::PrimitiveSet* clonePrimitive(osg::PrimitiveSet* ps)
+{
+    if (ps->referenceCount() <= 1)
+        return ps;
+    ps = dynamic_cast<osg::PrimitiveSet*>(ps->clone(osg::CopyOp::DEEP_COPY_ALL));
+    return ps;
 }
 
 bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
@@ -1120,7 +1141,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
             osg::Geometry* geom = child->asGeometry();
             if (geom)
             {
-                if (!geometryContainsSharedArrays(*geom) &&
+                if (
                     geom->getDataVariance()!=osg::Object::DYNAMIC &&
                     isOperationPermissibleForObject(geom))
                 {
@@ -1254,6 +1275,12 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 DuplicateList& duplicateList = *mitr;
                 if (!duplicateList.empty())
                 {
+                    if (_alphaBlendingActive)
+                    {
+                        LessGeometryViewPoint lgvp;
+                        lgvp._viewPoint = _viewPoint;
+                        std::sort(duplicateList.begin(), duplicateList.end(), lgvp);
+                    }
                     DuplicateList::iterator ditr = duplicateList.begin();
                     osg::ref_ptr<osg::Geometry> lhs = *ditr++;
                     group.addChild(lhs.get());
@@ -1290,10 +1317,12 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 {
                     if (prim->getNumIndices()==3)
                     {
+                        prim = clonePrimitive(prim); (*itr) = prim;
                         prim->setMode(osg::PrimitiveSet::TRIANGLES);
                     }
                     else if (prim->getNumIndices()==4)
                     {
+                        prim = clonePrimitive(prim); (*itr) = prim;
                         prim->setMode(osg::PrimitiveSet::QUADS);
                     }
                 }
@@ -1319,6 +1348,8 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
 
 #if 1
                 bool doneCombine = false;
+
+                std::set<osg::PrimitiveSet*> toremove;
 
                 osg::Geometry::PrimitiveSetList& primitives = geom->getPrimitiveSetList();
                 unsigned int lhsNo=0;
@@ -1348,6 +1379,8 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
 
                     if (combine)
                     {
+                        lhs = clonePrimitive(lhs);
+                        primitives[lhsNo] = lhs;
 
                         switch(lhs->getType())
                         {
@@ -1375,7 +1408,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                     if (combine)
                     {
                         // make this primitive set as invalid and needing cleaning up.
-                        rhs->setMode(0xffffff);
+                        toremove.insert(rhs);
                         doneCombine = true;
                         ++rhsNo;
                     }
@@ -1390,7 +1423,6 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                 if (doneCombine)
                 {
                     // now need to clean up primitiveset so it no longer contains the rhs combined primitives.
-
                     // first swap with a empty primitiveSet to empty it completely.
                     osg::Geometry::PrimitiveSetList oldPrimitives;
                     primitives.swap(oldPrimitives);
@@ -1400,7 +1432,7 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                         pitr != oldPrimitives.end();
                         ++pitr)
                     {
-                        if ((*pitr)->getMode()!=0xffffff) primitives.push_back(*pitr);
+                        if (!toremove.count(*pitr)) primitives.push_back(*pitr);
                     }
                 }
     #endif
@@ -1479,34 +1511,6 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
     return false;
 }
 
-bool Optimizer::MergeGeometryVisitor::geometryContainsSharedArrays(osg::Geometry& geom)
-{
-    if (geom.getVertexArray() && geom.getVertexArray()->referenceCount()>1) return true;
-    if (geom.getNormalArray() && geom.getNormalArray()->referenceCount()>1) return true;
-    if (geom.getColorArray() && geom.getColorArray()->referenceCount()>1) return true;
-    if (geom.getSecondaryColorArray() && geom.getSecondaryColorArray()->referenceCount()>1) return true;
-    if (geom.getFogCoordArray() && geom.getFogCoordArray()->referenceCount()>1) return true;
-
-
-    for(unsigned int unit=0;unit<geom.getNumTexCoordArrays();++unit)
-    {
-        osg::Array* tex = geom.getTexCoordArray(unit);
-        if (tex && tex->referenceCount()>1) return true;
-    }
-
-    // shift the indices of the incoming primitives to account for the pre existing geometry.
-    for(osg::Geometry::PrimitiveSetList::iterator primItr=geom.getPrimitiveSetList().begin();
-        primItr!=geom.getPrimitiveSetList().end();
-        ++primItr)
-    {
-        if ((*primItr)->referenceCount()>1) return true;
-    }
-
-
-    return false;
-}
-
-
 class MergeArrayVisitor : public osg::ArrayVisitor
 {
     protected:
@@ -1574,6 +1578,8 @@ class MergeArrayVisitor : public osg::ArrayVisitor
 
 bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geometry& rhs)
 {
+    if (lhs.containsSharedArrays())
+        lhs.duplicateSharedArrays();
 
     MergeArrayVisitor merger;
 
@@ -1661,7 +1667,6 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
         }
     }
 
-
     // shift the indices of the incoming primitives to account for the pre existing geometry.
     osg::Geometry::PrimitiveSetList::iterator primItr;
     for(primItr=rhs.getPrimitiveSetList().begin(); primItr!=rhs.getPrimitiveSetList().end(); ++primItr)
@@ -1697,7 +1702,8 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
                 }
                 else
                 {
-                    primitive->offsetIndices(base);
+                    (*primItr) = clonePrimitive(primitive);
+                    (*primItr)->offsetIndices(base);
                 }
             }
             break;
@@ -1722,7 +1728,8 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
                 }
                 else
                 {
-                    primitive->offsetIndices(base);
+                    (*primItr) = clonePrimitive(primitive);
+                    (*primItr)->offsetIndices(base);
                 }
             }
             break;
@@ -1731,7 +1738,8 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
         case(osg::PrimitiveSet::DrawArrayLengthsPrimitiveType):
         case(osg::PrimitiveSet::DrawElementsUIntPrimitiveType):
         default:
-            primitive->offsetIndices(base);
+            (*primItr) = clonePrimitive(primitive);
+            (*primItr)->offsetIndices(base);
             break;
         }
     }

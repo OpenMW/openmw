@@ -57,6 +57,9 @@ namespace Terrain
         void setViewPoint(const osg::Vec3f& viewPoint);
         const osg::Vec3f& getViewPoint() const;
 
+        void setActiveGrid(const osg::Vec4i &grid) { if (grid != mActiveGrid) {mActiveGrid = grid;mEntries.clear();mNumEntries=0;} }
+        const osg::Vec4i &getActiveGrid() const { return mActiveGrid;}
+
     private:
         std::vector<Entry> mEntries;
         unsigned int mNumEntries;
@@ -64,6 +67,7 @@ namespace Terrain
         bool mChanged;
         osg::Vec3f mViewPoint;
         bool mHasViewPoint;
+        osg::Vec4i mActiveGrid;
     };
 
     class ViewDataMap : public osg::Referenced
@@ -75,7 +79,7 @@ namespace Terrain
             , mExpiryDelay(1.f)
         {}
 
-        ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, bool& needsUpdate);
+        ViewData* getViewData(osg::Object* viewer, const osg::Vec3f& viewPoint, const osg::Vec4i &activeGrid, bool& needsUpdate);
 
         ViewData* createOrReuseView();
 
