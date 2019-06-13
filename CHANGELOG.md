@@ -102,6 +102,7 @@
     Bug #5047: # in cell names sets color
     Bug #5050: Invalid spell effects are not handled gracefully
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
+    Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
