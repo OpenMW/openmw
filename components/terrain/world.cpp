@@ -19,6 +19,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
+    , mHeightCullCallback(new HeightCullCallback)
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
@@ -118,6 +119,13 @@ void World::updateTextureFiltering()
 void World::clearAssociatedCaches()
 {
     mChunkManager->clearCache();
+}
+
+osg::Callback* World::getHeightCullCallback(float highz, unsigned int mask)
+{
+    mHeightCullCallback->setHighZ(highz);
+    mHeightCullCallback->setCullMask(mask);
+    return mHeightCullCallback;
 }
 
 }

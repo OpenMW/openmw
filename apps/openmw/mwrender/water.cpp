@@ -436,6 +436,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     , mToggled(true)
     , mTop(0)
     , mInterior(false)
+    , mCullCallback(nullptr)
 {
     mSimulation.reset(new RippleSimulation(mSceneRoot, resourceSystem));
 
@@ -466,6 +467,29 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
         ico->add(mWaterNode);
 }
 
+void Water::setCullCallback(osg::Callback* callback)
+{
+    if (mCullCallback)
+    {
+        mWaterNode->removeCullCallback(mCullCallback);
+        if (mReflection)
+            mReflection->removeCullCallback(mCullCallback);
+        if (mRefraction)
+            mRefraction->removeCullCallback(mCullCallback);
+    }
+
+    mCullCallback = callback;
+
+    if (callback)
+    {
+        mWaterNode->addCullCallback(callback);
+        if (mReflection)
+            mReflection->addCullCallback(callback);
+        if (mRefraction)
+            mRefraction->addCullCallback(callback);
+    }
+}
+
 osg::Uniform *Water::getRainIntensityUniform()
 {
     return mRainIntensityUniform.get();
@@ -491,6 +515,8 @@ void Water::updateWaterMaterial()
         mReflection = new Reflection(mInterior);
         mReflection->setWaterLevel(mTop);
         mReflection->setScene(mSceneRoot);
+        if (mCullCallback)
+            mReflection->addCullCallback(mCullCallback);
         mParent->addChild(mReflection);
 
         if (Settings::Manager::getBool("refraction", "Water"))
@@ -498,6 +524,8 @@ void Water::updateWaterMaterial()
             mRefraction = new Refraction;
             mRefraction->setWaterLevel(mTop);
             mRefraction->setScene(mSceneRoot);
+            if (mCullCallback)
+                mRefraction->addCullCallback(mCullCallback);
             mParent->addChild(mRefraction);
         }
 

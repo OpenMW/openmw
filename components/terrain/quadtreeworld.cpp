@@ -307,6 +307,38 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, C
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
 }
 
+void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+{
+    if (!(cv->getTraversalMask() & callback->getCullMask()))
+        return;
+    float lowZ = FLT_MAX;
+    float highZ = callback->getHighZ();
+    if (cv->getEyePoint().z() <= highZ || outofworld)
+    {
+        callback->setLowZ(-FLT_MAX);
+        return;
+    }
+    cv->pushCurrentMask();
+    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    {
+        ViewData::Entry& entry = vd->getEntry(i);
+        osg::BoundingBox bb = static_cast<osg::Drawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getBoundingBox();
+        float minZ = bb._min.z();
+        if (minZ > highZ)
+            continue;
+        osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);
+        bb._min += ofs; bb._max += ofs;
+        bb._min.z() = highZ;
+        bb._max.z() = highZ;
+        if (cv->isCulled(bb))
+            continue;
+        lowZ = minZ;
+        break;
+    }
+    callback->setLowZ(lowZ);
+    cv->popCurrentMask();
+}
+
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
@@ -383,6 +415,9 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
         entry.mRenderingNode->accept(nv);
     }
+
+    if (isCullVisitor)
+        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !mGrid.empty());
 
     if (!isCullVisitor)
         vd->clear(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
