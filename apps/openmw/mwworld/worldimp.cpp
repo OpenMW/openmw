@@ -21,6 +21,7 @@
 #include <components/resource/bulletshape.hpp>
 #include <components/resource/resourcesystem.hpp>
 
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/detournavigator/debug.hpp>
@@ -2215,9 +2216,10 @@ namespace MWWorld
             computeBounds.setTraversalMask(~MWRender::Mask_ParticleSystem);
             dropped.getRefData().getBaseNode()->accept(computeBounds);
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
+            osg::Vec3 cellorigin = SceneUtil::getCellOrigin(cell->getCell());
             if (bounds.valid())
             {
-                bounds.set(bounds._min - pos.asVec3(), bounds._max - pos.asVec3());
+                bounds.set(bounds._min + cellorigin - pos.asVec3(), bounds._max + cellorigin - pos.asVec3());
 
                 osg::Vec3f adjust (
                             (bounds.xMin() + bounds.xMax()) / 2,
