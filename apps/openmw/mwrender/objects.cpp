@@ -105,13 +105,13 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
     if(ocq)
     {
         ocq = static_cast<SceneUtil::StaticOcclusionQueryNode *>(ocq->getChild(0));
-
         const ESM::Cell * esmcell = ptr.getCell()->getCell();
+        const ESM::CellId::CellIndex &cellid = esmcell->getCellId().mIndex;
         float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 
         osg::BoundingSphere bs;
-        bs.center() = osg::Vec3( (static_cast<float>(esmcell->getGridX())+0.5f) * cellSize,
-                                 (static_cast<float>(esmcell->getGridY())+0.5f) * cellSize, 0);
+        bs.center() = osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
+                                 (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
         bs.radius() = 0.5f * cellSize;
 
         osg::BoundingSphere bsi = objectNode->getBound();
