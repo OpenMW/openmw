@@ -609,6 +609,58 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 
 }
 
+/// Avoid costy call to getBounds on OQN when bounds invalidated (deffered to further traversal)
+/// but don't use cached bounds ...
+class OQGetBoundsVisitor : public osg::NodeVisitor
+{
+public:
+    OQGetBoundsVisitor(TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN): osg::NodeVisitor(traversalMode){}
+
+    void apply(osg::Transform& transform)
+    {
+        osg::Matrix matrix;
+        if (!_matrixStack.empty()) matrix = _matrixStack.back();
+
+        transform.computeLocalToWorldMatrix(matrix,this);
+
+        pushMatrix(matrix);
+
+        traverse(transform);
+
+        popMatrix();
+    }
+    void applyBoundingSphere(const osg::BoundingSphere& bbox)
+    {
+        if (_matrixStack.empty()) _bb.expandBy(bbox);
+        else if (bbox.valid())
+        {
+            const osg::Matrix& matrix = _matrixStack.back();
+            osg::BoundingSphere bs;
+            bs.center() = bbox._center* matrix;
+            bs.radius() = bbox.radius();
+            _bb.expandBy(bs);
+        }
+    }
+    void apply(osg::Drawable& drawable)
+    {
+        applyBoundingSphere(drawable.getBound());
+    }
+
+    inline void pushMatrix(osg::Matrix& matrix) { _matrixStack.push_back(matrix); }
+
+    inline void popMatrix() { _matrixStack.pop_back(); }
+
+    const osg::BoundingSphere& getBoundingSphere(){ return _bb; }
+
+    typedef std::vector<osg::Matrix> MatrixStack;
+
+    const MatrixStack& getMatrixStack() const { return _matrixStack; }
+
+protected:
+    MatrixStack         _matrixStack;
+    osg::BoundingSphere    _bb;
+};
+
 void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
 {
     osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
@@ -621,8 +673,9 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     bsi.center() = bs.center() + indexf * bsi.radius();
     osg::ref_ptr<StaticOcclusionQueryNode> qnode;
     osg::ref_ptr<osg::Group> target = parent.getChild(ind)->asGroup();
-
-    osg::BoundingSphere bst (target->getBound());
+    OQGetBoundsVisitor boundvis;
+    target->accept(boundvis);
+    osg::BoundingSphere bst (boundvis.getBoundingSphere());
     if( bst.valid()
         && bst.radius() > mSettings.minOQNSize
         && bsi.radius() > mSettings.minOQNSize
@@ -646,13 +699,15 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             for(unsigned int i=0; i<target->getNumChildren(); ++i)
             {
                 osg::Group * childi = target->getChild(i)->asGroup();
-                osg::BoundingSphere bschild (childi->getBound());
+                OQGetBoundsVisitor boundvis2;
+                childi->accept(boundvis2);
+                osg::BoundingSphere bschild (boundvis2.getBoundingSphere());
                 recursivCellAddStaticObject(bsi, *qnode, childi, bschild);
             }
             parent.setChild(ind, qnode);
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
-        qnode->invalidateQueryGeometry();
+        //qnode->invalidateQueryGeometry();
 
         //disable high BVH queries level
         float powlev = float(1<<mSettings.maxBVHOQLevelCount);
