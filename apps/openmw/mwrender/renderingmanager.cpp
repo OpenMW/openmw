@@ -701,33 +701,23 @@ namespace MWRender
 
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
     {
-
-        SceneUtil::getCellOrigin(ptr.getCell()->getCell());
-
+        MWWorld::RefData& refdata = ptr.getRefData();
+        osg::Group * basenode = refdata.getBaseNode();
+        bool isFlatten = refdata.isBaseNodeFlatten();
         osg::Vec3 cellorigin(0,0,0);
-        SceneUtil::PositionAttitudeTransform* trans;
-        if(ptr.getRefData().isBaseNodeFlatten())
-            trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
-        else trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
 
-;
-        SceneUtil::PositionAttitudeTransform* ptrans;
-        if(ptr.getRefData().getBaseNode()->getNumParents()>0)
-        {
-            ptrans=dynamic_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getParent(0));
-            if(ptrans)
-                cellorigin=SceneUtil::getCellOrigin(ptr.getCell()->getCell());
-            else
-            {
-                if(!ptr.getClass().isNpc())
-                    OSG_WARN<<"fuck"<<std::endl;
-            }
-            //if(ptrans)cellorigin=ptrans->getPosition();
-        }
-        //OSG_WARN<<"moveobject"<<ptr.getRefData().std::endl;
+        SceneUtil::PositionAttitudeTransform* trans = isFlatten ?
+            static_cast<SceneUtil::PositionAttitudeTransform*>(basenode->getChild(0)->getUserData())
+            : static_cast<SceneUtil::PositionAttitudeTransform*>(basenode);
+
+        if(basenode->getParent(0) != mSceneRoot)
+            cellorigin = SceneUtil::getCellOrigin(ptr.getCell()->getCell());
+        // else  OSG_WARN<<"Player don't have parent cell "<<std::endl;
+
         trans->setPosition(pos-cellorigin);
-        if(ptr.getRefData().isBaseNodeFlatten())
-            ptr.getRefData().flattenTransform();
+
+        if(isFlatten)
+            refdata.flattenTransform();
     }
 
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)

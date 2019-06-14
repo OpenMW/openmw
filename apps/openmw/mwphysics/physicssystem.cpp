@@ -1136,10 +1136,9 @@ namespace MWPhysics
 
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
     {
-        SceneUtil::PositionAttitudeTransform* trans;
-        if(ptr.getRefData().isBaseNodeFlatten())
-            trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
-        else trans=static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+        SceneUtil::PositionAttitudeTransform* trans = ptr.getRefData().isBaseNodeFlatten() ?
+            static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())
+            : static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
 
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())

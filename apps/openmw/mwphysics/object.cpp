@@ -29,10 +29,9 @@ namespace MWPhysics
 
         setScale(ptr.getCellRef().getScale());
 
-        SceneUtil::PositionAttitudeTransform* trans;
-        if(ptr.getRefData().isBaseNodeFlatten())
-            trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
-        else trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+        SceneUtil::PositionAttitudeTransform* trans = ptr.getRefData().isBaseNodeFlatten() ?
+            static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())
+            : static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
 
         setRotation(Misc::Convert::toBullet(trans->getAttitude()));
 

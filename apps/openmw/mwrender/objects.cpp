@@ -169,7 +169,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
 
 bool Objects::removeObject (const MWWorld::Ptr& ptr)
 {
-    SceneUtil::PositionAttitudeTransform *basenode = (SceneUtil::PositionAttitudeTransform *) ptr.getRefData().getBaseNode();
+    osg::Group *basenode =  ptr.getRefData().getBaseNode();
     if(!basenode)
         return true;
 
@@ -254,11 +254,9 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         objectNode->getParent(0)->removeChild(objectNode);
         oldorig = SceneUtil::getCellOrigin(old.getCell()->getCell());
     }
-
-    SceneUtil::PositionAttitudeTransform* trans;
-    if(cur.getRefData().isBaseNodeFlatten())
-        trans = static_cast<SceneUtil::PositionAttitudeTransform*>(cur.getRefData().getBaseNode()->getChild(0)->getUserData());
-    else trans = static_cast<SceneUtil::PositionAttitudeTransform*>(cur.getRefData().getBaseNode());
+    SceneUtil::PositionAttitudeTransform* trans = cur.getRefData().isBaseNodeFlatten() ?
+        static_cast<SceneUtil::PositionAttitudeTransform*>(cur.getRefData().getBaseNode()->getChild(0)->getUserData())
+        : static_cast<SceneUtil::PositionAttitudeTransform*>(cur.getRefData().getBaseNode());
 
     const float *f = cur.getRefData().getPosition().pos;
     trans->setPosition( osg::Vec3(f[0],f[1],f[2])-SceneUtil::getCellOrigin(cur.getCell()->getCell()));

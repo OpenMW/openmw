@@ -70,9 +70,9 @@ class Objects{
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
     osg::Group* insertBegin(const MWWorld::Ptr& ptr);
+public:
     osg::Group * getOrCreateCell(const MWWorld::Ptr& ptr);
 
-public:
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();
 
