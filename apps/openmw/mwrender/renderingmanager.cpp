@@ -34,7 +34,6 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
@@ -691,13 +690,12 @@ namespace MWRender
             mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
         }
         if(!ptr.getRefData().isBaseNodeFlatten())
-        static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setAttitude(rot);
-        else {
+            static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->setAttitude(rot);
+        else
+        {
             //need reflatten
-
             static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData())->setAttitude(rot);
-             ptr.getRefData().flattenTransform();
-
+            ptr.getRefData().flattenTransform();
         }
     }
 

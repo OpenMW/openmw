@@ -71,14 +71,7 @@ namespace
     {
         if (!ptr.getRefData().getBaseNode())
             return;
-      /*  if(ptr.getRefData().getBaseNode()->getNodeMask()== (1<<11)&&//Mask_Static&&
-                !ptr.getClass().isMobile(ptr)
-                &&!ptr.getClass().isActivator() &&!ptr.getClass().isDoor()
-                )
-        {
-            OSG_WARN<<"updating immobile trans"<<std::endl;
-            return;
-        }*/
+
         rendering.rotateObject(ptr,
             ptr.getClass().isActor()
             ? makeActorOsgQuat(ptr.getRefData().getPosition())
@@ -107,7 +100,6 @@ namespace
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
 
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
-
         setNodeRotation(ptr, rendering, false);
 
         ptr.getClass().insertObject (ptr, model, physics);

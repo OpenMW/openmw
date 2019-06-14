@@ -1631,6 +1631,7 @@ namespace MWMechanics
         osg::Vec3f vec = pos1 - pos2;
         if (observer.getRefData().getBaseNode())
         {
+            assert(!observer.getRefData().isBaseNodeFlatten());
             osg::Vec3f observerDir = (static_cast<SceneUtil::PositionAttitudeTransform*>(observer.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0));
 
             float angleRadians = std::acos(observerDir * vec / (observerDir.length() * vec.length()));

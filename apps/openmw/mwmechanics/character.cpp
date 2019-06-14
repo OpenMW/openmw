@@ -1127,6 +1127,7 @@ void CharacterController::updateIdleStormState(bool inwater)
 
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
+        assert(!mPtr.getRefData().isBaseNodeFlatten());
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         osg::Vec3f characterDirection = static_cast<SceneUtil::PositionAttitudeTransform*>(mPtr.getRefData().getBaseNode())->getAttitude() * osg::Vec3f(0,1,0);
         stormDirection.normalize();

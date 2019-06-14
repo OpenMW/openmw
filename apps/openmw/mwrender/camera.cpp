@@ -373,7 +373,7 @@ namespace MWRender
         else
         {
             mAnimation->setViewMode(NpcAnimation::VM_Normal);
-            //assert(mTrackingPtr.getRefData().getBaseNode()!=MWRender::Mask_Static);
+            assert(!mTrackingPtr.getRefData().isBaseNodeFlatten());
             SceneUtil::PositionAttitudeTransform* transform = static_cast<SceneUtil::PositionAttitudeTransform*>(mTrackingPtr.getRefData().getBaseNode());
             mTrackingNode = transform;
             if (transform)

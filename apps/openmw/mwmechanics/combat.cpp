@@ -75,6 +75,7 @@ namespace MWMechanics
         if (!blocker.getRefData().getBaseNode())
             return false; // shouldn't happen
 
+        assert(!blocker.getRefData().isBaseNodeFlatten());
         float angleDegrees = osg::RadiansToDegrees(
                     signedAngleRadians (
                     (attacker.getRefData().getPosition().asVec3() - blocker.getRefData().getPosition().asVec3()),

@@ -13,6 +13,7 @@
 #include "visitor.hpp"
 #include "positionattitudetransform.hpp"
 #include "apps/openmw/mwrender/objects.hpp"
+
 namespace SceneUtil
 {
 
@@ -52,14 +53,9 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    void addLight (osg::Group* node, const ESM::Cell* curcell,const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
+    void addLight (osg::Group* node, const ESM::Cell* curcell, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
     {
 
-        OSG_WARN<<node->getParent(0)->className()<<std::endl;//curcell->mPo
-        SceneUtil::PositionAttitudeTransform* cell=static_cast<SceneUtil::PositionAttitudeTransform*>(node->getParent(0));
-
-//MWRender::PtrHolder* ptr=(MWRender::PtrHolder*) cellitem->getUserDataContainer()->getUserObject(0);
-//ptr->mPtr.getCell().
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
 
@@ -67,9 +63,6 @@ namespace SceneUtil
         if (visitor.mFoundNode)
         {
             attachTo = visitor.mFoundNode;
-            OSG_WARN<<"mFoundNode "<<visitor.mFoundNode->className()<<std::endl;
-            OSG_WARN<<"mFoundNodepar "<<visitor.mFoundNode->getParent(0)->className()<<std::endl;
-           // cell=static_cast<SceneUtil::PositionAttitudeTransform*>(visitor.mFoundNode->getParent(0));
         }
         else
         {

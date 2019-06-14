@@ -596,7 +596,12 @@ namespace MWScript
                     else
                         return;
 
-                    osg::Quat attitude =   static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude();
+                    SceneUtil::PositionAttitudeTransform* trans;
+                    if(ptr.getRefData().isBaseNodeFlatten())
+                        trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
+                    else trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
+
+                    osg::Quat attitude =  trans->getAttitude();
                     MWBase::Environment::get().getWorld()->rotateWorldObject(ptr, attitude * rot);
                 }
         };
@@ -658,12 +663,16 @@ namespace MWScript
                     }
                     else
                         return;
+                    SceneUtil::PositionAttitudeTransform* trans;
+                    if(ptr.getRefData().isBaseNodeFlatten())
+                        trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode()->getChild(0)->getUserData());
+                    else trans = static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode());
 
                     // is it correct that disabled objects can't be Move-d?
-                    if (!ptr.getRefData().getBaseNode())
+                    if (!trans)
                         return;
 
-                    osg::Vec3f diff =   static_cast<SceneUtil::PositionAttitudeTransform*>(ptr.getRefData().getBaseNode())->getAttitude() * posChange;
+                    osg::Vec3f diff = trans->getAttitude() * posChange;
                     osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
                     worldPos += diff;
 
