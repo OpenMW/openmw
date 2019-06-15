@@ -585,8 +585,11 @@ namespace NifOsg
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 const std::string nodeName = Misc::StringUtils::lowerCase(triShape->name);
-                static const std::string pattern = "tri editormarker";
-                if (!hasMarkers || nodeName.compare(0, pattern.size(), pattern) != 0)
+                static const std::string markerName = "tri editormarker";
+                static const std::string shadowName = "shadow";
+                static const std::string shadowName2 = "tri shadow";
+                const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
+                if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
                     if (triShape->skin.empty())
                         handleTriShape(triShape, node, composite, boundTextures, animflags);
