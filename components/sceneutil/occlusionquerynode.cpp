@@ -749,7 +749,7 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
         {
             unsigned int capacity = 0;
             for(unsigned int i=0; i<8; ++i)
-                capacity += parent.getChild(i)->asGroup()->getNumChildren();
+                capacity += curpar->getChild(i)->asGroup()->getNumChildren();
             /// TODO check other criterion for parent collapse
             if(capacity==0){
                 ///collapse parent
