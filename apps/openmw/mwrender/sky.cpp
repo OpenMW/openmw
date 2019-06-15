@@ -572,7 +572,7 @@ private:
         // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
         // circumvent this.
         osg::Geometry* queryGeom = oqn->getQueryGeometry();
-        osg::Geometry* debugGeom = oqn->getQueryGeometry();
+        osg::Geometry* debugGeom = oqn->getDebugGeometry();
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
         queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
