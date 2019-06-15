@@ -66,7 +66,7 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* ocnode = new SceneUtil::StaticOcclusionQueryNode;
-            ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQMask, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             for(unsigned int i = 0; i<8; ++i)
                 ocnode->addChild(new osg::Group());
             ocnode->setDebugDisplay(mOQNSettings.debugDisplay);
@@ -75,9 +75,10 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
             ocnode->setQueryMargin(mOQNSettings.querymargin);            
             ocnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
             ocnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
+            ocnode->setDataVariance(osg::Object::DYNAMIC);
 
             SceneUtil::StaticOcclusionQueryNode*qnode = new SceneUtil::StaticOcclusionQueryNode;
-            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQMask, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
@@ -117,7 +118,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
         osg::BoundingSphere bsi = objectNode->getBound();
         if(bsi.valid() )
         {
-            SceneUtil::OctreeAddRemove adder(mOQNSettings, VisMask::Mask_OcclusionQuery);
+            SceneUtil::OctreeAddRemove adder(mOQNSettings);
             adder.recursivCellAddStaticObject(bs, *ocq, objectNode, bsi);
         }
     }
@@ -130,7 +131,7 @@ void Objects::cellRemoveStaticObject(osg::Group* cellnode,const MWWorld::Ptr &pt
     SceneUtil::StaticOcclusionQueryNode* ocq = dynamic_cast<SceneUtil::StaticOcclusionQueryNode*>(cellnode);
     if(ocq)
     {
-        SceneUtil::OctreeAddRemove remover(mOQNSettings, VisMask::Mask_OcclusionQuery);
+        SceneUtil::OctreeAddRemove remover(mOQNSettings);
         if(!remover.recursivCellRemoveStaticObject(*ocq, objectNode))
             OSG_WARN<<"removal failed"<<std::endl;
     }else if(!cellnode->removeChild(objectNode))
@@ -166,7 +167,6 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
 
-    basenode->setDataVariance(osg::Object::STATIC);
     basenode->setNodeMask(Mask_Object);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));

@@ -726,8 +726,8 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     else
     {
         target->addChild(child);
-        parent.getQueryGeometry()->setNodeMask(_OQGmask);
-        parent.getDebugGeometry()->setNodeMask(_OQGmask);
+        parent.getQueryGeometry()->setNodeMask(mSettings.OQMask);
+        parent.getDebugGeometry()->setNodeMask(mSettings.OQMask);
         parent.setQueriesEnabled(true);
     }
 }
