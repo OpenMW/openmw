@@ -588,6 +588,16 @@
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                         </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="4 148 300 24" align="Left Top">
+                            <Property key="Caption" value="Objects in shadow zfar"/>
+                        </Widget>
+                        <Widget type="HBox" skin="" position="200 148 300 24">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowObjectfarButton">
+                                <UserString key="SettingCategory" value="Shadows"/>
+                                <UserString key="SettingName" value="include objects in far plane computation"/>
+                                <UserString key="SettingType" value="CheckButton"/>
+                            </Widget>
+                        </Widget>
                         <Widget type="TextBox" skin="NormalText" position="4 200 329 18" align="Left Top" name="ShadowMapCountText">
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 224 329 18" align="HStretch Top">
