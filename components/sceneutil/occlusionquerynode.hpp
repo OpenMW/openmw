@@ -14,7 +14,7 @@ namespace SceneUtil{
 class TestResult : public osg::Referenced
 {
 public:
-    TestResult() : _init( false ), _id( 0 ), _contextID( 0 ), _active( false ), _numPixels( 0 ) {setThreadSafeRefUnref(true);}
+    TestResult() : _init( false ), _id( 0 ), _contextID( 0 ), _active( false ), _lastresultavailable( false ), _numPixels( 0 ) {setThreadSafeRefUnref(true);}
     ~TestResult() {}
 
     bool _init;
@@ -27,6 +27,8 @@ public:
     // Set to true when a query gets issued and set to
     //   false when the result is retrieved.
     mutable bool _active;
+    // avoid blinking when querygeometry screen size decreases
+    mutable bool _lastresultavailable;
     // Result of last query.
     GLint _numPixels;
 };
