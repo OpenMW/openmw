@@ -575,12 +575,12 @@ private:
         osg::Geometry* debugGeom = oqn->getDebugGeometry();
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
-        queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
+        queryGeom->removePrimitiveSet(0, queryGeom->getNumPrimitiveSets());
         queryGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
         debugGeom->setVertexArray(mGeom->getVertexArray());
         debugGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
-        debugGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
+        debugGeom->removePrimitiveSet(0, debugGeom->getNumPrimitiveSets());
         debugGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
         // don't update querygeometry
