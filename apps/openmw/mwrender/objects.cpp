@@ -301,8 +301,8 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     if(objectNode->getNodeMask() & (Mask_Object | Mask_Static) )
     {
         if (objectNode->getNumParents())
-            cellRemoveStaticObject(objectNode->getParent(0),cur);
-        cellAddStaticObject(cellnode,cur);
+            cellRemoveStaticObject(getOrCreateCell(old), cur);
+        cellAddStaticObject(cellnode, cur);
     }
     else {
         if (objectNode->getNumParents())
