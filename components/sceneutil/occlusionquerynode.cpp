@@ -118,7 +118,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     // If the distance from the near plane to the bounding sphere shell is positive, retrieve
     //   the results. Otherwise (near plane inside the BS shell) we are considered
     //   to have passed and don't need to retrieve the query.
-    const osg::BoundingSphere& bs = getBound();
+    const osg::BoundingSphere& bs = qg->getBound();
     osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
