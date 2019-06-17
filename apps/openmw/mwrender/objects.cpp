@@ -116,7 +116,29 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
         bs.radius() = 0.5f * cellSize;
 
         osg::BoundingSphere bsi = objectNode->getBound();
-        if(bsi.valid() )
+        if(objectNode->getNodeMask() == Mask_Actor)
+        {
+            SceneUtil::StaticOcclusionQueryNode * qnode=new SceneUtil::StaticOcclusionQueryNode();
+            qnode->setQueryMargin(mOQNSettings.querymargin);
+            qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
+            qnode->setDebugDisplay(mOQNSettings.debugDisplay);
+            qnode->setQueryFrameCount(mOQNSettings.queryframecount);
+            qnode->setDistancePreventingPopin(mOQNSettings.securepopdistance);
+            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
+            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
+            unsigned int childc = objectNode->getNumChildren();
+            osg::Node * cht;
+            for(unsigned int i=0; i<childc; ++i)
+            {
+                cht=objectNode->getChild(i);
+                cht->setNodeMask(Mask_Object);//a bit hacky but required for actor to be OQN culled
+                qnode->addChild(cht);
+            }
+            objectNode->removeChildren(0, childc);
+            objectNode->addChild(qnode);
+            cellnode->addChild(objectNode);
+        }
+        else if(bsi.valid() )
         {
             SceneUtil::OctreeAddRemove adder(mOQNSettings);
             adder.recursivCellAddStaticObject(bs, *ocq, objectNode, bsi);
@@ -192,7 +214,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     else
         anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
 
-     cellroot->addChild(basenode);
+     cellAddStaticObject(cellroot, ptr);
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
         ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
@@ -207,7 +229,8 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     basenode->setNodeMask(Mask_Actor);
 
     osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
-    cellroot->addChild(basenode);
+
+    cellAddStaticObject(cellroot, ptr);
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
     {

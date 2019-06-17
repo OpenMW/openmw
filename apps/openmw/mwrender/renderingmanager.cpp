@@ -219,7 +219,7 @@ namespace MWRender
         if(isIndoor) { mShadowManager->enableOutdoorMode(); mShadowManager->enableIndoorMode();}
         else { mShadowManager->enableIndoorMode(); mShadowManager->enableOutdoorMode(); }
 
-        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene|Mask_Lighting);
+        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor);
         unsigned int computefarmask = Mask_Static;
 
         if (Settings::Manager::getBool("include terrain in far plane computation", "Shadows"))
