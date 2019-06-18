@@ -28,6 +28,7 @@
 #include <osg/AlphaFunc>
 #include <osg/Depth>
 #include <osg/PolygonMode>
+#include <osg/PolygonOffset>
 #include <osg/FrontFace>
 #include <osg/Stencil>
 #include <osg/Material>
