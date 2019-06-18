@@ -1626,7 +1626,11 @@ namespace NifOsg
                                                                                    getBlendMode((alphaprop->flags>>5)&0xf)));
                         blendFunc = shareAttribute(blendFunc);
                         stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-
+                        
+                        osg::ref_ptr<osg::PolygonOffset> po = new osg::PolygonOffset( -1, -1 );
+                        po = shareAttribute(depth);
+                        stateset->setAttributeAndModes( po, osg::StateAttribute::ON );
+                        
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
                             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
