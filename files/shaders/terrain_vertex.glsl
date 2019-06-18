@@ -21,6 +21,7 @@ varying vec3 passNormal;
 void main(void)
 {
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+    gl_TexCoord[6] = gl_Position;
     depth = gl_Position.z;
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);

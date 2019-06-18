@@ -153,13 +153,14 @@ float frustumDepth;
 
 float linearizeDepth(float depth)
   {
-    float z_n = 2.0 * depth - 1.0;
-    depth = 2.0 * near * far / (far + near - z_n * frustumDepth);
+    depth = exp(depth*log(1000000000.0+1.0)) - 1;
     return depth;
   }
 
 void main(void)
 {
+    gl_FragDepth = (log(gl_TexCoord[6].z + 1.0) / log(1000000000.0 + 1.0));
+
     frustumDepth = abs(far - near);
     vec3 worldPos = position.xyz + nodePosition.xyz;
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
