@@ -40,6 +40,9 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQState()
     osg::Depth* d = new osg::Depth( osg::Depth::LESS, 0.f, 1.f, false );
     OQStateSet->setAttributeAndModes( d, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
+    osg::PolygonMode* pm = new osg::PolygonMode( osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL );
+    OQStateSet->setAttributeAndModes( pm, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+
     return OQStateSet;
 }
 
@@ -696,7 +699,15 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             qnode->setDebugDisplay(mSettings.debugDisplay);
             qnode->setQueryFrameCount(mSettings.queryframecount);
             qnode->setDistancePreventingPopin(mSettings.securepopdistance);
-
+            //disable high BVH queries level
+            float powlev = float(1<<mSettings.maxBVHOQLevelCount);
+            if(bsi.radius() > powlev*mSettings.minOQNSize)
+            {
+                OSG_INFO<<"masking high level OQN"<<std::endl;
+                qnode->getQueryGeometry()->setNodeMask(0);
+                qnode->getDebugGeometry()->setNodeMask(0);
+                qnode->setQueriesEnabled(false);
+            }
             for(unsigned int i=0; i<target->getNumChildren(); ++i)
             {
                 osg::Group * childi = target->getChild(i)->asGroup();
@@ -708,20 +719,8 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             parent.setChild(ind, qnode);
         }
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
-        //qnode->invalidateQueryGeometry();
+        qnode->invalidateQueryGeometry();
 
-        //disable high BVH queries level
-        float powlev = float(1<<mSettings.maxBVHOQLevelCount);
-        if(bsi.radius() > powlev*mSettings.minOQNSize)
-        {
-            OSG_INFO<<"masking high level OQN"<<std::endl;
-            parent.getQueryGeometry()->setNodeMask(0);
-            parent.getDebugGeometry()->setNodeMask(0);
-            parent.setQueriesEnabled(false);
-            qnode->getQueryGeometry()->setNodeMask(0);
-            qnode->getDebugGeometry()->setNodeMask(0);
-            qnode->setQueriesEnabled(false);
-        }
 
     }
     else
