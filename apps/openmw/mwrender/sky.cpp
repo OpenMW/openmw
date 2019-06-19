@@ -586,7 +586,7 @@ private:
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
-            depth->setZNear(1.0);
+            depth->setZNear(0.0);
             depth->setZFar(1.0);
             depth->setWriteMask(false);
             queryStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON);
