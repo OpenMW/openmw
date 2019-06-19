@@ -92,7 +92,7 @@ public:
 
     //enable or disable early exit for not continuous OQN (under a lod or switch)
     //NB: disable it for hierarchical OQN
-    inline void setDistancePreventingPopin(bool m) { _securepopdistance = m; }
+    inline void setDistancePreventingPopin(float m) { _securepopdistance = m; }
     inline float getDistancePreventingPopin() const { return _securepopdistance; }
 
 
