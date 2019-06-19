@@ -677,13 +677,9 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     bsi.center() = bs.center() + indexf * bsi.radius();
     osg::ref_ptr<StaticOcclusionQueryNode> qnode;
     osg::ref_ptr<osg::Group> target = parent.getChild(ind)->asGroup();
-    OQGetBoundsVisitor boundvis;
-    target->accept(boundvis);
-    osg::BoundingSphere bst (boundvis.getBoundingSphere());
-    if( bst.valid()
-        && bst.radius() > mSettings.minOQNSize
-        && bsi.radius() > mSettings.minOQNSize
-        && target->getNumChildren() > mSettings.maxOQNCapacity
+
+    if( bsi.radius() > mSettings.minOQNSize
+        && target->getNumChildren() >= mSettings.maxOQNCapacity
       )
     {
         qnode = dynamic_cast<StaticOcclusionQueryNode*>(target.get());
@@ -699,15 +695,23 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             qnode->setDebugDisplay(mSettings.debugDisplay);
             qnode->setQueryFrameCount(mSettings.queryframecount);
             qnode->setDistancePreventingPopin(mSettings.securepopdistance);
+
             //disable high BVH queries level
-            float powlev = float(1<<mSettings.maxBVHOQLevelCount);
-            if(bsi.radius() > powlev*mSettings.minOQNSize)
+            unsigned int powlev = 1<<mSettings.maxBVHOQLevelCount;
+            if( floor(bsi.radius() / mSettings.minOQNSize) >= powlev)
             {
-                OSG_INFO<<"masking high level OQN"<<std::endl;
+                //OSG_WARN<<"masking high level OQN"<<floor(bsi.radius()/mSettings.minOQNSize)<<std::endl;
                 qnode->getQueryGeometry()->setNodeMask(0);
                 qnode->getDebugGeometry()->setNodeMask(0);
                 qnode->setQueriesEnabled(false);
             }
+            else
+            {
+                qnode->getQueryGeometry()->setNodeMask(mSettings.OQMask);
+                qnode->getDebugGeometry()->setNodeMask(mSettings.OQMask);
+                qnode->setQueriesEnabled(true);
+            }
+
             for(unsigned int i=0; i<target->getNumChildren(); ++i)
             {
                 osg::Group * childi = target->getChild(i)->asGroup();
@@ -718,17 +722,14 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             }
             parent.setChild(ind, qnode);
         }
+
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
         qnode->invalidateQueryGeometry();
-
-
     }
     else
     {
         target->addChild(child);
-        parent.getQueryGeometry()->setNodeMask(mSettings.OQMask);
-        parent.getDebugGeometry()->setNodeMask(mSettings.OQMask);
-        parent.setQueriesEnabled(true);
+        parent.invalidateQueryGeometry();
     }
 }
 
