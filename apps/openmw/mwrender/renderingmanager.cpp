@@ -1247,8 +1247,6 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
     {
         mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
                                                 mFirstPersonFieldOfView);
-
-        player.getRefData().getBaseNode()->removeChild(0,1);
         
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
