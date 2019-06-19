@@ -171,7 +171,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
     camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
-    camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
+    camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 1000), osg::Vec3d(x, y, zmin), upVector);
     camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
     camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
     camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
