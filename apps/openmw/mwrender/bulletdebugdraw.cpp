@@ -2,6 +2,9 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include <components/shader/shadermanager.hpp>
+#include <components/resource/scenemanager.hpp>
+
 #include <osg/Geometry>
 #include <osg/Group>
 
@@ -20,10 +23,11 @@ namespace
 namespace MWRender
 {
 
-DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world)
+DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world, Resource::ResourceSystem* resourceSystem)
     : mParentNode(parentNode),
       mWorld(world),
-      mDebugOn(true)
+      mDebugOn(true),
+      mResourceSystem(resourceSystem)
 {
 
     createGeometry();
@@ -35,6 +39,17 @@ void DebugDrawer::createGeometry()
     {
         mGeometry = new osg::Geometry;
         mGeometry->setNodeMask(Mask_Debug);
+
+        std::map<std::string, std::string> defineMap;
+
+        Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+        osg::ref_ptr<osg::Shader> fragmentShader (shaderMgr.getShader("tcb_fragment.glsl",defineMap, osg::Shader::FRAGMENT));
+        osg::ref_ptr<osg::Shader> vertexShader (shaderMgr.getShader("tcb_vertex.glsl", defineMap, osg::Shader::VERTEX));
+
+        osg::ref_ptr<osg::Program> program (new osg::Program);
+        program->addShader(fragmentShader);
+        program->addShader(vertexShader);
+        mGeometry->getOrCreateStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
 
         mVertices = new osg::Vec3Array;
 
@@ -74,6 +89,7 @@ void DebugDrawer::step()
         mDrawArrays->setCount(mVertices->size());
         mVertices->dirty();
         mGeometry->dirtyBound();
+        mResourceSystem->getSceneManager()->recreateShaders(mGeometry);
     }
 }
 

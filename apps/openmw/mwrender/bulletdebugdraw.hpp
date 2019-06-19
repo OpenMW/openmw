@@ -7,6 +7,8 @@
 
 #include <LinearMath/btIDebugDraw.h>
 
+#include <components/resource/resourcesystem.hpp>
+
 class btCollisionWorld;
 
 namespace osg
@@ -32,9 +34,11 @@ protected:
     void createGeometry();
     void destroyGeometry();
 
+    Resource::ResourceSystem* mResourceSystem;
+
 public:
 
-    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world);
+    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world, Resource::ResourceSystem* resourceSystem);
     ~DebugDrawer();
 
     void step();
