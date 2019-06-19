@@ -242,7 +242,7 @@ void main(void)
 #if REFRACTION
     float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x);
     float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x);
-    float surfaceDepth = linearizeDepth(gl_FragCoord.z);
+    float surfaceDepth = linearizeDepth(gl_FragDepth);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
     float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #else
