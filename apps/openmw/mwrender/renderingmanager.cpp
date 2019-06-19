@@ -352,7 +352,7 @@ namespace MWRender
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
-        osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
+        osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING|osg::Camera::NEAR_PLANE_CULLING;
 
         if (!Settings::Manager::getBool("small feature culling", "Camera"))
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
@@ -362,9 +362,7 @@ namespace MWRender
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
         }
 
-        mViewer->getCamera()->setCullingMode( cullingMode );
-
-        mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+        //mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
@@ -1153,6 +1151,8 @@ namespace MWRender
         mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
                                                 mFirstPersonFieldOfView);
 
+        player.getRefData().getBaseNode()->removeChild(0,1);
+        
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
     }
