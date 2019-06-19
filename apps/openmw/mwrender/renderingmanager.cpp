@@ -192,7 +192,101 @@ namespace MWRender
     private:
         Resource::ResourceSystem* mResourceSystem;
     };
+class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallback
+    {
+    public:
+        double _znear;
+        NearClamperCallback(double near):_znear(near){}
+        virtual bool clampProjectionMatrixImplementation(osg::Matrixf& projection,
+               double& znear, double& zfar) const
+        {
 
+            OSG_WARN<<"renderingmanager.cpp: NearClamperCallback:: not implemented for osg::Matrixf"<<std::endl;
+            return true;
+        }
+        virtual bool clampProjectionMatrixImplementation(osg::Matrixd& projection,
+                double& znear, double& zfar) const
+        
+        {
+                double epsilon = 1e-6;
+                if (zfar<znear-epsilon)
+                {
+                    if (zfar != -FLT_MAX || znear != FLT_MAX)
+                    {
+                        OSG_INFO<<"_clampProjectionMatrix not applied, invalid depth range, znear = "<<znear<<"  zfar = "<<zfar<<std::endl;
+                    }
+                    return false;
+                }
+        
+                if (zfar<znear+epsilon)
+                {
+                    // znear and zfar are too close together and could cause divide by zero problems
+                    // late on in the clamping code, so move the znear and zfar apart.
+                    double average = (znear+zfar)*0.5;
+                    znear = average-epsilon;
+                    zfar = average+epsilon;
+                    // OSG_INFO << "_clampProjectionMatrix widening znear and zfar to "<<znear<<" "<<zfar<<std::endl;
+                }
+        
+                if (fabs(projection(0,3))<epsilon  && fabs(projection(1,3))<epsilon  && fabs(projection(2,3))<epsilon )
+                {
+                    // OSG_INFO << "Orthographic matrix before clamping"<<projection<<std::endl;
+        
+                    double delta_span = (zfar-znear)*0.02;
+                    if (delta_span<1.0) delta_span = 1.0;
+                    double desired_znear = znear - delta_span;
+                    double desired_zfar = zfar + delta_span;
+        
+                    // assign the clamped values back to the computed values.
+                    znear = desired_znear;
+                    zfar = desired_zfar;
+        
+                    projection(2,2)=-2.0f/(desired_zfar-desired_znear);
+                    projection(3,2)=-(desired_zfar+desired_znear)/(desired_zfar-desired_znear);
+        
+                    // OSG_INFO << "Orthographic matrix after clamping "<<projection<<std::endl;
+                }
+                else
+                {
+        
+                    // OSG_INFO << "Persepective matrix before clamping"<<projection<<std::endl;
+        
+                    //std::cout << "_computed_znear"<<_computed_znear<<std::endl;
+                    //std::cout << "_computed_zfar"<<_computed_zfar<<std::endl;
+        
+                    double zfarPushRatio = 1.02;
+                    double znearPullRatio = 0.98;
+        
+                    //znearPullRatio = 0.99;
+        
+                    double desired_znear = znear * znearPullRatio;
+                    double desired_zfar = zfar * zfarPushRatio;
+        
+                    // near plane clamping.
+                    //OSG_WARN<<_znear<<std::endl;
+                    double min_near_plane =_znear;
+                    if (desired_znear<min_near_plane ) desired_znear=min_near_plane;
+        
+                    // assign the clamped values back to the computed values.
+                    znear = desired_znear;
+                    zfar = desired_zfar;
+        
+                    double trans_near_plane = (-desired_znear*projection(2,2)+projection(3,2))/(-desired_znear*projection(2,3)+projection(3,3));
+                    double trans_far_plane = (-desired_zfar*projection(2,2)+projection(3,2))/(-desired_zfar*projection(2,3)+projection(3,3));
+        
+                    double ratio = fabs(2.0/(trans_near_plane-trans_far_plane));
+                    double center = -(trans_near_plane+trans_far_plane)/2.0;
+        
+                    projection.postMult(osg::Matrix(1.0f,0.0f,0.0f,0.0f,
+                                                    0.0f,1.0f,0.0f,0.0f,
+                                                    0.0f,0.0f,ratio,0.0f,
+                                                    0.0f,0.0f,center*ratio,1.0f));
+        
+                    // OSG_INFO << "Persepective matrix after clamping"<<projection<<std::endl;
+                }
+        return true;
+        }
+    };
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
                                        Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                                        const std::string& resourcePath, DetourNavigator::Navigator& navigator)
@@ -352,7 +446,7 @@ namespace MWRender
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
-        osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING;
+        osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING|osg::Camera::NEAR_PLANE_CULLING;
 
         if (!Settings::Manager::getBool("small feature culling", "Camera"))
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
@@ -362,14 +456,15 @@ namespace MWRender
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
         }
 
-        mViewer->getCamera()->setCullingMode( cullingMode );
-
-        mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
+        //mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
+        
+        mViewer->getCamera()->setClampProjectionMatrixCallback(new NearClamperCallback(mNearClip));
+            
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
         float fov = Settings::Manager::getFloat("field of view", "Camera");
         mFieldOfView = std::min(std::max(1.f, fov), 179.f);
@@ -1152,7 +1247,7 @@ namespace MWRender
     {
         mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
                                                 mFirstPersonFieldOfView);
-
+        
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
     }
