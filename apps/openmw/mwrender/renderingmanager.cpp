@@ -220,14 +220,10 @@ namespace MWRender
         else { mShadowManager->enableIndoorMode(); mShadowManager->enableOutdoorMode(); }
 
         mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor);
-        unsigned int computefarmask = Mask_Static;
+        unsigned int computefarmask = Mask_Static | Mask_ParticleSystem | Mask_Object;
 
         if (Settings::Manager::getBool("include terrain in far plane computation", "Shadows"))
             computefarmask |= Mask_Terrain;// doesn't narrow enough far plane for distant terrain
-
-        if (Settings::Manager::getBool("include objects in far plane computation", "Shadows"))
-            computefarmask |=  Mask_ParticleSystem | ///seems it can't be separated from Objects
-                               Mask_Object;
 
         mShadowManager->getShadowTechnique()->setComputeFarMask(computefarmask);
 

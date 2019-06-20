@@ -589,12 +589,12 @@
                             </Widget>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="4 148 300 24" align="Left Top">
-                            <Property key="Caption" value="Objects in shadow zfar"/>
+                            <Property key="Caption" value="Debug Shadow splits"/>
                         </Widget>
                         <Widget type="HBox" skin="" position="200 148 300 24">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowObjectfarButton">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 48" align="Left Top" name="ShadowDebugfarButton">
                                 <UserString key="SettingCategory" value="Shadows"/>
-                                <UserString key="SettingName" value="include objects in far plane computation"/>
+                                <UserString key="SettingName" value="enable debug overlay"/>
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                         </Widget>
