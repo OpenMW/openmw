@@ -44,6 +44,11 @@ void Objects::resetSettings()
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
     mOQNSettings.OQMask = Mask_OcclusionQuery;
     mOQNSettings.OQRenderBin = RenderBin_OcclusionQuery;
+
+    ///update current queries
+    SceneUtil::SettingsUpdatorVisitor updator(mOQNSettings);
+    for (CellMap::iterator iter = mCellSceneNodes.begin(); iter != mCellSceneNodes.end(); ++iter)
+        iter->second->accept(updator);
 }
 
 Objects::~Objects()

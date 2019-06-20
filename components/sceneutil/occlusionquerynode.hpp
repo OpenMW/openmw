@@ -157,14 +157,20 @@ struct OcclusionQuerySettings
     unsigned int maxOQNCapacity;
 };
 
+struct SettingsUpdatorVisitor : public osg::NodeVisitor
+{
+    SettingsUpdatorVisitor(const OcclusionQuerySettings & settings);
+    const OcclusionQuerySettings & mSettings;
+    void apply(osg::OcclusionQueryNode&oqn);
+};
+
 struct OctreeAddRemove
 {
     OctreeAddRemove(const OcclusionQuerySettings & settings): mSettings(settings) {}
     const OcclusionQuerySettings & mSettings;
 
-    void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);
-
-    bool recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove);
+    void recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs);    
+    bool recursivCellRemoveStaticObject(StaticOcclusionQueryNode &parent, osg::Node * childtoremove);
 };
 }
 #endif

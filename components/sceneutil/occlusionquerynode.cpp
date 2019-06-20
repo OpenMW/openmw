@@ -733,7 +733,24 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
     }
 }
 
-bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & parent, osg::Node * childtoremove)
+
+SettingsUpdatorVisitor::SettingsUpdatorVisitor(const OcclusionQuerySettings & settings): osg::NodeVisitor(osg::NodeVisitor::TRAVERSE_ALL_CHILDREN), mSettings(settings) {}
+
+void SettingsUpdatorVisitor::apply(osg::OcclusionQueryNode&oqn)
+{
+    StaticOcclusionQueryNode *qnode = dynamic_cast<StaticOcclusionQueryNode*>(&oqn);
+    if(qnode)
+    {
+        qnode->setQueryMargin(mSettings.querymargin);
+        qnode->setVisibilityThreshold(mSettings.querypixelcount);
+        qnode->setDebugDisplay(mSettings.debugDisplay);
+        qnode->setQueryFrameCount(mSettings.queryframecount);
+        qnode->setDistancePreventingPopin(mSettings.securepopdistance);
+    }
+    traverse(oqn);
+}
+
+bool OctreeAddRemove::recursivCellRemoveStaticObject(StaticOcclusionQueryNode & parent, osg::Node * childtoremove)
 {
     osg::Group * pchild; bool removed=false;
     for(unsigned int i=0; i< parent.getNumChildren(); ++i)
@@ -744,9 +761,9 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
 
     if(removed){
 
-        osg::OcclusionQueryNode* curpar = &parent;
+        StaticOcclusionQueryNode* curpar = &parent;
 
-        while(curpar &&curpar->getParent(0))
+        while(curpar && curpar->getParent(0))
         {
             unsigned int capacity = 0;
             for(unsigned int i=0; i<8; ++i)
@@ -754,10 +771,10 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
             /// TODO check other criterion for parent collapse
             if(capacity==0){
                 ///collapse parent
-                OSG_WARN<<"collapse empty OQN"<<std::endl;
+                OSG_NOTICE<<"collapse empty OQN"<<std::endl;
                 osg::Group *paparent=curpar->getParent(0);
                 paparent->setChild(paparent->getChildIndex(curpar), new osg::Group);
-                curpar=dynamic_cast<osg::OcclusionQueryNode*>(paparent);
+                curpar=dynamic_cast<StaticOcclusionQueryNode*>(paparent);
             }
             else break;
         }
@@ -767,7 +784,7 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(osg::OcclusionQueryNode & p
     {
         for(unsigned int i=0; i< parent.getNumChildren(); ++i)
         {
-            osg::OcclusionQueryNode * child = dynamic_cast<osg::OcclusionQueryNode*>(parent.getChild(i));
+            StaticOcclusionQueryNode * child = dynamic_cast<StaticOcclusionQueryNode*>(parent.getChild(i));
             if(child && recursivCellRemoveStaticObject(*child, childtoremove))
                 return true;
         }

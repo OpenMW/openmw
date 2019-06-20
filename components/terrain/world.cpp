@@ -25,6 +25,9 @@ void World::resetSettings()
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
+    ///update current oqns settings
+    SceneUtil::SettingsUpdatorVisitor updator(mOQNSettings);
+    mTerrainRoot->accept(updator);
 }
 World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
              unsigned int nodeMask,const SceneUtil::OcclusionQuerySettings& oqsettings, unsigned  int preCompileMask, unsigned  int borderMask)
@@ -35,8 +38,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     , mTerrainNodeMask(nodeMask)
     , mOQNSettings(oqsettings)
 {
-    resetSettings();
     mTerrainRoot = new osg::Group;
+    resetSettings();
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
