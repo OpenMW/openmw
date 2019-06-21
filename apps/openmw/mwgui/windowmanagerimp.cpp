@@ -130,7 +130,9 @@ namespace MWGui
             osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
             ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& userDataPath)
-      : mStore(nullptr)
+      : mOldUpdateMask(0)
+      , mOldCullMask(0)
+      , mStore(nullptr)
       , mResourceSystem(resourceSystem)
       , mWorkQueue(workQueue)
       , mViewer(viewer)
@@ -676,12 +678,33 @@ namespace MWGui
         }
     }
 
+    void WindowManager::enableScene(bool enable)
+    {
+        unsigned int disablemask = MWRender::Mask_GUI|MWRender::Mask_PreCompile;
+        if (!enable && mViewer->getCamera()->getCullMask() != disablemask)
+        {
+            mOldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
+            mOldCullMask = mViewer->getCamera()->getCullMask();
+            mViewer->getUpdateVisitor()->setTraversalMask(disablemask);
+            mViewer->getCamera()->setCullMask(disablemask);
+        }
+        else if (enable && mViewer->getCamera()->getCullMask() == disablemask)
+        {
+            mViewer->getUpdateVisitor()->setTraversalMask(mOldUpdateMask);
+            mViewer->getCamera()->setCullMask(mOldCullMask);
+        }
+    }
+
     void WindowManager::updateVisible()
     {
+        bool loading = (getMode() == GM_Loading || getMode() == GM_LoadingWallpaper);
+
+        bool mainmenucover = containsMode(GM_MainMenu) && MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame;
+
+        enableScene(!loading && !mainmenucover);
+
         if (!mMap)
             return; // UI not created yet
-
-        bool loading = (getMode() == GM_Loading || getMode() == GM_LoadingWallpaper);
 
         mHud->setVisible(mHudEnabled && !loading);
         mToolTips->setVisible(mHudEnabled && !loading);
@@ -1876,11 +1899,7 @@ namespace MWGui
             mVideoBackground->eventKeyButtonPressed += MyGUI::newDelegate(this, &WindowManager::onVideoKeyPressed);
         }
 
-        // Turn off all rendering except for the GUI
-        int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
-        int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
-        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
+        enableScene(false);
 
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
@@ -1936,8 +1955,7 @@ namespace MWGui
         setCursorVisible(cursorWasVisible);
 
         // Restore normal rendering
-        mViewer->getUpdateVisitor()->setTraversalMask(oldUpdateMask);
-        mViewer->getCamera()->setCullMask(oldCullMask);
+        updateVisible();
 
         mVideoBackground->setVisible(false);
     }
