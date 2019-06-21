@@ -108,13 +108,13 @@ protected:
     static osg::ref_ptr< osg::StateSet > OQDebugStateSet;
     osg::StateSet *initMWOQState();
     osg::StateSet *initMWOQDebugState();
-    float _margin;
-    osg::Matrix::value_type _securepopdistance;
-    osg::ref_ptr< osg::Camera > _maincam;
 #if  OSG_VERSION_LESS_THAN(3,6,4)
     mutable bool _validQueryGeometry;
 #endif
-
+    float _margin;
+    osg::Matrix::value_type _securepopdistance;
+    osg::ref_ptr< osg::Camera > _maincam;
+    std::map< const osg::Camera*, unsigned int > _lastframes;
 };
 struct InvalidateOQNBound : public osg::NodeCallback
 {

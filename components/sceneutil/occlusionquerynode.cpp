@@ -94,18 +94,30 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     if(camera == _maincam)
         passed = _passed;
 
+    unsigned int& lasttestframe( _lastframes[ camera ] );
     {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
         //  2) we haven't rendered for an abnormally long time (probably because we're an out-of-range LOD child)
         // In these cases, assume we're visible to avoid blinking.
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
-        const unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
-        if( //( lastQueryFrame == 0 ) ||
+        unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
+
+        if (lasttestframe+1 < nv.getTraversalNumber())
+        {
+            ///entering frustum so force next OQ
+            lastQueryFrame = 0;
+            passed = true;
+            lasttestframe = nv.getTraversalNumber();
+            return passed;
+        }
+
+        if( ( lastQueryFrame == 0 ) ||
             ( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount+1 ) )
                 )
         {
             passed = true;
+            lasttestframe = nv.getTraversalNumber();
             return passed;
         }
     }
@@ -135,10 +147,13 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
            // The query hasn't finished yet and the result still
            // isn't available, return true to traverse the subgraphs.
            passed = true;
+           lasttestframe = nv.getTraversalNumber();
            return passed;
         }
 
         passed = ( result.numPixels >  _visThreshold );
+        if(passed)
+            lasttestframe = nv.getTraversalNumber();
     }
 
     return passed;
