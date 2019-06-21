@@ -19,6 +19,11 @@
 
         <Child type="Button" skin="MW_Box" offset="18 0 54 14" align="Stretch" name="Background"/>
 
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="14 0 24 14" align="Top HStretch" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="52 0 24 14" align="Top HStretch" name="SecondPart"/>
+
         <!-- Arrows -->
 
         <Child type="Widget" skin="MW_Box" offset="0 0 15 14" align="Left VStretch"/>
@@ -26,11 +31,6 @@
 
         <Child type="Widget" skin="MW_Box" offset="75 0 15 14" align="Right VStretch"/>
         <Child type="Button" skin="MW_ArrowRight" offset="77 2 10 10" align="Right VStretch" name="End"/>
-
-        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
-
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset="14 0 24 14" align="Top HStretch" name="FirstPart"/>
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset="52 0 24 14" align="Top HStretch" name="SecondPart"/>
 
         <Child type="Button" skin="MW_ScrollTrackH" offset="38 2 30 9" align="Left VStretch" name="Track"/>
     </Resource>
@@ -61,6 +61,11 @@
 
         <Child type="Button" skin="MW_Box" offset="0 18 14 55" align="Stretch" name="Background"/>
 
+        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
+
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 14 24 14" align="Left VStretch" name="FirstPart"/>
+        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 52 24 14" align="Left VStretch" name="SecondPart"/>
+
         <!-- Arrows -->
 
         <Child type="Widget" skin="MW_Box" offset="0 0 14 15" align="Top HStretch"/>
@@ -68,11 +73,6 @@
 
         <Child type="Widget" skin="MW_Box" offset="0 76 14 15" align="Bottom HStretch"/>
         <Child type="Button" skin="MW_ArrowDown" offset="2 78 10 10" align="Bottom HStretch" name="End"/>
-
-        <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
-
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 14 24 14" align="Left VStretch" name="FirstPart"/>
-        <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 52 24 14" align="Left VStretch" name="SecondPart"/>
 
         <!-- Tracker must be last to be on top and receive mouse events -->
 
