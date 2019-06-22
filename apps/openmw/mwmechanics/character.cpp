@@ -1135,8 +1135,8 @@ void CharacterController::updateIdleStormState(bool inwater)
         {
             if (!mAnimation->isPlaying("idlestorm"))
             {
-                mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
-                                1.0f, "start", "stop", 0.0f, ~0ul);
+                int mask = MWRender::Animation::BlendMask_Torso | MWRender::Animation::BlendMask_RightArm;
+                mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul);
             }
             else
             {
