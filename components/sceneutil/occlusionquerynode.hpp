@@ -127,11 +127,14 @@ struct InvalidateOQNBound : public osg::NodeCallback
 class OQComputeBoundsVisitor : public osg::ComputeBoundsVisitor
 {
 public:
-    OQComputeBoundsVisitor(): osg::ComputeBoundsVisitor() { }
-    virtual void apply(osg::OcclusionQueryNode& oq)
+
+    META_NodeVisitor(osgMW, OQComputeBoundsVisitor)
+    OQComputeBoundsVisitor(TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN): osg::ComputeBoundsVisitor(traversalMode) { }
+
+    virtual void apply(osg::OcclusionQueryNode& node)
     {
-        if(oq.getPassed())
-            traverse(oq);
+        if(node.getPassed())
+            traverse(node);
     }
 };
 

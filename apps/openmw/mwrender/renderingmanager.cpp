@@ -211,30 +211,32 @@ namespace MWRender
         if (Settings::Manager::getBool("object shadows", "Shadows"))
             shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
 
-        bool isIndoor=mShadowManager->getShadowSettings()->getCastsShadowTraversalMask()==mShadowManager->getIndoorShadowCastingMask();
-        mShadowManager->setIndoorShadowCastingMask(indoorShadowCastingTraversalMask);
-        mShadowManager->setOutdoorShadowCastingMask(shadowCastingTraversalMask);
-        mShadowManager->setupShadowSettings();
+        SceneUtil::ShadowManager * shadowManager = SceneUtil::ShadowManager::get();
+        bool isIndoor=shadowManager->getShadowSettings()->getCastsShadowTraversalMask()==shadowManager->getIndoorShadowCastingMask();
+        shadowManager->setIndoorShadowCastingMask(indoorShadowCastingTraversalMask);
+        shadowManager->setOutdoorShadowCastingMask(shadowCastingTraversalMask);
+        shadowManager->setupShadowSettings();
 
-        if(isIndoor) { mShadowManager->enableOutdoorMode(); mShadowManager->enableIndoorMode();}
-        else { mShadowManager->enableIndoorMode(); mShadowManager->enableOutdoorMode(); }
+        if(isIndoor) { shadowManager->enableOutdoorMode(); shadowManager->enableIndoorMode();}
+        else { shadowManager->enableIndoorMode(); shadowManager->enableOutdoorMode(); }
 
-        mShadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor);
+        shadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor);
         unsigned int computefarmask = Mask_Static | Mask_ParticleSystem | Mask_Object;
 
         if (Settings::Manager::getBool("include terrain in far plane computation", "Shadows"))
             computefarmask |= Mask_Terrain;// doesn't narrow enough far plane for distant terrain
 
-        mShadowManager->getShadowTechnique()->setComputeFarMask(computefarmask);
+        shadowManager->getShadowTechnique()->setComputeFarMask(computefarmask);
 
         if(enableOQN)
         {
-            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
-        }else
-        {
-            mShadowManager->getShadowTechnique()->setOcclusionQueryMask(0);
+            shadowManager->getShadowTechnique()->setOcclusionQueryMask(Mask_OcclusionQuery);
         }
-        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
+        else
+        {
+            shadowManager->getShadowTechnique()->setOcclusionQueryMask(0);
+        }
+        Shader::ShaderManager::DefineMap shadowDefines = shadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
 
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
@@ -285,7 +287,8 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, mResourceSystem->getSceneManager()->getShaderManager()));
+        // singleton creation
+        SceneUtil::ShadowManager::get(sceneRoot, mRootNode, &mResourceSystem->getSceneManager()->getShaderManager());
         resetShadowSettings();
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
@@ -417,10 +420,6 @@ namespace MWRender
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
         updateProjectionMatrix();
-
-        /// force update of unshadowed stateset
-        resetShadowSettings();
-
     }
 
     RenderingManager::~RenderingManager()
@@ -573,9 +572,9 @@ namespace MWRender
     {
         mSky->setEnabled(enabled);
         if (enabled)
-            mShadowManager->enableOutdoorMode();
+            SceneUtil::ShadowManager::get()->enableOutdoorMode();
         else
-            mShadowManager->enableIndoorMode();
+            SceneUtil::ShadowManager::get()->enableIndoorMode();
     }
 
     bool RenderingManager::toggleBorders()

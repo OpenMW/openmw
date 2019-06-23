@@ -12,12 +12,21 @@ namespace SceneUtil
 {
     class ShadowManager
     {
+    protected:
+        static ShadowManager* _instance;
+        ShadowManager(osg::Group* sceneRoot, osg::Group* rootNode, Shader::ShaderManager *shaderManager);
     public:
-        static void disableShadowsForStateSet(osg::StateSet* stateSet);
+        static ShadowManager* get(osg::Group* sceneRoot=0, osg::Group* rootNode=0, Shader::ShaderManager *shaderManager=0)
+        {
+            if(!_instance)
+                _instance = new ShadowManager(sceneRoot, rootNode, shaderManager);
+            return _instance;
+        }
+
+        void disableShadowsForStateSet(osg::StateSet* stateSet);
 
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
-        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, Shader::ShaderManager &shaderManager);
 
         virtual ~ShadowManager() = default;
 
@@ -46,7 +55,7 @@ namespace SceneUtil
         unsigned int mIndoorShadowCastingMask;
         Shader::ShaderManager & mShaderManager;
         typedef std::vector<osg::observer_ptr<osg::StateSet> > RegisteredUnshadowedStateSet;
-        static RegisteredUnshadowedStateSet _registeredUnshadowedStateSet;
+        RegisteredUnshadowedStateSet _registeredUnshadowedStateSet;
     };
 }
 

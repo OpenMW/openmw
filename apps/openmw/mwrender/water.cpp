@@ -284,7 +284,7 @@ public:
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
+        SceneUtil::ShadowManager::get()->disableShadowsForStateSet(getOrCreateStateSet());
     }
 
     void setScene(osg::Node* scene)
@@ -364,7 +364,7 @@ public:
         mClipCullNode = new ClipCullNode;
         addChild(mClipCullNode);
 
-        SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
+        SceneUtil::ShadowManager::get()->disableShadowsForStateSet(getOrCreateStateSet());
     }
 
     void setInterior(bool isInterior)

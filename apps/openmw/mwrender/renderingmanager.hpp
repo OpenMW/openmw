@@ -271,7 +271,6 @@ namespace MWRender
         TerrainStorage* mTerrainStorage;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<EffectManager> mEffectManager;
-        std::unique_ptr<SceneUtil::ShadowManager> mShadowManager;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;

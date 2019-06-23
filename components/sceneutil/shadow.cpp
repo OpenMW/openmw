@@ -4,10 +4,12 @@
 
 #include <components/settings/settings.hpp>
 
+using namespace osgShadow;
+
 namespace SceneUtil
 {
-    using namespace osgShadow;
-    ShadowManager::RegisteredUnshadowedStateSet ShadowManager::_registeredUnshadowedStateSet;
+    ShadowManager* ShadowManager::_instance = 0;
+
     void ShadowManager::setupShadowSettings()
     {
         mShadowTechnique = new MWShadowTechnique;
@@ -89,12 +91,31 @@ namespace SceneUtil
     void ShadowManager::disableShadowsForStateSet(osg::StateSet* stateset)
     {
         _registeredUnshadowedStateSet.push_back(stateset);
+
+        int numberOfShadowMapsPerLight =  mShadowSettings->getNumShadowMapsPerLight();
+        int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
+
+        osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
+        fakeShadowMapImage->allocateImage(1, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT);
+        *(float*)fakeShadowMapImage->data() = std::numeric_limits<float>::infinity();
+        osg::ref_ptr<osg::Texture> fakeShadowMapTexture = new osg::Texture2D(fakeShadowMapImage);
+        fakeShadowMapTexture->setShadowComparison(true);
+        fakeShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
+
+        for (int i = baseShadowTextureUnit; i < baseShadowTextureUnit + numberOfShadowMapsPerLight; ++i)
+        {
+            stateset->setTextureAttributeAndModes(i, fakeShadowMapTexture, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED);
+            stateset->removeUniform(("shadowTexture" + std::to_string(i - baseShadowTextureUnit)).c_str() );
+            stateset->removeUniform(("shadowTextureUnit" + std::to_string(i - baseShadowTextureUnit)).c_str() );
+            stateset->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
+            stateset->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
+        }
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
+    ShadowManager::ShadowManager(osg::Group* sceneRoot, osg::Group* rootNode, Shader::ShaderManager *shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
         mOutdoorShadowCastingMask(~0),
         mIndoorShadowCastingMask(~0),
-        mShaderManager(shaderManager)
+        mShaderManager(*shaderManager)
     {
 
         mShadowedScene->addChild(sceneRoot);
