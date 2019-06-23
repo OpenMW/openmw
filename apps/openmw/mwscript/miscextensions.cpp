@@ -1096,21 +1096,29 @@ namespace MWScript
                 std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral (runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find (spellId);
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
-                    runtime.getContext().report("spellcasting failed: can not find spell \""+spellId+"\"");
+                    runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
                     return;
                 }
 
                 if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
                 {
-                    runtime.getContext().report("spellcasting failed: you can cast only spells and powers.");
+                    runtime.getContext().report("spellcasting failed: you can only cast spells and powers.");
                     return;
                 }
 
-                // Obviously we can not use casting animation for player here
-                if (ptr.getClass().isActor() && ptr != MWMechanics::getPlayer())
+                if (ptr == MWMechanics::getPlayer())
+                {
+                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                    store.setSelectedEnchantItem(store.end());
+                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
+                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    return;
+                }
+
+                if (ptr.getClass().isActor())
                 {
                     MWMechanics::AiCast castPackage(targetId, spellId, true);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);

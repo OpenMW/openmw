@@ -109,15 +109,14 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 {
     QStringList paths = mGameSettings.getDataDirs();
 
-    foreach(const QString &path, paths)
-        mSelector->addFiles(path);
-
     mDataLocal = mGameSettings.getDataLocal();
 
     if (!mDataLocal.isEmpty())
-        mSelector->addFiles(mDataLocal);
+        paths.insert(0, mDataLocal);
 
-    paths.insert(0, mDataLocal);
+    foreach(const QString &path, paths)
+        mSelector->addFiles(path);
+
     PathIterator pathIterator(paths);
 
     mSelector->setProfileContent(filesInProfile(contentModelName, pathIterator));

@@ -55,8 +55,6 @@ namespace CS
             CSVTools::Merge mMerge;
             CSVDoc::ViewManager* mViewManager;
 
-            void setupDataFiles (const Files::PathContainer& dataDirs);
-
             std::pair<Files::PathContainer, std::vector<std::string> > readConfig(bool quiet=false);
             ///< \return data paths
 

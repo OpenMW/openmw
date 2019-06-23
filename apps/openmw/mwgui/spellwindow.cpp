@@ -83,7 +83,7 @@ namespace MWGui
         // Reset the filter focus when opening the window
         MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
         if (focus == mFilterEdit)
-            MyGUI::InputManager::getInstance().resetKeyFocusWidget();
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
 
         updateSpells();
     }

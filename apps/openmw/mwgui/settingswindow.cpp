@@ -6,7 +6,6 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
-#include <MyGUI_InputManager.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -616,7 +615,7 @@ namespace MWGui
         highlightCurrentResolution();
         updateControlsBox();
         resetScrollbars();
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mOkButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }
 
     void SettingsWindow::onWindowResize(MyGUI::Window *_sender)

@@ -1,7 +1,6 @@
 #include "scrollwindow.hpp"
 
 #include <MyGUI_ScrollView.h>
-#include <MyGUI_InputManager.h>
 
 #include <components/esm/loadbook.hpp>
 #include <components/widgets/imagebutton.hpp>
@@ -67,7 +66,7 @@ namespace MWGui
 
         setTakeButtonShow(showTakeButton);
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
     }
 
     void ScrollWindow::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)

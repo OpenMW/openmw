@@ -141,7 +141,7 @@ namespace MWGui
         mItemView->setModel (mSortModel);
         mItemView->resetScrollBars();
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         setTitle(container.getClass().getName(container));
     }
@@ -175,7 +175,7 @@ namespace MWGui
         if(mDragAndDrop != nullptr && mDragAndDrop->mIsOnDragAndDrop)
             return;
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
         // transfer everything into the player's inventory
         ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
@@ -222,7 +222,7 @@ namespace MWGui
     {
         if(mDragAndDrop == nullptr || !mDragAndDrop->mIsOnDragAndDrop)
         {
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(mCloseButton);
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
             onTakeAllButtonClicked(mTakeButton);
 

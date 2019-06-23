@@ -40,7 +40,7 @@ struct Clothing
         int mType;
         float mWeight;
         unsigned short mValue;
-        short mEnchant;
+        unsigned short mEnchant;
     };
     CTDTstruct mData;
 
