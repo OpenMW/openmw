@@ -183,13 +183,7 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
-
-    // assign large value to effectively turn off fog
-    // shaders don't respect glDisable(GL_FOG)
-    osg::ref_ptr<osg::Fog> fog (new osg::Fog);
-    fog->setStart(10000000);
-    fog->setEnd(10000000);
-    stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+    stateset->setMode(GL_FOG, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
     osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
     lightmodel->setAmbientIntensity(osg::Vec4(0.3f, 0.3f, 0.3f, 1.f));
