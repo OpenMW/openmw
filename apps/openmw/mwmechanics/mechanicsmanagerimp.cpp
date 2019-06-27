@@ -1647,18 +1647,28 @@ namespace MWMechanics
 
     void MechanicsManager::startCombat(const MWWorld::Ptr &ptr, const MWWorld::Ptr &target)
     {
-        MWMechanics::AiSequence& aiSequence = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
-        if (aiSequence.isInCombat(target))
+        // Don't add duplicate packages nor add packages to dead actors.
+        if (stats.isDead() || stats.getAiSequence().isInCombat(target))
             return;
 
-        aiSequence.stack(MWMechanics::AiCombat(target), ptr);
+        // The target is somehow the same as the actor. Early-out.
+        if (ptr == target)
+        {
+            // We don't care about dialogue filters since the target is invalid.
+            // We still want to play the combat taunt.
+            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+            return;
+        }
+
+        stats.getAiSequence().stack(MWMechanics::AiCombat(target), ptr);
         if (target == getPlayer())
         {
             // if guard starts combat with player, guards pursuing player should do the same
             if (ptr.getClass().isClass(ptr, "Guard"))
             {
-                ptr.getClass().getCreatureStats(ptr).setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
+                stats.setHitAttemptActorId(target.getClass().getCreatureStats(target).getActorId()); // Stops guard from ending combat if player is unreachable
                 for (Actors::PtrActorMap::const_iterator iter = mActors.begin(); iter != mActors.end(); ++iter)
                 {
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
@@ -1676,8 +1686,7 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        if (ptr.getClass().isNpc() && !ptr.getClass().getCreatureStats(ptr).isDead())
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+        MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
     }
 
     void MechanicsManager::getObjectsInRange(const osg::Vec3f &position, float radius, std::vector<MWWorld::Ptr> &objects)
