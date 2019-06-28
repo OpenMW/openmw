@@ -12,6 +12,9 @@
 #include <osg/ContextData>
 #endif
 
+//ensure minimum popin for in frustum occluded but drastically increase OQ count per frame
+//#define PROVOK_OQ_4_PREVIOUSLY_OCCLUDED 1
+
 using namespace osg;
 
 namespace SceneUtil
@@ -95,6 +98,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         passed = _passed;
 
     unsigned int& lasttestframe( _lastframes[ camera ] );
+    unsigned int traversalNumber = nv.getTraversalNumber();
     {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
@@ -103,21 +107,21 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
         unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
 
-        if (lasttestframe+1 < nv.getTraversalNumber())
+        if (lasttestframe+1 < traversalNumber)
         {
-            ///entering frustum so force next OQ
+            ///entering frustum so provoke next OQ
             lastQueryFrame = 0;
             passed = true;
-            lasttestframe = nv.getTraversalNumber();
+            lasttestframe = traversalNumber;
             return passed;
         }
 
         if( ( lastQueryFrame == 0 ) ||
-            ( (nv.getTraversalNumber() - lastQueryFrame) >  (_queryFrameCount+1 ) )
+            ( (traversalNumber - lastQueryFrame) >  (_queryFrameCount+1 ) )
                 )
         {
             passed = true;
-            lasttestframe = nv.getTraversalNumber();
+            lasttestframe = traversalNumber;
             return passed;
         }
     }
@@ -147,14 +151,17 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
            // The query hasn't finished yet and the result still
            // isn't available, return true to traverse the subgraphs.
            passed = true;
-           lasttestframe = nv.getTraversalNumber();
+           lasttestframe = traversalNumber;
            return passed;
         }
 
         passed = ( result.numPixels >  _visThreshold );
+#ifdef PROVOK_OQ_4_PREVIOUSLY_OCCLUDED
         if(passed)
-            lasttestframe = nv.getTraversalNumber();
+#endif
+            lasttestframe = traversalNumber;
     }
+    else lasttestframe = traversalNumber;
 
     return passed;
 }
