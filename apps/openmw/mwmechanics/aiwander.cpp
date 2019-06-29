@@ -527,7 +527,8 @@ namespace MWMechanics
         if (greetingState == AiWanderStorage::Greet_None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
-                !player.getClass().getCreatureStats(player).isDead() && MWBase::Environment::get().getWorld()->getLOS(player, actor)
+                !player.getClass().getCreatureStats(player).isDead() && !actor.getClass().getCreatureStats(actor).isParalyzed()
+                && MWBase::Environment::get().getWorld()->getLOS(player, actor)
                 && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
                 greetingTimer++;
 
