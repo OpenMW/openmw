@@ -526,8 +526,6 @@ namespace MWWorld
 
             void allowVanityMode(bool allow) override;
 
-            void togglePlayerLooking(bool enable) override;
-
             void changeVanityModeScale(float factor) override;
 
             bool vanityRotateCamera(float * rot) override;

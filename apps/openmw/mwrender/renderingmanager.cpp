@@ -1353,11 +1353,6 @@ namespace MWRender
         mCamera->allowVanityMode(allow);
     }
 
-    void RenderingManager::togglePlayerLooking(bool enable)
-    {
-        mCamera->togglePlayerLooking(enable);
-    }
-
     void RenderingManager::changeVanityModeScale(float factor)
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
