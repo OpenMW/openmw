@@ -116,6 +116,9 @@ namespace MWMechanics
                 || target.getClass().getCreatureStats(target).isDead())
             return true;
 
+        if (actor == target) // This should never happen.
+            return true;
+
         if (!storage.isFleeing())
         {
             if (storage.mCurrentAction.get()) // need to wait to init action with its attack range
