@@ -2099,28 +2099,6 @@ void CharacterController::update(float duration, bool animationOnly)
                     lat.normalize();
                     vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
                 }
-
-                // advance acrobatics
-                // also set jumping flag to allow GetPCJumping works
-                if (isPlayer)
-                {
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
-                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
-                }
-
-                // decrease fatigue
-                const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-                const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-                float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
-                if (normalizedEncumbrance > 1)
-                    normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
-
-                if (!godmode)
-                {
-                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                    cls.getCreatureStats(mPtr).setFatigue(fatigue);
-                }
             }
         }
         else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
@@ -2333,7 +2311,9 @@ void CharacterController::update(float duration, bool animationOnly)
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
-        // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
+        if (movement.z() == 0.f)
+            cls.getMovementSettings(mPtr).mPosition[2] = 0;
+        // Can't reset jump state (mPosition[2]) here in full; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
 
         if (!mSkipAnim)

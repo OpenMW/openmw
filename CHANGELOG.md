@@ -96,6 +96,7 @@
     Bug #4984: "Friendly hits" feature should be used only for player's followers
     Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
+    Bug #4991: Jumping occasionally takes too much fatigue
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
