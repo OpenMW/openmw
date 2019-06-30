@@ -2675,14 +2675,14 @@ void CharacterController::setVisibility(float visibility)
         if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
         {
             if (mPtr == getPlayer())
-                alpha = 0.4f;
+                alpha = 0.25f;
             else
-                alpha = 0.f;
+                alpha = 0.05f;
         }
         float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         if (chameleon)
         {
-            alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+            alpha *= std::min(0.75f, std::max(0.25f, (100.f - chameleon)/100.f));
         }
 
         visibility = std::min(visibility, alpha);
