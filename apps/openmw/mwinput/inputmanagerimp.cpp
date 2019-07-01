@@ -560,7 +560,7 @@ namespace MWInput
             // game mode does not move the position of the GUI cursor
             float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor;
             float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor;
-            if (xmove != 0|| ymove != 0)
+            if (xmove != 0|| ymove != 0 || zAxis != 0)
             {
                 mGuiCursorX += xmove;
                 mGuiCursorY += ymove;
