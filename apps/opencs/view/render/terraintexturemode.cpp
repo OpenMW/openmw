@@ -77,6 +77,10 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     EditMode::deactivate(toolbar);
 }
 
+void CSVRender::TerrainTextureMode::primaryOpenPressed(const WorldspaceHitResult& hit) // Apply changes here
+{
+}
+
 void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult& hit) // Apply changes here
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
