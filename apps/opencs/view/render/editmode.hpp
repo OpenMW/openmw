@@ -40,6 +40,9 @@ namespace CSVRender
             virtual void setEditLock (bool locked);
 
             /// Default-implementation: Ignored.
+            virtual void primaryOpenPressed (const WorldspaceHitResult& hit);
+
+            /// Default-implementation: Ignored.
             virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: Ignored.

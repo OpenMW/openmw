@@ -135,6 +135,7 @@
     Feature #4968: Scalable UI widget skins
     Feature #4994: Persistent pinnable windows hiding
     Feature #5000: Compressed BSA format support
+    Feature #5005: Editor: Instance window via Scene window
     Feature #5010: Native graphics herbalism support
     Feature #5031: Make GetWeaponType function return different values for tools
     Feature #5033: Magic armor mitigation for creatures

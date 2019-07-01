@@ -101,6 +101,9 @@ CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidg
     // Shortcuts
     CSMPrefs::Shortcut* primaryEditShortcut = new CSMPrefs::Shortcut("scene-edit-primary", "scene-speed-modifier",
             CSMPrefs::Shortcut::SM_Detach, this);
+    CSMPrefs::Shortcut* primaryOpenShortcut = new CSMPrefs::Shortcut("scene-open-primary", this);
+
+    connect(primaryOpenShortcut, SIGNAL(activated(bool)), this, SLOT(primaryOpen(bool)));
     connect(primaryEditShortcut, SIGNAL(activated(bool)), this, SLOT(primaryEdit(bool)));
     connect(primaryEditShortcut, SIGNAL(secondary(bool)), this, SLOT(speedMode(bool)));
 
@@ -696,11 +699,18 @@ void CSVRender::WorldspaceWidget::handleInteractionPress (const WorldspaceHitRes
         editMode.primarySelectPressed (hit);
     else if (type == InteractionType_SecondarySelect)
         editMode.secondarySelectPressed (hit);
+    else if (type == InteractionType_PrimaryOpen)
+        editMode.primaryOpenPressed (hit);
 }
 
 CSVRender::EditMode *CSVRender::WorldspaceWidget::getEditMode()
 {
     return dynamic_cast<CSVRender::EditMode *> (mEditMode->getCurrent());
+}
+
+void CSVRender::WorldspaceWidget::primaryOpen(bool activate)
+{
+    handleInteraction(InteractionType_PrimaryOpen, activate);
 }
 
 void CSVRender::WorldspaceWidget::primaryEdit(bool activate)

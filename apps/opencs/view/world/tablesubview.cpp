@@ -165,3 +165,8 @@ bool CSVWorld::TableSubView::eventFilter (QObject* object, QEvent* event)
     }
     return false;
 }
+
+void CSVWorld::TableSubView::requestFocus (const std::string& id)
+{
+    mTable->requestFocus(id);
+}
