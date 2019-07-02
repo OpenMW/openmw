@@ -4,8 +4,10 @@
 
 #include <pwd.h>
 #include <unistd.h>
+#include <linux/limits.h>
 #include <boost/filesystem/fstream.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
 
@@ -50,6 +52,9 @@ namespace Files
 LinuxPath::LinuxPath(const std::string& application_name)
     : mName(application_name)
 {
+    boost::filesystem::path localPath = getLocalPath();
+    if (chdir(localPath.string().c_str()) != 0)
+        Log(Debug::Warning) << "Error " << errno << " when changing current directory";
 }
 
 boost::filesystem::path LinuxPath::getUserConfigPath() const
@@ -75,7 +80,21 @@ boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 
 boost::filesystem::path LinuxPath::getLocalPath() const
 {
-    return boost::filesystem::path("./");
+    boost::filesystem::path localPath("./");
+    char binPath[PATH_MAX];
+    memset(binPath, 0, sizeof(binPath));
+    const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
+
+    for(const char *path : statusPaths)
+    {
+        if (readlink(path, binPath, sizeof(binPath)) != -1)
+	{
+	    localPath = boost::filesystem::path(binPath).parent_path();
+	    break;
+        }
+    }
+    
+    return localPath;
 }
 
 boost::filesystem::path LinuxPath::getGlobalDataPath() const
