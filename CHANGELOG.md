@@ -108,6 +108,7 @@
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
+    Bug #5082: Scrolling with controller in GUI mode is broken
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -141,6 +142,7 @@
     Feature #5033: Magic armor mitigation for creatures
     Feature #5034: Make enchanting window stay open after a failed attempt
     Feature #5036: Allow scripted faction leaving
+    Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
