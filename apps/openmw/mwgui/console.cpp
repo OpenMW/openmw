@@ -1,6 +1,7 @@
 #include "console.hpp"
 
 #include <MyGUI_EditBox.h>
+#include <MyGUI_InputManager.h>
 #include <MyGUI_LayerManager.h>
 
 #include <boost/filesystem.hpp>
@@ -263,26 +264,6 @@ namespace MWGui
                     mCommandLine->setCaption(text);
                     mCommandLine->setTextCursor(0);
                 }
-            }
-            else if(key == MyGUI::KeyCode::ArrowRight)
-            {
-                const auto& caption = mCommandLine->getCaption();
-                size_t pos = mCommandLine->getTextCursor();
-                while(pos < caption.size() && (isWhitespace(caption[pos]) || caption[pos] == '-'))
-                    pos++;
-                while(pos < caption.size() && !isWhitespace(caption[pos]) && caption[pos] != '-')
-                    pos++;
-                mCommandLine->setTextCursor(pos);
-            }
-            else if(key == MyGUI::KeyCode::ArrowLeft)
-            {
-                const auto& caption = mCommandLine->getCaption();
-                size_t pos = mCommandLine->getTextCursor();
-                while(pos > 0 && (isWhitespace(caption[pos - 1]) || caption[pos - 1] == '>'))
-                    pos--;
-                while(pos > 0 && !isWhitespace(caption[pos - 1]) && caption[pos - 1] != '>')
-                    pos--;
-                mCommandLine->setTextCursor(pos);
             }
         }
         else if(key == MyGUI::KeyCode::Tab)
