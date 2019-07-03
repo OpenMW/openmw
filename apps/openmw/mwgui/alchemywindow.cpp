@@ -5,7 +5,6 @@
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
-#include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -169,7 +168,7 @@ namespace MWGui
 
         update();
 
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mNameEdit);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
     }
 
     void AlchemyWindow::onIngredientSelected(MyGUI::Widget* _sender)

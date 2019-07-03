@@ -3,7 +3,6 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_ScrollBar.h>
 #include <MyGUI_RenderManager.h>
-#include <MyGUI_InputManager.h>
 
 #include <components/widgets/numericeditbox.hpp>
 
@@ -48,7 +47,7 @@ namespace MWGui
                 mMainWidget->getHeight());
 
         // by default, the text edit field has the focus of the keyboard
-        MyGUI::InputManager::getInstance().setKeyFocusWidget(mItemEdit);
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mItemEdit);
 
         mSlider->setScrollPosition(maxCount-1);
 

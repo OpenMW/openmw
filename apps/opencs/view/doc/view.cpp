@@ -22,6 +22,7 @@
 #include "../../model/world/idtable.hpp"
 
 #include "../world/subviews.hpp"
+#include "../world/scenesubview.hpp"
 #include "../world/tablesubview.hpp"
 
 #include "../tools/subviews.hpp"
@@ -626,6 +627,20 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     connect (view, SIGNAL (updateSubViewIndices (SubView *)),
         this, SLOT (updateSubViewIndices (SubView *)));
 
+    CSVWorld::TableSubView* tableView = dynamic_cast<CSVWorld::TableSubView*>(view);
+    if (tableView)
+    {
+        connect (this, SIGNAL (requestFocus (const std::string&)),
+            tableView, SLOT (requestFocus (const std::string&)));
+    }
+
+    CSVWorld::SceneSubView* sceneView = dynamic_cast<CSVWorld::SceneSubView*>(view);
+    if (sceneView)
+    {
+        connect(sceneView, SIGNAL(requestFocus(const std::string&)),
+                this, SLOT(onRequestFocus(const std::string&)));
+    }
+
     view->show();
 
     if (!hint.empty())
@@ -1064,4 +1079,17 @@ void CSVDoc::View::createScrollArea()
     mScroll->setWidgetResizable(true);
     mScroll->setWidget(&mSubViewWindow);
     setCentralWidget(mScroll);
+}
+
+void CSVDoc::View::onRequestFocus (const std::string& id)
+{
+    if(CSMPrefs::get()["3D Scene Editing"]["open-list-view"].isTrue())
+    {
+        addReferencesSubView();
+        emit requestFocus(id);
+    }
+    else
+    {
+        addSubView(CSMWorld::UniversalId (CSMWorld::UniversalId::Type_Reference, id));
+    }
 }

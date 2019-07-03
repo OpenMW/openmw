@@ -2,17 +2,20 @@
 ------
 
     Bug #1515: Opening console masks dialogue, inventory menu
+    Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
     Bug #2969: Scripted items can stack
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
+    Bug #3550: Companion from mod attacks the air after combat has ended
     Bug #3623: Display scaling breaks mouse recognition
     Bug #3725: Using script function in a non-conditional expression breaks script compilation
     Bug #3733: Normal maps are inverted on mirrored UVs
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
+    Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
@@ -20,6 +23,7 @@
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
+    Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
     Bug #4705: Editor: unable to open exterior cell views from Instances table
@@ -99,6 +103,13 @@
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Bug #5047: # in cell names sets color
     Bug #5050: Invalid spell effects are not handled gracefully
+    Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
+    Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
+    Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
+    Bug #5069: Blocking creatures' attacks doesn't degrade shields
+    Bug #5074: Paralyzed actors greet the player
+    Bug #5075: Enchanting cast style can be changed if there's no object
+    Bug #5082: Scrolling with controller in GUI mode is broken
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -126,14 +137,17 @@
     Feature #4968: Scalable UI widget skins
     Feature #4994: Persistent pinnable windows hiding
     Feature #5000: Compressed BSA format support
+    Feature #5005: Editor: Instance window via Scene window
     Feature #5010: Native graphics herbalism support
     Feature #5031: Make GetWeaponType function return different values for tools
     Feature #5033: Magic armor mitigation for creatures
     Feature #5034: Make enchanting window stay open after a failed attempt
     Feature #5036: Allow scripted faction leaving
+    Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
+    Task #4789: Optimize cell transitions
     Task #4721: Add NMake support to the Windows prebuild script
 
 0.45.0

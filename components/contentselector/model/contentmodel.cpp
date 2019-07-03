@@ -428,7 +428,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
     {
         QFileInfo info(dir.absoluteFilePath(path2));
 
-        if (item(info.absoluteFilePath()) != 0)
+        if (item(info.fileName()))
             continue;
 
         try {

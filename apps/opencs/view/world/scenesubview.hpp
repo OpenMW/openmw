@@ -82,6 +82,10 @@ namespace CSVWorld
             void cellSelectionChanged (const CSMWorld::UniversalId& id);
 
             void handleDrop(const std::vector<CSMWorld::UniversalId>& data);
+
+        signals:
+
+            void requestFocus (const std::string& id);
     };
 }
 

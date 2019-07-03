@@ -551,7 +551,7 @@ namespace MWMechanics
     void Actors::adjustMagicEffects (const MWWorld::Ptr& creature)
     {
         CreatureStats& creatureStats =  creature.getClass().getCreatureStats (creature);
-        if (creatureStats.isDead())
+        if (creatureStats.isDeathAnimationFinished())
             return;
 
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
@@ -1665,10 +1665,6 @@ namespace MWMechanics
                     stats.getActiveSpells().visitEffectSources(soulTrap);
                 }
 
-                // Reset magic effects and recalculate derived effects
-                // One case where we need this is to make sure bound items are removed upon death
-                stats.modifyMagicEffects(MWMechanics::MagicEffects());
-                stats.getActiveSpells().clear();
                 calculateCreatureStatModifiers(iter->first, 0);
 
                 if (cls.isEssential(iter->first))
@@ -1680,6 +1676,10 @@ namespace MWMechanics
 
                 ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
 
+                // Reset magic effects and recalculate derived effects
+                // One case where we need this is to make sure bound items are removed upon death
+                stats.modifyMagicEffects(MWMechanics::MagicEffects());
+                stats.getActiveSpells().clear();
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 

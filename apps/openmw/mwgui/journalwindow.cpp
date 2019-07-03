@@ -254,7 +254,7 @@ namespace
             }
             updateShowingPages();
 
-            MyGUI::InputManager::getInstance().setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(getWidget<MyGUI::Widget>(CloseBTN));
         }
 
         void onClose()
@@ -377,9 +377,9 @@ namespace
             prevPageBtn->setVisible(prevPageVisible);
 
             if (focus == nextPageBtn && !nextPageVisible && prevPageVisible)
-                MyGUI::InputManager::getInstance().setKeyFocusWidget(prevPageBtn);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(prevPageBtn);
             else if (focus == prevPageBtn && !prevPageVisible && nextPageVisible)
-                MyGUI::InputManager::getInstance().setKeyFocusWidget(nextPageBtn);
+                MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nextPageBtn);
 
             setVisible (PageOneNum, relPages > 0);
             setVisible (PageTwoNum, relPages > 1);
