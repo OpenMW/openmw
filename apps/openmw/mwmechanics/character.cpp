@@ -983,7 +983,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        sndMgr->stopSound3D(mPtr, evt.substr(7));
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
         return;
     }
@@ -1024,7 +1023,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
             else
             {
-                sndMgr->stopSound3D(mPtr, sound);
                 sndMgr->playSound3D(mPtr, sound, volume, pitch);
             }
         }
