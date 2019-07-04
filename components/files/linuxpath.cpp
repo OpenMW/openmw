@@ -88,12 +88,12 @@ boost::filesystem::path LinuxPath::getLocalPath() const
     for(const char *path : statusPaths)
     {
         if (readlink(path, binPath, sizeof(binPath)) != -1)
-	{
-	    localPath = boost::filesystem::path(binPath).parent_path();
-	    break;
+        {
+	        localPath = boost::filesystem::path(binPath).parent_path();
+	        break;
         }
     }
-    
+
     return localPath;
 }
 
