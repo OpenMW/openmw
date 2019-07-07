@@ -4,7 +4,6 @@
 
 #include <pwd.h>
 #include <unistd.h>
-#include <linux/limits.h>
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/debug/debuglog.hpp>
@@ -81,13 +80,12 @@ boost::filesystem::path LinuxPath::getGlobalConfigPath() const
 boost::filesystem::path LinuxPath::getLocalPath() const
 {
     boost::filesystem::path localPath("./");
-    char binPath[PATH_MAX];
-    memset(binPath, 0, sizeof(binPath));
+    std::string binPath(pathconf(".", _PC_PATH_MAX), '\0');
     const char *statusPaths[] = {"/proc/self/exe", "/proc/self/file", "/proc/curproc/exe", "/proc/curproc/file"};
 
     for(const char *path : statusPaths)
     {
-        if (readlink(path, binPath, sizeof(binPath)) != -1)
+        if (readlink(path, &binPath[0], binPath.size()) != -1)
         {
             localPath = boost::filesystem::path(binPath).parent_path();
             break;
