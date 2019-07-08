@@ -1010,7 +1010,10 @@ namespace NifOsg
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags, true);
-
+            
+            //prevent lighting from overriding color
+            partsys->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+            
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
             osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater = new osgParticle::ParticleSystemUpdater;
