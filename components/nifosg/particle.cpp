@@ -152,7 +152,6 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
     osg::Vec4f color = mData.interpKey(time);
 
     particle->setColorRange(osgParticle::rangev4(color, color));
-    particle->setAlphaRange(osgParticle::rangef(color.w(), color.w()));
 }
 
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
