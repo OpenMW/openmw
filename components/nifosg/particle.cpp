@@ -150,8 +150,11 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
 {
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
     osg::Vec4f color = mData.interpKey(time);
+    float alpha = color.a();
+    color.a() = 1.0f;
 
     particle->setColorRange(osgParticle::rangev4(color, color));
+    particle->setAlphaRange(osgParticle::rangef(alpha,alpha));
 }
 
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
