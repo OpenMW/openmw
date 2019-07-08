@@ -7,6 +7,7 @@
 #include <osg/LOD>
 #include <osg/Switch>
 #include <osg/TexGen>
+#include <osg/PointSprite>
 #include <osg/ValueObject>
 
 // resource
@@ -1020,6 +1021,38 @@ namespace NifOsg
                 trans->setUpdateCallback(new InverseWorldMatrix);
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
+            }
+
+            // setup shader
+            if(partsys->getUseShaders())
+            {
+                float _visibilityDistance = partsys->getVisibilityDistance();
+                int texture_unit = 0;
+                osg::StateSet *stateset = partsys->getOrCreateStateSet();
+                stateset->setDataVariance(osg::Object::STATIC);
+                stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+
+                osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
+                sprite = shareAttribute(sprite);
+                stateset->setTextureAttributeAndModes(texture_unit, sprite, osg::StateAttribute::ON);
+
+                #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
+                    stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
+                #else
+                    OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
+                #endif
+
+                osg::ref_ptr<osg::Program> program = new osg::Program;
+
+                program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, "resources/shaders/particle_vertex.glsl"));
+                program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT,"resources/shaders/particle_fragment.glsl"));
+
+                program = shareAttribute(program);
+                stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+
+                stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
+                stateset->addUniform(new osg::Uniform("baseTexture", 0));
+
             }
         }
 

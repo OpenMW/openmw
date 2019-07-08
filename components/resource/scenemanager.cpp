@@ -34,10 +34,6 @@
 #include "objectcache.hpp"
 #include "multiobjectcache.hpp"
 
-#include <osg/PointSprite>
-#include <osg/BlendFunc>
-#include <osgDB/FileUtils>
-
 namespace
 {
 
@@ -99,33 +95,6 @@ namespace
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
             {
-              if(partsys->getUseShaders())
-              {
-                float _visibilityDistance = partsys->getVisibilityDistance();
-                int texture_unit = 0;
-                osg::StateSet *stateset = partsys->getOrCreateStateSet();
-                stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-
-                osg::PointSprite *sprite = new osg::PointSprite;
-                stateset->setTextureAttributeAndModes(texture_unit, sprite, osg::StateAttribute::ON);
-
-                #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
-                    stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
-                #else
-                    OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
-                #endif
-
-                osg::Program *program = new osg::Program;
-
-                program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, "resources/shaders/particle_vertex.glsl"));
-                program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT,"resources/shaders/particle_fragment.glsl"));
-
-                stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-
-                stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
-                stateset->addUniform(new osg::Uniform("baseTexture", 0));
-
-            }
                 if (isWorldSpaceParticleSystem(partsys))
                 {
                     partsys->addUpdateCallback(new InitWorldSpaceParticlesCallback);

@@ -20,7 +20,7 @@ ParticleSystem::ParticleSystem()
     : osgParticle::ParticleSystem()
     , mQuota(std::numeric_limits<int>::max())
 {
-    if(Settings::Manager::getBool("force shaders","Shaders"))
+    if(Settings::Manager::getBool("force shaders", "Shaders"))
     {
         setUseVertexArray(true);
         setUseShaders(true);

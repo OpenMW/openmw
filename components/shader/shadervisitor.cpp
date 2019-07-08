@@ -3,6 +3,7 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
+#include <osgParticle/ParticleSystem>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -357,6 +358,11 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
+        osgParticle::ParticleSystem * partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drawable);
+        if(partsys && partsys->getUseShaders())
+            //not handle by shadermanager
+            return;
+
         // non-Geometry drawable (e.g. particle system)
         bool needPop = (drawable.getStateSet() != nullptr);
 
