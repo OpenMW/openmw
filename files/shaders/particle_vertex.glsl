@@ -22,7 +22,7 @@ gl_Position = gl_ProjectionMatrix*ecPos;
 gl_ClipVertex = ecPos;
 
 vec4 color = gl_Color;
-color.a = basic_prop.z;
+color.a *= basic_prop.z;
 
 gl_FrontColor = color;
 gl_BackColor = gl_FrontColor;

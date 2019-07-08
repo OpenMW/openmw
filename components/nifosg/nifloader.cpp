@@ -17,6 +17,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/settings/settings.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -918,6 +919,13 @@ namespace NifOsg
         void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
+
+            if(Settings::Manager::getBool("shader particles", "Shaders"))
+            {
+                partsys->setUseVertexArray(true);
+                partsys->setUseShaders(true);
+            }
+
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
             const Nif::NiParticleSystemController* partctrl = nullptr;
@@ -996,6 +1004,7 @@ namespace NifOsg
                 partsys->update(0.0, nv);
             }
 
+
             // affectors must be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
@@ -1023,18 +1032,18 @@ namespace NifOsg
                 parentNode->addChild(trans);
             }
 
+            osg::StateSet *stateset = partsys->getOrCreateStateSet();
+            stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+
             // setup shader
             if(partsys->getUseShaders())
             {
                 float _visibilityDistance = partsys->getVisibilityDistance();
-                int texture_unit = 0;
-                osg::StateSet *stateset = partsys->getOrCreateStateSet();
                 stateset->setDataVariance(osg::Object::STATIC);
-                stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
                 osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
                 sprite = shareAttribute(sprite);
-                stateset->setTextureAttributeAndModes(texture_unit, sprite, osg::StateAttribute::ON);
+                stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
 
                 #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
                     stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
@@ -1051,8 +1060,6 @@ namespace NifOsg
                 stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
                 stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
-                stateset->addUniform(new osg::Uniform("baseTexture", 0));
-
             }
         }
 
