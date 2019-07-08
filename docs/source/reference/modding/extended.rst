@@ -53,7 +53,7 @@ It is also possible to attach opening/closing sounds to container's animations:
 
 ::
 
-    1.0: ContainerClose: open
+    1.0: ContainerClose: start
     1.01: Sound: AC_dw_drawer_close
     2.0: ContainerClose: stop
 
