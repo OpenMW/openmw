@@ -157,7 +157,7 @@ void MorphGeometry::update(osg::NodeVisitor *nv)
     if (mLastFrameNumber == nv->getTraversalNumber() || !mDirty)
     {
         osg::Geometry& geom = *getGeometry(mLastFrameNumber);
-        mLastFrameMutex.unlock();
+
         nv->pushOntoNodePath(&geom);
         nv->apply(geom);
         nv->popFromNodePath();

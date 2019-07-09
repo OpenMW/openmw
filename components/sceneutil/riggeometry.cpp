@@ -184,7 +184,6 @@ void RigGeometry::update(osg::NodeVisitor* nv){
     if (mLastFrameNumber == traversalNumber || (mLastFrameNumber != 0 && !mSkeleton->getActive()))
     {
         osg::Geometry& geom = *getGeometry(mLastFrameNumber);
-        mLastFrameMutex.unlock();
         nv->pushOntoNodePath(&geom);
         nv->apply(geom);
         nv->popFromNodePath();
