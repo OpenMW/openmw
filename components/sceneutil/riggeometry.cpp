@@ -178,24 +178,22 @@ void RigGeometry::update(osg::NodeVisitor* nv){
          if (!initFromParentSkeleton(nv))
             return;
     }
-    //update next frame geom in order not to interfere with draw thread
-    mLastFrameMutex.lock();
+
     unsigned int traversalNumber = nv->getTraversalNumber();
 
     if (mLastFrameNumber == traversalNumber || (mLastFrameNumber != 0 && !mSkeleton->getActive()))
     {
-        osg::Geometry& geom = *getGeometry(mLastFrameNumber+1);
+        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
         mLastFrameMutex.unlock();
         nv->pushOntoNodePath(&geom);
         nv->apply(geom);
         nv->popFromNodePath();
         return;
     }
-    mLastFrameNumber = traversalNumber;
-    osg::Geometry& geom = *getGeometry(mLastFrameNumber+1);
 
-    mLastFrameMutex.unlock();
-    mSkeleton->updateBoneMatrices(mLastFrameNumber+1);
+    osg::Geometry& geom = *getGeometry(traversalNumber);
+
+    mSkeleton->updateBoneMatrices(traversalNumber);
 
     // skinning
     const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -255,6 +253,11 @@ void RigGeometry::update(osg::NodeVisitor* nv){
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
     nv->popFromNodePath();
+
+    mLastFrameMutex.lock();
+    //ready to consum
+    mLastFrameNumber = traversalNumber;
+    mLastFrameMutex.unlock();
 }
 
 void RigGeometry::cull(osg::NodeVisitor* nv)
