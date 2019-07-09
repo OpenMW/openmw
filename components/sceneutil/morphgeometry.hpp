@@ -77,7 +77,6 @@ namespace SceneUtil
         osg::Geometry* getGeometry(unsigned int frame) const;
 
         unsigned int mLastFrameNumber;
-        OpenThreads::Mutex mLastFrameMutex;
         bool mDirty; // Have any morph targets changed?
 
         mutable bool mMorphedBoundingBox;

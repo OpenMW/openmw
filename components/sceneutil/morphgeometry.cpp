@@ -38,7 +38,6 @@ void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
         to.setCullingActive(false); // make sure to disable culling since that's handled by this class
-        to.setDataVariance(osg::Object::DYNAMIC);
 
         // vertices are modified every frame, so we need to deep copy them.
         // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
@@ -184,24 +183,24 @@ void MorphGeometry::update(osg::NodeVisitor *nv)
     }
 
     positionDst->dirty();
+
+#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
+    geom.dirtyGLObjects();
+#endif
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
     nv->popFromNodePath();
 
-    mLastFrameMutex.lock();
-    //ready to consum
     mLastFrameNumber = traversalNumber;
-    mLastFrameMutex.unlock();
 }
 
 void MorphGeometry::cull(osg::NodeVisitor *nv)
 {
-        mLastFrameMutex.lock();
-        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
-        mLastFrameMutex.unlock();
-        nv->pushOntoNodePath(&geom);
-        nv->apply(geom);
-        nv->popFromNodePath();
+    osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+
+    nv->pushOntoNodePath(&geom);
+    nv->apply(geom);
+    nv->popFromNodePath();
 
 }
 

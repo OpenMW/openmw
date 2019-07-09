@@ -253,10 +253,7 @@ void RigGeometry::update(osg::NodeVisitor* nv){
     nv->apply(geom);
     nv->popFromNodePath();
 
-    mLastFrameMutex.lock();
-    //ready to consum
     mLastFrameNumber = traversalNumber;
-    mLastFrameMutex.unlock();
 }
 
 void RigGeometry::cull(osg::NodeVisitor* nv)
@@ -269,9 +266,7 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
             return;
     }
 
-    mLastFrameMutex.lock();
     osg::Geometry& geom = *getGeometry(mLastFrameNumber);
-    mLastFrameMutex.unlock();
 
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);

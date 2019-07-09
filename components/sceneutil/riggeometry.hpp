@@ -102,7 +102,6 @@ namespace SceneUtil
         std::vector<Bone*> mBoneNodesVector;
 
         unsigned int mLastFrameNumber;
-        OpenThreads::Mutex mLastFrameMutex;
         bool mBoundsFirstFrame;
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
