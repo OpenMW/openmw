@@ -38,6 +38,7 @@ void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
         to.setSupportsDisplayList(false);
         to.setUseVertexBufferObjects(true);
         to.setCullingActive(false); // make sure to disable culling since that's handled by this class
+        to.setDataVariance(osg::Object::DYNAMIC);
 
         // vertices are modified every frame, so we need to deep copy them.
         // assign a dedicated VBO to make sure that modifications don't interfere with source geometry's VBO.
