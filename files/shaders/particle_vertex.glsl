@@ -1,5 +1,5 @@
 uniform float visibilityDistance;
-varying vec3 basic_prop;
+varying vec3 basic_prop; // _alive, _current_size, _current_alpha
 
 //TOFIX
 #define SIZESCALE 1000
@@ -9,9 +9,10 @@ void main(void)
 
 basic_prop = gl_MultiTexCoord0.xyz;
 vec4 ecPos = gl_ModelViewMatrix * gl_Vertex;
-gl_PointSize = SIZESCALE*basic_prop.y / length( ecPos.xyz );
+
 
 float ecDepth = -ecPos.z;
+gl_PointSize = SIZESCALE * basic_prop.y / ecDepth;
 if (visibilityDistance > 0.0)
 {
     if (ecDepth <= 0.0 || ecDepth >= visibilityDistance)
