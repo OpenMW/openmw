@@ -81,8 +81,12 @@ void MorphGeometry::accept(osg::NodeVisitor &nv)
 
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         cull(&nv);
-    else
+    else if(nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+    {
+        update(&nv);
         nv.apply(*this);
+    }
+    else nv.apply(*this);
 
     nv.popFromNodePath();
 }
@@ -145,20 +149,22 @@ osg::BoundingBox MorphGeometry::computeBoundingBox() const
     }
 }
 
-void MorphGeometry::cull(osg::NodeVisitor *nv)
+void MorphGeometry::update(osg::NodeVisitor *nv)
 {
+    unsigned int traversalNumber = nv->getTraversalNumber();
+
     if (mLastFrameNumber == nv->getTraversalNumber() || !mDirty)
     {
         osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+        mLastFrameMutex.unlock();
         nv->pushOntoNodePath(&geom);
         nv->apply(geom);
         nv->popFromNodePath();
         return;
     }
+    osg::Geometry& geom = *getGeometry(traversalNumber);
 
     mDirty = false;
-    mLastFrameNumber = nv->getTraversalNumber();
-    osg::Geometry& geom = *getGeometry(mLastFrameNumber);
 
     const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
     osg::Vec3Array* positionDst = static_cast<osg::Vec3Array*>(geom.getVertexArray());
@@ -177,14 +183,25 @@ void MorphGeometry::cull(osg::NodeVisitor *nv)
     }
 
     positionDst->dirty();
-
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
-    geom.dirtyGLObjects();
-#endif
-
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
     nv->popFromNodePath();
+
+    mLastFrameMutex.lock();
+    //ready to consum
+    mLastFrameNumber = traversalNumber;
+    mLastFrameMutex.unlock();
+}
+
+void MorphGeometry::cull(osg::NodeVisitor *nv)
+{
+        mLastFrameMutex.lock();
+        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+        mLastFrameMutex.unlock();
+        nv->pushOntoNodePath(&geom);
+        nv->apply(geom);
+        nv->popFromNodePath();
+
 }
 
 osg::Geometry* MorphGeometry::getGeometry(unsigned int frame) const

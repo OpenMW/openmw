@@ -67,6 +67,7 @@ namespace SceneUtil
 
     private:
         void cull(osg::NodeVisitor* nv);
+        void update(osg::NodeVisitor* nv);
 
         MorphTargetList mMorphTargets;
 
@@ -76,6 +77,7 @@ namespace SceneUtil
         osg::Geometry* getGeometry(unsigned int frame) const;
 
         unsigned int mLastFrameNumber;
+        OpenThreads::Mutex mLastFrameMutex;
         bool mDirty; // Have any morph targets changed?
 
         mutable bool mMorphedBoundingBox;
