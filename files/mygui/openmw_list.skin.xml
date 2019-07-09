@@ -19,26 +19,26 @@
 
         <Child type="Button" skin="MW_Box" offset="18 0 54 14" align="Stretch" name="Background"/>
 
-        <!-- Arrows -->
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 15 14" align="Left VStretch"/>
-        <Child type="Button" skin="MW_ArrowLeft" offset="3 2 10 10" align="Left VStretch" name="Start"/>
-
-        <Child type="Widget" skin="MW_Box" offset="75 0 15 14" align="Right VStretch"/>
-        <Child type="Button" skin="MW_ArrowRight" offset="76 2 10 10" align="Right VStretch" name="End"/>
-
         <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
 
         <Child type="Button" skin="MW_ScrollEmptyPart" offset="14 0 24 14" align="Top HStretch" name="FirstPart"/>
         <Child type="Button" skin="MW_ScrollEmptyPart" offset="52 0 24 14" align="Top HStretch" name="SecondPart"/>
 
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 15 14" align="Left VStretch"/>
+        <Child type="Button" skin="MW_ArrowLeft" offset="2 2 10 10" align="Left VStretch" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="75 0 15 14" align="Right VStretch"/>
+        <Child type="Button" skin="MW_ArrowRight" offset="77 2 10 10" align="Right VStretch" name="End"/>
+
         <Child type="Button" skin="MW_ScrollTrackH" offset="38 2 30 9" align="Left VStretch" name="Track"/>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ScrollTrackH" size="16 16" texture="textures\tx_menubook_bookmark.dds">
-        <BasisSkin type="TileRect" offset="0 0 16 16" align="Stretch">
-            <State name="normal" offset="70 22 16 16">
-                <Property key="TileSize" value="16 16"/>
+    <Resource type="AutoSizedResourceSkin" name="MW_ScrollTrackH" texture="textures\omw_menu_scroll_center_h.dds">
+        <Property key="MinTrackSize" value="14"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
@@ -61,18 +61,18 @@
 
         <Child type="Button" skin="MW_Box" offset="0 18 14 55" align="Stretch" name="Background"/>
 
-        <!-- Arrows -->
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 14 15" align="Top HStretch"/>
-        <Child type="Button" skin="MW_ArrowUp" offset="2 3 10 10" align="Top HStretch" name="Start"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 76 14 15" align="Bottom HStretch"/>
-        <Child type="Button" skin="MW_ArrowDown" offset="2 77 10 10" align="Bottom HStretch" name="End"/>
-
         <!-- These are only provided to get mouse input, they should have no skin and be transparent -->
 
         <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 14 24 14" align="Left VStretch" name="FirstPart"/>
         <Child type="Button" skin="MW_ScrollEmptyPart" offset="0 52 24 14" align="Left VStretch" name="SecondPart"/>
+
+        <!-- Arrows -->
+
+        <Child type="Widget" skin="MW_Box" offset="0 0 14 15" align="Top HStretch"/>
+        <Child type="Button" skin="MW_ArrowUp" offset="2 2 10 10" align="Top HStretch" name="Start"/>
+
+        <Child type="Widget" skin="MW_Box" offset="0 76 14 15" align="Bottom HStretch"/>
+        <Child type="Button" skin="MW_ArrowDown" offset="2 78 10 10" align="Bottom HStretch" name="End"/>
 
         <!-- Tracker must be last to be on top and receive mouse events -->
 
@@ -80,11 +80,10 @@
 
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ScrollTrackV" size="16 16" texture="textures\tx_menubook_bookmark.dds">
+    <Resource type="AutoSizedResourceSkin" name="MW_ScrollTrackV" texture="textures\omw_menu_scroll_center_v.dds">
         <Property key="MinTrackSize" value="14"/>
-        <BasisSkin type="TileRect" offset="0 0 16 16" align="Stretch">
-            <State name="normal" offset="68 19 16 16">
-                <Property key="TileSize" value="16 16"/>
+        <BasisSkin type="TileRect" align="Stretch">
+            <State name="normal">
                 <Property key="TileH" value="true"/>
                 <Property key="TileV" value="true"/>
             </State>
@@ -130,7 +129,7 @@
 
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 4 14 508" align="Right VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 4 14 508" align="Right VStretch" name="VScroll"/>
 
         <Child type="Widget" skin="" offset="3 4 493 508" align="Stretch" name="Client"/>
 
@@ -142,7 +141,7 @@
         <Child type="Widget" skin="BlackBG" offset="0 0 516 516" align="Stretch"/>
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
 
         <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
     </Resource>
@@ -154,7 +153,7 @@
         <Child type="Widget" skin="FullBlackBG" offset="0 0 516 516" align="Stretch"/>
         <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
 
-        <Child type="MWScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
+        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
 
         <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
     </Resource>
@@ -205,27 +204,27 @@
 
     <!-- Arrows -->
 
-    <Resource type="ResourceSkin" name="MW_ArrowLeft" size="20 20" texture="textures\menu_scroll_left.dds">
-        <BasisSkin type="SubSkin" offset="0 0 19 20" align="Stretch">
-            <State name="normal" offset="0 0 19 20"/>
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowLeft" texture="textures\omw_menu_scroll_left.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ArrowRight" size="20 20" texture="textures\menu_scroll_right.dds">
-        <BasisSkin type="SubSkin" offset="1 0 19 20" align="Stretch">
-            <State name="normal" offset="1 0 19 20"/>
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowRight" texture="textures\omw_menu_scroll_right.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ArrowUp" size="20 20" texture="textures\menu_scroll_up.dds">
-        <BasisSkin type="SubSkin" offset="0 0 20 19" align="Stretch">
-            <State name="normal" offset="0 0 20 19"/>
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowUp" texture="textures\omw_menu_scroll_up.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ArrowDown" size="20 20" texture="textures\menu_scroll_down.dds">
-        <BasisSkin type="SubSkin" offset="0 1 20 20" align="Stretch">
-            <State name="normal" offset="0 1 20 20"/>
+    <Resource type="AutoSizedResourceSkin" name="MW_ArrowDown" texture="textures\omw_menu_scroll_down.dds">
+        <BasisSkin type="SubSkin" align="Stretch">
+            <State name="normal"/>
         </BasisSkin>
     </Resource>
 

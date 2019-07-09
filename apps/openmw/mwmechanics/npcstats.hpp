@@ -29,7 +29,7 @@ namespace MWMechanics
             // ----- used by the player only, maybe should be moved at some point -------
             int mBounty;
             int mWerewolfKills;
-            /// Used for the player only; NPCs have maximum one faction defined in their NPC record
+            /// Used only for the player and for NPC's with ranks, modified by scripts; other NPCs have maximum one faction defined in their NPC record
             std::map<std::string, int> mFactionRank;
             std::set<std::string> mExpelled;
             std::map<std::string, int> mFactionReputation;
@@ -61,7 +61,9 @@ namespace MWMechanics
             SkillValue& getSkill (int index);
             void setSkill(int index, const SkillValue& value);
 
+            int getFactionRank(const std::string &faction) const;
             const std::map<std::string, int>& getFactionRanks() const;
+
             /// Increase the rank in this faction by 1, if such a rank exists.
             void raiseRank(const std::string& faction);
             /// Lower the rank in this faction by 1, if such a rank exists.

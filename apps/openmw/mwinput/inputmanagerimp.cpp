@@ -77,6 +77,7 @@ namespace MWInput
         , mSneaking(false)
         , mAttemptJump(false)
         , mInvUiScalingFactor(1.f)
+        , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mFakeDeviceID(1)
     {
         mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
@@ -495,7 +496,7 @@ namespace MWInput
     void InputManager::updateCursorMode()
     {
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-             && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Console;
+             && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
 
         bool was_relative = mInputManager->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
@@ -558,9 +559,9 @@ namespace MWInput
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor;
-            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor;
-            if (xmove != 0|| ymove != 0)
+            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
+            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
+            if (xmove != 0|| ymove != 0 || zAxis != 0)
             {
                 mGuiCursorX += xmove;
                 mGuiCursorY += ymove;
@@ -606,6 +607,7 @@ namespace MWInput
             {
                 bool triedToMove = false;
                 bool isRunning = false;
+                bool alwaysRunAllowed = false;
 
                 // joystick movement
                 float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
@@ -622,11 +624,7 @@ namespace MWInput
                     mPlayer->setAutoMove (false);
                     mPlayer->setForwardBackward((yAxis - 0.5f) * 2 * -1);
                 }
-                else if(mPlayer->getAutoMove())
-                {
-                    triedToMove = true;
-                    mPlayer->setForwardBackward (1);
-                }
+
                 if (triedToMove)
                     mJoystickLastUsed = true;
 
@@ -634,31 +632,24 @@ namespace MWInput
                 isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
                 if(triedToMove) resetIdleTime();
 
-                if (actionIsActive(A_MoveLeft) && !actionIsActive(A_MoveRight))
+                if (actionIsActive(A_MoveLeft) != actionIsActive(A_MoveRight))
                 {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
-                    mPlayer->setLeftRight (-1);
-                }
-                else if (actionIsActive(A_MoveRight) && !actionIsActive(A_MoveLeft))
-                {
-                    triedToMove = true;
-                    mPlayer->setLeftRight (1);
+                    mPlayer->setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
                 }
 
-                if (actionIsActive(A_MoveForward) && !actionIsActive(A_MoveBackward))
+                if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
                 {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
                     mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (1);
+                    mPlayer->setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
                 }
-                else if (actionIsActive(A_MoveBackward) && !actionIsActive(A_MoveForward))
+
+                if (mPlayer->getAutoMove())
                 {
-                    triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (-1);
-                }
-                else if(mPlayer->getAutoMove())
-                {
+                    alwaysRunAllowed = true;
                     triedToMove = true;
                     mPlayer->setForwardBackward (1);
                 }
@@ -703,7 +694,7 @@ namespace MWInput
                     mOverencumberedMessageDelay = 0.f;
                 }
 
-                if (mAlwaysRunActive || isRunning)
+                if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
                     mPlayer->setRunState(!actionIsActive(A_Run));
                 else
                     mPlayer->setRunState(actionIsActive(A_Run));
@@ -864,7 +855,7 @@ namespace MWInput
         OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
         if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
                 == arg.keysym.scancode
-                && MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
+                && MWBase::Environment::get().getWindowManager()->isConsoleMode())
             SDL_StopTextInput();
 
         bool consumed = false;
@@ -1152,6 +1143,9 @@ namespace MWInput
             return;
         }
 
+        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            return;
+
         bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
 
@@ -1169,6 +1163,9 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             return;
         }
+
+        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            return;
 
         MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
         bool inGame = MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame;
@@ -1284,6 +1281,9 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
+        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
+            return;
+
         // Toggle between game mode and inventory mode
         if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Inventory);
@@ -1302,17 +1302,7 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        // Switch to console mode no matter what mode we are currently
-        // in, except of course if we are already in console mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            if (MWBase::Environment::get().getWindowManager()->getMode() == MWGui::GM_Console)
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-            else
-                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Console);
-        }
-        else
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Console);
+        MWBase::Environment::get().getWindowManager()->toggleConsole();
     }
 
     void InputManager::toggleJournal()

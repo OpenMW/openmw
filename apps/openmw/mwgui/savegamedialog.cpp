@@ -249,9 +249,6 @@ namespace MWGui
 
     void SaveGameDialog::accept(bool reallySure)
     {
-        // Remove for MyGUI 3.2.2
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
-
         if (mSaving)
         {
             // If overwriting an existing slot, ask for confirmation first

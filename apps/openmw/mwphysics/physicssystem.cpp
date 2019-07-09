@@ -1,4 +1,4 @@
-﻿#include "physicssystem.hpp"
+#include "physicssystem.hpp"
 
 #include <osg/Group>
 

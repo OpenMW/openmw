@@ -61,7 +61,6 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mValidBounds(false)
     , mSize(size)
     , mCenter(center)
-    , mViewDataMap(nullptr)
 {
     for (unsigned int i=0; i<4; ++i)
         mNeighbours[i] = 0;
@@ -109,56 +108,63 @@ void QuadTreeNode::initNeighbours()
         getChild(i)->initNeighbours();
 }
 
-void QuadTreeNode::traverse(osg::NodeVisitor &nv)
+void QuadTreeNode::traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist)
 {
     if (!hasValidBounds())
         return;
 
-    bool needsUpdate = true;
-    ViewData* vd = getView(nv, needsUpdate);
+    float dist = distance(viewPoint);
+    if (dist > maxDist)
+        return;
 
-    if ((mLodCallback && mLodCallback->isSufficientDetail(this, distance(vd->getViewPoint()))) || !getNumChildren())
-        vd->add(this, true);
+    bool stopTraversal = (lodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
+
+    if (stopTraversal)
+        vd->add(this);
     else
-        osg::Group::traverse(nv);
-}
-
-void QuadTreeNode::setLodCallback(LodCallback *lodCallback)
-{
-    mLodCallback = lodCallback;
-}
-
-LodCallback *QuadTreeNode::getLodCallback()
-{
-    return mLodCallback;
-}
-
-void QuadTreeNode::setViewDataMap(ViewDataMap *map)
-{
-    mViewDataMap = map;
-}
-
-ViewDataMap *QuadTreeNode::getViewDataMap()
-{
-    return mViewDataMap;
-}
-
-ViewData* QuadTreeNode::getView(osg::NodeVisitor &nv, bool& needsUpdate)
-{
-    ViewData* vd = NULL;
-    if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
     {
-        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-        vd = mViewDataMap->getViewData(cv->getCurrentCamera(), nv.getViewPoint(), needsUpdate);
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverse(vd, viewPoint, lodCallback, maxDist);
     }
-    else // INTERSECTION_VISITOR
+}
+
+void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (getCenter().x() + getSize()/2.f <= center.x() - size/2.f
+            || getCenter().x() - getSize()/2.f >= center.x() + size/2.f
+            || getCenter().y() + getSize()/2.f <= center.y() - size/2.f
+            || getCenter().y() - getSize()/2.f >= center.y() + size/2.f)
+        return;
+
+    bool stopTraversal = (getSize() == size);
+
+    if (stopTraversal)
+        vd->add(this);
+    else
     {
-        osg::Vec3f viewPoint = nv.getViewPoint();
-        static osg::ref_ptr<osg::Object> dummyObj = new osg::DummyObject;
-        vd = mViewDataMap->getViewData(dummyObj.get(), viewPoint, needsUpdate);
-        needsUpdate = true;
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->traverseTo(vd, size, center);
     }
-    return vd;
+}
+
+void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector* intersector)
+{
+    if (!hasValidBounds())
+        return;
+
+    if (!intersector->intersectAndClip(getBoundingBox()))
+        return;
+
+    if (getNumChildren() == 0)
+        vd->add(this);
+    else
+    {
+        for (unsigned int i=0; i<getNumChildren(); ++i)
+            getChild(i)->intersect(vd, intersector);
+    }
 }
 
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)

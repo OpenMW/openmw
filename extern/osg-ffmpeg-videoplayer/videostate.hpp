@@ -80,8 +80,8 @@ struct PacketQueue {
 
     AVPacketList *first_pkt, *last_pkt;
     std::atomic<bool> flushing;
-    int nb_packets;
-    int size;
+    std::atomic<int> nb_packets;
+    std::atomic<int> size;
 
     OpenThreads::Mutex mutex;
     OpenThreads::Condition cond;

@@ -27,8 +27,11 @@ CS::Editor::Editor (int argc, char **argv)
     std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig();
 
     mViewManager = new CSVDoc::ViewManager(mDocumentManager);
-
-    setupDataFiles (config.first);
+    if (argc > 1)
+    {
+        mFileToLoad = argv[1];
+        mDataDirs = config.first;
+    }
 
     NifOsg::Loader::setShowMarkers(true);
 
@@ -79,15 +82,6 @@ CS::Editor::~Editor ()
         remove(mPid.string().c_str())); // ignore any error
 }
 
-void CS::Editor::setupDataFiles (const Files::PathContainer& dataDirs)
-{
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
-    {
-        QString path = QString::fromUtf8 (iter->string().c_str());
-        mFileDialog.addFiles(path);
-    }
-}
-
 std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfig(bool quiet)
 {
     boost::program_options::variables_map variables;
@@ -114,9 +108,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
 
-    const std::string encoding = variables["encoding"].as<Files::EscapeHashString>().toStdString();
-    mDocumentManager.setEncoding (ToUTF8::calculateEncoding (encoding));
-    mFileDialog.setEncoding (QString::fromUtf8(encoding.c_str()));
+    mEncodingName = variables["encoding"].as<Files::EscapeHashString>().toStdString();
+    mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
+    mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
     mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
 
@@ -160,7 +154,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     dataDirs.insert (dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
     //iterate the data directories and add them to the file dialog for loading
-    for (Files::PathContainer::const_iterator iter = dataDirs.begin(); iter != dataDirs.end(); ++iter)
+    for (Files::PathContainer::const_reverse_iterator iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
     {
         QString path = QString::fromUtf8 (iter->string().c_str());
         mFileDialog.addFiles(path);
@@ -199,8 +193,7 @@ void CS::Editor::createAddon()
     mStartup.hide();
 
     mFileDialog.clearFiles();
-    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
-    setupDataFiles (config.first);
+    readConfig(/*quiet*/true);
 
     mFileDialog.showDialog (CSVDoc::ContentAction_New);
 }
@@ -224,18 +217,24 @@ void CS::Editor::loadDocument()
     mStartup.hide();
 
     mFileDialog.clearFiles();
-    std::pair<Files::PathContainer, std::vector<std::string> > config = readConfig(/*quiet*/true);
-    setupDataFiles (config.first);
+    readConfig(/*quiet*/true);
 
     mFileDialog.showDialog (CSVDoc::ContentAction_Edit);
 }
 
-void CS::Editor::openFiles (const boost::filesystem::path &savePath)
+void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::vector<boost::filesystem::path> &discoveredFiles)
 {
     std::vector<boost::filesystem::path> files;
 
-    foreach (const QString &path, mFileDialog.selectedFilePaths())
-        files.push_back(path.toUtf8().constData());
+    if(discoveredFiles.empty())
+    {
+        foreach(const QString &path, mFileDialog.selectedFilePaths())
+            files.push_back(path.toUtf8().constData());
+    }
+    else
+    {
+        files = discoveredFiles;
+    }
 
     mDocumentManager.addDocument (files, savePath, false);
 
@@ -361,9 +360,53 @@ int CS::Editor::run()
 
     Misc::Rng::init();
 
-    mStartup.show();
+    QApplication::setQuitOnLastWindowClosed(true);
 
-    QApplication::setQuitOnLastWindowClosed (true);
+    if (mFileToLoad.empty())
+    {
+        mStartup.show();
+    }
+    else
+    {
+        ESM::ESMReader fileReader;
+        ToUTF8::Utf8Encoder encoder = ToUTF8::calculateEncoding(mEncodingName);
+        fileReader.setEncoder(&encoder);
+        fileReader.open(mFileToLoad.string());
+
+        std::vector<boost::filesystem::path> discoveredFiles;
+
+        for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
+            itemIter != fileReader.getGameFiles().end(); ++itemIter)
+        {
+            for (Files::PathContainer::const_iterator pathIter = mDataDirs.begin();
+                pathIter != mDataDirs.end(); ++pathIter)
+            {
+                const boost::filesystem::path masterPath = *pathIter / itemIter->name;
+                if (boost::filesystem::exists(masterPath))
+                {
+                    discoveredFiles.push_back(masterPath);
+                    break;
+                }
+            }
+        }
+        discoveredFiles.push_back(mFileToLoad);
+
+        QString extension = QString::fromStdString(mFileToLoad.extension().string()).toLower();
+        if (extension == ".esm")
+        {
+            mFileToLoad.replace_extension(".omwgame");
+            mDocumentManager.addDocument(discoveredFiles, mFileToLoad, false);
+        }
+        else if (extension == ".esp")
+        {
+            mFileToLoad.replace_extension(".omwaddon");
+            mDocumentManager.addDocument(discoveredFiles, mFileToLoad, false);
+        }
+        else
+        {
+            openFiles(mFileToLoad, discoveredFiles);
+        }
+    }
 
     return QApplication::exec();
 }

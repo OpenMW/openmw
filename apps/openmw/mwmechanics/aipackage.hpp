@@ -130,8 +130,6 @@ namespace MWMechanics
 
             DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
 
-            bool canActorMoveByZAxis(const MWWorld::Ptr& actor) const;
-
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;

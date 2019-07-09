@@ -364,6 +364,7 @@ namespace MWGui
     virtual void activateHitOverlay(bool interrupt);
     virtual void setWerewolfOverlay(bool set);
 
+    virtual void toggleConsole();
     virtual void toggleDebugWindow();
 
     /// Cycle to next or previous spell

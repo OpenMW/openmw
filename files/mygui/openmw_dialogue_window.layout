@@ -11,7 +11,7 @@
             </Widget>
         </Widget>
 
-        <Widget type="MWScrollBar" skin="MW_VScroll" position="370 13 14 371" align="Right VStretch" name="VScroll">
+        <Widget type="ScrollBar" skin="MW_VScroll" position="370 13 14 371" align="Right VStretch" name="VScroll">
             <Property key="Visible" value="false"/>
         </Widget>
 

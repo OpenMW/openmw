@@ -102,7 +102,7 @@ namespace MWGui
         else
             message = gmst.find("sNotifyMessage43")->mValue.getString();
 
-        Misc::StringUtils::replace(message, "%d", std::to_string(mDays).c_str(), 2);
+        message = Misc::StringUtils::format(message, mDays);
 
         for (const int& skill : skills)
         {
@@ -112,8 +112,7 @@ namespace MWGui
             if (skill == ESM::Skill::Sneak || skill == ESM::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
-            Misc::StringUtils::replace(skillMsg, "%s", skillName.c_str(), 2);
-            Misc::StringUtils::replace(skillMsg, "%d", std::to_string(skillValue).c_str(), 2);
+            skillMsg = Misc::StringUtils::format(skillMsg, skillName, skillValue);
             message += "\n" + skillMsg;
         }
 

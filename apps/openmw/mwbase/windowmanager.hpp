@@ -336,6 +336,7 @@ namespace MWBase
             virtual void activateHitOverlay(bool interrupt=true) = 0;
             virtual void setWerewolfOverlay(bool set) = 0;
 
+            virtual void toggleConsole() = 0;
             virtual void toggleDebugWindow() = 0;
 
             /// Cycle to next or previous spell

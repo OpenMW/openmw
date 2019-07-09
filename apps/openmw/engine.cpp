@@ -257,9 +257,9 @@ OMW::Engine::~Engine()
 
     mWorkQueue = nullptr;
 
-    mResourceSystem.reset();
-
     mViewer = nullptr;
+
+    mResourceSystem.reset();
 
     delete mEncoder;
     mEncoder = nullptr;
@@ -283,7 +283,8 @@ void OMW::Engine::enableFSStrict(bool fsStrict)
 void OMW::Engine::setDataDirs (const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
-    mFileCollections = Files::Collections (dataDirs, !mFSStrict);
+    mDataDirs.insert(mDataDirs.begin(), (mResDir / "vfs"));
+    mFileCollections = Files::Collections (mDataDirs, !mFSStrict);
 }
 
 // Add BSA archive

@@ -238,10 +238,12 @@ struct NiRotatingParticles : Node
 // A node used as the base to switch between child nodes, such as for LOD levels.
 struct NiSwitchNode : public NiNode
 {
+    unsigned int initialIndex;
+
     void read(NIFStream *nif)
     {
         NiNode::read(nif);
-        nif->getInt(); // unknown
+        initialIndex = nif->getUInt();
     }
 };
 

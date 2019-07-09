@@ -1019,7 +1019,19 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    // If we already changed rank for this NPC, modify current rank in the NPC stats.
+                    // Otherwise take rank from base NPC record, increase it and put it to NPC data.
+                    int currentRank = ptr.getClass().getNpcStats(ptr).getFactionRank(factionID);
+                    if (currentRank >= 0)
+                        ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    else
+                    {
+                        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+                        rank++;
+                        ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
+                        for (int i=0; i<rank; i++)
+                            ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    }
                 }
         };
 
@@ -1042,7 +1054,21 @@ namespace MWScript
                     if (ptr == player)
                         return;
 
-                    ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
+                    // If we already changed rank for this NPC, modify current rank in the NPC stats.
+                    // Otherwise take rank from base NPC record, decrease it and put it to NPC data.
+                    int currentRank = ptr.getClass().getNpcStats(ptr).getFactionRank(factionID);
+                    if (currentRank == 0)
+                        return;
+                    else if (currentRank > 0)
+                        ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
+                    else
+                    {
+                        int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+                        rank--;
+                        ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
+                        for (int i=0; i<rank; i++)
+                            ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    }
                 }
         };
 

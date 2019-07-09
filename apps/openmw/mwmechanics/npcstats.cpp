@@ -66,6 +66,16 @@ const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
     return mFactionRank;
 }
 
+int MWMechanics::NpcStats::getFactionRank(const std::string &faction) const
+{
+    const std::string lower = Misc::StringUtils::lowerCase(faction);
+    std::map<std::string, int>::const_iterator it = mFactionRank.find(lower);
+    if (it != mFactionRank.end())
+        return it->second;
+
+    return -1;
+}
+
 void MWMechanics::NpcStats::raiseRank(const std::string &faction)
 {
     const std::string lower = Misc::StringUtils::lowerCase(faction);
@@ -85,7 +95,12 @@ void MWMechanics::NpcStats::lowerRank(const std::string &faction)
     std::map<std::string, int>::iterator it = mFactionRank.find(lower);
     if (it != mFactionRank.end())
     {
-        it->second = std::max(0, it->second-1);
+        it->second = it->second-1;
+        if (it->second < 0)
+        {
+            mFactionRank.erase(it);
+            mExpelled.erase(lower);
+        }
     }
 }
 
@@ -250,8 +265,7 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     MWBase::Environment::get().getWindowManager()->playSound("skillraise");
 
     std::string message = MWBase::Environment::get().getWindowManager ()->getGameSettingString ("sNotifyMessage39", "");
-    Misc::StringUtils::replace(message, "%s", ("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}").c_str(), 2);
-    Misc::StringUtils::replace(message, "%d", std::to_string(base).c_str(), 2);
+    message = Misc::StringUtils::format(message, ("#{" + ESM::Skill::sSkillNameIds[skillIndex] + "}"), base);
 
     if (readBook)
         message = "#{sBookSkillMessage}\n" + message;

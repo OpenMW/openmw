@@ -549,8 +549,9 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
-            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run)
-                    && !MWBase::Environment::get().getWorld()->isFlying(mPtr);
+            bool isflying = MWBase::Environment::get().getWorld()->isFlying(mPtr);
+            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !isflying;
+            bool issneaking = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !isflying;
 
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
@@ -584,7 +585,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
                     // We use the third person velocities instead.
                     // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    mMovementAnimSpeed = (isrunning ? 222.857f : 154.064f);
+                    mMovementAnimSpeed = (issneaking ? 33.5452f : (isrunning ? 222.857f : 154.064f));
                     mMovementAnimationControlled = false;
                 }
             }
@@ -982,7 +983,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        sndMgr->stopSound3D(mPtr, evt.substr(7));
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
         return;
     }
@@ -1023,7 +1023,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
             else
             {
-                sndMgr->stopSound3D(mPtr, sound);
                 sndMgr->playSound3D(mPtr, sound, volume, pitch);
             }
         }
@@ -1118,41 +1117,36 @@ void CharacterController::updatePtr(const MWWorld::Ptr &ptr)
 
 void CharacterController::updateIdleStormState(bool inwater)
 {
-    bool inStormDirection = false;
+    if (!mAnimation->hasAnimation("idlestorm") || mUpperBodyState != UpperCharState_Nothing || inwater)
+    {
+        mAnimation->disable("idlestorm");
+        return;
+    }
+
     if (MWBase::Environment::get().getWorld()->isInStorm())
     {
         osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
         osg::Vec3f characterDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
-        inStormDirection = std::acos(stormDirection * characterDirection / (stormDirection.length() * characterDirection.length()))
-                > osg::DegreesToRadians(120.f);
-    }
-    if (inStormDirection && !inwater && mUpperBodyState == UpperCharState_Nothing && mAnimation->hasAnimation("idlestorm"))
-    {
-        float complete = 0;
-        mAnimation->getInfo("idlestorm", &complete);
-
-        if (complete == 0)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "start", "loop start", 0.0f, 0);
-        else if (complete == 1)
-            mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, false,
-                             1.0f, "loop start", "loop stop", 0.0f, ~0ul);
-    }
-    else
-    {
-        if (mUpperBodyState == UpperCharState_Nothing)
+        stormDirection.normalize();
+        characterDirection.normalize();
+        if (stormDirection * characterDirection < -0.5f)
         {
-            if (mAnimation->isPlaying("idlestorm"))
+            if (!mAnimation->isPlaying("idlestorm"))
             {
-                if (mAnimation->getCurrentTime("idlestorm") < mAnimation->getTextKeyTime("idlestorm: loop stop"))
-                {
-                    mAnimation->play("idlestorm", Priority_Storm, MWRender::Animation::BlendMask_RightArm, true,
-                                     1.0f, "loop stop", "stop", 0.0f, 0);
-                }
+                int mask = MWRender::Animation::BlendMask_Torso | MWRender::Animation::BlendMask_RightArm;
+                mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul);
             }
+            else
+            {
+                mAnimation->setLoopingEnabled("idlestorm", true);
+            }
+            return;
         }
-        else
-            mAnimation->disable("idlestorm");
+    }
+
+    if (mAnimation->isPlaying("idlestorm"))
+    {
+        mAnimation->setLoopingEnabled("idlestorm", false);
     }
 }
 
@@ -1978,24 +1972,24 @@ void CharacterController::update(float duration, bool animationOnly)
         osg::Vec3f rot = cls.getRotationVector(mPtr);
 
         speed = cls.getSpeed(mPtr);
+        float analogueMult = 1.f;
         if(isPlayer)
         {
-            // Joystick anologue movement.
+            // Joystick analogue movement.
             float xAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[0]);
             float yAxis = std::abs(cls.getMovementSettings(mPtr).mPosition[1]);
-            float analogueMovement = ((xAxis > yAxis) ? xAxis : yAxis);
+            analogueMult = ((xAxis > yAxis) ? xAxis : yAxis);
 
             // If Strafing, our max speed is slower so multiply by X axis instead.
             if(std::abs(vec.x()/2.0f) > std::abs(vec.y()))
-                analogueMovement = xAxis;
+                analogueMult = xAxis;
 
             // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
-            if(!isrunning && !sneak && !flying && analogueMovement <= 0.5f)
-                speed *= 2;
-
-            speed *= (analogueMovement);
+            if(!isrunning && !sneak && !flying && analogueMult <= 0.5f)
+                analogueMult *= 2.f;
         }
 
+        speed *= analogueMult;
         vec.x() *= speed;
         vec.y() *= speed;
 
@@ -2062,6 +2056,7 @@ void CharacterController::update(float duration, bool animationOnly)
             }
         }
         fatigueLoss *= duration;
+        fatigueLoss *= analogueMult;
         DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
 
         if (!godmode)
@@ -2651,7 +2646,7 @@ void CharacterController::updateContinuousVfx()
 
     for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
     {
-        if (mPtr.getClass().getCreatureStats(mPtr).isDead()
+        if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
             || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).getMagnitude() <= 0)
             mAnimation->removeEffect(*it);
     }
@@ -2678,14 +2673,14 @@ void CharacterController::setVisibility(float visibility)
         if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
         {
             if (mPtr == getPlayer())
-                alpha = 0.4f;
+                alpha = 0.25f;
             else
-                alpha = 0.f;
+                alpha = 0.05f;
         }
         float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         if (chameleon)
         {
-            alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+            alpha *= std::min(0.75f, std::max(0.25f, (100.f - chameleon)/100.f));
         }
 
         visibility = std::min(visibility, alpha);

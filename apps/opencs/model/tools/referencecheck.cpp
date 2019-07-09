@@ -53,7 +53,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages &message
     // If object have creature soul trapped, check if that creature reference is valid
     if (!cellRef.mSoul.empty())
         if (mObjects.searchId(cellRef.mSoul) == -1)
-            messages.add(id, "Trapped soul object '" + cellRef.mOwner + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Trapped soul object '" + cellRef.mSoul + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (cellRef.mFaction.empty())
     {
