@@ -66,6 +66,7 @@ namespace SceneUtil
 
     private:
         void cull(osg::NodeVisitor* nv);
+        void update(osg::NodeVisitor* nv);
         void updateBounds(osg::NodeVisitor* nv);
 
         osg::ref_ptr<osg::Geometry> mGeometry[2];
@@ -101,6 +102,7 @@ namespace SceneUtil
         std::vector<Bone*> mBoneNodesVector;
 
         unsigned int mLastFrameNumber;
+        OpenThreads::Mutex mLastFrameMutex;
         bool mBoundsFirstFrame;
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);

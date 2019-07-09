@@ -171,29 +171,31 @@ bool RigGeometry::initFromParentSkeleton(osg::NodeVisitor* nv)
     return true;
 }
 
-void RigGeometry::cull(osg::NodeVisitor* nv)
-{
+void RigGeometry::update(osg::NodeVisitor* nv){
+
     if (!mSkeleton)
     {
-        Log(Debug::Error) << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor";
-        // try to recover anyway, though rendering is likely to be incorrect.
-        if (!initFromParentSkeleton(nv))
+         if (!initFromParentSkeleton(nv))
             return;
     }
-
+    //update next frame geom in order not to interfere with draw thread
+    mLastFrameMutex.lock();
     unsigned int traversalNumber = nv->getTraversalNumber();
+
     if (mLastFrameNumber == traversalNumber || (mLastFrameNumber != 0 && !mSkeleton->getActive()))
     {
-        osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+        osg::Geometry& geom = *getGeometry(mLastFrameNumber+1);
+        mLastFrameMutex.unlock();
         nv->pushOntoNodePath(&geom);
         nv->apply(geom);
         nv->popFromNodePath();
         return;
     }
     mLastFrameNumber = traversalNumber;
-    osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+    osg::Geometry& geom = *getGeometry(mLastFrameNumber+1);
 
-    mSkeleton->updateBoneMatrices(traversalNumber);
+    mLastFrameMutex.unlock();
+    mSkeleton->updateBoneMatrices(mLastFrameNumber+1);
 
     // skinning
     const osg::Vec3Array* positionSrc = static_cast<osg::Vec3Array*>(mSourceGeometry->getVertexArray());
@@ -253,6 +255,26 @@ void RigGeometry::cull(osg::NodeVisitor* nv)
     nv->pushOntoNodePath(&geom);
     nv->apply(geom);
     nv->popFromNodePath();
+}
+
+void RigGeometry::cull(osg::NodeVisitor* nv)
+{
+    if (!mSkeleton)
+    {
+        Log(Debug::Error) << "Error: RigGeometry rendering with no skeleton, should have been initialized by UpdateVisitor";
+        // try to recover anyway, though rendering is likely to be incorrect.
+        if (!initFromParentSkeleton(nv))
+            return;
+    }
+
+    mLastFrameMutex.lock();
+    osg::Geometry& geom = *getGeometry(mLastFrameNumber);
+    mLastFrameMutex.unlock();
+
+    nv->pushOntoNodePath(&geom);
+    nv->apply(geom);
+    nv->popFromNodePath();
+
 }
 
 void RigGeometry::updateBounds(osg::NodeVisitor *nv)
@@ -376,7 +398,10 @@ void RigGeometry::accept(osg::NodeVisitor &nv)
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         cull(&nv);
     else if (nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
+    {
+        update(&nv);
         updateBounds(&nv);
+    }
     else
         nv.apply(*this);
 
