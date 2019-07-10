@@ -65,7 +65,9 @@ namespace SceneUtil
 
     osgParticle::ParticleSystem* CopyOp::operator ()(const osgParticle::ParticleSystem* partsys) const
     {
-        osgParticle::ParticleSystem* cloned = osg::clone(partsys, *this);
+        osgParticle::ParticleSystem* cloned = osg::clone(partsys, (*this).getCopyFlags()
+                                                         |osg::CopyOp::DEEP_COPY_CALLBACKS //copy DrawCallback in case of shaded path
+                                                         );
 
         for (std::map<osgParticle::ParticleProcessor*, const osgParticle::ParticleSystem*>::const_iterator it = mMap.begin(); it != mMap.end(); ++it)
         {

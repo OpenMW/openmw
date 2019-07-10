@@ -360,15 +360,43 @@ namespace Shader
     }
 
 
+    //ComputeModelView point particle scaling for shader
+    struct ParticleSystemShadedDrawCallback : public osg::Drawable::DrawCallback
+    {
+        mutable osg::ref_ptr<osg::Uniform> mAxisScaling;
+        ParticleSystemShadedDrawCallback()
+        {
+            mAxisScaling = new osg::Uniform("axisScale", (float)1.0f);
+        }
+
+        ParticleSystemShadedDrawCallback(const ParticleSystemShadedDrawCallback& org,const osg::CopyOp& copyop):
+            osg::Drawable::DrawCallback(org,copyop)
+        {
+            mAxisScaling = new osg::Uniform("axisScale", (float)1.0f);
+        }
+        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
+        {
+            const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
+            osg::State * state = renderInfo.getState();
+            if(partsys->getParticleAlignment() == osgParticle::ParticleSystem::BILLBOARD)
+                mAxisScaling->set(osg::Matrix::transform3x3( state->getModelViewMatrix(),partsys->getAlignVectorX()).length());
+            else
+                mAxisScaling->set(osg::Matrix::transform3x3(state->getModelViewMatrix(),partsys->getAlignVectorX()).length2());
+
+            mAxisScaling->apply(state->get<osg::GLExtensions>(), state->getUniformLocation("axisScale"));
+            drawable->drawImplementation(renderInfo);
+        }
+    };
+
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
         NifOsg::ParticleSystem * partsys = dynamic_cast<NifOsg::ParticleSystem*>(&drawable);
         if(partsys)
          {
-            if (!mForceShaders)
+            if (!mForceShaders || partsys->getUseVertexArray() )
                 return;
             osg::StateSet* writableStateSet = nullptr;
-            if (mAllowedToModifyStateSets)
+            if (true)
                 writableStateSet = partsys->getOrCreateStateSet();
             else
                 writableStateSet = getWritableStateSet(*partsys);
@@ -376,20 +404,25 @@ namespace Shader
             float _visibilityDistance = partsys->getVisibilityDistance();
             partsys->setUseVertexArray(true);
             partsys->setUseShaders(true);
-            ShaderManager::DefineMap defineMap;
-            osg::StateSet * stateset = partsys->getOrCreateStateSet();
+            ShaderManager::DefineMap defineMap;/*
+            for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
+            {
+                defineMap[defaultTextures[i]] = "0";
+                defineMap[std::string(defaultTextures[i]) + std::string("UV")] = "0";
+            }*/
             osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader("particle_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
             osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader("particle_vertex.glsl", defineMap, osg::Shader::VERTEX));
-            stateset->setAttributeAndModes(mShaderManager.getProgram(vertexShader,fragmentShader),osg::StateAttribute::ON);
-            stateset->setDataVariance(osg::Object::STATIC);
+            writableStateSet->setAttributeAndModes(mShaderManager.getProgram(vertexShader,fragmentShader),osg::StateAttribute::ON);
 
             #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
-                stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
+                writableStateSet->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
             #else
                 OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
             #endif
 
-            stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
+                writableStateSet->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
+                partsys->setDrawCallback(new ParticleSystemShadedDrawCallback());
+
             return;
         }
 
