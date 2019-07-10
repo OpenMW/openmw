@@ -37,41 +37,6 @@
 namespace
 {
 
-    class InitWorldSpaceParticlesCallback : public osg::NodeCallback
-    {
-    public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-        {
-            osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
-
-            // HACK: Ignore the InverseWorldMatrix transform the particle system is attached to
-            if (partsys->getNumParents() && partsys->getParent(0)->getNumParents())
-                transformInitialParticles(partsys, partsys->getParent(0)->getParent(0));
-
-            node->removeUpdateCallback(this);
-        }
-
-        void transformInitialParticles(osgParticle::ParticleSystem* partsys, osg::Node* node)
-        {
-            osg::NodePathList nodepaths = node->getParentalNodePaths();
-            if (nodepaths.empty())
-                return;
-            osg::Matrixf worldMat = osg::computeLocalToWorld(nodepaths[0]);
-            worldMat.orthoNormalize(worldMat); // scale is already applied on the particle node
-            for (int i=0; i<partsys->numParticles(); ++i)
-            {
-                partsys->getParticle(i)->transformPositionVelocity(worldMat);
-            }
-
-            // transform initial bounds to worldspace
-            osg::BoundingSphere sphere(partsys->getInitialBound());
-            SceneUtil::transformBoundingSphere(worldMat, sphere);
-            osg::BoundingBox box;
-            box.expandBy(sphere);
-            partsys->setInitialBound(box);
-        }
-
-    };
 
     class InitParticlesVisitor : public osg::NodeVisitor
     {
@@ -83,22 +48,10 @@ namespace
         {
         }
 
-        bool isWorldSpaceParticleSystem(osgParticle::ParticleSystem* partsys)
-        {
-            // HACK: ParticleSystem has no getReferenceFrame()
-            return (partsys->getUserDataContainer()
-                    && partsys->getUserDataContainer()->getNumDescriptions() > 0
-                    && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
-        }
-
         void apply(osg::Drawable& drw)
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
             {
-                if (isWorldSpaceParticleSystem(partsys))
-                {
-                    partsys->addUpdateCallback(new InitWorldSpaceParticlesCallback);
-                }
                 partsys->setNodeMask(mMask);
             }
         }
