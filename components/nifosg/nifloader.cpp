@@ -942,17 +942,11 @@ namespace NifOsg
                 return;
             }
 
-            osgParticle::ParticleProcessor::ReferenceFrame rf = (animflags & Nif::NiNode::ParticleFlag_LocalSpace)
-                    ? osgParticle::ParticleProcessor::RELATIVE_RF
-                    : osgParticle::ParticleProcessor::ABSOLUTE_RF;
+            osgParticle::ParticleSystem::ParticleScaleReferenceFrame rf = (animflags & Nif::NiNode::ParticleFlag_LocalSpace)
+                    ? osgParticle::ParticleSystem::LOCAL_COORDINATES
+                    : osgParticle::ParticleSystem::WORLD_COORDINATES;
 
-            // HACK: ParticleSystem has no setReferenceFrame method
-            if (rf == osgParticle::ParticleProcessor::ABSOLUTE_RF)
-            {
-                partsys->getOrCreateUserDataContainer()->addDescription("worldspace");
-            }
-
-            partsys->setParticleScaleReferenceFrame(osgParticle::ParticleSystem::LOCAL_COORDINATES);
+            partsys->setParticleScaleReferenceFrame(rf);
 
             handleParticleInitialState(nifNode, partsys, partctrl);
 
@@ -1005,7 +999,10 @@ namespace NifOsg
             // affectors must be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
-            handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
+            osgParticle::ParticleProcessor::ReferenceFrame procrf = (rf==osgParticle::ParticleSystem::WORLD_COORDINATES ?
+                                                                         osgParticle::ParticleProcessor::ABSOLUTE_RF
+                                                                         :osgParticle::ParticleProcessor::RELATIVE_RF);
+            handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), procrf);
 
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
