@@ -926,13 +926,6 @@ namespace NifOsg
         void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, osg::Node* rootNode)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
-
-            if(Settings::Manager::getBool("shader particles", "Shaders"))
-            {
-                partsys->setUseVertexArray(true);
-                partsys->setUseShaders(true);
-            }
-
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
             const Nif::NiParticleSystemController* partctrl = nullptr;
@@ -1042,32 +1035,9 @@ namespace NifOsg
             osg::StateSet *stateset = partsys->getOrCreateStateSet();
             stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
 
-            // setup shader
-            if(partsys->getUseShaders())
-            {
-                float _visibilityDistance = partsys->getVisibilityDistance();
-                stateset->setDataVariance(osg::Object::STATIC);
-
-                osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
-                sprite = shareAttribute(sprite);
-                stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
-
-                #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
-                    stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
-                #else
-                    OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
-                #endif
-
-                osg::ref_ptr<osg::Program> program = new osg::Program;
-
-                program->addShader(osg::Shader::readShaderFile(osg::Shader::VERTEX, "resources/shaders/particle_vertex.glsl"));
-                program->addShader(osg::Shader::readShaderFile(osg::Shader::FRAGMENT,"resources/shaders/particle_fragment.glsl"));
-
-                program = shareAttribute(program);
-                stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
-
-                stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
-            }
+            osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
+            sprite = shareAttribute(sprite);
+            stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
         }
 
         void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)

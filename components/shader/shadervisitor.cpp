@@ -3,7 +3,7 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
-#include <osgParticle/ParticleSystem>
+#include <components/nifosg/particle.hpp>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -359,12 +359,39 @@ namespace Shader
             popRequirements();
     }
 
+
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
-        osgParticle::ParticleSystem * partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drawable);
-        if(partsys && partsys->getUseShaders())
-            //not handle by shadermanager
+        NifOsg::ParticleSystem * partsys = dynamic_cast<NifOsg::ParticleSystem*>(&drawable);
+        if(partsys)
+         {
+            if (!mForceShaders)
+                return;
+            osg::StateSet* writableStateSet = nullptr;
+            if (mAllowedToModifyStateSets)
+                writableStateSet = partsys->getOrCreateStateSet();
+            else
+                writableStateSet = getWritableStateSet(*partsys);
+
+            float _visibilityDistance = partsys->getVisibilityDistance();
+            partsys->setUseVertexArray(true);
+            partsys->setUseShaders(true);
+            ShaderManager::DefineMap defineMap;
+            osg::StateSet * stateset = partsys->getOrCreateStateSet();
+            osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader("particle_fragment.glsl",defineMap,osg::Shader::FRAGMENT));
+            osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader("particle_vertex.glsl", defineMap, osg::Shader::VERTEX));
+            stateset->setAttributeAndModes(mShaderManager.getProgram(vertexShader,fragmentShader),osg::StateAttribute::ON);
+            stateset->setDataVariance(osg::Object::STATIC);
+
+            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
+                stateset->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
+            #else
+                OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
+            #endif
+
+            stateset->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
             return;
+        }
 
         // non-Geometry drawable (e.g. particle system)
         bool needPop = (drawable.getStateSet() != nullptr);
