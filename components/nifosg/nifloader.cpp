@@ -1016,7 +1016,7 @@ namespace NifOsg
 
             osg::Node* toAttach = partsys.get();
 
-            if (rf == osgParticle::ParticleProcessor::RELATIVE_RF)
+            if (rf == osgParticle::ParticleSystem::LOCAL_COORDINATES)
                 parentNode->addChild(toAttach);
             else
             {
