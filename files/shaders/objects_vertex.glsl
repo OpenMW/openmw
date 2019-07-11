@@ -58,10 +58,10 @@ varying vec3 passNormal;
 
 void main(void)
 {
-    depth = gl_Position.z;
 
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_Position = gl_ProjectionMatrix * viewPos;
+    depth = gl_Position.z;
     gl_ClipVertex = viewPos;
 
 #if @pointsprite
