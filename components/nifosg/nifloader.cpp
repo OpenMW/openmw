@@ -1011,9 +1011,18 @@ namespace NifOsg
             collectDrawableProperties(nifNode, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags, true);
             
-            //prevent lighting from overriding color
-            partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-            
+            //setup default particle stateset
+            osg::StateSet *stateset = partsys->getOrCreateStateSet();
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            ///set blending for emission (not set in nif)
+            osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
+            osg::Material *mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            if(mat && mat->getColorMode() == osg::Material::EMISSION)
+                blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE);
+            else blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
+
+            blend = shareAttribute(blend);
+            stateset->setAttributeAndModes(blend, osg::StateAttribute::ON);
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
             osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater = new osgParticle::ParticleSystemUpdater;
