@@ -1029,22 +1029,12 @@ namespace NifOsg
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
-
+            // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
             osg::StateSet *stateset = partsys->getOrCreateStateSet();
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
             sprite = shareAttribute(sprite);
             stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
-
-            ///set blending for emission (not set in nif)
-            osg::ref_ptr<osg::BlendFunc> blend = new osg::BlendFunc;
-            osg::Material *mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            if(mat && mat->getColorMode() == osg::Material::EMISSION)
-                blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE);
-            else blend->setFunction(osg::BlendFunc::SRC_ALPHA, osg::BlendFunc::ONE_MINUS_SRC_ALPHA);
-
-            blend = shareAttribute(blend);
-            stateset->setAttributeAndModes(blend, osg::StateAttribute::ON);
         }
 
         void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
