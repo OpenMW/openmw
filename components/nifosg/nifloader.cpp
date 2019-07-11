@@ -1627,13 +1627,15 @@ namespace NifOsg
                         blendFunc = shareAttribute(blendFunc);
                         stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
                         
-                        osg::ref_ptr<osg::Depth> depth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0, false);
-                        depth = shareAttribute(depth);
-                        stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
+                        {
+                            osg::ref_ptr<osg::Depth> depth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0, false);
+                            depth = shareAttribute(depth);
+                            stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                        }
                         else
                             stateset->setRenderBinToInherit();
                     }
