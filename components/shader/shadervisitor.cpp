@@ -3,7 +3,7 @@
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
-#include <components/nifosg/particle.hpp>
+#include <osg/Version>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -14,6 +14,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/nifosg/particle.hpp>
 
 #include "shadermanager.hpp"
 
@@ -278,6 +279,7 @@ namespace Shader
         {
             mAxisScaling = new osg::Uniform("axisScale", (float)1.0f);
         }
+
         virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
         {
             const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
@@ -291,8 +293,51 @@ namespace Shader
             drawable->drawImplementation(renderInfo);
         }
     };
+
+    struct ParticleSystemFFPDrawCallback : public osg::Drawable::DrawCallback
+    {
+        osg::ref_ptr<osg::Vec3Array> mNormalArray;
+        ParticleSystemFFPDrawCallback()
+        {
+            mNormalArray=new osg::Vec3Array(1);mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+            (*mNormalArray.get())[0] = osg::Vec3(0, 0, 1);
+        }
+
+        ParticleSystemFFPDrawCallback(const ParticleSystemFFPDrawCallback& org,const osg::CopyOp& copyop):
+            osg::Drawable::DrawCallback(org,copyop)
+        {
+            mNormalArray=new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+            (*mNormalArray.get())[0] = osg::Vec3(0, 0, 1);
+        }
+
+        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
+        {
+            const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
+            osg::State * state = renderInfo.getState();
+
+#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
+            if(state->useVertexArrayObject(partsys->getUseVertexArrayObject()))
+            {
+                state->getCurrentVertexArrayState()->assignNormalArrayDispatcher();
+                state->getCurrentVertexArrayState()->setNormalArray(*state, mNormalArray);
+            }else
+            {
+                state->getAttributeDispatchers().activateNormalArray(mNormalArray);
+            }
+#else
+            ///this doesn't work on 3.6
+            state->setNormalPointer(mNormalArray);
+            //if it fail on 3.4 too use the deprecated way:
+            //state->Normal(0,0,1);
+#endif
+            drawable->drawImplementation(renderInfo);
+        }
+    };
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
+        osgParticle::ParticleSystem * partsys = dynamic_cast<osgParticle::ParticleSystem *>(reqs.mNode);
+        if(partsys)
+            partsys->setDrawCallback(new ParticleSystemFFPDrawCallback());
         if (!reqs.mShaderRequired && !mForceShaders)
             return;
 
@@ -316,7 +361,6 @@ namespace Shader
         }
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
-        osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(reqs.mNode);
         defineMap["pointsprite"] = partsys ? "1" : "0";
         if(partsys)
         {
@@ -403,6 +447,7 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
+
         // non-Geometry drawable (e.g. particle system)
         bool needPop = (drawable.getStateSet() != nullptr);
 
