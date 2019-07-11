@@ -401,9 +401,6 @@ namespace Shader
             popRequirements();
     }
 
-
-
-
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
         // non-Geometry drawable (e.g. particle system)

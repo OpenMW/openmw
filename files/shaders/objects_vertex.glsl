@@ -75,10 +75,11 @@ void main(void)
         if (ecDepth <= 0.0 || ecDepth >= visibilityDistance)
             basic_prop.x = -1.0;
     }
-    vec3 viewNormal =normalize(gl_NormalMatrix *vec3(0,0,1));
+    vec3 viewNormal = normalize(gl_NormalMatrix *vec3(0,0,1));
 #else
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
+
 #if @envMap
     vec3 viewVec = normalize(viewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
@@ -119,6 +120,9 @@ void main(void)
 
 #if @pointsprite
     color.a *= basic_prop.z;
+    passNormal = vec3(0,0,1);
+#else
+    passNormal = gl_Normal.xyz;
 #endif
 #if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, color, shadowDiffuseLighting);
@@ -127,10 +131,6 @@ void main(void)
 #endif
 
     passViewPos = viewPos.xyz;
-#if @pointsprite
-    passNormal = vec3(0,0,1);
-#else
-    passNormal = gl_Normal.xyz;
-#endif
+
     setupShadowCoords(viewPos, viewNormal);
 }

@@ -17,7 +17,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/util.hpp>
-#include <components/settings/settings.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -1004,7 +1003,6 @@ namespace NifOsg
                 partsys->update(0.0, nv);
             }
 
-
             // affectors must be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
@@ -1655,8 +1653,7 @@ namespace NifOsg
                         osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
                                                                                    getBlendMode((alphaprop->flags>>5)&0xf)));
                         blendFunc = shareAttribute(blendFunc);
-                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
-                        
+                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);                        
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
