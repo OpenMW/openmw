@@ -1012,7 +1012,7 @@ namespace NifOsg
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags, true);
             
             //prevent lighting from overriding color
-            partsys->getOrCreateStateSet()->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
+            partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
@@ -1672,14 +1672,6 @@ namespace NifOsg
 
             if (specFlags == 0)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
-
-            // Particles don't have normals, so can't be diffuse lit.
-            if (particleMaterial)
-            {
-                // NB ignoring diffuse.a()
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
-                mat->setColorMode(osg::Material::AMBIENT);
-            }
 
             if (lightmode == 0)
             {
