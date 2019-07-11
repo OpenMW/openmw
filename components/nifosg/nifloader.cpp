@@ -1033,8 +1033,7 @@ namespace NifOsg
             }
 
             osg::StateSet *stateset = partsys->getOrCreateStateSet();
-            stateset->setMode(GL_LIGHTING,osg::StateAttribute::OFF);
-
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
             sprite = shareAttribute(sprite);
             stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
@@ -1679,14 +1678,6 @@ namespace NifOsg
 
             if (specFlags == 0)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
-
-            // Particles don't have normals, so can't be diffuse lit.
-            if (particleMaterial)
-            {
-                // NB ignoring diffuse.a()
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
-                mat->setColorMode(osg::Material::AMBIENT);
-            }
 
             if (lightmode == 0)
             {
