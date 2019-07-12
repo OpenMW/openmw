@@ -40,6 +40,7 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/sceneutil/visitor.hpp>
 
 #include "particle.hpp"
 #include "userdata.hpp"
@@ -1030,6 +1031,7 @@ namespace NifOsg
             }
         }
 
+
         void triShapeToGeometry(const Nif::NiTriShape *triShape, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
@@ -1068,7 +1070,11 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(triShape, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false);
+            if(applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false))
+            {
+                SceneUtil::AddRemoveTransparentCullCallback transvis(true);
+                geometry->accept(transvis);
+            }
         }
 
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
@@ -1559,11 +1565,11 @@ namespace NifOsg
                 found = sCache.insert(attr).first;
             return *found;
         }
-
-        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
+        bool applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
                                              bool hasVertexColors, int animflags, bool particleMaterial)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
+            bool isTransparent = false;
 
             int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
             osg::ref_ptr<osg::Material> mat (new osg::Material);
@@ -1639,8 +1645,10 @@ namespace NifOsg
                         stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
-                        if (!noSort)
+                        if (!noSort){
                             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            isTransparent = true;
+                        }
                         else
                             stateset->setRenderBinToInherit();
                     }
@@ -1715,12 +1723,13 @@ namespace NifOsg
                     && mat->getSpecular(osg::Material::FRONT_AND_BACK) == osg::Vec4f(0.f, 0.f, 0.f, 0.f))
             {
                 // default state, skip
-                return;
+                return isTransparent;
             }
 
             mat = shareAttribute(mat);
 
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+            return isTransparent;
         }
 
     };

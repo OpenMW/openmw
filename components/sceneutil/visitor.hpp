@@ -118,6 +118,16 @@ namespace SceneUtil
 
         void applyImpl(osg::Node& node);
     };
+    class AddRemoveTransparentCullCallback : public osg::NodeVisitor
+    {
+        bool _add;
+    public:
+        AddRemoveTransparentCullCallback(bool add)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), _add(add)
+        {
+        }
+        virtual void apply(osg::Drawable& drw);
+    };
 }
 
 #endif

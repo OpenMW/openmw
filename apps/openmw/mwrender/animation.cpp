@@ -1859,9 +1859,16 @@ namespace MWRender
             osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+
+            SceneUtil::AddRemoveTransparentCullCallback transvis(true);
+            mObjectRoot->accept(transvis);
         }
         else if (osg::StateSet* stateset = mObjectRoot->getStateSet())
+        {
             stateset->setRenderBinToInherit();
+            SceneUtil::AddRemoveTransparentCullCallback transvis(false);
+            mObjectRoot->accept(transvis);
+        }
     }
 
     void Animation::setLightEffect(float effect)

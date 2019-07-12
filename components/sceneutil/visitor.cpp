@@ -5,6 +5,8 @@
 
 #include <osgParticle/ParticleSystem>
 
+#include <osgUtil/CullVisitor>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -152,5 +154,87 @@ namespace SceneUtil
             // Not safe to remove in apply(), since the visitor is still iterating the child list
             mToRemove.push_back(std::make_pair(&node, parent));
         }
+    }
+
+    class PreciseLeafDepthCullCallback : public osg::Drawable::CullCallback
+    {
+
+            inline osgUtil::CullVisitor::value_type distance(const osg::Vec3& coord,const osg::Matrix& matrix) const
+            {
+                return -((osgUtil::CullVisitor::value_type)coord[0]*(osgUtil::CullVisitor::value_type)matrix(0,2)+(osgUtil::CullVisitor::value_type)coord[1]*(osgUtil::CullVisitor::value_type)matrix(1,2)+(osgUtil::CullVisitor::value_type)coord[2]*(osgUtil::CullVisitor::value_type)matrix(2,2)+matrix(3,2));
+            }
+
+            virtual bool cull(osg::NodeVisitor* nv, osg::Drawable* drawable, osg::RenderInfo* renderInfo) const
+            {
+                osgUtil::CullVisitor * cv = static_cast<osgUtil::CullVisitor *>(nv);
+                osg::RefMatrix& matrix = *cv->getModelViewMatrix();
+                const osg::BoundingBox& bb = drawable->getBoundingBox();
+                if (drawable->isCullingActive() && cv->isCulled(bb)) return true;
+
+
+                if (cv->getComputeNearFarMode() && bb.valid())
+                {
+                    if (!cv->updateCalculatedNearFar(matrix,*drawable,false)) return true;
+                }
+
+                // need to track how push/pops there are, so we can unravel the stack correctly.
+                unsigned int numPopStateSetRequired = 0;
+
+                // push the geoset's state on the geostate stack.
+                osg::StateSet* stateset = drawable->getStateSet();
+                if (stateset)
+                {
+                    ++numPopStateSetRequired;
+                    cv->pushStateSet(stateset);
+                }
+
+                osg::CullingSet& cs = cv->getCurrentCullingSet();
+                if (!cs.getStateFrustumList().empty())
+                {
+                    osg::CullingSet::StateFrustumList& sfl = cs.getStateFrustumList();
+                    for(osg::CullingSet::StateFrustumList::iterator itr = sfl.begin();
+                        itr != sfl.end();
+                        ++itr)
+                    {
+                        if (itr->second.contains(bb))
+                        {
+                            ++numPopStateSetRequired;
+                            cv->pushStateSet(itr->first.get());
+                        }
+                    }
+                }
+
+                float depth = FLT_MAX;
+                if(bb.valid())
+                {
+                   for(unsigned int i=0; i<8; ++i)
+                       depth = std::min((float)distance(bb.corner(i), matrix), depth);
+                }
+                else depth = 0.0f;
+
+                if (osg::isNaN(depth))
+                {
+                    OSG_NOTICE<<"CullVisitor::apply(Geode&) detected NaN,"<<std::endl
+                                            <<"    depth="<<depth<<", center=("<<bb.center()<<"),"<<std::endl
+                                            <<"    matrix="<<matrix<<std::endl;
+                    OSG_DEBUG << "    NodePath:" << std::endl;
+                }
+                else
+                {
+                    cv->addDrawableAndDepth(drawable,&matrix,depth);
+                }
+
+                for(unsigned int i=0;i< numPopStateSetRequired; ++i)
+                {
+                    cv->popStateSet();
+                }
+                return true;
+            }
+     };
+
+    void AddRemoveTransparentCullCallback::apply(osg::Drawable &drw)
+    {
+        if(_add) drw.setCullCallback(new PreciseLeafDepthCullCallback());
+        else drw.setCullCallback(0);
     }
 }
