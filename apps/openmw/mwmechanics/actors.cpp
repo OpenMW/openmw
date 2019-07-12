@@ -1580,7 +1580,8 @@ namespace MWMechanics
                 else if (!isPlayer)
                     iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
 
-                if (iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
+                const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
+                if (!isDead && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
                     ctrl->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
