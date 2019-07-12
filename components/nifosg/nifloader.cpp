@@ -1031,7 +1031,6 @@ namespace NifOsg
             }
             // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
             osg::StateSet *stateset = partsys->getOrCreateStateSet();
-            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
             sprite = shareAttribute(sprite);
             stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
@@ -1647,12 +1646,7 @@ namespace NifOsg
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
-                        {
-                            osg::ref_ptr<osg::Depth> depth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0, false);
-                            depth = shareAttribute(depth);
-                            stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-                        }
                         else
                             stateset->setRenderBinToInherit();
                     }
