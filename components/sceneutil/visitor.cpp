@@ -206,16 +206,12 @@ namespace SceneUtil
                         }
                     }
                 }
-                osg::Vec3 lookVector(-matrix(0,2),-matrix(1,2),-matrix(2,2));
-
-                unsigned int bbCornerNear = (lookVector.x()>=0?0:1) +
-                               (lookVector.y()>=0?0:2) +
-                               (lookVector.z()>=0?0:4);
 
                 float depth = FLT_MAX;
                 if(bb.valid())
                 {
-                   depth = std::min((float)distance(bb.corner(bbCornerNear), matrix), depth);
+                   for(unsigned int i=0; i<8; ++i)
+                       depth = std::min((float)distance(bb.corner(i), matrix), depth);
                 }
                 else depth = 0.0f;
 
