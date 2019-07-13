@@ -159,7 +159,6 @@ namespace SceneUtil
 
     class PreciseLeafDepthCullCallback : public osg::Drawable::CullCallback
     {
-
             inline osgUtil::CullVisitor::value_type distance(const osg::Vec3& coord,const osg::Matrix& matrix) const
             {
                 return -((osgUtil::CullVisitor::value_type)coord[0]*(osgUtil::CullVisitor::value_type)matrix(0,2)+(osgUtil::CullVisitor::value_type)coord[1]*(osgUtil::CullVisitor::value_type)matrix(1,2)+(osgUtil::CullVisitor::value_type)coord[2]*(osgUtil::CullVisitor::value_type)matrix(2,2)+matrix(3,2));
@@ -208,23 +207,21 @@ namespace SceneUtil
                 }
                 osg::Vec3 lookVector(-matrix(0,2),-matrix(1,2),-matrix(2,2));
 
-                unsigned int bbCornerNear = (lookVector.x()>=0?0:1) +
-                               (lookVector.y()>=0?0:2) +
-                               (lookVector.z()>=0?0:4);
+                unsigned int bbCornerFar = (lookVector.x()>=0?1:0) +
+                               (lookVector.y()>=0?2:0) +
+                               (lookVector.z()>=0?4:0);
 
-                float depth = FLT_MAX;
+                float depth = 0;
                 if(bb.valid())
                 {
-                   depth = std::min((float)distance(bb.corner(bbCornerNear), matrix), depth);
+                   depth = (float)distance(bb.corner(bbCornerFar), matrix);
                 }
-                else depth = 0.0f;
 
                 if (osg::isNaN(depth))
                 {
-                    OSG_NOTICE<<"CullVisitor::apply(Geode&) detected NaN,"<<std::endl
-                                            <<"    depth="<<depth<<", center=("<<bb.center()<<"),"<<std::endl
-                                            <<"    matrix="<<matrix<<std::endl;
-                    OSG_DEBUG << "    NodePath:" << std::endl;
+                    Log(Debug::Warning) << "PreciseLeafDepthCullCallback  detected NaN,";
+                    Log(Debug::Warning) <<"    depth="<<depth<<", center=("<<bb.center()<<"),";
+                    Log(Debug::Warning) <<"    matrix="<<matrix;
                 }
                 else
                 {
@@ -242,9 +239,9 @@ namespace SceneUtil
     void AddRemoveTransparentCullCallback::apply(osg::Drawable &drw)
     {
 #if OSG_MIN_VERSION_REQUIRED(3,6,0) //to precise
-        if(_add) drw.addCullCallback(new PreciseLeafDepthCullCallback());
+        if(mAdd) drw.addCullCallback(new PreciseLeafDepthCullCallback());
 #else
-        if(_add)
+        if(mAdd)
         {
             osg::Callback * cb = drw.getCullCallback(), *parentcb = 0;
             while(cb)
