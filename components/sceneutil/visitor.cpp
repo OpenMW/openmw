@@ -1,5 +1,6 @@
 #include "visitor.hpp"
 
+#include <osg/Version>
 #include <osg/Drawable>
 #include <osg/MatrixTransform>
 
@@ -169,6 +170,8 @@ namespace SceneUtil
                 osgUtil::CullVisitor * cv = static_cast<osgUtil::CullVisitor *>(nv);
                 osg::RefMatrix& matrix = *cv->getModelViewMatrix();
                 const osg::BoundingBox& bb = drawable->getBoundingBox();
+                const osg::Drawable::CullCallback* nestedcb = dynamic_cast<const osg::Drawable::CullCallback*>(getNestedCallback());
+                if(nestedcb && nestedcb->cull(nv, drawable, renderInfo)) return true;
                 if (drawable->isCullingActive() && cv->isCulled(bb)) return true;
 
 
@@ -238,7 +241,38 @@ namespace SceneUtil
 
     void AddRemoveTransparentCullCallback::apply(osg::Drawable &drw)
     {
-        if(_add) drw.setCullCallback(new PreciseLeafDepthCullCallback());
-        else drw.setCullCallback(0);
+#if OSG_MIN_VERSION_REQUIRED(3,6,0) //to precise
+        if(_add) drw.addCullCallback(new PreciseLeafDepthCullCallback());
+#else
+        if(_add)
+        {
+            osg::Callback * cb = drw.getCullCallback(), *parentcb = 0;
+            while(cb)
+            {
+                parentcb = cb; cb = cb->getNestedCallback();
+            }
+            if(parentcb)
+                parentcb->setNestedCallback(new PreciseLeafDepthCullCallback());
+            else drw.setCullCallback(new PreciseLeafDepthCullCallback());
+        }
+#endif
+        else
+        {
+            osg::Callback * cb = drw.getCullCallback(), *parentcb = 0;
+            while(cb)
+            {
+                if(dynamic_cast<PreciseLeafDepthCullCallback*>(cb)){
+                    osg::ref_ptr<osg::Callback> nested_callback = cb->getNestedCallback();
+                    if(parentcb)
+                    {
+                        parentcb->setNestedCallback(nested_callback);
+                    }
+                    else drw.setCullCallback(nested_callback);
+                    return;
+                }
+                parentcb = cb;
+                cb = cb->getNestedCallback();
+            }
+        }
     }
 }
