@@ -1646,7 +1646,7 @@ namespace NifOsg
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort){
-                            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            stateset->setRenderBinDetails(0, "SORT_FRONT_TO_BACK");
                             isTransparent = true;
                         }
                         else

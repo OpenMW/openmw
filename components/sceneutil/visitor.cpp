@@ -207,14 +207,14 @@ namespace SceneUtil
                 }
                 osg::Vec3 lookVector(-matrix(0,2),-matrix(1,2),-matrix(2,2));
 
-                unsigned int bbCornerFar = (lookVector.x()>=0?1:0) +
-                               (lookVector.y()>=0?2:0) +
-                               (lookVector.z()>=0?4:0);
+                unsigned int bbCornerNear = (lookVector.x()>=0?0:1) +
+                               (lookVector.y()>=0?0:1) +
+                               (lookVector.z()>=0?0:4);
 
-                float depth = 0;
+                float depth = FLT_MAX;
                 if(bb.valid())
                 {
-                   depth = (float)distance(bb.corner(bbCornerFar), matrix);
+                   depth = (float)distance(bb.corner(bbCornerNear), matrix);
                 }
 
                 if (osg::isNaN(depth))
