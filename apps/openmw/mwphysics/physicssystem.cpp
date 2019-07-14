@@ -62,6 +62,11 @@ namespace MWPhysics
     //   Anything from 0.5 to 0.01 is relatively sane, but very small values may experience problems the further away from the world's origin you get.
     //   0.5 starts to result in obvious snagging at relatively normal angles at normal speeds.
 
+    // do the extra safety margin rejection trace - disabling causes problems but improves performance
+    static const bool sDoExtraSafetyTrace = false;
+    // do extra stairstepping logic hacks to work around bad morrowind assets - disabling causes problems but improves performance
+    static const bool sDoExtraStairHacks = false;
+
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
 
@@ -160,7 +165,7 @@ namespace MWPhysics
 
                 if(attempt == 1)
                     tracerDest = tracerPos + toMove;
-                else if (!firstIteration) // first attempt failed and not on first movement solver iteration, can't retry
+                else if (!firstIteration || !sDoExtraStairHacks) // first attempt failed and not on first movement solver iteration, can't retry -- or we have extra hacks disabled
                 {
                     return false;
                 }
@@ -193,16 +198,19 @@ namespace MWPhysics
                     moveDistance -= sSafetyMargin;
                     tracerDest = tracerPos + normalMove*moveDistance;
 
-                    // safely eject from what we hit by the safety margin
-                    auto tempDest = tracerDest + mTracer.mPlaneNormal*sSafetyMargin*2;
-
-                    ActorTracer tempTracer;
-                    tempTracer.doTrace(mColObj, tracerDest, tempDest, mColWorld);
-
-                    if(tempTracer.mFraction > 0.5f) // distance to any object is greater than sSafetyMargin (we checked sSafetyMargin*2 distance)
+                    if(sDoExtraSafetyTrace)
                     {
-                        auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
-                        tracerDest += mTracer.mPlaneNormal*sSafetyMargin*effectiveFraction;
+                        // safely eject from what we hit by the safety margin
+                        auto tempDest = tracerDest + mTracer.mPlaneNormal*sSafetyMargin*2;
+
+                        ActorTracer tempTracer;
+                        tempTracer.doTrace(mColObj, tracerDest, tempDest, mColWorld);
+
+                        if(tempTracer.mFraction > 0.5f) // distance to any object is greater than sSafetyMargin (we checked sSafetyMargin*2 distance)
+                        {
+                            auto effectiveFraction = tempTracer.mFraction*2.0f - 1.0f;
+                            tracerDest += mTracer.mPlaneNormal*sSafetyMargin*effectiveFraction;
+                        }
                     }
                 }
 
@@ -393,7 +401,7 @@ namespace MWPhysics
             float remainingTime = time;
             // to ensure actor state gets updated when climbing a stairstep while jumping
             bool forceGroundTest = false;
-            // to control the "tiny slope" stair stepping hack
+            // to control the "tiny slope" stair stepping hacks
             bool noSlidingYet = true;
             // to handle simple acute crevices
             int numTimesSlid = 0;
@@ -502,21 +510,24 @@ namespace MWPhysics
 
                     // eject from whatever we hit, along the normal of contact
                     // (this makes it so that numerical instability doesn't render the motion-directional safety margin moot when hugging walls)
-                    auto testPosition = newPosition + virtualNormal*sSafetyMargin*2;
-                    ActorTracer tempTracer;
-                    tempTracer.doTrace(colobj, newPosition, testPosition, collisionWorld);
-                    if(tempTracer.mHitObject)
+                    if(sDoExtraSafetyTrace)
                     {
-                        float hitDistance = tempTracer.mFraction*sSafetyMargin*2;
-                        hitDistance -= sSafetyMargin;
-                        if(hitDistance > 0.0f)
+                        auto testPosition = newPosition + virtualNormal*sSafetyMargin*2;
+                        ActorTracer tempTracer;
+                        tempTracer.doTrace(colobj, newPosition, testPosition, collisionWorld);
+                        if(tempTracer.mHitObject)
                         {
-                            newPosition += virtualNormal*hitDistance;
+                            float hitDistance = tempTracer.mFraction*sSafetyMargin*2;
+                            hitDistance -= sSafetyMargin;
+                            if(hitDistance > 0.0f)
+                            {
+                                newPosition += virtualNormal*hitDistance;
+                            }
                         }
-                    }
-                    else
-                    {
-                        newPosition += virtualNormal*sSafetyMargin;
+                        else
+                        {
+                            newPosition += virtualNormal*sSafetyMargin;
+                        }
                     }
 
                     // then do not allow sliding upward if we're walking or jumping on land
@@ -528,7 +539,8 @@ namespace MWPhysics
                     // or else we get bounced back and forth between two of them until we run out of iterations.
 
                     // check for colliding with acute convex corners; handling of acute crevices
-                    if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.0f) || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.0f))
+                    if ((numTimesSlid > 0 && lastSlideNormal * virtualNormal <= 0.0f)
+                        || (numTimesSlid > 1 && lastSlideFallbackNormal * virtualNormal <= 0.0f))
                     {
                         // if we've already done crevice detection then we're probably stuck
                         if(numTimesSlidFallback > 1)
@@ -586,7 +598,6 @@ namespace MWPhysics
                     numTimesSlid += 1;
                     lastSlideFallbackNormal = lastSlideNormal;
                     lastSlideNormal = virtualNormal;
-
                     velocity = newVelocity;
                 }
             }

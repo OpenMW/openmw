@@ -33,9 +33,9 @@ public:
 class ClosestNotMeConvexResultCallback : public btCollisionWorld::ClosestConvexResultCallback
 {
 public:
-    ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &up, btScalar minSlopeDot, const btCollisionWorld * world)
+    ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot, const btCollisionWorld * world)
       : btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
-        mMe(me), mUp(up), mMinSlopeDot(minSlopeDot), mWorld(world)
+        mMe(me), mMotion(motion), mMinCollisionDot(minCollisionDot), mWorld(world)
     {
     }
 
@@ -56,7 +56,7 @@ public:
             {
                 auto originA = Misc::Convert::toOsg(mMe->getWorldTransform().getOrigin());
                 auto originB = Misc::Convert::toOsg(convexResult.m_hitCollisionObject->getWorldTransform().getOrigin());
-                osg::Vec3f motion = Misc::Convert::toOsg(mUp);
+                osg::Vec3f motion = Misc::Convert::toOsg(mMotion);
                 osg::Vec3f normal = (originA-originB);
                 normal.z() = 0;
                 normal.normalize();
@@ -86,8 +86,9 @@ public:
             hitNormalWorld = convexResult.m_hitCollisionObject->getWorldTransform().getBasis()*convexResult.m_hitNormalLocal;
         }
 
-        btScalar dotUp = mUp.dot(hitNormalWorld);
-        if(dotUp < mMinSlopeDot)
+        // dot product of the motion vector against the collision contact normal
+        btScalar dotCollision = mMotion.dot(hitNormalWorld);
+        if(dotCollision <= mMinCollisionDot)
             return btScalar(1);
 
         return ClosestConvexResultCallback::addSingleResult(convexResult, normalInWorldSpace);
@@ -95,8 +96,8 @@ public:
 
 protected:
     const btCollisionObject *mMe;
-    const btVector3 mUp;
-    const btScalar mMinSlopeDot;
+    const btVector3 mMotion;
+    const btScalar mMinCollisionDot;
     const btCollisionWorld * mWorld;
 };
 
