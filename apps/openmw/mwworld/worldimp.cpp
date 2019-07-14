@@ -1286,7 +1286,8 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(newPtr, vec);
+
+            mRendering->moveObject(newPtr, vec, !isPlayer);
             if (movePhysics)
             {
                 mPhysics->updatePosition(newPtr);

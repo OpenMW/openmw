@@ -130,7 +130,7 @@ namespace MWRender
         void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
         void rotateObject(const MWWorld::Ptr& ptr, const osg::Quat& rot);
-        void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos);
+        void moveObject(const MWWorld::Ptr& ptr, const osg::Vec3f& pos, bool belongtocell);
         void scaleObject(const MWWorld::Ptr& ptr, const osg::Vec3f& scale);
 
         void removeObject(const MWWorld::Ptr& ptr);

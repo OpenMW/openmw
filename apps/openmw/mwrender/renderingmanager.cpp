@@ -694,16 +694,14 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setAttitude(rot);
     }
 
-    void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
+    void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos, bool belongtocell)
     {
         osg::Vec3 cellorigin(0,0,0);
-        //TOFIX : logic handling special case of Player (not belong to any cell...)
-        //don't use moveObject for Player and remove these generalized tests
-        SceneUtil::PositionAttitudeTransform* ptrans, *trans=ptr.getRefData().getBaseNode();
-        if(trans->getNumParents()>0)
+        SceneUtil::PositionAttitudeTransform *trans=ptr.getRefData().getBaseNode();
+        if(belongtocell)
         {
-            ptrans = dynamic_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
-            if(ptrans) cellorigin = ptrans->getPosition();
+            SceneUtil::PositionAttitudeTransform *ptrans = static_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
+            cellorigin = ptrans->getPosition();
         }
         trans->setPosition(pos-cellorigin);
     }
