@@ -140,7 +140,8 @@ void CSVRender::Object::update()
     if (light)
     {
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
+        ESM::Cell dummy;
+        SceneUtil::addLight(mBaseNode, &dummy, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
     }
 }
 

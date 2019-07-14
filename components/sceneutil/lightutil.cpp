@@ -52,7 +52,7 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
+    void addLight (osg::Group* node, const ESM::Cell* curcell, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -72,7 +72,7 @@ namespace SceneUtil
 
             // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans(new SceneUtil::PositionAttitudeTransform);
-            trans->setPosition(computeBound.getBoundingBox().center());
+            trans->setPosition(computeBound.getBoundingBox().center() - SceneUtil::getCellOrigin(curcell));
 
             node->addChild(trans);
 
