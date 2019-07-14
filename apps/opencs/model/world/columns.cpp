@@ -422,7 +422,7 @@ namespace
 
     static const char *sApparatusTypes[] =
     {
-        "Mortar & Pestle", "Albemic", "Calcinator", "Retort", 0
+        "Mortar & Pestle", "Alembic", "Calcinator", "Retort", 0
     };
 
     static const char *sArmorTypes[] =

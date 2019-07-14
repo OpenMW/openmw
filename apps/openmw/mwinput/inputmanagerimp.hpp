@@ -209,6 +209,7 @@ namespace MWInput
         std::map<std::string, bool> mControlSwitch;
 
         float mInvUiScalingFactor;
+        float mGamepadCursorSpeed;
 
     private:
         void convertMousePosForMyGUI(int& x, int& y);

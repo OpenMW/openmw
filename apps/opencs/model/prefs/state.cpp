@@ -247,6 +247,9 @@ void CSMPrefs::State::declare()
         addValues (landeditOutsideVisibleCell);
     declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
         setMin (1);
+    declareBool ("open-list-view", "Open displays list view", false).
+        setTooltip ("When opening a reference from the scene view, it will open the"
+        " instance list view instead of the individual instance record view.");
 
     declareCategory ("Key Bindings");
 
@@ -331,6 +334,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
     declareShortcut ("scene-navi-secondary", "Camera Translation From Mouse Movement",
         QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
+    declareShortcut ("scene-open-primary", "Primary Open", QKeySequence(Qt::ShiftModifier | (int)Qt::LeftButton));
     declareShortcut ("scene-edit-primary", "Primary Edit", QKeySequence(Qt::RightButton));
     declareShortcut ("scene-edit-secondary", "Secondary Edit",
         QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));

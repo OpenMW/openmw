@@ -169,8 +169,8 @@ void ESMStore::validate()
             if (!fact)
             {
                 Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '" << npc.mFaction << "', ignoring it.";
-                npc.mFaction = "";
-                npc.mNpdt.mRank = -1;
+                npc.mFaction.clear();
+                npc.mNpdt.mRank = 0;
                 changed = true;
             }
         }

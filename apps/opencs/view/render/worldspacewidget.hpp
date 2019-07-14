@@ -91,6 +91,7 @@ namespace CSVRender
                 InteractionType_PrimarySelect,
                 InteractionType_SecondaryEdit,
                 InteractionType_SecondarySelect,
+                InteractionType_PrimaryOpen,
                 InteractionType_None
             };
 
@@ -263,6 +264,8 @@ namespace CSVRender
 
             void showToolTip();
 
+            void primaryOpen(bool activate);
+
             void primaryEdit(bool activate);
 
             void secondaryEdit(bool activate);
@@ -282,6 +285,8 @@ namespace CSVRender
             void closeRequest();
 
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
+
+            void requestFocus (const std::string& id);
 
         friend class MouseState;
     };

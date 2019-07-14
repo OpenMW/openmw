@@ -94,6 +94,8 @@ CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidg
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
 {
+    connect(this, SIGNAL(requestFocus(const std::string&)),
+            worldspaceWidget, SIGNAL(requestFocus(const std::string&)));
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -172,6 +174,18 @@ void CSVRender::InstanceMode::primaryEditPressed (const WorldspaceHitResult& hit
 {
     if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         primarySelectPressed (hit);
+}
+
+void CSVRender::InstanceMode::primaryOpenPressed (const WorldspaceHitResult& hit)
+{
+    if(hit.tag)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
+        {
+            const std::string refId = objectTag->mObject->getReferenceId();
+            emit requestFocus(refId);
+        }
+    }
 }
 
 void CSVRender::InstanceMode::secondaryEditPressed (const WorldspaceHitResult& hit)
