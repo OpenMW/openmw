@@ -6,6 +6,7 @@
 
 #include <osg/ref_ptr>
 #include <osg/Object>
+#include <osg/Vec3>
 
 #include "../mwworld/ptr.hpp"
 
@@ -68,9 +69,10 @@ class Objects{
 
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-    void insertBegin(const MWWorld::Ptr& ptr);
-
+    osg::Group* insertBegin(const MWWorld::Ptr& ptr);
 public:
+    osg::Group * getOrCreateCell(const MWWorld::Ptr& ptr);
+
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();
 
