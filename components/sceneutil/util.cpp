@@ -1,9 +1,12 @@
 #include "util.hpp"
-
 #include <osg/Node>
+#include <components/esm/loadcell.hpp>
+#include <components/esm/loadland.hpp>
 
 namespace SceneUtil
 {
+
+const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 
 void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
 {
@@ -72,5 +75,9 @@ bool hasUserDescription(const osg::Node* node, const std::string pattern)
 
     return false;
 }
-
+osg::Vec3 getCellOrigin(const ESM::Cell *c){
+    const ESM::CellId::CellIndex &cellid =c->getCellId().mIndex;
+    return osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
+                         (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
+}
 }
