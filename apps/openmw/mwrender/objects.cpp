@@ -36,7 +36,6 @@ Objects::~Objects()
 
 osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
 {
-
     osg::ref_ptr<osg::Group> cellnode;
     CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
     if (found == mCellSceneNodes.end())
@@ -58,9 +57,9 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
 {
     assert(mObjects.find(ptr) == mObjects.end());
 
-    osg::ref_ptr<osg::Group> cellnode = getOrCreateCell(ptr);
+    osg::Group* cellnode = getOrCreateCell(ptr);
 
-    SceneUtil::PositionAttitudeTransform* insert = new SceneUtil::PositionAttitudeTransform;
+    SceneUtil::PositionAttitudeTransform * insert = new SceneUtil::PositionAttitudeTransform;
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
@@ -81,8 +80,7 @@ osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
     osg::Group *cellroot = insertBegin(ptr);
-    SceneUtil::PositionAttitudeTransform* transbasenode = static_cast<SceneUtil::PositionAttitudeTransform *>(ptr.getRefData().getBaseNode());
-    osg::Group * basenode = transbasenode;
+    SceneUtil::PositionAttitudeTransform * basenode = ptr.getRefData().getBaseNode();
     osg::ref_ptr<ObjectAnimation> anim = new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight);
 
     basenode->setNodeMask(Mask_Object);
@@ -95,7 +93,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
 {
     osg::Group *cellroot = insertBegin(ptr);
-    SceneUtil::PositionAttitudeTransform* basenode = static_cast<SceneUtil::PositionAttitudeTransform *>(ptr.getRefData().getBaseNode());
+    SceneUtil::PositionAttitudeTransform * basenode = ptr.getRefData().getBaseNode();
 
     basenode->setDataVariance(osg::Object::DYNAMIC);
     basenode->setNodeMask(Mask_Actor);
@@ -117,7 +115,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
     osg::Group *cellroot = insertBegin(ptr);
-    SceneUtil::PositionAttitudeTransform* basenode = static_cast<SceneUtil::PositionAttitudeTransform *>(ptr.getRefData().getBaseNode());
+    SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
 
     basenode->setDataVariance(osg::Object::DYNAMIC);
     basenode->setNodeMask(Mask_Actor);
@@ -152,9 +150,8 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
 
             ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
-        osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
 
-        cellroot->removeChild(basenode);
+        ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());
 
         ptr.getRefData().setBaseNode(nullptr);
         return true;

@@ -703,7 +703,7 @@ namespace MWRender
         if(trans->getNumParents()>0)
         {
             ptrans = dynamic_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
-            if(ptrans)cellorigin = ptrans->getPosition();
+            if(ptrans) cellorigin = ptrans->getPosition();
         }
         trans->setPosition(pos-cellorigin);
     }
