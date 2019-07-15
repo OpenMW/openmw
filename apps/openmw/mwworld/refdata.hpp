@@ -78,13 +78,13 @@ namespace MWWorld
             RefData& operator= (const RefData& refData);
 
             /// Return base node (can be a null pointer).
-            SceneUtil::PositionAttitudeTransform* getBaseNode();
+            inline SceneUtil::PositionAttitudeTransform* getBaseNode() { return mBaseNode; }
 
             /// Return base node (can be a null pointer).
-            const SceneUtil::PositionAttitudeTransform* getBaseNode() const;
+            inline const SceneUtil::PositionAttitudeTransform* getBaseNode() const { return mBaseNode; }
 
             /// Set base node (can be a null pointer).
-            void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
+            inline void setBaseNode (SceneUtil::PositionAttitudeTransform* base) { mBaseNode = base; }
 
             int getCount() const;
 

@@ -345,7 +345,7 @@ namespace MWWorld
     }
 
     CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
-        : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
+        : mStore(esmStore), mReader(readerList), mCell (cell), mBaseNode(nullptr), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
     }
@@ -360,16 +360,6 @@ namespace MWWorld
         return mState;
     }
 
-    const std::vector<std::string> &CellStore::getPreloadedIds() const
-    {
-        return mIds;
-    }
-
-    bool CellStore::hasState() const
-    {
-        return mHasState;
-    }
-
     bool CellStore::hasId (const std::string& id) const
     {
         if (mState==State_Unloaded)
@@ -379,6 +369,16 @@ namespace MWWorld
             return std::binary_search (mIds.begin(), mIds.end(), id);
 
         return searchConst (id).isEmpty();
+    }
+
+    const std::vector<std::string> &CellStore::getPreloadedIds() const
+    {
+        return mIds;
+    }
+
+    bool CellStore::hasState() const
+    {
+        return mHasState;
     }
 
     template <typename PtrType>

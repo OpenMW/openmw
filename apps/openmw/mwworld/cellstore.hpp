@@ -35,6 +35,11 @@
 #include "timestamp.hpp"
 #include "ptr.hpp"
 
+namespace SceneUtil
+{
+    class PositionAttitudeTransform;
+}
+
 namespace ESM
 {
     struct Cell;
@@ -68,6 +73,7 @@ namespace MWWorld
             std::shared_ptr<ESM::FogState> mFogState;
 
             const ESM::Cell *mCell;
+            SceneUtil::PositionAttitudeTransform* mBaseNode;
             State mState;
             bool mHasState;
             std::vector<std::string> mIds;
@@ -379,6 +385,14 @@ namespace MWWorld
             void respawn ();
             ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.
 
+            /// Return base node (can be a null pointer).
+            inline SceneUtil::PositionAttitudeTransform* getBaseNode() { return mBaseNode; }
+
+            /// Return base node (can be a null pointer).
+            inline const SceneUtil::PositionAttitudeTransform* getBaseNode() const { return mBaseNode; }
+
+            /// Set base node (can be a null pointer).
+            inline void setBaseNode (SceneUtil::PositionAttitudeTransform* base) { mBaseNode = base; }
         private:
 
             /// Run through references and store IDs

@@ -131,21 +131,6 @@ namespace MWWorld
         {}
     }
 
-    void RefData::setBaseNode(SceneUtil::PositionAttitudeTransform *base)
-    {
-        mBaseNode = base;
-    }
-
-    SceneUtil::PositionAttitudeTransform* RefData::getBaseNode()
-    {
-        return mBaseNode;
-    }
-
-    const SceneUtil::PositionAttitudeTransform* RefData::getBaseNode() const
-    {
-        return mBaseNode;
-    }
-
     int RefData::getCount() const
     {
         return mCount;
