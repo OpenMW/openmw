@@ -7,7 +7,7 @@
 #include <osg/ref_ptr>
 #include <osg/Object>
 #include <osg/Vec3>
-
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include "../mwworld/ptr.hpp"
 
 namespace osg
@@ -59,7 +59,7 @@ public:
 class Objects{
     typedef std::map<MWWorld::ConstPtr,osg::ref_ptr<Animation> > PtrAnimationMap;
 
-    typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<osg::Group> > CellMap;
+    typedef std::map<const MWWorld::CellStore*, osg::ref_ptr<SceneUtil::PositionAttitudeTransform> > CellMap;
     CellMap mCellSceneNodes;
     PtrAnimationMap mObjects;
 
@@ -69,9 +69,9 @@ class Objects{
 
     osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-    osg::Group* insertBegin(const MWWorld::Ptr& ptr);
+    SceneUtil::PositionAttitudeTransform* insertBegin(const MWWorld::Ptr& ptr);
 public:
-    osg::Group * getOrCreateCell(const MWWorld::CellStore* ptr);
+    SceneUtil::PositionAttitudeTransform * getOrCreateCell(const MWWorld::CellStore* ptr);
 
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();
