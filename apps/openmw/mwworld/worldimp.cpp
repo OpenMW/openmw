@@ -1232,6 +1232,7 @@ namespace MWWorld
                 }
                 addContainerScripts (getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();
+                mRendering->updatePtr(ptr, newPtr);
             }
             else
             {
@@ -1287,7 +1288,7 @@ namespace MWWorld
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
 
-            mRendering->moveObject(newPtr, vec, !isPlayer);
+            mRendering->moveObject(newPtr, vec);
             if (movePhysics)
             {
                 mPhysics->updatePosition(newPtr);

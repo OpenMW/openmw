@@ -205,8 +205,6 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         return;
 
     SceneUtil::PositionAttitudeTransform * curcellnode = cur.getCell()->getBaseNode();
-    const MWWorld::CellStore * curcell = cur.getCell();
-    osg::Group* cellnode = getOrCreateCell(curcell);
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)
@@ -223,7 +221,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
 
     const float *f = cur.getRefData().getPosition().pos;
     objectNode->setPosition( osg::Vec3(f[0],f[1],f[2]) - curcellnode->getPosition());
-    cellnode->addChild(objectNode);
+    curcellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);
     if(iter != mObjects.end())

@@ -694,16 +694,10 @@ namespace MWRender
         ptr.getRefData().getBaseNode()->setAttitude(rot);
     }
 
-    void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos, bool belongtocell)
+    void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos)
     {
-        osg::Vec3 cellorigin(0,0,0);
         SceneUtil::PositionAttitudeTransform *trans = ptr.getRefData().getBaseNode();
-        if(belongtocell)
-        {
-            SceneUtil::PositionAttitudeTransform *ptrans = static_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));
-            cellorigin = ptrans->getPosition();
-        }
-        trans->setPosition(pos-cellorigin);
+        trans->setPosition(pos-ptr.getCell()->getBaseNode()->getPosition());
     }
 
     void RenderingManager::scaleObject(const MWWorld::Ptr &ptr, const osg::Vec3f &scale)
@@ -1143,7 +1137,7 @@ namespace MWRender
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
             mPlayerNode->setNodeMask(Mask_Player);
             mPlayerNode->setName("Player Root");
-            mSceneRoot->addChild(mPlayerNode);
+
         }
 
         mPlayerNode->setUserDataContainer(new osg::DefaultUserDataContainer);
@@ -1159,7 +1153,8 @@ namespace MWRender
     {
         mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
                                                 mFirstPersonFieldOfView);
-
+        if(mPlayerNode->getNumParents()==0)
+            mObjects->getOrCreateCell(player.getCell())->addChild(mPlayerNode);
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
     }
