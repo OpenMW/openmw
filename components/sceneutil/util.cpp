@@ -11,8 +11,8 @@ const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 osg::Vec3 getCellOrigin(const ESM::Cell *c)
 {
     const ESM::CellId::CellIndex &cellid =c->getCellId().mIndex;
-    return osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
-                         (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
+    return osg::Vec3( (static_cast<float>(cellid.mX)) * cellSize,
+                         (static_cast<float>(cellid.mY)) * cellSize, 0);
 }
 
 void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
