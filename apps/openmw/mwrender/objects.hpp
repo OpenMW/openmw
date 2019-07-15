@@ -71,7 +71,7 @@ class Objects{
 
     osg::Group* insertBegin(const MWWorld::Ptr& ptr);
 public:
-    osg::Group * getOrCreateCell(const MWWorld::Ptr& ptr);
+    osg::Group * getOrCreateCell(const MWWorld::CellStore* ptr);
 
     Objects(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> rootNode, SceneUtil::UnrefQueue* unrefQueue);
     ~Objects();

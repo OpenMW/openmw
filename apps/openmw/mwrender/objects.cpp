@@ -34,36 +34,36 @@ Objects::~Objects()
     mCellSceneNodes.clear();
 }
 
-osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
+osg::Group * Objects::getOrCreateCell(const MWWorld::CellStore* ptr)
 {
-    osg::ref_ptr<osg::Group> cellnode;
-    CellMap::iterator found = mCellSceneNodes.find(ptr.getCell());
+    CellMap::iterator found = mCellSceneNodes.find(ptr);
     if (found == mCellSceneNodes.end())
     {
+        osg::ref_ptr<osg::Group> cellnode;
         SceneUtil::PositionAttitudeTransform *cell = new SceneUtil::PositionAttitudeTransform;
-        cell->setPosition(SceneUtil::getCellOrigin(ptr.getCell()->getCell()));
+        cell->setPosition(SceneUtil::getCellOrigin(ptr->getCell()));
         cellnode = cell;
         cellnode->setName("Cell Root");
         cellnode->setDataVariance(osg::Object::DYNAMIC);
         mRootNode->addChild(cellnode);
-        mCellSceneNodes[ptr.getCell()] = cellnode;
+        mCellSceneNodes[ptr] = cellnode;
+        return cellnode;
     }
     else
-        cellnode = found->second;
-    return cellnode;
+        return found->second;
 }
 
 osg::Group * Objects::insertBegin(const MWWorld::Ptr& ptr)
 {
     assert(mObjects.find(ptr) == mObjects.end());
-
-    osg::Group* cellnode = getOrCreateCell(ptr);
+    const MWWorld::CellStore * cell = ptr.getCell();
+    osg::Group* cellnode = getOrCreateCell(cell);
 
     SceneUtil::PositionAttitudeTransform * insert = new SceneUtil::PositionAttitudeTransform;
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
-    osg::Vec3 fc =SceneUtil::getCellOrigin(ptr.getCell()->getCell());
+    osg::Vec3 fc =SceneUtil::getCellOrigin(cell->getCell());
 
     const float scale = ptr.getCellRef().getScale();
     const float *f = ptr.getRefData().getPosition().pos;
@@ -199,7 +199,8 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     if (!objectNode)
         return;
 
-    osg::Group* cellnode = getOrCreateCell(cur);
+    const MWWorld::CellStore * curcell = cur.getCell();
+    osg::Group* cellnode = getOrCreateCell(curcell);
 
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)
@@ -218,7 +219,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
     SceneUtil::PositionAttitudeTransform* trans = cur.getRefData().getBaseNode();
 
     const float *f = cur.getRefData().getPosition().pos;
-    trans->setPosition( osg::Vec3(f[0],f[1],f[2]) - SceneUtil::getCellOrigin(cur.getCell()->getCell()));
+    trans->setPosition( osg::Vec3(f[0],f[1],f[2]) - SceneUtil::getCellOrigin(curcell->getCell()));
     cellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);

@@ -5,6 +5,7 @@
 #include <osg/ComputeBoundsVisitor>
 
 #include <components/esm/loadligh.hpp>
+#include <components/esm/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "lightmanager.hpp"

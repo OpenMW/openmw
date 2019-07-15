@@ -7,7 +7,7 @@
 #include <osg/Vec3f>
 
 namespace ESM {
-    class Cell;
+    struct Cell;
 }
 
 namespace SceneUtil

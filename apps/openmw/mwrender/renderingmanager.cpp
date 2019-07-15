@@ -697,7 +697,7 @@ namespace MWRender
     void RenderingManager::moveObject(const MWWorld::Ptr &ptr, const osg::Vec3f &pos, bool belongtocell)
     {
         osg::Vec3 cellorigin(0,0,0);
-        SceneUtil::PositionAttitudeTransform *trans=ptr.getRefData().getBaseNode();
+        SceneUtil::PositionAttitudeTransform *trans = ptr.getRefData().getBaseNode();
         if(belongtocell)
         {
             SceneUtil::PositionAttitudeTransform *ptrans = static_cast<SceneUtil::PositionAttitudeTransform*>(trans->getParent(0));

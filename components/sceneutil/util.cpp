@@ -8,6 +8,12 @@ namespace SceneUtil
 
 const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 
+osg::Vec3 getCellOrigin(const ESM::Cell *c){
+    const ESM::CellId::CellIndex &cellid =c->getCellId().mIndex;
+    return osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
+                         (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
+}
+
 void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& bsphere)
 {
     osg::BoundingSphere::vec_type xdash = bsphere._center;
@@ -75,9 +81,6 @@ bool hasUserDescription(const osg::Node* node, const std::string pattern)
 
     return false;
 }
-osg::Vec3 getCellOrigin(const ESM::Cell *c){
-    const ESM::CellId::CellIndex &cellid =c->getCellId().mIndex;
-    return osg::Vec3( (static_cast<float>(cellid.mX)+0.5f) * cellSize,
-                         (static_cast<float>(cellid.mY)+0.5f) * cellSize, 0);
-}
+
+
 }
