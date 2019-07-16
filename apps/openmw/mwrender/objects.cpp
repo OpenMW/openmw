@@ -205,7 +205,6 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         return;
 
     SceneUtil::PositionAttitudeTransform * curcellnode = cur.getCell()->getBaseNode();
-
     osg::UserDataContainer* userDataContainer = objectNode->getUserDataContainer();
     if (userDataContainer)
         for (unsigned int i=0; i<userDataContainer->getNumUserObjects(); ++i)

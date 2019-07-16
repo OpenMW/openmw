@@ -1232,7 +1232,6 @@ namespace MWWorld
                 }
                 addContainerScripts (getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();
-                mRendering->updatePtr(ptr, newPtr);
             }
             else
             {
@@ -1301,6 +1300,7 @@ namespace MWWorld
         if (isPlayer)
         {
             mWorldScene->playerMoved(vec);
+            mRendering->updatePtr(ptr, newPtr);
         }
         return newPtr;
     }
