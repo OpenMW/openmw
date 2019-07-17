@@ -17,6 +17,7 @@
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
+    Bug #4276: Resizing character window differs from vanilla
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn

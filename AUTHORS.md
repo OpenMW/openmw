@@ -29,6 +29,7 @@ Programmers
     Ardekantur
     Armin Preiml
     Artem Kotsynyak (greye)
+    Artem Nykolenko (anikm21)
     artemutin
     Arthur Moore (EmperorArthur)
     Assumeru
