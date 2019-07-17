@@ -195,8 +195,8 @@ namespace MWRender
 class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallback
     {
     public:
-        double _znear;
-        NearClamperCallback(double near):_znear(near){}
+        double mZnear;
+        NearClamperCallback(double near):mZnear(near){}
         virtual bool clampProjectionMatrixImplementation(osg::Matrixf& projection,
                double& znear, double& zfar) const
         {
@@ -264,7 +264,7 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
         
                     // near plane clamping.
                     //OSG_WARN<<_znear<<std::endl;
-                    double min_near_plane =_znear;
+                    double min_near_plane = mZnear;
                     if (desired_znear<min_near_plane ) desired_znear=min_near_plane;
         
                     // assign the clamped values back to the computed values.
