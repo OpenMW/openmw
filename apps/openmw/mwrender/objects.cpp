@@ -68,11 +68,10 @@ SceneUtil::PositionAttitudeTransform * Objects::insertBegin(const MWWorld::Ptr& 
 
     insert->getOrCreateUserDataContainer()->addUserObject(new PtrHolder(ptr));
 
-    osg::Vec3 fc = SceneUtil::getCellOrigin(cell->getCell());
+    osg::Vec3 cellorigin = SceneUtil::getCellOrigin(cell->getCell());
 
     const float scale = ptr.getCellRef().getScale();
-    const float *f = ptr.getRefData().getPosition().pos;
-    insert->setPosition(osg::Vec3(f[0]-fc[0], f[1]-fc[1], f[2]-fc[2]));
+    insert->setPosition(ptr.getRefData().getPosition().asVec3() - cellorigin);
 
     osg::Vec3f scaleVec(scale, scale, scale);
     ptr.getClass().adjustScale(ptr, scaleVec, true);
@@ -218,8 +217,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
         objectNode->getParent(0)->removeChild(objectNode);
     }
 
-    const float *f = cur.getRefData().getPosition().pos;
-    objectNode->setPosition( osg::Vec3(f[0],f[1],f[2]) - curcellnode->getPosition());
+    objectNode->setPosition( cur.getRefData().getPosition().asVec3() - curcellnode->getPosition());
     curcellnode->addChild(objectNode);
 
     PtrAnimationMap::iterator iter = mObjects.find(old);

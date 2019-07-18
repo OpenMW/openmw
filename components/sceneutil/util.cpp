@@ -6,10 +6,10 @@
 namespace SceneUtil
 {
 
-const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
 
 osg::Vec3 getCellOrigin(const ESM::Cell *c)
 {
+    const float cellSize = static_cast<float>(ESM::Land::REAL_SIZE);
     const ESM::CellId::CellIndex &cellid =c->getCellId().mIndex;
     return osg::Vec3( (static_cast<float>(cellid.mX)) * cellSize,
                          (static_cast<float>(cellid.mY)) * cellSize, 0);

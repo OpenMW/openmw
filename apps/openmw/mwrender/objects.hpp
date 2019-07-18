@@ -6,7 +6,6 @@
 
 #include <osg/ref_ptr>
 #include <osg/Object>
-#include <osg/Vec3>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include "../mwworld/ptr.hpp"
 
