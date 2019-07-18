@@ -932,8 +932,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     double minZNear = 0.0;
     double maxZFar = dbl_max;
-
-    if (cachedNearFarMode==osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR)
+    
     {
         double left, right, top, bottom;
         if (orthographicViewFrustum)
