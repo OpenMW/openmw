@@ -368,11 +368,7 @@ namespace Shader
             partsys->setUseVertexArray(true);
             partsys->setUseShaders(true);
 
-            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE)
-                writableStateSet->setMode(GL_VERTEX_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
-            #else
-                OSG_NOTICE<<"Warning: ParticleSystem::setDefaultAttributesUsingShaders(..) not fully implemented."<<std::endl;
-            #endif
+            writableStateSet->setMode(GL_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
 
             writableStateSet->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
             partsys->setDrawCallback(new ParticleSystemShadedDrawCallback());
