@@ -1,9 +1,13 @@
 #include "shadervisitor.hpp"
 
+#include <OpenThreads/ScopedLock>
+
+#include <osg/BufferTemplate>
 #include <osg/Texture>
 #include <osg/Material>
 #include <osg/Geometry>
 #include <osg/Version>
+
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -265,32 +269,109 @@ namespace Shader
     {
         mRequirements.pop_back();
     }
-    //ComputeModelView point particle scaling for shader
-    struct ParticleSystemShadedDrawCallback : public osg::Drawable::DrawCallback
+
+    class PartsysHack : public osgParticle::ParticleSystem
     {
+    public:
+        unsigned int & getlastframe() const { return _last_frame; }
+        bool & getdirty() const { return _dirty_dt; }
+    };
+
+    //ComputeModelView point particle scaling for shader
+    class ParticleSystemShadedDrawCallback : public osg::Drawable::DrawCallback
+    {
+    public:
+
         mutable osg::ref_ptr<osg::Uniform> mAxisScaling;
         ParticleSystemShadedDrawCallback()
         {
             mAxisScaling = new osg::Uniform("axisScale", (float)1.0f);
+            _particles = new SubmitParticles(); _particles->setDataVariance(osg::Object::DYNAMIC);
+            _particles->setBufferObject(new osg::VertexBufferObject);
         }
 
         ParticleSystemShadedDrawCallback(const ParticleSystemShadedDrawCallback& org,const osg::CopyOp& copyop):
             osg::Drawable::DrawCallback(org,copyop)
         {
             mAxisScaling = new osg::Uniform("axisScale", (float)1.0f);
+             _particles = new SubmitParticles();
+             _particles->setDataVariance(osg::Object::DYNAMIC);
+             _particles->setBufferObject(new osg::VertexBufferObject);
         }
-
+        struct SubmitParticle
+        {
+            osg::Vec3f pos;
+            osg::Vec4f col;
+            osg::Vec3f prop;
+        };
+        typedef osg::BufferTemplate<std::vector<SubmitParticle> > SubmitParticles;
+        osg::ref_ptr<SubmitParticles> _particles;
         virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
         {
             const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
-            osg::State * state = renderInfo.getState();
+            osg::State& state = *renderInfo.getState();
             if(partsys->getParticleAlignment() == osgParticle::ParticleSystem::BILLBOARD)
-                mAxisScaling->set(osg::Matrix::transform3x3( state->getModelViewMatrix(),partsys->getAlignVectorX()).length());
+                mAxisScaling->set(osg::Matrix::transform3x3( state.getModelViewMatrix(), partsys->getAlignVectorX()).length());
             else
-                mAxisScaling->set(osg::Matrix::transform3x3(state->getModelViewMatrix(),partsys->getAlignVectorX()).length2());
+                mAxisScaling->set(osg::Matrix::transform3x3(state.getModelViewMatrix(), partsys->getAlignVectorX()).length2());
 
-            mAxisScaling->apply(state->get<osg::GLExtensions>(), state->getUniformLocation("axisScale"));
+            mAxisScaling->apply(state.get<osg::GLExtensions>(), state.getUniformLocation("axisScale"));
+#if OSG_MIN_VERSION_REQUIRED(3,6,0)
             drawable->drawImplementation(renderInfo);
+#else //OSG Scrawl specific
+           int numParticles;
+           {
+                OpenThreads::ScopedLock< OpenThreads::Mutex > lock(*partsys->getReadWriteMutex());
+
+                const PartsysHack * dhis = static_cast<const PartsysHack*>(partsys);
+                // update the frame count, so other objects can detect when
+                // this particle system is culled
+                dhis->getlastframe() = state.getFrameStamp()->getFrameNumber();
+
+                // update the dirty flag of delta time, so next time a new request for delta time
+                // will automatically cause recomputing
+                dhis->getdirty() = true;
+
+                // set up depth mask for first rendering pass
+            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
+                glPushAttrib(GL_DEPTH_BUFFER_BIT);
+            #endif
+
+                glDepthMask(GL_FALSE);
+
+                numParticles = partsys->numParticles();
+                if (numParticles > 0)
+                {
+                    _particles->getData().resize(numParticles);
+                    std::vector<SubmitParticle>::iterator pit = _particles->getData().begin();
+                    const osgParticle::Particle  *itr;
+                    for(int i =0; i<numParticles; ++i,++pit)
+                    {
+                        itr = partsys->getParticle(i);
+                        pit->pos = itr->getPosition();
+                        pit->col = itr->getCurrentColor();
+                        pit->prop[0] = itr->isAlive(), pit->prop[1] = itr->getCurrentSize(), pit->prop[2] =  itr->getCurrentAlpha();
+                    }
+                }
+                _particles->dirty();
+                state.bindVertexBufferObject(_particles->getBufferObject()->getOrCreateGLBufferObject(state.getContextID()));
+
+                GLsizei stride = sizeof(SubmitParticle);
+
+                // Draw particles as arrays
+                state.lazyDisablingOfVertexAttributes();
+                state.setVertexPointer(3, GL_FLOAT, stride , ((char *)NULL + (0)));
+                state.setColorPointer(4, GL_FLOAT, stride ,((char *)NULL + (12)));
+                state.setTexCoordPointer(0, 3, GL_FLOAT, stride , ((char *)NULL + (28)));
+                state.applyDisablingOfVertexAttributes();
+
+                glDrawArrays(GL_POINTS, 0, numParticles);
+            }
+        #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
+            // restore depth mask settings
+            glPopAttrib();
+        #endif
+#endif
         }
     };
 
@@ -299,7 +380,7 @@ namespace Shader
         osg::ref_ptr<osg::Vec3Array> mNormalArray;
         ParticleSystemFFPDrawCallback()
         {
-            mNormalArray=new osg::Vec3Array(1);mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+            mNormalArray=new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
             (*mNormalArray.get())[0] = osg::Vec3(0, 0, 1);
         }
 
@@ -318,12 +399,13 @@ namespace Shader
             {
                 state->getCurrentVertexArrayState()->assignNormalArrayDispatcher();
                 state->getCurrentVertexArrayState()->setNormalArray(*state, mNormalArray);
-            }else
+            }
+            else
             {
                 state->getAttributeDispatchers().activateNormalArray(mNormalArray);
             }
 #else
-           state->Normal(0,0,1);
+            state->Normal(0,0,1);
 #endif
             drawable->drawImplementation(renderInfo);
         }
