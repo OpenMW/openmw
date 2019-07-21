@@ -312,11 +312,9 @@ namespace Shader
 
         virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
         {
-            const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
             osg::State * state = renderInfo.getState();
-
 #if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
-            if(state->useVertexArrayObject(partsys->getUseVertexArrayObject()))
+            if(state->useVertexArrayObject(drawable->getUseVertexArrayObject()))
             {
                 state->getCurrentVertexArrayState()->assignNormalArrayDispatcher();
                 state->getCurrentVertexArrayState()->setNormalArray(*state, mNormalArray);
@@ -325,10 +323,7 @@ namespace Shader
                 state->getAttributeDispatchers().activateNormalArray(mNormalArray);
             }
 #else
-            ///this doesn't work on 3.6
-            state->setNormalPointer(mNormalArray);
-            //if it fail on 3.4 too use the deprecated way:
-            //state->Normal(0,0,1);
+           state->Normal(0,0,1);
 #endif
             drawable->drawImplementation(renderInfo);
         }
