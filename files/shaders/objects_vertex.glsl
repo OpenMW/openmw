@@ -37,7 +37,6 @@ varying vec2 specularMapUV;
 uniform float axisScale;
 uniform float visibilityDistance;
 varying vec3 basic_prop; // _alive, _current_size, _current_alpha
-#define SIZESCALE 1000
 #endif
 varying float depth;
 
@@ -68,14 +67,14 @@ void main(void)
     basic_prop = gl_MultiTexCoord0.xyz;
 
     float ecDepth = -viewPos.z;
-    gl_PointSize = SIZESCALE * axisScale*basic_prop.y / (ecDepth);
+    gl_PointSize = axisScale * basic_prop.y / ecDepth;
 
     if (visibilityDistance > 0.0)
     {
         if (ecDepth <= 0.0 || ecDepth >= visibilityDistance)
             basic_prop.x = -1.0;
     }
-    vec3 viewNormal = normalize(gl_NormalMatrix *vec3(0,0,1));
+    vec3 viewNormal = normalize(gl_NormalMatrix * vec3(0.0, 0.0, 1.0));
 #else
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
@@ -120,7 +119,7 @@ void main(void)
 
 #if @pointsprite
     color.a *= basic_prop.z;
-    passNormal = vec3(0,0,1);
+    passNormal = vec3(0.0, 0.0, 1.0);
 #else
     passNormal = gl_Normal.xyz;
 #endif
