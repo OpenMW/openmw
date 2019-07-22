@@ -377,7 +377,7 @@ namespace MWClass
         {
             // Missed
             if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(ptr, "miss", 0.98f, 0.75f);
             return;
         }
 

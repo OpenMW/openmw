@@ -1227,8 +1227,9 @@ bool CharacterController::updateCreatureState()
 
                 mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability());
 
+                // Note: for non-bipedal creatures attack strength seems to be 0 during pitch calculation
                 if (weapType == WeapType_HandToHand)
-                    playSwishSound(0.0f);
+                    playSwishSound("Weapon Swish", 0.f);
             }
         }
 
@@ -1698,18 +1699,16 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
 
             if(mWeaponType != WeapType_Crossbow && mWeaponType != WeapType_BowAndArrow)
             {
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-
                 if(isWerewolf)
                 {
                     const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
                     const ESM::Sound *sound = store.get<ESM::Sound>().searchRandom("WolfSwing");
                     if(sound)
-                        sndMgr->playSound3D(mPtr, sound->mId, 1.0f, 1.0f);
+                        playSwishSound(sound->mId, attackStrength);
                 }
                 else
                 {
-                    playSwishSound(attackStrength);
+                    playSwishSound("Weapon Swish", attackStrength);
                 }
             }
             mAttackStrength = attackStrength;
@@ -1802,7 +1801,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                     mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                     break;
                 }
-                playSwishSound(0.0f);
+                playSwishSound("Weapon Swish", 0.0f);
             }
             // Fall-through
             case UpperCharState_MaxAttackToMinHit:
@@ -2839,17 +2838,12 @@ void CharacterController::setHeadTrackTarget(const MWWorld::ConstPtr &target)
     mHeadTrackTarget = target;
 }
 
-void CharacterController::playSwishSound(float attackStrength)
+void CharacterController::playSwishSound(const std::string& sound, float attackStrength)
 {
-    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+    float volume = 0.98 + attackStrength * 0.02f;
+    float pitch = 0.75 + attackStrength * 0.4f;
 
-    std::string sound = "Weapon Swish";
-    if(attackStrength < 0.5f)
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 0.8f); //Weak attack
-    else if(attackStrength < 1.0f)
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.0f); //Medium attack
-    else
-        sndMgr->playSound3D(mPtr, sound, 1.0f, 1.2f); //Strong attack
+    MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, sound, volume, pitch);
 }
 
 void CharacterController::updateHeadTracking(float duration)
