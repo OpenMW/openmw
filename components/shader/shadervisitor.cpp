@@ -320,28 +320,13 @@ namespace Shader
             drawable->drawImplementation(renderInfo);
 #else //OSG Scrawl specific
            int numParticles;
+
+           numParticles = partsys->numParticles();
+           if (numParticles > 0)
            {
-                OpenThreads::ScopedLock< OpenThreads::Mutex > lock(*partsys->getReadWriteMutex());
 
-                const PartsysHack * dhis = static_cast<const PartsysHack*>(partsys);
-                // update the frame count, so other objects can detect when
-                // this particle system is culled
-                dhis->getlastframe() = state.getFrameStamp()->getFrameNumber();
-
-                // update the dirty flag of delta time, so next time a new request for delta time
-                // will automatically cause recomputing
-                dhis->getdirty() = true;
-
-                // set up depth mask for first rendering pass
-            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-                glPushAttrib(GL_DEPTH_BUFFER_BIT);
-            #endif
-
-                glDepthMask(GL_FALSE);
-
-                numParticles = partsys->numParticles();
-                if (numParticles > 0)
-                {
+               {
+                    OpenThreads::ScopedLock< OpenThreads::Mutex > lock(*partsys->getReadWriteMutex());
                     _particles->getData().resize(numParticles);
                     std::vector<SubmitParticle>::iterator pit = _particles->getData().begin();
                     const osgParticle::Particle  *itr;
@@ -352,8 +337,25 @@ namespace Shader
                         pit->col = itr->getCurrentColor();
                         pit->prop[0] = itr->isAlive(), pit->prop[1] = itr->getCurrentSize(), pit->prop[2] =  itr->getCurrentAlpha();
                     }
+                    _particles->dirty();
+
+                    const PartsysHack * dhis = static_cast<const PartsysHack*>(partsys);
+                    // update the frame count, so other objects can detect when
+                    // this particle system is culled
+                    dhis->getlastframe() = state.getFrameStamp()->getFrameNumber();
+
+                    // update the dirty flag of delta time, so next time a new request for delta time
+                    // will automatically cause recomputing
+                    dhis->getdirty() = true;
                 }
-                _particles->dirty();
+
+                // set up depth mask for first rendering pass
+            #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
+                glPushAttrib(GL_DEPTH_BUFFER_BIT);
+            #endif
+
+                glDepthMask(GL_FALSE);
+
                 state.bindVertexBufferObject(_particles->getBufferObject()->getOrCreateGLBufferObject(state.getContextID()));
 
                 GLsizei stride = sizeof(SubmitParticle);
@@ -366,11 +368,12 @@ namespace Shader
                 state.applyDisablingOfVertexAttributes();
 
                 glDrawArrays(GL_POINTS, 0, numParticles);
-            }
+
         #if !defined(OSG_GLES1_AVAILABLE) && !defined(OSG_GLES2_AVAILABLE) && !defined(OSG_GL3_AVAILABLE)
-            // restore depth mask settings
-            glPopAttrib();
+                // restore depth mask settings
+                glPopAttrib();
         #endif
+           }
 #endif
         }
     };
