@@ -5,7 +5,9 @@
 #include <osg/Camera>
 
 #include <components/resource/resourcesystem.hpp>
-#include "components/settings/settings.hpp"
+#include <components/settings/settings.hpp>
+
+#include <components/sceneutil/occlusionquerynode.hpp>
 
 #include "storage.hpp"
 #include "texturemanager.hpp"

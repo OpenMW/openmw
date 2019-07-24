@@ -5,8 +5,9 @@
 
 #include <osg/Vec2f>
 
+#include <components/sceneutil/occlusionsettings.hpp>
+
 #include "world.hpp"
-#include "components/sceneutil/occlusionquerynode.hpp"
 
 namespace Terrain
 {

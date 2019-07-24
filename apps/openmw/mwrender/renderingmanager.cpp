@@ -36,6 +36,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/occlusionquerynode.hpp>
 #include <components/sceneutil/workqueue.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>

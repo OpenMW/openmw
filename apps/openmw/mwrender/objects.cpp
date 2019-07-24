@@ -4,7 +4,9 @@
 #include <osg/ValueObject>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/occlusionquerynode.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/ptr.hpp"

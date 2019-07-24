@@ -6,6 +6,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
+#include <components/sceneutil/occlusionquerynode.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"

@@ -13,7 +13,7 @@
 #include "defs.hpp"
 #include "cellborder.hpp"
 
-#include "components/sceneutil/occlusionquerynode.hpp"
+#include <components/sceneutil/occlusionsettings.hpp>
 
 namespace osg
 {

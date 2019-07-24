@@ -8,7 +8,7 @@
 #include <osg/Object>
 
 #include "../mwworld/ptr.hpp"
-#include "components/sceneutil/occlusionquerynode.hpp"
+#include "components/sceneutil/occlusionsettings.hpp"
 
 namespace osg
 {

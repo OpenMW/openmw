@@ -9,6 +9,8 @@
 #include <osg/OcclusionQueryNode>
 #include <osg/ComputeBoundsVisitor>
 
+#include "occlusionsettings.hpp"
+
 namespace SceneUtil{
 
 class TestResult : public osg::Referenced
@@ -136,28 +138,6 @@ public:
         if(node.getPassed())
             traverse(node);
     }
-};
-
-struct OcclusionQuerySettings
-{
-    /// OQN settings
-    bool enable;
-    bool debugDisplay;
-    unsigned int querypixelcount;
-    unsigned int queryframecount;
-    float querymargin;
-    float securepopdistance;
-
-    ///RenderBin and Mask
-    unsigned int OQMask;
-    unsigned int OQRenderBin;
-
-    ///Octree parameters
-    unsigned int maxBVHOQLevelCount;
-
-    ///subdivision criterions
-    float minOQNSize;
-    unsigned int maxOQNCapacity;
 };
 
 struct SettingsUpdatorVisitor : public osg::NodeVisitor

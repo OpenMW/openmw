@@ -4,6 +4,8 @@
 
 #include <osg/Group>
 
+#include <components/sceneutil/occlusionquerynode.hpp>
+
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
 
