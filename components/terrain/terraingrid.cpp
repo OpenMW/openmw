@@ -48,8 +48,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         osg::ref_ptr<osg::Group> group;
         if(mOQNSettings.enable)
         {
-            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
-            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;            
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
@@ -82,7 +82,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
-            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);

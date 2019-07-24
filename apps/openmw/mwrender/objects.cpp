@@ -71,7 +71,7 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
         if(mOQNSettings.enable)
         {
             SceneUtil::StaticOcclusionQueryNode* ocnode = new SceneUtil::StaticOcclusionQueryNode;
-            ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            ocnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             for(unsigned int i = 0; i<8; ++i)
                 ocnode->addChild(new osg::Group());
             ocnode->setDebugDisplay(mOQNSettings.debugDisplay);
@@ -83,7 +83,7 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
             ocnode->setDataVariance(osg::Object::DYNAMIC);
 
             SceneUtil::StaticOcclusionQueryNode*qnode = new SceneUtil::StaticOcclusionQueryNode;
-            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);

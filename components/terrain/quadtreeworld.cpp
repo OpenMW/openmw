@@ -319,8 +319,8 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
 
         if(mOQNSettings.enable&&entry.mRenderingNode.valid())
         {
-            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;            
-            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "RenderBin", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
+            SceneUtil::StaticOcclusionQueryNode* qnode = new SceneUtil::StaticOcclusionQueryNode;
+            qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);

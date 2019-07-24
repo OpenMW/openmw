@@ -717,6 +717,7 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
             qnode->setDebugDisplay(mSettings.debugDisplay);
             qnode->setQueryFrameCount(mSettings.queryframecount);
             qnode->setDistancePreventingPopin(mSettings.securepopdistance);
+            qnode->getQueryStateSet()->setRenderBinDetails( mSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
 
             //disable high BVH queries level
             unsigned int powlev = 1<<mSettings.maxBVHOQLevelCount;
@@ -768,6 +769,7 @@ void SettingsUpdatorVisitor::apply(osg::OcclusionQueryNode&oqn)
         qnode->setDebugDisplay(mSettings.debugDisplay);
         qnode->setQueryFrameCount(mSettings.queryframecount);
         qnode->setDistancePreventingPopin(mSettings.securepopdistance);
+        qnode->getQueryStateSet()->setRenderBinDetails( mSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
     }
     traverse(oqn);
 }
