@@ -7,6 +7,7 @@
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace Settings
 {
@@ -354,12 +355,14 @@ float Manager::getFloat (const std::string& setting, const std::string& category
     const std::string value = getString(setting, category);
     try
     {
-        return std::stof(value);
+        // We have to rely on Boost because std::stof from C++11 uses the current locale
+        // for separators (which is undesired) and it often silently ignores parsing errors.
+        return boost::lexical_cast<float>(value);
     }
-    catch(const std::exception& e)
+    catch (boost::bad_lexical_cast&)
     {
         Log(Debug::Warning) << "Cannot parse setting '" << setting << "' (invalid setting value: " << value << ").";
-        return 0;
+        return 0.f;
     }
 }
 
@@ -401,12 +404,16 @@ void Manager::setString(const std::string &setting, const std::string &category,
 
 void Manager::setInt (const std::string& setting, const std::string& category, const int value)
 {
-    setString(setting, category, std::to_string(value));
+    std::ostringstream stream;
+    stream << value;
+    setString(setting, category, stream.str());
 }
 
 void Manager::setFloat (const std::string &setting, const std::string &category, const float value)
 {
-    setString(setting, category, std::to_string(value));
+    std::ostringstream stream;
+    stream << value;
+    setString(setting, category, stream.str());
 }
 
 void Manager::setBool(const std::string &setting, const std::string &category, const bool value)

@@ -2808,6 +2808,7 @@ namespace MWWorld
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
                         pos = destDoor.mRef.getDoorDest();
+                        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
                         return true;
                     }
                 }
@@ -2818,6 +2819,7 @@ namespace MWWorld
         if (!statics.empty())
         {
             pos = statics.begin()->mRef.getPosition();
+            pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
             return true;
         }
 

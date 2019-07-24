@@ -55,6 +55,8 @@ namespace CSVRender
 
             virtual void setEditLock (bool locked);
 
+            virtual void primaryOpenPressed (const WorldspaceHitResult& hit);
+
             virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
             virtual void secondaryEditPressed (const WorldspaceHitResult& hit);
@@ -82,6 +84,10 @@ namespace CSVRender
             virtual void dropEvent (QDropEvent *event);
 
             virtual int getSubMode() const;
+
+        signals:
+
+            void requestFocus (const std::string& id);
 
         private slots:
 

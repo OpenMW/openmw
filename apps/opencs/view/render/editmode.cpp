@@ -29,6 +29,8 @@ void CSVRender::EditMode::setEditLock (bool locked)
 
 }
 
+void CSVRender::EditMode::primaryOpenPressed (const WorldspaceHitResult& hit) {}
+
 void CSVRender::EditMode::primaryEditPressed (const WorldspaceHitResult& hit) {}
 
 void CSVRender::EditMode::secondaryEditPressed (const WorldspaceHitResult& hit) {}

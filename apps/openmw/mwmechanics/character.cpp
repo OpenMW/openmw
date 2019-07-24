@@ -983,7 +983,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     if(evt.compare(0, 7, "sound: ") == 0)
     {
         MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-        sndMgr->stopSound3D(mPtr, evt.substr(7));
         sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
         return;
     }
@@ -1024,7 +1023,6 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
             }
             else
             {
-                sndMgr->stopSound3D(mPtr, sound);
                 sndMgr->playSound3D(mPtr, sound, volume, pitch);
             }
         }
@@ -2675,14 +2673,14 @@ void CharacterController::setVisibility(float visibility)
         if (mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Invisibility).getModifier()) // Ignore base magnitude (see bug #3555).
         {
             if (mPtr == getPlayer())
-                alpha = 0.4f;
+                alpha = 0.25f;
             else
-                alpha = 0.f;
+                alpha = 0.05f;
         }
         float chameleon = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
         if (chameleon)
         {
-            alpha *= std::max(0.2f, (100.f - chameleon)/100.f);
+            alpha *= std::min(0.75f, std::max(0.25f, (100.f - chameleon)/100.f));
         }
 
         visibility = std::min(visibility, alpha);

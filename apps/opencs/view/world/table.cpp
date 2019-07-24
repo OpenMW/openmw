@@ -737,7 +737,12 @@ void CSVWorld::Table::requestFocus (const std::string& id)
     QModelIndex index = mProxyModel->getModelIndex (id, 0);
 
     if (index.isValid())
-        scrollTo (index, QAbstractItemView::PositionAtTop);
+    {
+        // This will scroll to the row.
+        selectRow (index.row());
+        // This will actually select it.
+        selectionModel()->select (index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
 }
 
 void CSVWorld::Table::recordFilterChanged (std::shared_ptr<CSMFilter::Node> filter)

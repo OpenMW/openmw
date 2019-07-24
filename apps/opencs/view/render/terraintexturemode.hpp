@@ -35,6 +35,8 @@ namespace CSVRender
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
 
+            void primaryOpenPressed (const WorldspaceHitResult& hit);
+
             /// \brief Create single command for one-click texture editing
             void primaryEditPressed (const WorldspaceHitResult& hit);
 

@@ -44,6 +44,7 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
+    connect(framerateLimitCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotFramerateLimitToggled(bool)));
 
 }
 
@@ -121,6 +122,13 @@ bool Launcher::GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height);
     }
 
+    float fpsLimit = mEngineSettings.getFloat("framerate limit", "Video");
+    if (fpsLimit != 0)
+    {
+        framerateLimitCheckBox->setCheckState(Qt::Checked);
+        framerateLimitSpinBox->setValue(fpsLimit);
+    }
+
     return true;
 }
 
@@ -166,6 +174,17 @@ void Launcher::GraphicsPage::saveSettings()
     int cScreen = screenComboBox->currentIndex();
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
+
+    if (framerateLimitCheckBox->checkState())
+    {
+        float cFpsLimit = framerateLimitSpinBox->value();
+        if (cFpsLimit != mEngineSettings.getFloat("framerate limit", "Video"))
+            mEngineSettings.setFloat("framerate limit", "Video", cFpsLimit);
+    }
+    else if (mEngineSettings.getFloat("framerate limit", "Video") != 0)
+    {
+        mEngineSettings.setFloat("framerate limit", "Video", 0);
+    }
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -265,4 +284,9 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
     }
+}
+
+void Launcher::GraphicsPage::slotFramerateLimitToggled(bool checked)
+{
+    framerateLimitSpinBox->setEnabled(checked);
 }

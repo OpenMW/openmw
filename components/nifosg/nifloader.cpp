@@ -400,7 +400,10 @@ namespace NifOsg
                 return;
             }
 
-            osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(handleSourceTexture(textureEffect->texture.getPtr(), imageManager)));
+            osg::ref_ptr<osg::Image> image (handleSourceTexture(textureEffect->texture.getPtr(), imageManager));
+            osg::ref_ptr<osg::Texture2D> texture2d (new osg::Texture2D(image));
+            if (image)
+                texture2d->setTextureSize(image->s(), image->t());
             texture2d->setName("envMap");
             unsigned int clamp = static_cast<unsigned int>(textureEffect->clamp);
             int wrapT = (clamp) & 0x1;
@@ -585,8 +588,11 @@ namespace NifOsg
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 const std::string nodeName = Misc::StringUtils::lowerCase(triShape->name);
-                static const std::string pattern = "tri editormarker";
-                if (!hasMarkers || nodeName.compare(0, pattern.size(), pattern) != 0)
+                static const std::string markerName = "tri editormarker";
+                static const std::string shadowName = "shadow";
+                static const std::string shadowName2 = "tri shadow";
+                const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
+                if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
                     if (triShape->skin.empty())
                         handleTriShape(triShape, node, composite, boundTextures, animflags);
@@ -768,7 +774,10 @@ namespace NifOsg
                             wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
                         }
 
-                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(handleSourceTexture(st.getPtr(), imageManager)));
+                        osg::ref_ptr<osg::Image> image (handleSourceTexture(st.getPtr(), imageManager));
+                        osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(image));
+                        if (image)
+                            texture->setTextureSize(image->s(), image->t());
                         texture->setWrap(osg::Texture::WRAP_S, wrapS);
                         texture->setWrap(osg::Texture::WRAP_T, wrapT);
                         textures.push_back(texture);
@@ -1335,6 +1344,8 @@ namespace NifOsg
                         const Nif::NiSourceTexture *st = tex.texture.getPtr();
                         osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
                         texture2d = new osg::Texture2D(image);
+                        if (image)
+                            texture2d->setTextureSize(image->s(), image->t());
                     }
                     else
                         texture2d = new osg::Texture2D;
