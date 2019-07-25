@@ -221,8 +221,8 @@ namespace MWRender
         if(isIndoor) { shadowManager->enableOutdoorMode(); shadowManager->enableIndoorMode();}
         else { shadowManager->enableIndoorMode(); shadowManager->enableOutdoorMode(); }
 
-        shadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor);
-        unsigned int computefarmask = Mask_Static | Mask_ParticleSystem | Mask_Object;
+        shadowManager->getShadowTechnique()->setSceneMask(Mask_Scene | Mask_Lighting | Mask_Actor| Mask_ParticleSystem);
+        unsigned int computefarmask = Mask_Static | Mask_Object;
 
         if (Settings::Manager::getBool("include terrain in far plane computation", "Shadows"))
             computefarmask |= Mask_Terrain;// doesn't narrow enough far plane for distant terrain
