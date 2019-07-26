@@ -56,7 +56,7 @@ public:
     QueryResult getMWQueryResult( const osg::Camera* cam );
 
     unsigned int getLastQueryNumPixels( const osg::Camera* cam );
-    void forceLastQueryResult( const osg::Camera* cam, unsigned int numPixels);
+    void forceQueryResult( const osg::Camera* cam, unsigned int numPixels);
 
     virtual void releaseGLObjects( osg::State* state = 0 ) const;
 

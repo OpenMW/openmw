@@ -71,13 +71,28 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
     return OQDebugStateSet;
 }
 
-inline void pullUpVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, uint numPix)
+inline void pullUpVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsigned int numPix)
 {
     StaticOcclusionQueryNode *parent = oq;
     while(parent && static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->getLastQueryNumPixels(cam) == 0)
     {
-        static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->forceLastQueryResult(cam, numPix);
+        static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->forceQueryResult(cam, numPix);
         parent = dynamic_cast<StaticOcclusionQueryNode*>(parent->getParent(0));
+    }
+}
+
+void pullDownVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsigned int numPix)
+{
+    StaticOcclusionQueryNode *child;
+    unsigned int numch = oq->getNumChildren();
+    for(unsigned int i=0; i<numch; ++i)
+    {
+        child = dynamic_cast<StaticOcclusionQueryNode*>(oq->getChild(i));
+        if(!child) return;
+        static_cast<MWQueryGeometry*>(child->getQueryGeometry())->forceQueryResult(cam, numPix);
+
+        // OSG_NOTICE<<"pullDownVisibility forcechild"<<std::endl;
+        pullDownVisibility(child, cam, numPix);
     }
 }
 
@@ -102,8 +117,8 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
 
         // The box of the query geometry is invalid, return false to not traverse
         // the subgraphs.
-        //_passed = false;
-        //return _passed;
+        _passed = false;
+        return _passed;
     }
 
     osgUtil::CullVisitor& cv = static_cast<osgUtil::CullVisitor&>(nv);
@@ -120,30 +135,29 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
     }
 
     unsigned int traversalNumber = nv.getTraversalNumber();
-    bool wasVisible, leafOrWasInvisible;
+    bool wasVisible, leafOrWasInvisible, wasTested;
 
     MWQueryGeometry::QueryResult result ;
     {
-        // Two situations where we want to simply do a regular traversal:
-        //  1) it's the first frame for this camera
-        //  2) we haven't rendered for an abnormally long time (probably because we're an out-of-range LOD child)
-        // In these cases, assume we're visible to avoid blinking.
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
         unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
         unsigned int& lasttestframe( _lastframes[ camera ] );
 
         result = qg->getMWQueryResult( camera );
-        wasVisible = result.lastnumPixels>0 && lasttestframe+1 >= traversalNumber;
-        StaticOcclusionQueryNode* isnotLeaf=dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
-
+        wasTested =  lasttestframe+1 >= traversalNumber;
+        wasVisible = result.lastnumPixels>0 && wasTested;
+        StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
         leafOrWasInvisible = !wasVisible || !isnotLeaf;
-        if( lasttestframe+1 < traversalNumber)
+
+        if( !wasTested )
         {
-            lastQueryFrame=traversalNumber;
+            lastQueryFrame = traversalNumber;
             wasVisible = true;
-            qg->forceLastQueryResult(camera, 1000);
+            qg->forceQueryResult(camera,1000);
+            if(isnotLeaf) pullDownVisibility(this, camera, 1000);
+            // OSG_NOTICE<<"entering frustum"<<traversalNumber<<" "<<lasttestframe<<std::endl;
             lasttestframe = traversalNumber;
-            passed = true; return passed;
+            passed = true;return passed;
         }
 
         if( ( lastQueryFrame == 0 ) ||
@@ -155,7 +169,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
             return passed;
         }
 
-        if(leafOrWasInvisible) lastQueryFrame = 0;
+         /*if(leafOrWasInvisible)            lastQueryFrame = 0;*/
 
         lasttestframe = traversalNumber;
     }
@@ -182,8 +196,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
         if (result.valid)
         {
             passed = ( result.numPixels >  _visThreshold );
-            if(passed)
-                pullUpVisibility(this, camera, result.numPixels);
+            //if(passed && result.lastnumPixels == 0)                pullUpVisibility(this, camera, result.numPixels);
 
 #ifdef PROVOK_OQ_4_PREVIOUSLY_OCCLUDED
         if(passed)
@@ -586,7 +599,7 @@ MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camer
     return QueryResult((tr->_init && !tr->_active ), tr->_numPixels, tr->_lastnumPixels);
 }
 
-void MWQueryGeometry::forceLastQueryResult( const osg::Camera* cam, unsigned int numPixels)
+void MWQueryGeometry::forceQueryResult( const osg::Camera* cam, unsigned int numPixels)
 {
     osg::ref_ptr<SceneUtil::TestResult> tr;
     {
@@ -604,9 +617,9 @@ void MWQueryGeometry::forceLastQueryResult( const osg::Camera* cam, unsigned int
 #endif
             _mwresults[ cam ] = tr;
         }
-
+        tr->_lastnumPixels = numPixels;
+        tr->_numPixels = numPixels;
     }
-    tr->_lastnumPixels = numPixels;
 }
 
 void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
