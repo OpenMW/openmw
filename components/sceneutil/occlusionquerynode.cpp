@@ -7,10 +7,15 @@
 #include <osg/ColorMask>
 #include <osg/PolygonOffset>
 #include <osg/Depth>
+#include <osgUtil/CullVisitor>
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,6,0)
 #include <osg/ContextData>
 #endif
+
+///test result initialization hacks
+#define VISIBLE_AS_DEFAULT 1
+//#define VISIBLE_AS_DEFAULT_ONLY_FOR_GUESS 1
 
 //ensure minimum popin for in frustum occluded but drastically increase OQ count per frame
 //#define PROVOK_OQ_4_PREVIOUSLY_OCCLUDED 1
@@ -66,7 +71,17 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
     return OQDebugStateSet;
 }
 
-bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv )
+inline void pullUpVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, uint numPix)
+{
+    StaticOcclusionQueryNode *parent = oq;
+    while(parent && static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->getLastQueryNumPixels(cam) == 0)
+    {
+        static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->forceLastQueryResult(cam, numPix);
+        parent = dynamic_cast<StaticOcclusionQueryNode*>(parent->getParent(0));
+    }
+}
+
+bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
 {
     if ( !_enabled )
     {
@@ -87,18 +102,27 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
         // The box of the query geometry is invalid, return false to not traverse
         // the subgraphs.
-        _passed = false;
-        return _passed;
+        //_passed = false;
+        //return _passed;
     }
 
+    osgUtil::CullVisitor& cv = static_cast<osgUtil::CullVisitor&>(nv);
+    const Camera* camera = cv.getRenderStage()->getCamera();
     ///stat only main camera
     bool ret;
     bool & passed = ret;
     if(camera == _maincam)
         passed = _passed;
 
-    unsigned int& lasttestframe( _lastframes[ camera ] );
+    if(cv.isCulled(*qg))
+    {
+        passed = false; return passed;
+    }
+
     unsigned int traversalNumber = nv.getTraversalNumber();
+    bool wasVisible, leafOrWasInvisible;
+
+    MWQueryGeometry::QueryResult result ;
     {
         // Two situations where we want to simply do a regular traversal:
         //  1) it's the first frame for this camera
@@ -106,24 +130,34 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         // In these cases, assume we're visible to avoid blinking.
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
         unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
+        unsigned int& lasttestframe( _lastframes[ camera ] );
 
-        if (lasttestframe+1 < traversalNumber)
+        result = qg->getMWQueryResult( camera );
+        wasVisible = result.lastnumPixels>0 && lasttestframe+1 >= traversalNumber;
+        StaticOcclusionQueryNode* isnotLeaf=dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
+
+        leafOrWasInvisible = !wasVisible || !isnotLeaf;
+        if( lasttestframe+1 < traversalNumber)
         {
-            ///entering frustum so provoke next OQ
-            lastQueryFrame = 0;
-            passed = true;
+            lastQueryFrame=traversalNumber;
+            wasVisible = true;
+            qg->forceLastQueryResult(camera, 1000);
             lasttestframe = traversalNumber;
-            return passed;
+            passed = true; return passed;
         }
 
         if( ( lastQueryFrame == 0 ) ||
             ( (traversalNumber - lastQueryFrame) >  (_queryFrameCount+1 ) )
                 )
         {
-            passed = true;
             lasttestframe = traversalNumber;
+            passed = true;
             return passed;
         }
+
+        if(leafOrWasInvisible) lastQueryFrame = 0;
+
+        lasttestframe = traversalNumber;
     }
 
     // Get the near plane for the upcoming distance calculation.
@@ -141,28 +175,24 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
-    passed =  ( distance <= _securepopdistance );
+    bool insecurearea =  ( distance <= _securepopdistance );
 
-    if (!passed)
+    if (!insecurearea)
     {
-        MWQueryGeometry::QueryResult result = qg->getMWQueryResult( camera );
-        if (!result.valid)
+        if (result.valid)
         {
-           // The query hasn't finished yet and the result still
-           // isn't available, return true to traverse the subgraphs.
-           passed = true;
-           lasttestframe = traversalNumber;
-           return passed;
-        }
+            passed = ( result.numPixels >  _visThreshold );
+            if(passed)
+                pullUpVisibility(this, camera, result.numPixels);
 
-        passed = ( result.numPixels >  _visThreshold );
 #ifdef PROVOK_OQ_4_PREVIOUSLY_OCCLUDED
         if(passed)
 #endif
-            lasttestframe = traversalNumber;
+        return passed;
+        }
     }
-    else lasttestframe = traversalNumber;
 
+    passed = insecurearea || wasVisible;
     return passed;
 }
 osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
@@ -216,7 +246,7 @@ osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
 
 void StaticOcclusionQueryNode::createSupportNodes()
 {
-    setDataVariance(osg::Object::STATIC);
+    setDataVariance(osg::Object::DYNAMIC);
 
     osg::DrawElementsUShort * dr = new osg::DrawElementsUShort( osg::PrimitiveSet::QUADS, 24,  cubeindices );
     dr->setDataVariance(Object::STATIC);
@@ -344,11 +374,10 @@ struct RetrieveQueriesCallback : public osg::Camera::DrawCallback
                     OSG_WARN << "osgOQ: RQCB: " <<
                     "glGetQueryObjectiv returned negative value (" << tr->_numPixels << ")." << std::endl;
 
+                tr->_lastnumPixels = tr->_numPixels;
                 // Either retrieve last frame's results, or ignore it because the
                 //   camera is inside the view. In either case, _active is now false.
                 tr->_active = false;
-                tr->_lastresultavailable = true;
-
             }
             // else: query result not available yet, try again next frame
 
@@ -415,9 +444,9 @@ MWQueryGeometry::~MWQueryGeometry()
 }
 
 unsigned int
-MWQueryGeometry::getNumPixels( const osg::Camera* cam )
+MWQueryGeometry::getLastQueryNumPixels( const osg::Camera* cam )
 {
-    return getMWQueryResult(cam).numPixels;
+    return getMWQueryResult(cam).lastnumPixels;
 }
 
 #if OSG_VERSION_LESS_THAN(3,6,0)
@@ -544,12 +573,42 @@ MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camer
         if (!tr.valid())
         {
             tr = new SceneUtil::TestResult;
+#ifdef VISIBLE_AS_DEFAULT
+#ifndef VISIBLE_AS_DEFAULT_ONLY_FOR_GUESS
+            tr->_numPixels =
+#endif
+            tr->_lastnumPixels = 1000;
+#endif
             _mwresults[ cam ] = tr;
         }
 
     }
-    return QueryResult((tr->_init && (!tr->_active || tr->_lastresultavailable) ), tr->_numPixels);
+    return QueryResult((tr->_init && !tr->_active ), tr->_numPixels, tr->_lastnumPixels);
 }
+
+void MWQueryGeometry::forceLastQueryResult( const osg::Camera* cam, unsigned int numPixels)
+{
+    osg::ref_ptr<SceneUtil::TestResult> tr;
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _mapMutex );
+        tr =  _mwresults[ cam ];
+        if (!tr.valid())
+        {
+            tr = new SceneUtil::TestResult();
+
+#ifdef VISIBLE_AS_DEFAULT
+#ifndef VISIBLE_AS_DEFAULT_ONLY_FOR_GUESS
+            tr->_numPixels =
+#endif
+            tr->_lastnumPixels = 1000;
+#endif
+            _mwresults[ cam ] = tr;
+        }
+
+    }
+    tr->_lastnumPixels = numPixels;
+}
+
 void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 {
     unsigned int contextID = renderInfo.getState()->getContextID();
@@ -580,6 +639,12 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
         if (!tr.valid())
         {
             tr = new SceneUtil::TestResult;
+#ifdef VISIBLE_AS_DEFAULT
+#ifndef VISIBLE_AS_DEFAULT_ONLY_FOR_GUESS
+            tr->_numPixels =
+#endif
+            tr->_lastnumPixels = 1000;
+#endif
             _mwresults[ cam ] = tr;
         }
     }
@@ -611,6 +676,7 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
     OSG_DEBUG <<
         "osgOQ: QG: Querying for: " << _oqnName << std::endl;
 
+    tr->_lastnumPixels = tr->_numPixels;
     ext->glBeginQuery( GL_SAMPLES_PASSED_ARB, tr->_id );
     osg::Geometry::drawImplementation( renderInfo );
     ext->glEndQuery( GL_SAMPLES_PASSED_ARB );
@@ -727,6 +793,9 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 qnode->getQueryGeometry()->setNodeMask(0);
                 qnode->getDebugGeometry()->setNodeMask(0);
                 qnode->setQueriesEnabled(false);
+                parent.getQueryGeometry()->setNodeMask(0);
+                parent.getDebugGeometry()->setNodeMask(0);
+                parent.setQueriesEnabled(false);
             }
             else
             {
