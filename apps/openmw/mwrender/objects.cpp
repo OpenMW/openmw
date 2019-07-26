@@ -84,14 +84,22 @@ osg::Group * Objects::getOrCreateCell(const MWWorld::Ptr& ptr)
             ocnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
             ocnode->setDataVariance(osg::Object::DYNAMIC);
 
+            //not part of OQ hierarchy so disable query
+            ocnode->setQueriesEnabled(false);
+            ocnode->getQueryGeometry()->setNodeMask(0);
+            ocnode->getDebugGeometry()->setNodeMask(0);
+
             SceneUtil::StaticOcclusionQueryNode*qnode = new SceneUtil::StaticOcclusionQueryNode;
             qnode->getQueryStateSet()->setRenderBinDetails( mOQNSettings.OQRenderBin, "SORT_FRONT_TO_BACK", osg::StateSet::PROTECTED_RENDERBIN_DETAILS);
             qnode->setDebugDisplay(mOQNSettings.debugDisplay);
             qnode->setVisibilityThreshold(mOQNSettings.querypixelcount);
             qnode->setQueryFrameCount(mOQNSettings.queryframecount);
             qnode->setQueryMargin(mOQNSettings.querymargin);
-            qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
-            qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
+
+            //not part of OQ hierarchy so disable query
+            qnode->setQueriesEnabled(false);
+            qnode->getQueryGeometry()->setNodeMask(0);
+            qnode->getDebugGeometry()->setNodeMask(0);
             cellnode = qnode;
             cellnode->addChild(ocnode);
 
