@@ -140,7 +140,7 @@ framerate limit
 
 :Type:		floating point
 :Range:		>= 0.0
-:Default:	0.0
+:Default:	300
 
 This setting determines the maximum frame rate in frames per second.
 If this setting is 0.0, the frame rate is unlimited.
@@ -158,8 +158,6 @@ in the sense that enabling vertical sync limits the frame rate to the refresh ra
 (often 60 frames per second).
 Choosing to limit the frame rate using this setting instead of vsync may reduce input lag
 due to the game not having to wait for the vertical blanking interval.
-
-This setting can only be configured by editing the settings configuration file.
 
 contrast
 --------
