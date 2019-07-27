@@ -96,7 +96,7 @@ void pullDownVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsi
     }
 }
 
-bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
+bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv )
 {
     if ( !_enabled )
     {
@@ -122,7 +122,6 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
     }
 
     osgUtil::CullVisitor& cv = static_cast<osgUtil::CullVisitor&>(nv);
-    const Camera* camera = cv.getRenderStage()->getCamera();
     ///stat only main camera
     bool ret;
     bool & passed = ret;
@@ -149,7 +148,9 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* cam, NodeVisitor& nv )
         StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
         leafOrWasInvisible = !wasVisible || !isnotLeaf;
 
-        if( !wasTested )
+        if( !wasTested &&
+                (cv.getTraversalMask()& qg->getNodeMask())//workaround a shadow bug (dont enable oq with shadow)
+                )
         {
             lastQueryFrame = traversalNumber;
             wasVisible = true;
