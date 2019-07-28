@@ -215,6 +215,9 @@ endif()
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
+# Reqiuired for unity build
+add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
+
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if (USE_SYSTEM_TINYXML)
