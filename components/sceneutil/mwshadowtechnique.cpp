@@ -553,7 +553,7 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
     // set up the camera
     _camera = new osg::Camera;
     _camera->setName("ShadowCamera");
-    _camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+    _camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
 
     //_camera->setClearColor(osg::Vec4(1.0f,1.0f,1.0f,1.0f));
     _camera->setClearColor(osg::Vec4(0.0f,0.0f,0.0f,0.0f));
