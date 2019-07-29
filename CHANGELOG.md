@@ -111,6 +111,7 @@
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5082: Scrolling with controller in GUI mode is broken
+    Bug #3676: NiParticleColorModifier isn't applied properly
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
