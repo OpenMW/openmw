@@ -17,6 +17,7 @@
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
+    Bug #4276: Resizing character window differs from vanilla
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
@@ -111,6 +112,8 @@
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5082: Scrolling with controller in GUI mode is broken
+    Bug #5092: NPCs with enchanted weapons play sound when out of charges
+    Bug #5093: Hand to hand sound plays on knocked out enemies
     Bug #3676: NiParticleColorModifier isn't applied properly
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI

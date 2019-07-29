@@ -69,6 +69,7 @@ namespace MWGui
             std::set<std::string> mExpelled;
 
             bool mChanged;
+            const int mMinFullWidth;
 
         protected:
             virtual void onPinToggled();

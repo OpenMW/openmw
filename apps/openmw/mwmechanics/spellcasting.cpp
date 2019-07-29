@@ -838,21 +838,24 @@ namespace MWMechanics
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
                 if (mCaster == getPlayer())
+                {
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
 
-                // Failure sound
-                int school = 0;
-                if (!enchantment->mEffects.mList.empty())
-                {
-                    short effectId = enchantment->mEffects.mList.front().mEffectID;
-                    const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
-                    school = magicEffect->mData.mSchool;
+                    // Failure sound
+                    int school = 0;
+                    if (!enchantment->mEffects.mList.empty())
+                    {
+                        short effectId = enchantment->mEffects.mList.front().mEffectID;
+                        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+                        school = magicEffect->mData.mSchool;
+                    }
+
+                    static const std::string schools[] = {
+                        "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
+                    };
+                    MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
+                    sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 }
-                static const std::string schools[] = {
-                    "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration"
-                };
-                MWBase::SoundManager *sndMgr = MWBase::Environment::get().getSoundManager();
-                sndMgr->playSound3D(mCaster, "Spell Failure " + schools[school], 1.0f, 1.0f);
                 return false;
             }
             // Reduce charge

@@ -441,7 +441,7 @@ namespace MWMechanics
             if(sound)
                 sndMgr->playSound3D(victim, sound->mId, 1.0f, 1.0f);
         }
-        else
+        else if (!healthdmg)
             sndMgr->playSound3D(victim, "Hand To Hand Hit", 1.0f, 1.0f);
     }
 
