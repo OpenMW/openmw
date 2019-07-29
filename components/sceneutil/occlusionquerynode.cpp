@@ -121,19 +121,19 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         return _passed;
     }
 
-    osgUtil::CullVisitor& cv = static_cast<osgUtil::CullVisitor&>(nv);
     ///stat only main camera
     bool ret;
     bool & passed = ret;
     if(camera == _maincam)
         passed = _passed;
-
-    if( camera->getReferenceFrame() == osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT)//workaround a shadow bug (dont enable oq with shadow))
+    //workaround a shadow cam bug (dont enable oq with shadow))
+    if( camera->getReferenceFrame() == osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT)
     {
         passed = true; return passed;
     }
+
     unsigned int traversalNumber = nv.getTraversalNumber();
-    bool wasVisible, leafOrWasInvisible, wasTested;
+    bool wasVisible, wasTested;
 
     MWQueryGeometry::QueryResult result ;
     {
@@ -145,7 +145,6 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         wasTested =  lasttestframe+1 >= traversalNumber;
         wasVisible = result.lastnumPixels>0 && wasTested;
         StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
-        leafOrWasInvisible = !wasVisible || !isnotLeaf;
 
         if( !wasTested )
         {
