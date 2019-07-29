@@ -128,11 +128,10 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     if(camera == _maincam)
         passed = _passed;
 
-    if(cv.isCulled(*qg))
+    if( camera->getReferenceFrame() == osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT)//workaround a shadow bug (dont enable oq with shadow))
     {
-        passed = false; return passed;
+        passed = true; return passed;
     }
-
     unsigned int traversalNumber = nv.getTraversalNumber();
     bool wasVisible, leafOrWasInvisible, wasTested;
 
@@ -141,16 +140,14 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
         unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
         unsigned int& lasttestframe( _lastframes[ camera ] );
-
         result = qg->getMWQueryResult( camera );
+
         wasTested =  lasttestframe+1 >= traversalNumber;
         wasVisible = result.lastnumPixels>0 && wasTested;
         StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
         leafOrWasInvisible = !wasVisible || !isnotLeaf;
 
-        if( !wasTested &&
-                (cv.getTraversalMask()& qg->getNodeMask())//workaround a shadow bug (dont enable oq with shadow)
-                )
+        if( !wasTested )
         {
             lastQueryFrame = traversalNumber;
             wasVisible = true;
