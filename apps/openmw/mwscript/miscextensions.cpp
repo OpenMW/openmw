@@ -443,7 +443,16 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
+                    effects += stats.getActiveSpells().getMagicEffects();
+                    if (ptr.getClass().isNpc())
+                    {
+                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                        effects += store.getMagicEffects();
+                    }
+
                     for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
                     {
                         if (it->first.mId == key && it->second.getModifier() > 0)
