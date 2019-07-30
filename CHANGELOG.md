@@ -112,6 +112,7 @@
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5082: Scrolling with controller in GUI mode is broken
+    Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
     Feature #1774: Handle AvoidNode
