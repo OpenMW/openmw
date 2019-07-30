@@ -122,9 +122,6 @@ namespace MWMechanics
                 return 0.f;
         }
 
-        if (spell->mData.mCost > stats.getMagicka().getCurrent())
-            return 0.f;
-
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(spell->mEffects);
         if ((types & Self) && stats.getActiveSpells().isSpellActive(spell->mId))
