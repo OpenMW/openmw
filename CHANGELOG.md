@@ -116,6 +116,7 @@
     Bug #5093: Hand to hand sound plays on knocked out enemies
     Bug #5099: Non-swimming enemies will enter water if player is water walking
     Bug #5105: NPCs start combat with werewolves from any distance
+    Bug #5106: Still can jump even when encumbered
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI

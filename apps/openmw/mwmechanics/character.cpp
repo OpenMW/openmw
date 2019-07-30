@@ -2065,7 +2065,8 @@ void CharacterController::update(float duration, bool animationOnly)
             cls.getCreatureStats(mPtr).setFatigue(fatigue);
         }
 
-        if(sneak || inwater || flying || incapacitated || !solid)
+        float z = cls.getJump(mPtr);
+        if(sneak || inwater || flying || incapacitated || !solid || z <= 0)
             vec.z() = 0.0f;
 
         bool inJump = true;
@@ -2088,7 +2089,6 @@ void CharacterController::update(float duration, bool animationOnly)
         else if(vec.z() > 0.0f && mJumpState != JumpState_InAir)
         {
             // Started a jump.
-            float z = cls.getJump(mPtr);
             if (z > 0)
             {
                 if(vec.x() == 0 && vec.y() == 0)
