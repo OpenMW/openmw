@@ -549,10 +549,6 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
-            bool isflying = MWBase::Environment::get().getWorld()->isFlying(mPtr);
-            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !isflying;
-            bool issneaking = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !isflying;
-
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
@@ -585,7 +581,7 @@ void CharacterController::refreshMovementAnims(const WeaponInfo* weap, Character
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
                     // We use the third person velocities instead.
                     // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    mMovementAnimSpeed = (issneaking ? 33.5452f : (isrunning ? 222.857f : 154.064f));
+                    mMovementAnimSpeed = (isSneaking() ? 33.5452f : (isRunning() ? 222.857f : 154.064f));
                     mMovementAnimationControlled = false;
                 }
             }
