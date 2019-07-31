@@ -4,6 +4,7 @@
 #include <cctype>
 #include <sstream>
 #include <iterator>
+#include <regex>
 
 #include "exception.hpp"
 #include "errorhandler.hpp"
@@ -290,53 +291,69 @@ namespace Compiler
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
 
+        bool quoted = false;
+
         if (name.size()>=2 && name[0]=='"' && name[name.size()-1]=='"')
         {
             name = name.substr (1, name.size()-2);
+            quoted = true;
+            
+            if (regex_match(name, std::regex("[+-]?[0-9]+")))
+            {
+                int intValue;
+                intValue = stoi(name);
+                cont = parser.parseInt(intValue, loc, *this);
+                return true;
+            }
+            else if (regex_match(name, std::regex("[+-]?[0-9]+.[0-9]+")))
+            {
+                float floatValue;
+                floatValue = stod(name);
+                cont = parser.parseFloat(floatValue, loc, *this);
+                return true;
+            }
+        }
+
 // allow keywords enclosed in ""
 /// \todo optionally disable
-            if (mStrictKeywords)
+        if (!(quoted && mStrictKeywords))
+        {
+            int i = 0;
+
+            std::string lowerCase = Misc::StringUtils::lowerCase(name);
+            bool isKeyword = false;
+            for (; sKeywords[i]; ++i)
+                if (lowerCase == sKeywords[i])
+                {
+                    isKeyword = true;
+                    break;
+                }
+
+            // Russian localization and some mods use a quirk - add newline character directly
+            // to compiled bytecode via HEX-editor to implement multiline messageboxes.
+            // Of course, original editor will not compile such script.
+            // Allow messageboxes to bybass the "incomplete string or name" error.
+            if (lowerCase == "messagebox")
+                enableIgnoreNewlines();
+            else if (isKeyword)
+                mIgnoreNewline = false;
+
+            if (sKeywords[i])
             {
-                cont = parser.parseName (name, loc, *this);
+                cont = parser.parseKeyword(i, loc, *this);
                 return true;
             }
-        }
 
-        int i = 0;
-
-        std::string lowerCase = Misc::StringUtils::lowerCase(name);
-        bool isKeyword = false;
-        for (; sKeywords[i]; ++i)
-            if (lowerCase==sKeywords[i])
+            if (mExtensions)
             {
-                isKeyword = true;
-                break;
-            }
-
-        // Russian localization and some mods use a quirk - add newline character directly
-        // to compiled bytecode via HEX-editor to implement multiline messageboxes.
-        // Of course, original editor will not compile such script.
-        // Allow messageboxes to bybass the "incomplete string or name" error.
-        if (lowerCase == "messagebox")
-            enableIgnoreNewlines();
-        else if (isKeyword)
-            mIgnoreNewline = false;
-
-        if (sKeywords[i])
-        {
-            cont = parser.parseKeyword (i, loc, *this);
-            return true;
-        }
-
-        if (mExtensions)
-        {
-            if (int keyword = mExtensions->searchKeyword (lowerCase))
-            {
-                cont = parser.parseKeyword (keyword, loc, *this);
-                return true;
+                if (int keyword = mExtensions->searchKeyword(lowerCase))
+                {
+                    cont = parser.parseKeyword(keyword, loc, *this);
+                    return true;
+                }
             }
         }
-
+        
         cont = parser.parseName (name, loc, *this);
 
         return true;
