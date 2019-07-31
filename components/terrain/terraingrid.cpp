@@ -109,10 +109,8 @@ void TerrainGrid::loadCell(int x, int y)
 
     osg::Vec2f center(x+0.5f, y+0.5f);
     osg::ref_ptr<osg::Node> terrainNode = buildTerrain(nullptr, 1.f, center);
-
     if (!terrainNode)
         return; // no terrain defined
-
 
     TerrainGrid::World::loadCell(x,y);
 

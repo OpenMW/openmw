@@ -11,7 +11,8 @@
 
 #include "occlusionsettings.hpp"
 
-namespace SceneUtil{
+namespace SceneUtil
+{
 
 class TestResult : public osg::Referenced
 {

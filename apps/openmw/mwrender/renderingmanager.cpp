@@ -383,8 +383,6 @@ namespace MWRender
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
-
-
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 

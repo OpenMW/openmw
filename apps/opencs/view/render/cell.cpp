@@ -119,7 +119,7 @@ void CSVRender::Cell::updateLand()
 
     //TODO
     SceneUtil::OcclusionQuerySettings OQsettings;
-    OQsettings.enable=false;
+    OQsettings.enable = false;
     // Setup land if available
     const CSMWorld::IdCollection<CSMWorld::Land>& land = mData.getLand();
     int landIndex = land.searchId(mId);

@@ -230,14 +230,10 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mViewDistance(std::numeric_limits<float>::max())
 {
     resetSettings();
-
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
     mChunkManager->setMaxCompositeGeometrySize(maxCompGeometrySize);
-
 }
-
-
 
 QuadTreeWorld::~QuadTreeWorld()
 {
@@ -416,8 +412,6 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
         }
         entry.mRenderingNode->accept(nv);
-
-
     }
 
     if (!isCullVisitor)
