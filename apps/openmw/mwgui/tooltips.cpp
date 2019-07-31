@@ -667,6 +667,63 @@ namespace MWGui
         return ret;
     }
 
+    std::string ToolTips::getDurationString(float duration, const std::string& prefix)
+    {
+        std::string ret;
+        ret = prefix + ": ";
+
+        if (duration < 1.f)
+        {
+            ret += "0 s";
+            return ret;
+        }
+
+        constexpr float secondsPerMinute = 60.f; // 60 seconds
+        constexpr float secondsPerHour = secondsPerMinute * 60.f; // 60 minutes
+        constexpr float secondsPerDay = secondsPerHour * 24.f; // 24 hours
+        constexpr float secondsPerMonth = secondsPerDay * 30.f; // 30 days
+        constexpr float secondsPerYear = secondsPerDay * 365.f;
+        int units = 0;
+        if (duration >= secondsPerYear)
+        {
+            units++;
+            int years = duration / secondsPerYear;
+            duration -= years * secondsPerYear;
+            ret += toString(years) + " y ";
+        }
+        if (duration >= secondsPerMonth)
+        {
+            units++;
+            int months = duration / secondsPerMonth;
+            duration -= months * secondsPerMonth;
+            ret += toString(months) + " mo ";
+        }
+        if (units < 2 && duration >= secondsPerDay)
+        {
+            units++;
+            int days = duration / secondsPerDay;
+            duration -= days * secondsPerDay;
+            ret += toString(days) + " d ";
+        }
+        if (units < 2 && duration >= secondsPerHour)
+        {
+            units++;
+            int hours = duration / secondsPerHour;
+            duration -= hours * secondsPerHour;
+            ret += toString(hours) + " h ";
+        }
+        if (units < 2 && duration >= secondsPerMinute)
+        {
+            int minutes = duration / secondsPerMinute;
+            duration -= minutes * secondsPerMinute;
+            ret += toString(minutes) + " min ";
+        }
+        if (units < 2 && duration >= 1.f)
+            ret += toString(int(duration)) + " s ";
+
+        return ret;
+    }
+
     bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;
