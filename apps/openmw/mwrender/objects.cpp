@@ -158,6 +158,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
             SceneUtil::OctreeAddRemove adder(mOQNSettings);
             adder.recursivCellAddStaticObject(bs, *ocq, objectNode, bsi);
         }
+        else cellnode->addChild(objectNode);
     }
     else cellnode->addChild(objectNode);
 }
