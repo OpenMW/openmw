@@ -422,6 +422,11 @@ namespace MWMechanics
                 return true;
         }
 
+        if (actor.getClass().isPureLandCreature(actor) && MWBase::Environment::get().getWorld()->isWalkingOnWater(enemy))
+        {
+            return false;
+        }
+
         if (actor.getClass().isPureFlyingCreature(actor) || actor.getClass().isPureLandCreature(actor))
         {
             if (MWBase::Environment::get().getWorld()->isSwimming(enemy))
