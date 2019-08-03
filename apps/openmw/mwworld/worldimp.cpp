@@ -1401,7 +1401,7 @@ namespace MWWorld
 
         pos.z() += 20; // place slightly above. will snap down to ground with code below
 
-        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && isActorCollisionEnabled(ptr)))
+        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !isSwimming(ptr) && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
