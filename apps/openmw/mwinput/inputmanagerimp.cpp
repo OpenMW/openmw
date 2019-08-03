@@ -39,6 +39,7 @@ namespace MWInput
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
+            const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
@@ -113,9 +114,13 @@ namespace MWInput
 
         // Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
-        if(controllerBindingsFile!="")
+        if(!controllerBindingsFile.empty())
         {
             SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
+        }
+        if(!userControllerBindingsFile.empty())
+        {
+            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
         }
 #endif
 

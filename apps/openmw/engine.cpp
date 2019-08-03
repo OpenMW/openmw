@@ -515,8 +515,17 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         controllerFileName = "gamecontrollerdb.txt";
     }
 
+    const std::string userdefault = mCfgMgr.getUserConfigPath().string() + "/" + controllerFileName;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
+
+    std::string userGameControllerdb;
+    if (boost::filesystem::exists(userdefault)){
+        userGameControllerdb = userdefault;
+    }
+    else
+        userGameControllerdb = "";
+
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
@@ -525,7 +534,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();
