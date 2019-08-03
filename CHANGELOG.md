@@ -24,7 +24,7 @@
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
-    Bug #4600: Crash when no sound output is available or --no-sound is used. 
+    Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
@@ -153,6 +153,7 @@
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
     Feature #5094: Unix like console hotkeys
+    Feature #5098: Allow user controller bindings
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions
