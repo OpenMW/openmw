@@ -5,6 +5,8 @@
 #include <components/resource/resourcemanager.hpp>
 #include <components/esm/loadcell.hpp>
 
+#include <OpenThreads/Mutex>
+
 namespace Resource
 {
     class SceneManager;
@@ -33,10 +35,16 @@ namespace MWRender
 
         virtual unsigned int getNodeMask() override;
 
+        void enableObject(const ESM::RefNum & refnum, bool enabled);
+        void clear();
+
     private:
         Resource::SceneManager* mSceneManager;
         bool mMergeGeometry;
         float mMinSize;
+
+        OpenThreads::Mutex mDisabledMutex;
+        std::set<ESM::RefNum> mDisabled;
     };
 
 }

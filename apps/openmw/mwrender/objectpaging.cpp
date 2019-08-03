@@ -171,7 +171,7 @@ namespace MWRender
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM::Land::REAL_SIZE;
         osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
 
-        std::vector<ESM::CellRef> refs;
+        std::map<ESM::RefNum, ESM::CellRef> refs;
         std::vector<ESM::ESMReader> esm;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
@@ -197,8 +197,8 @@ namespace MWRender
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
                             if (!typeFilter(type,size>=2)) continue;
-                            if (deleted) continue;
-                            refs.push_back(ref);
+                            if (deleted) { refs.erase(ref.mRefNum); continue; }
+                            refs[ref.mRefNum] = ref;
                         }
                     }
                     catch (std::exception& e)
@@ -210,18 +210,25 @@ namespace MWRender
                 {
                     ESM::CellRef ref = it->first;
                     bool deleted = it->second;
-                    if (deleted) continue;
+                    if (deleted) { refs.erase(ref.mRefNum); continue; }
                     int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
                     if (!typeFilter(type,size>=2)) continue;
-                    refs.push_back(ref);
+                    refs[ref.mRefNum] = ref;
                 }
             }
         }
 
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+            for (auto disabled : mDisabled)
+                refs.erase(disabled);
+        }
+
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
         osg::Vec2f maxBound = (center + osg::Vec2f(size/2.f, size/2.f));
-        for (const ESM::CellRef& ref : refs)
+        for (const auto& pair : refs)
         {
+            const ESM::CellRef& ref = pair.second;
             std::string id = Misc::StringUtils::lowerCase(ref.mRefID);
             if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
                 continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
@@ -299,4 +306,16 @@ namespace MWRender
         return Mask_Static;
     }
 
+    void ObjectPaging::enableObject(const ESM::RefNum & refnum, bool enabled)
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+        if (enabled) mDisabled.erase(refnum);
+        else mDisabled.insert(refnum);
+    }
+
+    void ObjectPaging::clear()
+    {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+        mDisabled.clear();
+    }
 }

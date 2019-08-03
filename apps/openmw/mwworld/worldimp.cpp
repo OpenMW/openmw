@@ -814,6 +814,9 @@ namespace MWWorld
 
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
+
+            if (reference.getCellRef().getRefNum().hasContentFile())
+                mRendering->pagingEnableObject(reference.getCellRef().getRefNum(), true);
         }
     }
 
@@ -838,20 +841,23 @@ namespace MWWorld
 
     void World::disable (const Ptr& reference)
     {
+        if (!reference.getRefData().isEnabled())
+            return;
+
         // disable is a no-op for items in containers
         if (!reference.isInCell())
             return;
 
-        if (reference.getRefData().isEnabled())
-        {
-            if (reference == getPlayerPtr())
-                throw std::runtime_error("can not disable player object");
+        if (reference == getPlayerPtr())
+            throw std::runtime_error("can not disable player object");
 
-            reference.getRefData().disable();
+        reference.getRefData().disable();
 
-            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
-                mWorldScene->removeObjectFromScene (reference);
-        }
+        if (reference.getCellRef().getRefNum().hasContentFile())
+            mRendering->pagingEnableObject(reference.getCellRef().getRefNum(), false);
+
+        if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+            mWorldScene->removeObjectFromScene (reference);
     }
 
     void World::advanceTime (double hours, bool incremental)
