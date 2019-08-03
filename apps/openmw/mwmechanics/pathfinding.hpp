@@ -84,6 +84,9 @@ namespace MWMechanics
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
                 const DetourNavigator::Flags flags);
 
+            void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
+                const DetourNavigator::Flags flags, const float pointTolerance);
+
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance);
 
