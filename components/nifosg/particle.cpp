@@ -153,6 +153,36 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
 
     particle->setColorRange(osgParticle::rangev4(color, color));
 }
+ParticleRotationAffector::ParticleRotationAffector(const Nif::NiParticleRotation *clrdata):
+    mInitialAxis(clrdata->mInitialAxis),
+    mRotationSpeed(clrdata->mRotationSpeed),
+    mRandomInitialAxis(clrdata->mRandomInitialAxis)
+{}
+
+ParticleRotationAffector::ParticleRotationAffector()
+{
+}
+
+ParticleRotationAffector::ParticleRotationAffector(const ParticleRotationAffector &copy, const osg::CopyOp &copyop)
+    : osgParticle::Operator(copy, copyop)
+{
+    *this = copy;
+}
+
+void ParticleRotationAffector::operate(osgParticle::Particle* particle, double /* dt */)
+{
+    if(particle->getAge() == 0)
+    {
+        osg::Vec3 initialAxis = osg::Vec3f(Misc::Rng::rollClosedProbability() * 2.0 * osg::PI,
+                                           Misc::Rng::rollClosedProbability() * 2.0 * osg::PI,
+                                           Misc::Rng::rollClosedProbability() * 2.0 * osg::PI);
+        initialAxis[0] *= mInitialAxis[0];
+        initialAxis[1] *= mInitialAxis[1];
+        initialAxis[2] *= mInitialAxis[2];
+        particle->setAngle(initialAxis);
+        particle->setAngularVelocity(mInitialAxis * mRotationSpeed);
+    }
+}
 
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
     : mForce(gravity->mForce)

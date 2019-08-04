@@ -124,6 +124,10 @@ public:
 class NiParticleRotation : public Controlled
 {
 public:
+    bool mRandomInitialAxis;
+    float mRotationSpeed;
+    osg::Vec3f mInitialAxis;
+
     void read(NIFStream *nif);
 };
 

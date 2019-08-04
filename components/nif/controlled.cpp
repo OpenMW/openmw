@@ -78,13 +78,9 @@ namespace Nif
     void NiParticleRotation::read(NIFStream *nif)
     {
         Controlled::read(nif);
-
-        /*
-           byte (0 or 1)
-           float (1)
-           float*3
-        */
-        nif->skip(17);
+        mRandomInitialAxis = nif->getChar();
+        mRotationSpeed = nif->getFloat();
+        mInitialAxis = nif->getVector3();
     }
 
     void NiSphericalCollider::read(NIFStream* nif)

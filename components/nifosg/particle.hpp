@@ -18,6 +18,7 @@ namespace Nif
     class NiPlanarCollider;
     class NiSphericalCollider;
     class NiColorData;
+    class NiParticleRotation;
 }
 
 namespace NifOsg
@@ -161,6 +162,22 @@ namespace NifOsg
 
     private:
         Vec4Interpolator mData;
+    };
+    class ParticleRotationAffector : public osgParticle::Operator
+    {
+    public:
+        ParticleRotationAffector(const Nif::NiParticleRotation * rotdata);
+        ParticleRotationAffector();
+        ParticleRotationAffector(const ParticleRotationAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        META_Object(NifOsg, ParticleRotationAffector)
+
+        virtual void operate(osgParticle::Particle* particle, double dt);
+
+    private:
+        bool mRandomInitialAxis;
+        float mRotationSpeed;
+        osg::Vec3f mInitialAxis;
     };
 
     class GravityAffector : public osgParticle::Operator
