@@ -440,15 +440,18 @@ namespace Shader
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
         }
 
+        int programmode = osg::StateAttribute::ON;
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
         defineMap["pointsprite"] = partsys ? "1" : "0";
         if(partsys)
         {
+            /// ON is not enough in some case (snow in particular)
+            programmode |= osg::StateAttribute::PROTECTED;
             float _visibilityDistance = partsys->getVisibilityDistance();
             partsys->setUseVertexArray(true);
             partsys->setUseShaders(true);
 
-            writableStateSet->setMode(GL_PROGRAM_POINT_SIZE, osg::StateAttribute::ON);
+            writableStateSet->setMode(GL_PROGRAM_POINT_SIZE, programmode);
 
             writableStateSet->addUniform(new osg::Uniform("visibilityDistance", (float)_visibilityDistance));
             partsys->setDrawCallback(new ParticleSystemShadedDrawCallback());
@@ -460,7 +463,7 @@ namespace Shader
 
         if (vertexShader && fragmentShader)
         {
-            writableStateSet->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), osg::StateAttribute::ON);
+            writableStateSet->setAttributeAndModes(mShaderManager.getProgram(vertexShader, fragmentShader), programmode);
 
             for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin(); texIt != reqs.mTextures.end(); ++texIt)
             {
