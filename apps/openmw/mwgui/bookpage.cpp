@@ -112,10 +112,7 @@ struct TypesetBookImpl : TypesetBook
         if (i->empty())
             return Range (Utf8Point (nullptr), Utf8Point (nullptr));
 
-        Utf8Point begin = &i->front ();
-        Utf8Point end   = &i->front () + i->size ();
-
-        return Range (begin, end);
+        return Range (i->data(), i->data() + i->size());
     }
 
     size_t pageCount () const { return mPages.size (); }
@@ -346,8 +343,8 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         assert (end <= mCurrentContent->size ());
         assert (begin <= mCurrentContent->size ());
 
-        Utf8Point begin_ = &mCurrentContent->front () + begin;
-        Utf8Point end_   = &mCurrentContent->front () + end  ;
+        Utf8Point begin_ = mCurrentContent->data() + begin;
+        Utf8Point end_   = mCurrentContent->data() + end;
 
         writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }

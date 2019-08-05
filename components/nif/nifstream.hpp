@@ -160,9 +160,9 @@ public:
     {
         std::vector<char> str(length + 1, 0);
 
-        inp->read(&str[0], length);
+        inp->read(str.data(), length);
 
-        return &str[0];
+        return str.data();
     }
     ///Read in a string of the length specified in the file
     std::string getString()
@@ -181,34 +181,34 @@ public:
     void getUShorts(std::vector<unsigned short> &vec, size_t size)
     {
         vec.resize(size);
-        readLittleEndianDynamicBufferOfType<unsigned short,unsigned short>(inp, &vec.front(), size);
+        readLittleEndianDynamicBufferOfType<unsigned short,unsigned short>(inp, vec.data(), size);
     }
 
     void getFloats(std::vector<float> &vec, size_t size)
     {
         vec.resize(size);
-        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, &vec.front(), size);
+        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, vec.data(), size);
     }
 
     void getVector2s(std::vector<osg::Vec2f> &vec, size_t size)
     {
         vec.resize(size);
         /* The packed storage of each Vec2f is 2 floats exactly */
-        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp,(float*) &vec.front(), size*2);
+        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp,(float*)vec.data(), size*2);
     }
 
     void getVector3s(std::vector<osg::Vec3f> &vec, size_t size)
     {
         vec.resize(size);
         /* The packed storage of each Vec3f is 3 floats exactly */
-        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*) &vec.front(), size*3);
+        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*)vec.data(), size*3);
     }
 
     void getVector4s(std::vector<osg::Vec4f> &vec, size_t size)
     {
         vec.resize(size);
         /* The packed storage of each Vec4f is 4 floats exactly */
-        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*) &vec.front(), size*4);
+        readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, (float*)vec.data(), size*4);
     }
 
     void getQuaternions(std::vector<osg::Quat> &quat, size_t size)

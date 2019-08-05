@@ -1034,11 +1034,10 @@ namespace NifOsg
         {
             const Nif::NiTriShapeData* data = triShape->data.getPtr();
 
-            {
-                geometry->setVertexArray(new osg::Vec3Array(data->vertices.size(), &data->vertices[0]));
-                if (!data->normals.empty())
-                    geometry->setNormalArray(new osg::Vec3Array(data->normals.size(), &data->normals[0]), osg::Array::BIND_PER_VERTEX);
-            }
+            if (!data->vertices.empty())
+                geometry->setVertexArray(new osg::Vec3Array(data->vertices.size(), data->vertices.data()));
+            if (!data->normals.empty())
+                geometry->setNormalArray(new osg::Vec3Array(data->normals.size(), data->normals.data()), osg::Array::BIND_PER_VERTEX);
 
             int textureStage = 0;
             for (std::vector<int>::const_iterator it = boundTextures.begin(); it != boundTextures.end(); ++it,++textureStage)
@@ -1048,19 +1047,20 @@ namespace NifOsg
                 {
                     Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on TriShape \"" << triShape->name << "\" in " << mFilename;
                     if (!data->uvlist.empty())
-                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[0].size(), &data->uvlist[0][0]), osg::Array::BIND_PER_VERTEX);
+                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[0].size(), data->uvlist[0].data()), osg::Array::BIND_PER_VERTEX);
                     continue;
                 }
 
-                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[uvSet].size(), &data->uvlist[uvSet][0]), osg::Array::BIND_PER_VERTEX);
+                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[uvSet].size(), data->uvlist[uvSet].data()), osg::Array::BIND_PER_VERTEX);
             }
 
             if (!data->colors.empty())
-                geometry->setColorArray(new osg::Vec4Array(data->colors.size(), &data->colors[0]), osg::Array::BIND_PER_VERTEX);
+                geometry->setColorArray(new osg::Vec4Array(data->colors.size(), data->colors.data()), osg::Array::BIND_PER_VERTEX);
 
-            geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
-                                                                  data->triangles.size(),
-                                                                  (unsigned short*)&data->triangles[0]));
+            if (!data->triangles.empty())
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES,
+                                                                    data->triangles.size(),
+                                                                    (unsigned short*)data->triangles.data()));
 
             // osg::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
@@ -1115,7 +1115,7 @@ namespace NifOsg
                 return morphGeom;
             // Note we are not interested in morph 0, which just contains the original vertices
             for (unsigned int i = 1; i < morphs.size(); ++i)
-                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), &morphs[i].mVertices[0]), 0.f);
+                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
 
             return morphGeom;
         }
@@ -1282,7 +1282,7 @@ namespace NifOsg
             }
 
             unsigned char* data = new unsigned char[pixelData->data.size()];
-            memcpy(data, &pixelData->data[0], pixelData->data.size());
+            memcpy(data, pixelData->data.data(), pixelData->data.size());
 
             image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
             image->setMipmapLevels(mipmapVector);
