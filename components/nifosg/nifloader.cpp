@@ -812,10 +812,6 @@ namespace NifOsg
                 else if (affectors->recType == Nif::RC_NiParticleRotation)
                 {
                     const Nif::NiParticleRotation *cl = static_cast<const Nif::NiParticleRotation*>(affectors.getPtr());
-                    /*OSG_WARN << "handling RC_NiParticleRotation modifier " << affectors->recName << " in " << mFilename;
-                    OSG_WARN << cl->mRandomInitialAxis <<std::endl;
-                    OSG_WARN << cl->mRotationSpeed <<std::endl;
-                    OSG_WARN << cl->mInitialAxis <<std::endl;*/
                     program->addOperator(new ParticleRotationAffector(cl));
                 }
                 else
