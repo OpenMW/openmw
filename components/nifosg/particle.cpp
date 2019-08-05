@@ -154,9 +154,9 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
     particle->setColorRange(osgParticle::rangev4(color, color));
 }
 ParticleRotationAffector::ParticleRotationAffector(const Nif::NiParticleRotation *clrdata):
-    mInitialAxis(clrdata->mInitialAxis),
+    mRandomInitialAxis(clrdata->mRandomInitialAxis),
     mRotationSpeed(clrdata->mRotationSpeed),
-    mRandomInitialAxis(clrdata->mRandomInitialAxis)
+    mInitialAxis(clrdata->mInitialAxis)
 {}
 
 ParticleRotationAffector::ParticleRotationAffector()
@@ -173,14 +173,16 @@ void ParticleRotationAffector::operate(osgParticle::Particle* particle, double /
 {
     if(particle->getAge() == 0)
     {
-        osg::Vec3 initialAxis = osg::Vec3f(Misc::Rng::rollClosedProbability() * 2.0 * osg::PI,
-                                           Misc::Rng::rollClosedProbability() * 2.0 * osg::PI,
-                                           Misc::Rng::rollClosedProbability() * 2.0 * osg::PI);
-        initialAxis[0] *= mInitialAxis[0];
-        initialAxis[1] *= mInitialAxis[1];
-        initialAxis[2] *= mInitialAxis[2];
+        osg::Vec3 initialAxis = mInitialAxis;
+        if(mRandomInitialAxis)
+        {
+            initialAxis[0] *= Misc::Rng::rollClosedProbability() * 2.0 * osg::PI;
+            initialAxis[1] *= Misc::Rng::rollClosedProbability() * 2.0 * osg::PI;
+            initialAxis[2] *= Misc::Rng::rollClosedProbability() * 2.0 * osg::PI;
+        }
         particle->setAngle(initialAxis);
         particle->setAngularVelocity(mInitialAxis * mRotationSpeed);
+
     }
 }
 
