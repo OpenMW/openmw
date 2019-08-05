@@ -5,6 +5,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/aipackage.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -48,8 +49,9 @@ namespace MWWorld
         else
         {
             // Don't teleport hostile
-            if( actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat() )
-                return;
+            if( actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat()
+                && actor.getClass().getCreatureStats(actor).getAiSequence().getActivePackage()->getTarget() == world->getPlayerPtr() ) return;
+
             if (mCellName.empty())
             {
                 int cellX;
