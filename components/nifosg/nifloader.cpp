@@ -7,7 +7,10 @@
 #include <osg/LOD>
 #include <osg/Switch>
 #include <osg/TexGen>
+#include <osg/PointSprite>
+#include <osg/ComputeBoundsVisitor>
 #include <osg/ValueObject>
+#include <osg/LightSource>
 
 // resource
 #include <components/debug/debuglog.hpp>
@@ -15,7 +18,13 @@
 #include <components/misc/stringops.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
+#include <components/esm/loadligh.hpp>
+#include <components/sceneutil/lightutil.hpp>
+#include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/lightcontroller.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
+
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -364,6 +373,77 @@ namespace NifOsg
 
         void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
         {
+
+            if (nifNode->recType == Nif::RC_NiLight)
+            {
+                const Nif::NiLight* nilight = static_cast<const Nif::NiLight*>(nifNode);
+                //TOFIX
+                float radius = std::max(1000.0f, nilight->boundXYZ.length());
+                //store osg::LightSource and convert it at instanciation to SceneUtil::LightSource
+                osg::ref_ptr<osg::LightSource> lightSource (new osg::LightSource);
+                osg::ref_ptr<osg::Light> light (new osg::Light);
+                light->setPosition(osg::Vec4(nilight->boundPos, 1.0f));
+
+                OSG_WARN<<radius<<std::endl;
+                OSG_WARN<<nilight->boundPos<<std::endl;
+                OSG_WARN<<nilight->boundXYZ<<std::endl;
+
+                const Nif::NiPointLight* nipointlight = dynamic_cast<const Nif::NiPointLight*>(nifNode);
+
+                if(nipointlight)
+                {
+                    light->setConstantAttenuation(nipointlight->constantAttenuation);
+                    light->setLinearAttenuation(nipointlight->linearAttenuation);
+                    light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
+
+                    const Nif::NiSpotLight* nispotlight = dynamic_cast<const Nif::NiSpotLight*>(nifNode);
+                    if(nispotlight)
+                    {
+                        light->setSpotCutoff(nispotlight->cutoff);
+                        light->setSpotExponent(nispotlight->exponent);
+                    }
+                }else
+                    //record this arbitrary radius for instanciation setup
+                    lightSource->setUserData(new osg::FloatValueObject("radius",radius));
+                    //SceneUtil::configureLight(light, radius, isExterior);
+
+OSG_WARN<<nilight->ambient<<std::endl;
+OSG_WARN<<nilight->diffuse<<std::endl;
+OSG_WARN<<nilight->specular<<std::endl;
+
+                osg::Vec4f ambient = osg::Vec4( nilight->ambient[0], nilight->ambient[1], nilight->ambient[2], 1.0f);
+                osg::Vec4f diffuse = osg::Vec4( nilight->diffuse[0], nilight->diffuse[1],  nilight->diffuse[2], 1.0f);
+                osg::Vec4f specular = osg::Vec4( nilight->specular[0], nilight->specular[1], nilight->specular[2], 1.0f);
+
+                if(!nilight->controller.empty())
+                {
+                    OSG_WARN<< nilight->controller->recName << " nilight controller not supported yet" << std::endl;
+                }
+
+                light->setAmbient(ambient);
+                light->setDiffuse(diffuse);
+                light->setSpecular(specular);
+
+                lightSource->setLight(light);
+ #if 0
+                osg::ComputeBoundsVisitor computeBound;
+
+                osg::Group * parent=node->asGroup();
+                while(parent->getNumParents()>0 && parent->getParent(0))parent=parent->getParent(0);
+                computeBound->traverse(*parent);
+
+                // PositionAttitudeTransform seems to be slightly faster than MatrixTransform
+                osg::ref_ptr<SceneUtil::PositionAttitudeTransform> trans(new SceneUtil::PositionAttitudeTransform);
+                trans->setPosition(computeBound.getBoundingBox().center());
+
+                trans->addChild(lightSource);
+                node->asGroup()->addChild(trans);
+#else
+                node->asGroup()->addChild(lightSource);
+#endif
+                Log(Debug::Info) << "processed nilight " << nifNode->recName << " in " << mFilename;
+                return;
+            }
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
                 Log(Debug::Info) << "Unhandled effect " << nifNode->recName << " in " << mFilename;

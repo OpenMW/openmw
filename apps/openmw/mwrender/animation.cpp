@@ -7,8 +7,10 @@
 #include <osg/TexEnvCombine>
 #include <osg/MatrixTransform>
 #include <osg/BlendFunc>
+#include <osg/LightSource>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
+#include <osg/ValueObject>
 #include <osg/Switch>
 
 #include <osgParticle/ParticleSystem>
@@ -28,6 +30,7 @@
 
 #include <components/vfs/manager.hpp>
 
+#include <components/sceneutil/lightcontroller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -146,6 +149,63 @@ namespace
                 node.setSingleChildOn(1);
             }
 
+            traverse(node);
+        }
+    };
+
+    class ConvertOsgLightSourceVisitor : public osg::NodeVisitor
+    {
+        bool mIsExterior;
+    public:
+
+        ConvertOsgLightSourceVisitor(bool isext)
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mIsExterior(isext)
+        {
+        }
+
+        virtual void apply(osg::Group& node)
+        {
+            for(unsigned int i=0; i<node.getNumChildren(); ++i)
+            {
+                osg::LightSource *ls= dynamic_cast<osg::LightSource*>(node.getChild(i));
+                if(ls)
+                {
+                    //replace ls with SceneUtil ls
+
+                    SceneUtil::LightSource *nls= new  SceneUtil::LightSource();
+                    nls->setNodeMask(MWRender::Mask_ParticleSystem);
+                    float radius = 0;
+                    osg::FloatValueObject* fo = dynamic_cast<osg::FloatValueObject*>(ls->getUserData());
+                    if(fo) radius = fo->getValue();
+
+                    //workaround pingpong light trick
+                    // SceneUtil::configureLight(ls->getLight(), radius, mIsExterior);
+                    osg::Light * light = new osg::Light(*ls->getLight());
+                    if(fo)
+                        SceneUtil::configureLight(light, radius, mIsExterior);
+
+                    nls->setLight(light);
+                    nls->setRadius(radius*10);
+
+                    osg::Callback *cb = ls->getUpdateCallback();
+                    while(cb && !dynamic_cast<SceneUtil::LightController*>(cb))
+                        cb = cb->getNestedCallback();
+
+                    if(cb)
+                        nls->addUpdateCallback(cb);
+                    else
+                    {
+                        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
+                        ctrl->setDiffuse(light->getDiffuse());
+                        ctrl->setType(SceneUtil::LightController::LT_Normal);
+                        OSG_WARN<<"not controller found setting default"<<std::endl;
+                        nls->addUpdateCallback(ctrl);
+                    }
+                   node.removeChild(i);
+                   node.insertChild(i, nls);
+
+                }
+            }
             traverse(node);
         }
     };
@@ -2028,6 +2088,9 @@ namespace MWRender
                 mObjectRoot->accept(visitor);
             }
         }
+
+        ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
+        mObjectRoot->accept(lightvis);
     }
 
     bool ObjectAnimation::canBeHarvested() const
