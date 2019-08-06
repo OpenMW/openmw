@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <stack>
 #include <iterator>
+#include <regex>
+#include <string>
 
 #include <components/misc/stringops.hpp>
 
@@ -322,6 +324,22 @@ namespace Compiler
             if (mExplicit.empty() && getContext().isId (name2))
             {
                 mExplicit = name2;
+                return true;
+            }
+
+            // In case someone tried passing an int in quotes
+            if (regex_match(name, std::regex("[+-]?[0-9]+")))
+            {
+                pushIntegerLiteral (stof(name));
+                mTokenLoc = loc;
+                return true;
+            }
+
+            // In case someone tried passing a float in quotes
+            if (regex_match(name, std::regex("[+-]?[0-9]+.[0-9]+")))
+            {
+                pushFloatLiteral (stof(name));
+                mTokenLoc = loc;
                 return true;
             }
         }
