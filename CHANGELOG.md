@@ -105,6 +105,7 @@
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Bug #5047: # in cell names sets color
     Bug #5050: Invalid spell effects are not handled gracefully
+    Bug #5055: Mark, Recall, Intervention magic effect abilities have no effect when added and removed in the same frame
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
