@@ -167,40 +167,23 @@ namespace
         {
             for(unsigned int i=0; i<node.getNumChildren(); ++i)
             {
-                osg::LightSource *ls= dynamic_cast<osg::LightSource*>(node.getChild(i));
+                osg::LightSource *ls = dynamic_cast<osg::LightSource*>(node.getChild(i));
                 if(ls)
                 {
                     //replace ls with SceneUtil ls
-
                     SceneUtil::LightSource *nls= new  SceneUtil::LightSource();
                     nls->setNodeMask(MWRender::Mask_ParticleSystem);
+                    osg::Light * light = new osg::Light(*ls->getLight());
                     float radius = 0;
                     osg::FloatValueObject* fo = dynamic_cast<osg::FloatValueObject*>(ls->getUserData());
-                    if(fo) radius = fo->getValue();
-
-                    //workaround pingpong light trick
-                    // SceneUtil::configureLight(ls->getLight(), radius, mIsExterior);
-                    osg::Light * light = new osg::Light(*ls->getLight());
                     if(fo)
-                        SceneUtil::configureLight(light, radius, mIsExterior);
-
-                    nls->setLight(light);
-                    nls->setRadius(radius*10);
-
-                    osg::Callback *cb = ls->getUpdateCallback();
-                    while(cb && !dynamic_cast<SceneUtil::LightController*>(cb))
-                        cb = cb->getNestedCallback();
-
-                    if(cb)
-                        nls->addUpdateCallback(cb);
-                    else
                     {
-                        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
-                        ctrl->setDiffuse(light->getDiffuse());
-                        ctrl->setType(SceneUtil::LightController::LT_Normal);
-                        OSG_WARN<<"not controller found setting default"<<std::endl;
-                        nls->addUpdateCallback(ctrl);
+                        radius = fo->getValue();
+                        SceneUtil::configureLight(light, radius, mIsExterior);
+                        nls->setRadius(radius * 10.0f);//TOFIX
                     }
+                    nls->setLight(light);
+
                    node.removeChild(i);
                    node.insertChild(i, nls);
 
