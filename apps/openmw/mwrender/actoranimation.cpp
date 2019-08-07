@@ -353,9 +353,12 @@ void ActorAnimation::updateQuiver()
     {
         osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
         osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
-        if (!ammo->getClass().getEnchantment(*ammo).empty())
-            mGlowUpdater = SceneUtil::addEnchantedGlow(arrow, mResourceSystem, glowColor);
     }
+
+    // Assign GlowUpdater for ammo sheathing bone itself to do not attach it to every arrow
+    ammoNode->setUpdateCallback(nullptr);
+    if (ammoCount > 0 && !ammo->getClass().getEnchantment(*ammo).empty())
+        SceneUtil::addEnchantedGlow(ammoNode, mResourceSystem, glowColor);
 }
 
 void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
