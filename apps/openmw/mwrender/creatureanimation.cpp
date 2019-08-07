@@ -173,6 +173,16 @@ bool CreatureWeaponAnimation::isArrowAttached() const
 void CreatureWeaponAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);
+
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+    if (ammo != inv.end() && !ammo->getClass().getEnchantment(*ammo).empty())
+    {
+        osg::Group* bone = getArrowBone();
+        if (bone != nullptr && bone->getNumChildren())
+            addGlow(bone->getChild(0), ammo->getClass().getEnchantmentColor(*ammo));
+    }
+
     updateQuiver();
 }
 
