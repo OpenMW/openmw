@@ -79,7 +79,7 @@ PartHolderPtr ActorAnimation::getWeaponPart(const std::string& model, const std:
         return PartHolderPtr();
 
     if (enchantedGlow)
-        addGlow(instance, *glowColor);
+        mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
     return PartHolderPtr(new PartHolder(instance));
 }
@@ -272,7 +272,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         if (isEnchanted)
         {
             osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-            addGlow(weaponNode, glowColor);
+            mGlowUpdater = SceneUtil::addEnchantedGlow(weaponNode, mResourceSystem, glowColor);
         }
     }
 }
@@ -354,7 +354,7 @@ void ActorAnimation::updateQuiver()
         osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
         osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
         if (!ammo->getClass().getEnchantment(*ammo).empty())
-            addGlow(arrow, glowColor);
+            mGlowUpdater = SceneUtil::addEnchantedGlow(arrow, mResourceSystem, glowColor);
     }
 }
 

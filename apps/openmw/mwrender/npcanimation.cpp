@@ -664,7 +664,7 @@ PartHolderPtr NpcAnimation::insertBoundedPart(const std::string& model, const st
 
     osg::ref_ptr<osg::Node> attached = SceneUtil::attach(instance, mObjectRoot, bonefilter, found->second);
     if (enchantedGlow)
-        addGlow(attached, *glowColor);
+        mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, *glowColor);
 
     return PartHolderPtr(new PartHolder(attached));
 }
@@ -954,7 +954,7 @@ void NpcAnimation::attachArrow()
     {
         osg::Group* bone = getArrowBone();
         if (bone != nullptr && bone->getNumChildren())
-            addGlow(bone->getChild(0), ammo->getClass().getEnchantmentColor(*ammo));
+            SceneUtil::addEnchantedGlow(bone->getChild(0), mResourceSystem, ammo->getClass().getEnchantmentColor(*ammo));
     }
 
     updateQuiver();

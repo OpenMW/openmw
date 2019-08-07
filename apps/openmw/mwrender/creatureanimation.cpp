@@ -132,7 +132,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         scene.reset(new PartHolder(attached));
 
         if (!item.getClass().getEnchantment(item).empty())
-            addGlow(attached, item.getClass().getEnchantmentColor(item));
+            mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, item.getClass().getEnchantmentColor(item));
 
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
@@ -180,7 +180,7 @@ void CreatureWeaponAnimation::attachArrow()
     {
         osg::Group* bone = getArrowBone();
         if (bone != nullptr && bone->getNumChildren())
-            addGlow(bone->getChild(0), ammo->getClass().getEnchantmentColor(*ammo));
+            SceneUtil::addEnchantedGlow(bone->getChild(0), mResourceSystem, ammo->getClass().getEnchantmentColor(*ammo));
     }
 
     updateQuiver();
