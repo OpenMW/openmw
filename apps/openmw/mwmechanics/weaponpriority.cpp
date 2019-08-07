@@ -102,8 +102,9 @@ namespace MWMechanics
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             {
                 int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+                float charge = item.getCellRef().getEnchantmentCharge();
 
-                if (item.getCellRef().getEnchantmentCharge() == -1 || item.getCellRef().getEnchantmentCharge() >= castCost)
+                if (charge == -1 || charge >= castCost || weapon->mData.mType >= ESM::Weapon::MarksmanThrown)
                     rating += rateEffects(enchantment->mEffects, actor, enemy);
             }
         }

@@ -340,7 +340,7 @@ namespace Compiler
             extensions.registerFunction ("getmasserphase", 'l', "", opcodeGetMasserPhase);
             extensions.registerFunction ("getsecundaphase", 'l', "", opcodeGetSecundaPhase);
             extensions.registerFunction ("getcurrentweather", 'l', "", opcodeGetCurrentWeather);
-            extensions.registerInstruction ("modregion", "S/llllllllll", opcodeModRegion);
+            extensions.registerInstruction ("modregion", "S/llllllllllX", opcodeModRegion);
         }
     }
 

@@ -24,7 +24,7 @@
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4540: Rain delay when exiting water
-    Bug #4600: Crash when no sound output is available or --no-sound is used. 
+    Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
@@ -105,6 +105,7 @@
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Bug #5047: # in cell names sets color
     Bug #5050: Invalid spell effects are not handled gracefully
+    Bug #5055: Mark, Recall, Intervention magic effect abilities have no effect when added and removed in the same frame
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
@@ -112,8 +113,13 @@
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5082: Scrolling with controller in GUI mode is broken
+    Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
+    Bug #5099: Non-swimming enemies will enter water if player is water walking
+    Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
+    Bug #5105: NPCs start combat with werewolves from any distance
+    Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -149,6 +155,8 @@
     Feature #5036: Allow scripted faction leaving
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
+    Feature #5094: Unix like console hotkeys
+    Feature #5098: Allow user controller bindings
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

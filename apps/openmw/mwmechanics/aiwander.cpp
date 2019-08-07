@@ -448,7 +448,7 @@ namespace MWMechanics
         else
         {
             // have not yet reached the destination
-            evadeObstacles(actor, storage);
+            evadeObstacles(actor, duration, storage);
         }
     }
 
@@ -479,8 +479,17 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
+        if (mUsePathgrid)
+        {
+            const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
+                    + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+            const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
+            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor), pointTolerance);
+        }
+
         if (mObstacleCheck.isEvading())
         {
             // first check if we're walking into a door

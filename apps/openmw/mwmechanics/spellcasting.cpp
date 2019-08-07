@@ -823,17 +823,21 @@ namespace MWMechanics
         mStack = false;
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+        bool isProjectile = false;
+        if (item.getTypeName() == typeid(ESM::Weapon).name())
+        {
+            const ESM::Weapon* ref = item.get<ESM::Weapon>()->mBase;
+            isProjectile = ref->mData.mType >= ESM::Weapon::MarksmanThrown;
+        }
+        int type = enchantment->mData.mType;
 
         // Check if there's enough charge left
-        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+        if (!godmode && (type == ESM::Enchantment::WhenUsed || (!isProjectile && type == ESM::Enchantment::WhenStrikes)))
         {
             int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
                 item.getCellRef().setEnchantmentCharge(static_cast<float>(enchantment->mData.mCharge));
-
-            if (godmode)
-                castCost = 0;
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {
@@ -862,30 +866,23 @@ namespace MWMechanics
             item.getCellRef().setEnchantmentCharge(item.getCellRef().getEnchantmentCharge() - castCost);
         }
 
-        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed)
+        if (type == ESM::Enchantment::WhenUsed)
         {
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 1);
         }
-        else if (enchantment->mData.mType == ESM::Enchantment::CastOnce)
+        else if (type == ESM::Enchantment::CastOnce)
         {
             if (!godmode)
                 item.getContainerStore()->remove(item, 1, mCaster);
         }
-        else if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+        else if (type == ESM::Enchantment::WhenStrikes)
         {
             if (mCaster == getPlayer())
                 mCaster.getClass().skillUsageSucceeded (mCaster, ESM::Skill::Enchant, 3);
         }
 
         inflict(mCaster, mCaster, enchantment->mEffects, ESM::RT_Self);
-
-        bool isProjectile = false;
-        if (item.getTypeName() == typeid(ESM::Weapon).name())
-        {
-            const MWWorld::LiveCellRef<ESM::Weapon> *ref = item.get<ESM::Weapon>();
-            isProjectile = ref->mBase->mData.mType == ESM::Weapon::Arrow || ref->mBase->mData.mType == ESM::Weapon::Bolt || ref->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
-        }
 
         if (isProjectile || !mTarget.isEmpty())
             inflict(mTarget, mCaster, enchantment->mEffects, ESM::RT_Touch);
