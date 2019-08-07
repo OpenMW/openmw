@@ -373,7 +373,8 @@ namespace NifOsg
                 //store osg::LightSource and convert it at instanciation to SceneUtil::LightSource
                 osg::ref_ptr<osg::LightSource> lightSource (new osg::LightSource);
                 osg::ref_ptr<osg::Light> light (new osg::Light);
-                light->setPosition(osg::Vec4(nilight->boundPos, 1.0f));
+                light->setPosition(osg::Vec4());
+                light->setDirection(osg::Vec3( 0.0, 0.0, -1.0) * nilight->trafo.toMatrix());
 
                 const Nif::NiPointLight* nipointlight = dynamic_cast<const Nif::NiPointLight*>(nifNode);
 
@@ -382,6 +383,7 @@ namespace NifOsg
                     light->setConstantAttenuation(nipointlight->constantAttenuation);
                     light->setLinearAttenuation(nipointlight->linearAttenuation);
                     light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
+                    light->setPosition(osg::Vec4(nilight->trafo.pos, 1.0f));
 
                     const Nif::NiSpotLight* nispotlight = dynamic_cast<const Nif::NiSpotLight*>(nifNode);
                     if(nispotlight)
@@ -389,25 +391,29 @@ namespace NifOsg
                         light->setSpotCutoff(nispotlight->cutoff);
                         light->setSpotExponent(nispotlight->exponent);
                     }
-                }else
+                }
+                else
+                {
                     //record this arbitrary radius for instanciation setup
                     lightSource->setUserData(new osg::FloatValueObject("radius",radius));
-
+                }
                 osg::Vec4f ambient(nilight->ambient, 1.0f);
                 osg::Vec4f diffuse(nilight->diffuse, 1.0f);
                 osg::Vec4f specular(nilight->specular, 1.0f);
 
-                if(!nilight->controller.empty())
-                {
-                    Log(Debug::Info) << nilight->controller->recName << " nilight controller not supported yet";
-                }
 
                 light->setAmbient(ambient);
                 light->setDiffuse(diffuse);
                 light->setSpecular(specular);
 
                 lightSource->setLight(light);
+
+                if(!nilight->controller.empty())
+                {
+                    Log(Debug::Info) << nilight->controller->recName << " nilight controller not supported yet";
+                }
                 node->asGroup()->addChild(lightSource);
+
                 Log(Debug::Info) << "processed nilight " << nifNode->recName << " in " << mFilename;
 
                 return;
@@ -673,7 +679,6 @@ namespace NifOsg
                     if (!effects[i].empty())
                         handleEffect(effects[i].getPtr(), node, imageManager);
                 }
-
                 const Nif::NodeList &children = ninode->children;
                 for(size_t i = 0;i < children.length();++i)
                 {
