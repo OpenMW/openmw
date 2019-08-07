@@ -178,8 +178,9 @@ namespace
                     osg::FloatValueObject* fo = dynamic_cast<osg::FloatValueObject*>(ls->getUserData());
                     if(fo)
                     {
-                        radius = fo->getValue();
-                        SceneUtil::configureLight(light, radius, mIsExterior);
+                        radius = fo->getValue();                        
+                        if(light->getPosition().w() == 0) //directional light
+                            SceneUtil::configureLight(light, radius, mIsExterior);
                         nls->setRadius(radius * 10.0f);//TOFIX
                     }
                     nls->setLight(light);

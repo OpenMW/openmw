@@ -306,10 +306,10 @@ namespace NifOsg
                     else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
-                            applyTo->setUserValue("overrideFx", 1);                
+                            applyTo->setUserValue("overrideFx", 1);
                     }
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
-                }              
+                }
             }
         }
 
@@ -364,7 +364,7 @@ namespace NifOsg
         }
 
         void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
-        {            
+        {
             if (nifNode->recType == Nif::RC_NiLight)
             {
                 const Nif::NiLight* nilight = static_cast<const Nif::NiLight*>(nifNode);
@@ -380,6 +380,7 @@ namespace NifOsg
 
                 if(nipointlight)
                 {
+                    lightSource->setUserData(new osg::FloatValueObject("radius", radius));
                     light->setConstantAttenuation(nipointlight->constantAttenuation);
                     light->setLinearAttenuation(nipointlight->linearAttenuation);
                     light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
