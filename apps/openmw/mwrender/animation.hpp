@@ -330,8 +330,6 @@ protected:
      */
     virtual void addControllers();
 
-    osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
-
     void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, float glowDuration = -1);
 
     /// Set the render bin for this animation's object root. May be customized by subclasses.

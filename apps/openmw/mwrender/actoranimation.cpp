@@ -238,7 +238,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     {
         if (showHolsteredWeapons)
         {
-            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
+            osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
             mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
             if (mScabbard)
                 resetControllers(mScabbard->getNode());
@@ -271,7 +271,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 
         if (isEnchanted)
         {
-            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
+            osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
             addGlow(weaponNode, glowColor);
         }
     }
@@ -347,7 +347,7 @@ void ActorAnimation::updateQuiver()
     }
 
     // Add new ones
-    osg::Vec4f glowColor = getEnchantmentColor(*ammo);
+    osg::Vec4f glowColor = ammo->getClass().getEnchantmentColor(*ammo);
     std::string model = ammo->getClass().getModel(*ammo);
     for (unsigned int i=0; i<ammoCount; ++i)
     {

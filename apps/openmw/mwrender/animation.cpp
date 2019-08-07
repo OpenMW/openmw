@@ -1658,31 +1658,6 @@ namespace MWRender
         mResourceSystem->getSceneManager()->recreateShaders(node);
     }
 
-    // TODO: Should not be here
-    osg::Vec4f Animation::getEnchantmentColor(const MWWorld::ConstPtr& item) const
-    {
-        osg::Vec4f result(1,1,1,1);
-        std::string enchantmentName = item.getClass().getEnchantment(item);
-        if (enchantmentName.empty())
-            return result;
-
-        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
-        if (!enchantment)
-            return result;
-
-        assert (enchantment->mEffects.mList.size());
-
-        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
-                enchantment->mEffects.mList.front().mEffectID);
-        if (!magicEffect)
-            return result;
-
-        result.x() = magicEffect->mData.mRed / 255.f;
-        result.y() = magicEffect->mData.mGreen / 255.f;
-        result.z() = magicEffect->mData.mBlue / 255.f;
-        return result;
-    }
-
     void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light *esmLight)
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
@@ -2001,7 +1976,7 @@ namespace MWRender
                 addAnimSource(model, model);
 
             if (!ptr.getClass().getEnchantment(ptr).empty())
-                addGlow(mObjectRoot, getEnchantmentColor(ptr));
+                addGlow(mObjectRoot, ptr.getClass().getEnchantmentColor(ptr));
         }
         if (ptr.getTypeName() == typeid(ESM::Light).name() && allowLight)
             addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);

@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec4f>
+
 #include "ptr.hpp"
 
 namespace ESM
@@ -367,6 +369,8 @@ namespace MWWorld
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
             virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
+
+            virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
     };
 }
 

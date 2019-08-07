@@ -132,7 +132,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         scene.reset(new PartHolder(attached));
 
         if (!item.getClass().getEnchantment(item).empty())
-            addGlow(attached, getEnchantmentColor(item));
+            addGlow(attached, item.getClass().getEnchantmentColor(item));
 
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
