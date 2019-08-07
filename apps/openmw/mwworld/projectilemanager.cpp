@@ -323,6 +323,8 @@ namespace MWWorld
         MWWorld::Ptr ptr = ref.getPtr();
 
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, osg::Vec4(0,0,0,0));
+        if (!ptr.getClass().getEnchantment(ptr).empty())
+            SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
         mProjectiles.push_back(state);
     }

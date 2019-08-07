@@ -79,7 +79,7 @@ PartHolderPtr ActorAnimation::getWeaponPart(const std::string& model, const std:
         return PartHolderPtr();
 
     if (enchantedGlow)
-        addGlow(instance, *glowColor);
+        mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
     return PartHolderPtr(new PartHolder(instance));
 }
@@ -238,7 +238,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     {
         if (showHolsteredWeapons)
         {
-            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
+            osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
             mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
             if (mScabbard)
                 resetControllers(mScabbard->getNode());
@@ -271,8 +271,8 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 
         if (isEnchanted)
         {
-            osg::Vec4f glowColor = getEnchantmentColor(*weapon);
-            addGlow(weaponNode, glowColor);
+            osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
+            mGlowUpdater = SceneUtil::addEnchantedGlow(weaponNode, mResourceSystem, glowColor);
         }
     }
 }
@@ -347,15 +347,18 @@ void ActorAnimation::updateQuiver()
     }
 
     // Add new ones
-    osg::Vec4f glowColor = getEnchantmentColor(*ammo);
+    osg::Vec4f glowColor = ammo->getClass().getEnchantmentColor(*ammo);
     std::string model = ammo->getClass().getModel(*ammo);
     for (unsigned int i=0; i<ammoCount; ++i)
     {
         osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
         osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
-        if (!ammo->getClass().getEnchantment(*ammo).empty())
-            addGlow(arrow, glowColor);
     }
+
+    // Assign GlowUpdater for ammo sheathing bone itself to do not attach it to every arrow
+    ammoNode->setUpdateCallback(nullptr);
+    if (ammoCount > 0 && !ammo->getClass().getEnchantment(*ammo).empty())
+        SceneUtil::addEnchantedGlow(ammoNode, mResourceSystem, glowColor);
 }
 
 void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
