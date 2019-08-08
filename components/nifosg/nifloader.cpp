@@ -1081,11 +1081,17 @@ namespace NifOsg
                 const Nif::NiTriStripsData* data = triStrips->data.getPtr();
                 vertexColorsPresent = !data->colors.empty();
                 triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triStrips->name);
-                // Can't make a triangle from less than three vertices. All strips have the same size.
-                if (!data->strips.empty() && data->strips[0].size() >= 3)
+                if (!data->strips.empty())
+                {
                     for (const std::vector<unsigned short>& strip : data->strips)
+                    {
+                        // Can't make a triangle from less than three vertices.
+                        if (strip.size() < 3)
+                            continue;
                         geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), 
                                                                             (unsigned short*)strip.data()));
+                    }
+                }
             }
 
             // osg::Material properties are handled here for two reasons:

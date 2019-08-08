@@ -58,16 +58,25 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
 {
     const std::vector<osg::Vec3f> &vertices = data.vertices;
     const std::vector<std::vector<unsigned short>> &strips = data.strips;
-    // Can't make a triangle from less than three vertices. All strips have the same size.
-    if (vertices.empty() || strips.empty() || strips[0].size() < 3)
+    if (vertices.empty() || strips.empty())
         return;
     mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
-    // There are N+2*M vertex indices overall, so we must substract 2*M (N triangles, M strips)
-    mesh.preallocateIndices(static_cast<int>((strips.size()-2) * strips[0].size()));
+    int numTriangles = 0;
+    for (const std::vector<unsigned short>& strip : strips)
+    {
+        // Each strip with N points contains information about N-2 triangles.
+        if (strip.size() >= 3)
+            numTriangles += static_cast<int>(strip.size()-2);
+    }
+    mesh.preallocateIndices(static_cast<int>(numTriangles));
 
     // It's triangulation time. Totally not a NifSkope spell ripoff.
     for (const std::vector<unsigned short>& strip : strips)
     {
+        // Can't make a triangle from less than 3 points.
+        if (strip.size() < 3)
+            continue;
+
         unsigned short a = strip[0], b = strip[0], c = strip[1];
         for (int i = 2; i < static_cast<int>(strip.size()); i++)
         {

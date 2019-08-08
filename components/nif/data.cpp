@@ -98,12 +98,14 @@ void NiTriStripsData::read(NIFStream *nif)
     /*int tris =*/ nif->getUShort();
     // Number of triangle strips
     int numStrips = nif->getUShort();
-    // Number of points in each strip
-    int lengths = nif->getUShort();
+
+    std::vector<unsigned short> lengths;
+    nif->getUShorts(lengths, numStrips);
+
     for (int i = 0; i < numStrips; i++)
     {
         std::vector<unsigned short> strip;
-        nif->getUShorts(strip, lengths);
+        nif->getUShorts(strip, lengths[i]);
         strips.emplace_back(strip);
     }
 }
