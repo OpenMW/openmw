@@ -87,7 +87,7 @@ boost::filesystem::path LinuxPath::getLocalPath() const
     {
         if (readlink(path, &binPath[0], binPath.size()) != -1)
         {
-            localPath = boost::filesystem::path(binPath).parent_path();
+            localPath = boost::filesystem::path(binPath).parent_path() / "/";
             break;
         }
     }
