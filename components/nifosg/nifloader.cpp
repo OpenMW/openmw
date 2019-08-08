@@ -452,6 +452,7 @@ namespace NifOsg
                 break;
             }
             case Nif::RC_NiTriShape:
+            case Nif::RC_NiTriStrips:
             case Nif::RC_NiAutoNormalParticles:
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
@@ -580,6 +581,11 @@ namespace NifOsg
                 node->setDataVariance(osg::Object::DYNAMIC);
             }
 
+            if (nifNode->recType == Nif::RC_NiTriStrips && isAnimated) // the same thing for animated NiTriStrips
+            {
+                node->setDataVariance(osg::Object::DYNAMIC);
+            }
+
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
@@ -603,6 +609,25 @@ namespace NifOsg
                         handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
                 }
             }
+            if (nifNode->recType == Nif::RC_NiTriStrips && !skipMeshes)
+            {
+                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
+                const std::string nodeName = Misc::StringUtils::lowerCase(triStrips->name);
+                static const std::string markerName = "tri editormarker";
+                static const std::string shadowName = "shadow";
+                static const std::string shadowName2 = "tri shadow";
+                const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
+                if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
+                {
+                    if (triStrips->skin.empty()) {}
+                        /*handleTriShape(triShape, node, composite, boundTextures, animflags);*/
+                    else {}
+                        /*handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);*/
+
+                    if (!nifNode->controller.empty()) {}
+                        /*handleMeshControllers(nifNode, node, composite, boundTextures, animflags);*/
+                }
+            }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
                 handleParticleSystem(nifNode, node, composite, animflags, rootNode);
@@ -612,7 +637,8 @@ namespace NifOsg
 
             // Note: NiTriShapes are not allowed to have KeyframeControllers (the vanilla engine just crashes when there is one).
             // We can take advantage of this constraint for optimizations later.
-            if (nifNode->recType != Nif::RC_NiTriShape && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
+            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips
+                    && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
 
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);

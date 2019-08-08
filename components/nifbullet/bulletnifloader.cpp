@@ -248,6 +248,10 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         {
             handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, getWorldTransform(node), isAnimated, avoid);
         }
+        if(!node->hasBounds && node->recType == Nif::RC_NiTriStrips)
+        {
+            handleNiTriStrips(static_cast<const Nif::NiTriStrips*>(node), flags, getWorldTransform(node), isAnimated, avoid);
+        }
     }
 
     // For NiNodes, loop through children
@@ -328,6 +332,13 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
         // Static shape, just transform all vertices into position
         fillTriangleMeshWithTransform(*mStaticMesh, shape->data.get(), transform);
     }
+}
+
+
+void BulletNifLoader::handleNiTriStrips(const Nif::NiTriStrips *shape, int flags, const osg::Matrixf &transform,
+                                       bool isAnimated, bool avoid)
+{
+    // do nothing for now
 }
 
 } // namespace NifBullet

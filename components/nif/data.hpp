@@ -53,6 +53,15 @@ public:
     void read(NIFStream *nif);
 };
 
+class NiTriStripsData : public ShapeData
+{
+public:
+    // Triangle strips, series of vertex indices.
+    std::vector<std::vector<unsigned short>> strips;
+
+    void read(NIFStream *nif);
+};
+
 class NiAutoNormalParticlesData : public ShapeData
 {
 public:
