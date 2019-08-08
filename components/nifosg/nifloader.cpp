@@ -576,12 +576,8 @@ namespace NifOsg
                 node->setDataVariance(osg::Object::DYNAMIC);
             }
 
-            if (nifNode->recType == Nif::RC_NiTriShape && isAnimated) // the same thing for animated NiTriShapes
-            {
-                node->setDataVariance(osg::Object::DYNAMIC);
-            }
-
-            if (nifNode->recType == Nif::RC_NiTriStrips && isAnimated) // the same thing for animated NiTriStrips
+            // Same thing for animated shapes
+            if ((nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips) && isAnimated)
             {
                 node->setDataVariance(osg::Object::DYNAMIC);
             }
