@@ -158,6 +158,7 @@
     Feature #5051: Provide a separate textures for scrollbars
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
+    Feature #5121: Handle NiTriStrips and NiTriStripsData
     Feature #5122: Use magic glow for enchanted arrows
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
