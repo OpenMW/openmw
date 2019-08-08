@@ -1128,6 +1128,10 @@ namespace NifOsg
             {
                 for (const std::vector<unsigned short>& strip : data->strips)
                 {
+                    // Can't make a triangle from less than three vertices.
+                    // All strips have the same size.
+                    if (strip.size() < 3)
+                        break;
                     geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 
                                                                             strip.size(), (unsigned short*)strip.data()));
                 }

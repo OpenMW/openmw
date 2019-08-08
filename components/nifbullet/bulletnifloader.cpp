@@ -63,7 +63,7 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
 
     // Assume every strip has the same size
     const int singleStripSize = static_cast<int>(strips[0].size());
-    // Can't make a triangle from 2 vertices or less.
+    // Can't make a triangle from less than three vertices.
     if (singleStripSize < 3)
         return;
 
