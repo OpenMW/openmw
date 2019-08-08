@@ -619,13 +619,13 @@ namespace NifOsg
                 const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
                 if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
-                    if (triStrips->skin.empty()) {}
-                        /*handleTriShape(triShape, node, composite, boundTextures, animflags);*/
-                    else {}
-                        /*handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);*/
+                    if (triStrips->skin.empty())
+                        handleTriStrips(triStrips, node, composite, boundTextures, animflags);
+                    else
+                        handleSkinnedTriStrips(triStrips, node, composite, boundTextures, animflags);
 
-                    if (!nifNode->controller.empty()) {}
-                        /*handleMeshControllers(nifNode, node, composite, boundTextures, animflags);*/
+                    if (!nifNode->controller.empty())
+                        handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
                 }
             }
 
@@ -699,7 +699,7 @@ namespace NifOsg
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
                 }
                 else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-                {} // handled in handleTriShape
+                {} // handled in handleTriShape/handleTriStrips
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
@@ -1097,6 +1097,51 @@ namespace NifOsg
             applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false);
         }
 
+        void triStripsToGeometry(const Nif::NiTriStrips *triStrips, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        {
+            const Nif::NiTriStripsData* data = triStrips->data.getPtr();
+
+            if (!data->vertices.empty())
+                geometry->setVertexArray(new osg::Vec3Array(data->vertices.size(), data->vertices.data()));
+            if (!data->normals.empty())
+                geometry->setNormalArray(new osg::Vec3Array(data->normals.size(), data->normals.data()), osg::Array::BIND_PER_VERTEX);
+
+            int textureStage = 0;
+            for (const int uvSet : boundTextures)
+            {
+                if (uvSet >= (int)data->uvlist.size())
+                {
+                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on TriStrips \"" << triStrips->name << "\" in " << mFilename;
+                    if (!data->uvlist.empty())
+                        geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[0].size(), data->uvlist[0].data()), osg::Array::BIND_PER_VERTEX);
+                    continue;
+                }
+
+                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(data->uvlist[uvSet].size(), data->uvlist[uvSet].data()), osg::Array::BIND_PER_VERTEX);
+                textureStage++;
+            }
+
+            if (!data->colors.empty())
+                geometry->setColorArray(new osg::Vec4Array(data->colors.size(), data->colors.data()), osg::Array::BIND_PER_VERTEX);
+
+            if (!data->strips.empty())
+            {
+                for (const std::vector<unsigned short>& strip : data->strips)
+                {
+                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, 
+                                                                            strip.size(), (unsigned short*)strip.data()));
+                }
+            }
+
+            // osg::Material properties are handled here for two reasons:
+            // - if there are no vertex colors, we need to disable colorMode.
+            // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
+            //   above the actual renderable would be tedious.
+            std::vector<const Nif::Property*> drawableProps;
+            collectDrawableProperties(triStrips, drawableProps);
+            applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false);
+        }
+
         void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<osg::Drawable> drawable;
@@ -1128,12 +1173,61 @@ namespace NifOsg
             parentNode->addChild(drawable);
         }
 
+        void handleTriStrips(const Nif::NiTriStrips* triStrips, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        {
+            osg::ref_ptr<osg::Drawable> drawable;
+            for (Nif::ControllerPtr ctrl = triStrips->controller; !ctrl.empty(); ctrl = ctrl->next)
+            {
+                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
+                    continue;
+                if(ctrl->recType == Nif::RC_NiGeomMorpherController)
+                {
+                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triStrips, parentNode, composite, boundTextures, animflags);
+
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
+                                static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
+                    setupController(ctrl.getPtr(), morphctrl, animflags);
+                    drawable->setUpdateCallback(morphctrl);
+                    break;
+                }
+            }
+
+            if (!drawable.get())
+            {
+                osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
+                drawable = geom;
+                triStripsToGeometry(triStrips, geom, parentNode, composite, boundTextures, animflags);
+            }
+
+            drawable->setName(triStrips->name);
+
+            parentNode->addChild(drawable);
+        }
+
         osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
 
             osg::ref_ptr<osg::Geometry> sourceGeometry (new osg::Geometry);
             triShapeToGeometry(triShape, sourceGeometry, parentNode, composite, boundTextures, animflags);
+            morphGeom->setSourceGeometry(sourceGeometry);
+
+            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
+            if (morphs.empty())
+                return morphGeom;
+            // Note we are not interested in morph 0, which just contains the original vertices
+            for (unsigned int i = 1; i < morphs.size(); ++i)
+                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
+
+            return morphGeom;
+        }
+
+        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriStrips *triStrips, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        {
+            osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
+
+            osg::ref_ptr<osg::Geometry> sourceGeometry (new osg::Geometry);
+            triStripsToGeometry(triStrips, sourceGeometry, parentNode, composite, boundTextures, animflags);
             morphGeom->setSourceGeometry(sourceGeometry);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
@@ -1182,6 +1276,44 @@ namespace NifOsg
 
             parentNode->addChild(rig);
         }
+
+        void handleSkinnedTriStrips(const Nif::NiTriStrips *triStrips, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+                                          const std::vector<int>& boundTextures, int animflags)
+        {
+            osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
+            triStripsToGeometry(triStrips, geometry, parentNode, composite, boundTextures, animflags);
+
+            osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
+            rig->setSourceGeometry(geometry);
+            rig->setName(triStrips->name);
+
+            const Nif::NiSkinInstance *skin = triStrips->skin.getPtr();
+
+            // Assign bone weights
+            osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
+
+            const Nif::NiSkinData *data = skin->data.getPtr();
+            const Nif::NodeList &bones = skin->bones;
+            for(size_t i = 0;i < bones.length();i++)
+            {
+                std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
+
+                SceneUtil::RigGeometry::BoneInfluence influence;
+                const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
+                for(size_t j = 0;j < weights.size();j++)
+                {
+                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
+                }
+                influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
+                influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
+
+                map->mData.emplace_back(boneName, influence);
+            }
+            rig->setInfluenceMap(map);
+
+            parentNode->addChild(rig);
+        }
+
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
         {
