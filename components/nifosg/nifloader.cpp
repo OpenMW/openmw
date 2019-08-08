@@ -599,28 +599,16 @@ namespace NifOsg
                 const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
                 if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
-                    bool skinned = false;
+                    Nif::NiSkinInstancePtr skin;
                     if (nifNode->recType == Nif::RC_NiTriShape)
-                    {
-                        const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                        if (!triShape->skin.empty())
-                        {
-                            skinned = true;
-                            handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
-                        }
-                    }
+                        skin = static_cast<const Nif::NiTriShape*>(nifNode)->skin;
                     else // if (nifNode->recType == Nif::RC_NiTriStrips)
-                    {
-                        const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                        if (!triStrips->skin.empty())
-                        {
-                            skinned = true;
-                            handleSkinnedTriStrips(triStrips, node, composite, boundTextures, animflags);
-                        }
-                    }
+                        skin = static_cast<const Nif::NiTriStrips*>(nifNode)->skin;
 
-                    if (!skinned)
+                    if (skin.empty())
                         handleTriShape(nifNode, node, composite, boundTextures, animflags);
+                    else
+                        handleSkinnedTriShape(nifNode, node, composite, boundTextures, animflags);
 
                     if (!nifNode->controller.empty())
                         handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
@@ -1206,21 +1194,34 @@ namespace NifOsg
             return morphGeom;
         }
 
-        void handleSkinnedTriShape(const Nif::NiTriShape *triShape, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
+        void handleSkinnedTriShape(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-            triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
+            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips)
+                return;
 
+            osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
+            Nif::NiSkinInstancePtr skinPtr;
+            if (nifNode->recType != Nif::RC_NiTriShape)
+            {
+                const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
+                triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
+                skinPtr = triShape->skin;
+            }
+            else
+            {
+                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
+                triStripsToGeometry(triStrips, geometry, parentNode, composite, boundTextures, animflags);
+                skinPtr = triStrips->skin;
+            }
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
-            rig->setName(triShape->name);
-
-            const Nif::NiSkinInstance *skin = triShape->skin.getPtr();
+            rig->setName(nifNode->name);
 
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
 
+            const Nif::NiSkinInstance *skin = skinPtr.getPtr();
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)
@@ -1242,44 +1243,6 @@ namespace NifOsg
 
             parentNode->addChild(rig);
         }
-
-        void handleSkinnedTriStrips(const Nif::NiTriStrips *triStrips, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
-                                          const std::vector<int>& boundTextures, int animflags)
-        {
-            osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
-            triStripsToGeometry(triStrips, geometry, parentNode, composite, boundTextures, animflags);
-
-            osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
-            rig->setSourceGeometry(geometry);
-            rig->setName(triStrips->name);
-
-            const Nif::NiSkinInstance *skin = triStrips->skin.getPtr();
-
-            // Assign bone weights
-            osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
-
-            const Nif::NiSkinData *data = skin->data.getPtr();
-            const Nif::NodeList &bones = skin->bones;
-            for(size_t i = 0;i < bones.length();i++)
-            {
-                std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
-
-                SceneUtil::RigGeometry::BoneInfluence influence;
-                const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
-                for(size_t j = 0;j < weights.size();j++)
-                {
-                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
-                }
-                influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
-                influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
-
-                map->mData.emplace_back(boneName, influence);
-            }
-            rig->setInfluenceMap(map);
-
-            parentNode->addChild(rig);
-        }
-
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
         {
