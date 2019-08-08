@@ -58,28 +58,17 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
 {
     const std::vector<osg::Vec3f> &vertices = data.vertices;
     const std::vector<std::vector<unsigned short>> &strips = data.strips;
-    if (vertices.empty() || strips.empty())
+    // Can't make a triangle from less than three vertices. All strips have the same size.
+    if (vertices.empty() || strips.empty() || strips[0].size() < 3)
         return;
-
-    // Assume every strip has the same size
-    const int singleStripSize = static_cast<int>(strips[0].size());
-    // Can't make a triangle from less than three vertices.
-    if (singleStripSize < 3)
-        return;
-
     mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
-    // There are N+2*M vertex indices in sum in all strips
-    // where N is the number of triangles and M is the number of strips
-    mesh.preallocateIndices(static_cast<int>((strips.size()-2) * singleStripSize));
+    // There are N+2*M vertex indices overall, so we must substract 2*M (N triangles, M strips)
+    mesh.preallocateIndices(static_cast<int>((strips.size()-2) * strips[0].size()));
 
     // It's triangulation time. Totally not a NifSkope spell ripoff.
     for (const std::vector<unsigned short>& strip : strips)
     {
-        unsigned short a = strip[0];
-        unsigned short b = strip[0];
-        unsigned short c = strip[1];
-        bool flip = false;
-
+        unsigned short a = strip[0], b = strip[0], c = strip[1];
         for (int i = 2; i < static_cast<int>(strip.size()); i++)
         {
             a = b;
@@ -87,24 +76,26 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
             c = strip[i];
             if (a != b && b != c && a != c)
             {
-                if (!flip)
+                if (i%2==0)
                     mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[b]), getbtVector(vertices[c]));
                 else
                     mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[c]), getbtVector(vertices[b]));
             }
-            flip = !flip;
         }
     }
 }
 
-void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
+void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::Node* nifNode, const osg::Matrixf &transform)
 {
-    fillTriangleMeshWithTransform(mesh, data, osg::Matrixf());
+    if (nifNode->recType == Nif::RC_NiTriShape)
+        fillTriangleMeshWithTransform(mesh, static_cast<const Nif::NiTriShape*>(nifNode)->data.get(), transform);
+    else // if (nifNode->recType == Nif::RC_NiTriStrips)
+        fillTriangleMeshWithTransform(mesh, static_cast<const Nif::NiTriStrips*>(nifNode)->data.get(), transform);
 }
 
-void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
+void fillTriangleMesh(btTriangleMesh& mesh, const Nif::Node* node)
 {
-    fillTriangleMeshWithTransform(mesh, data, osg::Matrixf());
+    fillTriangleMeshWithTransform(mesh, node, osg::Matrixf());
 }
 
 }
@@ -326,9 +317,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
         const Nif::NiTriShape* shape = static_cast<const Nif::NiTriShape*>(nifNode);
         if (!shape->skin.empty())
             isAnimated = false;
-        if (shape->data.empty())
-            return;
-        if (shape->data->triangles.empty())
+        if (shape->data.empty() || shape->data->triangles.empty())
             return;
     }
     else
@@ -336,9 +325,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
         const Nif::NiTriStrips* shape = static_cast<const Nif::NiTriStrips*>(nifNode);
         if (!shape->skin.empty())
             isAnimated = false;
-        if (shape->data.empty())
-            return;
-        if (shape->data->strips.empty())
+        if (shape->data.empty() || shape->data->strips.empty())
             return;
     }
 
@@ -350,10 +337,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
 
         std::unique_ptr<btTriangleMesh> childMesh(new btTriangleMesh);
 
-        if (nifNode->recType == Nif::RC_NiTriShape)
-            fillTriangleMesh(*childMesh, static_cast<const Nif::NiTriShape*>(nifNode)->data.get());
-        else
-            fillTriangleMesh(*childMesh, static_cast<const Nif::NiTriStrips*>(nifNode)->data.get());
+        fillTriangleMesh(*childMesh, nifNode);
 
         std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
         childMesh.release();
@@ -381,16 +365,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
         if (!mAvoidStaticMesh)
             mAvoidStaticMesh.reset(new btTriangleMesh(false));
 
-        if (nifNode->recType == Nif::RC_NiTriShape)
-        {
-            const Nif::NiTriShape* shape = static_cast<const Nif::NiTriShape*>(nifNode);
-            fillTriangleMeshWithTransform(*mAvoidStaticMesh, shape->data.get(), transform);
-        }
-        else
-        {
-            const Nif::NiTriStrips* shape = static_cast<const Nif::NiTriStrips*>(nifNode);
-            fillTriangleMeshWithTransform(*mAvoidStaticMesh, shape->data.get(), transform);
-        }
+        fillTriangleMeshWithTransform(*mAvoidStaticMesh, nifNode, transform);
     }
     else
     {
@@ -398,17 +373,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
             mStaticMesh.reset(new btTriangleMesh(false));
 
         // Static shape, just transform all vertices into position
-
-        if (nifNode->recType == Nif::RC_NiTriShape)
-        {
-            const Nif::NiTriShape* shape = static_cast<const Nif::NiTriShape*>(nifNode);
-            fillTriangleMeshWithTransform(*mStaticMesh, shape->data.get(), transform);
-        }
-        else
-        {
-            const Nif::NiTriStrips* shape = static_cast<const Nif::NiTriStrips*>(nifNode);
-            fillTriangleMeshWithTransform(*mStaticMesh, shape->data.get(), transform);
-        }
+        fillTriangleMeshWithTransform(*mStaticMesh, nifNode, transform);
     }
 }
 

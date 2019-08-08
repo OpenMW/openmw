@@ -96,7 +96,6 @@ void NiTriStripsData::read(NIFStream *nif)
 
     // Every strip with n points defines n-2 triangles, so this should be unnecessary.
     /*int tris =*/ nif->getUShort();
-
     // Number of triangle strips
     int numStrips = nif->getUShort();
     // Number of points in each strip
