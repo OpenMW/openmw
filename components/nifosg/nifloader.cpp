@@ -1134,8 +1134,7 @@ namespace NifOsg
 
         void handleTriShape(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips)
-                return;
+            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips);
 
             osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
@@ -1197,12 +1196,11 @@ namespace NifOsg
         void handleSkinnedTriShape(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<int>& boundTextures, int animflags)
         {
-            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips)
-                return;
+            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips);
 
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             Nif::NiSkinInstancePtr skinPtr;
-            if (nifNode->recType != Nif::RC_NiTriShape)
+            if (nifNode->recType == Nif::RC_NiTriShape)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 triShapeToGeometry(triShape, geometry, parentNode, composite, boundTextures, animflags);
