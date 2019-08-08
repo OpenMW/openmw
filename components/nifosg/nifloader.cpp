@@ -590,39 +590,37 @@ namespace NifOsg
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
 
-            if (nifNode->recType == Nif::RC_NiTriShape && !skipMeshes)
+            if ((nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips) && !skipMeshes)
             {
-                const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                const std::string nodeName = Misc::StringUtils::lowerCase(triShape->name);
+                const std::string nodeName = Misc::StringUtils::lowerCase(nifNode->name);
                 static const std::string markerName = "tri editormarker";
                 static const std::string shadowName = "shadow";
                 static const std::string shadowName2 = "tri shadow";
                 const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
                 if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
-                    if (triShape->skin.empty())
-                        handleTriShape(triShape, node, composite, boundTextures, animflags);
-                    else
-                        handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
+                    bool skinned = false;
+                    if (nifNode->recType == Nif::RC_NiTriShape)
+                    {
+                        const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
+                        if (!triShape->skin.empty())
+                        {
+                            skinned = true;
+                            handleSkinnedTriShape(triShape, node, composite, boundTextures, animflags);
+                        }
+                    }
+                    else // if (nifNode->recType == Nif::RC_NiTriStrips)
+                    {
+                        const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
+                        if (!triStrips->skin.empty())
+                        {
+                            skinned = true;
+                            handleSkinnedTriStrips(triStrips, node, composite, boundTextures, animflags);
+                        }
+                    }
 
-                    if (!nifNode->controller.empty())
-                        handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
-                }
-            }
-            if (nifNode->recType == Nif::RC_NiTriStrips && !skipMeshes)
-            {
-                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                const std::string nodeName = Misc::StringUtils::lowerCase(triStrips->name);
-                static const std::string markerName = "tri editormarker";
-                static const std::string shadowName = "shadow";
-                static const std::string shadowName2 = "tri shadow";
-                const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
-                if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
-                {
-                    if (triStrips->skin.empty())
-                        handleTriStrips(triStrips, node, composite, boundTextures, animflags);
-                    else
-                        handleSkinnedTriStrips(triStrips, node, composite, boundTextures, animflags);
+                    if (!skinned)
+                        handleTriShape(nifNode, node, composite, boundTextures, animflags);
 
                     if (!nifNode->controller.empty())
                         handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
@@ -699,7 +697,7 @@ namespace NifOsg
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
                 }
                 else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-                {} // handled in handleTriShape/handleTriStrips
+                {} // handled in handleMorphController
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
@@ -1146,47 +1144,43 @@ namespace NifOsg
             applyDrawableProperties(parentNode, drawableProps, composite, !data->colors.empty(), animflags, false);
         }
 
-        void handleTriShape(const Nif::NiTriShape* triShape, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        void handleTriShape(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
+            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips)
+                return;
+
             osg::ref_ptr<osg::Drawable> drawable;
-            for (Nif::ControllerPtr ctrl = triShape->controller; !ctrl.empty(); ctrl = ctrl->next)
+            osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
+            if (nifNode->recType == Nif::RC_NiTriShape)
             {
-                if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
-                    continue;
-                if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-                {
-                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triShape, parentNode, composite, boundTextures, animflags);
-
-                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
-                                static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
-                    setupController(ctrl.getPtr(), morphctrl, animflags);
-                    drawable->setUpdateCallback(morphctrl);
-                    break;
-                }
-            }
-
-            if (!drawable.get())
-            {
-                osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
-                drawable = geom;
+                const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
                 triShapeToGeometry(triShape, geom, parentNode, composite, boundTextures, animflags);
+                handleMorphController(triShape->controller, drawable, geom, parentNode, composite, boundTextures, animflags);
+            }
+            else
+            {
+                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
+                triStripsToGeometry(triStrips, geom, parentNode, composite, boundTextures, animflags);
+                handleMorphController(triStrips->controller, drawable, geom, parentNode, composite, boundTextures, animflags);
             }
 
-            drawable->setName(triShape->name);
+            if (!drawable.get())
+                drawable = geom;
+
+            drawable->setName(nifNode->name);
 
             parentNode->addChild(drawable);
         }
 
-        void handleTriStrips(const Nif::NiTriStrips* triStrips, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        void handleMorphController(Nif::ControllerPtr ctrl, osg::Drawable *drawable, osg::ref_ptr<osg::Geometry> geom, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
-            osg::ref_ptr<osg::Drawable> drawable;
-            for (Nif::ControllerPtr ctrl = triStrips->controller; !ctrl.empty(); ctrl = ctrl->next)
+            for (; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), triStrips, parentNode, composite, boundTextures, animflags);
+                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), geom, parentNode, composite, boundTextures, animflags);
 
                     osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
                                 static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
@@ -1195,43 +1189,11 @@ namespace NifOsg
                     break;
                 }
             }
-
-            if (!drawable.get())
-            {
-                osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
-                drawable = geom;
-                triStripsToGeometry(triStrips, geom, parentNode, composite, boundTextures, animflags);
-            }
-
-            drawable->setName(triStrips->name);
-
-            parentNode->addChild(drawable);
         }
 
-        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriShape *triShape, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
+        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, osg::ref_ptr<osg::Geometry> sourceGeometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
         {
             osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
-
-            osg::ref_ptr<osg::Geometry> sourceGeometry (new osg::Geometry);
-            triShapeToGeometry(triShape, sourceGeometry, parentNode, composite, boundTextures, animflags);
-            morphGeom->setSourceGeometry(sourceGeometry);
-
-            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
-            if (morphs.empty())
-                return morphGeom;
-            // Note we are not interested in morph 0, which just contains the original vertices
-            for (unsigned int i = 1; i < morphs.size(); ++i)
-                morphGeom->addMorphTarget(new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
-
-            return morphGeom;
-        }
-
-        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, const Nif::NiTriStrips *triStrips, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
-        {
-            osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
-
-            osg::ref_ptr<osg::Geometry> sourceGeometry (new osg::Geometry);
-            triStripsToGeometry(triStrips, sourceGeometry, parentNode, composite, boundTextures, animflags);
             morphGeom->setSourceGeometry(sourceGeometry);
 
             const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->data.getPtr()->mMorphs;
