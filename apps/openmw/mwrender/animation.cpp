@@ -153,47 +153,6 @@ namespace
         }
     };
 
-    class ConvertOsgLightSourceVisitor : public osg::NodeVisitor
-    {
-        bool mIsExterior;
-    public:
-
-        ConvertOsgLightSourceVisitor(bool isext)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mIsExterior(isext)
-        {
-        }
-
-        virtual void apply(osg::Group& node)
-        {
-            for(unsigned int i=0; i<node.getNumChildren(); ++i)
-            {
-                osg::LightSource *ls = dynamic_cast<osg::LightSource*>(node.getChild(i));
-                if(ls)
-                {
-                    //replace ls with SceneUtil ls
-                    SceneUtil::LightSource *nls= new  SceneUtil::LightSource();
-                    nls->setNodeMask(MWRender::Mask_ParticleSystem);
-                    osg::Light * light = new osg::Light(*ls->getLight());
-                    float radius = 0;
-                    osg::FloatValueObject* fo = dynamic_cast<osg::FloatValueObject*>(ls->getUserData());
-                    if(fo)
-                    {
-                        radius = fo->getValue();                        
-                        if(light->getPosition().w() == 0) //directional light
-                            SceneUtil::configureLight(light, radius, mIsExterior);
-                        nls->setRadius(radius * 10.0f);//TOFIX
-                    }
-                    nls->setLight(light);
-
-                   node.removeChild(i);
-                   node.insertChild(i, nls);
-
-                }
-            }
-            traverse(node);
-        }
-    };
-
     NifOsg::TextKeyMap::const_iterator findGroupStart(const NifOsg::TextKeyMap &keys, const std::string &groupname)
     {
         NifOsg::TextKeyMap::const_iterator iter(keys.begin());
@@ -2073,7 +2032,7 @@ namespace MWRender
             }
         }
 
-        ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior());
+        SceneUtil::ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior(), MWRender::Mask_Lighting);
         mObjectRoot->accept(lightvis);
     }
 

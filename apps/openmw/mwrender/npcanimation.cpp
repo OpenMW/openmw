@@ -19,12 +19,14 @@
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/skeleton.hpp>
+#include <components/sceneutil/lightutil.hpp>
 
 #include <components/settings/settings.hpp>
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -415,6 +417,8 @@ void NpcAnimation::rebuild()
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
+    SceneUtil::ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior(), MWRender::Mask_Lighting);
+    mObjectRoot->accept(lightvis);
 }
 
 int NpcAnimation::getSlot(const osg::NodePath &path) const
