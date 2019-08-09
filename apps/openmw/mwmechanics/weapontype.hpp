@@ -68,7 +68,7 @@ namespace MWMechanics
         {
             ESM::Weapon::ShortBladeOneHand,
             {
-                /* short group */ "1h",
+                /* short group */ "1s",
                 /* long group  */ "weapononehand",
                 /*  sound ID   */ "Item Weapon Shortblade",
                 /* attach bone */ "Weapon Bone",
@@ -96,7 +96,7 @@ namespace MWMechanics
         {
             ESM::Weapon::BluntOneHand,
             {
-                /* short group */ "1h",
+                /* short group */ "1b",
                 /* long group  */ "weapononehand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
@@ -110,7 +110,7 @@ namespace MWMechanics
         {
             ESM::Weapon::AxeOneHand,
             {
-                /* short group */ "1h",
+                /* short group */ "1b",
                 /* long group  */ "weapononehand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
@@ -138,7 +138,7 @@ namespace MWMechanics
         {
             ESM::Weapon::AxeTwoHand,
             {
-                /* short group */ "2c",
+                /* short group */ "2b",
                 /* long group  */ "weapontwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
@@ -152,7 +152,7 @@ namespace MWMechanics
         {
             ESM::Weapon::BluntTwoClose,
             {
-                /* short group */ "2c",
+                /* short group */ "2b",
                 /* long group  */ "weapontwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
@@ -194,7 +194,7 @@ namespace MWMechanics
         {
             ESM::Weapon::MarksmanBow,
             {
-                /* short group */ "1h",
+                /* short group */ "bow",
                 /* long group  */ "bowandarrow",
                 /*  sound ID   */ "Item Weapon Bow",
                 /* attach bone */ "Weapon Bone Left",

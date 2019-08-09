@@ -335,17 +335,12 @@ void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, Ju
             jumpAnimName += weapShortGroup;
             if(!mAnimation->hasAnimation(jumpAnimName))
             {
-                jumpmask = MWRender::Animation::BlendMask_LowerBody;
-                jumpAnimName = "jump";
+                jumpAnimName = fallbackShortWeaponGroup("jump", &jumpmask);
 
-                // Since we apply movement only for lower body, do not reset idle animations.
+                // If we apply jump only for lower body, do not reset idle animations.
                 // For upper body there will be idle animation.
-                if (idle == CharState_None)
+                if (jumpmask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
                     idle = CharState_Idle;
-
-                // For crossbow animations use 1h ones as fallback
-                if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                    jumpAnimName += "1h";
             }
         }
     }
@@ -419,6 +414,43 @@ void CharacterController::onClose()
     }
 }
 
+std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask)
+{
+    bool isRealWeapon = mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
+    if (!isRealWeapon)
+    {
+        if (blendMask != nullptr)
+            *blendMask = MWRender::Animation::BlendMask_LowerBody;
+
+        return baseGroupName;
+    }
+
+    static const std::string oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mShortGroup;
+    static const std::string twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mShortGroup;
+
+    std::string groupName = baseGroupName;
+    const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
+
+    // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
+    if (isRealWeapon && weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
+        groupName += twoHandFallback;
+    else if (isRealWeapon)
+        groupName += oneHandFallback;
+
+    // Special case for crossbows - we shouls apply 1h animations a fallback only for lower body
+    if (mWeaponType == ESM::Weapon::MarksmanCrossbow && blendMask != nullptr)
+        *blendMask = MWRender::Animation::BlendMask_LowerBody;
+
+    if (!mAnimation->hasAnimation(groupName))
+    {
+        groupName = baseGroupName;
+        if (blendMask != nullptr)
+            *blendMask = MWRender::Animation::BlendMask_LowerBody;
+    }
+
+    return groupName;
+}
+
 void CharacterController::refreshMovementAnims(const std::string& weapShortGroup, CharacterState movement, CharacterState& idle, bool force)
 {
     if (movement == mMovementState && idle == mIdleState && !force)
@@ -449,15 +481,12 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                 movementAnimName = movestate->groupname;
                 if (swimpos == std::string::npos)
                 {
-                    movemask = MWRender::Animation::BlendMask_LowerBody;
-                    // Since we apply movement only for lower body, do not reset idle animations.
-                    // For upper body there will be idle animation.
-                    if (idle == CharState_None)
-                        idle = CharState_Idle;
+                    movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
 
-                    // For crossbow animations use 1h ones as fallback
-                    if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                        movementAnimName += "1h";
+                    // If we apply movement only for lower body, do not reset idle animations.
+                    // For upper body there will be idle animation.
+                    if (movemask == MWRender::Animation::BlendMask_LowerBody && idle == CharState_None)
+                        idle = CharState_Idle;
                 }
                 else if (idle == CharState_None)
                 {
@@ -493,10 +522,6 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                 }
                 else
                 {
-                    // For crossbow animations use 1h ones as fallback
-                    if (mWeaponType == ESM::Weapon::MarksmanCrossbow)
-                        movementAnimName += "1h";
-
                     movementAnimName.erase(swimpos, 4);
                     if (!weapShortGroup.empty())
                     {
@@ -504,7 +529,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                         if(mAnimation->hasAnimation(weapMovementAnimName))
                             movementAnimName = weapMovementAnimName;
                         else
-                            movemask = MWRender::Animation::BlendMask_LowerBody;
+                            movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
                     }
 
                     if (!mAnimation->hasAnimation(movementAnimName))
@@ -607,7 +632,9 @@ void CharacterController::refreshIdleAnims(const std::string& weapShortGroup, Ch
             {
                 idleGroup += weapShortGroup;
                 if(!mAnimation->hasAnimation(idleGroup))
-                    idleGroup = "idle";
+                {
+                    idleGroup = fallbackShortWeaponGroup("idle");
+                }
 
                 // play until the Loop Stop key 2 to 5 times, then play until the Stop key
                 // this replicates original engine behavior for the "Idle1h" 1st-person animation

@@ -230,6 +230,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     bool updateCarriedLeftVisible(int weaptype) const;
 
+    std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr);
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();
