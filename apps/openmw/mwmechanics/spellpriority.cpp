@@ -16,6 +16,8 @@
 
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
+#include "weapontype.hpp"
+#include "combat.hpp"
 
 namespace
 {
@@ -376,7 +378,7 @@ namespace MWMechanics
 
         case ESM::MagicEffect::BoundLongbow:
             // AI should not summon the bow if there is no suitable ammo.
-            if (rateAmmo(actor, enemy, ESM::Weapon::Arrow) <= 0.f)
+            if (rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f)
                 return 0.f;
             break;
 

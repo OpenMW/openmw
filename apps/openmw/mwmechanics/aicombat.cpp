@@ -445,10 +445,9 @@ namespace MWMechanics
 
         if (targetClass.hasInventoryStore(target))
         {
-            MWMechanics::WeaponType weapType = WeapType_None;
-            MWWorld::ContainerStoreIterator weaponSlot =
-                MWMechanics::getActiveWeapon(targetClass.getCreatureStats(target), targetClass.getInventoryStore(target), &weapType);
-            if (weapType != WeapType_PickProbe && weapType != WeapType_Spell && weapType != WeapType_None && weapType != WeapType_HandToHand)
+            int weapType = ESM::Weapon::None;
+            MWWorld::ContainerStoreIterator weaponSlot = MWMechanics::getActiveWeapon(target, &weapType);
+            if (weapType > ESM::Weapon::None)
                 targetWeapon = *weaponSlot;
         }
 
@@ -645,7 +644,7 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
     // get projectile speed (depending on weapon type)
-    if (weapType == ESM::Weapon::MarksmanThrown)
+    if (MWMechanics::getWeaponType(weapType)->mWeaponClass == ESM::WeaponType::Thrown)
     {
         static float fThrownWeaponMinSpeed = gmst.find("fThrownWeaponMinSpeed")->mValue.getFloat();
         static float fThrownWeaponMaxSpeed = gmst.find("fThrownWeaponMaxSpeed")->mValue.getFloat();

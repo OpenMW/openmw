@@ -541,6 +541,10 @@ namespace NifOsg
                         // Marker objects. These meshes are only visible in the editor.
                         hasMarkers = true;
                     }
+                    else if(sd->string == "BONE")
+                    {
+                        node->getOrCreateUserDataContainer()->addDescription("CustomBone");
+                    }
                 }
             }
 

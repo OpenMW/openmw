@@ -28,6 +28,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/weapontype.hpp"
 
 #include "vismask.hpp"
 
@@ -51,8 +52,6 @@ ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group>
 
     // Make sure we cleaned object from effects, just in cast if we re-use node
     removeEffects();
-
-    mWeaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
 }
 
 ActorAnimation::~ActorAnimation()
@@ -84,7 +83,7 @@ PartHolderPtr ActorAnimation::getWeaponPart(const std::string& model, const std:
     return PartHolderPtr(new PartHolder(instance));
 }
 
-osg::Group* ActorAnimation::getBoneByName(std::string boneName)
+osg::Group* ActorAnimation::getBoneByName(const std::string& boneName)
 {
     if (!mObjectRoot)
         return nullptr;
@@ -105,91 +104,11 @@ std::string ActorAnimation::getHolsteredWeaponBoneName(const MWWorld::ConstPtr& 
     if(type == typeid(ESM::Weapon).name())
     {
         const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon.get<ESM::Weapon>();
-        ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
-        return getHolsteredWeaponBoneName(weaponType);
+        int weaponType = ref->mBase->mData.mType;
+        return MWMechanics::getWeaponType(weaponType)->mSheathingBone;
     }
 
     return boneName;
-}
-
-std::string ActorAnimation::getHolsteredWeaponBoneName(const unsigned int weaponType)
-{
-    std::string boneName;
-
-    switch(weaponType)
-    {
-        case ESM::Weapon::ShortBladeOneHand:
-            boneName = "Bip01 ShortBladeOneHand";
-            break;
-        case ESM::Weapon::LongBladeOneHand:
-            boneName = "Bip01 LongBladeOneHand";
-            break;
-        case ESM::Weapon::BluntOneHand:
-            boneName = "Bip01 BluntOneHand";
-            break;
-        case ESM::Weapon::AxeOneHand:
-            boneName = "Bip01 LongBladeOneHand";
-            break;
-        case ESM::Weapon::LongBladeTwoHand:
-            boneName = "Bip01 LongBladeTwoClose";
-            break;
-        case ESM::Weapon::BluntTwoClose:
-            boneName = "Bip01 BluntTwoClose";
-            break;
-        case ESM::Weapon::AxeTwoHand:
-            boneName = "Bip01 AxeTwoClose";
-            break;
-        case ESM::Weapon::BluntTwoWide:
-            boneName = "Bip01 BluntTwoWide";
-            break;
-        case ESM::Weapon::SpearTwoWide:
-            boneName = "Bip01 SpearTwoWide";
-            break;
-        case ESM::Weapon::MarksmanBow:
-            boneName = "Bip01 MarksmanBow";
-            break;
-        case ESM::Weapon::MarksmanCrossbow:
-            boneName = "Bip01 MarksmanCrossbow";
-            break;
-        case ESM::Weapon::MarksmanThrown:
-            boneName = "Bip01 MarksmanThrown";
-            break;
-        default:
-            break;
-    }
-
-    return boneName;
-}
-
-void ActorAnimation::injectWeaponBones()
-{
-    if (!mResourceSystem->getVFS()->exists("meshes\\xbase_anim_sh.nif"))
-    {
-        mWeaponSheathing = false;
-        return;
-    }
-
-    osg::ref_ptr<osg::Node> sheathSkeleton = mResourceSystem->getSceneManager()->getInstance("meshes\\xbase_anim_sh.nif");
-
-    for (unsigned int type=0; type<=ESM::Weapon::MarksmanThrown; ++type)
-    {
-        const std::string holsteredBoneName = getHolsteredWeaponBoneName(type);
-
-        SceneUtil::FindByNameVisitor findVisitor (holsteredBoneName);
-        sheathSkeleton->accept(findVisitor);
-        osg::ref_ptr<osg::Node> sheathNode = findVisitor.mFoundNode;
-
-        if (sheathNode && sheathNode.get()->getNumParents())
-        {
-            osg::Group* sheathParent = getBoneByName(sheathNode.get()->getParent(0)->getName());
-
-            if (sheathParent)
-            {
-                sheathNode.get()->getParent(0)->removeChild(sheathNode);
-                sheathParent->addChild(sheathNode);
-            }
-        }
-    }
 }
 
 void ActorAnimation::resetControllers(osg::Node* node)
@@ -205,7 +124,8 @@ void ActorAnimation::resetControllers(osg::Node* node)
 
 void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 {
-    if (!mWeaponSheathing)
+    static const bool weaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
+    if (!weaponSheathing)
         return;
 
     if (!mPtr.getClass().hasInventoryStore(mPtr))
@@ -219,7 +139,8 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         return;
 
     // Since throwing weapons stack themselves, do not show such weapon itself
-    if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         showHolsteredWeapons = false;
 
     std::string mesh = weapon->getClass().getModel(*weapon);
@@ -279,7 +200,8 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
 
 void ActorAnimation::updateQuiver()
 {
-    if (!mWeaponSheathing)
+    static const bool weaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
+    if (!weaponSheathing)
         return;
 
     if (!mPtr.getClass().hasInventoryStore(mPtr))
@@ -303,10 +225,12 @@ void ActorAnimation::updateQuiver()
     bool suitableAmmo = false;
     MWWorld::ConstContainerStoreIterator ammo = weapon;
     unsigned int ammoCount = 0;
-    if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    const auto& weaponType = MWMechanics::getWeaponType(type);
+    if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
     {
         ammoCount = ammo->getRefData().getCount();
-        osg::Group* throwingWeaponNode = getBoneByName("Weapon Bone");
+        osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
         if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
             ammoCount--;
 
@@ -323,10 +247,7 @@ void ActorAnimation::updateQuiver()
         if (arrowAttached)
             ammoCount--;
 
-        if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
-            suitableAmmo = ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt;
-        else if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanBow)
-            suitableAmmo = ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Arrow;
+        suitableAmmo = ammo->get<ESM::Weapon>()->mBase->mData.mType == weaponType->mAmmoType;
     }
 
     if (!suitableAmmo)
@@ -382,7 +303,8 @@ void ActorAnimation::itemAdded(const MWWorld::ConstPtr& item, int /*count*/)
         return;
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
-    if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         ammo = weapon;
     else
         ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
@@ -415,7 +337,8 @@ void ActorAnimation::itemRemoved(const MWWorld::ConstPtr& item, int /*count*/)
         return;
 
     MWWorld::ConstContainerStoreIterator ammo = inv.end();
-    if (weapon->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown)
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    if (MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown)
         ammo = weapon;
     else
         ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
