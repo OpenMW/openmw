@@ -372,13 +372,14 @@ namespace NifOsg
                 float radius = std::max(1000.0f, nilight->boundXYZ.length());
                 //store osg::LightSource and convert it at instanciation to SceneUtil::LightSource
                 osg::ref_ptr<osg::LightSource> lightSource (new osg::LightSource);
+                //record this arbitrary radius for instanciation setup
+                lightSource->setUserData(new osg::FloatValueObject("radius",radius));
                 osg::ref_ptr<osg::Light> light (new osg::Light);
 
                 const Nif::NiPointLight* nipointlight = dynamic_cast<const Nif::NiPointLight*>(nifNode);
 
                 if(nipointlight)
                 {
-                    lightSource->setUserData(new osg::FloatValueObject("radius", radius));
                     light->setConstantAttenuation(nipointlight->constantAttenuation);
                     light->setLinearAttenuation(nipointlight->linearAttenuation);
                     light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
@@ -399,12 +400,10 @@ namespace NifOsg
                     osg::Matrix transform = nilight->trafo.toMatrix();
                     osg::Vec3 direction = osg::Matrix::transform3x3(transform, osg::Vec3(1,0,0));
                     light->setPosition(osg::Vec4(direction, 0.f));
-                    //record this arbitrary radius for instanciation setup
-                    lightSource->setUserData(new osg::FloatValueObject("radius",radius));
                 }
-                osg::Vec4f ambient(nilight->ambient, 1.0f);
-                osg::Vec4f diffuse(nilight->diffuse, 1.0f);
-                osg::Vec4f specular(nilight->specular, 1.0f);
+                osg::Vec4f ambient(nilight->ambient * nilight->dimmer, 1.0f);
+                osg::Vec4f diffuse(nilight->diffuse * nilight->dimmer, 1.0f);
+                osg::Vec4f specular(nilight->specular * nilight->dimmer, 1.0f);
 
 
                 light->setAmbient(ambient);
