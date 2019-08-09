@@ -54,9 +54,57 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriShapeDa
     }
 }
 
-void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
+void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, const osg::Matrixf &transform)
 {
-    fillTriangleMeshWithTransform(mesh, data, osg::Matrixf());
+    const std::vector<osg::Vec3f> &vertices = data.vertices;
+    const std::vector<std::vector<unsigned short>> &strips = data.strips;
+    if (vertices.empty() || strips.empty())
+        return;
+    mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
+    int numTriangles = 0;
+    for (const std::vector<unsigned short>& strip : strips)
+    {
+        // Each strip with N points contains information about N-2 triangles.
+        if (strip.size() >= 3)
+            numTriangles += static_cast<int>(strip.size()-2);
+    }
+    mesh.preallocateIndices(static_cast<int>(numTriangles));
+
+    // It's triangulation time. Totally not a NifSkope spell ripoff.
+    for (const std::vector<unsigned short>& strip : strips)
+    {
+        // Can't make a triangle from less than 3 points.
+        if (strip.size() < 3)
+            continue;
+
+        unsigned short a = strip[0], b = strip[0], c = strip[1];
+        for (int i = 2; i < static_cast<int>(strip.size()); i++)
+        {
+            a = b;
+            b = c;
+            c = strip[i];
+            if (a != b && b != c && a != c)
+            {
+                if (i%2==0)
+                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[b]), getbtVector(vertices[c]));
+                else
+                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[c]), getbtVector(vertices[b]));
+            }
+        }
+    }
+}
+
+void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::Node* nifNode, const osg::Matrixf &transform)
+{
+    if (nifNode->recType == Nif::RC_NiTriShape)
+        fillTriangleMeshWithTransform(mesh, static_cast<const Nif::NiTriShape*>(nifNode)->data.get(), transform);
+    else // if (nifNode->recType == Nif::RC_NiTriStrips)
+        fillTriangleMeshWithTransform(mesh, static_cast<const Nif::NiTriStrips*>(nifNode)->data.get(), transform);
+}
+
+void fillTriangleMesh(btTriangleMesh& mesh, const Nif::Node* node)
+{
+    fillTriangleMeshWithTransform(mesh, node, osg::Matrixf());
 }
 
 }
@@ -244,9 +292,9 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         // NOTE: a trishape with hasBounds=true, but no BBoxCollision flag should NOT go through handleNiTriShape!
         // It must be ignored completely.
         // (occurs in tr_ex_imp_wall_arch_04.nif)
-        if(!node->hasBounds && node->recType == Nif::RC_NiTriShape)
+        if(!node->hasBounds && (node->recType == Nif::RC_NiTriShape || node->recType == Nif::RC_NiTriStrips))
         {
-            handleNiTriShape(static_cast<const Nif::NiTriShape*>(node), flags, getWorldTransform(node), isAnimated, avoid);
+            handleNiTriShape(node, flags, getWorldTransform(node), isAnimated, avoid);
         }
     }
 
@@ -263,25 +311,33 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
     }
 }
 
-void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, const osg::Matrixf &transform,
+void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, const osg::Matrixf &transform,
                                        bool isAnimated, bool avoid)
 {
-    assert(shape != nullptr);
+    assert(nifNode != nullptr);
 
     // If the object was marked "NCO" earlier, it shouldn't collide with
     // anything. So don't do anything.
     if ((flags & 0x800))
-    {
         return;
+
+    if (nifNode->recType == Nif::RC_NiTriShape)
+    {
+        const Nif::NiTriShape* shape = static_cast<const Nif::NiTriShape*>(nifNode);
+        if (!shape->skin.empty())
+            isAnimated = false;
+        if (shape->data.empty() || shape->data->triangles.empty())
+            return;
+    }
+    else
+    {
+        const Nif::NiTriStrips* shape = static_cast<const Nif::NiTriStrips*>(nifNode);
+        if (!shape->skin.empty())
+            isAnimated = false;
+        if (shape->data.empty() || shape->data->strips.empty())
+            return;
     }
 
-    if (!shape->skin.empty())
-        isAnimated = false;
-
-    if (shape->data.empty())
-        return;
-    if (shape->data->triangles.empty())
-        return;
 
     if (isAnimated)
     {
@@ -290,13 +346,13 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
         std::unique_ptr<btTriangleMesh> childMesh(new btTriangleMesh);
 
-        fillTriangleMesh(*childMesh, shape->data.get());
+        fillTriangleMesh(*childMesh, nifNode);
 
         std::unique_ptr<Resource::TriangleMeshShape> childShape(new Resource::TriangleMeshShape(childMesh.get(), true));
         childMesh.release();
 
-        float scale = shape->trafo.scale;
-        const Nif::Node* parent = shape;
+        float scale = nifNode->trafo.scale;
+        const Nif::Node* parent = nifNode;
         while (parent->parent)
         {
             parent = parent->parent;
@@ -308,7 +364,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
 
         btTransform trans(btQuaternion(q.x(), q.y(), q.z(), q.w()), btVector3(v.x(), v.y(), v.z()));
 
-        mShape->mAnimatedShapes.insert(std::make_pair(shape->recIndex, mCompoundShape->getNumChildShapes()));
+        mShape->mAnimatedShapes.emplace(nifNode->recIndex, mCompoundShape->getNumChildShapes());
 
         mCompoundShape->addChildShape(trans, childShape.get());
         childShape.release();
@@ -318,7 +374,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
         if (!mAvoidStaticMesh)
             mAvoidStaticMesh.reset(new btTriangleMesh(false));
 
-        fillTriangleMeshWithTransform(*mAvoidStaticMesh, shape->data.get(), transform);
+        fillTriangleMeshWithTransform(*mAvoidStaticMesh, nifNode, transform);
     }
     else
     {
@@ -326,7 +382,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::NiTriShape *shape, int flags, 
             mStaticMesh.reset(new btTriangleMesh(false));
 
         // Static shape, just transform all vertices into position
-        fillTriangleMeshWithTransform(*mStaticMesh, shape->data.get(), transform);
+        fillTriangleMeshWithTransform(*mStaticMesh, nifNode, transform);
     }
 }
 

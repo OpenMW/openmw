@@ -90,6 +90,26 @@ void NiTriShapeData::read(NIFStream *nif)
     }
 }
 
+void NiTriStripsData::read(NIFStream *nif)
+{
+    ShapeData::read(nif);
+
+    // Every strip with n points defines n-2 triangles, so this should be unnecessary.
+    /*int tris =*/ nif->getUShort();
+    // Number of triangle strips
+    int numStrips = nif->getUShort();
+
+    std::vector<unsigned short> lengths;
+    nif->getUShorts(lengths, numStrips);
+
+    for (int i = 0; i < numStrips; i++)
+    {
+        std::vector<unsigned short> strip;
+        nif->getUShorts(strip, lengths[i]);
+        strips.emplace_back(strip);
+    }
+}
+
 void NiAutoNormalParticlesData::read(NIFStream *nif)
 {
     ShapeData::read(nif);
