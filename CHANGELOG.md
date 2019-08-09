@@ -109,6 +109,7 @@
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
+    Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
