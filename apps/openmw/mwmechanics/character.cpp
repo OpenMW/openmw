@@ -414,6 +414,27 @@ void CharacterController::onClose()
     }
 }
 
+std::string CharacterController::getWeaponAnimation(int weaponType) const
+{
+    std::string weaponGroup = getWeaponType(weaponType)->mLongGroup;
+    bool isRealWeapon = weaponType != ESM::Weapon::HandToHand && weaponType != ESM::Weapon::Spell && weaponType != ESM::Weapon::None;
+    if (isRealWeapon && !mAnimation->hasAnimation(weaponGroup))
+    {
+        static const std::string oneHandFallback = getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
+        static const std::string twoHandFallback = getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+
+        const ESM::WeaponType* weapInfo = getWeaponType(weaponType);
+
+        // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
+        if (weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
+            weaponGroup = twoHandFallback;
+        else if (isRealWeapon)
+            weaponGroup = oneHandFallback;
+    }
+
+    return weaponGroup;
+}
+
 std::string CharacterController::fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask)
 {
     bool isRealWeapon = mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::None;
@@ -838,7 +859,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
             if (mWeaponType != ESM::Weapon::None)
             {
                 mUpperBodyState = UpperCharState_WeapEquiped;
-                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
+                mCurrentWeapon = getWeaponAnimation(mWeaponType);
             }
 
             if(mWeaponType != ESM::Weapon::None && mWeaponType != ESM::Weapon::Spell && mWeaponType != ESM::Weapon::HandToHand)
@@ -1259,7 +1280,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             if (!weaponChanged)
             {
                 // Note: we do not disable unequipping animation automatically to avoid body desync
-                weapgroup = getWeaponType(mWeaponType)->mLongGroup;
+                weapgroup = getWeaponAnimation(mWeaponType);
                 mAnimation->play(weapgroup, priorityWeapon,
                                 MWRender::Animation::BlendMask_All, false,
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
@@ -1287,8 +1308,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             {
                 forcestateupdate = true;
                 mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
+                weapgroup = getWeaponAnimation(weaptype);
 
-                weapgroup = getWeaponType(weaptype)->mLongGroup;
                 // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
                 // for other weapons they should use absolute time. Some mods rely on this behaviour (to rotate throwing projectiles, for example)
                 ESM::WeaponType::Class weaponClass = getWeaponType(weaptype)->mWeaponClass;
@@ -1327,7 +1348,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 }
 
                 mWeaponType = weaptype;
-                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
+                mCurrentWeapon = getWeaponAnimation(mWeaponType);
 
                 if(!upSoundId.empty() && !isStillWeapon)
                 {
@@ -1342,7 +1363,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 mUpperBodyState = UpperCharState_Nothing;
                 mAnimation->disable(mCurrentWeapon);
                 mWeaponType = ESM::Weapon::None;
-                mCurrentWeapon = getWeaponType(mWeaponType)->mLongGroup;
+                mCurrentWeapon = getWeaponAnimation(mWeaponType);
             }
         }
     }

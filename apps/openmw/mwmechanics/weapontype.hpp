@@ -69,7 +69,7 @@ namespace MWMechanics
             ESM::Weapon::ShortBladeOneHand,
             {
                 /* short group */ "1s",
-                /* long group  */ "weapononehand",
+                /* long group  */ "shortbladeonehand",
                 /*  sound ID   */ "Item Weapon Shortblade",
                 /* attach bone */ "Weapon Bone",
                 /* sheath bone */ "Bip01 ShortBladeOneHand",
@@ -97,7 +97,7 @@ namespace MWMechanics
             ESM::Weapon::BluntOneHand,
             {
                 /* short group */ "1b",
-                /* long group  */ "weapononehand",
+                /* long group  */ "bluntonehand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
                 /* sheath bone */ "Bip01 BluntOneHand",
@@ -111,7 +111,7 @@ namespace MWMechanics
             ESM::Weapon::AxeOneHand,
             {
                 /* short group */ "1b",
-                /* long group  */ "weapononehand",
+                /* long group  */ "bluntonehand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
                 /* sheath bone */ "Bip01 LongBladeOneHand",
@@ -139,7 +139,7 @@ namespace MWMechanics
             ESM::Weapon::AxeTwoHand,
             {
                 /* short group */ "2b",
-                /* long group  */ "weapontwohand",
+                /* long group  */ "bluntwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
                 /* sheath bone */ "Bip01 AxeTwoClose",
@@ -153,7 +153,7 @@ namespace MWMechanics
             ESM::Weapon::BluntTwoClose,
             {
                 /* short group */ "2b",
-                /* long group  */ "weapontwohand",
+                /* long group  */ "bluntwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
                 /* attach bone */ "Weapon Bone",
                 /* sheath bone */ "Bip01 BluntTwoClose",

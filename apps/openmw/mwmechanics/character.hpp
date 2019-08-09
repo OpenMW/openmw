@@ -232,6 +232,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     std::string fallbackShortWeaponGroup(const std::string& baseGroupName, MWRender::Animation::BlendMask* blendMask = nullptr);
 
+    std::string getWeaponAnimation(int weaponType) const;
+
 public:
     CharacterController(const MWWorld::Ptr &ptr, MWRender::Animation *anim);
     virtual ~CharacterController();

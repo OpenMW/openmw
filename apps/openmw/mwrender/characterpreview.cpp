@@ -309,6 +309,17 @@ namespace MWRender
                 // We still should use one-handed animation as fallback
                 if (mAnimation->hasAnimation(inventoryGroup))
                     groupname = inventoryGroup;
+                else
+                {
+                    static const std::string oneHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
+                    static const std::string twoHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+
+                    // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
+                    if (weaponInfo->mFlags & ESM::WeaponType::TwoHanded && weaponInfo->mWeaponClass == ESM::WeaponType::Melee)
+                        groupname = twoHandFallback;
+                    else
+                        groupname = oneHandFallback;
+                }
            }
         }
 
