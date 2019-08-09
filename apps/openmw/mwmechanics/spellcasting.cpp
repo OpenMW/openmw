@@ -241,7 +241,7 @@ namespace MWMechanics
         float castChance = 100.f;
         if (spell != nullptr && !caster.isEmpty() && caster.getClass().isActor())
         {
-            castChance = getSpellSuccessChance(spell, caster, nullptr, false); // Uncapped casting chance
+            castChance = getSpellSuccessChance(spell, caster, nullptr, false, false); // Uncapped casting chance
         }
         if (castChance > 0)
             x *= 50 / castChance;
@@ -939,7 +939,7 @@ namespace MWMechanics
                 bool fail = false;
 
                 // Check success
-                float successChance = getSpellSuccessChance(spell, mCaster);
+                float successChance = getSpellSuccessChance(spell, mCaster, nullptr, true, false);
                 if (Misc::Rng::roll0to99() >= successChance)
                 {
                     if (mCaster == getPlayer())
