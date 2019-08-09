@@ -678,48 +678,45 @@ namespace MWGui
             return ret;
         }
 
-        constexpr float secondsPerMinute = 60.f; // 60 seconds
-        constexpr float secondsPerHour = secondsPerMinute * 60.f; // 60 minutes
-        constexpr float secondsPerDay = secondsPerHour * 24.f; // 24 hours
-        constexpr float secondsPerMonth = secondsPerDay * 30.f; // 30 days
-        constexpr float secondsPerYear = secondsPerDay * 365.f;
+        constexpr int secondsPerMinute = 60; // 60 seconds
+        constexpr int secondsPerHour = secondsPerMinute * 60; // 60 minutes
+        constexpr int secondsPerDay = secondsPerHour * 24; // 24 hours
+        constexpr int secondsPerMonth = secondsPerDay * 30; // 30 days
+        constexpr int secondsPerYear = secondsPerDay * 365;
+        int fullDuration = static_cast<int>(duration);
         int units = 0;
-        if (duration >= secondsPerYear)
+        int years = fullDuration / secondsPerYear;
+        int months = fullDuration % secondsPerYear / secondsPerMonth;
+        int days = fullDuration % secondsPerYear % secondsPerMonth / secondsPerDay; // Because a year is not exactly 12 "months"
+        int hours = fullDuration % secondsPerDay / secondsPerHour;
+        int minutes = fullDuration % secondsPerHour / secondsPerMinute;
+        int seconds = fullDuration % secondsPerMinute;
+        if (years)
         {
             units++;
-            int years = duration / secondsPerYear;
-            duration -= years * secondsPerYear;
             ret += toString(years) + " y ";
         }
-        if (duration >= secondsPerMonth)
+        if (months)
         {
             units++;
-            int months = duration / secondsPerMonth;
-            duration -= months * secondsPerMonth;
             ret += toString(months) + " mo ";
         }
-        if (units < 2 && duration >= secondsPerDay)
+        if (units < 2 && days)
         {
             units++;
-            int days = duration / secondsPerDay;
-            duration -= days * secondsPerDay;
             ret += toString(days) + " d ";
         }
-        if (units < 2 && duration >= secondsPerHour)
+        if (units < 2 && hours)
         {
             units++;
-            int hours = duration / secondsPerHour;
-            duration -= hours * secondsPerHour;
             ret += toString(hours) + " h ";
         }
-        if (units < 2 && duration >= secondsPerMinute)
-        {
-            int minutes = duration / secondsPerMinute;
-            duration -= minutes * secondsPerMinute;
+        if (units >= 2)
+            return ret;
+        if (minutes)
             ret += toString(minutes) + " min ";
-        }
-        if (units < 2 && duration >= 1.f)
-            ret += toString(int(duration)) + " s ";
+        if (seconds)
+            ret += toString(seconds) + " s ";
 
         return ret;
     }
