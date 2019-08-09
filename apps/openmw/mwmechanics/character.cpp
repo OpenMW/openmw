@@ -529,19 +529,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             if(!mAnimation->hasAnimation(movementAnimName))
             {
                 std::string::size_type swimpos = movementAnimName.find("swim");
-                if(swimpos == std::string::npos)
-                {
-                    std::string::size_type runpos = movementAnimName.find("run");
-                    if (runpos != std::string::npos)
-                    {
-                        movementAnimName.replace(runpos, runpos+3, "walk");
-                        if (!mAnimation->hasAnimation(movementAnimName))
-                            movementAnimName.clear();
-                    }
-                    else
-                        movementAnimName.clear();
-                }
-                else
+                if (swimpos != std::string::npos)
                 {
                     movementAnimName.erase(swimpos, 4);
                     if (!weapShortGroup.empty())
@@ -552,8 +540,18 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                         else
                             movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
                     }
+                }
 
-                    if (!mAnimation->hasAnimation(movementAnimName))
+                if (swimpos == std::string::npos || !mAnimation->hasAnimation(movementAnimName))
+                {
+                    std::string::size_type runpos = movementAnimName.find("run");
+                    if (runpos != std::string::npos)
+                    {
+                        movementAnimName.replace(runpos, runpos+3, "walk");
+                        if (!mAnimation->hasAnimation(movementAnimName))
+                            movementAnimName.clear();
+                    }
+                    else
                         movementAnimName.clear();
                 }
             }
