@@ -373,8 +373,6 @@ namespace NifOsg
                 //store osg::LightSource and convert it at instanciation to SceneUtil::LightSource
                 osg::ref_ptr<osg::LightSource> lightSource (new osg::LightSource);
                 osg::ref_ptr<osg::Light> light (new osg::Light);
-                light->setPosition(osg::Vec4());
-                light->setDirection(osg::Vec3( 0.0, 0.0, -1.0) * nilight->trafo.toMatrix());
 
                 const Nif::NiPointLight* nipointlight = dynamic_cast<const Nif::NiPointLight*>(nifNode);
 
@@ -389,12 +387,18 @@ namespace NifOsg
                     const Nif::NiSpotLight* nispotlight = dynamic_cast<const Nif::NiSpotLight*>(nifNode);
                     if(nispotlight)
                     {
+                        osg::Matrix transform = nilight->trafo.toMatrix();
+                        osg::Vec3 direction = osg::Matrix::transform3x3(transform, osg::Vec3(1,0,0));
+                        light->setDirection(direction);
                         light->setSpotCutoff(nispotlight->cutoff);
                         light->setSpotExponent(nispotlight->exponent);
                     }
                 }
                 else
                 {
+                    osg::Matrix transform = nilight->trafo.toMatrix();
+                    osg::Vec3 direction = osg::Matrix::transform3x3(transform, osg::Vec3(1,0,0));
+                    light->setPosition(osg::Vec4(direction, 0.f));
                     //record this arbitrary radius for instanciation setup
                     lightSource->setUserData(new osg::FloatValueObject("radius",radius));
                 }
