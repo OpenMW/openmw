@@ -337,11 +337,12 @@ void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
 {
     mInfluenceMap = influenceMap;
 
-    typedef std::map<unsigned short, std::vector<BoneWeight> > Vertex2BoneMap;
+    typedef std::map<unsigned int, std::pair<float, std::vector<BoneWeight> > > Vertex2BoneMap;
     Vertex2BoneMap vertex2BoneMap;
     mBoneSphereVector = new BoneSphereVector;
     mBoneSphereVector->mData.reserve(mInfluenceMap->mData.size());
     mBone2VertexVector = new Bone2VertexVector;
+
     for (auto& influencePair : mInfluenceMap->mData)
     {
         const std::string& boneName = influencePair.first;
@@ -350,16 +351,25 @@ void RigGeometry::setInfluenceMap(osg::ref_ptr<InfluenceMap> influenceMap)
 
         for (auto& weightPair: bi.mWeights)
         {
-            std::vector<BoneWeight>& vec = vertex2BoneMap[weightPair.first];
-
-            vec.emplace_back(std::make_pair(boneName, bi.mInvBindMatrix), weightPair.second);
+            std::pair<float, std::vector<BoneWeight> >& vec = vertex2BoneMap[weightPair.first];
+            vec.first += weightPair.second;
+            vec.second.emplace_back(std::make_pair(boneName, bi.mInvBindMatrix), weightPair.second);
         }
+    }
+
+    /// normalize weights
+    for (auto& vertexPair : vertex2BoneMap)
+    {
+        float norm = vertexPair.second.first;
+        if (norm > 0.f && norm != 1.f)
+            for (BoneWeight& weight : vertexPair.second.second)
+                weight.second /= norm;
     }
 
     Bone2VertexMap bone2VertexMap;
     for (auto& vertexPair : vertex2BoneMap)
     {
-        bone2VertexMap[vertexPair.second].emplace_back(vertexPair.first);
+        bone2VertexMap[vertexPair.second.second].emplace_back(vertexPair.first);
     }
 
     mBone2VertexVector->mData.reserve(bone2VertexMap.size());
