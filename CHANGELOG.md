@@ -121,6 +121,7 @@
     Bug #5105: NPCs start combat with werewolves from any distance
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Bug #5123: Script won't run on respawn
+    Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

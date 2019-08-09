@@ -315,6 +315,8 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             {
                 mAnimation->disable(mCurrentWeapon);
                 mUpperBodyState = UpperCharState_WeapEquiped;
+                if (mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell)
+                    mAnimation->showWeapons(true);
             }
             else if (mUpperBodyState > UpperCharState_Nothing && mUpperBodyState < UpperCharState_WeapEquiped)
             {
@@ -1321,6 +1323,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         mUpperBodyState = UpperCharState_WeapEquiped;
         mAttackingOrSpell = false;
         mAnimation->disable(mCurrentWeapon);
+        mAnimation->showWeapons(true);
         if (mPtr == getPlayer())
             MWBase::Environment::get().getWorld()->getPlayer().setAttackingOrSpell(false);
     }
@@ -1726,7 +1729,11 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         else if (isKnockedDown())
         {
             if (mUpperBodyState > UpperCharState_WeapEquiped)
+            {
                 mUpperBodyState = UpperCharState_WeapEquiped;
+                if (mWeaponType > WeapType_HandToHand && mWeaponType < WeapType_Spell)
+                    mAnimation->showWeapons(true);
+            }
             mAnimation->disable(mCurrentWeapon);
         }
     }
