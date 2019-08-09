@@ -119,6 +119,13 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             bonename = MWMechanics::getWeaponType(type)->mAttachBone;
+            if (bonename != "Weapon Bone")
+            {
+                const NodeMap& nodeMap = getNodeMap();
+                NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+                if (found == nodeMap.end())
+                    bonename = "Weapon Bone";
+            }
         }
         else
             bonename = "Weapon Bone";

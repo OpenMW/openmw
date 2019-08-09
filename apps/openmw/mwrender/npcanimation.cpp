@@ -745,7 +745,15 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
             if(weapon != inv.end() && weapon->getTypeName() == typeid(ESM::Weapon).name())
             {
                 int weaponType = weapon->get<ESM::Weapon>()->mBase->mData.mType;
-                bonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
+                const std::string weaponBonename = MWMechanics::getWeaponType(weaponType)->mAttachBone;
+
+                if (weaponBonename != bonename)
+                {
+                    const NodeMap& nodeMap = getNodeMap();
+                    NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(weaponBonename));
+                    if (found != nodeMap.end())
+                        bonename = weaponBonename;
+                }
             }
         }
 

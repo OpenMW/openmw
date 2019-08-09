@@ -197,7 +197,7 @@ namespace MWMechanics
                 /* short group */ "1h",
                 /* long group  */ "bowandarrow",
                 /*  sound ID   */ "Item Weapon Bow",
-                /* attach bone */ "Weapon Bone",
+                /* attach bone */ "Weapon Bone Left",
                 /* sheath bone */ "Bip01 MarksmanBow",
                 /* usage skill */ ESM::Skill::Marksman,
                 /* weapon class*/ ESM::WeaponType::Ranged,
