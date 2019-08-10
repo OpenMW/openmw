@@ -558,6 +558,11 @@ private:
         osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;
         oqn->setQueriesEnabled(true);
 
+        //force validity of query geometry (3.6)
+        oqn->addChild(mGeom);
+        oqn->getBound();
+        oqn->removeChildren(0, 1);
+
         // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
         // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
         // is only called once.
