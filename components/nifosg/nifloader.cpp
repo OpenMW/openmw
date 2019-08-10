@@ -684,7 +684,7 @@ namespace NifOsg
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
                 }
                 else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-                {} // handled in handleMorphController
+                {} // handled in handleTriShape
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
