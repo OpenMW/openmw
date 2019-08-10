@@ -3,6 +3,11 @@
 
 #include <osg/Geometry>
 
+namespace osg
+{
+    class ClusterCullingCallback;
+}
+
 namespace osgUtil
 {
     class CullVisitor;
@@ -43,6 +48,8 @@ namespace Terrain
 
         void setLightListCallback(SceneUtil::LightListCallback* lightListCallback);
 
+        void createClusterCullingCallback();
+
         virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
 
         void setCompositeMap(CompositeMap* map) { mCompositeMap = map; }
@@ -50,6 +57,8 @@ namespace Terrain
 
     private:
         PassVector mPasses;
+
+        osg::ref_ptr<osg::ClusterCullingCallback> mClusterCullingCallback;
 
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
         osg::ref_ptr<CompositeMap> mCompositeMap;
