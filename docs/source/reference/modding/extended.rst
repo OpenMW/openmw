@@ -203,8 +203,79 @@ Shield holstering is not supported at the moment since it conflicts with any mod
 
 An example of a mod which uses this feature is `Weapon Sheathing`_.
 
+
+Skeleton extensions
+-------------------
+
+It is possible to inject custom bones into actor skeletons:
+
+::
+
+    [Game]
+    use additional anim sources = true
+
+If this setting is enabled, OpenMW will seek for modified skeletons in the ``Animations/[skeleton name]`` folder in your ``Data Files``.
+For example, the biped creature skeleton folder is ``Animations/xbase_anim``, the female NPCs skeleton folder is ``Animations/xbase_anim_female``,
+the beast race skeleton folder is ``Animations/xbase_anim_kna``.
+Note that these are the third person view skeletons, and the first person view skeleton will have a different name.
+
+OpenMW scans every NIF file in such a folder for nodes which have "BONE" NiStringExtraData.
+It is recommended to give such nodes names that start with "Bip01 " so that the mesh optimizer doesn't try to optimize them out.
+Then OpenMW copies all found nodes to related skeleton. To determine the bone to which the new node should be attached,
+OpenMW checks the name of the parent node of the new node in the original NIF file.
+For example, to attach a custom weapon bone, you'll need to follow this NIF record hierarchy:
+
+::
+
+NiNode "root"
+    NiNode "Bip01 L Hand"
+        NiNode "Weapon Bone Left"
+            NiStringExtraData "BONE"
+
+OpenMW will detect ``Weapon Bone Left`` node and attach it to ``Bip01 L Hand`` bone of the target skeleton.
+
+An example of a mod which uses this feature is `Weapon Sheathing`_.
+
+
+Extended weapon animations
+--------------------------
+
+It is possible to use unique animation groups for different weapon types.
+They are not mandatory, and the currently hardcoded weapon types will fall back to existing generic animations.
+Every weapon type has an attack animation group and a suffix for the movement animation groups.
+For example, long blades use ``weapononehand`` attack animation group, ``idle1h`` idle animation group, ``jump1h`` jumping animation group, etc.
+This is the full table of supported animation groups:
+
++---------------+-------------------+------------------+----------------------+-----------------------+
+|  Weapon type  |  Animation group  |  Movement suffix |   Attack (fallback)  |   Suffix (fallback)   |
++===============+===================+==================+======================+=======================+
+|  Short blade  | shortbladeonehand |        1s        |    weapononehand     |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+| Long blade 1H |   weapononehand   |        1h        |                      |                       |
++---------------+-------------------+------------------+----------------------+-----------------------+
+| Long blade 2H |   weapontwohand   |        2c        |                      |                       |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|   Blunt 1H    |   bluntonehand    |        1b        |    weapononehand     |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|   Blunt 2H    |   blunttwohand    |        2b        |    weapontwohand     |          2c           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|    Axe 1H     |   bluntonehand    |        1b        |    weapononehand     |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|    Axe 2H     |   blunttwohand    |        2b        |    weapontwohand     |          2c           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+| Blunt 2H wide |   weapontwowide   |        2w        |    weapontwohand     |          2c           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|     Spear     |   weapontwowide   |        2w        |    weapontwohand     |          2c           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|      Bow      |    bowandarrow    |        bow       |                      |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|    Crossbow   |     crossbow      |     crossbow     |                      |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+|     Thrown    |    throwweapon    |        1t        |                      |          1h           |
++---------------+-------------------+------------------+----------------------+-----------------------+
+
 .. _`Graphic Herbalism`: https://www.nexusmods.com/morrowind/mods/46599
 .. _`OpenMW Containers Animated`: https://www.nexusmods.com/morrowind/mods/46232
 .. _`Glow in the Dahrk`: https://www.nexusmods.com/morrowind/mods/45886
 .. _`Almalexia's Cast for Beasts`: https://www.nexusmods.com/morrowind/mods/45853
-.. _`Weapon sheathing`: https://www.nexusmods.com/morrowind/mods/46069`
+.. _`Weapon sheathing`: https://www.nexusmods.com/morrowind/mods/46069
