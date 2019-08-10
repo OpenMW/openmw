@@ -453,8 +453,12 @@ MWQueryGeometry::~MWQueryGeometry()
     reset();
 }
 
-unsigned int
-MWQueryGeometry::getLastQueryNumPixels( const osg::Camera* cam )
+unsigned int MWQueryGeometry::getNumPixels( const osg::Camera* cam )
+{
+    return getMWQueryResult(cam).numPixels;
+}
+
+unsigned int MWQueryGeometry::getLastQueryNumPixels( const osg::Camera* cam )
 {
     return getMWQueryResult(cam).lastnumPixels;
 }
