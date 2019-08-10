@@ -1118,16 +1118,6 @@ namespace NifOsg
                 ctrl = static_cast<const Nif::NiTriShape*>(nifNode)->controller;
             else
                 ctrl = static_cast<const Nif::NiTriStrips*>(nifNode)->controller;
-            handleMorphController(ctrl, drawable, geom, parentNode, composite, boundTextures, animflags);
-
-            if (!drawable.get())
-                drawable = geom;
-            drawable->setName(nifNode->name);
-            parentNode->addChild(drawable);
-        }
-
-        void handleMorphController(Nif::ControllerPtr ctrl, osg::Drawable *drawable, osg::ref_ptr<osg::Geometry> geom, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
-        {
             for (; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -1143,6 +1133,10 @@ namespace NifOsg
                     break;
                 }
             }
+            if (!drawable.get())
+                drawable = geom;
+            drawable->setName(nifNode->name);
+            parentNode->addChild(drawable);
         }
 
         osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher, osg::ref_ptr<osg::Geometry> sourceGeometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<int>& boundTextures, int animflags)
