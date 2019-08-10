@@ -164,6 +164,8 @@
     Feature #5098: Allow user controller bindings
     Feature #5121: Handle NiTriStrips and NiTriStripsData
     Feature #5122: Use magic glow for enchanted arrows
+    Feature #5131: Custom skeleton bones
+    Feature #5132: Unique animations for different weapon types
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions
