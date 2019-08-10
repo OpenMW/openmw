@@ -123,24 +123,6 @@ namespace SceneUtil
         return lightSource;
     }
 
-    class DirectionalLightUpdater : public osg::NodeCallback
-    {
-    public:
-        META_Object(SceneUtil, DirectionalLightUpdater)
-
-        DirectionalLightUpdater() : osg::NodeCallback() {}
-        DirectionalLightUpdater(const DirectionalLightUpdater &copy, const osg::CopyOp &copyop) : osg::NodeCallback(copy, copyop) {}
-
-        void operator() (osg::Node* node, osg::NodeVisitor* nv)
-        {
-            SceneUtil::LightSource* lightsource = static_cast<SceneUtil::LightSource*>(node);
-            osg::Light * light = lightsource->getLight(nv->getTraversalNumber());
-            osg::Matrix ptrans = osg::computeLocalToWorld(nv->getNodePath());
-            osg::Vec3 dir = osg::Matrix::transform3x3(ptrans, osg::Vec3(1,0,0));
-            light->setPosition(osg::Vec4(dir, 0.f));
-            traverse(node, nv);
-        }
-    };
     void ConvertOsgLightSourceVisitor::apply(osg::Group& node)
     {
         for(unsigned int i=0; i<node.getNumChildren(); ++i)
@@ -150,28 +132,22 @@ namespace SceneUtil
             {
                 //replace ls with SceneUtil ls
                 SceneUtil::LightSource* nls = new SceneUtil::LightSource();
-                nls->setUpdateCallback(ls->getUpdateCallback());
-                nls->setUserDataContainer(ls->getUserDataContainer());
-
                 nls->setNodeMask(mLightMask);
+
                 osg::Light* light = new osg::Light(*ls->getLight());
                 float radius = 0;
                 osg::FloatValueObject* fo = dynamic_cast<osg::FloatValueObject*>(ls->getUserData());
                 if(fo)
                 {
                     radius = fo->getValue();
-                    if(light->getPosition().w() == 0) //directional light
-                    {
-                        SceneUtil::configureLight(light, radius, mIsExterior);
-                        nls->addUpdateCallback(new DirectionalLightUpdater());
-                    }
                     nls->setRadius(radius * 10.0f);//TOFIX
+                    if(light->getPosition().w() == 0) //directional light
+                        SceneUtil::configureLight(light, radius, mIsExterior);
                 }
                 nls->setLight(light);
 
-               node.removeChild(i);
-               node.insertChild(i, nls);
-
+                node.removeChild(i);
+                node.insertChild(i, nls);
             }
         }
         traverse(node);

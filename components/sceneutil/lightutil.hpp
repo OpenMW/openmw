@@ -42,15 +42,13 @@ namespace SceneUtil
     /// @param ambient Ambient component of the light.
     osg::ref_ptr<LightSource> createLightSource (const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient=osg::Vec4f(0,0,0,1));
 
+    /// @brief instanciate SceneUtil::LightSource from found osg::LightSource
     class ConvertOsgLightSourceVisitor : public osg::NodeVisitor
     {
         bool mIsExterior; int mLightMask;
     public:
-
         ConvertOsgLightSourceVisitor(bool isext, int lightmask)
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mIsExterior(isext), mLightMask(lightmask)
-        {
-        }
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mIsExterior(isext), mLightMask(lightmask){}
 
         virtual void apply(osg::Group& node);
     };

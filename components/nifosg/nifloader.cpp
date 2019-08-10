@@ -363,8 +363,8 @@ namespace NifOsg
             }
             return image;
         }
-#define LIGHT_USE_TRANSFORM 1
-        void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager, int animflags)
+
+        void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
         {
             if (nifNode->recType == Nif::RC_NiLight)
             {
@@ -381,39 +381,21 @@ namespace NifOsg
 
                 if(nipointlight)
                 {
-#if LIGHT_USE_TRANSFORM
                     light->setPosition(osg::Vec4(0.f,0.f,0.f,1.f));
-#else
-                    light->setPosition(osg::Vec4(nilight->trafo.pos, 1.0f));
-#endif
                     light->setConstantAttenuation(nipointlight->constantAttenuation);
                     light->setLinearAttenuation(nipointlight->linearAttenuation);
                     light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
                     const Nif::NiSpotLight* nispotlight = dynamic_cast<const Nif::NiSpotLight*>(nifNode);
                     if(nispotlight)
                     {
-#if LIGHT_USE_TRANSFORM
                         light->setDirection(osg::Vec3(1,0,0));
-#else
-                        osg::Matrix transform = nilight->trafo.toMatrix();
-                        osg::Vec3 direction = osg::Matrix::transform3x3(transform, osg::Vec3(1,0,0));
-                        light->setDirection(direction);
-#endif
                         light->setSpotCutoff(nispotlight->cutoff);
                         light->setSpotExponent(nispotlight->exponent);
                     }
                 }
                 else
-                {
-
-#if LIGHT_USE_TRANSFORM
                     light->setPosition(osg::Vec4(1.f,0.f,0.f,0.f));
-#else
-                    osg::Matrix transform = nilight->trafo.toMatrix();
-                    osg::Vec3 direction = osg::Matrix::transform3x3(transform, osg::Vec3(1,0,0));
-                    light->setPosition(osg::Vec4(direction, 0.f));
-#endif
-                }
+
                 osg::Vec4f ambient(nilight->ambient * nilight->dimmer, 1.0f);
                 osg::Vec4f diffuse(nilight->diffuse * nilight->dimmer, 1.0f);
                 osg::Vec4f specular(nilight->specular * nilight->dimmer, 1.0f);
@@ -431,22 +413,14 @@ namespace NifOsg
                 SceneUtil::FindByNameVisitor visitor(nilight->parent->name);
                 node->accept(visitor);
 
-#if LIGHT_USE_TRANSFORM
-
-#endif
-
                 if(!visitor.mFoundNode)
                     Log(Debug::Info) << "error processed nilight " << nifNode->recName << " in " << mFilename << "parent node "<<nilight->parent->name<<" not found";
                 else
                 {
-#if LIGHT_USE_TRANSFORM
                     osg::MatrixTransform* lightnode(new osg::MatrixTransform);
                     lightnode->setMatrix(nilight->trafo.toMatrix());
                     lightnode->addChild(lightSource);
                     visitor.mFoundNode->asGroup()->addChild(lightnode);
-#else
-                    visitor.mFoundNode->asGroup()->addChild(lightSource);
-#endif
                 }
                 Log(Debug::Info) << "processed nilight " << nifNode->recName << " in " << mFilename;
 
@@ -717,9 +691,8 @@ namespace NifOsg
                 for (size_t i = 0; i < effects.length(); ++i)
                 {
                     if (!effects[i].empty())
-                        handleEffect(effects[i].getPtr(), node, imageManager, animflags);
+                        handleEffect(effects[i].getPtr(), node, imageManager);
                 }
-
             }
 
             if (nifNode->recType == Nif::RC_NiSwitchNode)

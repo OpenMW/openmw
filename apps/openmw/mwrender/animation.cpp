@@ -1547,6 +1547,8 @@ namespace MWRender
             mInsert->addChild(mObjectRoot);
         }
 
+        SceneUtil::ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior(), MWRender::Mask_Lighting);
+        mObjectRoot->accept(lightvis);
         if (previousStateset)
             mObjectRoot->setStateSet(previousStateset);
 
@@ -2031,9 +2033,6 @@ namespace MWRender
                 mObjectRoot->accept(visitor);
             }
         }
-
-        SceneUtil::ConvertOsgLightSourceVisitor lightvis(mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior(), MWRender::Mask_Lighting);
-        mObjectRoot->accept(lightvis);
     }
 
     bool ObjectAnimation::canBeHarvested() const
