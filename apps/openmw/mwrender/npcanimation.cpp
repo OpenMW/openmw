@@ -24,6 +24,8 @@
 
 #include <components/nifosg/nifloader.hpp> // TextKeyMapHolder
 
+#include <components/vfs/manager.hpp>
+
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
@@ -511,6 +513,55 @@ void NpcAnimation::updateNpcBase()
     mWeaponAnimationTime->updateStartTime();
 }
 
+std::string NpcAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
+{
+    std::string mesh = shield.getClass().getModel(shield);
+    const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
+    std::vector<ESM::PartReference> bodyparts = armor->mParts.mParts;
+    if (!bodyparts.empty())
+    {
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+
+        // For NPCs try to get shield model from bodyparts first, with ground model as fallback
+        for (auto & part : bodyparts)
+        {
+            if (part.mPart != ESM::PRT_Shield)
+                continue;
+
+            std::string bodypartName;
+            if (!mNpc->isMale() && !part.mFemale.empty())
+                bodypartName = part.mFemale;
+            else if (!part.mMale.empty())
+                bodypartName = part.mMale;
+
+            if (!bodypartName.empty())
+            {
+                const ESM::BodyPart *bodypart = 0;
+                bodypart = partStore.search(bodypartName);
+                if (bodypart->mData.mType != ESM::BodyPart::MT_Armor)
+                    return "";
+                else if (!bodypart->mModel.empty())
+                    mesh = "meshes\\" + bodypart->mModel;
+            }
+        }
+    }
+
+    std::string holsteredName = mesh;
+    holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");
+    if(mResourceSystem->getVFS()->exists(holsteredName))
+    {
+        osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
+        SceneUtil::FindByNameVisitor findVisitor ("Bip01 Sheath");
+        shieldTemplate->accept(findVisitor);
+        osg::ref_ptr<osg::Node> sheathNode = findVisitor.mFoundNode;
+        if(!sheathNode)
+            return std::string();
+    }
+
+    return mesh;
+}
+
 void NpcAnimation::updateParts()
 {
     if (!mObjectRoot.get())
@@ -954,6 +1005,8 @@ void NpcAnimation::showCarriedLeft(bool show)
     }
     else
         removeIndividualPart(ESM::PRT_Shield);
+
+    updateHolsteredShield(mShowCarriedLeft);
 }
 
 void NpcAnimation::attachArrow()
@@ -1051,6 +1104,14 @@ void NpcAnimation::setWeaponGroup(const std::string &group, bool relativeDuratio
 
 void NpcAnimation::equipmentChanged()
 {
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (shieldSheathing)
+    {
+        int weaptype;
+        MWMechanics::getActiveWeapon(mPtr, &weaptype);
+        showCarriedLeft(updateCarriedLeftVisible(weaptype));
+    }
+
     updateParts();
 }
 

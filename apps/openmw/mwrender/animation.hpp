@@ -153,6 +153,8 @@ public:
 
     void setTextKeyListener(TextKeyListener* listener);
 
+    virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; };
+
 protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
@@ -453,6 +455,7 @@ public:
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 
+    virtual bool useShieldAnimations() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}
