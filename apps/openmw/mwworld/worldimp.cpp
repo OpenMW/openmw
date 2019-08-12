@@ -1514,7 +1514,10 @@ namespace MWWorld
         ipos.rot[2] = referenceObject.getRefData().getPosition().rot[2];
 
         MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
-        adjustPosition(placed, true); // snap to ground
+
+        if (!placed.getClass().isActor())
+            adjustPosition(placed, true); // snap only objects to ground
+
         return placed;
     }
 

@@ -979,7 +979,16 @@ namespace MWPhysics
     {
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
-            return ptr.getRefData().getPosition().asVec3();
+        {
+            MWPhysics::PhysicsSystem::RayResult result = castRay(position, position-osg::Vec3(0.f, 0.f, maxHeight), MWWorld::Ptr(), std::vector<MWWorld::Ptr>(),
+                                                                MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door);
+            if(result.mHit)
+            {
+                result.mHitPos.z() += ptr.getRefData().getBaseNode()->getBound().radius(); //could be more precise with actual boundingbox
+                return result.mHitPos;
+            }
+            return position;
+        }
         else
             return MovementSolver::traceDown(ptr, position, found->second, mCollisionWorld, maxHeight);
     }
