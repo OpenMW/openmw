@@ -140,6 +140,7 @@ class NiSkinInstance;
 class NiSourceTexture;
 class NiRotatingParticlesData;
 class NiAutoNormalParticlesData;
+class NiPalette;
 
 typedef RecordPtrT<Node> NodePtr;
 typedef RecordPtrT<Extra> ExtraPtr;
@@ -160,6 +161,7 @@ typedef RecordPtrT<NiSkinInstance> NiSkinInstancePtr;
 typedef RecordPtrT<NiSourceTexture> NiSourceTexturePtr;
 typedef RecordPtrT<NiRotatingParticlesData> NiRotatingParticlesDataPtr;
 typedef RecordPtrT<NiAutoNormalParticlesData> NiAutoNormalParticlesDataPtr;
+typedef RecordPtrT<NiPalette> NiPalettePtr;
 
 typedef RecordListT<Node> NodeList;
 typedef RecordListT<Property> PropertyList;

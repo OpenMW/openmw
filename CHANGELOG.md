@@ -148,6 +148,7 @@
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4859: Make water reflections more configurable
+    Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
     Feature #4958: Support eight blood types
