@@ -1,6 +1,7 @@
 #include "physicssystem.hpp"
 
 #include <osg/Group>
+#include <osg/ComputeBoundsVisitor>
 
 #include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
@@ -984,7 +985,11 @@ namespace MWPhysics
                                                                 MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door);
             if(result.mHit)
             {
-                result.mHitPos.z() += ptr.getRefData().getBaseNode()->getBound().radius(); //could be more precise with actual boundingbox
+                // offset height according bounding box
+                osg::ComputeBoundsVisitor cb;
+                ptr.getRefData().getBaseNode()->accept(cb);
+                osg::BoundingBox &bb = cb.getBoundingBox();
+                result.mHitPos.z() += bb.center().z() - bb.zMin();
                 return result.mHitPos;
             }
             return position;
