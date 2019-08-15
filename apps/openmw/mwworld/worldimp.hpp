@@ -146,6 +146,8 @@ namespace MWWorld
     private:
             void PCDropped (const Ptr& item);
 
+            bool rotateDoor(const Ptr door, int state, float duration);
+
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
