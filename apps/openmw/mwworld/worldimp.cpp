@@ -1458,6 +1458,9 @@ namespace MWWorld
         {
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
         }
     }
 
