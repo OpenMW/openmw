@@ -1610,8 +1610,13 @@ namespace MWWorld
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
-        return result.mHit;
+        return !castRay(a, b, mask).isEmpty();
+    }
+
+    MWWorld::Ptr World::castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask) const
+    {
+        const auto result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
+        return result.mHit ? result.mHitObject : MWWorld::Ptr();
     }
 
     void World::processDoors(float duration)

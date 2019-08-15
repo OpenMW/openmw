@@ -147,6 +147,8 @@ namespace MWMechanics
 
         private:
             bool isNearInactiveCell(osg::Vec3f position);
+
+            bool isDoorOnTheWay(const MWWorld::Ptr& actor, const MWWorld::Ptr& door) const;
     };
 }
 
