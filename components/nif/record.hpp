@@ -97,7 +97,8 @@ enum RecordType
   RC_NiSkinInstance,
   RC_RootCollisionNode,
   RC_NiSphericalCollider,
-  RC_NiLookAtController
+  RC_NiLookAtController,
+  RC_NiPalette
 };
 
 /// Base class for all records

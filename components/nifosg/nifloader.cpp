@@ -1276,9 +1276,11 @@ namespace NifOsg
             switch (pixelData->fmt)
             {
             case Nif::NiPixelData::NIPXFMT_RGB8:
+            case Nif::NiPixelData::NIPXFMT_PAL8:
                 pixelformat = GL_RGB;
                 break;
             case Nif::NiPixelData::NIPXFMT_RGBA8:
+            case Nif::NiPixelData::NIPXFMT_PALA8:
                 pixelformat = GL_RGBA;
                 break;
             default:
@@ -1293,7 +1295,7 @@ namespace NifOsg
             int height = 0;
 
             std::vector<unsigned int> mipmapVector;
-            for (unsigned int i=0; i<pixelData->mipmaps.size()-3; ++i)
+            for (unsigned int i=0; i<pixelData->mipmaps.size(); ++i)
             {
                 const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
 
@@ -1319,10 +1321,59 @@ namespace NifOsg
                 return nullptr;
             }
 
-            unsigned char* data = new unsigned char[pixelData->data.size()];
-            memcpy(data, pixelData->data.data(), pixelData->data.size());
+            const std::vector<unsigned char>& pixels = pixelData->data;
+            switch (pixelData->fmt)
+            {
+            case Nif::NiPixelData::NIPXFMT_RGB8:
+            case Nif::NiPixelData::NIPXFMT_RGBA8:
+            {
+                unsigned char* data = new unsigned char[pixels.size()];
+                memcpy(data, pixels.data(), pixels.size());
+                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                break;
+            }
+            case Nif::NiPixelData::NIPXFMT_PAL8:
+            case Nif::NiPixelData::NIPXFMT_PALA8:
+            {
+                if (pixelData->palette.empty() || pixelData->bpp != 8)
+                {
+                    Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring";
+                    return nullptr;
+                }
+                // We're going to convert the indices that pixel data contains
+                // into real colors using the palette.
+                const std::vector<unsigned int>& palette = pixelData->palette->colors;
+                if (pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8)
+                {
+                    unsigned char* data = new unsigned char[pixels.size() * 3];
+                    for (size_t i = 0; i < pixels.size(); i++)
+                    {
+                        unsigned int color = palette[pixels[i]];
+                        data[i * 3 + 0] = (color >>  0) & 0xFF;
+                        data[i * 3 + 1] = (color >>  8) & 0xFF;
+                        data[i * 3 + 2] = (color >> 16) & 0xFF;
+                    }
+                    image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                }
+                else // if (fmt = NIPXFMT_PALA8)
+                {
+                    unsigned char* data = new unsigned char[pixels.size() * 4];
+                    for (size_t i = 0; i < pixels.size(); i++)
+                    {
+                        unsigned int color = palette[pixels[i]];
+                        data[i * 4 + 0] = (color >>  0) & 0xFF;
+                        data[i * 4 + 1] = (color >>  8) & 0xFF;
+                        data[i * 4 + 2] = (color >> 16) & 0xFF;
+                        data[i * 4 + 3] = (color >> 24) & 0xFF;
+                    }
+                    image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                }
+                break;
+            }
+            default:
+                return nullptr;
+            }
 
-            image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
             image->setMipmapLevels(mipmapVector);
             image->flipVertical();
 
