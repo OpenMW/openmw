@@ -189,12 +189,6 @@ namespace MWScript
                     if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
                     {
                         MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
-
-                        float xr = ptr.getCellRef().getPosition().rot[0];
-                        float yr = ptr.getCellRef().getPosition().rot[1];
-                        float zr = ptr.getCellRef().getPosition().rot[2];
-
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
                     }
                 }
         };
