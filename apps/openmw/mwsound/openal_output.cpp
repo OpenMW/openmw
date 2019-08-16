@@ -798,7 +798,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
                 if(alGetError() == AL_NO_ERROR)
                     Log(Debug::Info) << "Standard Reverb supported";
             }
-            EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_GENERIC;
+            EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_LIVINGROOM;
             props.flGain = 0.0f;
             LoadEffect(mDefaultEffect, props);
         }
