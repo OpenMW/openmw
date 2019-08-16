@@ -408,8 +408,8 @@ namespace NifOsg
             unsigned int clamp = static_cast<unsigned int>(textureEffect->clamp);
             int wrapT = (clamp) & 0x1;
             int wrapS = (clamp >> 1) & 0x1;
-            texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
-            texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+            texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
             osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
             texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
@@ -777,8 +777,8 @@ namespace NifOsg
 
                         // inherit wrap settings from the target slot
                         osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(flipctrl->mTexSlot, osg::StateAttribute::TEXTURE));
-                        osg::Texture2D::WrapMode wrapS = osg::Texture2D::CLAMP;
-                        osg::Texture2D::WrapMode wrapT = osg::Texture2D::CLAMP;
+                        osg::Texture2D::WrapMode wrapS = osg::Texture2D::CLAMP_TO_EDGE;
+                        osg::Texture2D::WrapMode wrapT = osg::Texture2D::CLAMP_TO_EDGE;
                         if (inherit)
                         {
                             wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
@@ -1392,8 +1392,8 @@ namespace NifOsg
                     int wrapT = (clamp) & 0x1;
                     int wrapS = (clamp >> 1) & 0x1;
 
-                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP);
-                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP);
+                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
                     int texUnit = boundTextures.size();
 
