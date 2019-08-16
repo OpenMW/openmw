@@ -238,7 +238,7 @@ namespace MWMechanics
             {
                 /* short group */ "",
                 /* long group  */ "",
-                /*  sound ID   */ "Item Weapon Ammo",
+                /*  sound ID   */ "Item Ammo",
                 /* attach bone */ "ArrowBone",
                 /* sheath bone */ "",
                 /* usage skill */ ESM::Skill::Marksman,
@@ -252,7 +252,7 @@ namespace MWMechanics
             {
                 /* short group */ "",
                 /* long group  */ "",
-                /*  sound ID   */ "Item Weapon Ammo",
+                /*  sound ID   */ "Item Ammo",
                 /* attach bone */ "ArrowBone",
                 /* sheath bone */ "",
                 /* usage skill */ ESM::Skill::Marksman,
