@@ -293,7 +293,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
 
         std::string text;
 

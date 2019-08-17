@@ -168,7 +168,7 @@ namespace MWClass
         const ESM::WeaponType* weaponType = MWMechanics::getWeaponType(ref->mBase->mData.mType);
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();

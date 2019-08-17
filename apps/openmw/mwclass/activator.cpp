@@ -103,7 +103,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
