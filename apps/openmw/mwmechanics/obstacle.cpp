@@ -76,10 +76,8 @@ namespace MWMechanics
         return MWWorld::Ptr(); // none found
     }
 
-    ObstacleCheck::ObstacleCheck():
-        mPrevX(0) // to see if the moved since last time
-      , mPrevY(0)
-      , mWalkState(State_Norm)
+    ObstacleCheck::ObstacleCheck()
+      : mWalkState(State_Norm)
       , mStuckDuration(0)
       , mEvadeDuration(0)
       , mDistSameSpot(-1) // avoid calculating it each time
@@ -123,19 +121,15 @@ namespace MWMechanics
      */
     void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration)
     {
-        const MWWorld::Class& cls = actor.getClass();
-        ESM::Position pos = actor.getRefData().getPosition();
+        const osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
 
-        if(mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * cls.getSpeed(actor);
+        if (mDistSameSpot == -1)
+            mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor);
 
-        float distSameSpot = mDistSameSpot * duration;
+        const float distSameSpot = mDistSameSpot * duration;
+        const bool samePosition =  (pos - mPrev).length2() <  distSameSpot * distSameSpot;
 
-        bool samePosition =  (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2() <  distSameSpot * distSameSpot;
-
-        // update position
-        mPrevX = pos.pos[0];
-        mPrevY = pos.pos[1];
+        mPrev = pos;
 
         switch(mWalkState)
         {
