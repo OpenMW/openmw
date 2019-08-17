@@ -1071,11 +1071,11 @@ namespace MWClass
         bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
 
-        info.caption = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
         if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
-            info.caption += ref->mBase->mName;
+            info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);
             info.caption += ")";
         }
 
