@@ -18,12 +18,14 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
 
 #include <components/vfs/manager.hpp>
 
+#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -1378,6 +1380,9 @@ namespace MWRender
 
     void injectCustomBones(osg::ref_ptr<osg::Node>& node, const std::string& model, Resource::ResourceSystem* resourceSystem)
     {
+        if (model.empty())
+            return;
+
         const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
 
         std::string animationPath = model;
@@ -1405,14 +1410,7 @@ namespace MWRender
         }
     }
 
-    enum InjectType
-    {
-        None,
-        Model,
-        ModelWithFallback
-    };
-
-    osg::ref_ptr<osg::Node> getModelInstance(Resource::ResourceSystem* resourceSystem, const std::string& model, bool baseonly, InjectType inject)
+    osg::ref_ptr<osg::Node> getModelInstance(Resource::ResourceSystem* resourceSystem, const std::string& model, bool baseonly, bool inject, const std::string& defaultSkeleton)
     {
         Resource::SceneManager* sceneMgr = resourceSystem->getSceneManager();
         if (baseonly)
@@ -1424,11 +1422,11 @@ namespace MWRender
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
 
-                if (inject == InjectType::ModelWithFallback)
-                    injectCustomBones(created, "meshes\\xbase_anim.nif", resourceSystem);
-
-                if (inject != InjectType::None)
+                if (inject)
+                {
+                    injectCustomBones(created, defaultSkeleton, resourceSystem);
                     injectCustomBones(created, model, resourceSystem);
+                }
 
                 SceneUtil::CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
@@ -1445,11 +1443,11 @@ namespace MWRender
         {
             osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
 
-            if (inject == InjectType::ModelWithFallback)
-                injectCustomBones(created, "meshes\\xbase_anim.nif", resourceSystem);
-
-            if (inject != InjectType::None)
+            if (inject)
+            {
+                injectCustomBones(created, defaultSkeleton, resourceSystem);
                 injectCustomBones(created, model, resourceSystem);
+            }
 
             return created;
         }
@@ -1475,17 +1473,44 @@ namespace MWRender
         mAccumCtrl = nullptr;
 
         static const bool useAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
-        InjectType inject = useAdditionalSources && mPtr.getClass().isActor() ? InjectType::Model : InjectType::None;
-        if (inject != InjectType::None && isCreature)
+        std::string defaultSkeleton;
+        bool inject = false;
+
+        if (useAdditionalSources && mPtr.getClass().isActor())
         {
-            MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
-            if(ref->mBase->mFlags & ESM::Creature::Bipedal)
-                inject = InjectType::ModelWithFallback;
+            if (isCreature)
+            {
+                MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+                if(ref->mBase->mFlags & ESM::Creature::Bipedal)
+                {
+                    defaultSkeleton = "meshes\\xbase_anim.nif";
+                    inject = true;
+                }
+            }
+            else
+            {
+                inject = true;
+                MWWorld::LiveCellRef<ESM::NPC> *ref = mPtr.get<ESM::NPC>();
+                if (!ref->mBase->mModel.empty())
+                {
+                    // If NPC has a custom animation model attached, we should inject bones from default skeleton for given race and gender as well
+                    // Since it is a quite rare case, there should not be a noticable performance loss
+                    // Note: consider that player and werewolves have no custom animation files attached for now
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const ESM::Race *race = store.get<ESM::Race>().find(ref->mBase->mRace);
+
+                    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+                    bool isFemale = !ref->mBase->isMale();
+
+                    defaultSkeleton = SceneUtil::getActorSkeleton(false, isFemale, isBeast, false);
+                    defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+                }
+            }
         }
 
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
@@ -1501,7 +1526,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {
