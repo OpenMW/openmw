@@ -2398,11 +2398,6 @@ namespace MWWorld
         mRendering->allowVanityMode(allow);
     }
 
-    void World::togglePlayerLooking(bool enable)
-    {
-        mRendering->togglePlayerLooking(enable);
-    }
-
     void World::changeVanityModeScale(float factor)
     {
         mRendering->changeVanityModeScale(factor);
