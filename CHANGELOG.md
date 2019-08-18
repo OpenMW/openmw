@@ -121,6 +121,7 @@
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
     Bug #5099: Non-swimming enemies will enter water if player is water walking
+    Bug #5103: Sneaking state behavior is still inconsistent
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
     Bug #5105: NPCs start combat with werewolves from any distance
     Bug #5106: Still can jump even when encumbered

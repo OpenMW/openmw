@@ -186,14 +186,7 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
-                    MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                    MWBase::World* world = MWBase::Environment::get().getWorld();
-
-                    bool stanceOn = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-                    bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
-                    bool inair = !world->isOnGround(ptr) && !world->isSwimming(ptr) && !world->isFlying(ptr);
-
-                    runtime.push(stanceOn && (sneaking || inair));
+                    runtime.push(MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));
                 }
         };
 
