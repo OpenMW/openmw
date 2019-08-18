@@ -247,7 +247,10 @@ namespace
         void apply(osg::Node& node)
         {
             if (SceneUtil::hasUserDescription(&node, "CustomBone"))
+            {
                 mFoundBones.emplace_back(&node, node.getParent(0));
+                return;
+            }
 
             traverse(node);
         }
