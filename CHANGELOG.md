@@ -168,6 +168,7 @@
     Feature #5036: Allow scripted faction leaving
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
+    Feature #5091: Human-readable light source duration
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
     Feature #5121: Handle NiTriStrips and NiTriStripsData

@@ -667,6 +667,60 @@ namespace MWGui
         return ret;
     }
 
+    std::string ToolTips::getDurationString(float duration, const std::string& prefix)
+    {
+        std::string ret;
+        ret = prefix + ": ";
+
+        if (duration < 1.f)
+        {
+            ret += "0 s";
+            return ret;
+        }
+
+        constexpr int secondsPerMinute = 60; // 60 seconds
+        constexpr int secondsPerHour = secondsPerMinute * 60; // 60 minutes
+        constexpr int secondsPerDay = secondsPerHour * 24; // 24 hours
+        constexpr int secondsPerMonth = secondsPerDay * 30; // 30 days
+        constexpr int secondsPerYear = secondsPerDay * 365;
+        int fullDuration = static_cast<int>(duration);
+        int units = 0;
+        int years = fullDuration / secondsPerYear;
+        int months = fullDuration % secondsPerYear / secondsPerMonth;
+        int days = fullDuration % secondsPerYear % secondsPerMonth / secondsPerDay; // Because a year is not exactly 12 "months"
+        int hours = fullDuration % secondsPerDay / secondsPerHour;
+        int minutes = fullDuration % secondsPerHour / secondsPerMinute;
+        int seconds = fullDuration % secondsPerMinute;
+        if (years)
+        {
+            units++;
+            ret += toString(years) + " y ";
+        }
+        if (months)
+        {
+            units++;
+            ret += toString(months) + " mo ";
+        }
+        if (units < 2 && days)
+        {
+            units++;
+            ret += toString(days) + " d ";
+        }
+        if (units < 2 && hours)
+        {
+            units++;
+            ret += toString(hours) + " h ";
+        }
+        if (units >= 2)
+            return ret;
+        if (minutes)
+            ret += toString(minutes) + " min ";
+        if (seconds)
+            ret += toString(seconds) + " s ";
+
+        return ret;
+    }
+
     bool ToolTips::toggleFullHelp()
     {
         mFullHelp = !mFullHelp;
