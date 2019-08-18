@@ -132,7 +132,6 @@
     Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
     Bug #5126: Swimming creatures without RunForward animations are motionless during combat
     Bug #5134: Doors rotation by "Lock" console command is inconsistent
-    Bug #5126: Swimming creatures without RunForward animations are motionless during combat
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
