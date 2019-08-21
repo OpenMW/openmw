@@ -271,7 +271,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();

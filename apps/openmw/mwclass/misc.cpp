@@ -159,7 +159,7 @@ namespace MWClass
         else // gold displays its count also if it's 1.
             countString = " (" + std::to_string(count) + ")";
 
-        info.caption = ref->mBase->mName + countString;
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + countString;
         info.icon = ref->mBase->mIcon;
 
         if (ref->mRef.getSoul() != "")

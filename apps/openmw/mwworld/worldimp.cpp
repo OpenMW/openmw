@@ -1404,7 +1404,7 @@ namespace MWWorld
 
         pos.z() += 20; // place slightly above. will snap down to ground with code below
 
-        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && isActorCollisionEnabled(ptr)))
+        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !isSwimming(ptr) && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
@@ -1461,6 +1461,9 @@ namespace MWWorld
         {
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
         }
     }
 
@@ -1617,6 +1620,45 @@ namespace MWWorld
         return result.mHit;
     }
 
+    bool World::rotateDoor(const Ptr door, int state, float duration)
+    {
+        const ESM::Position& objPos = door.getRefData().getPosition();
+        float oldRot = objPos.rot[2];
+
+        float minRot = door.getCellRef().getPosition().rot[2];
+        float maxRot = minRot + osg::DegreesToRadians(90.f);
+
+        float diff = duration * osg::DegreesToRadians(90.f);
+        float targetRot = std::min(std::max(minRot, oldRot + diff * (state == 1 ? 1 : -1)), maxRot);
+        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot);
+
+        bool reached = (targetRot == maxRot && state) || targetRot == minRot;
+
+        /// \todo should use convexSweepTest here
+        std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(door, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
+        for (MWWorld::Ptr& ptr : collisions)
+        {
+            if (ptr.getClass().isActor())
+            {
+                // Collided with actor, ask actor to try to avoid door
+                if(ptr != getPlayerPtr() )
+                {
+                    MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                    if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                        seq.stack(MWMechanics::AiAvoidDoor(door),ptr);
+                }
+
+                // we need to undo the rotation
+                rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
+                reached = false;
+            }
+        }
+
+        // the rotation order we want to use
+        mWorldScene->updateObjectRotation(door, false);
+        return reached;
+    }
+
     void World::processDoors(float duration)
     {
         std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
@@ -1631,40 +1673,7 @@ namespace MWWorld
             }
             else
             {
-                const ESM::Position& objPos = it->first.getRefData().getPosition();
-                float oldRot = objPos.rot[2];
-
-                float minRot = it->first.getCellRef().getPosition().rot[2];
-                float maxRot = minRot + osg::DegreesToRadians(90.f);
-
-                float diff = duration * osg::DegreesToRadians(90.f);
-                float targetRot = std::min(std::max(minRot, oldRot + diff * (it->second == 1 ? 1 : -1)), maxRot);
-                rotateObject(it->first, objPos.rot[0], objPos.rot[1], targetRot);
-
-                bool reached = (targetRot == maxRot && it->second) || targetRot == minRot;
-
-                /// \todo should use convexSweepTest here
-                std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
-                for (MWWorld::Ptr& ptr : collisions)
-                {
-                    if (ptr.getClass().isActor())
-                    {
-                        // Collided with actor, ask actor to try to avoid door
-                        if(ptr != getPlayerPtr() )
-                        {
-                            MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-                            if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
-                                seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
-                        }
-
-                        // we need to undo the rotation
-                        rotateObject(it->first, objPos.rot[0], objPos.rot[1], oldRot);
-                        reached = false;
-                    }
-                }
-
-                // the rotation order we want to use
-                mWorldScene->updateObjectRotation(it->first, false);
+                bool reached = rotateDoor(it->first, it->second, duration);
 
                 if (reached)
                 {
@@ -2393,11 +2402,6 @@ namespace MWWorld
         mRendering->allowVanityMode(allow);
     }
 
-    void World::togglePlayerLooking(bool enable)
-    {
-        mRendering->togglePlayerLooking(enable);
-    }
-
     void World::changeVanityModeScale(float factor)
     {
         mRendering->changeVanityModeScale(factor);
@@ -2536,7 +2540,10 @@ namespace MWWorld
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
         if (state == 0)
+        {
             mDoorStates.erase(door);
+            rotateDoor(door, state, 1);
+        }
     }
 
     bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)

@@ -90,6 +90,26 @@ void NiTriShapeData::read(NIFStream *nif)
     }
 }
 
+void NiTriStripsData::read(NIFStream *nif)
+{
+    ShapeData::read(nif);
+
+    // Every strip with n points defines n-2 triangles, so this should be unnecessary.
+    /*int tris =*/ nif->getUShort();
+    // Number of triangle strips
+    int numStrips = nif->getUShort();
+
+    std::vector<unsigned short> lengths;
+    nif->getUShorts(lengths, numStrips);
+
+    for (int i = 0; i < numStrips; i++)
+    {
+        std::vector<unsigned short> strip;
+        nif->getUShorts(strip, lengths[i]);
+        strips.emplace_back(strip);
+    }
+}
+
 void NiAutoNormalParticlesData::read(NIFStream *nif)
 {
     ShapeData::read(nif);
@@ -143,22 +163,23 @@ void NiPixelData::read(NIFStream *nif)
 {
     fmt = (Format)nif->getUInt();
 
-    rmask = nif->getInt(); // usually 0xff
-    gmask = nif->getInt(); // usually 0xff00
-    bmask = nif->getInt(); // usually 0xff0000
-    amask = nif->getInt(); // usually 0xff000000 or zero
+    rmask = nif->getUInt(); // usually 0xff
+    gmask = nif->getUInt(); // usually 0xff00
+    bmask = nif->getUInt(); // usually 0xff0000
+    amask = nif->getUInt(); // usually 0xff000000 or zero
 
-    bpp = nif->getInt();
+    bpp = nif->getUInt();
 
-    // Unknown
-    nif->skip(12);
+    // 8 bytes of "Old Fast Compare". Whatever that means.
+    nif->skip(8);
+    palette.read(nif);
 
-    numberOfMipmaps = nif->getInt();
+    numberOfMipmaps = nif->getUInt();
 
     // Bytes per pixel, should be bpp * 8
-    /* int bytes = */ nif->getInt();
+    /* int bytes = */ nif->getUInt();
 
-    for(int i=0; i<numberOfMipmaps; i++)
+    for(unsigned int i=0; i<numberOfMipmaps; i++)
     {
         // Image size and offset in the following data field
         Mipmap m;
@@ -169,10 +190,15 @@ void NiPixelData::read(NIFStream *nif)
     }
 
     // Read the data
-    unsigned int dataSize = nif->getInt();
+    unsigned int dataSize = nif->getUInt();
     data.reserve(dataSize);
     for (unsigned i=0; i<dataSize; ++i)
         data.push_back((unsigned char)nif->getChar());
+}
+
+void NiPixelData::post(NIFFile *nif)
+{
+    palette.post(nif);
 }
 
 void NiColorData::read(NIFStream *nif)
@@ -256,6 +282,16 @@ void NiKeyframeData::read(NIFStream *nif)
     mTranslations->read(nif);
     mScales = std::make_shared<FloatKeyMap>();
     mScales->read(nif);
+}
+
+void NiPalette::read(NIFStream *nif)
+{
+    unsigned int alphaMask = !nif->getChar() ? 0xFF000000 : 0;
+    // Fill the entire palette with black even if there isn't enough entries.
+    colors.resize(256);
+    unsigned int numEntries = nif->getUInt();
+    for (unsigned int i = 0; i < numEntries; i++)
+        colors[i] = nif->getUInt() | alphaMask;
 }
 
 } // Namespace

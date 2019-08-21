@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex Rice
     Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
@@ -29,6 +30,7 @@ Programmers
     Ardekantur
     Armin Preiml
     Artem Kotsynyak (greye)
+    Artem Nykolenko (anikm21)
     artemutin
     Arthur Moore (EmperorArthur)
     Assumeru

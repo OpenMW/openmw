@@ -15,6 +15,8 @@
 
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/weapontype.hpp"
+
 #include "../mwworld/class.hpp"
 
 namespace MWRender
@@ -50,9 +52,6 @@ CreatureWeaponAnimation::CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const 
 
         if((ref->mBase->mFlags&ESM::Creature::Bipedal))
         {
-            if (mWeaponSheathing)
-                injectWeaponBones();
-
             addAnimSource("meshes\\xbase_anim.nif", model);
         }
         addAnimSource(model, model);
@@ -115,7 +114,22 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
 
     std::string bonename;
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
-        bonename = "Weapon Bone";
+    {
+        if(item.getTypeName() == typeid(ESM::Weapon).name())
+        {
+            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            bonename = MWMechanics::getWeaponType(type)->mAttachBone;
+            if (bonename != "Weapon Bone")
+            {
+                const NodeMap& nodeMap = getNodeMap();
+                NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
+                if (found == nodeMap.end())
+                    bonename = "Weapon Bone";
+            }
+        }
+        else
+            bonename = "Weapon Bone";
+    }
     else
         bonename = "Shield Bone";
 
@@ -132,7 +146,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
         scene.reset(new PartHolder(attached));
 
         if (!item.getClass().getEnchantment(item).empty())
-            addGlow(attached, getEnchantmentColor(item));
+            mGlowUpdater = SceneUtil::addEnchantedGlow(attached, mResourceSystem, item.getClass().getEnchantmentColor(item));
 
         // Crossbows start out with a bolt attached
         // FIXME: code duplicated from NpcAnimation
@@ -140,8 +154,9 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
                 item.getTypeName() == typeid(ESM::Weapon).name() &&
                 item.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanCrossbow)
         {
+            const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(ESM::Weapon::MarksmanCrossbow);
             MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
-            if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::Bolt)
+            if (ammo != inv.end() && ammo->get<ESM::Weapon>()->mBase->mData.mType == weaponInfo->mAmmoType)
                 attachArrow();
             else
                 mAmmunition.reset();
@@ -173,6 +188,16 @@ bool CreatureWeaponAnimation::isArrowAttached() const
 void CreatureWeaponAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);
+
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator ammo = inv.getSlot(MWWorld::InventoryStore::Slot_Ammunition);
+    if (ammo != inv.end() && !ammo->getClass().getEnchantment(*ammo).empty())
+    {
+        osg::Group* bone = getArrowBone();
+        if (bone != nullptr && bone->getNumChildren())
+            SceneUtil::addEnchantedGlow(bone->getChild(0), mResourceSystem, ammo->getClass().getEnchantmentColor(*ammo));
+    }
+
     updateQuiver();
 }
 
@@ -187,7 +212,19 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
     if (!mWeapon)
         return nullptr;
 
-    SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+    if (!mPtr.getClass().hasInventoryStore(mPtr))
+        return nullptr;
+
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    if(weapon == inv.end() || weapon->getTypeName() != typeid(ESM::Weapon).name())
+        return nullptr;
+
+    int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
+    int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
+
+    SceneUtil::FindByNameVisitor findVisitor (MWMechanics::getWeaponType(ammoType)->mAttachBone);
+
     mWeapon->getNode()->accept(findVisitor);
 
     return findVisitor.mFoundNode;

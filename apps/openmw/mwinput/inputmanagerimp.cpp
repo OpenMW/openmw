@@ -39,6 +39,7 @@ namespace MWInput
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists,
+            const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
@@ -113,9 +114,13 @@ namespace MWInput
 
         // Load controller mappings
 #if SDL_VERSION_ATLEAST(2,0,2)
-        if(controllerBindingsFile!="")
+        if(!controllerBindingsFile.empty())
         {
             SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
+        }
+        if(!userControllerBindingsFile.empty())
+        {
+            SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
         }
 #endif
 
@@ -589,7 +594,7 @@ namespace MWInput
                 rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
 
                 // Only actually turn player when we're not in vanity mode
-                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && mControlSwitch["playerlooking"])
                 {
                     mPlayer->yaw(rot[2]);
                     mPlayer->pitch(rot[0]);
@@ -827,9 +832,6 @@ namespace MWInput
 
     void InputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
-        if (mControlSwitch[sw] == value) {
-            return;
-        }
         /// \note 7 switches at all, if-else is relevant
         if (sw == "playercontrols" && !value) {
             mPlayer->setLeftRight(0);
@@ -841,8 +843,8 @@ namespace MWInput
             mPlayer->setUpDown(0);
         } else if (sw == "vanitymode") {
             MWBase::Environment::get().getWorld()->allowVanityMode(value);
-        } else if (sw == "playerlooking") {
-            MWBase::Environment::get().getWorld()->togglePlayerLooking(value);
+        } else if (sw == "playerlooking" && !value) {
+            MWBase::Environment::get().getWorld()->rotateObject(mPlayer->getPlayer(), 0.f, 0.f, 0.f);
         }
         mControlSwitch[sw] = value;
     }
@@ -976,7 +978,7 @@ namespace MWInput
             rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot))
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && mControlSwitch["playerlooking"])
             {
                 mPlayer->yaw(x);
                 mPlayer->pitch(y);

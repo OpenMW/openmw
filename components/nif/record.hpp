@@ -41,6 +41,7 @@ enum RecordType
   RC_NiBillboardNode,
   RC_AvoidNode,
   RC_NiTriShape,
+  RC_NiTriStrips,
   RC_NiRotatingParticles,
   RC_NiAutoNormalParticles,
   RC_NiBSParticleNode,
@@ -80,6 +81,7 @@ enum RecordType
   RC_NiParticleRotation,
   RC_NiFloatData,
   RC_NiTriShapeData,
+  RC_NiTriStripsData,
   RC_NiVisData,
   RC_NiColorData,
   RC_NiPixelData,
@@ -95,7 +97,8 @@ enum RecordType
   RC_NiSkinInstance,
   RC_RootCollisionNode,
   RC_NiSphericalCollider,
-  RC_NiLookAtController
+  RC_NiLookAtController,
+  RC_NiPalette
 };
 
 /// Base class for all records

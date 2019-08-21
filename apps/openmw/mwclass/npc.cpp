@@ -1,4 +1,4 @@
-#include "npc.hpp"
+﻿#include "npc.hpp"
 
 #include <memory>
 
@@ -26,7 +26,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
-#include "../mwmechanics/character.hpp"
+#include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -37,6 +37,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/localscripts.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -939,10 +940,9 @@ namespace MWClass
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool swimming = world->isSwimming(ptr);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
+        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        sneaking = sneaking && (inair || MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));
-        bool running =  stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
@@ -1070,11 +1070,11 @@ namespace MWClass
         bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
 
-        info.caption = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
         if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
-            info.caption += ref->mBase->mName;
+            info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);
             info.caption += ")";
         }
 
@@ -1180,7 +1180,7 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
 
         // Race weight should not affect 1st-person meshes, otherwise it will change hand proportions and can break aiming.
-        if (ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
+        if (ptr == MWMechanics::getPlayer() && ptr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson())
         {
             if (ref->mBase->isMale())
                 scale *= race->mData.mHeight.mMale;
@@ -1227,9 +1227,9 @@ namespace MWClass
                 if (getNpcStats(ptr).isWerewolf()
                         && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
-                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(getCreatureStats(ptr), getInventoryStore(ptr), &weaponType);
-                    if (weaponType == MWMechanics::WeapType_None)
+                    int weaponType = ESM::Weapon::None;
+                    MWMechanics::getActiveWeapon(ptr, &weaponType);
+                    if (weaponType == ESM::Weapon::None)
                         return std::string();
                 }
 
@@ -1376,7 +1376,12 @@ namespace MWClass
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
+                {
                     ptr.getRefData().setCount(1);
+                    const std::string& script = getScript(ptr);
+                    if (!script.empty())
+                        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
+                }
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(nullptr);

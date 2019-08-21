@@ -34,7 +34,7 @@
       <item row="2" column="0">
        <widget class="QCheckBox" name="windowBorderCheckBox">
         <property name="text">
-         <string>Window border</string>
+         <string>Window Border</string>
         </property>
        </widget>
       </item>
@@ -59,6 +59,13 @@
         </property>
         <property name="alignment">
          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="framerateLimitCheckBox">
+        <property name="text">
+         <string>Framerate Limit:</string>
         </property>
        </widget>
       </item>
@@ -142,6 +149,31 @@
          <widget class="QComboBox" name="resolutionComboBox"/>
         </item>
        </layout>
+      </item>
+      <item row="6" column="1">
+       <widget class="QDoubleSpinBox" name="framerateLimitSpinBox">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="suffix">
+         <string> FPS</string>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+        <property name="minimum">
+         <double>1</double>
+        </property>
+        <property name="maximum">
+         <double>1000</double>
+        </property>
+        <property name="singleStep">
+         <double>15</double>
+        </property>
+        <property name="value">
+         <double>300</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

@@ -27,6 +27,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/localscripts.hpp"
 
 #include "../mwrender/renderinginterface.hpp"
 #include "../mwrender/objects.hpp"
@@ -585,7 +586,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -844,7 +845,12 @@ namespace MWClass
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
+                {
                     ptr.getRefData().setCount(1);
+                    const std::string& script = getScript(ptr);
+                    if(!script.empty())
+                        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
+                }
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(nullptr);
