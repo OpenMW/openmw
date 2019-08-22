@@ -15,6 +15,7 @@
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
+    Bug #3894: Hostile spell effects not detected/present on first frame of OnPCHitMe
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4276: Resizing character window differs from vanilla
@@ -84,6 +85,7 @@
     Bug #4945: Poor random magic magnitude distribution
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
+    Bug #4952: Torches held by NPCs flicker too quickly
     Bug #4961: Flying creature combat engagement takes z-axis into account
     Bug #4963: Enchant skill progress is incorrect
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
@@ -96,6 +98,7 @@
     Bug #4984: "Friendly hits" feature should be used only for player's followers
     Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
+    Bug #4991: Jumping occasionally takes too much fatigue
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
@@ -109,19 +112,27 @@
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
+    Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
+    Bug #5078: DisablePlayerLooking is broken
     Bug #5082: Scrolling with controller in GUI mode is broken
     Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
     Bug #5099: Non-swimming enemies will enter water if player is water walking
+    Bug #5103: Sneaking state behavior is still inconsistent
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
     Bug #5105: NPCs start combat with werewolves from any distance
+    Bug #5106: Still can jump even when encumbered
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
+    Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
     Bug #5123: Script won't run on respawn
     Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
+    Bug #5126: Swimming creatures without RunForward animations are motionless during combat
+    Bug #5134: Doors rotation by "Lock" console command is inconsistent
+    Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Bug #5125: Vertex bone weights are not normalized
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
@@ -143,6 +154,7 @@
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4859: Make water reflections more configurable
+    Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
     Feature #4958: Support eight blood types
@@ -158,9 +170,13 @@
     Feature #5036: Allow scripted faction leaving
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
+    Feature #5091: Human-readable light source duration
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
+    Feature #5121: Handle NiTriStrips and NiTriStripsData
     Feature #5122: Use magic glow for enchanted arrows
+    Feature #5131: Custom skeleton bones
+    Feature #5132: Unique animations for different weapon types
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

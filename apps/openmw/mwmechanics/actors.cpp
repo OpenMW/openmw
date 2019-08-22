@@ -1785,14 +1785,7 @@ namespace MWMechanics
 
         MWWorld::Ptr player = getPlayer();
 
-        CreatureStats& stats = player.getClass().getCreatureStats(player);
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        bool inair = !world->isOnGround(player) && !world->isSwimming(player) && !world->isFlying(player);
-        sneaking = sneaking && (ctrl->isSneaking() || inair);
-
-        if (!sneaking)
+        if (!MWBase::Environment::get().getMechanicsManager()->isSneaking(player))
         {
             MWBase::Environment::get().getWindowManager()->setSneakVisibility(false);
             return;
@@ -1800,6 +1793,7 @@ namespace MWMechanics
 
         static float sneakSkillTimer = 0.f; // Times sneak skill progress from "avoid notice"
 
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
         static const float fSneakUseDist = gmst.find("fSneakUseDist")->mValue.getFloat();
         static const float fSneakUseDelay = gmst.find("fSneakUseDelay")->mValue.getFloat();

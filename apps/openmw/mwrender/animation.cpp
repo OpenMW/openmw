@@ -18,12 +18,14 @@
 #include <components/resource/keyframemanager.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/resourcehelpers.hpp>
 
 #include <components/nifosg/nifloader.hpp> // KeyframeHolder
 #include <components/nifosg/controller.hpp>
 
 #include <components/vfs/manager.hpp>
 
+#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -232,6 +234,28 @@ namespace
         // <node to remove, parent node to remove it from>
         typedef std::vector<std::pair<osg::Node*, osg::Group*> > RemoveVec;
         std::vector<std::pair<osg::Node*, osg::Group*> > mToRemove;
+    };
+
+    class GetExtendedBonesVisitor : public osg::NodeVisitor
+    {
+    public:
+        GetExtendedBonesVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        void apply(osg::Node& node)
+        {
+            if (SceneUtil::hasUserDescription(&node, "CustomBone"))
+            {
+                mFoundBones.emplace_back(&node, node.getParent(0));
+                return;
+            }
+
+            traverse(node);
+        }
+
+        std::vector<std::pair<osg::Node*, osg::Group*> > mFoundBones;
     };
 
     class RemoveFinishedCallbackVisitor : public RemoveVisitor
@@ -1336,8 +1360,62 @@ namespace MWRender
             state->second.mLoopingEnabled = enabled;
     }
 
-    osg::ref_ptr<osg::Node> getModelInstance(Resource::SceneManager* sceneMgr, const std::string& model, bool baseonly)
+    void loadBonesFromFile(osg::ref_ptr<osg::Node>& baseNode, const std::string &model, Resource::ResourceSystem* resourceSystem)
     {
+        const osg::Node* node = resourceSystem->getSceneManager()->getTemplate(model).get();
+        osg::ref_ptr<osg::Node> sheathSkeleton (const_cast<osg::Node*>(node)); // const-trickery required because there is no const version of NodeVisitor
+
+        GetExtendedBonesVisitor getBonesVisitor;
+        sheathSkeleton->accept(getBonesVisitor);
+        for (auto& nodePair : getBonesVisitor.mFoundBones)
+        {
+            SceneUtil::FindByNameVisitor findVisitor (nodePair.second->getName());
+            baseNode->accept(findVisitor);
+
+            osg::Group* sheathParent = findVisitor.mFoundNode;
+            if (sheathParent)
+            {
+                osg::Node* copy = osg::clone(nodePair.first, osg::CopyOp::DEEP_COPY_NODES);
+                sheathParent->addChild(copy);
+            }
+        }
+    }
+
+    void injectCustomBones(osg::ref_ptr<osg::Node>& node, const std::string& model, Resource::ResourceSystem* resourceSystem)
+    {
+        if (model.empty())
+            return;
+
+        const std::map<std::string, VFS::File*>& index = resourceSystem->getVFS()->getIndex();
+
+        std::string animationPath = model;
+        if (animationPath.find("meshes") == 0)
+        {
+            animationPath.replace(0, 6, "animations");
+        }
+        animationPath.replace(animationPath.size()-4, 4, "/");
+
+        resourceSystem->getVFS()->normalizeFilename(animationPath);
+
+        std::map<std::string, VFS::File*>::const_iterator found = index.lower_bound(animationPath);
+        while (found != index.end())
+        {
+            const std::string& name = found->first;
+            if (name.size() >= animationPath.size() && name.substr(0, animationPath.size()) == animationPath)
+            {
+                size_t pos = name.find_last_of('.');
+                if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".nif") == 0)
+                    loadBonesFromFile(node, name, resourceSystem);
+            }
+            else
+                break;
+            ++found;
+        }
+    }
+
+    osg::ref_ptr<osg::Node> getModelInstance(Resource::ResourceSystem* resourceSystem, const std::string& model, bool baseonly, bool inject, const std::string& defaultSkeleton)
+    {
+        Resource::SceneManager* sceneMgr = resourceSystem->getSceneManager();
         if (baseonly)
         {
             typedef std::map<std::string, osg::ref_ptr<osg::Node> > Cache;
@@ -1346,6 +1424,12 @@ namespace MWRender
             if (found == cache.end())
             {
                 osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+                if (inject)
+                {
+                    injectCustomBones(created, defaultSkeleton, resourceSystem);
+                    injectCustomBones(created, model, resourceSystem);
+                }
 
                 SceneUtil::CleanObjectRootVisitor removeDrawableVisitor;
                 created->accept(removeDrawableVisitor);
@@ -1359,7 +1443,17 @@ namespace MWRender
                 return sceneMgr->createInstance(found->second);
         }
         else
-            return sceneMgr->getInstance(model);
+        {
+            osg::ref_ptr<osg::Node> created = sceneMgr->getInstance(model);
+
+            if (inject)
+            {
+                injectCustomBones(created, defaultSkeleton, resourceSystem);
+                injectCustomBones(created, model, resourceSystem);
+            }
+
+            return created;
+        }
     }
 
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
@@ -1381,9 +1475,45 @@ namespace MWRender
         mAccumRoot = nullptr;
         mAccumCtrl = nullptr;
 
+        static const bool useAdditionalSources = Settings::Manager::getBool ("use additional anim sources", "Game");
+        std::string defaultSkeleton;
+        bool inject = false;
+
+        if (useAdditionalSources && mPtr.getClass().isActor())
+        {
+            if (isCreature)
+            {
+                MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
+                if(ref->mBase->mFlags & ESM::Creature::Bipedal)
+                {
+                    defaultSkeleton = "meshes\\xbase_anim.nif";
+                    inject = true;
+                }
+            }
+            else
+            {
+                inject = true;
+                MWWorld::LiveCellRef<ESM::NPC> *ref = mPtr.get<ESM::NPC>();
+                if (!ref->mBase->mModel.empty())
+                {
+                    // If NPC has a custom animation model attached, we should inject bones from default skeleton for given race and gender as well
+                    // Since it is a quite rare case, there should not be a noticable performance loss
+                    // Note: consider that player and werewolves have no custom animation files attached for now
+                    const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+                    const ESM::Race *race = store.get<ESM::Race>().find(ref->mBase->mRace);
+
+                    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+                    bool isFemale = !ref->mBase->isMale();
+
+                    defaultSkeleton = SceneUtil::getActorSkeleton(false, isFemale, isBeast, false);
+                    defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+                }
+            }
+        }
+
         if (!forceskeleton)
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             mInsert->addChild(created);
             mObjectRoot = created->asGroup();
             if (!mObjectRoot)
@@ -1399,7 +1529,7 @@ namespace MWRender
         }
         else
         {
-            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem->getSceneManager(), model, baseonly);
+            osg::ref_ptr<osg::Node> created = getModelInstance(mResourceSystem, model, baseonly, inject, defaultSkeleton);
             osg::ref_ptr<SceneUtil::Skeleton> skel = dynamic_cast<SceneUtil::Skeleton*>(created.get());
             if (!skel)
             {

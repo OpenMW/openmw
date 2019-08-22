@@ -2,8 +2,6 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
 
@@ -78,10 +76,8 @@ namespace MWMechanics
         return MWWorld::Ptr(); // none found
     }
 
-    ObstacleCheck::ObstacleCheck():
-        mPrevX(0) // to see if the moved since last time
-      , mPrevY(0)
-      , mWalkState(State_Norm)
+    ObstacleCheck::ObstacleCheck()
+      : mWalkState(State_Norm)
       , mStuckDuration(0)
       , mEvadeDuration(0)
       , mDistSameSpot(-1) // avoid calculating it each time
@@ -125,21 +121,15 @@ namespace MWMechanics
      */
     void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration)
     {
-        const ESM::Position pos = actor.getRefData().getPosition();
+        const osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
 
         if (mDistSameSpot == -1)
-        {
-            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-            mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor) + 1.2 * std::max(halfExtents.x(), halfExtents.y());
-        }
+            mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor);
 
         const float distSameSpot = mDistSameSpot * duration;
-        const float squaredMovedDistance = (osg::Vec2f(pos.pos[0], pos.pos[1]) - osg::Vec2f(mPrevX, mPrevY)).length2();
-        const bool samePosition = squaredMovedDistance < distSameSpot * distSameSpot;
+        const bool samePosition =  (pos - mPrev).length2() <  distSameSpot * distSameSpot;
 
-        // update position
-        mPrevX = pos.pos[0];
-        mPrevY = pos.pos[1];
+        mPrev = pos;
 
         switch(mWalkState)
         {

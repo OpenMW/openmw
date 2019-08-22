@@ -26,7 +26,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
-#include "../mwmechanics/character.hpp"
+#include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -940,10 +940,9 @@ namespace MWClass
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool swimming = world->isSwimming(ptr);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
+        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        sneaking = sneaking && (inair || MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));
-        bool running =  stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
@@ -1071,11 +1070,11 @@ namespace MWClass
         bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
 
-        info.caption = getName(ptr);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
         if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
-            info.caption += ref->mBase->mName;
+            info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);
             info.caption += ")";
         }
 
@@ -1228,9 +1227,9 @@ namespace MWClass
                 if (getNpcStats(ptr).isWerewolf()
                         && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
-                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(getCreatureStats(ptr), getInventoryStore(ptr), &weaponType);
-                    if (weaponType == MWMechanics::WeapType_None)
+                    int weaponType = ESM::Weapon::None;
+                    MWMechanics::getActiveWeapon(ptr, &weaponType);
+                    if (weaponType == ESM::Weapon::None)
                         return std::string();
                 }
 

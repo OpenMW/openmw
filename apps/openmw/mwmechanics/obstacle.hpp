@@ -1,6 +1,8 @@
 #ifndef OPENMW_MECHANICS_OBSTACLE_H
 #define OPENMW_MECHANICS_OBSTACLE_H
 
+#include <osg/Vec3f>
+
 namespace MWWorld
 {
     class Ptr;
@@ -37,9 +39,8 @@ namespace MWMechanics
 
         private:
 
-            // for checking if we're stuck (ignoring Z axis)
-            float mPrevX;
-            float mPrevY;
+            // for checking if we're stuck
+            osg::Vec3f mPrev;
 
             // directions to try moving in when get stuck
             static const float evadeDirections[NUM_EVADE_DIRECTIONS][2];

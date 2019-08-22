@@ -586,7 +586,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

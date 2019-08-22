@@ -26,6 +26,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -241,7 +242,7 @@ namespace MWMechanics
         float castChance = 100.f;
         if (spell != nullptr && !caster.isEmpty() && caster.getClass().isActor())
         {
-            castChance = getSpellSuccessChance(spell, caster, nullptr, false); // Uncapped casting chance
+            castChance = getSpellSuccessChance(spell, caster, nullptr, false, false); // Uncapped casting chance
         }
         if (castChance > 0)
             x *= 50 / castChance;
@@ -826,8 +827,9 @@ namespace MWMechanics
         bool isProjectile = false;
         if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
-            const ESM::Weapon* ref = item.get<ESM::Weapon>()->mBase;
-            isProjectile = ref->mData.mType >= ESM::Weapon::MarksmanThrown;
+            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
         }
         int type = enchantment->mData.mType;
 
@@ -939,7 +941,7 @@ namespace MWMechanics
                 bool fail = false;
 
                 // Check success
-                float successChance = getSpellSuccessChance(spell, mCaster);
+                float successChance = getSpellSuccessChance(spell, mCaster, nullptr, true, false);
                 if (Misc::Rng::roll0to99() >= successChance)
                 {
                     if (mCaster == getPlayer())
