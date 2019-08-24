@@ -1072,28 +1072,32 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_NiTriShape)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                const Nif::NiTriShapeData* data = triShape->data.getPtr();
-                vertexColorsPresent = !data->colors.empty();
-                triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triShape->name);
-                if (!data->triangles.empty())
-                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, data->triangles.size(),
-                                                                            (unsigned short*)data->triangles.data()));
+                if (const Nif::NiTriShapeData* data = triShape->data.getPtr())
+                {
+                    vertexColorsPresent = !data->colors.empty();
+                    triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triShape->name);
+                    if (!data->triangles.empty())
+                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, data->triangles.size(),
+                                                                                (unsigned short*)data->triangles.data()));
+                }
             }
             else
             {
                 const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                const Nif::NiTriStripsData* data = triStrips->data.getPtr();
-                vertexColorsPresent = !data->colors.empty();
-                triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triStrips->name);
-                if (!data->strips.empty())
+                if (const Nif::NiTriStripsData* data = triStrips->data.getPtr())
                 {
-                    for (const std::vector<unsigned short>& strip : data->strips)
+                    vertexColorsPresent = !data->colors.empty();
+                    triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triStrips->name);
+                    if (!data->strips.empty())
                     {
-                        // Can't make a triangle from less than three vertices.
-                        if (strip.size() < 3)
-                            continue;
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), 
-                                                                            (unsigned short*)strip.data()));
+                        for (const std::vector<unsigned short>& strip : data->strips)
+                        {
+                            // Can't make a triangle from less than three vertices.
+                            if (strip.size() < 3)
+                                continue;
+                            geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), 
+                                                                                (unsigned short*)strip.data()));
+                        }
                     }
                 }
             }
