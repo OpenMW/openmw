@@ -228,6 +228,9 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     if (getTypeId() == TypeIdWander)
         return;
 
+    if (mPathFinder.getPathSize() == 0)
+        return;
+
     MWBase::World* world = MWBase::Environment::get().getWorld();
     static float distance = world->getMaxActivationDistance();
 
