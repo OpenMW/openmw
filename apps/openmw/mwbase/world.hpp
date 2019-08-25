@@ -9,6 +9,7 @@
 #include <components/esm/cellid.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/doorstate.hpp"
 
 #include "../mwrender/rendermode.hpp"
 
@@ -419,7 +420,7 @@ namespace MWBase
             /// update movement state of a non-teleport door as specified
             /// @param state see MWClass::setDoorState
             /// @note throws an exception when invoked on a teleport door
-            virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
+            virtual void activateDoor(const MWWorld::Ptr& door, MWWorld::DoorState state) = 0;
 
             virtual void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) = 0; ///< get a list of actors standing on \a object
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
