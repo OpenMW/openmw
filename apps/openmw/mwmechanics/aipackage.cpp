@@ -224,6 +224,10 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
 
 void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 {
+    // note: AiWander currently does not open doors
+    if (getTypeId() == TypeIdWander)
+        return;
+
     MWBase::World* world = MWBase::Environment::get().getWorld();
     static float distance = world->getMaxActivationDistance();
 
@@ -231,8 +235,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     if (door == MWWorld::Ptr())
         return;
 
-    // note: AiWander currently does not open doors
-    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
+    if (!door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
     {
         if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
         {
