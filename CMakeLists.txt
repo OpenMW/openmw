@@ -319,7 +319,7 @@ find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
-
+find_package(ZLIB REQUIRED)
 include_directories("."
     SYSTEM
     ${SDL2_INCLUDE_DIR}
@@ -327,9 +327,10 @@ include_directories("."
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS} ${ZLIB_LIB_DIR})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)
@@ -609,6 +610,7 @@ set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static librari
 add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
+add_subdirectory (extern/esm4)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)
 endif()

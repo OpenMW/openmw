@@ -24,6 +24,7 @@ namespace ESM
         std::string author; // Author's name
         std::string desc;   // File description
         int records;        // Number of records
+        unsigned long nextObjectId;
     };
 
     struct GMDT

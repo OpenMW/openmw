@@ -97,12 +97,13 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index)
+        virtual void load(const boost::filesystem::path& filepath, int& index, std::vector<std::vector<std::string> > &contentFiles)
         {
+
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                it->second->load(filepath, index, contentFiles);
             }
             else
             {
@@ -167,7 +168,8 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mEsm.resize(contentFiles.size());
+        //for(int i=0; i<contentFiles.size(); ++i)
+        mEsm.resize(3);
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -185,7 +187,9 @@ namespace MWWorld
         listener->loadingOff();
 
         // insert records that may not be present in all versions of MW
-        if (mEsm[0].getFormat() == 0)
+        int firstreader=0;// FIXME: first file may not be for MW
+        while(mEsm[firstreader].empty())++firstreader;
+        if (mEsm[firstreader][0]->getFormat() == 0)
             ensureNeededRecords();
 
         fillGlobalVariables();
@@ -606,7 +610,7 @@ namespace MWWorld
         return mStore;
     }
 
-    std::vector<ESM::ESMReader>& World::getEsmReader()
+    std::vector<std::vector<ESM::ESMReader*> >& World::getEsmReader()
     {
         return mEsm;
     }
@@ -2916,10 +2920,46 @@ namespace MWWorld
     {
         return mScriptsEnabled;
     }
+    // The aim is to allow loading various types of TES files in any combination, as long as
+    // the dependent files are loaded first.  To achieve this, separate indicies for each TES
+    // versions are required.
+    //
+    // The trouble is that until the file is opened by an ESM reader to check the version from
+    // the header we don't know which index to increment.
+    //
+    // One option is to allow the content loader to manage.
 
+    // FIXME: Appears to be loading all the files named in 'content' located in fileCollections
+    // based on the extension string (e.g. .esm).  This probably means that the contents are in
+    // the correct load order.
+    //
+    // 'contentLoader' has a number of loaders that can deal with various extension types.
     void World::loadContentFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& content, ContentLoader& contentLoader)
     {
+        std::vector<std::vector<std::string> > contentFiles;
+        contentFiles.resize(3);
+
+        int idx = 0;
+        std::vector<std::string>::const_iterator it(content.begin());
+        std::vector<std::string>::const_iterator end(content.end());
+        for (; it != end; ++it)
+        {
+            boost::filesystem::path filename(*it);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            if (col.doesExist(*it))
+            {
+                contentLoader.load(col.getPath(*it), idx,contentFiles);
+            }
+            else
+            {
+                std::stringstream msg;
+                msg << "Failed loading " << *it << ": the content file does not exist";
+                throw std::runtime_error(msg.str());
+            }
+            idx++;
+        }
+    /*
         int idx = 0;
         for (const std::string &file : content)
         {
@@ -2935,7 +2975,7 @@ namespace MWWorld
                 throw std::runtime_error(message);
             }
             idx++;
-        }
+        }*/
     }
 
     bool World::startSpellCast(const Ptr &actor)

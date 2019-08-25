@@ -344,7 +344,7 @@ namespace MWWorld
         return false;
     }
 
-    CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
+    CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<std::vector<ESM::ESMReader*> >& readerList)
         : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
     {
         mWaterLevel = cell->mWater;
@@ -476,7 +476,7 @@ namespace MWWorld
 
     void CellStore::listRefs()
     {
-        std::vector<ESM::ESMReader>& esm = mReader;
+        std::vector<std::vector<ESM::ESMReader*> >& esm = mReader;
 
         assert (mCell);
 
@@ -489,14 +489,15 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList.at(i).index;
-                mCell->restore (esm[index], i);
+                const ESM::ESM_Context & context = mCell->mContextList.at(i);
+                ESM::ESMReader* reader = esm[context.TESindex][context.index];
+                mCell->restore (*reader, i);
 
                 ESM::CellRef ref;
 
                 // Get each reference in turn
                 bool deleted = false;
-                while (mCell->getNextRef (esm[index], ref, deleted))
+                while (mCell->getNextRef (*reader, ref, deleted))
                 {
                     if (deleted)
                         continue;
@@ -532,7 +533,7 @@ namespace MWWorld
 
     void CellStore::loadRefs()
     {
-        std::vector<ESM::ESMReader>& esm = mReader;
+        std::vector<std::vector<ESM::ESMReader*> >& esm = mReader;
 
         assert (mCell);
 
@@ -547,15 +548,17 @@ namespace MWWorld
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                int index = mCell->mContextList.at(i).index;
-                mCell->restore (esm[index], i);
+
+                const ESM::ESM_Context & context = mCell->mContextList.at(i);
+                ESM::ESMReader * reader =esm[context.TESindex][context.index];
+                mCell->restore (*reader, i);
 
                 ESM::CellRef ref;
                 ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
 
                 // Get each reference in turn
                 bool deleted = false;
-                while(mCell->getNextRef(esm[index], ref, deleted))
+                while(mCell->getNextRef(*reader, ref, deleted))
                 {
                     // Don't load reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter =

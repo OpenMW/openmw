@@ -229,6 +229,10 @@ namespace MWWorld
             return ptr;
         }
 
+        void loadTes4Record (ESM::ESMReader& esm);
+        // Can't use ESM4::Reader& as the parameter here because we need esm.hasMoreRecs() for
+        // checking an empty group followed by EOF
+        void loadTes4Group (ESM::ESMReader &esm);
         // This method must be called once, after loading all master/plugin files. This can only be done
         //  from the outside, so it must be public.
         void setUp(bool validateRecords = false);

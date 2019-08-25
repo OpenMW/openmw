@@ -29,12 +29,28 @@ void ESM::Header::load (ESMReader &esm)
 
     if (esm.isNextSub("HEDR"))
     {
+       // if(esm.getRecName() == "TES3")
+        {
       esm.getSubHeader();
       esm.getT(mData.version);
       esm.getT(mData.type);
       mData.author.assign( esm.getString(32) );
       mData.desc.assign( esm.getString(256) );
       esm.getT(mData.records);
+        }
+#if 0
+        else
+        {
+            //TES4
+
+            esm.getSubHeader();
+            esm.getT(mData.version);
+            esm.getT(mData.records);
+            esm.getT(mData.nextObjectId);
+         /*   mData.author.assign( esm.getString(32) );
+            mData.desc.assign( esm.getString(256) );*/
+        }
+#endif
     }
 
     while (esm.isNextSub ("MAST"))

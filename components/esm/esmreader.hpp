@@ -5,7 +5,7 @@
 #include <cassert>
 #include <vector>
 #include <sstream>
-
+#include <string>
 #include <components/files/constrainedfilestream.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -23,6 +23,7 @@ public:
 
   ESMReader();
 
+  virtual ~ESMReader() {}
   /*************************************************************************
    *
    *  Information retrieval
@@ -83,8 +84,11 @@ public:
   void setIndex(const int index) {mIdx = index; mCtx.index = index;}
   int getIndex() {return mIdx;}
 
-  void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
-  std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
+  void setTESIndex(const int index) { mCtx.TESindex = index;}
+  int getTESIndex() {return mCtx.TESindex;}
+
+  void setGlobalReaderList(std::vector<ESMReader*> *list) {mGlobalReaderList = list;}
+  std::vector<ESMReader*> *getGlobalReaderList() {return mGlobalReaderList;}
 
   /*************************************************************************
    *
@@ -156,9 +160,11 @@ public:
 
   // Read a string with the given sub-record name
   std::string getHNString(const char* name);
+  void getHNString(const int name, std::string& str);
 
   // Read a string, including the sub-record header (but not the name)
   std::string getHString();
+  void getHString(std::string& str);
 
   // Read the given number of bytes from a subrecord
   void getHExact(void*p, int size);
@@ -174,6 +180,7 @@ public:
 
   // Get the next subrecord name and check if it matches the parameter
   void getSubNameIs(const char* name);
+  void getSubNameIs(const int name);
 
   /** Checks if the next sub record name matches the parameter. If it
       does, it is read into 'subName' just as if getSubName() was
@@ -181,6 +188,7 @@ public:
       calls to getSubName(), isNextSub() and getSubNameIs().
    */
   bool isNextSub(const char* name);
+  bool isNextSub(const int name);
 
   bool peekNextSub(const char* name);
 
@@ -253,6 +261,8 @@ public:
   // Read the next 'size' bytes and return them as a string. Converts
   // them from native encoding to UTF8 in the process.
   std::string getString(int size);
+  void getString(std::string& str, int size);
+
 
   void skip(int bytes);
 
@@ -267,11 +277,9 @@ public:
 
   size_t getFileSize() const { return mFileSize; }
 
-private:
+protected:
   void clearCtx();
-
   Files::IStreamPtr mEsm;
-
   ESM_Context mCtx;
 
   unsigned int mRecordFlags;
@@ -283,7 +291,7 @@ private:
 
   Header mHeader;
 
-  std::vector<ESMReader> *mGlobalReaderList;
+  std::vector<ESMReader*> *mGlobalReaderList;
   ToUTF8::Utf8Encoder* mEncoder;
 
   size_t mFileSize;

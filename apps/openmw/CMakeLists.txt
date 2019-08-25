@@ -117,6 +117,7 @@ include_directories(
     ${FFmpeg_INCLUDE_DIRS}
 )
 
+ADD_DEFINITIONS( -DUSE_ZLIB )
 target_link_libraries(openmw
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
@@ -137,7 +138,9 @@ target_link_libraries(openmw
     ${RecastNavigation_LIBRARIES}
     "osg-ffmpeg-videoplayer"
     "oics"
+    "esm4"
     components
+    ${ZLIB_LIBRARY}
 )
 
 if (ANDROID)
