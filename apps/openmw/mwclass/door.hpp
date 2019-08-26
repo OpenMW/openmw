@@ -59,10 +59,9 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            /// 0 = nothing, 1 = opening, 2 = closing
-            virtual int getDoorState (const MWWorld::ConstPtr &ptr) const;
+            virtual MWWorld::DoorState getDoorState (const MWWorld::ConstPtr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
-            virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
+            virtual void setDoorState (const MWWorld::Ptr &ptr, MWWorld::DoorState state) const;
 
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)

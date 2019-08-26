@@ -460,12 +460,12 @@ namespace MWWorld
         return false;
     }
 
-    int Class::getDoorState (const MWWorld::ConstPtr &ptr) const
+    MWWorld::DoorState Class::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
         throw std::runtime_error("this is not a door");
     }
 
-    void Class::setDoorState (const MWWorld::Ptr &ptr, int state) const
+    void Class::setDoorState (const MWWorld::Ptr &ptr, MWWorld::DoorState state) const
     {
         throw std::runtime_error("this is not a door");
     }
