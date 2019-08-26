@@ -1072,8 +1072,9 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_NiTriShape)
             {
                 const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                if (const Nif::NiTriShapeData* data = triShape->data.getPtr())
+                if (!triShape->data.empty())
                 {
+                    const Nif::NiTriShapeData* data = triShape->data.getPtr();
                     vertexColorsPresent = !data->colors.empty();
                     triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triShape->name);
                     if (!data->triangles.empty())
@@ -1084,8 +1085,9 @@ namespace NifOsg
             else
             {
                 const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                if (const Nif::NiTriStripsData* data = triStrips->data.getPtr())
+                if (!triStrips->data.empty())
                 {
+                    const Nif::NiTriStripsData* data = triStrips->data.getPtr();
                     vertexColorsPresent = !data->colors.empty();
                     triCommonToGeometry(geometry, data->vertices, data->normals, data->uvlist, data->colors, boundTextures, triStrips->name);
                     if (!data->strips.empty())
