@@ -420,8 +420,6 @@ namespace MWWorld
 
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
-            MWWorld::Ptr castRay (const osg::Vec3f& from, const osg::Vec3f& to, int mask) const override;
-
             void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
             bool isActorCollisionEnabled(const Ptr& ptr) override;
 
