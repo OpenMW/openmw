@@ -15,6 +15,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/convert.hpp>
 
 #include <components/files/collections.hpp>
 
@@ -3829,4 +3830,23 @@ namespace MWWorld
             return getHalfExtents(actor);
     }
 
+    bool World::hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const
+    {
+        const auto object = mPhysics->getObject(door);
+
+        if (!object)
+            return false;
+
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+        object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+        const auto toLocal = object->getCollisionObject()->getWorldTransform().inverse();
+        const auto localFrom = toLocal(Misc::Convert::toBullet(position));
+        const auto localTo = toLocal(Misc::Convert::toBullet(destination));
+
+        btScalar hitDistance = 1;
+        btVector3 hitNormal;
+        return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
+    }
 }

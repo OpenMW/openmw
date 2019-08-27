@@ -13,6 +13,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -224,6 +226,13 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
 
 void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 {
+    // note: AiWander currently does not open doors
+    if (getTypeId() == TypeIdWander)
+        return;
+
+    if (mPathFinder.getPathSize() == 0)
+        return;
+
     MWBase::World* world = MWBase::Environment::get().getWorld();
     static float distance = world->getMaxActivationDistance();
 
@@ -231,9 +240,11 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     if (door == MWWorld::Ptr())
         return;
 
-    // note: AiWander currently does not open doors
-    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
+    if (!door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
     {
+        if (!isDoorOnTheWay(actor, door))
+            return;
+
         if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
         {
             world->activate(door, actor);
@@ -401,4 +412,14 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
+}
+
+bool MWMechanics::AiPackage::isDoorOnTheWay(const MWWorld::Ptr& actor, const MWWorld::Ptr& door) const
+{
+    const auto world = MWBase::Environment::get().getWorld();
+    const auto halfExtents = world->getHalfExtents(actor);
+    const auto position = actor.getRefData().getPosition().asVec3() + osg::Vec3f(0, 0, halfExtents.z());
+    const auto destination = mPathFinder.getPath().front() + osg::Vec3f(0, 0, halfExtents.z());
+
+    return world->hasCollisionWithDoor(door, position, destination);
 }
