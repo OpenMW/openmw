@@ -1630,6 +1630,13 @@ namespace MWMechanics
         updateCombatMusic();
     }
 
+    void Actors::notifyDied(const MWWorld::Ptr &actor)
+    {
+        actor.getClass().getCreatureStats(actor).notifyDied();
+
+        ++mDeathCount[Misc::StringUtils::lowerCase(actor.getCellRef().getRefId())];
+    }
+
     void Actors::killDeadActors()
     {
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
@@ -1673,9 +1680,7 @@ namespace MWMechanics
             }
             else if (killResult == CharacterController::Result_DeathAnimJustFinished)
             {
-                iter->first.getClass().getCreatureStats(iter->first).notifyDied();
-
-                ++mDeathCount[Misc::StringUtils::lowerCase(iter->first.getCellRef().getRefId())];
+                notifyDied(iter->first);
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death

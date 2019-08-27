@@ -211,6 +211,8 @@ namespace MWMechanics
 
             virtual float getActorsProcessingRange() const override;
 
+            virtual void notifyDied(const MWWorld::Ptr& actor) override;
+
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
             virtual bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer) override;
