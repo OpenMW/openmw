@@ -64,7 +64,7 @@ ActorAnimation::~ActorAnimation()
     mScabbard.reset();
 }
 
-PartHolderPtr ActorAnimation::getWeaponPart(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
+PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
 {
     osg::Group* parent = getBoneByName(bonename);
     if (!parent)
@@ -160,7 +160,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         if (showHolsteredWeapons)
         {
             osg::Vec4f glowColor = weapon->getClass().getEnchantmentColor(*weapon);
-            mScabbard = getWeaponPart(mesh, boneName, isEnchanted, &glowColor);
+            mScabbard = attachMesh(mesh, boneName, isEnchanted, &glowColor);
             if (mScabbard)
                 resetControllers(mScabbard->getNode());
         }
@@ -168,7 +168,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
         return;
     }
 
-    mScabbard = getWeaponPart(scabbardName, boneName);
+    mScabbard = attachMesh(scabbardName, boneName);
 
     osg::Group* weaponNode = getBoneByName("Bip01 Weapon");
     if (!weaponNode)
