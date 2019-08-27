@@ -529,19 +529,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
             if(!mAnimation->hasAnimation(movementAnimName))
             {
                 std::string::size_type swimpos = movementAnimName.find("swim");
-                if(swimpos == std::string::npos)
-                {
-                    std::string::size_type runpos = movementAnimName.find("run");
-                    if (runpos != std::string::npos)
-                    {
-                        movementAnimName.replace(runpos, runpos+3, "walk");
-                        if (!mAnimation->hasAnimation(movementAnimName))
-                            movementAnimName.clear();
-                    }
-                    else
-                        movementAnimName.clear();
-                }
-                else
+                if (swimpos != std::string::npos)
                 {
                     movementAnimName.erase(swimpos, 4);
                     if (!weapShortGroup.empty())
@@ -552,8 +540,18 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                         else
                             movementAnimName = fallbackShortWeaponGroup(movementAnimName, &movemask);
                     }
+                }
 
-                    if (!mAnimation->hasAnimation(movementAnimName))
+                if (swimpos == std::string::npos || !mAnimation->hasAnimation(movementAnimName))
+                {
+                    std::string::size_type runpos = movementAnimName.find("run");
+                    if (runpos != std::string::npos)
+                    {
+                        movementAnimName.replace(runpos, runpos+3, "walk");
+                        if (!mAnimation->hasAnimation(movementAnimName))
+                            movementAnimName.clear();
+                    }
+                    else
                         movementAnimName.clear();
                 }
             }
@@ -570,10 +568,6 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
-            bool isflying = MWBase::Environment::get().getWorld()->isFlying(mPtr);
-            bool isrunning = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Run) && !isflying;
-            bool issneaking = mPtr.getClass().getCreatureStats(mPtr).getStance(MWMechanics::CreatureStats::Stance_Sneak) && !isflying;
-
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
@@ -606,7 +600,7 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
                     // The first person anims don't have any velocity to calculate a speed multiplier from.
                     // We use the third person velocities instead.
                     // FIXME: should be pulled from the actual animation, but it is not presently loaded.
-                    mMovementAnimSpeed = (issneaking ? 33.5452f : (isrunning ? 222.857f : 154.064f));
+                    mMovementAnimSpeed = (isSneaking() ? 33.5452f : (isRunning() ? 222.857f : 154.064f));
                     mMovementAnimationControlled = false;
                 }
             }
@@ -2048,28 +2042,6 @@ void CharacterController::update(float duration, bool animationOnly)
                     lat.normalize();
                     vec = osg::Vec3f(lat.x(), lat.y(), 1.0f) * z * 0.707f;
                 }
-
-                // advance acrobatics
-                // also set jumping flag to allow GetPCJumping works
-                if (isPlayer)
-                {
-                    cls.skillUsageSucceeded(mPtr, ESM::Skill::Acrobatics, 0);
-                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
-                }
-
-                // decrease fatigue
-                const float fatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-                const float fatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-                float normalizedEncumbrance = mPtr.getClass().getNormalizedEncumbrance(mPtr);
-                if (normalizedEncumbrance > 1)
-                    normalizedEncumbrance = 1;
-                const float fatigueDecrease = fatigueJumpBase + normalizedEncumbrance * fatigueJumpMult;
-
-                if (!godmode)
-                {
-                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                    cls.getCreatureStats(mPtr).setFatigue(fatigue);
-                }
             }
         }
         else if(mJumpState == JumpState_InAir && !inwater && !flying && solid)
@@ -2282,7 +2254,9 @@ void CharacterController::update(float duration, bool animationOnly)
 
         movement = vec;
         cls.getMovementSettings(mPtr).mPosition[0] = cls.getMovementSettings(mPtr).mPosition[1] = 0;
-        // Can't reset jump state (mPosition[2]) here; we don't know for sure whether the PhysicSystem will actually handle it in this frame
+        if (movement.z() == 0.f)
+            cls.getMovementSettings(mPtr).mPosition[2] = 0;
+        // Can't reset jump state (mPosition[2]) here in full; we don't know for sure whether the PhysicSystem will actually handle it in this frame
         // due to the fixed minimum timestep used for the physics update. It will be reset in PhysicSystem::move once the jump is handled.
 
         if (!mSkipAnim)

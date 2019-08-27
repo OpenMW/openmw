@@ -232,7 +232,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
         return;
 
     // note: AiWander currently does not open doors
-    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
+    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
     {
         if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
         {

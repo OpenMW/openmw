@@ -151,18 +151,14 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
 
-        if (Settings::Manager::getBool("show effect duration","Game"))
-        {
-            // -1 is infinite light source, so duration makes no sense here. Other negative values are treated as 0.
-            float remainingTime = ptr.getClass().getRemainingUsageTime(ptr);
-            if (remainingTime != -1.0f)
-                text += "\n#{sDuration}: " + MWGui::ToolTips::toString(std::max(0.f, remainingTime));
-        }
+        // Don't show duration for infinite light sources.
+        if (Settings::Manager::getBool("show effect duration","Game") && ptr.getClass().getRemainingUsageTime(ptr) != -1)
+            text += MWGui::ToolTips::getDurationString(ptr.getClass().getRemainingUsageTime(ptr), "\n#{sDuration}");
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");

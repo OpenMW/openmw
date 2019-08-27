@@ -98,6 +98,7 @@
     Bug #4984: "Friendly hits" feature should be used only for player's followers
     Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
+    Bug #4991: Jumping occasionally takes too much fatigue
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
@@ -115,11 +116,13 @@
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
+    Bug #5078: DisablePlayerLooking is broken
     Bug #5082: Scrolling with controller in GUI mode is broken
     Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
     Bug #5099: Non-swimming enemies will enter water if player is water walking
+    Bug #5103: Sneaking state behavior is still inconsistent
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
     Bug #5105: NPCs start combat with werewolves from any distance
     Bug #5106: Still can jump even when encumbered
@@ -127,6 +130,9 @@
     Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
     Bug #5123: Script won't run on respawn
     Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
+    Bug #5126: Swimming creatures without RunForward animations are motionless during combat
+    Bug #5134: Doors rotation by "Lock" console command is inconsistent
+    Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -147,6 +153,7 @@
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4859: Make water reflections more configurable
+    Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
     Feature #4958: Support eight blood types
@@ -162,6 +169,7 @@
     Feature #5036: Allow scripted faction leaving
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
+    Feature #5091: Human-readable light source duration
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
     Feature #5121: Handle NiTriStrips and NiTriStripsData

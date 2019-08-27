@@ -44,7 +44,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
             return true; // We have tried backing up for more than one second, we've probably cleared it
     }
 
-    if (!mDoorPtr.getClass().getDoorState(mDoorPtr))
+    if (mDoorPtr.getClass().getDoorState(mDoorPtr) == MWWorld::DoorState::Idle)
         return true; //Door is no longer opening
 
     ESM::Position tPos = mDoorPtr.getRefData().getPosition(); //Position of the door
