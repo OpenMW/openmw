@@ -176,6 +176,7 @@
     Feature #5122: Use magic glow for enchanted arrows
     Feature #5131: Custom skeleton bones
     Feature #5132: Unique animations for different weapon types
+    Feature #5146: Safe Dispose corpse
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

@@ -237,6 +237,8 @@ namespace MWBase
 
             virtual float getActorsProcessingRange() const = 0;
 
+            virtual void notifyDied(const MWWorld::Ptr& actor) = 0;
+
             virtual bool onOpen(const MWWorld::Ptr& ptr) = 0;
             virtual void onClose(const MWWorld::Ptr& ptr) = 0;
 

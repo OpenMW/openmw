@@ -71,6 +71,8 @@ namespace MWMechanics
             PtrActorMap::const_iterator begin() { return mActors.begin(); }
             PtrActorMap::const_iterator end() { return mActors.end(); }
 
+            void notifyDied(const MWWorld::Ptr &actor);
+
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
             bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer);
