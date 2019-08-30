@@ -16,7 +16,7 @@ void main(void)
                          0.5, 0.5, 0.5, 1.0);
 
     vec4 texcoordProj = ((scalemat) * ( gl_Position));
-    screenCoordsPassthrough = vec3(texcoordProj.x, texcoordProj.y, texcoordProj.w);
+    screenCoordsPassthrough = texcoordProj.xyw;
 
     position = gl_Vertex;
 
