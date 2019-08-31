@@ -42,8 +42,10 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        int price = static_cast<int>(spell.mData.mCost*store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat());
+        int cost = spell.mData.mCost;
+        int price = static_cast<int>(cost*store.get<ESM::GameSetting>().find("fSpellValueMult")->mValue.getFloat());
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
+        std::string costString = " (" + MyGUI::utility::toString(cost) + (abs(cost) == 1 ? " #{sPoint}) " : " #{sPoints}) ");
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
@@ -65,7 +67,7 @@ namespace MWGui
         mCurrentY += lineHeight;
 
         toAdd->setUserData(price);
-        toAdd->setCaptionWithReplacing(spell.mName+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
+        toAdd->setCaptionWithReplacing(spell.mName+costString+"   -   "+MyGUI::utility::toString(price)+"#{sgp}");
         toAdd->setSize(mSpellsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &SpellBuyingWindow::onMouseWheel);
         toAdd->setUserString("ToolTipType", "Spell");
