@@ -268,7 +268,8 @@ namespace MWGui
             virtual void initialiseOverride();
 
         private:
-
+            static const int sIconOffset = 24;
+            
             void updateWidgets();
 
             SpellEffectParams mEffectParams;

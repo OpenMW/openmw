@@ -129,6 +129,7 @@
     Bug #5106: Still can jump even when encumbered
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
+    Bug #5113: Unknown alchemy question mark not centered
     Bug #5123: Script won't run on respawn
     Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
     Bug #5126: Swimming creatures without RunForward animations are motionless during combat
