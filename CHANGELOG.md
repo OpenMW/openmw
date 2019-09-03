@@ -135,6 +135,7 @@
     Bug #5126: Swimming creatures without RunForward animations are motionless during combat
     Bug #5134: Doors rotation by "Lock" console command is inconsistent
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
+    Bug #5149: Failing lock pick attempts isn't always a crime
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
