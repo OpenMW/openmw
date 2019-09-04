@@ -2580,11 +2580,15 @@ void CharacterController::updateMagicEffects()
     if (!mPtr.getClass().isActor())
         return;
 
-    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
-    mAnimation->setVampire(vampire);
-
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);
+
+    // If you're dead you don't care about whether you've started/stopped being a vampire or not
+    if (mPtr.getClass().getCreatureStats(mPtr).isDead())
+        return;
+
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
+    mAnimation->setVampire(vampire);
 }
 
 void CharacterController::setVisibility(float visibility)
