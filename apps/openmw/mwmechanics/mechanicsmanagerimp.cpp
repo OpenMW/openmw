@@ -1452,7 +1452,6 @@ namespace MWMechanics
 
         if (reported)
         {
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sCrimeMessage}");
             player.getClass().getNpcStats(player).setBounty(player.getClass().getNpcStats(player).getBounty()
                                                       + arg);
 
@@ -1923,7 +1922,6 @@ namespace MWMechanics
                 {
                     npcStats.setBounty(npcStats.getBounty()+
                                        gmst.find("iWereWolfBounty")->mValue.getInteger());
-                    windowManager->messageBox("#{sCrimeMessage}");
                 }
             }
         }
