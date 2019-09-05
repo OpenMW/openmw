@@ -1632,11 +1632,14 @@ namespace MWWorld
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
         /// \todo should use convexSweepTest here
+        bool collisionWithActor = false;
         std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(door, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
         for (MWWorld::Ptr& ptr : collisions)
         {
             if (ptr.getClass().isActor())
             {
+                collisionWithActor = true;
+                
                 // Collided with actor, ask actor to try to avoid door
                 if(ptr != getPlayerPtr() )
                 {
@@ -1648,6 +1651,25 @@ namespace MWWorld
                 // we need to undo the rotation
                 rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
                 reached = false;
+            }
+        }
+
+        // Cancel door closing sound if collision with actor is detected
+        if (collisionWithActor)
+        {
+            const ESM::Door* ref = door.get<ESM::Door>()->mBase;
+
+            if (state == MWWorld::DoorState::Opening)
+            {
+                const std::string& openSound = ref->mOpenSound;
+                if (!openSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, openSound))
+                    MWBase::Environment::get().getSoundManager()->stopSound3D(door, openSound);
+            }
+            else if (state == MWWorld::DoorState::Closing)
+            {
+                const std::string& closeSound = ref->mCloseSound;
+                if (!closeSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, closeSound))
+                    MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
         }
 
