@@ -142,8 +142,8 @@ namespace MWMechanics
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
                                     int count, bool alarm = true) override;
-            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
-            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) override;
+            /// Utility to check if unlocking this object is illegal and calling commitCrime if so
+            virtual void unlockAttempted (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) override;
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) override;

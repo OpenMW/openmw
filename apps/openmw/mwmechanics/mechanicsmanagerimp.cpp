@@ -1034,7 +1034,7 @@ namespace MWMechanics
             return false;
     }
 
-    void MechanicsManager::objectOpened(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
+    void MechanicsManager::unlockAttempted(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item)
     {
         MWWorld::Ptr victim;
         if (isAllowedToUse(ptr, item, victim))

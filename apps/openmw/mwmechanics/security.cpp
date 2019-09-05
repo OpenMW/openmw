@@ -59,7 +59,7 @@ namespace MWMechanics
                 resultMessage = "#{sLockFail}";
         }
 
-        MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, lock);
         int uses = lockpick.getClass().getItemHealth(lockpick);
         --uses;
         lockpick.getCellRef().setCharge(uses);
@@ -101,7 +101,7 @@ namespace MWMechanics
                 resultMessage = "#{sTrapFail}";
         }
 
-        MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, trap);
         int uses = probe.getClass().getItemHealth(probe);
         --uses;
         probe.getCellRef().setCharge(uses);
