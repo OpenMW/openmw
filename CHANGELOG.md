@@ -18,6 +18,7 @@
     Bug #3894: Hostile spell effects not detected/present on first frame of OnPCHitMe
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
+    Bug #4270: Closing doors while they are obstructed desyncs closing sfx
     Bug #4276: Resizing character window differs from vanilla
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
