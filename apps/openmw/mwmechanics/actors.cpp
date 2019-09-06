@@ -372,7 +372,7 @@ namespace MWMechanics
 
     void Actors::playIdleDialogue(const MWWorld::Ptr& actor)
     {
-        if (!actor.getClass().isActor() || actor == getPlayer() || !MWBase::Environment::get().getSoundManager()->sayDone(actor))
+        if (!actor.getClass().isActor() || actor == getPlayer() || MWBase::Environment::get().getSoundManager()->sayActive(actor))
             return;
 
         const CreatureStats &stats = actor.getClass().getCreatureStats(actor);

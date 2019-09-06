@@ -104,6 +104,7 @@
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
+    Bug #5012: "Take all" on owned container generates a messagebox per item
     Bug #5018: Spell tooltips don't support purely negative magnitudes
     Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
