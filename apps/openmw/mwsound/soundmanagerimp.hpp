@@ -179,8 +179,11 @@ namespace MWSound
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        virtual bool sayActive(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
         ///< Is actor not speaking?
+
+        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        ///< For scripting backward compatibility
 
         virtual void stopSay(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr());
         ///< Stop an actor speaking
