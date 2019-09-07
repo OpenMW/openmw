@@ -12,6 +12,7 @@ namespace MWMechanics
         {
             ESM::Weapon::None,
             {
+                /*     id      */ ESM::Weapon::None,
                 /* short group */ "",
                 /* long group  */ "",
                 /*  sound ID   */ "",
@@ -26,6 +27,7 @@ namespace MWMechanics
         {
             ESM::Weapon::PickProbe,
             {
+                /*     id      */ ESM::Weapon::PickProbe,
                 /* short group */ "1h",
                 /* long group  */ "pickprobe",
                 /*  sound ID   */ "",
@@ -40,6 +42,7 @@ namespace MWMechanics
         {
             ESM::Weapon::Spell,
             {
+                /*     id      */ ESM::Weapon::Spell,
                 /* short group */ "spell",
                 /* long group  */ "spellcast",
                 /*  sound ID   */ "",
@@ -54,6 +57,7 @@ namespace MWMechanics
         {
             ESM::Weapon::HandToHand,
             {
+                /*     id      */ ESM::Weapon::HandToHand,
                 /* short group */ "hh",
                 /* long group  */ "handtohand",
                 /*  sound ID   */ "",
@@ -68,6 +72,7 @@ namespace MWMechanics
         {
             ESM::Weapon::ShortBladeOneHand,
             {
+                /*     id      */ ESM::Weapon::ShortBladeOneHand,
                 /* short group */ "1s",
                 /* long group  */ "shortbladeonehand",
                 /*  sound ID   */ "Item Weapon Shortblade",
@@ -82,6 +87,7 @@ namespace MWMechanics
         {
             ESM::Weapon::LongBladeOneHand,
             {
+                /*     id      */ ESM::Weapon::LongBladeOneHand,
                 /* short group */ "1h",
                 /* long group  */ "weapononehand",
                 /*  sound ID   */ "Item Weapon Longblade",
@@ -96,6 +102,7 @@ namespace MWMechanics
         {
             ESM::Weapon::BluntOneHand,
             {
+                /*     id      */ ESM::Weapon::BluntOneHand,
                 /* short group */ "1b",
                 /* long group  */ "bluntonehand",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -110,6 +117,7 @@ namespace MWMechanics
         {
             ESM::Weapon::AxeOneHand,
             {
+                /*     id      */ ESM::Weapon::AxeOneHand,
                 /* short group */ "1b",
                 /* long group  */ "bluntonehand",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -124,6 +132,7 @@ namespace MWMechanics
         {
             ESM::Weapon::LongBladeTwoHand,
             {
+                /*     id      */ ESM::Weapon::LongBladeTwoHand,
                 /* short group */ "2c",
                 /* long group  */ "weapontwohand",
                 /*  sound ID   */ "Item Weapon Longblade",
@@ -138,6 +147,7 @@ namespace MWMechanics
         {
             ESM::Weapon::AxeTwoHand,
             {
+                /*     id      */ ESM::Weapon::AxeTwoHand,
                 /* short group */ "2b",
                 /* long group  */ "blunttwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -152,6 +162,7 @@ namespace MWMechanics
         {
             ESM::Weapon::BluntTwoClose,
             {
+                /*     id      */ ESM::Weapon::BluntTwoClose,
                 /* short group */ "2b",
                 /* long group  */ "blunttwohand",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -166,6 +177,7 @@ namespace MWMechanics
         {
             ESM::Weapon::BluntTwoWide,
             {
+                /*     id      */ ESM::Weapon::BluntTwoWide,
                 /* short group */ "2w",
                 /* long group  */ "weapontwowide",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -180,6 +192,7 @@ namespace MWMechanics
         {
             ESM::Weapon::SpearTwoWide,
             {
+                /*     id      */ ESM::Weapon::SpearTwoWide,
                 /* short group */ "2w",
                 /* long group  */ "weapontwowide",
                 /*  sound ID   */ "Item Weapon Spear",
@@ -194,6 +207,7 @@ namespace MWMechanics
         {
             ESM::Weapon::MarksmanBow,
             {
+                /*     id      */ ESM::Weapon::MarksmanBow,
                 /* short group */ "bow",
                 /* long group  */ "bowandarrow",
                 /*  sound ID   */ "Item Weapon Bow",
@@ -208,6 +222,7 @@ namespace MWMechanics
         {
             ESM::Weapon::MarksmanCrossbow,
             {
+                /*     id      */ ESM::Weapon::MarksmanCrossbow,
                 /* short group */ "crossbow",
                 /* long group  */ "crossbow",
                 /*  sound ID   */ "Item Weapon Crossbow",
@@ -222,6 +237,7 @@ namespace MWMechanics
         {
             ESM::Weapon::MarksmanThrown,
             {
+                /*     id      */ ESM::Weapon::MarksmanThrown,
                 /* short group */ "1t",
                 /* long group  */ "throwweapon",
                 /*  sound ID   */ "Item Weapon Blunt",
@@ -236,6 +252,7 @@ namespace MWMechanics
         {
             ESM::Weapon::Arrow,
             {
+                /*     id      */ ESM::Weapon::Arrow,
                 /* short group */ "",
                 /* long group  */ "",
                 /*  sound ID   */ "Item Ammo",
@@ -250,6 +267,7 @@ namespace MWMechanics
         {
             ESM::Weapon::Bolt,
             {
+                /*     id      */ ESM::Weapon::Bolt,
                 /* short group */ "",
                 /* long group  */ "",
                 /*  sound ID   */ "Item Ammo",
@@ -266,6 +284,8 @@ namespace MWMechanics
     MWWorld::ContainerStoreIterator getActiveWeapon(MWWorld::Ptr actor, int *weaptype);
 
     const ESM::WeaponType* getWeaponType(const int weaponType);
+
+    void registerWeaponType(const ESM::WeaponType& weaponType);
 }
 
 #endif

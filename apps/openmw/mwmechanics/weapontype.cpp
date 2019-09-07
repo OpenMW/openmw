@@ -50,4 +50,18 @@ namespace MWMechanics
 
          return &found->second;
     }
+
+    void registerWeaponType(const ESM::WeaponType& weaponType)
+    {
+        if (weaponType.mId < 0)
+        {
+            throw std::invalid_argument("Invalid 'id' parameter provided. It must be a positive integer.");
+        }
+        else if (sWeaponTypeList.find(weaponType.mId) != sWeaponTypeList.end())
+        {
+            throw std::invalid_argument("Invalid 'id' parameter provided. A weapon type with this id already exists.");
+        }
+
+        sWeaponTypeList[weaponType.mId] = weaponType;
+    }
 }

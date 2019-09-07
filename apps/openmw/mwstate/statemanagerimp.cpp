@@ -28,6 +28,9 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
 
+#include "../mwlua/luamanager.hpp"
+#include "../mwlua/loadedgame.hpp"
+
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
@@ -152,6 +155,10 @@ void MWState::StateManager::newGame (bool bypass)
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
+
+        if (mwse::lua::event::LoadedGameEvent::getEventEnabled()) {
+            mwse::lua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new mwse::lua::event::LoadedGameEvent(nullptr, false, true));
+        }
     }
     catch (std::exception& e)
     {
@@ -374,7 +381,7 @@ void MWState::StateManager::loadGame(const std::string& filepath)
     loadGame(character, filepath);
 }
 
-void MWState::StateManager::loadGame (const Character *character, const std::string& filepath)
+void MWState::StateManager::loadGame (const Character *character, const std::string& filepath, bool quickLoad)
 {
     try
     {
@@ -546,6 +553,11 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         // Since we passed "changeEvent=false" to changeCell, we shouldn't have triggered the cell change flag.
         // But make sure the flag is cleared anyway in case it was set from an earlier game.
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();
+
+        // FIXME: getThreadSafeStateHandle()
+        if (mwse::lua::event::LoadedGameEvent::getEventEnabled()) {
+            mwse::lua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new mwse::lua::event::LoadedGameEvent(filepath.substr(filepath.find_last_of('/')+1).c_str(), quickLoad, false));
+        }
     }
     catch (const std::exception& e)
     {
@@ -569,7 +581,7 @@ void MWState::StateManager::quickLoad()
     {
         if (currentCharacter->begin() == currentCharacter->end())
             return;
-        loadGame (currentCharacter, currentCharacter->begin()->mPath.string()); //Get newest save
+        loadGame (currentCharacter, currentCharacter->begin()->mPath.string(), true); //Get newest save
     }
 }
 

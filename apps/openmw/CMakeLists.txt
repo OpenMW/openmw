@@ -28,6 +28,14 @@ add_openmw_dir (mwinput
     inputmanagerimp
     )
 
+add_openmw_dir (mwlua
+    luamanager luascript dynamicluaobject luatimer luautil tes3utillua baseevent genericevent disableableevent disableableeventmanager loadedgame
+    )
+
+add_openmw_dir (mwlua/structs
+    magiceffect weapontype ptr
+    )
+
 add_openmw_dir (mwgui
     layout textinput widgets race class birth review windowmanagerimp console dialogue
     windowbase statswindow messagebox journalwindow charactercreation
@@ -95,21 +103,36 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
+
+find_package(LuaJit REQUIRED)
+
+MESSAGE(STATUS "Found LuaJit_LIBRARIES: ${LuaJit_LIBRARIES}")
+MESSAGE(STATUS "Found LuaJit_INCLUDE_DIRS: ${LuaJit_INCLUDE_DIRS}")
+
+source_group(game FILES ${LUA_INCLUDE_DIR})
+
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_LUA -ldl")
+include_directories(SYSTEM ${LuaJit_INCLUDE_DIRS})
+
 # Main executable
 
 if (NOT ANDROID)
     openmw_add_executable(openmw
         ${OPENMW_FILES}
+        ${LUA_HEADER}
         ${GAME} ${GAME_HEADER}
         ${APPLE_BUNDLE_RESOURCES}
     )
 else ()
     add_library(openmw
         SHARED
+        ${LUA_HEADER}
         ${OPENMW_FILES}
         ${GAME} ${GAME_HEADER}
     )
 endif ()
+
+target_link_libraries(openmw ${LuaJit_LIBRARIES})
 
 # Sound stuff - here so CMake doesn't stupidly recompile EVERYTHING
 # when we change the backend.

@@ -51,6 +51,8 @@
 
 #include "mwclass/classes.hpp"
 
+#include "mwlua/luamanager.hpp"
+
 #include "mwdialogue/dialoguemanagerimp.hpp"
 #include "mwdialogue/journalimp.hpp"
 #include "mwdialogue/scripttest.hpp"
@@ -741,6 +743,8 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
+    mwse::lua::LuaManager::getInstance().hook();
+
     // Start the main rendering loop
     osg::Timer frameTimer;
     double simulationTime = 0.0;
@@ -773,6 +777,8 @@ void OMW::Engine::go()
 
         mEnvironment.limitFrameRate(frameTimer.time_s());
     }
+
+    mwse::lua::LuaManager::getInstance().cleanup();
 
     // Save user settings
     settings.saveUser(settingspath);

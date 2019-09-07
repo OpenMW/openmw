@@ -32,6 +32,7 @@ struct MagicEffect
         CastTarget = 0x100, // Allows range - cast on target.
         UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
         NonRecastable = 0x4000, // Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
+        IllegalDaedra = 0x8000, // Not used by original engine, but can be useful for scripting.
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
         CasterLinked = 0x20000, // Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
 

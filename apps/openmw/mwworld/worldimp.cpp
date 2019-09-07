@@ -56,6 +56,8 @@
 #include "../mwphysics/collisiontype.hpp"
 #include "../mwphysics/object.hpp"
 
+#include "../mwlua/luamanager.hpp"
+
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellstore.hpp"
@@ -309,6 +311,8 @@ namespace MWWorld
 
     void World::clear()
     {
+        mwse::lua::LuaManager::getInstance().clearTimers();
+
         mWeatherManager->clear();
         mRendering->clear();
         mProjectileManager->clear();
@@ -1855,6 +1859,9 @@ namespace MWWorld
             mSpellPreloadTimer = 0.1f;
             preloadSpells();
         }
+
+        float timestamp = getTimeStamp().getDay() * 24 + getTimeStamp().getHour();
+        mwse::lua::LuaManager::getInstance().update(duration, timestamp, paused);
     }
 
     void World::updatePhysics (float duration, bool paused)

@@ -99,6 +99,7 @@ struct WeaponType
     };
 
     //std::string mDisplayName; // TODO: will be needed later for editor
+    int mId;
     std::string mShortGroup;
     std::string mLongGroup;
     std::string mSoundId;
