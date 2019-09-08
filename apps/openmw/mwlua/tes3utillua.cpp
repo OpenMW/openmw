@@ -1099,12 +1099,15 @@ namespace mwse {
 					throw std::exception("tes3.removeEffects: Must pass either 'effect' or 'castType' parameter!");
 				}
 			};
+            */
 
-			state["tes3"]["getPlayerGold"] = []() -> int {
-				auto player = TES3::WorldController::get()->getMobilePlayer();
-				return player->getGold();
+			state["omw"]["getPlayerGold"] = []() -> int
+			{
+                MWWorld::Ptr player = MWMechanics::getPlayer();
+				return player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 			};
 
+            /*
 			state["tes3"]["triggerCrime"] = [](sol::table params) {
 				auto& luaManager = mwse::lua::LuaManager::getInstance();
 				auto stateHandle = luaManager.getThreadSafeStateHandle();
