@@ -1,6 +1,6 @@
 #include "tes3utillua.hpp"
 
-#include <iostream>
+#include <MyGUI_InputManager.h>
 
 #include <algorithm>
 #include "sol.hpp"
@@ -8,6 +8,7 @@
 #include "luautil.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1044,21 +1045,20 @@ namespace mwse {
 				return sol::nil;
 			};
 
-			state["tes3"]["getCursorPosition"] = []() -> sol::object {
-				TES3::WorldController * worldController = TES3::WorldController::get();
-				if (worldController) {
-					auto& luaManager = mwse::lua::LuaManager::getInstance();
-					auto stateHandle = luaManager.getThreadSafeStateHandle();
-					sol::state& state = stateHandle.state;
-					sol::table results = state.create_table();
-					results["x"] = worldController->mouseController->position.x;
-					results["y"] = worldController->mouseController->position.z;
-					return results;
-				}
-
-				return sol::nil;
+            */
+			state["omw"]["getCursorPosition"] = []() -> sol::object
+			{
+                MyGUI::IntPoint cursorPosition = MyGUI::InputManager::getInstance().getMousePosition();
+                auto& luaManager = mwse::lua::LuaManager::getInstance();
+                auto stateHandle = luaManager.getThreadSafeStateHandle();
+                sol::state& state = stateHandle.state;
+                sol::table results = state.create_table();
+                results["x"] = int(cursorPosition.left);
+                results["y"] = int(cursorPosition.top);
+                return results;
 			};
 
+            /*
 			state["tes3"]["getSkill"] = [](int skillID) -> sol::object {
 				TES3::DataHandler * dataHandler = TES3::DataHandler::get();
 				if (dataHandler) {
