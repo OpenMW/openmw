@@ -604,11 +604,14 @@ namespace mwse {
 				return sol::nil;
 			};
 
-			// Bind function: tes3.newGame
-			state["tes3"]["newGame"] = []() {
-				tes3::startNewGame();
+            */
+
+			state["omw"]["newGame"] = []()
+            {
+				MWBase::Environment::get().getStateManager()->newGame(false);
 			};
 
+            /*
 			// Bind function: tes3.getCameraVector
 			// This function currently calls out to MGE, which should be changed at some point.
 			state["tes3"]["getCameraVector"] = []() {
