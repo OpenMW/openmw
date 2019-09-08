@@ -1937,27 +1937,6 @@ namespace mwse {
 				return true;
 			};
 
-			state["tes3"]["getLanguageCode"] = []() {
-				return reinterpret_cast<int(__stdcall*)()>(0x4678F0)();
-			};
-
-			state["tes3"]["getLanguage"] = []() -> sol::optional<std::string> {
-				int language = reinterpret_cast<int(__stdcall*)()>(0x4678F0)();
-
-				switch (language) {
-				case 0:
-					return "eng";
-				case 1:
-					return "fra";
-				case 2:
-					return "deu";
-				case 3:
-					return "rus";
-				}
-
-				return sol::optional<std::string>();
-			};
-
 			state["tes3"]["addSoulGem"] = [](sol::table params) {
 				TES3::Misc * item = getOptionalParamObject<TES3::Misc>(params, "item");
 				if (item == nullptr) {
