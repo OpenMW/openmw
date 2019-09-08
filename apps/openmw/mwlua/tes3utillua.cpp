@@ -8,6 +8,7 @@
 #include "luautil.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -402,24 +403,18 @@ namespace mwse {
 
 				TES3::DataHandler::get()->removeSound(sound, reference);
 			};
+            */
 
 			// Bind function: tes3.streamMusic
-			state["tes3"]["streamMusic"] = [](sol::optional<sol::table> params) {
+			state["omw"]["streamMusic"] = [](sol::optional<sol::table> params)
+            {
 				// Get parameters.
-				const char* relativePath = getOptionalParam<const char*>(params, "path", nullptr);
-				int situation = getOptionalParam<int>(params, "situation", int(TES3::MusicSituation::Uninterruptible));
-				double crossfade = getOptionalParam<double>(params, "crossfade", 1.0);
-
-				if (relativePath) {
-					auto w = TES3::WorldController::get();
-					char path[260];
-
-					std::snprintf(path, sizeof(path), "Data Files/music/%s", relativePath);
-					w->audioController->changeMusicTrack(path, 1000 * crossfade, 1.0);
-					w->musicSituation = TES3::MusicSituation(situation);
-				}
+                // FIXME: support for MCP' uninterruptable and crossfade
+				//int situation = getOptionalParam<int>(params, "situation", int(TES3::MusicSituation::Uninterruptible));
+				//double crossfade = getOptionalParam<double>(params, "crossfade", 1.0);
+                const char* path = getOptionalParam<const char*>(params, "path", nullptr);
+                MWBase::Environment::get().getSoundManager()->streamMusic (path);
 			};
-            */
 
 			state["omw"]["messageBox"] = [](sol::object param, sol::optional<sol::variadic_args> va) {
 				auto& luaManager = mwse::lua::LuaManager::getInstance();
