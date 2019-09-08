@@ -1437,35 +1437,36 @@ namespace mwse {
 				return true;
 			};
 
+            state["omw"]["updateJournal"] = [](sol::table params) -> bool
+            {
+                sol::optional<std::string> id = params["id"];
+                sol::optional<int> index = params["index"];
+                if (!id || !index)
+                {
+                    return false;
+                }
+
+                MWWorld::Ptr actor = getOptionalParamReference(params, "speaker");
+                if (!actor.isEmpty())
+                {
+                    actor = MWMechanics::getPlayer();
+                }
+
+                // Invoking Journal with a non-existing index is allowed, and triggers no errors. Seriously? :(
+                try
+                {
+                    MWBase::Environment::get().getJournal()->addEntry (Misc::StringUtils::lowerCase(id.value()), index.value(), actor);
+                }
+                catch (...)
+                {
+                    if (MWBase::Environment::get().getJournal()->getJournalIndex(Misc::StringUtils::lowerCase(id.value())) < index.value())
+                        MWBase::Environment::get().getJournal()->setJournalIndex(Misc::StringUtils::lowerCase(id.value()), index.value());
+                }
+
+                return true;
+            };
+
             /*
-			state["tes3"]["updateJournal"] = [](sol::table params) -> bool {
-				TES3::Dialogue * journal = getOptionalParamDialogue(params, "id");
-				if (journal == nullptr || journal->type != TES3::DialogueType::Journal) {
-					return false;
-				}
-
-				sol::optional<int> index = params["index"];
-				if (!index) {
-					return false;
-				}
-
-				TES3::MobileActor * actor = getOptionalParamMobileActor(params, "speaker");
-				if (actor == nullptr) {
-					actor = TES3::WorldController::get()->getMobilePlayer();
-				}
-
-				if (!journal->addToJournal(index.value(), actor)) {
-					return false;
-				}
-
-				sol::optional<bool> showMessage = params["showMessage"];
-				if (showMessage.value_or(true) && tes3::ui::getMenuNode(*reinterpret_cast<short*>(0x7D3442)) == nullptr) {
-					tes3::ui::messagePlayer(TES3::DataHandler::get()->nonDynamicData->GMSTs[TES3::GMST::sJournalEntry]->value.asString);
-				}
-
-				return true;
-			};
-
 			state["tes3"]["getFileExists"] = [](const char* path) {
 				return tes3::resolveAssetPath(path) != 0;
 			};
@@ -2704,8 +2705,6 @@ namespace mwse {
 
 				if (!ptr.isEmpty())
                 {
-                    std::cout << ptr.getCellRef().getRefId() << std::endl;
-
                     if (ptr == MWMechanics::getPlayer())
                         return -1;
 
