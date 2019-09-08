@@ -1516,15 +1516,22 @@ namespace mwse {
 			};
             */
 
-			state["omw"]["fadeOut"] = [](float duration)
+            state["omw"]["fadeIn"] = [](float duration)
             {
                 MWBase::Environment::get().getWindowManager()->fadeScreenIn(duration, false);
-			};
+            };
 
-			state["omw"]["fadeTo"] = [](float duration)
+            state["omw"]["fadeOut"] = [](float duration)
             {
                 MWBase::Environment::get().getWindowManager()->fadeScreenOut(duration, false);
-			};
+            };
+
+            state["omw"]["fadeTo"] = [](sol::optional<sol::table> params)
+            {
+                float alpha = getOptionalParam(params, "value", 1.0f);
+                float duration = getOptionalParam(params, "duration", 1.0f);
+                MWBase::Environment::get().getWindowManager()->fadeScreenTo(static_cast<int>(alpha*100), duration, false);
+            };
 
             /*
 			state["tes3"]["setStatistic"] = [](sol::table params) {
