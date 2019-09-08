@@ -312,57 +312,56 @@ namespace mwse {
 
 				return sol::nil;
 			};
+            */
 
-			// Bind function: tes3.playSound
-			state["tes3"]["playSound"] = [](sol::optional<sol::table> params) {
-				// Get parameters.
-				TES3::Sound* sound = getOptionalParamSound(params, "sound");
-				const char* soundPath = getOptionalParam<const char*>(params, "soundPath", nullptr);
-				TES3::Reference* reference = getOptionalParamReference(params, "reference");
-				bool loop = getOptionalParam<bool>(params, "loop", false);
-				int mix = getOptionalParam<int>(params, "mixChannel", int(TES3::AudioMixType::Effects));
-				double volume = getOptionalParam<double>(params, "volume", 1.0);
-				float pitch = getOptionalParam<double>(params, "pitch", 1.0);
+            state["omw"]["playSound"] = [](sol::optional<sol::table> params)
+            {
+                // Get parameters.
+                const char* sound = getOptionalParam<const char*>(params, "sound", nullptr);
+                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                bool loop = getOptionalParam<bool>(params, "loop", false);
+                double volume = getOptionalParam<double>(params, "volume", 1.0);
+                float pitch = getOptionalParam<double>(params, "pitch", 1.0);
 
-				if (sound == nullptr && soundPath == nullptr) {
-					log::getLog() << "tes3.playSound: Could not locate sound." << std::endl;
-					return false;
-				}
+                // Clamp volume. RIP no std::clamp.
+                volume = std::max(0.0, volume);
+                volume = std::min(volume, 1.0);
 
-				// Clamp volume. RIP no std::clamp.
-				volume = std::max(0.0, volume);
-				volume = std::min(volume, 1.0);
+                if (ptr.isEmpty())
+                {
+                    MWBase::Environment::get().getSoundManager()->playSound(sound, volume, pitch, MWSound::Type::Sfx, MWSound::PlayMode::NoEnv);
+                }
+                else
+                {
+                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, sound, volume, pitch,
+                                                                              MWSound::Type::Sfx,
+                                                                              loop ? MWSound::PlayMode::LoopRemoveAtDistance
+                                                                                    : MWSound::PlayMode::Normal);
+                }
+            };
 
-				// Apply mix and rescale to 0-250
-				volume *= 250.0 * TES3::WorldController::get()->audioController->getMixVolume(TES3::AudioMixType(mix));
+            state["omw"]["getSoundPlaying"] = [](sol::optional<sol::table> params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                const char* sound = getOptionalParam<const char*>(params, "sound", nullptr);
 
-				if (soundPath) {
-					bool isVoiceover = getOptionalParam<bool>(params, "isVoiceover", false);
-					TES3::DataHandler::get()->addTemporySound(soundPath, reference, loop ? TES3::SoundPlayFlags::Loop : 0, volume, pitch, isVoiceover, sound);
-					return true;
-				}
-				else if (sound) {
-					TES3::DataHandler::get()->addSound(sound, reference, loop ? TES3::SoundPlayFlags::Loop : 0, volume, pitch);
-					return true;
-				}
+                bool ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying (ptr, sound);
 
-				return false;
-			};
+                // GetSoundPlaying called on an equipped item should also look for sounds played by the equipping actor.
+                if (!ret && ptr.getContainerStore())
+                {
+                    MWWorld::Ptr cont = MWBase::Environment::get().getWorld()->findContainer(ptr);
 
-			// Bind function: tes3.getSoundPlaying
-			state["tes3"]["getSoundPlaying"] = [](sol::optional<sol::table> params) {
-				// Get parameters.
-				TES3::Sound* sound = getOptionalParamSound(params, "sound");
-				TES3::Reference* reference = getOptionalParamReference(params, "reference");
+                    if (!cont.isEmpty() && cont.getClass().hasInventoryStore(cont) && cont.getClass().getInventoryStore(cont).isEquipped(ptr))
+                    {
+                        ret = MWBase::Environment::get().getSoundManager()->getSoundPlaying (cont, sound);
+                    }
+                }
 
-				if (sound == nullptr) {
-					log::getLog() << "tes3.getSoundPlaying: Could not locate sound." << std::endl;
-					return false;
-				}
+                return ret;
+            };
 
-				return bool(TES3::DataHandler::get()->getSoundPlaying(sound, reference));
-			};
-
+            /*
 			// Bind function: tes3.adjustSoundVolume
 			state["tes3"]["adjustSoundVolume"] = [](sol::optional<sol::table> params) {
 				// Get parameters.
