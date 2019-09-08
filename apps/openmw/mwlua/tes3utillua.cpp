@@ -529,19 +529,40 @@ namespace mwse {
 
 				return mods;
 			};
+            */
 
-			// Bind function: tes3.playItemPickupSound
-			state["tes3"]["playItemPickupSound"] = [](sol::optional<sol::table> params) {
-				TES3::Reference* reference = getOptionalParamExecutionReference(params);
-				TES3::Item* item = getOptionalParamObject<TES3::Item>(params, "item");
-				bool pickup = getOptionalParam<bool>(params, "pickup", true);
-				if (item == NULL) {
-					return;
-				}
+            state["omw"]["playItemPickupSound"] = [](sol::optional<sol::table> params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                MWWorld::Ptr item = getOptionalParamReference(params, "item");
+                if (item.isEmpty())
+                    return;
 
-				TES3::WorldController::get()->playItemUpDownSound(item, pickup, reference);
-			};
+                bool pickup = getOptionalParam<bool>(params, "pickup", true);
+                std::string soundId;
+                if (pickup)
+                {
+                    soundId = item.getClass().getUpSoundId(item);
+                }
+                else
+                {
+                    soundId = item.getClass().getDownSoundId(item);
+                }
 
+                if (soundId.empty())
+                    return;
+
+                if (ptr.isEmpty())
+                {
+                    MWBase::Environment::get().getWindowManager()->playSound(soundId);
+                }
+                else
+                {
+                    MWBase::Environment::get().getSoundManager()->playSound3D(ptr, soundId, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Normal);
+                }
+            };
+
+            /*
 			// Bind function: tes3.iterateList
 			state["tes3"]["iterateObjects"] = sol::overload(&iterateObjects, &iterateObjectsFiltered);
 
