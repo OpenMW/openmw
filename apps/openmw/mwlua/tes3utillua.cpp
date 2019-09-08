@@ -1531,28 +1531,19 @@ namespace mwse {
 				float duration = getOptionalParam(params, "duration", 1.0f);
 				fader->fadeTo(0.0f, duration);
 			};
+            */
 
-			state["tes3"]["fadeOut"] = [](sol::optional<sol::table> params) {
-				TES3::Fader * fader = getOptionalParam(params, "fader", TES3::WorldController::get()->transitionFader);
-				if (fader == nullptr) {
-					return;
-				}
-
-				float duration = getOptionalParam(params, "duration", 1.0f);
-				fader->fadeTo(1.0f, duration);
+			state["omw"]["fadeOut"] = [](float duration)
+            {
+                MWBase::Environment::get().getWindowManager()->fadeScreenIn(duration, false);
 			};
 
-			state["tes3"]["fadeTo"] = [](sol::optional<sol::table> params) {
-				TES3::Fader * fader = getOptionalParam(params, "fader", TES3::WorldController::get()->transitionFader);
-				if (fader == nullptr) {
-					return;
-				}
-
-				float value = getOptionalParam(params, "value", 1.0f);
-				float duration = getOptionalParam(params, "duration", 1.0f);
-				fader->fadeTo(value, duration);
+			state["omw"]["fadeTo"] = [](float duration)
+            {
+                MWBase::Environment::get().getWindowManager()->fadeScreenOut(duration, false);
 			};
 
+            /*
 			state["tes3"]["setStatistic"] = [](sol::table params) {
 				auto& luaManager = mwse::lua::LuaManager::getInstance();
 				auto stateHandle = luaManager.getThreadSafeStateHandle();
