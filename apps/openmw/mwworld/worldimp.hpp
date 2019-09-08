@@ -124,7 +124,6 @@ namespace MWWorld
             std::string mStartCell;
 
             void updateWeather(float duration, bool paused = false);
-            int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust);
 
@@ -227,6 +226,8 @@ namespace MWWorld
             void useDeathCamera() override;
 
             void setWaterHeight(const float height) override;
+
+            int getDaysPerMonth (int month) const override;
 
             void rotateWorldObject (const MWWorld::Ptr& ptr, osg::Quat rotate) override;
 

@@ -902,15 +902,14 @@ namespace mwse {
 			state["tes3"]["getTopMenu"] = []() {
 				return tes3::ui::getTopMenu();
 			};
+            */
 
-			state["tes3"]["getDaysInMonth"] = [](int month) -> sol::optional<int> {
-				TES3::WorldController * worldController = TES3::WorldController::get();
-				if (worldController) {
-					return worldController->getDaysInMonth(month);
-				}
-				return sol::optional<int>();
-			};
+            state["omw"]["getDaysInMonth"] = [](int month) -> sol::optional<int>
+            {
+                return MWBase::Environment::get().getWorld()->getDaysPerMonth(month);
+            };
 
+            /*
 			state["tes3"]["getCumulativeDaysForMonth"] = [](int month) -> sol::optional<int> {
 				TES3::WorldController * worldController = TES3::WorldController::get();
 				if (worldController) {

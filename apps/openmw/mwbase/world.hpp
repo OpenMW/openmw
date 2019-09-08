@@ -120,6 +120,8 @@ namespace MWBase
 
             virtual void setWaterHeight(const float height) = 0;
 
+            virtual int getDaysPerMonth (int month) const = 0;
+
             virtual bool toggleWater() = 0;
             virtual bool toggleWorld() = 0;
             virtual bool toggleBorders() = 0;
