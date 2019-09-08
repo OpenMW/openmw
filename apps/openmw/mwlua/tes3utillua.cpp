@@ -8,6 +8,7 @@
 #include "luautil.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/journal.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -22,6 +23,8 @@
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadweap.hpp>
+
+#include <components/misc/stringops.hpp>
 
 /*
 #include "TES3GameFile.h"
@@ -1413,38 +1416,28 @@ namespace mwse {
 				return actor->tradesItemType(item->objectType);
 			};
 
-			state["tes3"]["getJournalIndex"] = [](sol::table params) -> sol::optional<int> {
-				TES3::Dialogue * journal = getOptionalParamDialogue(params, "id");
-				if (journal == nullptr || journal->type != TES3::DialogueType::Journal) {
-					return sol::optional<int>();
-				}
-
-				return journal->journalIndex;
+            */
+			state["omw"]["getJournalIndex"] = [](const char* quest) -> sol::optional<int>
+			{
+                int index = MWBase::Environment::get().getJournal()->getJournalIndex (Misc::StringUtils::lowerCase(quest));
+                return index;
 			};
 
-			state["tes3"]["setJournalIndex"] = [](sol::table params) -> bool {
-				TES3::Dialogue * journal = getOptionalParamDialogue(params, "id");
-				if (journal == nullptr || journal->type != TES3::DialogueType::Journal) {
-					return false;
-				}
-
+			state["omw"]["setJournalIndex"] = [](sol::table params) -> bool
+			{
+				sol::optional<std::string> id = params["id"];
 				sol::optional<int> index = params["index"];
-				if (!index) {
+				if (!id || !index)
+                {
 					return false;
 				}
 
-				if (!journal->setJournalIndex(index.value())) {
-					return false;
-				}
-
-				sol::optional<bool> showMessage = params["showMessage"];
-				if (showMessage.value_or(false) && tes3::ui::getMenuNode(*reinterpret_cast<short*>(0x7D3442)) == nullptr) {
-					tes3::ui::messagePlayer(TES3::DataHandler::get()->nonDynamicData->GMSTs[TES3::GMST::sJournalEntry]->value.asString);
-				}
+                MWBase::Environment::get().getJournal()->setJournalIndex (Misc::StringUtils::lowerCase(id.value()), index.value());
 
 				return true;
 			};
 
+            /*
 			state["tes3"]["updateJournal"] = [](sol::table params) -> bool {
 				TES3::Dialogue * journal = getOptionalParamDialogue(params, "id");
 				if (journal == nullptr || journal->type != TES3::DialogueType::Journal) {
