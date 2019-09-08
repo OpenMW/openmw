@@ -12,6 +12,7 @@
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -1110,98 +1111,50 @@ namespace mwse {
 				return player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 			};
 
-            /*
-			state["tes3"]["triggerCrime"] = [](sol::table params) {
-				auto& luaManager = mwse::lua::LuaManager::getInstance();
-				auto stateHandle = luaManager.getThreadSafeStateHandle();
-				sol::state& state = stateHandle.state;
-
-				TES3::CrimeEvent crimeEvent;
+			state["omw"]["triggerCrime"] = [](sol::table params)
+            {
+                MWBase::MechanicsManager::OffenseType crimeType = MWBase::MechanicsManager::OT_Theft;
 
 				// Look at the given type.
-				int crimeType = getOptionalParam<int>(params, "type", 3);
-				if (crimeType < 1 || crimeType > 7) {
-					throw std::exception("Invalid type given. Value must be between 1 and 7.");
+				int crimeTypeInt = getOptionalParam<int>(params, "type", 3);
+				if (crimeTypeInt < 1 || crimeTypeInt > 7)
+                {
+					throw std::invalid_argument("Invalid type given. Value must be between 1 and 7.");
 				}
-				crimeEvent.type = crimeType;
 
-				// Also set the type string based on the crime committed.
-				switch (crimeType) {
+				switch (crimeTypeInt)
+                {
 				case 1:
-					crimeEvent.typeString = "attack";
+					crimeType = MWBase::MechanicsManager::OT_Assault;
 					break;
 				case 2:
-					crimeEvent.typeString = "killing";
+					crimeType = MWBase::MechanicsManager::OT_Murder;
 					break;
 				case 3:
-					crimeEvent.typeString = "stealing";
 					break;
 				case 4:
-					crimeEvent.typeString = "pickpocket";
-					crimeEvent.penalty = 25;
+					crimeType = MWBase::MechanicsManager::OT_Pickpocket;
 					break;
 				case 5:
-					crimeEvent.typeString = "theft";
 					break;
 				case 6:
-					crimeEvent.typeString = "trespass";
+					crimeType = MWBase::MechanicsManager::OT_Trespassing;
 					break;
 				case 7:
-					crimeEvent.typeString = "werewolf";
+                    // FIXME: a special case in the MechanicsManager::setWerewolf()
+					//crimeEvent.typeString = "werewolf";
 					break;
 				}
 
-				// Criminal is assumed to be the player if no value is supplied.
-				TES3::MobileActor * criminal = getOptionalParamMobileActor(params, "criminal");
-				if (criminal == nullptr) {
-					criminal = TES3::WorldController::get()->getMobilePlayer();
-				}
-				crimeEvent.criminal = criminal;
+				// FIXME: penalty works only for theft now
+				int penalty = getOptionalParam<int>(params, "value", 0);
 
-				// Set some basic crime event data.
-				crimeEvent.timestamp = timeGetTime();
-				crimeEvent.position = criminal->position;
-				crimeEvent.penalty = getOptionalParam<int>(params, "value", crimeEvent.penalty);
+                MWWorld::Ptr victim = getOptionalParamReference(params, "victim");
 
-				// Victim can be more complicated.
-				sol::object victim = params["victim"];
-				crimeEvent.victim = TES3::WorldController::get()->getMobilePlayer();
-				if (victim.is<TES3::Faction>()) {
-					crimeEvent.victimFaction = victim.as<TES3::Faction*>();
-				}
-				else if (victim.is<TES3::Actor>()) {
-					crimeEvent.victim = TES3::WorldController::get()->getMobilePlayer();
-					crimeEvent.victimFaction = victim.as<TES3::Actor*>()->getFaction();
-					if (victim.is<TES3::NPC>()) {
-						crimeEvent.victimBaseActor = victim.as<TES3::NPC*>();
-					}
-					else if (victim.is<TES3::NPCInstance>()) {
-						crimeEvent.victimBaseActor = victim.as<TES3::NPCInstance*>()->baseNPC;
-					}
-				}
-				else if (victim.is<TES3::MobileNPC>()) {
-					TES3::MobileNPC * mach = victim.as<TES3::MobileNPC*>();
-					crimeEvent.victim = mach;
-					crimeEvent.victimFaction = mach->npcInstance->getFaction();
-					crimeEvent.victimBaseActor = mach->npcInstance;
-				}
-
-				// Do detection and the like.
-				bool forceDetection = getOptionalParam<bool>(params, "forceDetection", false);
-				auto controller = TES3::WorldController::get()->mobController->unknown_0x24;
-				if (!forceDetection && controller->detectPresence(crimeEvent.criminal)) {
-					controller->checkRadius(crimeEvent.victim, crimeEvent.witnesses);
-				}
-
-				// If we were detected, add it to the list.
-				if (forceDetection || crimeEvent.witnesses->size > 0) {
-					auto crimeController = &crimeEvent.victim->crimesA;
-					crimeController->insertCrime(&crimeEvent);
-				}
-
-				return true;
+                MWBase::Environment::get().getMechanicsManager()->commitCrime(MWMechanics::getPlayer(), victim, crimeType, penalty, true);
 			};
 
+            /*
 			state["tes3"]["loadMesh"] = [](const char* relativePath) -> sol::object {
 				std::string path = "Meshes\\";
 				path += relativePath;
