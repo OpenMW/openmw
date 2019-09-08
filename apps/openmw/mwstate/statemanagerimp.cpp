@@ -363,6 +363,8 @@ void MWState::StateManager::quickSave (std::string name)
 
 void MWState::StateManager::loadGame(const std::string& filepath)
 {
+    std::cout << filepath << std::endl;
+
     for (CharacterIterator it = mCharacterManager.begin(); it != mCharacterManager.end(); ++it)
     {
         const MWState::Character& character = *it;
@@ -383,6 +385,8 @@ void MWState::StateManager::loadGame(const std::string& filepath)
 
 void MWState::StateManager::loadGame (const Character *character, const std::string& filepath, bool quickLoad)
 {
+        std::cout << filepath << std::endl;
+
     try
     {
         cleanup();
@@ -683,4 +687,13 @@ void MWState::StateManager::writeScreenshot(std::vector<char> &imageData) const
     std::string data = ostream.str();
     imageData = std::vector<char>(data.begin(), data.end());
 
+}
+
+void MWState::StateManager::simpleGameLoad(const std::string& filename)
+{
+    const MWState::Character* character = getCurrentCharacter();
+    if (character == nullptr)
+        return;
+
+    loadGame((character->getPath() / filename).string()+".omwsave");
 }

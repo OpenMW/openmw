@@ -85,6 +85,8 @@ namespace MWState
             virtual CharacterIterator characterEnd();
 
             virtual void update (float duration);
+
+            virtual void simpleGameLoad(const std::string& filename);
     };
 }
 

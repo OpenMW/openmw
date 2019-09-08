@@ -405,7 +405,6 @@ namespace mwse {
 			};
             */
 
-			// Bind function: tes3.streamMusic
 			state["omw"]["streamMusic"] = [](sol::optional<sol::table> params)
             {
 				// Get parameters.
@@ -492,20 +491,12 @@ namespace mwse {
                 return true;
 			};
 
-            /*
-			// Bind function: tes3.loadGame and tes3.loadGameMainMenu
-			state["tes3"]["loadGame"] = [](const char* fileName) {
-				// Char Gen State will equal 0 in the menu.
-				if (TES3::WorldController::get()->gvarCharGenState->value == 0)
-				{
-					TES3::DataHandler::get()->nonDynamicData->loadGameMainMenu(fileName);
-				}
-				else
-				{
-					TES3::DataHandler::get()->nonDynamicData->loadGame(fileName);
-				}
+			state["omw"]["loadGame"] = [](const char* fileName)
+            {
+				MWBase::Environment::get().getStateManager()->simpleGameLoad(fileName);
 			};
 
+            /*
 			// Bind function: tes3.isModActive
 			state["tes3"]["isModActive"] = [](const char* modName) {
 				TES3::DataHandler* dataHandler = TES3::DataHandler::get();

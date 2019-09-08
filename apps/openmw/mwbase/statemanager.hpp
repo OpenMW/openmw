@@ -90,6 +90,8 @@ namespace MWBase
             virtual CharacterIterator characterEnd() = 0;
 
             virtual void update (float duration) = 0;
+
+            virtual void simpleGameLoad(const std::string& filename) = 0;
     };
 }
 
