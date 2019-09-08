@@ -829,12 +829,15 @@ namespace mwse {
 
 				return results;
 			};
+            */
 
-			// Bind function: tes3.is3rdPerson
-			state["tes3"]["is3rdPerson"] = []() {
-				return TES3::WorldController::get()->getMobilePlayer()->is3rdPerson();
-			};
+            // Bind function: tes3.is3rdPerson
+            state["omw"]["is3rdPerson"] = []()
+            {
+                return !MWBase::Environment::get().getWorld()->isFirstPerson();
+            };
 
+            /*
 			// Bind function: tes3.tapKey
 			state["tes3"]["tapKey"] = [](double key) {
 				Stack::getInstance().pushLong(key);
@@ -882,14 +885,6 @@ namespace mwse {
 				return tes3::ui::getTopMenu();
 			};
 
-			state["tes3"]["hasCodePatchFeature"] = [](int id) -> sol::optional<bool> {
-				if (!mcp::hasFeaturesFound()) {
-					return sol::optional<bool>();
-				}
-
-				return mcp::getFeatureEnabled(id);
-			};
-
 			state["tes3"]["getDaysInMonth"] = [](int month) -> sol::optional<int> {
 				TES3::WorldController * worldController = TES3::WorldController::get();
 				if (worldController) {
@@ -905,15 +900,16 @@ namespace mwse {
 				}
 				return sol::optional<int>();
 			};
+            */
 
-			state["tes3"]["getSimulationTimestamp"] = []() -> sol::optional<double> {
-				TES3::WorldController * worldController = TES3::WorldController::get();
-				if (worldController) {
-					return worldController->getHighPrecisionSimulationTimestamp();
-				}
-				return sol::optional<double>();
-			};
+            state["omw"]["getSimulationTimestamp"] = []() -> sol::optional<float>
+            {
+                auto timestamp = MWBase::Environment::get().getWorld()->getTimeStamp();
+                float time = timestamp.getDay() * 24 + timestamp.getHour();
+                return time;
+            };
 
+            /*
 			state["tes3"]["getEquippedItem"] = [](sol::table params) -> TES3::EquipmentStack* {
 				// Find our equipment based on the object given.
 				TES3::Iterator<TES3::EquipmentStack> * equipment = NULL;
