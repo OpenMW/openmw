@@ -177,26 +177,24 @@ namespace mwse {
 			state["tes3"]["getWorldController"] = []() {
 				return TES3::WorldController::get();
 			};
-
-			// Bind function: tes3.getPlayerTarget
-			state["tes3"]["getPlayerTarget"] = []() -> sol::object {
-				TES3::Game * game = TES3::Game::get();
-				if (game) {
-					return makeLuaObject(game->playerTarget);
-				}
-				return sol::nil;
-			};
-
             */
-			// Bind function: tes3.getReference
-			state["omw"]["getReference"] = [](sol::optional<const char*> id) {
-				if (id) {
-					return makeLuaObject(MWBase::Environment::get().getWorld()->getPtr(id.value(), false));
-				}
-				else {
-					return makeLuaObject(LuaManager::getInstance().getCurrentReference());
-				}
-			};
+
+            state["omw"]["getPlayerTarget"] = []() -> sol::object
+            {
+                return makeLuaObject(MWBase::Environment::get().getWorld()->getFacedObject());
+            };
+
+            state["omw"]["getReference"] = [](sol::optional<const char*> id)
+            {
+                if (id)
+                {
+                    return makeLuaObject(MWBase::Environment::get().getWorld()->getPtr(id.value(), false));
+                }
+                else
+                {
+                    return makeLuaObject(LuaManager::getInstance().getCurrentReference());
+                }
+            };
 
             /*
 			// Bind function: tes3.getObject
