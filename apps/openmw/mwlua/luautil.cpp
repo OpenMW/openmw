@@ -1,8 +1,5 @@
 #include "luautil.hpp"
 
-#include "sol.hpp"
-#include "luamanager.hpp"
-
 #include <components/debug/debuglog.hpp>
 
 namespace mwse {
@@ -21,66 +18,6 @@ namespace mwse {
 					Log(Debug::Error) << asString.value();
 				}
 			}
-		}
-
-		sol::object makeLuaObject(ESM::MagicEffect* object) {
-			if (object == nullptr) {
-				return sol::nil;
-			}
-
-			LuaManager& luaManager = LuaManager::getInstance();
-			auto stateHandle = luaManager.getThreadSafeStateHandle();
-
-            /*
-			// Search in cache first.
-			sol::object result = stateHandle.getCachedUserdata(object);
-			if (result != sol::nil) {
-				return result;
-			}
-			*/
-
-			sol::state& state = stateHandle.state;
-
-			sol::object result = sol::make_object(state, object);
-
-            /*
-			// Insert the object into cache.
-			if (result != sol::nil) {
-				stateHandle.insertUserdataIntoCache(object, result);
-			}
-			*/
-
-			return result;
-		}
-
-		sol::object makeLuaObject(ESM::WeaponType* object) {
-			if (object == nullptr) {
-				return sol::nil;
-			}
-
-			LuaManager& luaManager = LuaManager::getInstance();
-			auto stateHandle = luaManager.getThreadSafeStateHandle();
-
-            /*
-			// Search in cache first.
-			sol::object result = stateHandle.getCachedUserdata(object);
-			if (result != sol::nil) {
-				return result;
-			}
-			*/
-
-			sol::state& state = stateHandle.state;
-
-			sol::object result = sol::make_object(state, object);
-
-            /*
-			// Insert the object into cache.
-			if (result != sol::nil) {
-				stateHandle.insertUserdataIntoCache(object, result);
-			}
-			*/
-
-			return result;
 		}
 
 		sol::object makeLuaObject(MWWorld::Ptr object)

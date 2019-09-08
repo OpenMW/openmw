@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sol.hpp"
+#include "luamanager.hpp"
 
 #include <unordered_map>
 
@@ -29,8 +30,39 @@ namespace mwse {
 		// Dumps the current stacktrace to the log.
 		void logStackTrace(const char* message = nullptr);
 
-        sol::object makeLuaObject(ESM::MagicEffect* object);
-        sol::object makeLuaObject(ESM::WeaponType* object);
+		template<typename T>
+		sol::object makeLuaObject(T* object)
+        {
+			if (object == nullptr)
+            {
+				return sol::nil;
+			}
+
+			LuaManager& luaManager = LuaManager::getInstance();
+			auto stateHandle = luaManager.getThreadSafeStateHandle();
+
+            /*
+			// Search in cache first.
+			sol::object result = stateHandle.getCachedUserdata(object);
+			if (result != sol::nil) {
+				return result;
+			}
+			*/
+
+			sol::state& state = stateHandle.state;
+
+			sol::object result = sol::make_object(state, object);
+
+            /*
+			// Insert the object into cache.
+			if (result != sol::nil) {
+				stateHandle.insertUserdataIntoCache(object, result);
+			}
+			*/
+
+			return result;
+		}
+
         sol::object makeLuaObject(MWWorld::Ptr object);
 
         MWWorld::Ptr getOptionalParamReference(sol::optional<sol::table> maybeParams, const char* key);
