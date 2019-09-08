@@ -226,32 +226,19 @@ namespace mwse {
 				}
 				return sol::nil;
 			};
+            */
 
-			// Bind function: tes3.getGlobal
-			state["tes3"]["getGlobal"] = [](const char* id) -> sol::optional<float> {
-				TES3::DataHandler * dataHandler = TES3::DataHandler::get();
-				if (dataHandler) {
-					TES3::GlobalVariable * global = dataHandler->nonDynamicData->findGlobalVariable(id);
-					if (global) {
-						return global->value;
-					}
-				}
-				return sol::optional<float>();
-			};
+            state["omw"]["getGlobal"] = [](const char* id) -> sol::optional<float>
+            {
+                return MWBase::Environment::get().getWorld()->getGlobalFloat(id);
+            };
 
-			// Bind function: tes3.setGlobal
-			state["tes3"]["setGlobal"] = [](std::string& id, double value) {
-				TES3::DataHandler * dataHandler = TES3::DataHandler::get();
-				if (dataHandler) {
-					TES3::GlobalVariable * global = dataHandler->nonDynamicData->findGlobalVariable(id.c_str());
-					if (global) {
-						global->value = value;
-						return true;
-					}
-				}
-				return false;
-			};
+            state["omw"]["setGlobal"] = [](const char* id, double value)
+            {
+                MWBase::Environment::get().getWorld()->setGlobalFloat (id, value);
+            };
 
+            /*
 			// Bind function: tes3.findGlobal
 			state["tes3"]["findGlobal"] = [](const char* id) -> sol::object {
 				TES3::DataHandler * dataHandler = TES3::DataHandler::get();
