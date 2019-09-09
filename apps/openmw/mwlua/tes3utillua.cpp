@@ -2866,35 +2866,43 @@ namespace mwse {
 				int page = getOptionalParam<int>(params, "page", -1);
 				return makeLuaObject(TES3::Dialogue::getDialogue(type, page));
 			};
+            */
 
-			state["tes3"]["setEnabled"] = [](sol::table params) {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid 'reference' parameter provided.");
-				}
+            state["omw"]["setEnabled"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
 
-				reference->setObjectModified(true);
+                // Allow toggling.
+                if (getOptionalParam<bool>(params, "toggle", false))
+                {
+                    if (ptr.getRefData().isEnabled())
+                    {
+                        MWBase::Environment::get().getWorld()->disable(ptr);
+                    }
+                    else
+                    {
+                        MWBase::Environment::get().getWorld()->enable(ptr);
+                    }
+                }
+                // Otherwise base it on enabled (default true).
+                else
+                {
+                    if (getOptionalParam<bool>(params, "enabled", true))
+                    {
+                        MWBase::Environment::get().getWorld()->enable(ptr);
+                    }
+                    else
+                    {
+                        MWBase::Environment::get().getWorld()->disable(ptr);
+                    }
+                }
+            };
 
-				// Allow toggling.
-				if (getOptionalParam<bool>(params, "toggle", false)) {
-					if (reference->getDisabled()) {
-						return reference->enable();
-					}
-					else {
-						return reference->disable();
-					}
-				}
-				// Otherwise base it on enabled (default true).
-				else {
-					if (getOptionalParam<bool>(params, "enabled", true)) {
-						return reference->enable();
-					}
-					else {
-						return reference->disable();
-					}
-				}
-			};
-
+            /*
 			state["tes3"]["playAnimation"] = [](sol::table params) {
 				TES3::Reference * reference = getOptionalParamExecutionReference(params);
 				if (reference == nullptr) {
