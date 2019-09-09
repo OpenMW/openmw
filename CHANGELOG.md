@@ -143,7 +143,8 @@
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
-    Feature #3893: Implicit target for "set" function in console
+    Feature #3871: Editor: Terrain Selection
+    Feature #3893: Implicit target for "set" function in console    
     Feature #3980: In-game option to disable controller
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut

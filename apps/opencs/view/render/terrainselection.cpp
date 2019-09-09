@@ -22,7 +22,7 @@ namespace
 }
 
 CSVRender::TerrainSelection::TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget):
-mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget)
+mParentNode(parentNode), mWorldspaceWidget (worldspaceWidget), mDraggedOperationFlag(false)
 {
     mGeometry = new osg::Geometry();
 
@@ -42,40 +42,68 @@ std::vector<std::pair<int, int>> CSVRender::TerrainSelection::getTerrainSelectio
     return mSelection;
 }
 
-void CSVRender::TerrainSelection::selectTerrainTexture(const WorldspaceHitResult& hit)
+void CSVRender::TerrainSelection::onlySelect(const std::vector<std::pair<int, int>> localPositions)
 {
     mSelection.clear();
-
-    const std::pair<int, int> localPos {toTextureCoords(hit.worldPos)};
-
-    if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
-        mSelection.push_back(localPos);
-
-    update();
-}
-
-void CSVRender::TerrainSelection::onlyAddSelect(const WorldspaceHitResult& hit)
-{
-    const std::pair<int, int> localPos {toTextureCoords(hit.worldPos)};
-
-    if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
-            mSelection.push_back(localPos);
-
-    update();
-}
-
-void CSVRender::TerrainSelection::toggleSelect(const WorldspaceHitResult& hit)
-{
-    const std::pair<int, int> localPos {toTextureCoords(hit.worldPos)};
-    const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
-
-    if (iter != mSelection.end())
+    for(auto const& value: localPositions)
     {
-        mSelection.erase(iter);
+        mSelection.emplace_back(value);
+    }
+    update();
+}
+
+void CSVRender::TerrainSelection::addSelect(const std::pair<int, int> localPos)
+{
+    if (std::find(mSelection.begin(), mSelection.end(), localPos) == mSelection.end())
+            mSelection.emplace_back(localPos);
+
+    update();
+}
+
+void CSVRender::TerrainSelection::toggleSelect(const std::vector<std::pair<int, int>> localPositions, bool toggleInProgress)
+{
+    if (toggleInProgress == true)
+    {
+        for(auto const& localPos: localPositions)
+        {
+            auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+            auto itertemp = std::find(mTemporarySelection.begin(), mTemporarySelection.end(), localPos);
+            mDraggedOperationFlag = true;
+
+            if (itertemp == mTemporarySelection.end())
+            {
+                if (iter != mSelection.end())
+                {
+                    mSelection.erase(iter);
+                }
+                else
+                {
+                    mSelection.emplace_back(localPos);
+                }
+            }
+
+            mTemporarySelection.push_back(localPos);
+        }
+    }
+    else if (mDraggedOperationFlag == false)
+    {
+        for(auto const& localPos: localPositions)
+        {
+            const auto iter = std::find(mSelection.begin(), mSelection.end(), localPos);
+            if (iter != mSelection.end())
+            {
+                mSelection.erase(iter);
+            }
+            else
+            {
+                mSelection.emplace_back(localPos);
+            }
+        }
     }
     else
     {
-        mSelection.push_back(localPos);
+        mDraggedOperationFlag = false;
+        mTemporarySelection.clear();
     }
     update();
 }
@@ -88,33 +116,6 @@ void CSVRender::TerrainSelection::activate()
 void CSVRender::TerrainSelection::deactivate()
 {
     mParentNode->removeChild(mSelectionNode);
-}
-
-std::pair<int, int> CSVRender::TerrainSelection::toTextureCoords(osg::Vec3d worldPos) const
-{
-    const auto xd = static_cast<double>(worldPos.x() * landTextureSize / cellSize - 0.25f);
-    const auto yd = static_cast<double>(worldPos.y() * landTextureSize / cellSize + 0.25f);
-
-    const auto x = static_cast<int>(std::floor(xd));
-    const auto y = static_cast<int>(std::floor(yd));
-
-    return std::make_pair(x, y);
-}
-
-std::pair<int, int> CSVRender::TerrainSelection::toVertexCoords(osg::Vec3d worldPos) const
-{
-    const auto xd = static_cast<double>(worldPos.x() * landSize / cellSize);
-    const auto yd = static_cast<double>(worldPos.y() * landSize / cellSize);
-
-    const auto x = static_cast<int>(std::floor(xd));
-    const auto y = static_cast<int>(std::floor(yd));
-
-    return std::make_pair(x, y);
-}
-
-double CSVRender::TerrainSelection::texSelectionToWorldCoords(int pos)
-{
-    return cellSize * static_cast<double>(pos) / landTextureSize;
 }
 
 void CSVRender::TerrainSelection::update()
@@ -152,10 +153,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousX = texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentX = texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+(i-1), y2)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+i, y2)+2));
+                    double drawPreviousX = CSMWorld::CellCoordinates::texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = CSMWorld::CellCoordinates::texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, CSMWorld::CellCoordinates::texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+(i-1), y2)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, CSMWorld::CellCoordinates::texSelectionToWorldCoords(y + 1) - nudgeOffset, calculateLandHeight(x1+i, y2)+2));
                 }
             }
 
@@ -164,10 +165,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousX = texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentX = texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+(i-1), y1)+2));
-                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+i, y1)+2));
+                    double drawPreviousX = CSMWorld::CellCoordinates::texSelectionToWorldCoords(x)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentX = CSMWorld::CellCoordinates::texSelectionToWorldCoords(x)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(drawPreviousX + nudgeOffset, CSMWorld::CellCoordinates::texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+(i-1), y1)+2));
+                    vertices->push_back(osg::Vec3f(drawCurrentX + nudgeOffset, CSMWorld::CellCoordinates::texSelectionToWorldCoords(y) - nudgeOffset, calculateLandHeight(x1+i, y1)+2));
                 }
             }
 
@@ -176,10 +177,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousY = texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentY = texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x + 1) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x2, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x + 1) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x2, y1+i)+2));
+                    double drawPreviousY = CSMWorld::CellCoordinates::texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = CSMWorld::CellCoordinates::texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::texSelectionToWorldCoords(x + 1) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x2, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::texSelectionToWorldCoords(x + 1) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x2, y1+i)+2));
                 }
             }
 
@@ -188,10 +189,10 @@ void CSVRender::TerrainSelection::update()
             {
                 for(int i = 1; i < (textureSizeToLandSizeModifier + 1); i++)
                 {
-                    double drawPreviousY = texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
-                    double drawCurrentY = texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
-                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x1, y1+(i-1))+2));
-                    vertices->push_back(osg::Vec3f(texSelectionToWorldCoords(x) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x1, y1+i)+2));
+                    double drawPreviousY = CSMWorld::CellCoordinates::texSelectionToWorldCoords(y)+(i-1)*(cellSize / (landSize - 1));
+                    double drawCurrentY = CSMWorld::CellCoordinates::texSelectionToWorldCoords(y)+i*(cellSize / (landSize - 1));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::texSelectionToWorldCoords(x) + nudgeOffset, drawPreviousY - nudgeOffset, calculateLandHeight(x1, y1+(i-1))+2));
+                    vertices->push_back(osg::Vec3f(CSMWorld::CellCoordinates::texSelectionToWorldCoords(x) + nudgeOffset, drawCurrentY - nudgeOffset, calculateLandHeight(x1, y1+i)+2));
                 }
             }
         }

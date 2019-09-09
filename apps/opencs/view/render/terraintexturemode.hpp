@@ -79,8 +79,11 @@ namespace CSVRender
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
-            /// Handle brush mechanics, maths regarding worldspace hit etc.
+            /// Handle brush mechanics for texture editing, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
+
+            /// Handle brush mechanics for texture selection
+            void selectTerrainTextures (std::pair<int, int>, unsigned char, bool);
 
             /// Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,

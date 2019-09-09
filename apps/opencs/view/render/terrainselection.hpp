@@ -29,9 +29,9 @@ namespace CSVRender
             TerrainSelection(osg::Group* parentNode, WorldspaceWidget *worldspaceWidget);
             ~TerrainSelection();
 
-            void selectTerrainTexture(const WorldspaceHitResult&);
-            void onlyAddSelect(const WorldspaceHitResult&);
-            void toggleSelect(const WorldspaceHitResult&);
+            void onlySelect(const std::vector<std::pair<int, int>> localPositions);
+            void addSelect(const std::pair<int, int> localPos);
+            void toggleSelect(const std::vector<std::pair<int, int>> localPositions, bool);
 
             void activate();
             void deactivate();
@@ -46,15 +46,6 @@ namespace CSVRender
 
             void update();
 
-            ///Converts Worldspace coordinates to global texture selection, modified by texture offset.
-            std::pair<int, int> toTextureCoords(osg::Vec3d worldPos) const;
-
-            ///Converts Worldspace coordinates to global vertex selection.
-            std::pair<int, int> toVertexCoords(osg::Vec3d worldPos) const;
-
-            ///Converts Global texture coordinates to Worldspace coordinate at upper left corner of the selected texture.
-            static double texSelectionToWorldCoords(int);
-
             int calculateLandHeight(int x, int y);
 
         private:
@@ -65,6 +56,8 @@ namespace CSVRender
             osg::ref_ptr<osg::Geometry> mGeometry;
             osg::ref_ptr<osg::Group> mSelectionNode;
             std::vector<std::pair<int, int>> mSelection; // Global terrain selection coordinate in either vertex or texture units
+            std::vector<std::pair<int, int>> mTemporarySelection; // Used during toggle to compare the most recent drag operation
+            bool mDraggedOperationFlag; //true during drag operation, false when click-operation
     };
 }
 

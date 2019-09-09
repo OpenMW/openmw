@@ -48,6 +48,7 @@ namespace CSMWorld
             /// \return cell coordinates such that given world coordinates are in it.
             static std::pair<int, int> coordinatesToCellIndex (float x, float y);
 
+<<<<<<< HEAD
             ///Converts worldspace coordinates to global texture selection, taking in account the texture offset.
             static std::pair<int, int> toTextureCoords(osg::Vec3d worldPos);
 
@@ -65,6 +66,16 @@ namespace CSMWorld
 
             ///Converts global vertex coordinates to cell id
             static std::string vertexGlobalToCellId(std::pair<int, int>);
+=======
+            ///Converts Worldspace coordinates to global texture selection, modified by texture offset.
+            static std::pair<int, int> toTextureCoords(osg::Vec3d worldPos);
+
+            ///Converts Worldspace coordinates to global vertex selection.
+            static std::pair<int, int> toVertexCoords(osg::Vec3d worldPos);
+
+            ///Converts Global texture coordinates to Worldspace coordinate at upper left corner of the selected texture.
+            static double texSelectionToWorldCoords(int);
+>>>>>>> Fix merge conflict
     };
 
     bool operator== (const CellCoordinates& left, const CellCoordinates& right);
