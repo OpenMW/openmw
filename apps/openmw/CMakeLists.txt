@@ -36,6 +36,10 @@ add_openmw_dir (mwlua/structs
     magiceffect weapontype ptr
     )
 
+add_openmw_dir (mwlua/functions
+    ai gui mechanics sound world
+    )
+
 add_openmw_dir (mwgui
     layout textinput widgets race class birth review windowmanagerimp console dialogue
     windowbase statswindow messagebox journalwindow charactercreation
