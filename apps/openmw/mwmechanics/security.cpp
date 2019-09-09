@@ -29,8 +29,7 @@ namespace MWMechanics
                             std::string& resultMessage, std::string& resultSound)
     {
         if (lock.getCellRef().getLockLevel() <= 0 ||
-            lock.getCellRef().getLockLevel() == ESM::UnbreakableLock ||
-            !lock.getClass().canLock(lock)) //If it's unlocked or can not be unlocked back out immediately
+            lock.getCellRef().getLockLevel() == ESM::UnbreakableLock) //If it's unlocked or can not be unlocked back out immediately
             return;
 
         int lockStrength = lock.getCellRef().getLockLevel();

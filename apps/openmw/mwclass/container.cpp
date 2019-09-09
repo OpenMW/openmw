@@ -321,7 +321,8 @@ namespace MWClass
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
-        return true;
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
