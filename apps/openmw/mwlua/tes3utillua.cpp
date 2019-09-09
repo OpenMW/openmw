@@ -1292,46 +1292,56 @@ namespace mwse {
                 return true;
             };
 
-            /*
-			state["tes3"]["checkMerchantTradesItem"] = [](sol::table params) -> bool {
-				auto reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid reference parameter provided: Can't be nil.");
-				}
+            state["omw"]["checkMerchantTradesItem"] = [](sol::table params) -> bool
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided: Can't be empty.");
+                }
 
+				//FIXME: support for Id parameter
+				/*
 				TES3::Item* item = getOptionalParamObject<TES3::Item>(params, "item");
 				if (item == nullptr) {
 					throw std::invalid_argument("Invalid item parameter provided: Can't be nil.");
 				}
+				*/
 
-				auto actor = reinterpret_cast<TES3::Actor*>(reference->baseObject);
-				if (!actor->isActor()) {
-					throw std::invalid_argument("Invalid reference parameter provided: Base object must be an actor.");
-				}
+                if (!ptr.getClass().isActor())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided: Base object must be an actor.");
+                }
 
-				return actor->tradesItemType(item->objectType);
-			};
+                MWWorld::Ptr item = getOptionalParamReference(params, "item");
+                if (item.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid item parameter provided: Can't be empty.");
+                }
 
-            */
-			state["omw"]["getJournalIndex"] = [](const char* quest) -> sol::optional<int>
-			{
+                int services = ptr.getClass().getServices(ptr);
+                return item.getClass().canSell(item, services);
+            };
+
+            state["omw"]["getJournalIndex"] = [](const char* quest) -> sol::optional<int>
+            {
                 int index = MWBase::Environment::get().getJournal()->getJournalIndex (Misc::StringUtils::lowerCase(quest));
                 return index;
-			};
+            };
 
-			state["omw"]["setJournalIndex"] = [](sol::table params) -> bool
-			{
-				sol::optional<std::string> id = params["id"];
-				sol::optional<int> index = params["index"];
-				if (!id || !index)
+            state["omw"]["setJournalIndex"] = [](sol::table params) -> bool
+            {
+                sol::optional<std::string> id = params["id"];
+                sol::optional<int> index = params["index"];
+                if (!id || !index)
                 {
-					return false;
-				}
+                    return false;
+                }
 
                 MWBase::Environment::get().getJournal()->setJournalIndex (Misc::StringUtils::lowerCase(id.value()), index.value());
 
-				return true;
-			};
+                return true;
+            };
 
             state["omw"]["updateJournal"] = [](sol::table params) -> bool
             {
@@ -1416,16 +1426,6 @@ namespace mwse {
 
 				// Otherwise try to use X/Y.
 				return makeLuaObject(TES3::DataHandler::get()->nonDynamicData->getCellByGrid(params["x"], params["y"]));
-			};
-
-			state["tes3"]["fadeIn"] = [](sol::optional<sol::table> params) {
-				TES3::Fader * fader = getOptionalParam(params, "fader", TES3::WorldController::get()->transitionFader);
-				if (fader == nullptr) {
-					return;
-				}
-
-				float duration = getOptionalParam(params, "duration", 1.0f);
-				fader->fadeTo(0.0f, duration);
 			};
             */
 
