@@ -2902,48 +2902,41 @@ namespace mwse {
                 }
             };
 
+            state["omw"]["playAnimation"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
+
+                if (!ptr.getRefData().isEnabled())
+                    return;
+
+                const char* group = getOptionalParam<const char*>(params, "group", nullptr);
+                if (group == nullptr)
+                {
+                    throw std::invalid_argument("Invalid 'group' parameter provided: must be not empty.");
+                }
+
+                int mode = getOptionalParam<int>(params, "startFlag", 0);
+                int loopCount = getOptionalParam<int>(params, "loopCount", std::numeric_limits<int>::max());
+
+                MWBase::Environment::get().getMechanicsManager()->playAnimationGroup (ptr, group, mode, loopCount, true);
+            };
+
+            state["omw"]["skipAnimationFrame"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
+
+                MWBase::Environment::get().getMechanicsManager()->skipAnimation (ptr);
+            };
+
             /*
-			state["tes3"]["playAnimation"] = [](sol::table params) {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid 'reference' parameter provided.");
-				}
-
-				auto animData = reference->getAttachedAnimationData();
-				if (animData == nullptr) {
-					return;
-				}
-
-				int group = getOptionalParam<int>(params, "group", 0);
-				if (group < 0 || group > 149) {
-					throw std::invalid_argument("Invalid 'group' parameter provided: must be between 0 and 149.");
-				}
-
-				int startFlag = getOptionalParam<int>(params, "startFlag", 0);
-				int loopCount = getOptionalParam<int>(params, "loopCount", -1);
-
-				auto mact = reference->getAttachedMobileActor();
-				if (mact) {
-					mact->setMobileActorFlag(TES3::MobileActorFlag::IdleAnim, group != 0);
-				}
-
-				animData->playAnimationGroup(group, startFlag, loopCount);
-			};
-
-			state["tes3"]["skipAnimationFrame"] = [](sol::table params) {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid 'reference' parameter provided.");
-				}
-
-				auto animData = reference->getAttachedAnimationData();
-				if (animData == nullptr) {
-					return;
-				}
-
-				animData->unknown_0x54 |= 0xFFFF;
-			};
-
 			state["tes3"]["isAffectedBy"] = [](sol::table params) {
 				TES3::Reference * reference = getOptionalParamExecutionReference(params);
 				if (reference == nullptr) {
