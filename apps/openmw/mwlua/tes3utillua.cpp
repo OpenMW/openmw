@@ -16,7 +16,10 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwgui/mode.hpp"
+
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/aiactivate.hpp"
 #include "../mwmechanics/aicast.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/weapontype.hpp"
@@ -24,6 +27,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadweap.hpp>
 
@@ -2094,12 +2098,18 @@ namespace mwse {
                 return true;
             };
 
-            /*
-			state["tes3"]["showRepairServiceMenu"] = []() {
-				reinterpret_cast<int(__cdecl *)(TES3::MobileActor*)>(0x615160)(TES3::WorldController::get()->getMobilePlayer());
-				TES3::UI::enterMenuMode(TES3::UI::registerID("MenuServiceRepair"));
-			};
+            state["omw"]["showRepairServiceMenu"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
 
+                MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MerchantRepair, ptr);
+            };
+
+            /*
 			state["tes3"]["addItem"] = [](sol::table params) -> int {
 				// Get the reference we are manipulating.
 				TES3::Reference * reference = getOptionalParamReference(params, "reference");
@@ -2588,45 +2598,45 @@ namespace mwse {
 			};
 
             */
-			state["omw"]["getCurrentAIPackageId"] = [](sol::table params)
+            state["omw"]["getCurrentAIPackageId"] = [](sol::table params)
             {
-				MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
 
-				if (!ptr.isEmpty())
+                if (!ptr.isEmpty())
                 {
                     if (ptr == MWMechanics::getPlayer())
                         return -1;
 
-					return ptr.getClass().getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
-				}
-				else {
-					throw std::invalid_argument("Invalid reference parameter provided.");
-				}
+                    return ptr.getClass().getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
+                }
+                else
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
 
-				return -1;
-			};
+                return -1;
+            };
+
+            state["omw"]["setAIActivate"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                if (!ptr.getClass().isActor())
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+
+                // FIXME: reference target support
+                sol::optional<std::string> target = params["target"];
+                if (target.value().empty())
+                    throw std::invalid_argument("Invalid target parameter provided.");
+
+                // FIXME: actual reset flag support
+                //bool reset = getOptionalParam<bool>(params, "reset", true);
+
+                MWMechanics::AiActivate activatePackage(target.value());
+                ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(activatePackage, ptr);
+                Log(Debug::Info) << "AiActivate";
+            };
 
             /*
-			state["tes3"]["setAIActivate"] = [](sol::table params) {
-				TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
-				if (mobileActor == nullptr) {
-					throw std::invalid_argument("Invalid reference parameter provided.");
-				}
-
-				TES3::Reference * target = getOptionalParamReference(params, "target");
-				if (target == nullptr) {
-					throw std::invalid_argument("Invalid target parameter provided.");
-				}
-
-				auto config = tes3::_new<TES3::AIPackageActivate::Config>();
-				config->type = TES3::AIPackageConfigType::Activate;
-				config->target = target;
-				config->reset = getOptionalParam<bool>(params, "reset", true);
-
-				auto actor = static_cast<TES3::Actor*>(mobileActor->reference->baseObject);
-				actor->setAIPackage(config, mobileActor->reference);
-			};
-
 			state["tes3"]["setAIFollow"] = [](sol::table params) {
 				TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
 				if (mobileActor == nullptr) {
