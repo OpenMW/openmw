@@ -70,5 +70,32 @@ namespace mwse {
 
 			return value;
 		}
+
+		MWWorld::Ptr getOptionalParamExecutionReference(sol::optional<sol::table> maybeParams)
+        {
+			MWWorld::Ptr value = MWWorld::Ptr();
+
+			if (maybeParams)
+            {
+				sol::table params = maybeParams.value();
+				sol::object maybeValue = params["reference"];
+				if (maybeValue.valid())
+                {
+					//if (maybeValue.is<std::string>()) {
+					//	value = tes3::getReference(maybeValue.as<std::string>());
+					//}
+					//else
+                    if (maybeValue.is<MWWorld::Ptr>())
+                    {
+						value = maybeValue.as<MWWorld::Ptr>();
+					}
+				}
+			}
+
+			if (value.isEmpty())
+				value = LuaManager::getInstance().getCurrentReference();
+
+			return value;
+		}
 	}
 }

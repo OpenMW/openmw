@@ -66,5 +66,6 @@ namespace mwse {
         sol::object makeLuaObject(MWWorld::Ptr object);
 
         MWWorld::Ptr getOptionalParamReference(sol::optional<sol::table> maybeParams, const char* key);
+        MWWorld::Ptr getOptionalParamExecutionReference(sol::optional<sol::table> maybeParams);
 	}
 }

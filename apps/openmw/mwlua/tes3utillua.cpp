@@ -397,14 +397,15 @@ namespace mwse {
 			state["omw"]["streamMusic"] = [](sol::optional<sol::table> params)
             {
 				// Get parameters.
-                // FIXME: support for MCP' uninterruptable and crossfade
+                // FIXME: support for MCP's uninterruptable and crossfade
 				//int situation = getOptionalParam<int>(params, "situation", int(TES3::MusicSituation::Uninterruptible));
 				//double crossfade = getOptionalParam<double>(params, "crossfade", 1.0);
                 const char* path = getOptionalParam<const char*>(params, "path", nullptr);
                 MWBase::Environment::get().getSoundManager()->streamMusic (path);
 			};
 
-			state["omw"]["messageBox"] = [](sol::object param, sol::optional<sol::variadic_args> va) {
+			state["omw"]["messageBox"] = [](sol::object param, sol::optional<sol::variadic_args> va)
+            {
 				auto& luaManager = mwse::lua::LuaManager::getInstance();
 				auto stateHandle = luaManager.getThreadSafeStateHandle();
 				sol::state& state = stateHandle.state;
@@ -1194,162 +1195,104 @@ namespace mwse {
 				actor->playVoiceover(voiceover);
 				return true;
 			};
+            */
 
-			state["tes3"]["getLocked"] = [](sol::table params) -> bool {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return false;
-				}
+            state["omw"]["getLocked"] = [](sol::table params) -> bool
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return false;
 
-				auto node = reference->getAttachedLockNode();
-				if (node == nullptr) {
-					return false;
-				}
+                bool isLocked = ptr.getCellRef().getLockLevel() > 0;
+                return isLocked;
+            };
 
-				return node->locked;
-			};
+            state["omw"]["setLockLevel"] = [](sol::table params) -> bool
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return false;
 
-			state["tes3"]["setLockLevel"] = [](sol::table params) -> bool {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return false;
-				}
+                int level = getOptionalParam<int>(params, "level", -1);
+                if (level >= 0)
+                {
+                    ptr.getClass().lock(ptr, level);
+                    return true;
+                }
 
-				auto node = reference->getOrCreateLockNode();
-				if (node == nullptr) {
-					return false;
-				}
+                return false;
+            };
 
-				int level = getOptionalParam<int>(params, "level", -1);
-				if (level >= 0) {
-					node->lockLevel = level;
-					reference->setObjectModified(true);
-					return true;
-				}
+            state["omw"]["getLockLevel"] = [](sol::table params) -> sol::optional<int>
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return sol::optional<int>();
 
-				return false;
-			};
+                return ptr.getCellRef().getLockLevel();
+            };
 
-			state["tes3"]["getLockLevel"] = [](sol::table params) -> sol::optional<int> {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return sol::optional<int>();
-				}
+            state["omw"]["lock"] = [](sol::table params) -> bool
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return false;
 
-				auto node = reference->getAttachedLockNode();
-				if (node == nullptr) {
-					return sol::optional<int>();
-				}
+                // Set the lock level if one was provided.
+                int lockLevel = getOptionalParam<int>(params, "level", ptr.getCellRef().getLockLevel());
 
-				return node->lockLevel;
-			};
+                if(ptr.getCellRef().getLockLevel() == 0)
+                {
+                    //no lock level was ever set, set to 100 as default
+                    lockLevel = 100;
+                }
 
-			state["tes3"]["lock"] = [](sol::table params) -> bool {
-				auto reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return false;
-				}
+                ptr.getClass().lock (ptr, lockLevel);
 
-				// Manage state for doors.
-				if (reference->baseObject->objectType == TES3::ObjectType::Door) {
-					// Clear door opening/closing flags.
-					reference->clearActionFlag(TES3::ActionFlags::DoorOpening | TES3::ActionFlags::DoorClosing | TES3::ActionFlags::DoorJammedOpening | TES3::ActionFlags::DoorJammedClosing);
+                // Instantly reset door to closed state
+                // This is done when using Lock in scripts, but not when using Lock spells.
+                if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
+                {
+                    MWBase::Environment::get().getWorld()->activateDoor(ptr, MWWorld::DoorState::Idle);
+                }
 
-					// Reset orientation.
-					auto orientationAttachment = static_cast<TES3::NewOrientationAttachment*>(reference->getAttachment(TES3::AttachmentType::NewOrientation));
-					if (orientationAttachment) {
-						orientationAttachment->orientation.z = reference->orientation.z;
-					}
+                return true;
+            };
 
-					// Update the scene graph with the new orientation.
-					if (reference->sceneNode) {
-						TES3::Matrix33 tempOutArg;
-						reference->sceneNode->setLocalRotationMatrix(reference->updateSceneMatrix(&tempOutArg));
-						reference->sceneNode->update();
-					}
-				}
+            state["omw"]["unlock"] = [](sol::table params) -> bool
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return false;
 
-				// Get or create our lock node.
-				auto lockNode = reference->getOrCreateLockNode();
-				if (lockNode == nullptr) {
-					return false;
-				}
+                ptr.getClass().unlock (ptr);
+                return true;
+            };
 
-				// Set the lock level if one was provided.
-				int lockLevel = getOptionalParam<int>(params, "level", -1);
-				if (lockLevel >= 0) {
-					lockNode->lockLevel = lockLevel;
-				}
+            state["omw"]["getTrap"] = [](sol::table params) -> sol::optional<std::string>
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return std::string();
 
-				// Set the locked state, and return true if it changed.
-				reference->setObjectModified(true);
-				if (!lockNode->locked) {
-					lockNode->locked = true;
-					return true;
-				}
-				else {
-					return false;
-				}
-			};
+                return ptr.getCellRef().getTrap();
+            };
 
-			state["tes3"]["unlock"] = [](sol::table params) -> bool {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return false;
-				}
+            state["omw"]["setTrap"] = [](sol::table params) -> bool
+            {
+                const char* spell = getOptionalParam<const char*>(params, "spell", nullptr);
+                if (spell == nullptr)
+                    return false;
 
-				auto node = reference->getAttachedLockNode();
-				if (node == nullptr) {
-					return false;
-				}
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty() || !ptr.getClass().canLock(ptr))
+                    return false;
 
-				if (node->locked) {
-					node->locked = false;
-					reference->setObjectModified(true);
-					return true;
-				}
-				else {
-					return false;
-				}
-			};
+                ptr.getCellRef().setTrap(spell);
+                return true;
+            };
 
-			state["tes3"]["getTrap"] = [](sol::table params) -> TES3::Spell* {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return nullptr;
-				}
-
-				auto node = reference->getAttachedLockNode();
-				if (node == nullptr) {
-					return nullptr;
-				}
-
-				return node->trap;
-			};
-
-			state["tes3"]["setTrap"] = [](sol::table params) -> bool {
-				auto reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					return false;
-				}
-
-				// Only accept containers or doors.
-				auto objectType = reference->baseObject->objectType;
-				if (objectType != TES3::ObjectType::Container && objectType != TES3::ObjectType::Door) {
-					return false;
-				}
-
-				// Get or create our lock node.
-				auto lockNode = reference->getOrCreateLockNode();
-				if (lockNode == nullptr) {
-					return false;
-				}
-
-				lockNode->trap = getOptionalParamSpell(params, "spell");
-				reference->setObjectModified(true);
-				return true;
-			};
-
+            /*
 			state["tes3"]["checkMerchantTradesItem"] = [](sol::table params) -> bool {
 				auto reference = getOptionalParamExecutionReference(params);
 				if (reference == nullptr) {
