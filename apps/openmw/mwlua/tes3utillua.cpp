@@ -17,6 +17,8 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/aicast.hpp"
+#include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwworld/class.hpp"
@@ -2038,47 +2040,61 @@ namespace mwse {
 				reference->setObjectModified(true);
 				return true;
 			};
+            */
 
-			state["tes3"]["cast"] = [](sol::table params) {
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid reference parameter provided.");
-				}
+            state["omw"]["cast"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
 
-				TES3::Reference * target = getOptionalParamReference(params, "target");
-				if (target == nullptr) {
-					throw std::invalid_argument("Invalid target parameter provided.");
-				}
+                // FIXME: references support
+                std::string spellId = params["spell"];
 
-				TES3::Spell * spell = getOptionalParamSpell(params, "spell");
-				if (spell == nullptr) {
-					throw std::invalid_argument("Invalid spell parameter provided.");
-				}
+                std::string targetId = params["target"];
 
-				TES3::MobileActor * casterMobile = reference->getAttachedMobileActor();
-				if (casterMobile) {
-					if (casterMobile->isActive()) {
-						casterMobile->setCurrentMagicSourceFiltered(spell);
-						casterMobile->setActionTarget(target->getAttachedMobileActor());
-						return true;
-					}
-				}
-				else {
-					TES3::MagicSourceCombo sourceCombo;
-					sourceCombo.source.asSpell = spell;
-					sourceCombo.sourceType = TES3::MagicSourceType::Spell;
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                if (!spell)
+                {
+                    throw std::invalid_argument("Invalid spell parameter provided.");
+                }
 
-					auto spellInstanceController = TES3::WorldController::get()->spellInstanceController;
-					auto serial = spellInstanceController->activateSpell(reference, nullptr, &sourceCombo);
-					auto spellInstance = spellInstanceController->getInstanceFromSerial(serial);
-					spellInstance->overrideCastChance = 100.0f;
-					spellInstance->target = target;
-					return true;
-				}
+                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
+                {
+                    throw std::invalid_argument("Invalid spell parameter provided.");
+                }
 
-				return false;
-			};
+                if (ptr == MWMechanics::getPlayer())
+                {
+                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                    store.setSelectedEnchantItem(store.end());
+                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
+                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    return true;
+                }
 
+                if (ptr.getClass().isActor())
+                {
+                    MWMechanics::AiCast castPackage(targetId, spellId, true);
+                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+
+                    return true;
+                }
+
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
+
+                MWMechanics::CastSpell cast(ptr, target, false, true);
+                cast.playSpellCastingEffects(spell->mId, false);
+                cast.mHitPosition = target.getRefData().getPosition().asVec3();
+                cast.mAlwaysSucceed = true;
+                cast.cast(spell);
+
+                return true;
+            };
+
+            /*
 			state["tes3"]["showRepairServiceMenu"] = []() {
 				reinterpret_cast<int(__cdecl *)(TES3::MobileActor*)>(0x615160)(TES3::WorldController::get()->getMobilePlayer());
 				TES3::UI::enterMenuMode(TES3::UI::registerID("MenuServiceRepair"));
