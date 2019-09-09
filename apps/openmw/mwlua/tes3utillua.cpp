@@ -1112,13 +1112,13 @@ namespace mwse {
 			};
             */
 
-			state["omw"]["getPlayerGold"] = []() -> int
-			{
+            state["omw"]["getPlayerGold"] = []() -> int
+            {
                 MWWorld::Ptr player = MWMechanics::getPlayer();
-				return player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
-			};
+                return player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+            };
 
-			state["omw"]["triggerCrime"] = [](sol::table params)
+            state["omw"]["triggerCrime"] = [](sol::table params)
             {
                 MWBase::MechanicsManager::OffenseType crimeType = MWBase::MechanicsManager::OT_Theft;
 
@@ -2771,63 +2771,27 @@ namespace mwse {
                 }
             };
 
+            state["omw"]["hasOwnershipAccess"] = [](sol::table params)
+            {
+                // Who are we checking ownership for? The player by default.
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    ptr = MWMechanics::getPlayer();
+                }
+
+                // What are we checking ownership of?
+                MWWorld::Ptr target = getOptionalParamReference(params, "target");
+                if (target.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid target parameter provided.");
+                }
+
+                MWWorld::Ptr victim;
+                return MWBase::Environment::get().getMechanicsManager()->isAllowedToUse(ptr, target, victim);
+            };
+
             /*
-			state["tes3"]["hasOwnershipAccess"] = [](sol::table params) {
-				// Who are we checking ownership for? The player by default.
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				auto playerReference = TES3::WorldController::get()->getMobilePlayer()->reference;
-				if (reference == nullptr) {
-					reference = playerReference;
-				}
-
-				// What are we checking ownership of?
-				TES3::Reference * target = getOptionalParamReference(params, "target");
-				if (target == nullptr) {
-					throw std::invalid_argument("Invalid target parameter provided.");
-				}
-
-				// Do we have an owner?
-				auto targetData = target->getAttachedItemData();
-				if (targetData == nullptr || targetData->owner == nullptr) {
-					return true;
-				}
-
-				// Are we looking at an NPC owner?
-				if (targetData->owner->objectType == TES3::ObjectType::NPC) {
-					// We own our own things.
-					if (target->getBaseObject() == targetData->owner) {
-						return true;
-					}
-
-					// No variable? No chance to own.
-					else if (targetData->requiredVariable == nullptr) {
-						return false;
-					}
-
-					// Players get access if the variable is set.
-					else if (reference == playerReference) {
-						return targetData->requiredVariable->value > 0.0f;
-					}
-				}
-
-				else if (targetData->owner->objectType == TES3::ObjectType::Faction) {
-					auto ownerAsFaction = reinterpret_cast<TES3::Faction*>(targetData->owner);
-
-					// Players require the right rank.
-					if (reference == playerReference) {
-						return ownerAsFaction->getEffectivePlayerRank() >= targetData->requiredRank;
-					}
-
-					// As do NPCs, but their faction info is stored elsewhere.
-					auto referenceObjectAsNPC = reinterpret_cast<TES3::NPC*>(reference->getBaseObject());
-					if (referenceObjectAsNPC->objectType == TES3::ObjectType::NPC) {
-						return (referenceObjectAsNPC->getFaction() == targetData->owner && referenceObjectAsNPC->factionRank >= targetData->requiredRank);
-					}
-				}
-
-				return false;
-			};
-
 			state["tes3"]["dropItem"] = [](sol::table params) {
 				// Who is dropping?
 				TES3::MobileActor * mobile = getOptionalParamMobileActor(params, "reference");
@@ -3027,8 +2991,8 @@ namespace mwse {
             {
                 ESM::WeaponType *weaponType = const_cast<ESM::WeaponType*>(MWMechanics::getWeaponType(id));
 
-				return makeLuaObject(weaponType);
-			};
+                return makeLuaObject(weaponType);
+            };
 
             state["omw"]["addWeaponType"] = [](sol::table params)
             {
