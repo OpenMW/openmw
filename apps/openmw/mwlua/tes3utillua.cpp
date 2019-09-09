@@ -2741,42 +2741,37 @@ namespace mwse {
 				auto actor = static_cast<TES3::Actor*>(mobileActor->reference->baseObject);
 				actor->setAIPackage(config, mobileActor->reference);
 			};
+            */
 
-			state["tes3"]["say"] = [](sol::table params) {
-				auto dataHandler = TES3::DataHandler::get();
-				auto worldController = TES3::WorldController::get();
-				if (worldController == nullptr || dataHandler == nullptr) {
-					throw std::invalid_argument("Cannoy be called before tes3worldController and tes3dataHandler are initialized.");
-				}
+            state["omw"]["say"] = [](sol::table params)
+            {
+                MWWorld::Ptr ptr = getOptionalParamExecutionReference(params);
+                if (ptr.isEmpty())
+                {
+                    throw std::invalid_argument("Invalid reference parameter provided.");
+                }
 
-				TES3::Reference * reference = getOptionalParamExecutionReference(params);
-				if (reference == nullptr) {
-					throw std::invalid_argument("Invalid reference parameter provided.");
-				}
+                const char* path = getOptionalParam<const char*>(params, "soundPath", nullptr);
+                if (path == nullptr)
+                {
+                    throw std::invalid_argument("Invalid soundPath parameter provided.");
+                }
 
-				const char* path = getOptionalParam<const char*>(params, "soundPath", nullptr);
-				if (path == nullptr) {
-					throw std::invalid_argument("Invalid soundPath parameter provided.");
-				}
+                // FIXME: optional volume parameters
+                //float pitch = getOptionalParam(params, "pitch", 1.0f);
+                //float volume = std::min(std::max(0.0f, getOptionalParam(params, "volume", 1.0f)), 1.0f);
 
-				float pitch = getOptionalParam(params, "pitch", 1.0f);
+                MWBase::Environment::get().getSoundManager()->say (ptr, path);
 
-				// Apply volume, using mix channel and rescale to 0-250.
-				float volume = std::min(std::max(0.0f, getOptionalParam(params, "volume", 1.0f)), 1.0f);
-				volume *= 250.0 * worldController->audioController->getMixVolume(TES3::AudioMixType::Voice);
+                if (MWBase::Environment::get().getWindowManager()->getSubtitlesEnabled() || getOptionalParam(params, "forceSubtitle", false))
+                {
+                    const char* subtitle = getOptionalParam<const char*>(params, "subtitle", nullptr);
+                    if (subtitle != nullptr)
+                        MWBase::Environment::get().getWindowManager()->messageBox (subtitle);
+                }
+            };
 
-				// Show a messagebox.
-				if (worldController->showSubtitles || getOptionalParam(params, "forceSubtitle", false)) {
-					const char* subtitle = getOptionalParam<const char*>(params, "subtitle", nullptr);
-					if (subtitle != nullptr) {
-						tes3::ui::messagePlayer(subtitle);
-					}
-				}
-
-				// Play the related sound.
-				dataHandler->addTemporySound(path, reference, 0, volume, pitch, true);
-			};
-
+            /*
 			state["tes3"]["hasOwnershipAccess"] = [](sol::table params) {
 				// Who are we checking ownership for? The player by default.
 				TES3::Reference * reference = getOptionalParamExecutionReference(params);
