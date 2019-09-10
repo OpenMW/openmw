@@ -102,8 +102,9 @@ namespace MWClass
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,

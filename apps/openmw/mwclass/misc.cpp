@@ -56,8 +56,9 @@ namespace MWClass
     std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,

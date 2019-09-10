@@ -47,8 +47,9 @@ namespace MWClass
     std::string Lockpick::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Lockpick> *ref = ptr.get<ESM::Lockpick>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Lockpick::activate (const MWWorld::Ptr& ptr,

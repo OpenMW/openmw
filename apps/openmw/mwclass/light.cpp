@@ -70,9 +70,10 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
-            return "";
+            return std::string();
 
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,

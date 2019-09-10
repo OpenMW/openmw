@@ -224,8 +224,9 @@ namespace MWClass
     std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)

@@ -47,8 +47,9 @@ namespace MWClass
     std::string Probe::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
     std::shared_ptr<MWWorld::Action> Probe::activate (const MWWorld::Ptr& ptr,
         const MWWorld::Ptr& actor) const

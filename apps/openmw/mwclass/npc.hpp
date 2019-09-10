@@ -48,8 +48,7 @@ namespace MWClass
             ///< Add reference into a cell for rendering
 
             virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
-            ///< \return name (the one that is to be presented to the user; not the internal one);
-            /// can return an empty string.
+            ///< \return name or ID; can return an empty string.
 
             virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
             ///< Return creature stats

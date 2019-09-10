@@ -83,8 +83,7 @@ namespace MWWorld
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const ConstPtr& ptr) const = 0;
-            ///< \return name (the one that is to be presented to the user; not the internal one);
-            /// can return an empty string.
+            ///< \return name or ID; can return an empty string.
 
             virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
