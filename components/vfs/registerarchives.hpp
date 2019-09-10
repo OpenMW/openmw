@@ -9,7 +9,7 @@ namespace VFS
 
     /// @brief Register BSA and file system archives based on the given OpenMW configuration.
     void registerArchives (VFS::Manager* vfs, const Files::Collections& collections,
-        const std::vector<std::string>& archives, bool useLooseFiles);
+        const std::vector<std::string>& archives, bool useLooseFiles, bool isTES4 = false);
 }
 
 #endif

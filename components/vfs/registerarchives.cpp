@@ -12,7 +12,7 @@
 namespace VFS
 {
 
-    void registerArchives(VFS::Manager *vfs, const Files::Collections &collections, const std::vector<std::string> &archives, bool useLooseFiles)
+    void registerArchives(VFS::Manager *vfs, const Files::Collections &collections, const std::vector<std::string> &archives, bool useLooseFiles, bool isTES4)
     {
         const Files::PathContainer& dataDirs = collections.getPaths();
 

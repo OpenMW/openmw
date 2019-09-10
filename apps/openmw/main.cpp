@@ -66,8 +66,11 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
             "set local data directory (highest priority)")
 
-        ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
-            ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
+            ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
+                ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
+
+            ("fallback-tes4archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-tes4archive")
+                ->multitoken(), "set fallback TES4 BSA archives (later archives have higher priority)")
 
             ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
             "set resources directory")
@@ -201,7 +204,12 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         engine.addArchive(*it);
     }
-
+    // fallback-tes4archive
+    StringsVector tes4archives = variables["fallback-tes4archive"].as<Files::EscapeStringVector>().toStdStringVector();
+    for (StringsVector::const_iterator it = tes4archives.begin(); it != tes4archives.end(); ++it)
+    {
+      //  engine.addTES4Archive(*it);
+    }
     StringsVector content = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
     if (content.empty())
     {

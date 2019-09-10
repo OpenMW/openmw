@@ -1,6 +1,9 @@
 #include "quest.hpp"
 
 #include <components/esm/queststate.hpp>
+#include <extern/esm4/quest.hpp>
+#include <extern/esm4/dial.hpp>
+#include <extern/esm4/info.hpp>
 
 #include "../mwworld/esmstore.hpp"
 
@@ -26,10 +29,38 @@ namespace MWDialogue
         const ESM::Dialogue *dialogue =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find (mTopic);
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
-            iter!=dialogue->mInfo.end(); ++iter)
-            if (iter->mQuestStatus==ESM::DialInfo::QS_Name)
-                return iter->mResponse;
+        const ESM4::Dialog *dialogue2 =
+            MWBase::Environment::get().getWorld()->getStore().getESM4<ESM4::Dialog>().find (mTopic);
+dialogue2=&*MWBase::Environment::get().getWorld()->getStore().getESM4<ESM4::Dialog>().begin();//debi
+
+        if(dialogue2)
+        {
+            if(dialogue2->mVecInfoDial.empty())//TOFIX
+            {
+            for( auto id : dialogue2->mQuestid)
+            {
+
+                const ESM4::Info *info =
+                    MWBase::Environment::get().getWorld()->getStore().getESM4<ESM4::Info>().find (ESM4::formIdToString(id));
+
+                const_cast<ESM4::Dialog*>(dialogue2)->mVecInfoDial.push_back(*info);
+            }
+            }
+                    for (std::vector<ESM4::Info>::const_iterator iter = dialogue2->mVecInfoDial.begin();
+                         iter!=dialogue2->mVecInfoDial.end(); ++iter)
+                    {
+
+                        const ESM4::Quest *quest =
+                            MWBase::Environment::get().getWorld()->getStore().getESM4<ESM4::Quest>().find (ESM4::formIdToString(iter->mQuestId));
+
+                            return quest->mQuestName;
+                    }
+        }
+        if(dialogue)
+            for (ESM::Dialogue::InfoContainer::const_iterator iter (dialogue->mInfo.begin());
+                iter!=dialogue->mInfo.end(); ++iter)
+                if (iter->mQuestStatus==ESM::DialInfo::QS_Name)
+                    return iter->mResponse;
 
         return "";
     }

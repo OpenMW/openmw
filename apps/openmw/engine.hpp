@@ -78,7 +78,7 @@ namespace OMW
             ToUTF8::FromType mEncoding;
             ToUTF8::Utf8Encoder* mEncoder;
             Files::PathContainer mDataDirs;
-            std::vector<std::string> mArchives;
+            std::vector<std::string> mArchives, mTES4Archives;
             boost::filesystem::path mResDir;
             osg::ref_ptr<osgViewer::Viewer> mViewer;
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
@@ -145,6 +145,9 @@ namespace OMW
 
             /// Add BSA archive
             void addArchive(const std::string& archive);
+
+            /// Add BSA archive
+            void addTes4Archive(const std::string& archive);
 
             /// Set resource dir
             void setResourceDir(const boost::filesystem::path& parResDir);
