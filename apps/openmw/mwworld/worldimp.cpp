@@ -57,6 +57,7 @@
 #include "../mwphysics/object.hpp"
 
 #include "../mwlua/luamanager.hpp"
+#include "../mwlua/events/activate.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -3732,6 +3733,20 @@ namespace MWWorld
     void World::activate(const Ptr &object, const Ptr &actor)
     {
         breakInvisibility(actor);
+
+        if (MWLua::Event::ActivateEvent::getEventEnabled())
+        {
+            auto stateHandle = MWLua::LuaManager::getInstance().getThreadSafeStateHandle();
+            sol::object response = stateHandle.triggerEvent(new MWLua::Event::ActivateEvent(actor, object));
+            if (response.get_type() == sol::type::table)
+            {
+                sol::table eventData = response;
+                if (eventData["block"] == true)
+                {
+                    return;
+                }
+            }
+        }
 
         if (object.getRefData().activate())
         {

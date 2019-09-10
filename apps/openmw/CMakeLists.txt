@@ -29,11 +29,11 @@ add_openmw_dir (mwinput
     )
 
 add_openmw_dir (mwlua
-    luamanager script dynamicluaobject timer util tes3util baseevent genericevent disableableevent disableableeventmanager loadedgame
+    luamanager script dynamicluaobject timer util tes3util baseevent genericevent disableableevent disableableeventmanager loadedgame objectfilteredevent
     )
 
 add_openmw_dir (mwlua/events
-    loadedgame
+    activate loadedgame
     )
 
 add_openmw_dir (mwlua/functions

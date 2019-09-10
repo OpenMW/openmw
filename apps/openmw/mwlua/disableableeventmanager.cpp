@@ -2,10 +2,10 @@
 
 #include "luamanager.hpp"
 
+#include "events/activate.hpp"
 #include "events/loadedgame.hpp"
 
 /*
-#include "LuaActivateEvent.h"
 #include "LuaActivationTargetChangedEvent.h"
 #include "LuaAddTopicEvent.h"
 #include "LuaAttackEvent.h"
@@ -119,10 +119,10 @@ namespace MWLua
 
             //usertypeDefinition.set("loaded", true);
             usertypeDefinition.set("loaded", sol::property(&LoadedGameEvent::getEventEnabled, &LoadedGameEvent::setEventEnabled));
+            usertypeDefinition.set("activate", sol::property(&ActivateEvent::getEventEnabled, &ActivateEvent::setEventEnabled));
 
             /*
             // Give access to the enabled state.
-            usertypeDefinition.set("activate", sol::property(&ActivateEvent::getEventEnabled, &ActivateEvent::setEventEnabled));
             usertypeDefinition.set("activationTargetChanged", sol::property(&ActivationTargetChangedEvent::getEventEnabled, &ActivationTargetChangedEvent::setEventEnabled));
             usertypeDefinition.set("attack", sol::property(&AttackEvent::getEventEnabled, &AttackEvent::setEventEnabled));
             usertypeDefinition.set("bodyPartsUpdated", sol::property(&BodyPartsUpdatedEvent::getEventEnabled, &BodyPartsUpdatedEvent::setEventEnabled));
