@@ -82,8 +82,8 @@ namespace MWScript
 
              id = ptr.getClass().getScript (ptr);
 
-            ptr.getRefData().setLocals (
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+            ptr.getRefData().setLocals (id);
+            //    *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
 
             return ptr.getRefData().getLocals();
         }
@@ -102,8 +102,8 @@ namespace MWScript
 
             id = ptr.getClass().getScript (ptr);
 
-            ptr.getRefData().setLocals (
-                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
+            ptr.getRefData().setLocals (id);
+            //                *MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find (id));
 
             return ptr.getRefData().getLocals();
         }
@@ -441,6 +441,20 @@ namespace MWScript
     }
 
     void InterpreterContext::stopScript (const std::string& name)
+    {
+        MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
+    }
+
+    void InterpreterContext::startQuest (const std::string& name, const std::string& targetId)
+    {
+     const MWWorld::ESMStore& store= MWBase::Environment::get().getWorld()->getStore();
+     for( auto quest : store.getESM4<ESM4::Quest>())
+         if(quest.mQuestName==name){
+             quest.mQuestName=name;
+         }
+    }
+
+    void InterpreterContext::stopQuest (const std::string& name)
     {
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
     }

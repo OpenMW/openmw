@@ -28,11 +28,20 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().search (name))
             {
                 GlobalScriptDesc desc;
                 desc.mRunning = true;
-                desc.mLocals.configure (*script);
+                desc.mLocals.configure (script->mId);
+                desc.mId = targetId;
+
+                mScripts.insert (std::make_pair (name, desc));
+            }
+            else if (const ESM4::Script *script2 = mStore.getESM4<ESM4::Script>().find (name))
+            {
+                GlobalScriptDesc desc;
+                desc.mRunning = true;
+                desc.mLocals.configure (ESM4::formIdToString(script2->mFormId));
                 desc.mId = targetId;
 
                 mScripts.insert (std::make_pair (name, desc));
@@ -92,15 +101,42 @@ namespace MWScript
         // make list of global scripts to be added
         std::vector<std::string> scripts;
 
-        scripts.push_back ("main");
-
+if(mStore.getESM4<ESM4::Script>().getSize()==0)
+{
+    scripts.push_back ("main");
         for (MWWorld::Store<ESM::StartScript>::iterator iter =
             mStore.get<ESM::StartScript>().begin();
             iter != mStore.get<ESM::StartScript>().end(); ++iter)
         {
             scripts.push_back (iter->mId);
         }
+}
+else
+   for (MWWorld::Store<ESM4::Quest>::iterator iter =   mStore.getESM4<ESM4::Quest>().begin();
+         iter != mStore.getESM4<ESM4::Quest>().end(); ++iter)
+     {
+        OSG_WARN<<iter->mQuestName<<std::endl;
+        OSG_WARN<<iter->mEditorId<<std::endl;
 
+        if(iter->mEditorId=="StartupQuest")
+                scripts.push_back (ESM4::formIdToString(iter->mScript));
+                //TODO set quest as active
+    }
+ /* for (MWWorld::Store<ESM4::Script>::iterator iter =
+        mStore.getESM4<ESM4::Script>().begin();
+        iter != mStore.getESM4<ESM4::Script>().end(); ++iter)
+    {
+OSG_WARN<<iter->mEditorId<<std::endl;
+        if(iter->mEditorId=="Startup"){
+        scripts.push_back (ESM4::formIdToString(iter->mFormId));
+    for (MWWorld::Store<ESM4::Quest>::iterator iter2 =   mStore.getESM4<ESM4::Quest>().begin();
+         iter2 != mStore.getESM4<ESM4::Quest>().end(); ++iter2)
+     {
+     if(iter2->mScript==iter->mFormId){
+        OSG_WARN<<iter2->mQuestName<<std::endl;
+        OSG_WARN<<iter2->mEditorId<<std::endl;
+     }}}
+    }*/
         // add scripts
         for (std::vector<std::string>::const_iterator iter (scripts.begin());
             iter!=scripts.end(); ++iter)
@@ -161,7 +197,7 @@ namespace MWScript
                     try
                     {
                         GlobalScriptDesc desc;
-                        desc.mLocals.configure (*scriptRecord);
+                        desc.mLocals.configure (scriptRecord->mId);
 
                         iter = mScripts.insert (std::make_pair (script.mId, desc)).first;
                     }
@@ -195,12 +231,22 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            const ESM::Script *script = mStore.get<ESM::Script>().find (name);
+            if(const ESM::Script *script = mStore.get<ESM::Script>().search (name))
+            {
 
-            GlobalScriptDesc desc;
-            desc.mLocals.configure (*script);
+                GlobalScriptDesc desc;
+                desc.mLocals.configure (script->mId);
 
-            iter = mScripts.insert (std::make_pair (name2, desc)).first;
+                iter = mScripts.insert (std::make_pair (name2, desc)).first;
+            }
+            else if(const ESM4::Script *script = mStore.getESM4<ESM4::Script>().find (name))
+            {
+
+                GlobalScriptDesc desc;
+                desc.mLocals.configure (ESM4::formIdToString(script->mFormId));
+
+                iter = mScripts.insert (std::make_pair (name2, desc)).first;
+            }
         }
 
         return iter->second.mLocals;

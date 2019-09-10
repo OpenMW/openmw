@@ -42,15 +42,23 @@ namespace MWScript
     {
         mParser.reset();
         mErrorHandler.reset();
+std::string scriptText;
+if (const ESM::Script *script = mStore.get<ESM::Script>().search (name))
+    scriptText=script->mScriptText;
+else
+    if (const ESM4::Script *script = mStore.getESM4<ESM4::Script>().find (name))
+        scriptText=script->mText;
 
-        if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+if (!scriptText.empty())
+        //if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
         {
+            std::cout<< scriptText<<std::endl;
             mErrorHandler.setContext(name);
 
             bool Success = true;
             try
             {
-                std::istringstream input (script->mScriptText);
+                std::istringstream input (scriptText);
 
                 Compiler::Scanner scanner (mErrorHandler, input, mCompilerContext.getExtensions());
 
@@ -182,7 +190,23 @@ namespace MWScript
                 mOtherLocals.insert (std::make_pair (name2, locals)).first;
 
             return iter->second;
-        }
+        }else
+            if (const ESM4::Script *script = mStore.getESM4<ESM4::Script>().search (name))
+            {
+                Compiler::Locals locals;
+
+                mErrorHandler.setContext(name2 + "[local variables]");
+
+                std::istringstream stream (script->mText);
+                Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
+                Compiler::Scanner scanner (mErrorHandler, stream, mCompilerContext.getExtensions());
+                scanner.scan (parser);
+
+                std::map<std::string, Compiler::Locals>::iterator iter =
+                    mOtherLocals.insert (std::make_pair (name2, locals)).first;
+
+                return iter->second;
+            }
 
         throw std::logic_error ("script " + name + " does not exist");
     }

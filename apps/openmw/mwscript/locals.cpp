@@ -19,22 +19,22 @@ namespace MWScript
     {
         if (!mInitialised)
         {
-            const ESM::Script *script = MWBase::Environment::get().getWorld()->getStore().
-                get<ESM::Script>().find (scriptName);
+           // const ESM::Script *script = MWBase::Environment::get().getWorld()->getStore().
+              //  get<ESM::Script>().find (scriptName);
 
-            configure (*script);
+            configure (scriptName);
         }
     }
 
     Locals::Locals() : mInitialised (false) {}
 
-    bool Locals::configure (const ESM::Script& script)
+    bool Locals::configure (const std::string scriptid)
     {
         if (mInitialised)
             return false;
 
         const Compiler::Locals& locals =
-            MWBase::Environment::get().getScriptManager()->getLocals (script.mId);
+            MWBase::Environment::get().getScriptManager()->getLocals (scriptid);
 
         mShorts.clear();
         mShorts.resize (locals.get ('s').size(), 0);
@@ -46,6 +46,25 @@ namespace MWScript
         mInitialised = true;
         return true;
     }
+    /*
+    bool Locals::configure (const ESM4::Script& script)
+    {
+        if (mInitialised)
+            return false;
+
+        const Compiler::Locals& locals =
+            MWBase::Environment::get().getScriptManager()->getLocals (ESM4::formIdToString(script.mFormId));
+
+        mShorts.clear();
+        mShorts.resize (locals.get ('s').size(), 0);
+        mLongs.clear();
+        mLongs.resize (locals.get ('l').size(), 0);
+        mFloats.clear();
+        mFloats.resize (locals.get ('f').size(), 0);
+
+        mInitialised = true;
+        return true;
+    }*/
 
     bool Locals::isEmpty() const
     {

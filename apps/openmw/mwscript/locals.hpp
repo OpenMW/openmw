@@ -32,7 +32,7 @@ namespace MWScript
             bool isEmpty() const;
 
             /// \return Did the state of *this change from uninitialised to initialised?
-            bool configure (const ESM::Script& script);
+            bool configure (const std::string scriptid);
 
             /// @note var needs to be in lowercase
             ///

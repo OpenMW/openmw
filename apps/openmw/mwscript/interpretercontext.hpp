@@ -119,8 +119,10 @@ namespace MWScript
             virtual bool isScriptRunning (const std::string& name) const;
 
             virtual void startScript (const std::string& name, const std::string& targetId = "");
-
             virtual void stopScript (const std::string& name);
+
+            virtual void startQuest (const std::string& name, const std::string& targetId = "");
+            virtual void stopQuest (const std::string& name);
 
             virtual float getDistance (const std::string& name, const std::string& id = "") const;
             ///< @note if \a id is empty, assumes an implicit reference
