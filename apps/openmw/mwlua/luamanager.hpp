@@ -98,21 +98,21 @@ namespace mwse
             void initSimulationTime();
 
             // Event management.
-            mwse::lua::event::DisableableEventManager m_DisableableEventManager;
+            mwse::lua::event::DisableableEventManager mDisableableEventManager;
 
             //
             static LuaManager singleton;
 
-            sol::state luaState;
+            sol::state mLuaState;
 
             //
-            ESM::Script* currentScript = nullptr;
-            MWWorld::Ptr currentReference;
+            ESM::Script* mCurrentScript = nullptr;
+            MWWorld::Ptr mCurrentReference;
 
             // Timers.
-            std::shared_ptr<TimerController> gameTimers;
-            std::shared_ptr<TimerController> simulateTimers;
-            std::shared_ptr<TimerController> realTimers;
+            std::shared_ptr<TimerController> mGameTimers;
+            std::shared_ptr<TimerController> mSimulateTimers;
+            std::shared_ptr<TimerController> mRealTimers;
 
             sol::object triggerEvent(event::BaseEvent*);
         };

@@ -15,14 +15,14 @@ namespace mwse
         {
             LoadedGameEvent::LoadedGameEvent(const char* fileName, bool quickLoad, bool newGame) :
                 GenericEvent("loaded"),
-                m_FileName(fileName),
-                m_QuickLoad(quickLoad),
-                m_NewGame(newGame)
+                mFileName(fileName),
+                mQuickLoad(quickLoad),
+                mNewGame(newGame)
             {
-                if (m_FileName == nullptr && !m_NewGame)
+                if (mFileName == nullptr && !mNewGame)
                 {
-                    m_QuickLoad = true;
-                    m_FileName = "quiсksave.omwsave";
+                    mQuickLoad = true;
+                    mFileName = "quiсksave.omwsave";
                 }
             }
 
@@ -32,16 +32,16 @@ namespace mwse
                 sol::state& state = stateHandle.state;
                 sol::table eventData = state.create_table();
 
-                if (m_NewGame)
+                if (mNewGame)
                 {
                     eventData["newGame"] = true;
                     eventData["quickload"] = false;
                 }
                 else
                 {
-                    std::string filename = m_FileName;
+                    std::string filename = mFileName;
                     eventData["filename"] = filename.substr(0, filename.find_last_of('.'));;
-                    eventData["quickload"] = m_QuickLoad;
+                    eventData["quickload"] = mQuickLoad;
                     eventData["newGame"] = false;
                 }
 
@@ -63,7 +63,7 @@ namespace mwse
                 sol::state& state = stateHandle.state;
                 sol::table options = state.create_table();
 
-                options["filter"] = m_FileName;
+                options["filter"] = mFileName;
 
                 return options;
             }

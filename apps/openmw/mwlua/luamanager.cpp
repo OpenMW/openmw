@@ -247,16 +247,16 @@ namespace mwse
         LuaManager::LuaManager()
         {
             // Open default lua libraries.
-            luaState.open_libraries();
+            mLuaState.open_libraries();
 
             // Override the default atpanic to print to the log.
-            luaState.set_panic(&panic);
-            luaState.set_exception_handler(&exceptionHandler);
+            mLuaState.set_panic(&panic);
+            mLuaState.set_exception_handler(&exceptionHandler);
 
             // Set up our timers.
-            gameTimers = std::make_shared<TimerController>();
-            simulateTimers = std::make_shared<TimerController>();
-            realTimers = std::make_shared<TimerController>();
+            mGameTimers = std::make_shared<TimerController>();
+            mSimulateTimers = std::make_shared<TimerController>();
+            mRealTimers = std::make_shared<TimerController>();
 
             // Bind our data types.
             bindData();
@@ -265,7 +265,7 @@ namespace mwse
         void LuaManager::bindData()
         {
             // Bind our LuaScript type, which is used for holding script contexts.
-            luaState.new_usertype<LuaScript>("LuaScript",
+            mLuaState.new_usertype<LuaScript>("LuaScript",
                 sol::constructors<LuaScript()>(),
 
                 // Implement dynamic object metafunctions.
@@ -281,13 +281,13 @@ namespace mwse
                 );
 
             // Create the base of API tables.
-            luaState["omw"] = luaState.create_table();
+            mLuaState["omw"] = mLuaState.create_table();
 
             // Expose timers.
             bindLuaTimer();
-            luaState["omw"]["realTimers"] = realTimers;
-            luaState["omw"]["simulateTimers"] = simulateTimers;
-            luaState["omw"]["gameTimers"] = gameTimers;
+            mLuaState["omw"]["realTimers"] = mRealTimers;
+            mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
+            mLuaState["omw"]["gameTimers"] = mGameTimers;
 
             bindTES3MagicEffect();
             bindTES3WeaponType();
@@ -383,7 +383,7 @@ namespace mwse
 
             // Bind our disable event manager.
             mwse::lua::event::DisableableEventManager::bindToLua();
-            luaState["omw"]["disableableEvents"] = &m_DisableableEventManager;
+            mLuaState["omw"]["disableableEvents"] = &mDisableableEventManager;
         }
 
         void LuaManager::update(float duration, float timestamp, bool paused)
@@ -391,7 +391,7 @@ namespace mwse
             updateTimers(duration, timestamp, !paused);
         }
 
-        ThreadedStateHandle::ThreadedStateHandle(LuaManager * manager) : state(manager->luaState), luaManager(manager)
+        ThreadedStateHandle::ThreadedStateHandle(LuaManager * manager) : state(manager->mLuaState), luaManager(manager)
         {
             //luaManager->claimLuaThread();
         }
@@ -443,7 +443,7 @@ namespace mwse
             initSimulationTime();
 
             // Execute init.lua
-            sol::protected_function_result result = luaState.safe_script_file("scripts/init.lua");
+            sol::protected_function_result result = mLuaState.safe_script_file("scripts/init.lua");
             if (!result.valid())
             {
                 sol::error error = result;
@@ -490,22 +490,22 @@ namespace mwse
 
         ESM::Script* LuaManager::getCurrentScript()
         {
-            return currentScript;
+            return mCurrentScript;
         }
 
         void LuaManager::setCurrentScript(ESM::Script* script)
         {
-            currentScript = script;
+            mCurrentScript = script;
         }
 
         MWWorld::Ptr LuaManager::getCurrentReference()
         {
-            return currentReference;
+            return mCurrentReference;
         }
 
         void LuaManager::setCurrentReference(MWWorld::Ptr ptr)
         {
-            currentReference = ptr;
+            mCurrentReference = ptr;
         }
 
         sol::object LuaManager::triggerEvent(event::BaseEvent* baseEvent)
@@ -519,31 +519,31 @@ namespace mwse
 
         void LuaManager::updateTimers(float deltaTime, double simulationTimestamp, bool simulating)
         {
-            realTimers->incrementClock(deltaTime);
-            gameTimers->setClock(simulationTimestamp);
+            mRealTimers->incrementClock(deltaTime);
+            mGameTimers->setClock(simulationTimestamp);
 
             if (simulating)
             {
-                simulateTimers->incrementClock(deltaTime);
+                mSimulateTimers->incrementClock(deltaTime);
             }
         }
 
         void LuaManager::initSimulationTime()
         {
             // Reset the clocks for each timer.
-            realTimers->setClock(0.0);
-            simulateTimers->setClock(0.0);
+            mRealTimers->setClock(0.0);
+            mSimulateTimers->setClock(0.0);
 
             auto timestamp = MWBase::Environment::get().getWorld()->getTimeStamp();
             float time = timestamp.getDay() * 24 + timestamp.getHour();
-            gameTimers->setClock(time);
+            mGameTimers->setClock(time);
         }
 
         void LuaManager::clearTimers()
         {
-            realTimers->clearTimers();
-            simulateTimers->clearTimers();
-            gameTimers->clearTimers();
+            mRealTimers->clearTimers();
+            mSimulateTimers->clearTimers();
+            mGameTimers->clearTimers();
 
             initSimulationTime();
         }
@@ -552,9 +552,9 @@ namespace mwse
         {
             switch (type)
             {
-                case TimerType::RealTime: return realTimers;
-                case TimerType::SimulationTime: return simulateTimers;
-                case TimerType::GameTime: return gameTimers;
+                case TimerType::RealTime: return mRealTimers;
+                case TimerType::SimulationTime: return mSimulateTimers;
+                case TimerType::GameTime: return mGameTimers;
             }
             return nullptr;
         }

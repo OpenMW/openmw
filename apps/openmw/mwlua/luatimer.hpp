@@ -72,35 +72,35 @@ namespace mwse
             void repositionTimer(std::shared_ptr<Timer> timer);
 
             // The current internal clock to compare timers against.
-            double m_Clock;
+            double mClock;
 
             // A list of active timers, sorted by their completion time.
-            std::vector<std::shared_ptr<Timer>> m_ActiveTimers;
+            std::vector<std::shared_ptr<Timer>> mActiveTimers;
 
             // An unordered collection of paused timers.
-            std::unordered_set<std::shared_ptr<Timer>> m_PausedTimers;
+            std::unordered_set<std::shared_ptr<Timer>> mPausedTimers;
         };
 
         // A logicless structure containing timer data.
         struct Timer
         {
             // A handle back to the associated controller.
-            TimerController * controller;
+            TimerController * mController;
 
             // The current state of the timer.
-            TimerState state;
+            TimerState mState;
 
             // How long the timer lasts.
-            double duration;
+            double mDuration;
 
             // Either the completion state, or the time left when it was paused.
-            double timing;
+            double mTiming;
 
             // The number of iterations it has left, or -1 if it runs forever.
-            int iterations;
+            int mIterations;
 
             // Callback for timer completion.
-            sol::protected_function callback;
+            sol::protected_function mCallback;
         };
 
         // Create all the necessary lua binding for the timer API and the above data types.

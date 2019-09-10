@@ -16,7 +16,7 @@ namespace mwse
                 const char* getEventName();
 
             protected:
-                const char* m_EventName;
+                const char* mEventName;
             };
         }
     }

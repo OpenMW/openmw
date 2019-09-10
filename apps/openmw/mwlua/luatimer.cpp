@@ -12,54 +12,46 @@ namespace mwse
 {
     namespace lua
     {
-        //
-        // TimeComparer
-        //
-
         bool TimerComparer::operator()(const std::shared_ptr<Timer>& first, double second)
         {
-            return first->timing < second;
+            return first->mTiming < second;
         }
 
         bool TimerComparer::operator()(const std::shared_ptr<Timer>& first, const std::shared_ptr<Timer>& second)
         {
-            return first->timing < second->timing;
+            return first->mTiming < second->mTiming;
         }
 
         // Single instance to the comparator used for std::upper_bound.
         TimerComparer comparer;
 
-        //
-        // TimerController
-        //
-
         TimerController::TimerController() :
-            m_Clock(0.0)
+            mClock(0.0)
         {
 
         }
 
         TimerController::TimerController(double initialClock) :
-            m_Clock(initialClock)
+            mClock(initialClock)
         {
 
         }
 
         void TimerController::setClock(double clock)
         {
-            m_Clock = clock;
+            mClock = clock;
             update();
         }
 
         void TimerController::incrementClock(double delta)
         {
-            m_Clock += delta;
+            mClock += delta;
             update();
         }
 
         double TimerController::getClock()
         {
-            return m_Clock;
+            return mClock;
         }
 
         std::shared_ptr<Timer> TimerController::createTimer(double duration, sol::protected_function callback, int iterations)
@@ -80,11 +72,11 @@ namespace mwse
 
             // Setup the timer structure.
             auto timer = std::make_shared<Timer>();
-            timer->controller = this;
-            timer->duration = duration;
-            timer->timing = m_Clock + duration;
-            timer->iterations = iterations;
-            timer->callback = callback;
+            timer->mController = this;
+            timer->mDuration = duration;
+            timer->mTiming = mClock + duration;
+            timer->mIterations = iterations;
+            timer->mCallback = callback;
 
             // Find the position in the list to add this timer, and add it.
             insertActiveTimer(timer);
@@ -95,25 +87,25 @@ namespace mwse
         bool TimerController::pauseTimer(std::shared_ptr<Timer> timer)
         {
             // Validate timer.
-            if (timer->state != TimerState::Active)
+            if (timer->mState != TimerState::Active)
             {
                 return false;
             }
 
             // Remove from the active timer list.
-            auto result = std::find(m_ActiveTimers.begin(), m_ActiveTimers.end(), timer);
-            if (result == m_ActiveTimers.end())
+            auto result = std::find(mActiveTimers.begin(), mActiveTimers.end(), timer);
+            if (result == mActiveTimers.end())
             {
                 return false;
             }
-            m_ActiveTimers.erase(result);
+            mActiveTimers.erase(result);
 
             // And add it to the paused list.
-            m_PausedTimers.insert(timer);
+            mPausedTimers.insert(timer);
 
             // Update its state.
-            timer->state = TimerState::Paused;
-            timer->timing = timer->timing - m_Clock;
+            timer->mState = TimerState::Paused;
+            timer->mTiming = timer->mTiming - mClock;
 
             return true;
         }
@@ -121,13 +113,13 @@ namespace mwse
         bool TimerController::resumeTimer(std::shared_ptr<Timer> timer)
         {
             // Validate timer.
-            if (timer->state != TimerState::Paused)
+            if (timer->mState != TimerState::Paused)
             {
                 return false;
             }
 
             // Remove from the paused timer list.
-            m_PausedTimers.erase(timer);
+            mPausedTimers.erase(timer);
 
             // Add to the active list.
             insertActiveTimer(timer);
@@ -138,13 +130,13 @@ namespace mwse
         bool TimerController::resetTimer(std::shared_ptr<Timer> timer)
         {
             // Validate timer.
-            if (timer->state != TimerState::Active)
+            if (timer->mState != TimerState::Active)
             {
                 return false;
             }
 
             // Change timing.
-            timer->timing = m_Clock + timer->duration;
+            timer->mTiming = mClock + timer->mDuration;
 
             // Move it to the right place in the list.
             repositionTimer(timer);
@@ -154,25 +146,25 @@ namespace mwse
 
         bool TimerController::cancelTimer(std::shared_ptr<Timer> timer)
         {
-            TimerState previousState = timer->state;
-            timer->state = TimerState::Expired;
+            TimerState previousState = timer->mState;
+            timer->mState = TimerState::Expired;
 
             // Remove from the active list.
             if (previousState == TimerState::Active)
             {
-                auto position = std::find(m_ActiveTimers.begin(), m_ActiveTimers.end(), timer);
-                if (position == m_ActiveTimers.end())
+                auto position = std::find(mActiveTimers.begin(), mActiveTimers.end(), timer);
+                if (position == mActiveTimers.end())
                 {
                     return false;
                 }
-                m_ActiveTimers.erase(position);
+                mActiveTimers.erase(position);
                 return true;
             }
 
             // Remove from the paused timer list.
             else if (previousState == TimerState::Paused)
             {
-                return m_PausedTimers.erase(timer) == 1;
+                return mPausedTimers.erase(timer) == 1;
             }
 
             return false;
@@ -181,21 +173,21 @@ namespace mwse
         void TimerController::clearTimers()
         {
             // Mark all timers as expired.
-            for (auto itt = m_ActiveTimers.begin(); itt != m_ActiveTimers.end(); itt++)
+            for (auto itt = mActiveTimers.begin(); itt != mActiveTimers.end(); itt++)
             {
-                (*itt)->state = TimerState::Expired;
+                (*itt)->mState = TimerState::Expired;
             }
 
             // Free the timers from internal storage.
-            m_ActiveTimers.clear();
-            m_PausedTimers.clear();
+            mActiveTimers.clear();
+            mPausedTimers.clear();
         }
 
         void TimerController::update()
         {
             // Keep looking at the front timer until it hasn't expired.
             std::shared_ptr<Timer> timer = nullptr;
-            while (!m_ActiveTimers.empty() && (timer = m_ActiveTimers.front()) && timer->timing <= m_Clock)
+            while (!mActiveTimers.empty() && (timer = mActiveTimers.front()) && timer->mTiming <= mClock)
             {
                 // Build data to send to the callback.
                 sol::table data = LuaManager::getInstance().getThreadSafeStateHandle().state.create_table();
@@ -203,7 +195,7 @@ namespace mwse
                 data["timer"] = timer;
 
                 // Invoke the callback.
-                sol::protected_function callback = timer->callback;
+                sol::protected_function callback = timer->mCallback;
                 sol::protected_function_result result = callback(data);
                 if (!result.valid())
                 {
@@ -216,12 +208,12 @@ namespace mwse
                 }
 
                 // Decrement iterations if the timer uses them.
-                if (timer->iterations > 0)
+                if (timer->mIterations > 0)
                 {
-                    timer->iterations--;
+                    timer->mIterations--;
 
                     // If we just hit 0 left, cancel the timer.
-                    if (timer->iterations == 0)
+                    if (timer->mIterations == 0)
                     {
                         cancelTimer(timer);
                         continue;
@@ -229,26 +221,26 @@ namespace mwse
                 }
 
                 // Update timer and reposition it in the vector.
-                timer->timing += timer->duration;
+                timer->mTiming += timer->mDuration;
                 repositionTimer(timer);
             }
         }
 
         std::vector<std::shared_ptr<Timer>>::iterator TimerController::insertActiveTimer(std::shared_ptr<Timer> timer)
         {
-            auto position = std::upper_bound(m_ActiveTimers.begin(), m_ActiveTimers.end(), timer, comparer);
-            return m_ActiveTimers.insert(position, timer);
+            auto position = std::upper_bound(mActiveTimers.begin(), mActiveTimers.end(), timer, comparer);
+            return mActiveTimers.insert(position, timer);
         }
 
         void TimerController::repositionTimer(std::shared_ptr<Timer> timer)
         {
             // Remove from current position.
-            auto position = std::find(m_ActiveTimers.begin(), m_ActiveTimers.end(), timer);
-            if (position == m_ActiveTimers.end())
+            auto position = std::find(mActiveTimers.begin(), mActiveTimers.end(), timer);
+            if (position == mActiveTimers.end())
             {
                 return;
             }
-            m_ActiveTimers.erase(position);
+            mActiveTimers.erase(position);
 
             // Then insert it back in.
             insertActiveTimer(timer);
@@ -326,25 +318,25 @@ namespace mwse
         // Function to pause a given timer.
         bool legacyTimerPause(std::shared_ptr<Timer> timer)
         {
-            return timer->controller->pauseTimer(timer);
+            return timer->mController->pauseTimer(timer);
         }
 
         // Function to resume a given timer.
         bool legacyTimerResume(std::shared_ptr<Timer> timer)
         {
-            return timer->controller->resumeTimer(timer);
+            return timer->mController->resumeTimer(timer);
         }
 
         // Function to reset a given timer.
         bool legacyTimerReset(std::shared_ptr<Timer> timer)
         {
-            return timer->controller->resetTimer(timer);
+            return timer->mController->resetTimer(timer);
         }
 
         // Function to cancel a given timer.
         bool legacyTimerCancel(std::shared_ptr<Timer> timer)
         {
-            return timer->controller->cancelTimer(timer);
+            return timer->mController->cancelTimer(timer);
         }
 
         // Create a timer that will complete in the next cycle.
@@ -405,47 +397,47 @@ namespace mwse
                 usertypeDefinition.set("new", sol::no_constructor);
 
                 // Basic property binding.
-                usertypeDefinition.set("duration", sol::readonly_property(&Timer::duration));
-                usertypeDefinition.set("iterations", sol::readonly_property(&Timer::iterations));
-                usertypeDefinition.set("state", sol::readonly_property(&Timer::state));
-                usertypeDefinition.set("timing", sol::readonly_property(&Timer::timing));
-                usertypeDefinition.set("callback", sol::readonly_property(&Timer::callback));
+                usertypeDefinition.set("duration", sol::readonly_property(&Timer::mDuration));
+                usertypeDefinition.set("iterations", sol::readonly_property(&Timer::mIterations));
+                usertypeDefinition.set("state", sol::readonly_property(&Timer::mState));
+                usertypeDefinition.set("timing", sol::readonly_property(&Timer::mTiming));
+                usertypeDefinition.set("callback", sol::readonly_property(&Timer::mCallback));
                 usertypeDefinition.set("timeLeft", sol::readonly_property([](Timer& self) -> sol::optional<double>
                 {
-                    if (self.state == TimerState::Active)
+                    if (self.mState == TimerState::Active)
                     {
-                        return self.timing - self.controller->getClock();
+                        return self.mTiming - self.mController->getClock();
                     }
-                    else if (self.state == TimerState::Paused)
+                    else if (self.mState == TimerState::Paused)
                     {
-                        return self.timing;
+                        return self.mTiming;
                     }
 
                     return sol::optional<double>();
                 }));
 
                 // Legacy value binding.
-                usertypeDefinition.set("t", &Timer::duration);
-                usertypeDefinition.set("c", &Timer::callback);
-                usertypeDefinition.set("i", &Timer::iterations);
-                usertypeDefinition.set("f", &Timer::timing);
+                usertypeDefinition.set("t", &Timer::mDuration);
+                usertypeDefinition.set("c", &Timer::mCallback);
+                usertypeDefinition.set("i", &Timer::mIterations);
+                usertypeDefinition.set("f", &Timer::mTiming);
 
                 // Allow creating timers.
                 usertypeDefinition.set("pause", [](std::shared_ptr<Timer> self)
                 {
-                    return self->controller->pauseTimer(self);
+                    return self->mController->pauseTimer(self);
                 });
                 usertypeDefinition.set("resume", [](std::shared_ptr<Timer> self)
                 {
-                    return self->controller->resumeTimer(self);
+                    return self->mController->resumeTimer(self);
                 });
                 usertypeDefinition.set("reset", [](std::shared_ptr<Timer> self)
                 {
-                    return self->controller->resetTimer(self);
+                    return self->mController->resetTimer(self);
                 });
                 usertypeDefinition.set("cancel", [](std::shared_ptr<Timer> self)
                 {
-                    return self->controller->cancelTimer(self);
+                    return self->mController->cancelTimer(self);
                 });
 
                 // Finish up our usertype.

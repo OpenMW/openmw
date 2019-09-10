@@ -17,9 +17,9 @@ namespace mwse
                 sol::object getEventOptions();
 
             protected:
-                const char* m_FileName;
-                bool m_QuickLoad;
-                bool m_NewGame;
+                const char* mFileName;
+                bool mQuickLoad;
+                bool mNewGame;
             };
         }
     }
