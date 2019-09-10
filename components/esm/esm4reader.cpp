@@ -12,6 +12,7 @@ ESM::ESM4Reader::~ESM4Reader()
 
 void ESM::ESM4Reader::openTes4File(const std::string &name)
 {
+    mReader.setEncoder(mEncoder);
     mCtx.filename = name;
     // WARNING: may throw
     mCtx.leftFile = mReader.openTes4File(name);

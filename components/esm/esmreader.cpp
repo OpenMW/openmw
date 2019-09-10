@@ -557,6 +557,7 @@ size_t ESMReader::getFileOffset()
 
 void ESMReader::skip(int bytes)
 {
-    mEsm->seekg(getFileOffset()+bytes,std::ios::beg);
+   // mEsm->ignore(bytes);
+   mEsm->seekg(getFileOffset()+bytes,std::ios::beg);
 }
 }

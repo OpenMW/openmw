@@ -1,7 +1,9 @@
 #include "cellref.hpp"
 
+
 #include <components/debug/debuglog.hpp>
 
+#include "esm4reader.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -55,9 +57,12 @@ void ESM::CellRef::loadId (ESMReader& esm, bool wideRefNum)
 void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
 {
     isDeleted = false;
-
     bool isLoaded = false;
-    while (!isLoaded && esm.hasMoreSubs())
+    if(ESM4Reader*esm4reader = &dynamic_cast<ESM4Reader&>(esm))
+    {//WRONG
+        mEsm4.load(esm4reader->reader());
+    }
+    else while (!isLoaded && esm.hasMoreSubs())
     {
         esm.getSubName();
         switch (esm.retSubName().intval)

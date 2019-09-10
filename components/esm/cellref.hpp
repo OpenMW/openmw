@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <string>
+#include <extern/esm4/refr.hpp>
 
 #include "defs.hpp"
 
@@ -36,6 +37,8 @@ namespace ESM
     class CellRef
     {
         public:
+            //hacky
+            ESM4::Reference mEsm4;
             // Reference number
             // Note: Currently unused for items in containers
             RefNum mRefNum;

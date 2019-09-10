@@ -69,11 +69,18 @@ struct Cell
 
   enum Flags
     {
+      //TES3
       Interior  = 0x01, // Interior cell
       HasWater  = 0x02, // Does this cell have a water surface
-      NoSleep   = 0x04, // Is it allowed to sleep here (without a bed)
-      QuasiEx   = 0x80  // Behave like exterior (Tribunal+), with
+      NoSleep   = 0x04, // Is it allowed to wait/travel from here (without a bed)
+      QuasiEx   = 0x80,  // Behave like exterior (Tribunal+), with
                         // skybox and weather
+      //TES4
+      ForceHideLand   = 0x08, // Force hide land (exterior cell), Oblivion interior (interior cell) TES5 no lod water
+      PublicPlace = 0x20, // Public place
+      HandChanged = 0x40, // Hand changed
+      //TES5
+      UseSkyLighting = 0x100
     };
 
   struct DATAstruct
