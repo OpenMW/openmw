@@ -55,6 +55,12 @@ set(ESM4_SOURCE_FILES
     ammo.cpp
     appa.cpp
     ingr.cpp
+    bsgn.cpp
+    dial.cpp
+    quest.cpp
+    info.cpp
+    glob.cpp
+    faction.cpp
     sgst.cpp
     slgm.cpp
     keym.cpp
