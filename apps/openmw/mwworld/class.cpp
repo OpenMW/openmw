@@ -146,17 +146,21 @@ namespace MWWorld
 
     void Class::lock (const Ptr& ptr, int lockLevel) const
     {
-        throw std::runtime_error ("class does not support locking");
+        if(lockLevel != 0)
+            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
+        else
+            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
     }
 
     void Class::unlock (const Ptr& ptr) const
     {
-        throw std::runtime_error ("class does not support unlocking");
+        int lockLevel = ptr.getCellRef().getLockLevel();
+        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
     }
 
     bool Class::canLock(const ConstPtr &ptr) const
     {
-        return false;
+        return hasToolTip(ptr);
     }
 
     void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const

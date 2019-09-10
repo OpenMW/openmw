@@ -305,20 +305,6 @@ namespace MWClass
         return getContainerStore (ptr).getWeight();
     }
 
-    void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Container::unlock (const MWWorld::Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
-    }
-
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();

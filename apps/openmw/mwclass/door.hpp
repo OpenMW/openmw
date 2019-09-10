@@ -41,12 +41,6 @@ namespace MWClass
             static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);
             ///< @return destination cell name or token
 
-            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel = 0) const;
-            ///< Lock object
-
-            virtual void unlock (const MWWorld::Ptr& ptr) const;
-            ///< Unlock object
-
             virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
 
             virtual bool allowTelekinesis(const MWWorld::ConstPtr &ptr) const;
