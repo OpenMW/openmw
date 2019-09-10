@@ -101,4 +101,30 @@ namespace MWLua
 
         return value;
     }
+
+    osg::Vec3f getOptionalParamVector3(sol::optional<sol::table> maybeParams, const char* key)
+    {
+        if (maybeParams)
+        {
+            sol::table params = maybeParams.value();
+            sol::object maybeValue = params[key];
+            if (maybeValue.valid())
+            {
+                // Were we given a real vector?
+                if (maybeValue.is<osg::Vec3f>())
+                {
+                    return maybeValue.as<osg::Vec3f>();
+                }
+
+                // Were we given a table?
+                else if (maybeValue.get_type() == sol::type::table)
+                {
+                    sol::table value = maybeValue.as<sol::table>();
+                    return osg::Vec3f(value[1], value[2], value[3]);
+                }
+            }
+        }
+
+        return osg::Vec3f();
+    }
 }

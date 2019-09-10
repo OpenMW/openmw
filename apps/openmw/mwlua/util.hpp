@@ -71,6 +71,8 @@ namespace MWLua
 
     MWWorld::Ptr getOptionalParamReference(sol::optional<sol::table> maybeParams, const char* key);
     MWWorld::Ptr getOptionalParamExecutionReference(sol::optional<sol::table> maybeParams);
+
+    osg::Vec3f getOptionalParamVector3(sol::optional<sol::table> maybeParams, const char* key);
 }
 
 #endif

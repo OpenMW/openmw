@@ -4,6 +4,7 @@
 
 #include "events/activate.hpp"
 #include "events/activationtargetchanged.hpp"
+#include "events/attack.hpp"
 #include "events/loadedgame.hpp"
 
 /*
