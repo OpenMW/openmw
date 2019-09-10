@@ -9,6 +9,7 @@
 
 #include "../../mwmechanics/actorutil.hpp"
 #include "../../mwmechanics/aiactivate.hpp"
+#include "../../mwmechanics/aiescort.hpp"
 #include "../../mwmechanics/aifollow.hpp"
 #include "../../mwmechanics/creaturestats.hpp"
 
@@ -79,45 +80,39 @@ namespace MWLua
             std::string cellId = params["cell"];
             double duration = getOptionalParam<double>(params, "duration", 0.0);
             osg::Vec3f destination = getOptionalParamVector3(params, "destination");
+            // FIXME: AiEscort stores arget Id instead of reference in OpenMW
             MWMechanics::AiFollow followPackage(target, cellId, duration, destination.x(), destination.y(), destination.z());
             ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
 
             Log(Debug::Info) << "AiFollow: " << target.getCellRef().getRefId() << ", " << destination.x() << ", " << destination.y() << ", " << destination.z() << ", " << duration;
         };
 
-        /*
         state["tes3"]["setAIEscort"] = [](sol::table params)
         {
-            TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
-            if (mobileActor == nullptr)
-            {
+            MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+            if (!ptr.getClass().isActor())
                 throw std::invalid_argument("Invalid reference parameter provided.");
-            }
 
-            TES3::Reference * target = getOptionalParamReference(params, "target");
-            if (target == nullptr || !target->baseObject->isActor())
+            MWWorld::Ptr target = getOptionalParamReference(params, "target");
+            if (target.isEmpty() || !target.getClass().isActor())
             {
                 throw std::invalid_argument("Invalid target parameter provided.");
             }
 
-            auto destination = getOptionalParamVector3(params, "destination");
-            if (!destination)
-            {
-                throw std::invalid_argument("Destination parameter is missing.");
-            }
+            // FIXME: we do not know what this parameter is supposed to do.
+            // bool reset = getOptionalParam<bool>(params, "reset", true);
 
-            auto config = tes3::_new<TES3::AIPackageEscort::Config>();
-            config->type = TES3::AIPackageConfigType::Escort;
-            config->destination = destination.value();
-            config->duration = getOptionalParam<double>(params, "duration", 0.0);
-            config->actor = static_cast<TES3::Actor*>(target->getBaseObject());
-            config->cell = getOptionalParamCell(params, "cell");
-            config->reset = getOptionalParam<bool>(params, "reset", true);
+            std::string cellId = params["cell"];
+            double duration = getOptionalParam<double>(params, "duration", 0.0);
+            osg::Vec3f destination = getOptionalParamVector3(params, "destination");
+            // FIXME: AiEscort stores arget Id instead of reference in OpenMW
+            MWMechanics::AiEscort escortPackage(target.getCellRef().getRefId(), cellId, duration, destination.x(), destination.y(), destination.z());
+            ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
-            auto actor = static_cast<TES3::Actor*>(mobileActor->reference->baseObject);
-            actor->setAIPackage(config, mobileActor->reference);
+            Log(Debug::Info) << "AiEscort: " << target.getCellRef().getRefId() << ", " << destination.x() << ", " << destination.y() << ", " << destination.z() << ", " << duration;
         };
 
+        /*
         state["tes3"]["setAITravel"] = [](sol::table params)
         {
             TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
