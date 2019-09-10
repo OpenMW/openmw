@@ -5,7 +5,8 @@
 
 #include <iomanip>
 
-#include "../sol.hpp"
+#include <extern/sol2/sol.hpp>
+
 #include "../luamanager.hpp"
 
 namespace mwse

@@ -113,7 +113,7 @@ find_package(LuaJit REQUIRED)
 MESSAGE(STATUS "Found LuaJit_LIBRARIES: ${LuaJit_LIBRARIES}")
 MESSAGE(STATUS "Found LuaJit_INCLUDE_DIRS: ${LuaJit_INCLUDE_DIRS}")
 
-source_group(game FILES ${LUA_INCLUDE_DIR})
+source_group(game FILES ${LUA_INCLUDE_DIR} ${SOL2_INCLUDE_FILES})
 
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DENABLE_LUA -ldl")
 include_directories(SYSTEM ${LuaJit_INCLUDE_DIRS})

@@ -608,6 +608,7 @@ set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static librari
 
 add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
+add_subdirectory (extern/sol2)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)
     add_subdirectory (extern/osgQt)

@@ -1,7 +1,9 @@
 #pragma once
 
-namespace mwse {
-	namespace lua {
-		void bindTES3MagicEffect();
-	}
+namespace mwse
+{
+    namespace lua
+    {
+        void bindTES3MagicEffect();
+    }
 }

@@ -1,6 +1,7 @@
 #include "ai.hpp"
 
-#include "../sol.hpp"
+#include <extern/sol2/sol.hpp>
+
 #include "../luamanager.hpp"
 #include "../luautil.hpp"
 

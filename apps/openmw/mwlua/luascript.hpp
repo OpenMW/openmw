@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sol.hpp"
+#include <extern/sol2/sol.hpp>
 
 #include "dynamicluaobject.hpp"
 
@@ -8,15 +8,19 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace mwse {
-	namespace lua {
-		struct LuaScript : public DynamicLuaObject {
-			LuaScript() :
-				script(nullptr),
-				reference(MWWorld::Ptr()) {
-			}
-			ESM::Script* script;
-			MWWorld::Ptr reference;
-		};
-	}
+namespace mwse
+{
+    namespace lua
+    {
+        struct LuaScript : public DynamicLuaObject
+        {
+            LuaScript() :
+                script(nullptr),
+                reference(MWWorld::Ptr())
+            {
+            }
+            ESM::Script* script;
+            MWWorld::Ptr reference;
+        };
+    }
 }
