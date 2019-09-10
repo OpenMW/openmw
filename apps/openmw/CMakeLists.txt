@@ -32,12 +32,16 @@ add_openmw_dir (mwlua
     luamanager script dynamicluaobject timer util tes3util baseevent genericevent disableableevent disableableeventmanager loadedgame
     )
 
-add_openmw_dir (mwlua/structs
-    magiceffect weapontype ptr vectors
+add_openmw_dir (mwlua/events
+    loadedgame
     )
 
 add_openmw_dir (mwlua/functions
     ai gui mechanics sound world
+    )
+
+add_openmw_dir (mwlua/structs
+    magiceffect weapontype ptr vectors
     )
 
 add_openmw_dir (mwgui

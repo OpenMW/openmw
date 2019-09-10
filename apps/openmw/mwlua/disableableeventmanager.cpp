@@ -2,7 +2,7 @@
 
 #include "luamanager.hpp"
 
-#include "loadedgame.hpp"
+#include "events/loadedgame.hpp"
 
 /*
 #include "LuaActivateEvent.h"

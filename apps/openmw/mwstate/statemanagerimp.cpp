@@ -29,7 +29,7 @@
 #include "../mwbase/inputmanager.hpp"
 
 #include "../mwlua/luamanager.hpp"
-#include "../mwlua/loadedgame.hpp"
+#include "../mwlua/events/loadedgame.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
