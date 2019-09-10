@@ -33,9 +33,6 @@ namespace MWClass
             virtual int getValue (const MWWorld::ConstPtr& ptr) const;
             ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
-
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 

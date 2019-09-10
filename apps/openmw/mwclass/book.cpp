@@ -109,19 +109,12 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Book::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Book::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Book> *ref = ptr.get<ESM::Book>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

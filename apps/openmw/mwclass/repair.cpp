@@ -93,13 +93,6 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Repair::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
-
-        return (ref->mBase->mName != "");
-    }
-
     bool Repair::hasItemHealth (const MWWorld::ConstPtr& ptr) const
     {
         return true;
@@ -117,7 +110,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Repair> *ref = ptr.get<ESM::Repair>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

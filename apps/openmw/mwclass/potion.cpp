@@ -98,19 +98,12 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Potion::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Potion::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Potion> *ref = ptr.get<ESM::Potion>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

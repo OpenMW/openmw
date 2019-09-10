@@ -134,13 +134,6 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Miscellaneous::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
@@ -159,14 +152,16 @@ namespace MWClass
         else // gold displays its count also if it's 1.
             countString = " (" + std::to_string(count) + ")";
 
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + countString;
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + countString;
         info.icon = ref->mBase->mIcon;
 
         if (ref->mRef.getSoul() != "")
         {
             const ESM::Creature *creature = store.get<ESM::Creature>().search(ref->mRef.getSoul());
-            if (creature)
+            if (creature && !creature->mName.empty())
                 info.caption += " (" + creature->mName + ")";
+            else if (creature)
+                info.caption += " (" + creature->mId + ")";
         }
 
         std::string text;

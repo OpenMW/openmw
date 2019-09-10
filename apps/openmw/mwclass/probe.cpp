@@ -104,19 +104,12 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Probe::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Probe::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Probe> *ref = ptr.get<ESM::Probe>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

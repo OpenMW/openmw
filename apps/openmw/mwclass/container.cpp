@@ -252,18 +252,10 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        if (getName(ptr).empty())
-            return false;
-
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
             return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
 
         return true;
-    }
-
-    bool Container::canBeActivated(const MWWorld::Ptr& ptr) const
-    {
-        return hasToolTip(ptr);
     }
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -271,7 +263,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();

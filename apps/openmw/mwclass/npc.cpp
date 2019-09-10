@@ -1071,7 +1071,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
-        if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
+        if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
             info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);

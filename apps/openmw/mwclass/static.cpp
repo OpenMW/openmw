@@ -45,6 +45,11 @@ namespace MWClass
         return "";
     }
 
+    bool Static::hasToolTip(const MWWorld::ConstPtr& ptr) const
+    {
+        return false;
+    }
+
     void Static::registerSelf()
     {
         std::shared_ptr<Class> instance (new Static);

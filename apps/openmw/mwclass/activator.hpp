@@ -24,7 +24,7 @@ namespace MWClass
             /// can return an empty string.
 
             virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
+            ///< @return true if this object has a tooltip when focused (default implementation: true)
 
             virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const;
             ///< Return whether this class of object can be activated with telekinesis

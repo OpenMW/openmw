@@ -23,7 +23,7 @@ namespace MWClass
             /// can return an empty string.
 
             virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
+            ///< @return true if this object has a tooltip when focused (default implementation: true)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.

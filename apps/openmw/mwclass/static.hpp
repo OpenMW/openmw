@@ -20,6 +20,9 @@ namespace MWClass
             ///< \return name (the one that is to be presented to the user; not the internal one);
             /// can return an empty string.
 
+            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
+            ///< @return true if this object has a tooltip when focused (default implementation: true)
+
             static void registerSelf();
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
