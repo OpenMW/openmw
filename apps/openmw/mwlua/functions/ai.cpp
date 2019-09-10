@@ -15,52 +15,49 @@
 
 #include <components/debug/debuglog.hpp>
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    void bindTES3AI()
     {
-        void bindTES3AI()
+        auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
+        sol::state& state = stateHandle.state;
+
+        state["omw"]["getCurrentAIPackageId"] = [](sol::table params)
         {
-            auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
-            sol::state& state = stateHandle.state;
+            MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
 
-            state["omw"]["getCurrentAIPackageId"] = [](sol::table params)
+            if (!ptr.isEmpty())
             {
-                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+                if (ptr == MWMechanics::getPlayer())
+                    return -1;
 
-                if (!ptr.isEmpty())
-                {
-                    if (ptr == MWMechanics::getPlayer())
-                        return -1;
-
-                    return ptr.getClass().getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
-                }
-                else
-                {
-                    throw std::invalid_argument("Invalid reference parameter provided.");
-                }
-
-                return -1;
-            };
-
-            state["omw"]["setAIActivate"] = [](sol::table params)
+                return ptr.getClass().getCreatureStats (ptr).getAiSequence().getLastRunTypeId();
+            }
+            else
             {
-                MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
-                if (!ptr.getClass().isActor())
-                    throw std::invalid_argument("Invalid reference parameter provided.");
+                throw std::invalid_argument("Invalid reference parameter provided.");
+            }
 
-                // FIXME: reference target support
-                sol::optional<std::string> target = params["target"];
-                if (target.value().empty())
-                    throw std::invalid_argument("Invalid target parameter provided.");
+            return -1;
+        };
 
-                // FIXME: actual reset flag support
-                //bool reset = getOptionalParam<bool>(params, "reset", true);
+        state["omw"]["setAIActivate"] = [](sol::table params)
+        {
+            MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+            if (!ptr.getClass().isActor())
+                throw std::invalid_argument("Invalid reference parameter provided.");
 
-                MWMechanics::AiActivate activatePackage(target.value());
-                ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(activatePackage, ptr);
-                Log(Debug::Info) << "AiActivate";
-            };
-        }
+            // FIXME: reference target support
+            sol::optional<std::string> target = params["target"];
+            if (target.value().empty())
+                throw std::invalid_argument("Invalid target parameter provided.");
+
+            // FIXME: actual reset flag support
+            //bool reset = getOptionalParam<bool>(params, "reset", true);
+
+            MWMechanics::AiActivate activatePackage(target.value());
+            ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(activatePackage, ptr);
+            Log(Debug::Info) << "AiActivate";
+        };
     }
 }

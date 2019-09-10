@@ -1,9 +1,8 @@
-#pragma once
+#ifndef GAME_MWLUA_LUAMANAGER_H
+#define GAME_MWLUA_LUAMANAGER_H
 
 #include <unordered_map>
 #include <queue>
-
-//#include "TES3Util.h"
 
 #include <extern/sol2/sol.hpp>
 
@@ -15,106 +14,105 @@
 
 #include "disableableeventmanager.hpp"
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    typedef std::unordered_map<unsigned long, sol::object> UserdataMap;
+
+    class TimerController;
+    class LuaManager;
+
+    enum class TimerType
     {
-        typedef std::unordered_map<unsigned long, sol::object> UserdataMap;
+        RealTime,
+        SimulationTime,
+        GameTime
+    };
 
-        class TimerController;
-        class LuaManager;
+    class ThreadedStateHandle
+    {
+    public:
+        ThreadedStateHandle(LuaManager *);
+        ~ThreadedStateHandle();
 
-        enum class TimerType
+        // Trigger a thread-safe event.
+        sol::object triggerEvent(Event::BaseEvent*);
+
+        // Guarded access to the userdata cache.
+        //sol::object getCachedUserdata(TES3::BaseObject*);
+        //sol::object getCachedUserdata(TES3::MobileObject*);
+        //void insertUserdataIntoCache(TES3::BaseObject*, sol::object);
+        //void insertUserdataIntoCache(TES3::MobileObject*, sol::object);
+        //void removeUserdataFromCache(TES3::BaseObject*);
+        //void removeUserdataFromCache(TES3::MobileObject*);
+
+        sol::state& state;
+
+    private:
+        LuaManager * luaManager;
+    };
+
+    class LuaManager
+    {
+        friend class ThreadedStateHandle;
+
+    public:
+        // Returns an instance to the singleton.
+        static LuaManager& getInstance()
         {
-            RealTime,
-            SimulationTime,
-            GameTime
+            return singleton;
         };
 
-        class ThreadedStateHandle
-        {
-        public:
-            ThreadedStateHandle(LuaManager *);
-            ~ThreadedStateHandle();
+        // Returns a thread-locking reference to the sol2 lua state.
+        ThreadedStateHandle getThreadSafeStateHandle();
 
-            // Trigger a thread-safe event.
-            sol::object triggerEvent(event::BaseEvent*);
+        void hook();
 
-            // Guarded access to the userdata cache.
-            //sol::object getCachedUserdata(TES3::BaseObject*);
-            //sol::object getCachedUserdata(TES3::MobileObject*);
-            //void insertUserdataIntoCache(TES3::BaseObject*, sol::object);
-            //void insertUserdataIntoCache(TES3::MobileObject*, sol::object);
-            //void removeUserdataFromCache(TES3::BaseObject*);
-            //void removeUserdataFromCache(TES3::MobileObject*);
+        void cleanup();
 
-            sol::state& state;
+        // Set context for lua scripts.
+        ESM::Script* getCurrentScript();
+        void setCurrentScript(ESM::Script* script);
+        MWWorld::Ptr getCurrentReference();
+        void setCurrentReference(MWWorld::Ptr ptr);
 
-        private:
-            LuaManager * luaManager;
-        };
+        // Helper function to execute main.lua scripts recursively in a directory.
+        //void executeMainModScripts(const char* path, const char* filename = "main.lua");
 
-        class LuaManager
-        {
-            friend class ThreadedStateHandle;
+        // Management functions for timers.
+        void updateTimers(float deltaTime, double simulationTimestamp, bool simulating);
+        std::shared_ptr<TimerController> getTimerController(TimerType type);
 
-        public:
-            // Returns an instance to the singleton.
-            static LuaManager& getInstance()
-            {
-                return singleton;
-            };
+        void update(float duration, float timestamp, bool paused);
 
-            // Returns a thread-locking reference to the sol2 lua state.
-            ThreadedStateHandle getThreadSafeStateHandle();
+        void clearTimers();
 
-            void hook();
+    private:
+        LuaManager();
 
-            void cleanup();
+        //
+        void bindData();
 
-            // Set context for lua scripts.
-            ESM::Script* getCurrentScript();
-            void setCurrentScript(ESM::Script* script);
-            MWWorld::Ptr getCurrentReference();
-            void setCurrentReference(MWWorld::Ptr ptr);
+        void initSimulationTime();
 
-            // Helper function to execute main.lua scripts recursively in a directory.
-            //void executeMainModScripts(const char* path, const char* filename = "main.lua");
+        // Event management.
+        Event::DisableableEventManager mDisableableEventManager;
 
-            // Management functions for timers.
-            void updateTimers(float deltaTime, double simulationTimestamp, bool simulating);
-            std::shared_ptr<TimerController> getTimerController(TimerType type);
+        //
+        static LuaManager singleton;
 
-            void update(float duration, float timestamp, bool paused);
+        sol::state mLuaState;
 
-            void clearTimers();
+        //
+        ESM::Script* mCurrentScript = nullptr;
+        MWWorld::Ptr mCurrentReference;
 
-        private:
-            LuaManager();
+        // Timers.
+        std::shared_ptr<TimerController> mGameTimers;
+        std::shared_ptr<TimerController> mSimulateTimers;
+        std::shared_ptr<TimerController> mRealTimers;
 
-            //
-            void bindData();
-
-            void initSimulationTime();
-
-            // Event management.
-            mwse::lua::event::DisableableEventManager mDisableableEventManager;
-
-            //
-            static LuaManager singleton;
-
-            sol::state mLuaState;
-
-            //
-            ESM::Script* mCurrentScript = nullptr;
-            MWWorld::Ptr mCurrentReference;
-
-            // Timers.
-            std::shared_ptr<TimerController> mGameTimers;
-            std::shared_ptr<TimerController> mSimulateTimers;
-            std::shared_ptr<TimerController> mRealTimers;
-
-            sol::object triggerEvent(event::BaseEvent*);
-        };
-    }
+        sol::object triggerEvent(Event::BaseEvent*);
+    };
 }
+
+#endif

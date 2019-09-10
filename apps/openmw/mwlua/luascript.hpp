@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_MWLUA_SCRIPT_H
+#define GAME_MWLUA_SCRIPT_H
 
 #include <extern/sol2/sol.hpp>
 
@@ -8,19 +9,18 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    struct LuaScript : public DynamicLuaObject
     {
-        struct LuaScript : public DynamicLuaObject
+        LuaScript() :
+            script(nullptr),
+            reference(MWWorld::Ptr())
         {
-            LuaScript() :
-                script(nullptr),
-                reference(MWWorld::Ptr())
-            {
-            }
-            ESM::Script* script;
-            MWWorld::Ptr reference;
-        };
-    }
+        }
+        ESM::Script* script;
+        MWWorld::Ptr reference;
+    };
 }
+
+#endif

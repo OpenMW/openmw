@@ -156,8 +156,9 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);
         MWBase::Environment::get().getWindowManager()->fadeScreenIn(1);
 
-        if (mwse::lua::event::LoadedGameEvent::getEventEnabled()) {
-            mwse::lua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new mwse::lua::event::LoadedGameEvent(nullptr, false, true));
+        if (MWLua::Event::LoadedGameEvent::getEventEnabled())
+        {
+            MWLua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new MWLua::Event::LoadedGameEvent(nullptr, false, true));
         }
     }
     catch (std::exception& e)
@@ -559,8 +560,9 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         MWBase::Environment::get().getWorld()->markCellAsUnchanged();
 
         // FIXME: getThreadSafeStateHandle()
-        if (mwse::lua::event::LoadedGameEvent::getEventEnabled()) {
-            mwse::lua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new mwse::lua::event::LoadedGameEvent(filepath.substr(filepath.find_last_of('/')+1).c_str(), quickLoad, false));
+        if (MWLua::Event::LoadedGameEvent::getEventEnabled())
+        {
+            MWLua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new MWLua::Event::LoadedGameEvent(filepath.substr(filepath.find_last_of('/')+1).c_str(), quickLoad, false));
         }
     }
     catch (const std::exception& e)

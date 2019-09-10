@@ -1,9 +1,9 @@
-#pragma once
+#ifndef GAME_MWLUA_MAGICEFFECT_H
+#define GAME_MWLUA_MAGICEFFECT_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3MagicEffect();
-    }
+    void bindTES3MagicEffect();
 }
+
+#endif

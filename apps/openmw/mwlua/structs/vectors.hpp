@@ -1,9 +1,9 @@
-#pragma once
+#ifndef GAME_MWLUA_VECTORS_H
+#define GAME_MWLUA_VECTORS_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3Vectors();
-    }
+    void bindTES3Vectors();
 }
+
+#endif

@@ -1,9 +1,9 @@
-#pragma once
+#ifndef GAME_MWLUA_TES3UTIL_H
+#define GAME_MWLUA_TES3UTIL_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3Util();
-    }
+    void bindTES3Util();
 }
+
+#endif

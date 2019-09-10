@@ -311,7 +311,7 @@ namespace MWWorld
 
     void World::clear()
     {
-        mwse::lua::LuaManager::getInstance().clearTimers();
+        MWLua::LuaManager::getInstance().clearTimers();
 
         mWeatherManager->clear();
         mRendering->clear();
@@ -1861,7 +1861,7 @@ namespace MWWorld
         }
 
         float timestamp = getTimeStamp().getDay() * 24 + getTimeStamp().getHour();
-        mwse::lua::LuaManager::getInstance().update(duration, timestamp, paused);
+        MWLua::LuaManager::getInstance().update(duration, timestamp, paused);
     }
 
     void World::updatePhysics (float duration, bool paused)

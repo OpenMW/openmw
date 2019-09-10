@@ -212,351 +212,348 @@
 
 #include <unordered_map>
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    // Initialize singleton.
+    LuaManager LuaManager::singleton;
+
+    // We still abort the program if an unprotected lua error happens. Here we at least
+    // get it in the log so it can be debugged.
+    int panic(lua_State* L)
     {
-        // Initialize singleton.
-        LuaManager LuaManager::singleton;
+        const char* message = lua_tostring(L, -1);
+        Log(Debug::Error) << (message ? message : "An unexpected error occurred and forced the lua state to call atpanic.");
+        return 0;
+    }
 
-        // We still abort the program if an unprotected lua error happens. Here we at least
-        // get it in the log so it can be debugged.
-        int panic(lua_State* L)
-        {
-            const char* message = lua_tostring(L, -1);
-            Log(Debug::Error) << (message ? message : "An unexpected error occurred and forced the lua state to call atpanic.");
-            return 0;
+    int exceptionHandler(lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description)
+    {
+        if (maybe_exception) {
+            const std::exception& ex = *maybe_exception;
+            Log(Debug::Error) << "An unhandled exception occurred: " << ex.what();
+        }
+        else {
+            Log(Debug::Error) << "An unhandled exception occurred: " << description.data();
         }
 
-        int exceptionHandler(lua_State* L, sol::optional<const std::exception&> maybe_exception, sol::string_view description)
-        {
-            if (maybe_exception) {
-                const std::exception& ex = *maybe_exception;
-                Log(Debug::Error) << "An unhandled exception occurred: " << ex.what();
-            }
-            else {
-                Log(Debug::Error) << "An unhandled exception occurred: " << description.data();
-            }
+        logStackTrace();
 
-            logStackTrace();
+        return sol::stack::push(L, description);
+    }
 
-            return sol::stack::push(L, description);
-        }
+    // LuaManager constructor. This is private, as a singleton.
+    LuaManager::LuaManager()
+    {
+        // Open default lua libraries.
+        mLuaState.open_libraries();
 
-        // LuaManager constructor. This is private, as a singleton.
-        LuaManager::LuaManager()
-        {
-            // Open default lua libraries.
-            mLuaState.open_libraries();
+        // Override the default atpanic to print to the log.
+        mLuaState.set_panic(&panic);
+        mLuaState.set_exception_handler(&exceptionHandler);
 
-            // Override the default atpanic to print to the log.
-            mLuaState.set_panic(&panic);
-            mLuaState.set_exception_handler(&exceptionHandler);
+        // Set up our timers.
+        mGameTimers = std::make_shared<TimerController>();
+        mSimulateTimers = std::make_shared<TimerController>();
+        mRealTimers = std::make_shared<TimerController>();
 
-            // Set up our timers.
-            mGameTimers = std::make_shared<TimerController>();
-            mSimulateTimers = std::make_shared<TimerController>();
-            mRealTimers = std::make_shared<TimerController>();
+        // Bind our data types.
+        bindData();
+    }
 
-            // Bind our data types.
-            bindData();
-        }
+    void LuaManager::bindData()
+    {
+        // Bind our LuaScript type, which is used for holding script contexts.
+        mLuaState.new_usertype<LuaScript>("LuaScript",
+            sol::constructors<LuaScript()>(),
 
-        void LuaManager::bindData()
-        {
-            // Bind our LuaScript type, which is used for holding script contexts.
-            mLuaState.new_usertype<LuaScript>("LuaScript",
-                sol::constructors<LuaScript()>(),
+            // Implement dynamic object metafunctions.
+            sol::meta_function::index, &DynamicLuaObject::dynamic_get,
+            sol::meta_function::new_index, &DynamicLuaObject::dynamic_set,
+            sol::meta_function::length, [](DynamicLuaObject& d) { return d.entries.size(); },
 
-                // Implement dynamic object metafunctions.
-                sol::meta_function::index, &DynamicLuaObject::dynamic_get,
-                sol::meta_function::new_index, &DynamicLuaObject::dynamic_set,
-                sol::meta_function::length, [](DynamicLuaObject& d) { return d.entries.size(); },
+            // Set up read-only properties.
+            "script", sol::readonly(&LuaScript::script),
+            "reference", sol::readonly(&LuaScript::reference)//,
+            //"context", sol::readonly_property([](LuaScript& self) { return std::shared_ptr<ScriptContext>(new ScriptContext(self.script)); })
 
-                // Set up read-only properties.
-                "script", sol::readonly(&LuaScript::script),
-                "reference", sol::readonly(&LuaScript::reference)//,
-                //"context", sol::readonly_property([](LuaScript& self) { return std::shared_ptr<ScriptContext>(new ScriptContext(self.script)); })
+            );
 
-                );
+        // Create the base of API tables.
+        mLuaState["omw"] = mLuaState.create_table();
 
-            // Create the base of API tables.
-            mLuaState["omw"] = mLuaState.create_table();
+        // Expose timers.
+        bindLuaTimer();
+        mLuaState["omw"]["realTimers"] = mRealTimers;
+        mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
+        mLuaState["omw"]["gameTimers"] = mGameTimers;
 
-            // Expose timers.
-            bindLuaTimer();
-            mLuaState["omw"]["realTimers"] = mRealTimers;
-            mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
-            mLuaState["omw"]["gameTimers"] = mGameTimers;
+        bindTES3MagicEffect();
+        bindTES3WeaponType();
+        bindTES3Reference();
 
-            bindTES3MagicEffect();
-            bindTES3WeaponType();
-            bindTES3Reference();
-
-            // Bind TES3 data types.
-            /*
-            bindTES3ActionData();
-            bindTES3Activator();
-            bindTES3AI();
-            bindTES3Alchemy();
-            bindTES3Apparatus();
-            bindTES3Armor();
-            bindTES3Attachment();
-            bindTES3AudioController();
-            bindTES3BodyPart();
-            bindTES3Book();
-            bindTES3Cell();
-            bindTES3Class();
-            bindTES3Clothing();
-            bindTES3Collections();
-            bindTES3Collision();
-            bindTES3CombatSession();
-            bindTES3Container();
-            bindTES3Creature();
-            bindTES3DataHandler();
-            bindTES3Dialogue();
-            bindTES3Door();
-            bindTES3Enchantment();
-            bindTES3Faction();
-            bindTES3Fader();
-            bindTES3Game();
-            bindTES3GameFile();
-            bindTES3GameSetting();
-            bindTES3GlobalVariable();
-            bindTES3Ingredient();
-            bindTES3InputController();
-            bindTES3Inventory();
-            bindTES3LeveledList();
-            bindTES3Light();
-            bindTES3Lockpick();
-            bindTES3MagicEffectInstance();
-            bindTES3MagicSourceInstance();
-            bindTES3Misc();
-            bindTES3MobileActor();
-            bindTES3MobileCreature();
-            bindTES3MobileNPC();
-            bindTES3MobilePlayer();
-            bindTES3MobileProjectile();
-            bindTES3Moon();
-            bindTES3NPC();
-            bindTES3Probe();
-            bindTES3Race();
-            bindTES3Reference();
-            bindTES3ReferenceList();
-            bindTES3Region();
-            bindTES3RepairTool();
-            bindTES3Script();
-            bindTES3Skill();
-            bindTES3Sound();
-            bindTES3Spell();
-            bindTES3SpellList();
-            bindTES3Static();
-            bindTES3Statistic();
-            bindTES3TArray();
-            bindTES3Vectors();
-            bindTES3Weapon();
-            bindTES3Weather();
-            bindTES3WeatherController();
-            bindTES3WorldController();
-
-            bindTES3UIElement();
-            bindTES3UIInventoryTile();
-            bindTES3UIManager();
-            bindTES3UIMenuController();
-            bindTES3UIWidgets();
-
-            // Bind NI data types.
-            bindNICamera();
-            bindNICollisionSwitch();
-            bindNIColor();
-            bindNINode();
-            bindNIObject();
-            bindNILight();
-            bindNIPick();
-            bindNIPixelData();
-            bindNIProperties();
-            bindNISourceTexture();
-            bindNISwitchNode();
-            bindNITimeController();
-            bindNITriShape();
-            */
-
-            // Bind our disable event manager.
-            mwse::lua::event::DisableableEventManager::bindToLua();
-            mLuaState["omw"]["disableableEvents"] = &mDisableableEventManager;
-        }
-
-        void LuaManager::update(float duration, float timestamp, bool paused)
-        {
-            updateTimers(duration, timestamp, !paused);
-        }
-
-        ThreadedStateHandle::ThreadedStateHandle(LuaManager * manager) : state(manager->mLuaState), luaManager(manager)
-        {
-            //luaManager->claimLuaThread();
-        }
-
-        ThreadedStateHandle::~ThreadedStateHandle()
-        {
-            //luaManager->releaseLuaThread();
-        }
-
-        sol::object ThreadedStateHandle::triggerEvent(event::BaseEvent* e)
-        {
-            return luaManager->triggerEvent(e);
-        }
-
+        // Bind TES3 data types.
         /*
-        // Guarded access to the userdata cache.
-        sol::object ThreadedStateHandle::getCachedUserdata(TES3::BaseObject* o) {
-            return luaManager->getCachedUserdata(o);
-        }
+        bindTES3ActionData();
+        bindTES3Activator();
+        bindTES3AI();
+        bindTES3Alchemy();
+        bindTES3Apparatus();
+        bindTES3Armor();
+        bindTES3Attachment();
+        bindTES3AudioController();
+        bindTES3BodyPart();
+        bindTES3Book();
+        bindTES3Cell();
+        bindTES3Class();
+        bindTES3Clothing();
+        bindTES3Collections();
+        bindTES3Collision();
+        bindTES3CombatSession();
+        bindTES3Container();
+        bindTES3Creature();
+        bindTES3DataHandler();
+        bindTES3Dialogue();
+        bindTES3Door();
+        bindTES3Enchantment();
+        bindTES3Faction();
+        bindTES3Fader();
+        bindTES3Game();
+        bindTES3GameFile();
+        bindTES3GameSetting();
+        bindTES3GlobalVariable();
+        bindTES3Ingredient();
+        bindTES3InputController();
+        bindTES3Inventory();
+        bindTES3LeveledList();
+        bindTES3Light();
+        bindTES3Lockpick();
+        bindTES3MagicEffectInstance();
+        bindTES3MagicSourceInstance();
+        bindTES3Misc();
+        bindTES3MobileActor();
+        bindTES3MobileCreature();
+        bindTES3MobileNPC();
+        bindTES3MobilePlayer();
+        bindTES3MobileProjectile();
+        bindTES3Moon();
+        bindTES3NPC();
+        bindTES3Probe();
+        bindTES3Race();
+        bindTES3Reference();
+        bindTES3ReferenceList();
+        bindTES3Region();
+        bindTES3RepairTool();
+        bindTES3Script();
+        bindTES3Skill();
+        bindTES3Sound();
+        bindTES3Spell();
+        bindTES3SpellList();
+        bindTES3Static();
+        bindTES3Statistic();
+        bindTES3TArray();
+        bindTES3Vectors();
+        bindTES3Weapon();
+        bindTES3Weather();
+        bindTES3WeatherController();
+        bindTES3WorldController();
 
-        sol::object ThreadedStateHandle::getCachedUserdata(TES3::MobileObject* mo) {
-            return luaManager->getCachedUserdata(mo);
-        }
+        bindTES3UIElement();
+        bindTES3UIInventoryTile();
+        bindTES3UIManager();
+        bindTES3UIMenuController();
+        bindTES3UIWidgets();
 
-        void ThreadedStateHandle::insertUserdataIntoCache(TES3::BaseObject* o, sol::object lo) {
-            luaManager->insertUserdataIntoCache(o, lo);
-        }
-
-        void ThreadedStateHandle::insertUserdataIntoCache(TES3::MobileObject* mo, sol::object lo) {
-            luaManager->insertUserdataIntoCache(mo, lo);
-        }
-
-        void ThreadedStateHandle::removeUserdataFromCache(TES3::BaseObject* o) {
-            luaManager->removeUserdataFromCache(o);
-        }
-
-        void ThreadedStateHandle::removeUserdataFromCache(TES3::MobileObject* mo) {
-            luaManager->removeUserdataFromCache(mo);
-        }
+        // Bind NI data types.
+        bindNICamera();
+        bindNICollisionSwitch();
+        bindNIColor();
+        bindNINode();
+        bindNIObject();
+        bindNILight();
+        bindNIPick();
+        bindNIPixelData();
+        bindNIProperties();
+        bindNISourceTexture();
+        bindNISwitchNode();
+        bindNITimeController();
+        bindNITriShape();
         */
 
-        ThreadedStateHandle LuaManager::getThreadSafeStateHandle()
+        // Bind our disable event manager.
+        Event::DisableableEventManager::bindToLua();
+        mLuaState["omw"]["disableableEvents"] = &mDisableableEventManager;
+    }
+
+    void LuaManager::update(float duration, float timestamp, bool paused)
+    {
+        updateTimers(duration, timestamp, !paused);
+    }
+
+    ThreadedStateHandle::ThreadedStateHandle(LuaManager * manager) : state(manager->mLuaState), luaManager(manager)
+    {
+        //luaManager->claimLuaThread();
+    }
+
+    ThreadedStateHandle::~ThreadedStateHandle()
+    {
+        //luaManager->releaseLuaThread();
+    }
+
+    sol::object ThreadedStateHandle::triggerEvent(Event::BaseEvent* e)
+    {
+        return luaManager->triggerEvent(e);
+    }
+
+    /*
+    // Guarded access to the userdata cache.
+    sol::object ThreadedStateHandle::getCachedUserdata(TES3::BaseObject* o) {
+        return luaManager->getCachedUserdata(o);
+    }
+
+    sol::object ThreadedStateHandle::getCachedUserdata(TES3::MobileObject* mo) {
+        return luaManager->getCachedUserdata(mo);
+    }
+
+    void ThreadedStateHandle::insertUserdataIntoCache(TES3::BaseObject* o, sol::object lo) {
+        luaManager->insertUserdataIntoCache(o, lo);
+    }
+
+    void ThreadedStateHandle::insertUserdataIntoCache(TES3::MobileObject* mo, sol::object lo) {
+        luaManager->insertUserdataIntoCache(mo, lo);
+    }
+
+    void ThreadedStateHandle::removeUserdataFromCache(TES3::BaseObject* o) {
+        luaManager->removeUserdataFromCache(o);
+    }
+
+    void ThreadedStateHandle::removeUserdataFromCache(TES3::MobileObject* mo) {
+        luaManager->removeUserdataFromCache(mo);
+    }
+    */
+
+    ThreadedStateHandle LuaManager::getThreadSafeStateHandle()
+    {
+        return ThreadedStateHandle(this);
+    }
+
+    void LuaManager::hook()
+    {
+        initSimulationTime();
+
+        // Execute init.lua
+        sol::protected_function_result result = mLuaState.safe_script_file("scripts/init.lua");
+        if (!result.valid())
         {
-            return ThreadedStateHandle(this);
+            sol::error error = result;
+            Log(Debug::Error) << "[LuaManager] ERROR: Failed to initialize Lua interface: " << error.what();
+            return;
         }
 
-        void LuaManager::hook()
+        // Bind libraries.
+        //bindMWSEMemoryUtil();
+        //bindMWSEStack();
+        //bindScriptUtil();
+        //bindStringUtil();
+        bindTES3Util();
+
+        // Alter existing libraries.
+        //luaState["os"]["exit"] = customOSExit;
+
+        // UI framework hooks
+        //TES3::UI::hook();
+
+        // Install custom magic effect hooks.
+        //TES3::MagicEffectController::InstallCustomMagicEffectController();
+
+        // Look for main.lua scripts in the usual directories.
+        //executeMainModScripts("Data Files/MWSE/core");
+        //executeMainModScripts("Data Files/MWSE/mods");
+
+        // Temporary backwards compatibility for old-style MWSE mods.
+        //executeMainModScripts("Data Files/MWSE/lua", "mod_init.lua");
+    }
+
+    void LuaManager::cleanup()
+    {
+        // Clean up our handles to our override tables. Helps to prevent a crash when
+        // closing mid-execution.
+        /*
+        scriptOverrides.clear();
+
+        userdataMapMutex.lock();
+        userdataCache.clear();
+        userdataMapMutex.unlock();
+        */
+    }
+
+    ESM::Script* LuaManager::getCurrentScript()
+    {
+        return mCurrentScript;
+    }
+
+    void LuaManager::setCurrentScript(ESM::Script* script)
+    {
+        mCurrentScript = script;
+    }
+
+    MWWorld::Ptr LuaManager::getCurrentReference()
+    {
+        return mCurrentReference;
+    }
+
+    void LuaManager::setCurrentReference(MWWorld::Ptr ptr)
+    {
+        mCurrentReference = ptr;
+    }
+
+    sol::object LuaManager::triggerEvent(Event::BaseEvent* baseEvent)
+    {
+        //auto stateHandle = getThreadSafeStateHandle();
+
+        sol::object response = Event::trigger(baseEvent->getEventName(), baseEvent->createEventTable(), baseEvent->getEventOptions());
+        delete baseEvent;
+        return response;
+    }
+
+    void LuaManager::updateTimers(float deltaTime, double simulationTimestamp, bool simulating)
+    {
+        mRealTimers->incrementClock(deltaTime);
+        mGameTimers->setClock(simulationTimestamp);
+
+        if (simulating)
         {
-            initSimulationTime();
-
-            // Execute init.lua
-            sol::protected_function_result result = mLuaState.safe_script_file("scripts/init.lua");
-            if (!result.valid())
-            {
-                sol::error error = result;
-                Log(Debug::Error) << "[LuaManager] ERROR: Failed to initialize Lua interface: " << error.what();
-                return;
-            }
-
-            // Bind libraries.
-            //bindMWSEMemoryUtil();
-            //bindMWSEStack();
-            //bindScriptUtil();
-            //bindStringUtil();
-            bindTES3Util();
-
-            // Alter existing libraries.
-            //luaState["os"]["exit"] = customOSExit;
-
-            // UI framework hooks
-            //TES3::UI::hook();
-
-            // Install custom magic effect hooks.
-            //TES3::MagicEffectController::InstallCustomMagicEffectController();
-
-            // Look for main.lua scripts in the usual directories.
-            //executeMainModScripts("Data Files/MWSE/core");
-            //executeMainModScripts("Data Files/MWSE/mods");
-
-            // Temporary backwards compatibility for old-style MWSE mods.
-            //executeMainModScripts("Data Files/MWSE/lua", "mod_init.lua");
+            mSimulateTimers->incrementClock(deltaTime);
         }
+    }
 
-        void LuaManager::cleanup()
+    void LuaManager::initSimulationTime()
+    {
+        // Reset the clocks for each timer.
+        mRealTimers->setClock(0.0);
+        mSimulateTimers->setClock(0.0);
+
+        auto timestamp = MWBase::Environment::get().getWorld()->getTimeStamp();
+        float time = timestamp.getDay() * 24 + timestamp.getHour();
+        mGameTimers->setClock(time);
+    }
+
+    void LuaManager::clearTimers()
+    {
+        mRealTimers->clearTimers();
+        mSimulateTimers->clearTimers();
+        mGameTimers->clearTimers();
+
+        initSimulationTime();
+    }
+
+    std::shared_ptr<TimerController> LuaManager::getTimerController(TimerType type)
+    {
+        switch (type)
         {
-            // Clean up our handles to our override tables. Helps to prevent a crash when
-            // closing mid-execution.
-            /*
-            scriptOverrides.clear();
-
-            userdataMapMutex.lock();
-            userdataCache.clear();
-            userdataMapMutex.unlock();
-            */
+            case TimerType::RealTime: return mRealTimers;
+            case TimerType::SimulationTime: return mSimulateTimers;
+            case TimerType::GameTime: return mGameTimers;
         }
-
-        ESM::Script* LuaManager::getCurrentScript()
-        {
-            return mCurrentScript;
-        }
-
-        void LuaManager::setCurrentScript(ESM::Script* script)
-        {
-            mCurrentScript = script;
-        }
-
-        MWWorld::Ptr LuaManager::getCurrentReference()
-        {
-            return mCurrentReference;
-        }
-
-        void LuaManager::setCurrentReference(MWWorld::Ptr ptr)
-        {
-            mCurrentReference = ptr;
-        }
-
-        sol::object LuaManager::triggerEvent(event::BaseEvent* baseEvent)
-        {
-            //auto stateHandle = getThreadSafeStateHandle();
-
-            sol::object response = event::trigger(baseEvent->getEventName(), baseEvent->createEventTable(), baseEvent->getEventOptions());
-            delete baseEvent;
-            return response;
-        }
-
-        void LuaManager::updateTimers(float deltaTime, double simulationTimestamp, bool simulating)
-        {
-            mRealTimers->incrementClock(deltaTime);
-            mGameTimers->setClock(simulationTimestamp);
-
-            if (simulating)
-            {
-                mSimulateTimers->incrementClock(deltaTime);
-            }
-        }
-
-        void LuaManager::initSimulationTime()
-        {
-            // Reset the clocks for each timer.
-            mRealTimers->setClock(0.0);
-            mSimulateTimers->setClock(0.0);
-
-            auto timestamp = MWBase::Environment::get().getWorld()->getTimeStamp();
-            float time = timestamp.getDay() * 24 + timestamp.getHour();
-            mGameTimers->setClock(time);
-        }
-
-        void LuaManager::clearTimers()
-        {
-            mRealTimers->clearTimers();
-            mSimulateTimers->clearTimers();
-            mGameTimers->clearTimers();
-
-            initSimulationTime();
-        }
-
-        std::shared_ptr<TimerController> LuaManager::getTimerController(TimerType type)
-        {
-            switch (type)
-            {
-                case TimerType::RealTime: return mRealTimers;
-                case TimerType::SimulationTime: return mSimulateTimers;
-                case TimerType::GameTime: return mGameTimers;
-            }
-            return nullptr;
-        }
+        return nullptr;
     }
 }

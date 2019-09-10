@@ -1,7 +1,9 @@
-namespace mwse
+#ifndef GAME_MWLUA_SOUND_H
+#define GAME_MWLUA_SOUND_H
+
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3Sound();
-    }
+    void bindTES3Sound();
 }
+
+#endif

@@ -1,23 +1,23 @@
-#pragma once
+#ifndef GAME_MWLUA_GENERICEVENT_H
+#define GAME_MWLUA_GENERICEVENT_H
 
 #include "baseevent.hpp"
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    namespace Event
     {
-        namespace event
+        // Generic event. Delivers no real payload and contains a dynamic name.
+        class GenericEvent : public BaseEvent
         {
-            // Generic event. Delivers no real payload and contains a dynamic name.
-            class GenericEvent : public BaseEvent
-            {
-            public:
-                GenericEvent(const char* name);
-                const char* getEventName();
+        public:
+            GenericEvent(const char* name);
+            const char* getEventName();
 
-            protected:
-                const char* mEventName;
-            };
-        }
+        protected:
+            const char* mEventName;
+        };
     }
 }
+
+#endif

@@ -1,7 +1,9 @@
-namespace mwse
+#ifndef GAME_MWLUA_MECHANICS_H
+#define GAME_MWLUA_MECHANICS_H
+
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3Mechanics();
-    }
+    void bindTES3Mechanics();
 }
+
+#endif

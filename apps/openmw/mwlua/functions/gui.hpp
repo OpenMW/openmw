@@ -1,7 +1,9 @@
-namespace mwse
+#ifndef GAME_MWLUA_GUI_H
+#define GAME_MWLUA_GUI_H
+
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3GUI();
-    }
+    void bindTES3GUI();
 }
+
+#endif

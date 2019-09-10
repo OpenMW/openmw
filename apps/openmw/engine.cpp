@@ -743,7 +743,7 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
-    mwse::lua::LuaManager::getInstance().hook();
+    MWLua::LuaManager::getInstance().hook();
 
     // Start the main rendering loop
     osg::Timer frameTimer;
@@ -778,7 +778,7 @@ void OMW::Engine::go()
         mEnvironment.limitFrameRate(frameTimer.time_s());
     }
 
-    mwse::lua::LuaManager::getInstance().cleanup();
+    MWLua::LuaManager::getInstance().cleanup();
 
     // Save user settings
     settings.saveUser(settingspath);

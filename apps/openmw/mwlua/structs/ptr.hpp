@@ -1,9 +1,9 @@
-#pragma once
+#ifndef GAME_MWLUA_PTR_H
+#define GAME_MWLUA_PTR_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3Reference();
-    }
+    void bindTES3Reference();
 }
+
+#endif

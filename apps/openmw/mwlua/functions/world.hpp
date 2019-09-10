@@ -1,7 +1,9 @@
-namespace mwse
+#ifndef GAME_MWLUA_WORLD_H
+#define GAME_MWLUA_WORLD_H
+
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3World();
-    }
+    void bindTES3World();
 }
+
+#endif

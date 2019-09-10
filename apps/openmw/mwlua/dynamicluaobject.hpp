@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GAME_MWLUA_DYNAMICOBJECT_H
+#define GAME_MWLUA_DYNAMICOBJECT_H
 
 /*
     Taken from the Sol2 documentation for dynamic objects:
@@ -42,3 +43,5 @@ struct DynamicLuaObject
         return it->second;
     }
 };
+
+#endif

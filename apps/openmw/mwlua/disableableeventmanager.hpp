@@ -1,16 +1,16 @@
-#pragma once
+#ifndef GAME_MWLUA_EVENTMANAGER_H
+#define GAME_MWLUA_EVENTMANAGER_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    namespace Event
     {
-        namespace event
+        class DisableableEventManager
         {
-            class DisableableEventManager
-            {
-            public:
-                static void bindToLua();
-            };
-        }
+        public:
+            static void bindToLua();
+        };
     }
 }
+
+#endif

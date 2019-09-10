@@ -1,9 +1,9 @@
-#pragma once
+#ifndef GAME_MWLUA_WEAPONTYPE_H
+#define GAME_MWLUA_WEAPONTYPE_H
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
-    {
-        void bindTES3WeaponType();
-    }
+    void bindTES3WeaponType();
 }
+
+#endif

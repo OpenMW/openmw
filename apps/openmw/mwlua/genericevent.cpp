@@ -1,23 +1,18 @@
-#pragma once
-
 #include "genericevent.hpp"
 
-namespace mwse
+namespace MWLua
 {
-    namespace lua
+    namespace Event
     {
-        namespace event
+        GenericEvent::GenericEvent(const char* name) :
+            mEventName(name)
         {
-            GenericEvent::GenericEvent(const char* name) :
-                mEventName(name)
-            {
 
-            }
+        }
 
-            const char* GenericEvent::getEventName()
-            {
-                return mEventName;
-            }
+        const char* GenericEvent::getEventName()
+        {
+            return mEventName;
         }
     }
 }
