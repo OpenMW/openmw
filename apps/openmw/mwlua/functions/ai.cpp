@@ -12,6 +12,7 @@
 #include "../../mwmechanics/aiescort.hpp"
 #include "../../mwmechanics/aifollow.hpp"
 #include "../../mwmechanics/aitravel.hpp"
+#include "../../mwmechanics/aiwander.hpp"
 #include "../../mwmechanics/creaturestats.hpp"
 
 #include "../../mwworld/class.hpp"
@@ -134,14 +135,11 @@ namespace MWLua
             Log(Debug::Info) << "AiTravel: " << destination.value().x() << ", " << destination.value().y() << ", " << destination.value().z();
         };
 
-        /*
-        state["tes3"]["setAIWander"] = [](sol::table params)
+        state["omw"]["setAIWander"] = [](sol::table params)
         {
-            TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
-            if (mobileActor == nullptr)
-            {
+            MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+            if (!ptr.getClass().isActor())
                 throw std::invalid_argument("Invalid reference parameter provided.");
-            }
 
             sol::optional<sol::table> maybeIdles = params["idles"];
             if (!maybeIdles || maybeIdles.value().get_type() != sol::type::table)
@@ -149,22 +147,23 @@ namespace MWLua
                 throw std::invalid_argument("Invalid idles table provided.");
             }
 
-            auto config = tes3::_new<TES3::AIPackageWander::Config>();
-            config->type = TES3::AIPackageConfigType::Wander;
-            config->range = getOptionalParam<double>(params, "range", 0.0);
-            config->duration = getOptionalParam<double>(params, "duration", 0.0);
-            config->time = getOptionalParam<double>(params, "time", 0.0);
-            config->reset = getOptionalParam<bool>(params, "reset", true);
+            // FIXME: we do not know what this parameter is supposed to do.
+            // bool reset = getOptionalParam<bool>(params, "reset", true);
+
+            double duration = getOptionalParam<double>(params, "duration", 0.0);
+            double range = getOptionalParam<double>(params, "range", 0.0);
+            double time = getOptionalParam<double>(params, "time", 0.0);
 
             sol::table idles = maybeIdles.value();
+            std::vector<unsigned char> idleList;
+
             for (size_t i = 0; i < 8; i++)
             {
-                config->idles[i] = idles.get_or(i, 0);
+                idleList.push_back(idles.get_or(i, 0));
             }
 
-            auto actor = static_cast<TES3::Actor*>(mobileActor->reference->baseObject);
-            actor->setAIPackage(config, mobileActor->reference);
+            MWMechanics::AiWander wanderPackage(range, duration, time, idleList, true);
+            ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(wanderPackage, ptr);
         };
-        */
     }
 }
