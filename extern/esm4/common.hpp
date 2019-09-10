@@ -67,6 +67,7 @@ namespace ESM4
         REC_AVIF = MKTAG('A','V','I','F'), // Actor Values/Perk Tree Graphics
         REC_BOOK = MKTAG('B','O','O','K'), // Book
         REC_BPTD = MKTAG('B','P','T','D'), // Body Part Data
+        REC_BSGN = MKTAG('B','S','G','N'), // Birth Sign
         REC_CAMS = MKTAG('C','A','M','S'), // Camera Shot
         REC_CELL = MKTAG('C','E','L','L'), // Cell
         REC_CLAS = MKTAG('C','L','A','S'), // Class
@@ -181,7 +182,8 @@ namespace ESM4
         REC_WTHR = MKTAG('W','T','H','R'), // Weather
         REC_ACRE = MKTAG('A','C','R','E'), // Placed Creature (TES4 only?)
         REC_PGRD = MKTAG('P','G','R','D'), // Pathgrid (TES4 only?)
-        REC_ROAD = MKTAG('R','O','A','D')  // Road (TES4 only?)
+        REC_ROAD = MKTAG('R','O','A','D'), // Road (TES4 only?)
+        REC_SCPT = 0x54504353              //Script
     };
 
     enum SubRecordTypes
@@ -213,6 +215,7 @@ namespace ESM4
         SUB_PNAM = MKTAG('P','N','A','M'),
         SUB_RNAM = MKTAG('R','N','A','M'),
         SUB_TNAM = MKTAG('T','N','A','M'),
+        SUB_NPCS = MKTAG('N','P','C','S'),//birth sign powers?
         SUB_UNAM = MKTAG('U','N','A','M'),
         SUB_WCTR = MKTAG('W','C','T','R'),
         SUB_WNAM = MKTAG('W','N','A','M'),
@@ -334,6 +337,11 @@ namespace ESM4
         SUB_XLRL = MKTAG('X','L','R','L'),
 
         SUB_QNAM = MKTAG('Q','N','A','M'),
+        SUB_TIFC = MKTAG('T','I','F','C'),
+        SUB_NEXT = MKTAG('N','E','X','T'),
+        SUB_FLTR = MKTAG('F','L','T','R'),
+        SUB_QOBJ = MKTAG('Q','O','B','J'),
+
         SUB_COCT = MKTAG('C','O','C','T'),
         SUB_COED = MKTAG('C','O','E','D'),
         SUB_CNTO = MKTAG('C','N','T','O'),
@@ -420,7 +428,11 @@ namespace ESM4
         SUB_MIC2 = MKTAG('M','I','C','2'),
         SUB_EAMT = MKTAG('E','A','M','T'),
         SUB_EITM = MKTAG('E','I','T','M'),
-
+        SUB_QSDT = MKTAG('Q','S','D','T'),
+        SUB_QSTA = MKTAG('Q','S','T','A'),
+        SUB_QSTI = MKTAG('Q','S','T','I'),
+        SUB_TRDT = MKTAG('T','R','D','T'),
+        SUB_TCLT = MKTAG('T','C','L','T'),
         SUB_SCTX = MKTAG('S','C','T','X'),
         SUB_XLTW = MKTAG('X','L','T','W'),
         SUB_XMBP = MKTAG('X','M','B','P'),

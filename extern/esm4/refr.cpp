@@ -59,7 +59,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
     //mDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM4::VER_132 || esmVer == ESM4::VER_133 || esmVer == ESM4::VER_134;
-
+char tbuff[2048];
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
@@ -81,7 +81,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NAME:
             {
+            std::string te;
                 reader.getFormId(mBaseObj);
+              //  reader.getLocalizedString(mBaseObj, te);
 #if 0
                 if (mFlags & ESM4::Rec_Disabled)
                     std::cout << "REFR disable at start " << formIdToString(mFormId) <<
@@ -168,6 +170,12 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 //std::cout << "REFR XRTM : " << formIdToString(id) << std::endl;// FIXME
                 break;
             }
+        case ESM4::SUB_XMRK:
+        {
+            std::cout << "REFR MARKER FOUND" << this->mFullName << " skipping..." << std::endl;
+            reader.skipSubRecordData();
+            break;
+        }
             // lighting
             case ESM4::SUB_LNAM: // lighting template formId
             case ESM4::SUB_XLIG: // struct, FOV, fade, etc
@@ -178,7 +186,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XALP: // alpha cutoff
             //
             case ESM4::SUB_XLOC: // formId
-            case ESM4::SUB_XMRK:
+
             case ESM4::SUB_FNAM:
             case ESM4::SUB_XTRG: // formId
             case ESM4::SUB_XPCI: // formId
@@ -250,8 +258,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_WMI1: // FONV
             case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
             {
-                //std::cout << "REFR " << ESM4::printName(subHdr.typeId) << " skipping..." << std::endl;
-                reader.skipSubRecordData();
+                std::cout << "REFR " << ESM4::printName(subHdr.typeId) << " skipping..." <<subHdr.dataSize<< std::endl;
+                reader.get(tbuff,subHdr.dataSize);
+                //reader.skipSubRecordData();
                 break;
             }
             default:

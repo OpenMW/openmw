@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <iostream>
+
 #include <sstream>
 #include <cstring>
 #include "reader.hpp"
@@ -69,9 +71,10 @@ void ESM4::Npc::load(ESM4::Reader& reader)
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
+       // std::cout << "NPC_ : SUB_" << ESM4::printName(subHdr.typeId) << " processing..." << std::endl;
         switch (subHdr.typeId)
         {
-            case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
+           case ESM4::SUB_EDID: reader.getZString(mEditorId); break;
             case ESM4::SUB_MODL: reader.getZString(mModel);    break;
             case ESM4::SUB_FULL:
             {
@@ -183,15 +186,15 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_LNAM: reader.get(mHairLength); break;
-            case ESM4::SUB_HCLR:
-            {
-                reader.get(mHairColour.red);
-                reader.get(mHairColour.green);
-                reader.get(mHairColour.blue);
-                reader.get(mHairColour.custom);
+        case ESM4::SUB_HCLR:
+        {
+            reader.get(mHairColour.red);
+            reader.get(mHairColour.green);
+            reader.get(mHairColour.blue);
+            reader.get(mHairColour.custom);
 
-                break;
-            }
+            break;
+        }
             case ESM4::SUB_TPLT: reader.get(mBaseTemplate); break;
             case ESM4::SUB_FGGS:
             case ESM4::SUB_FGGA:
@@ -241,12 +244,28 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_NAM4: // FO3
             case ESM4::SUB_COED: // FO3
             {
-                //std::cout << "NPC_ " << ESM4::printName(subHdr.typeId) << " skipping..." << std::endl;
-                reader.skipSubRecordData();
+           // std::cout << "NPC_ : SUB_" << ESM4::printName(subHdr.typeId) << " skipping..." << std::endl;
+              reader.skipSubRecordData();
+          /*  char mtemp[2048];
+                reader.get((char*)mtemp,subHdr.dataSize);//
+               if(false)if(subHdr.typeId==ESM4::SUB_FGGS)
+               {
+                   uint32_t * tint;
+                   for(int i=0;i<subHdr.dataSize;++i)
+                   {
+                       tint=(uint32_t*)&mtemp[i];
+                       std::cout << "dump " << ESM4::printName(*tint) << " ..." <<i<< std::endl;
+
+                   }
+               }*/
                 break;
             }
             default:
-                throw std::runtime_error("ESM4::NPC_::load - Unknown subrecord " + ESM4::printName(subHdr.typeId));
+                std::cout << "NPC_default " << ESM4::printName(subHdr.typeId) << " skipping..." << std::endl;
+
+                char mtemp[2048];
+                    reader.get((char*)mtemp,subHdr.dataSize);//
+                 throw std::runtime_error("ESM4::NPC_::load - Unknown subrecord " + ESM4::printName(subHdr.typeId));
         }
     }
 }

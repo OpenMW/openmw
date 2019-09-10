@@ -31,6 +31,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
+#include <components/to_utf8/to_utf8.hpp>
 //#include <OgreResourceGroupManager.h>
 
 #include <zlib.h>
@@ -41,7 +42,7 @@
 #undef NDEBUG
 #endif
 
-ESM4::Reader::Reader() : mObserver(nullptr), mRecordRemaining(0), mCellGridValid(false)
+ESM4::Reader::Reader() : mObserver(nullptr), mRecordRemaining(0), mCellGridValid(false), mEncoder(nullptr), mLocalizationString("English")
 {
     mCtx.modIndex = 0;
     mCtx.currWorld = 0;
@@ -143,7 +144,6 @@ void ESM4::Reader::registerForUpdates(ESM4::ReaderObserver *observer)
     mObserver = observer;
 }
 
-// FIXME: only "English" strings supported for now
 void ESM4::Reader::buildLStringIndex()
 {
     if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
@@ -152,9 +152,9 @@ void ESM4::Reader::buildLStringIndex()
     boost::filesystem::path p(mCtx.filename);
     std::string filename = p.stem().filename().string();
 
-    buildLStringIndex("Strings/" + filename + "_English.STRINGS",   Type_Strings);
-    buildLStringIndex("Strings/" + filename + "_English.ILSTRINGS", Type_ILStrings);
-    buildLStringIndex("Strings/" + filename + "_English.DLSTRINGS", Type_DLStrings);
+    buildLStringIndex("Strings/" + filename + "_"+mLocalizationString+".STRINGS",   Type_Strings);
+    buildLStringIndex("Strings/" + filename + "_"+mLocalizationString+".ILSTRINGS", Type_ILStrings);
+    buildLStringIndex("Strings/" + filename + "_"+mLocalizationString+".DLSTRINGS", Type_DLStrings);
 }
 
 void ESM4::Reader::buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType)
@@ -254,7 +254,8 @@ bool ESM4::Reader::getRecordHeader()
     // FIXME: having a default instance of mObserver might be faster than checking for null all the time?
     if (mObserver)
         mObserver->update(mCtx.recHeaderSize);
-    mStream->read((char*)&mRecordHeader, mCtx.recHeaderSize); //TODO trycatch
+    try{mStream->read((char*)&mRecordHeader, mCtx.recHeaderSize);
+    }catch(...){return false;}
     return ( (mRecordRemaining = mRecordHeader.record.dataSize)); // for keeping track of sub records
 
     // After reading the record header we can cache a WRLD or CELL formId for convenient access later.
@@ -267,10 +268,19 @@ bool ESM4::Reader::getSubRecordHeader()
     // NOTE: some SubRecords have 0 dataSize (e.g. SUB_RDSD in one of REC_REGN records in Oblivion.esm).
     // Also SUB_XXXX has zero dataSize and the following 4 bytes represent the actual dataSize
     // - hence it require manual updtes to mRecordRemaining. See ESM4::NavMesh and ESM4::World.
+
     if (mRecordRemaining >= sizeof(mSubRecordHeader))
     {
         result = get(mSubRecordHeader);
-        mRecordRemaining -= (sizeof(mSubRecordHeader) + mSubRecordHeader.dataSize);
+        size_t dec=(sizeof(mSubRecordHeader) + static_cast<size_t>(mSubRecordHeader.dataSize));
+        if(dec>mRecordRemaining)
+        {
+            std::cerr<<" ESM4::Reader::getSubRecordHeader: parsing of REC_"<<printName(mRecordHeader.record.typeId)<<" stopped: no space in record for SUB_"<<printName(mSubRecordHeader.typeId)<<": remaining"<<mRecordRemaining<< "< required"<<dec<<std::endl;
+            mRecordRemaining = 0;
+            return true;
+            return false;
+        }
+        else mRecordRemaining -= dec ;
     }
     return result;
 }
@@ -410,20 +420,26 @@ void ESM4::Reader::getRecordData()
         strm.zalloc = Z_NULL;
         strm.zfree  = Z_NULL;
         strm.opaque = Z_NULL;
-        strm.avail_in = bufSize;
+        strm.avail_in =  mRecordHeader.record.dataSize-(int)sizeof(bufSize);
         strm.next_in = mInBuf.get();
         ret = inflateInit(&strm);
         if (ret != Z_OK)
             throw std::runtime_error("ESM4::Reader::getRecordData - inflateInit failed");
 
         strm.avail_out = bufSize;
+        mRecordRemaining = bufSize;
         strm.next_out = mDataBuf.get();
         ret = inflate(&strm, Z_NO_FLUSH);
         assert(ret != Z_STREAM_ERROR && "ESM4::Reader::getRecordData - inflate - state clobbered");
         switch (ret)
         {
         case Z_NEED_DICT:
-            ret = Z_DATA_ERROR; /* and fall through */
+            ret = Z_DATA_ERROR;
+            /* prevent fall through warning*/
+            inflateEnd(&strm);
+            getRecordDataPostActions();
+            throw std::runtime_error("ESM4::Reader::getRecordData - inflate failed");
+            break;
         case Z_DATA_ERROR: //FONV.esm 0xB0CFF04 LAND record zlip DATA_ERROR
         case Z_MEM_ERROR:
             inflateEnd(&strm);
@@ -431,7 +447,6 @@ void ESM4::Reader::getRecordData()
             throw std::runtime_error("ESM4::Reader::getRecordData - inflate failed");
         }
         assert(ret == Z_OK || ret == Z_STREAM_END);
-
     // For debugging only
 #if 0
         std::ostringstream ss;
@@ -499,8 +514,12 @@ bool ESM4::Reader::getZString(std::string& str, Files::IStreamPtr filestream)
             //std::cerr << "ESM4::Reader::getZString string is not terminated with a zero" << std::endl;
         }
         else
-            str.assign(buf.get(), size - 1);// don't copy null terminator
+            str.assign(buf.get(), size );
+            //str.assign(buf.get(), size - 1);// don't copy null terminator
 
+        // Convert to UTF8 and return
+        if (mEncoder)
+             str= mEncoder->getUtf8( str.c_str(), size );
         //assert((size_t)size-1 == str.size() && "ESM4::Reader::getZString string size mismatch");
         return true;
     }
@@ -509,6 +528,7 @@ bool ESM4::Reader::getZString(std::string& str, Files::IStreamPtr filestream)
         str.clear();
         return false; // FIXME: throw instead?
     }
+
 }
 
 // Assumes that saveGroupStatus() is not called before this (hence we don't update mCtx.groupStack)

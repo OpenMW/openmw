@@ -40,6 +40,7 @@ namespace ESM4
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
+        bool mDisabled;
         FormId      mBaseObj;
 
         Position mPosition;
@@ -48,7 +49,6 @@ namespace ESM4
         FormId   mGlobal;
         std::uint32_t mFactionRank;
 
-        bool mDisabled;
         EnableParent mEsp;    // TODO may need to check mFlags & 0x800 (initially disabled)
 
         ActorCreature();

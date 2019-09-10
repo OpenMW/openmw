@@ -28,7 +28,6 @@
 #include <cstddef>
 
 #include <boost/scoped_array.hpp>
-
 #include <components/files/constrainedfilestream.hpp>
 
 #include <cstring>
@@ -36,7 +35,10 @@
 
 #include "common.hpp"
 #include "tes4.hpp"
-
+namespace ToUTF8
+{
+    class Utf8Encoder;
+}
 namespace ESM4
 {
     class ReaderObserver
@@ -111,13 +113,19 @@ namespace ESM4
         std::map<FormId, LStringOffset> mLStringIndex;
 
         std::size_t mStreamsize;
+
         void getRecordDataPostActions(); // housekeeping actions before processing the next record
         void buildLStringIndex(const std::string& stringFile, LocalizedStringType stringType);
 
+        ToUTF8::Utf8Encoder* mEncoder;
+        std::string mLocalizationString;
     public:
 
         Reader();
         ~Reader();
+
+        void setEncoder(ToUTF8::Utf8Encoder*e) { mEncoder=e; }
+        ToUTF8::Utf8Encoder* getEncoder() const { return mEncoder; }
 
         // Methods added for updating loading progress bars
         inline std::size_t getFileSize() const { return mStreamsize; }
@@ -139,6 +147,8 @@ namespace ESM4
 
         void buildLStringIndex();
         inline bool hasLocalizedStrings() const { return (mHeader.mFlags & Rec_Localized) != 0; }
+        void setLocale(const std::string &s) { mLocalizationString = s; }
+        const std::string &getLocale() const { return mLocalizationString; }
         void getLocalizedString(std::string& str); // convenience method for below
         void getLocalizedString(const FormId stringId, std::string& str);
 

@@ -33,14 +33,33 @@
 #include "reader.hpp"
 //#include "writer.hpp"
 
-ESM4::Script::Script() : mFormId(0), mFlags(0)
+ESM4::Script::Script() : mFormId(0), mFlags(0) ,mSCDADataBuf(NULL), mSCDADataBufsize(0)
 {
     mEditorId.clear();
     mText.clear();
+
+
+}
+
+ESM4::Script::Script(const Script &p2)
+{
+    if(p2.mSCDADataBufsize>0)
+    {
+        mSCDADataBuf = new unsigned char[p2.mSCDADataBufsize];
+        memcpy(mSCDADataBuf, p2.mSCDADataBuf, p2.mSCDADataBufsize);
+    }
+    mSCDADataBufsize=p2.mSCDADataBufsize;
+    mEditorId=p2.mEditorId;
+    mText=p2.mText;
+    mFlags=p2.mFlags;
+    mFormId=p2.mFormId;
+    mLocalVarMetaDatas=p2.mLocalVarMetaDatas;
+    mLocalVarName=p2.mLocalVarName;
 }
 
 ESM4::Script::~Script()
 {
+    if(mSCDADataBufsize>0) delete mSCDADataBuf;
 }
 
 void ESM4::Script::load(ESM4::Reader& reader)
@@ -61,6 +80,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_SCHR:
             {
+
     // For debugging only
 #if 0
                 unsigned char mDataBuf[256/*bufSize*/];
@@ -80,7 +100,8 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                reader.skipSubRecordData();
+                //reader.skipSubRecordData();
+                reader.get(mCompiledScriptMetaData);/*20 bytes*/
 #endif
                 break;
             }
@@ -88,24 +109,28 @@ void ESM4::Script::load(ESM4::Reader& reader)
             {
                 reader.getZString(mText);
                 //if (mEditorId == "CTrapLogs01SCRIPT")
-                    //std::cout << mText << std::endl;
+                  //  std::cout <<"mText"<< mText << std::endl;
                 break;
             }
             case ESM4::SUB_SCDA:
             {
+            mSCDADataBuf = new unsigned char  [subHdr.dataSize];
+            mSCDADataBufsize = subHdr.dataSize;
+            reader.get(&mSCDADataBuf[0], subHdr.dataSize);
+           // reader.skipSubRecordData();
     // For debugging only
 #if 0
                 if (subHdr.dataSize >= 4096)
                 {
                     std::cout << "Skipping " << mEditorId << std::endl;
-                    reader.skipSubRecordData();
+                    //reader.skipSubRecordData();
                     break;
                 }
 
-                std::cout << mEditorId << std::endl;
+                std::cout <<"eedid"<< mEditorId << std::endl;
 
-                unsigned char mDataBuf[4096/*bufSize*/];
-                reader.get(&mDataBuf[0], subHdr.dataSize);
+                //unsigned char mDataBuf[4096/*bufSize*/];
+                //reader.get(&mDataBuf[0], subHdr.dataSize);
 
                 std::ostringstream ss;
                 for (unsigned int i = 0; i < subHdr.dataSize; ++i)
@@ -113,7 +138,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
                     //if (mDataBuf[i] > 64 && mDataBuf[i] < 91)
                         //ss << (char)(mDataBuf[i]) << " ";
                     //else
-                        ss << std::setfill('0') << std::setw(2) << std::hex << (int)(mDataBuf[i]);
+                        ss << std::setfill('0') << std::setw(2) << std::hex << (int)(mSCDADataBuf[i]);
                     if ((i & 0x000f) == 0xf)
                         ss << "\n";
                     else if (i < 4096/*bufSize*/-1)
@@ -121,17 +146,40 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                reader.skipSubRecordData();
+
+            //reader.skipSubRecordData();
 #endif
                 break;
             }
             case ESM4::SUB_SLSD: // variable data
+            {
+                SLSDstruct varmeta;
+                reader.get(varmeta);/*24 bytes*/
+                mLocalVarMetaDatas.push_back(varmeta);
+                break;
+            }
             case ESM4::SUB_SCVR: // variable name
+            {
+                std::string varname;
+                reader.getZString(varname);
+                //std::cout<<varname<<std::endl;
+                mLocalVarName.push_back(varname);
+                break;
+            }
             case ESM4::SUB_SCRO: // global variable ref
+            {
+                ESM4::FormId objectformid;
+                reader.getFormId(objectformid);
+                //std::cout<<objectformid<<std::endl;
+                mGlobalVars.push_back(objectformid);
+                break;
+            }
             case ESM4::SUB_SCRV: // declared ref variable data
             {
-                //std::cout << "SCPT " << ESM4::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
+                ESM4::FormId objectformid;
+                reader.getFormId(objectformid);
+                //std::cout<<objectformid<<std::endl;
+                mRefVariables.push_back(objectformid);
                 break;
             }
             default:
