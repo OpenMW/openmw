@@ -33,7 +33,7 @@ add_openmw_dir (mwlua
     )
 
 add_openmw_dir (mwlua/structs
-    magiceffect weapontype ptr
+    magiceffect weapontype ptr vectors
     )
 
 add_openmw_dir (mwlua/functions

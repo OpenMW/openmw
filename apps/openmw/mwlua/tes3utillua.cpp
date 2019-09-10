@@ -6,6 +6,8 @@
 #include "functions/sound.hpp"
 #include "functions/world.hpp"
 
+#include "structs/vectors.hpp"
+
 /*
 #include "TES3GameFile.h"
 
@@ -86,6 +88,7 @@ namespace mwse
             bindTES3Sound();
             bindTES3GUI();
             bindTES3World();
+            bindTES3Vectors();
 
             /*
 			// Bind function: tes3.getMobilePlayer
