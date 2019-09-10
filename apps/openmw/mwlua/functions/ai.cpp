@@ -11,6 +11,7 @@
 #include "../../mwmechanics/aiactivate.hpp"
 #include "../../mwmechanics/aiescort.hpp"
 #include "../../mwmechanics/aifollow.hpp"
+#include "../../mwmechanics/aitravel.hpp"
 #include "../../mwmechanics/creaturestats.hpp"
 
 #include "../../mwworld/class.hpp"
@@ -79,15 +80,15 @@ namespace MWLua
 
             std::string cellId = params["cell"];
             double duration = getOptionalParam<double>(params, "duration", 0.0);
-            osg::Vec3f destination = getOptionalParamVector3(params, "destination");
+            auto destination = getOptionalParamVector3(params, "destination");
             // FIXME: AiEscort stores arget Id instead of reference in OpenMW
-            MWMechanics::AiFollow followPackage(target, cellId, duration, destination.x(), destination.y(), destination.z());
+            MWMechanics::AiFollow followPackage(target, cellId, duration, destination.value().x(), destination.value().y(), destination.value().z());
             ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(followPackage, ptr);
 
-            Log(Debug::Info) << "AiFollow: " << target.getCellRef().getRefId() << ", " << destination.x() << ", " << destination.y() << ", " << destination.z() << ", " << duration;
+            Log(Debug::Info) << "AiFollow: " << target.getCellRef().getRefId() << ", " << destination.value().x() << ", " << destination.value().y() << ", " << destination.value().z() << ", " << duration;
         };
 
-        state["tes3"]["setAIEscort"] = [](sol::table params)
+        state["omw"]["setAIEscort"] = [](sol::table params)
         {
             MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
             if (!ptr.getClass().isActor())
@@ -104,22 +105,19 @@ namespace MWLua
 
             std::string cellId = params["cell"];
             double duration = getOptionalParam<double>(params, "duration", 0.0);
-            osg::Vec3f destination = getOptionalParamVector3(params, "destination");
+            auto destination = getOptionalParamVector3(params, "destination");
             // FIXME: AiEscort stores arget Id instead of reference in OpenMW
-            MWMechanics::AiEscort escortPackage(target.getCellRef().getRefId(), cellId, duration, destination.x(), destination.y(), destination.z());
+            MWMechanics::AiEscort escortPackage(target.getCellRef().getRefId(), cellId, duration, destination.value().x(), destination.value().y(), destination.value().z());
             ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(escortPackage, ptr);
 
-            Log(Debug::Info) << "AiEscort: " << target.getCellRef().getRefId() << ", " << destination.x() << ", " << destination.y() << ", " << destination.z() << ", " << duration;
+            Log(Debug::Info) << "AiEscort: " << target.getCellRef().getRefId() << ", " << destination.value().x() << ", " << destination.value().y() << ", " << destination.value().z() << ", " << duration;
         };
 
-        /*
-        state["tes3"]["setAITravel"] = [](sol::table params)
+        state["omw"]["setAITravel"] = [](sol::table params)
         {
-            TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");
-            if (mobileActor == nullptr)
-            {
+            MWWorld::Ptr ptr = getOptionalParamReference(params, "reference");
+            if (!ptr.getClass().isActor())
                 throw std::invalid_argument("Invalid reference parameter provided.");
-            }
 
             auto destination = getOptionalParamVector3(params, "destination");
             if (!destination)
@@ -127,15 +125,16 @@ namespace MWLua
                 throw std::invalid_argument("Invalid destination parameter provided.");
             }
 
-            auto config = tes3::_new<TES3::AIPackageTravel::Config>();
-            config->type = TES3::AIPackageConfigType::Travel;
-            config->position = destination.value();
-            config->reset = getOptionalParam<bool>(params, "reset", true);
+            // FIXME: we do not know what this parameter is supposed to do.
+            // bool reset = getOptionalParam<bool>(params, "reset", true);
 
-            auto actor = static_cast<TES3::Actor*>(mobileActor->reference->baseObject);
-            actor->setAIPackage(config, mobileActor->reference);
+            MWMechanics::AiTravel travelPackage(destination.value().x(), destination.value().y(), destination.value().z());
+            ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(travelPackage, ptr);
+
+            Log(Debug::Info) << "AiTravel: " << destination.value().x() << ", " << destination.value().y() << ", " << destination.value().z();
         };
 
+        /*
         state["tes3"]["setAIWander"] = [](sol::table params)
         {
             TES3::MobileActor * mobileActor = getOptionalParamMobileActor(params, "reference");

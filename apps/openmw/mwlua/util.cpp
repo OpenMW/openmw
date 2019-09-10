@@ -102,7 +102,7 @@ namespace MWLua
         return value;
     }
 
-    osg::Vec3f getOptionalParamVector3(sol::optional<sol::table> maybeParams, const char* key)
+    sol::optional<osg::Vec3f> getOptionalParamVector3(sol::optional<sol::table> maybeParams, const char* key)
     {
         if (maybeParams)
         {
@@ -125,6 +125,6 @@ namespace MWLua
             }
         }
 
-        return osg::Vec3f();
+        return sol::optional<osg::Vec3f>();
     }
 }
