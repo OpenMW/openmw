@@ -359,8 +359,9 @@ namespace Compiler
             keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
             keyword==Scanner::K_to || keyword==Scanner::K_startscript ||
-            keyword==Scanner::K_stopscript || keyword==Scanner::K_enable ||
-            keyword==Scanner::K_disable)
+            keyword==Scanner::K_stopscript ||keyword==Scanner::K_scriptname ||
+            keyword==Scanner::K_startquest || keyword==Scanner::K_stopquest ||
+            keyword==Scanner::K_enable || keyword==Scanner::K_disable)
         {
             return parseName (loc.mLiteral, loc, scanner);
         }

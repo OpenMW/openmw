@@ -276,6 +276,7 @@ namespace Compiler
         "getdistance",
         "getsecondspassed",
         "enable", "disable", "getdisabled",
+        "scriptname", "startquest", "stopquest",
         0
     };
 
@@ -415,6 +416,7 @@ namespace Compiler
             }
 
             special = S_member;
+            special = S_ref;//TES4?
         }
         else if (c=='=')
         {
@@ -463,6 +465,7 @@ namespace Compiler
             else
                 return false;
         }
+        /// operator ->
         else if (c=='-')
         {
             if (get (c))

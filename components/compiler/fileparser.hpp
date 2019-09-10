@@ -14,7 +14,7 @@ namespace Compiler
     {
             enum State
             {
-                BeginState, NameState, BeginCompleteState, EndNameState,
+                BeginState, NameState, BeginCompleteState, EndNameState, ScriptNameState,
                 EndCompleteState
             };
             

@@ -351,6 +351,20 @@ namespace
     {
         code.push_back (Compiler::Generator::segment5 (57));
     }
+
+    void opScriptName (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (74));
+    }
+    void opStartQuest (Compiler::Generator::CodeContainer& code, bool targeted)
+    {
+        code.push_back (Compiler::Generator::segment5 (72));
+    }
+
+    void opStopQuest (Compiler::Generator::CodeContainer& code)
+    {
+        code.push_back (Compiler::Generator::segment5 (73));
+    }
 }
 
 namespace Compiler
@@ -832,6 +846,28 @@ namespace Compiler
         void stopScript (CodeContainer& code)
         {
             opStopScript (code);
+        }
+
+        void scriptName (CodeContainer& code, Literals& literals, const std::string& id)
+        {
+            opScriptName (code);
+        }
+
+        void startQuest (CodeContainer& code, Literals& literals, const std::string& id)
+        {
+            if (id.empty())
+                opStartQuest (code, false);
+            else
+            {
+                int index = literals.addString (id);
+                opPushInt (code, index);
+                opStartQuest (code, true);
+            }
+        }
+
+        void stopQuest (CodeContainer& code)
+        {
+            opStopQuest (code);
         }
 
         void getDistance (CodeContainer& code, Literals& literals, const std::string& id)

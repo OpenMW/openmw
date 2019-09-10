@@ -115,6 +115,12 @@ namespace Compiler
 
         void stopScript (CodeContainer& code);
 
+        void scriptName(CodeContainer& code, Literals& literals, const std::string& id);
+
+        void startQuest (CodeContainer& code, Literals& literals, const std::string& id);
+
+        void stopQuest (CodeContainer& code);
+
         void getDistance (CodeContainer& code, Literals& literals, const std::string& id);
 
         void getSecondsPassed (CodeContainer& code);

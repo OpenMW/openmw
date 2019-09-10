@@ -114,6 +114,12 @@ namespace Interpreter
         interpreter.installSegment5 (48, new OpStopScript);
         interpreter.installSegment5 (71, new OpStartScriptExplicit);
 
+        // quest control (TES4 and over)
+        interpreter.installSegment5 (72, new OpStartQuest);
+        interpreter.installSegment5 (73, new OpStopQuest);
+        interpreter.installSegment5 (74, new OpScriptName);
+        //interpreter.installSegment5 (72, new OpStartScriptExplicit);
+
         // spacial
         interpreter.installSegment5 (49, new OpGetDistance);
         interpreter.installSegment5 (57, new OpGetDistanceExplicit);

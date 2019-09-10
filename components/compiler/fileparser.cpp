@@ -29,6 +29,11 @@ namespace Compiler
     bool FileParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
+        if(mState ==ScriptNameState)
+        {
+            mState = BeginState;
+            return true;
+        }
         if (mState==NameState)
         {
             mName = name;
@@ -59,13 +64,23 @@ namespace Compiler
     }
 
     bool FileParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
-    {
-        if (mState==BeginState && keyword==Scanner::K_begin)
-        {
-            mState = NameState;
-            scanner.enableTolerantNames(); /// \todo disable
-            return true;
-        }
+    {        ///TES4 and over
+
+            if (mState==BeginState && keyword==Scanner::K_scriptname)
+            {
+                std::string scriptname;
+                scanner.enableTolerantNames();mState = ScriptNameState;
+                //scanner.scan(*this);//Name(scriptname);
+                //mExprParser.parseArguments ("c", scanner, mCode);
+                //FileParser::scriptName(mCode, mLiterals, mExplicit);
+                return true;
+            }
+            if (mState==BeginState && keyword==Scanner::K_begin)
+            {
+                mState = NameState;
+                scanner.enableTolerantNames(); /// \todo disable
+                return true;
+            }
 
         if (mState==NameState)
         {

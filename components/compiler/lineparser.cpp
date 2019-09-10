@@ -274,6 +274,25 @@ namespace Compiler
                     Generator::stopScript (mCode);
                     mState = EndState;
                     return true;
+                ///TES4 and over
+            case Scanner::K_scriptname:
+                mExprParser.parseArguments ("c", scanner, mCode);
+                Generator::scriptName(mCode, mLiterals, mExplicit);
+                mState = EndState;
+                return true;
+            case Scanner::K_startquest:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::startQuest(mCode, mLiterals, mExplicit);
+                    mState = EndState;
+                    return true;
+
+                case Scanner::K_stopquest:
+
+                    mExprParser.parseArguments ("c", scanner, mCode);
+                    Generator::stopQuest (mCode);
+                    mState = EndState;
+                    return true;
             }
 
             // check for custom extensions
