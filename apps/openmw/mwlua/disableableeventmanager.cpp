@@ -3,10 +3,10 @@
 #include "luamanager.hpp"
 
 #include "events/activate.hpp"
+#include "events/activationtargetchanged.hpp"
 #include "events/loadedgame.hpp"
 
 /*
-#include "LuaActivationTargetChangedEvent.h"
 #include "LuaAddTopicEvent.h"
 #include "LuaAttackEvent.h"
 #include "LuaBodyPartsUpdatedEvent.h"
@@ -120,11 +120,11 @@ namespace MWLua
             //usertypeDefinition.set("loaded", true);
             usertypeDefinition.set("loaded", sol::property(&LoadedGameEvent::getEventEnabled, &LoadedGameEvent::setEventEnabled));
             usertypeDefinition.set("activate", sol::property(&ActivateEvent::getEventEnabled, &ActivateEvent::setEventEnabled));
+            usertypeDefinition.set("activationTargetChanged", sol::property(&ActivationTargetChangedEvent::getEventEnabled, &ActivationTargetChangedEvent::setEventEnabled));
+            usertypeDefinition.set("attack", sol::property(&AttackEvent::getEventEnabled, &AttackEvent::setEventEnabled));
 
             /*
             // Give access to the enabled state.
-            usertypeDefinition.set("activationTargetChanged", sol::property(&ActivationTargetChangedEvent::getEventEnabled, &ActivationTargetChangedEvent::setEventEnabled));
-            usertypeDefinition.set("attack", sol::property(&AttackEvent::getEventEnabled, &AttackEvent::setEventEnabled));
             usertypeDefinition.set("bodyPartsUpdated", sol::property(&BodyPartsUpdatedEvent::getEventEnabled, &BodyPartsUpdatedEvent::setEventEnabled));
             usertypeDefinition.set("bookGetText", sol::property(&BookGetTextEvent::getEventEnabled, &BookGetTextEvent::setEventEnabled));
             usertypeDefinition.set("buttonPressed", sol::property(&ButtonPressedEvent::getEventEnabled, &ButtonPressedEvent::setEventEnabled));

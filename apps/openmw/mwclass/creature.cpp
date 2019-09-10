@@ -19,6 +19,9 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwlua/luamanager.hpp"
+#include "../mwlua/events/attack.hpp"
+
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/actiontalk.hpp"
 #include "../mwworld/actionopen.hpp"
@@ -257,6 +260,13 @@ namespace MWClass
         stats.getAiSequence().getCombatTargets(targetActors);
 
         std::pair<MWWorld::Ptr, osg::Vec3f> result = MWBase::Environment::get().getWorld()->getHitContact(ptr, dist, targetActors);
+
+        if (MWLua::Event::AttackEvent::getEventEnabled())
+        {
+            auto stateHandle = MWLua::LuaManager::getInstance().getThreadSafeStateHandle();
+            stateHandle.triggerEvent(new MWLua::Event::AttackEvent(ptr, result.first));
+        }
+
         if (result.first.isEmpty())
             return; // Didn't hit anything
 

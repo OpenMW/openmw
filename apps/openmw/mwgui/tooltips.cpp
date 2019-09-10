@@ -20,6 +20,9 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwlua/luamanager.hpp"
+#include "../mwlua/events/activationtargetchanged.hpp"
+
 #include "mapwindow.hpp"
 #include "inventorywindow.hpp"
 
@@ -350,6 +353,9 @@ namespace MWGui
 
     void ToolTips::setFocusObject(const MWWorld::Ptr& focus)
     {
+        if (mFocusObject != focus && MWLua::Event::ActivationTargetChangedEvent::getEventEnabled())
+            MWLua::LuaManager::getInstance().getThreadSafeStateHandle().triggerEvent(new MWLua::Event::ActivationTargetChangedEvent(mFocusObject, focus));
+
         mFocusObject = focus;
 
         update(mFrameDuration);

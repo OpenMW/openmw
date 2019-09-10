@@ -18,6 +18,9 @@
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwlua/luamanager.hpp"
+#include "../mwlua/events/attack.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/movement.hpp"
@@ -576,6 +579,13 @@ namespace MWClass
 
         // TODO: Use second to work out the hit angle
         std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
+
+        if (MWLua::Event::AttackEvent::getEventEnabled())
+        {
+            auto stateHandle = MWLua::LuaManager::getInstance().getThreadSafeStateHandle();
+            stateHandle.triggerEvent(new MWLua::Event::AttackEvent(ptr, result.first));
+        }
+
         MWWorld::Ptr victim = result.first;
         osg::Vec3f hitPosition (result.second);
         if(victim.isEmpty()) // Didn't hit anything

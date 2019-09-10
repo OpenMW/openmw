@@ -33,7 +33,7 @@ add_openmw_dir (mwlua
     )
 
 add_openmw_dir (mwlua/events
-    activate loadedgame
+    activate attack activationtargetchanged loadedgame
     )
 
 add_openmw_dir (mwlua/functions
