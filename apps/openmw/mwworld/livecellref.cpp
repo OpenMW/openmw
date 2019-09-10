@@ -28,11 +28,13 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         // Make sure we still have a script. It could have been coming from a content file that is no longer active.
         if (!scriptId.empty())
         {
-            if (const ESM::Script* script = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (scriptId))
+            if (
+                    ( MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search (scriptId))||
+                  MWBase::Environment::get().getWorld()->getStore().getESM4<ESM4::Script>().search (scriptId)!=0)
             {
                 try
                 {
-                    mData.setLocals (*script);
+                    mData.setLocals (scriptId);
                     mData.getLocals().read (state.mLocals, scriptId);
                 }
                 catch (const std::exception& exception)

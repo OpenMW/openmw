@@ -544,6 +544,10 @@ namespace MWWorld
                 mStore.insertStatic(record);
             }
         }
+
+        ///TES4 init Perisistent References as MWWorld::Ptr;
+
+
     }
 
     World::~World()

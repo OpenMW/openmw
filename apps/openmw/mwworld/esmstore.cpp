@@ -83,6 +83,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         if (isTes4 || isTes5 || isFONV)
         {
             ESM4::Reader& reader = dynamic_cast<ESM::ESM4Reader*>(&esm)->reader();
+            //if(reader.getFileOffset()>= reader.getFileSize())break;
             reader.checkGroupStatus();
 
             loadTes4Group(esm);
@@ -95,7 +96,8 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         // Look up the record type.
         std::map<int, StoreBase *>::iterator it = mStores.find(n.intval);
 
-        if (it == mStores.end()) {
+        if (it == mStores.end())
+        {
             if (n.intval == ESM::REC_INFO) {
                 if (dialogue)
                 {
@@ -149,8 +151,36 @@ void ESMStore::loadTes4Group (ESM::ESMReader &esm)
     const ESM4::RecordHeader& hdr = reader.hdr();
 
     if (hdr.record.typeId != ESM4::REC_GRUP)
-        return loadTes4Record(esm);
+    {
+        /*if(hdr.record.typeId==ESM4::REC_DIAL)
+        {
+            ESM4::Dialog * dialog;
+            std::string id = ESM4::formIdToString(hdr.record.id);
+            loadTes4Record(esm);//load Dialog
 
+            dialog = const_cast<ESM4::Dialog*>(mDialogs2.find(id));
+
+            reader.getRecordHeader();
+            if(hdr.record.typeId == ESM4::REC_GRUP||hdr.record.typeId == ESM4::REC_INFO){
+                if(hdr.record.typeId == ESM4::REC_GRUP){
+                    reader.saveGroupStatus();
+
+                    reader.getRecordHeader();
+                }
+
+                while(hdr.record.typeId == ESM4::REC_INFO)
+                {
+                    reader.getRecordData();
+                    dialog->loadInfo(reader);
+                    reader.getRecordHeader();
+                }
+            }else
+                Log(Debug::Warning)<<"NO INFO DIALOG?"<<ESM4::printName(hdr.record.typeId );
+            if(hdr.record.typeId != ESM4::REC_GRUP)
+                return loadTes4Record(esm);
+        }
+        else */return loadTes4Record(esm);
+    }
     switch (hdr.group.type)
     {
         case ESM4::Grp_RecordType:
@@ -175,6 +205,10 @@ void ESMStore::loadTes4Group (ESM::ESMReader &esm)
                 hdr.group.label.value == ESM4::REC_LVLI || hdr.group.label.value == ESM4::REC_MATO ||
                 hdr.group.label.value == ESM4::REC_IDLE || hdr.group.label.value == ESM4::REC_LTEX ||
                 hdr.group.label.value == ESM4::REC_RACE || hdr.group.label.value == ESM4::REC_SBSP
+
+                    || hdr.group.label.value == ESM4::REC_BSGN|| hdr.group.label.value == ESM4::REC_DIAL|| hdr.group.label.value == ESM4::REC_QUST
+                    || hdr.group.label.value == ESM4::REC_FACT|| hdr.group.label.value == ESM4::REC_CLAS|| hdr.group.label.value == ESM4::REC_GLOB
+                    || hdr.group.label.value == ESM4::REC_SCPT
                 )
             {
                 reader.saveGroupStatus();
@@ -183,12 +217,13 @@ void ESMStore::loadTes4Group (ESM::ESMReader &esm)
             else
             {
                 // Skip groups that are of no interest (for now).
-                //  GMST GLOB CLAS FACT SKIL MGEF SCPT ENCH SPEL BSGN WTHR CLMT DIAL
+                //  GMST  SKIL MGEF  ENCH SPEL  WTHR CLMT
                 //  QUST PACK CSTY LSCR LVSP WATR EFSH
 
                 // FIXME: The label field of a group is not reliable, so we will need to check here as well
-                //std::cout << "skipping group... " << ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
-                reader.skipGroup();
+                std::cout << "skipping group... " << ESM4::printLabel(hdr.group.label, hdr.group.type) << std::endl;
+                reader.saveGroupStatus();
+                loadTes4Group(esm);//reader.skipGroup();
                 return;
             }
 
@@ -263,9 +298,187 @@ void ESMStore::loadTes4Record (ESM::ESMReader& esm)
     {
 
         // FIXME: removed for now
+    case ESM4::REC_SOUN : // Sound
+        case ESM4::REC_STAT : // Static
+    case ESM4::REC_WEAP :// weapons
 
+    case ESM4::REC_RACE : // Race / Creature type
+    case ESM4::REC_REGN : // Region (Audio/Weather)
+    case ESM4::REC_LIGH : // Light
+    case ESM4::REC_LTEX :// Land Texture
+    case ESM4::REC_LAND :// Land
+    case ESM4::REC_INGR : // Ingredient
+
+    case ESM4::REC_DOOR : // Door
+    case ESM4::REC_CREA: // Creature
+    case ESM4::REC_CONT : // Container
+    case ESM4::REC_CLOT : // Clothing
+    case ESM4::REC_CLAS : // Class
+    case ESM4::REC_CELL : // Cell
+    case ESM4::REC_ARMO : // Armor
+    case ESM4::REC_APPA : // Apparatus (probably unused)
+    case ESM4::REC_ALCH :// Potion
+    case ESM4::REC_ACTI :// Activator
+    case ESM4::REC_BOOK :// Book
+    case ESM4::REC_BSGN : // Birth Sign
+    case ESM4::REC_DIAL : // Dialog Topic
+   case ESM4::REC_DLBR : // Dialog Branch
+   case ESM4::REC_HAIR : // Hair
+    case ESM4::REC_QUST :// Quest
+       case ESM4::REC_INFO :// Dialog Topic Info
+  case ESM4::REC_ACHR :// Actor Reference
+   case ESM4::REC_ACRE :// Placed Creature (TES4 only?)
+    case ESM4::REC_NPC_ :  // Actor (NPC, Creature) TOFIX there seems to be subrecordd larger than the record itself !:/
+
+ case ESM4::REC_HDPT : // Head Part
+        case ESM4::REC_FLOR : // Flora
+        case ESM4::REC_AMMO : // Ammo
+    case ESM4::REC_EYES : // Eyes
+    case ESM4::REC_NOTE :  // Note
+    case ESM4::REC_GRAS :  // Grass
+    case ESM4::REC_GLOB : // Global Variable
+    case ESM4::REC_ANIO :// Animated Object
+
+    case ESM4::REC_ARMA: // Armature (Model) ArmorAddon
+         case ESM4::REC_FACT :// Faction
+        case ESM4::REC_FURN : // Furniture
+
+    case ESM4::REC_SCPT: // script
+         case ESM4::REC_REFR : // Object Reference (only persistent refs)
+    {
+        //  ESM4::ReaderContext ctx=reader.getContext();
+        reader.getRecordData();
+        mESM4Stores[hdr.record.typeId]->load(esm);
+       // reader.restoreContext(ctx);
+    }
+        break;
+     //   case ESM4::REC_NPC_ :  // Actor (NPC, Creature) TOFIX there seems to be subrecordd larger than the record itself !:/
+   //   reader.getRecordData();        while(reader.getSubRecordHeader())            reader.skipSubRecordData();
+          //reader.skipRecordData();
+        break;
+    case ESM4::REC_AACT :reader.skipRecordData();break; // Action
+    //case ESM4::REC_ACHR :reader.skipRecordData();break; // Actor Reference
+    case ESM4::REC_ADDN :reader.skipRecordData();break; // Addon Node
+    //case ESM4::REC_AMMO :reader.skipRecordData();break; // Ammo
+    //case ESM4::REC_ANIO :reader.skipRecordData();break;// Animated Object
+    //case ESM4::REC_ARMA:reader.skipRecordData();break;// Armature (Model)
+    case ESM4::REC_ARTO :reader.skipRecordData();break; // Art Object
+    case ESM4::REC_ASPC :reader.skipRecordData();break; // Acoustic Space
+    case ESM4::REC_ASTP:reader.skipRecordData();break; // Association Type
+    case ESM4::REC_AVIF :reader.skipRecordData();break; // Actor Values/Perk Tree Graphics
+    case ESM4::REC_BPTD :reader.skipRecordData();break; // Body Part Data
+    case ESM4::REC_CAMS :reader.skipRecordData();break; // Camera Shot
+    case ESM4::REC_CLFM :reader.skipRecordData();break; // Color
+    case ESM4::REC_CLMT :reader.skipRecordData();break; // Climate
+    case ESM4::REC_COBJ :reader.skipRecordData();break;// Constructible Object (recipes)
+    case ESM4::REC_COLL :reader.skipRecordData();break; // Collision Layer
+    case ESM4::REC_CPTH :reader.skipRecordData();break; // Camera Path
+    case ESM4::REC_CSTY :reader.skipRecordData();break; // Combat Style
+    case ESM4::REC_DEBR :reader.skipRecordData();break; // Debris
+//    case ESM4::REC_DIAL :reader.skipRecordData();break; // Dialog Topic
+    //case ESM4::REC_DLBR :reader.skipRecordData();break; // Dialog Branch
+    case ESM4::REC_DLVW :reader.skipRecordData();break; // Dialog View
+    case ESM4::REC_DOBJ :reader.skipRecordData();break; // Default Object Manager
+    case ESM4::REC_DUAL :reader.skipRecordData();break; // Dual Cast Data (possibly unused)
+  //REC_ECZN = MKTAG('E','C','Z','N'), // Encounter Zone
+  case ESM4::  REC_EFSH :reader.skipRecordData();break; // Effect Shader
+    case ESM4::REC_ENCH :reader.skipRecordData();break; // Enchantment
+    case ESM4::REC_EQUP :reader.skipRecordData();break; // Equip Slot (flag-type values)
+    case ESM4::REC_EXPL :reader.skipRecordData();break; // Explosion
+  //  case ESM4::REC_EYES :reader.skipRecordData();break; // Eyes
+   // case ESM4::REC_FACT :reader.skipRecordData();break; // Faction
+   // case ESM4::REC_FLOR :reader.skipRecordData();break; // Flora
+    case ESM4::REC_FLST:reader.skipRecordData();break; // Form List (non-leveled list)
+    case ESM4::REC_FSTP :reader.skipRecordData();break; // Footstep
+    case ESM4::REC_FSTS :reader.skipRecordData();break; // Footstep Set
+    //case ESM4::REC_FURN :reader.skipRecordData();break; // Furniture
+  //  case ESM4::REC_GLOB :reader.skipRecordData();break; // Global Variable
+    case ESM4::REC_GMST :reader.skipRecordData();break; // Game Setting
+//    case ESM4::REC_GRAS :reader.skipRecordData();break; // Grass
+    //case ESM4::REC_HAIR :reader.skipRecordData();break; // Hair
+  //REC_HAZD = MKTAG('H','A','Z','D'), // Hazard
+    //case ESM4::REC_HDPT :reader.skipRecordData();break; // Head Part
+    case ESM4::REC_IDLE :reader.skipRecordData();break; // Idle Animation
+    case ESM4::REC_IDLM :reader.skipRecordData();break; // Idle Marker
+    case ESM4::REC_IMAD :reader.skipRecordData();break;// Image Space Modifier
+    case ESM4::REC_IMGS :reader.skipRecordData();break; // Image Space
+    //case ESM4::REC_INFO :reader.skipRecordData();break; // Dialog Topic Info
+    case ESM4::REC_IPCT :reader.skipRecordData();break; // Impact Data
+    case ESM4::REC_IPDS :reader.skipRecordData();break; // Impact Data Set
+    case ESM4::REC_KEYM :reader.skipRecordData();break; // Key
+    case ESM4::REC_KYWD :reader.skipRecordData();break; // Keyword
+    case ESM4::REC_LCRT :reader.skipRecordData();break; // Location Reference Type
+    case ESM4::REC_LCTN :reader.skipRecordData();break; // Location
+    case ESM4::REC_LGTM :reader.skipRecordData();break; // Lighting Template
+    case ESM4::REC_LSCR :reader.skipRecordData();break; // Load Screen
+    case ESM4::REC_LVLC:reader.skipRecordData();break; // Leveled Creature
+    case ESM4::REC_LVLI :reader.skipRecordData();break; // Leveled Item
+    case ESM4::REC_LVLN :reader.skipRecordData();break; // Leveled Actor
+    case ESM4::REC_LVSP :reader.skipRecordData();break; // Leveled Spell
+    case ESM4::REC_MATO :reader.skipRecordData();break; // Material Object
+    case ESM4::REC_MATT :reader.skipRecordData();break; // Material Type
+    case ESM4::REC_MESG :reader.skipRecordData();break; // Message
+    case ESM4::REC_MGEF :reader.skipRecordData();break; // Magic Effect
+    case ESM4::REC_MISC :reader.skipRecordData();break; // Misc. Object
+    case ESM4::REC_MOVT :reader.skipRecordData();break; // Movement Type
+    case ESM4::REC_MSTT :reader.skipRecordData();break; // Movable Static
+    case ESM4::REC_MUSC :reader.skipRecordData();break; // Music Type
+    case ESM4::REC_MUST :reader.skipRecordData();break; // Music Track
+    case ESM4::REC_NAVI :reader.skipRecordData();break; // Navigation (master data)
+    case ESM4::REC_NAVM :reader.skipRecordData();break; // Nav Mesh
+    //case ESM4::REC_NOTE :reader.skipRecordData();break; // Note
+    //case ESM4::REC_NPC_ :reader.skipRecordData();break; // Actor (NPC, Creature)
+    case ESM4::REC_OTFT :reader.skipRecordData();break;// Outfit
+    case ESM4::REC_PACK :reader.skipRecordData();break; // AI Package
+    case ESM4::REC_PERK :reader.skipRecordData();break; // Perk
+    case ESM4::REC_PGRE :reader.skipRecordData();break; // Placed grenade
+    case ESM4::REC_PHZD :reader.skipRecordData();break; // Placed hazard
+    case ESM4::REC_PROJ :reader.skipRecordData();break; // Projectile
+  //  case ESM4::REC_QUST :reader.skipRecordData();break; // Quest
+   // case ESM4::REC_REFR :reader.skipRecordData();break; // Object Reference
+    case ESM4::REC_RELA :reader.skipRecordData();break; // Relationship
+    case ESM4::REC_REVB :reader.skipRecordData();break; // Reverb Parameters
+    case ESM4::REC_RFCT :reader.skipRecordData();break; // Visual Effect
+    case ESM4::REC_SBSP :reader.skipRecordData();break; // Subspace (TES4 only?)
+    case ESM4::REC_SCEN :reader.skipRecordData();break;// Scene
+    case ESM4::REC_SCRL :reader.skipRecordData();break; // Scroll
+    case ESM4::REC_SGST :reader.skipRecordData();break; // Sigil Stone
+    case ESM4::REC_SHOU :reader.skipRecordData();break; // Shout
+    case ESM4::REC_SLGM :reader.skipRecordData();break; // Soul Gem
+    case ESM4::REC_SMBN :reader.skipRecordData();break; // Story Manager Branch Node
+    case ESM4::REC_SMEN :reader.skipRecordData();break; // Story Manager Event Node
+    case ESM4::REC_SMQN :reader.skipRecordData();break; // Story Manager Quest Node
+    case ESM4::REC_SNCT:reader.skipRecordData();break;// Sound Category
+    case ESM4::REC_SNDR :reader.skipRecordData();break; // Sound Reference
+    case ESM4::REC_SOPM :reader.skipRecordData();break; // Sound Output Model
+    case ESM4::REC_SPEL :reader.skipRecordData();break; // Spell
+    case ESM4::REC_SPGD :reader.skipRecordData();break; // Shader Particle Geometry
+
+    case ESM4::REC_TACT :reader.skipRecordData();break; // Talking Activator
+    case ESM4::REC_TERM :reader.skipRecordData();break; // Terminal
+    case ESM4::REC_TES4 :reader.skipRecordData();break; // Plugin info
+    case ESM4::REC_TREE :reader.skipRecordData();break; // Tree
+    case ESM4::REC_TXST :reader.skipRecordData();break; // Texture Set
+    case ESM4::REC_VTYP :reader.skipRecordData();break; // Voice Type
+    case ESM4::REC_WATR :reader.skipRecordData();break; // Water Type
+    case ESM4::REC_WOOP :reader.skipRecordData();break; // Word Of Power
+    case ESM4::REC_WRLD :reader.skipRecordData();break;// World Space
+    case ESM4::REC_WTHR :reader.skipRecordData();break; // Weather
+   //case ESM4::REC_ACRE:reader.skipRecordData();break; // Placed Creature (TES4 only?)
+    case ESM4::REC_PGRD :reader.skipRecordData();break;// Pathgrid (TES4 only?)
+    case ESM4::REC_ROAD :reader.skipRecordData();break;  // Road (TES4 only?)
         default:
+    {
+        if(false)//hdr.record.typeId==ESM4::REC_NPC_)//REC_SSCR)
+        {
+            reader.getRecordData();
+            mESM4Stores[hdr.record.typeId]->load(esm);
+        }
+        else{
+            std::cerr<<"skipping record" <<ESM4::printName (hdr.record.typeId)<<std::endl;
             reader.skipRecordData();
+        }
+}
     }
 
     return;
@@ -274,9 +487,22 @@ void ESMStore::loadTes4Record (ESM::ESMReader& esm)
 void ESMStore::setUp(bool validateRecords)
 {
     mIds.clear();
-
+{
     std::map<int, StoreBase *>::iterator storeIt = mStores.begin();
     for (; storeIt != mStores.end(); ++storeIt) {
+        storeIt->second->setUp();
+
+        if (isCacheableRecord(storeIt->first))
+        {
+            std::vector<std::string> identifiers;
+            storeIt->second->listIdentifier(identifiers);
+
+            for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end(); ++record)
+                mIds[*record] = storeIt->first;
+        }
+    }}
+    std::map<int, StoreBase *>::iterator storeIt = mESM4Stores.begin();
+    for (; storeIt != mESM4Stores.end(); ++storeIt) {
         storeIt->second->setUp();
 
         if (isCacheableRecord(storeIt->first))

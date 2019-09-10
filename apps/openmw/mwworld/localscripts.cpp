@@ -87,11 +87,16 @@ bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
 
 void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
 {
+    std::string id;
     if (const ESM::Script *script = mStore.get<ESM::Script>().search (scriptName))
-    {
+        id=script->mId;
+    else
+        if (const ESM4::Script *script = mStore.getESM4<ESM4::Script>().search (scriptName))
+            id=ESM4::formIdToString(script->mFormId);
+    if(!id.empty()){
         try
         {
-            ptr.getRefData().setLocals (*script);
+            ptr.getRefData().setLocals (id);
 
             for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin(); iter!=mScripts.end(); ++iter)
                 if (iter->second==ptr)

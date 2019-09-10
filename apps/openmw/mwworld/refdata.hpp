@@ -88,7 +88,8 @@ namespace MWWorld
 
             int getCount() const;
 
-            void setLocals (const ESM::Script& script);
+            //void setLocals (const ESM::Script& script);
+            void setLocals (const std::string& scriptid);
 
             void setCount (int count);
             ///< Set object count (an object pile is a simple object with a count >1).

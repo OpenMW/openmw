@@ -151,7 +151,7 @@ namespace MWWorld
         return mCount;
     }
 
-    void RefData::setLocals (const ESM::Script& script)
+    void RefData::setLocals (const std::string& script)
     {
         if (mLocals.configure (script) && !mLocals.isEmpty())
             mChanged = true;

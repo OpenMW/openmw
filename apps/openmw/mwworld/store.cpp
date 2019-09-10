@@ -3,11 +3,13 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/esmreader.hpp>
+#include <components/esm/esm4reader.hpp>
 #include <components/esm/esmwriter.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
+#include <extern/esm4/reader.hpp>
 #include <stdexcept>
 
 namespace
@@ -29,7 +31,28 @@ namespace
                 mRecords->push_back(item);
         }
     };
+    template<typename T>
+    class GetRecords2
+    {
+        const std::string mFind;
+        std::vector<const T*> *mRecords;
 
+    public:
+        GetRecords2(const std::string &str, std::vector<const T*> *records)
+          : mFind(Misc::StringUtils::lowerCase(str)), mRecords(records)
+        { }
+
+        void operator()(const T *item)
+        {
+    #ifdef USEmEditorID
+            std::string mID = item->mEditorId;
+    #else
+            std::string mID = ESM4::formIdToString(item->mFormId);
+    #endif
+            if(Misc::StringUtils::ciCompareLen(mFind, mID, mFind.size()) == 0)
+                mRecords->push_back(item);
+        }
+    };
     struct Compare
     {
         bool operator()(const ESM::Land *x, const ESM::Land *y) {
@@ -340,6 +363,277 @@ namespace MWWorld
         return RecordId(record.mId, isDeleted);
     }
 
+    //ESM4Store
+
+    template<typename T>
+    ESM4Store<T>::ESM4Store()
+    {
+    }
+
+    template<typename T>
+    ESM4Store<T>::ESM4Store(const ESM4Store<T>& orig)
+        : mStatic(orig.mStatic)
+    {
+    }
+
+    template<typename T>
+    void ESM4Store<T>::clearDynamic()
+    {
+        // remove the dynamic part of mShared
+        assert(mShared.size() >= mStatic.size());
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+        mDynamic.clear();
+    }
+
+    template<typename T>
+    const T *ESM4Store<T>::search(const std::string &id) const
+    {
+        std::string idLower = /*Misc::StringUtils::lowerCase*/(id);
+
+        typename Dynamic::const_iterator dit = mDynamic.find(idLower);
+        if (dit != mDynamic.end()) {
+            return &dit->second;
+        }
+
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
+#ifdef USEmEditorID
+        std::string mID = it->second.mEditorId;//ss.str();
+#else
+        std::string mID = ESM4::formIdToString(it->second.mFormId);
+#endif
+        if (it != mStatic.end() && Misc::StringUtils::ciEqual(mID, id)) {
+            return &(it->second);
+        }
+
+        return 0;
+    }
+    template<typename T>
+    bool ESM4Store<T>::isDynamic(const std::string &id) const
+    {
+        typename Dynamic::const_iterator dit = mDynamic.find(id);
+        return (dit != mDynamic.end());
+    }
+    template<typename T>
+    const T *ESM4Store<T>::searchRandom(const std::string &id) const
+    {
+        std::vector<const T*> results;
+        std::for_each(mShared.begin(), mShared.end(), GetRecords2<T>(id, &results));
+        if(!results.empty())
+            return results[Misc::Rng::rollDice(results.size())];
+        return nullptr;
+    }
+    template<typename T>
+    const T *ESM4Store<T>::find(const std::string &id) const
+    {
+        const T *ptr = search(id);
+        if (ptr == 0)
+        {
+            const std::string msg =/* ESM4::printName (typeid)T::getRecordType() + */" '" + id + "' not found";
+            throw std::runtime_error(msg);
+        }
+        return ptr;
+    }
+    template<typename T>
+    const T *ESM4Store<T>::findRandom(const std::string &id) const
+    {
+        const T *ptr = searchRandom(id);
+        if(ptr == 0)
+        {
+            const std::string msg =/* T::getRecordType() + */" starting with '" + id + "' not found";
+            throw std::runtime_error(msg);
+        }
+        return ptr;
+    }
+    template<typename T>
+    RecordId ESM4Store<T>::load(ESM::ESMReader &esm)
+    {
+        T record;
+        bool isDeleted = false;
+
+        ESM4::Reader &read = static_cast<ESM::ESM4Reader&>(esm).reader();
+
+        record.load(read);//, isDeleted);
+
+#ifdef USEmEditorID
+        std::string mID = record.mEditorId;
+#else
+        std::string mID =  ESM4::formIdToString( record.mFormId);
+#endif
+        //Misc::StringUtils::lowerCaseInPlace(mID);
+
+        std::pair<typename Static::iterator, bool> inserted = mStatic.insert(std::make_pair(mID, record));
+        if (inserted.second)
+            mShared.push_back(&inserted.first->second);
+        else
+            inserted.first->second = record;
+
+        return RecordId(mID, isDeleted);
+    }
+    template<typename T>
+    void ESM4Store<T>::setUp()
+    {
+    }
+
+    template<typename T>
+    typename ESM4Store<T>::iterator ESM4Store<T>::begin() const
+    {
+        return mShared.begin();
+    }
+    template<typename T>
+    typename ESM4Store<T>::iterator ESM4Store<T>::end() const
+    {
+        return mShared.end();
+    }
+
+    template<typename T>
+    size_t ESM4Store<T>::getSize() const
+    {
+        return mShared.size();
+    }
+
+    template<typename T>
+    int ESM4Store<T>::getDynamicSize() const
+    {
+        return mDynamic.size();
+    }
+    template<typename T>
+    void ESM4Store<T>::listIdentifier(std::vector<std::string> &list) const
+    {
+        list.reserve(list.size() + getSize());
+        typename std::vector<T *>::const_iterator it = mShared.begin();
+        for (; it != mShared.end(); ++it) {
+
+
+#ifdef USEmEditorID
+        std::string mID = (*it)->mEditorId;
+#else            
+        std::string mID =  ESM4::formIdToString( (*it)->mFormId);
+#endif
+            list.push_back(mID);;
+        }
+    }
+    template<typename T>
+    T *ESM4Store<T>::insert(const T &item)
+    {
+#ifdef USEmEditorID
+        std::string id = item.mEditorId;
+#else
+        std::string id = ESM4::formIdToString( item.mFormId);
+#endif
+        std::pair<typename Dynamic::iterator, bool> result =
+            mDynamic.insert(std::pair<std::string, T>(id, item));
+        T *ptr = &result.first->second;
+        if (result.second) {
+            mShared.push_back(ptr);
+        } else {
+            *ptr = item;
+        }
+        return ptr;
+    }
+    template<typename T>
+    T *ESM4Store<T>::insertStatic(const T &item)
+    {
+#ifdef USEmEditorID
+        std::string id = item.mEditorId;
+#else
+        std::string id = ESM4::formIdToString(item.mFormId);
+#endif
+        std::pair<typename Static::iterator, bool> result =
+            mStatic.insert(std::pair<std::string, T>(id, item));
+        T *ptr = &result.first->second;
+        if (result.second) {
+            mShared.push_back(ptr);
+        } else {
+            *ptr = item;
+        }
+        return ptr;
+    }
+    template<typename T>
+    bool ESM4Store<T>::eraseStatic(const std::string &id)
+    {
+        std::string idLower = /*Misc::StringUtils::lowerCase*/(id);
+
+        typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
+
+#ifdef USEmEditorID
+        std::string mid = it->second.mEditorId;
+#else
+        std::string mid = ESM4::formIdToString(it->second.mFormId);
+#endif
+        if (it != mStatic.end() && Misc::StringUtils::ciEqual(mid, id)) {
+            // delete from the static part of mShared
+            typename std::vector<T *>::iterator sharedIter = mShared.begin();
+            typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
+
+            while (sharedIter != mShared.end() && sharedIter != end) {
+
+#ifdef USEmEditorID
+        std::string mid2 = (*sharedIter)->mEditorId;
+#else
+        std::string mid2 = ESM4::formIdToString((*sharedIter)->mFormId);
+#endif
+                if(mid2== idLower) {
+                    mShared.erase(sharedIter);
+                    break;
+                }
+                ++sharedIter;
+            }
+            mStatic.erase(it);
+        }
+
+        return true;
+    }
+
+    template<typename T>
+    bool ESM4Store<T>::erase(const std::string &id)
+    {
+        std::string key = /*Misc::StringUtils::lowerCase*/(id);
+        typename Dynamic::iterator it = mDynamic.find(key);
+        if (it == mDynamic.end()) {
+            return false;
+        }
+        mDynamic.erase(it);
+
+        // have to reinit the whole shared part
+        assert(mShared.size() >= mStatic.size());
+        mShared.erase(mShared.begin() + mStatic.size(), mShared.end());
+        for (it = mDynamic.begin(); it != mDynamic.end(); ++it) {
+            mShared.push_back(&it->second);
+        }
+        return true;
+    }
+    template<typename T>
+    bool ESM4Store<T>::erase(const T &item)
+    {
+#ifdef USEmEditorID
+        std::string mid = item.mEditorId;//ss.str();
+#else
+        std::string mid = ESM4::formIdToString(item.mFormId);
+#endif
+        return erase(mid);
+    }
+    template<typename T>
+    void ESM4Store<T>::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
+    {
+        //
+        std::cerr<<"ESM4Store write not impelemnted"<<std::endl;
+    }
+    template<typename T>
+    RecordId ESM4Store<T>::read(ESM::ESMReader& reader)
+    {
+        ESM4::Reader &read = static_cast<ESM::ESM4Reader&>(reader).reader();
+        T record;
+        bool isDeleted = false;
+        record.load (read);
+        insert (record);
+
+#ifdef USEmEditorID
+        std::string mid = record.mEditorId;//ss.str();
+#else
+        std::string mid = ESM4::formIdToString(record.mFormId);
+#endif
+        return RecordId(mid, isDeleted);
+    }
     // LandTexture
     //=========================================================================
     Store<ESM::LandTexture>::Store()
@@ -1136,3 +1430,75 @@ template class MWWorld::Store<ESM::StartScript>;
 template class MWWorld::Store<ESM::Static>;
 template class MWWorld::Store<ESM::Weapon>;
 
+
+
+template class MWWorld::ESM4Store<ESM4::Activator>;
+template class MWWorld::ESM4Store<ESM4::Apparatus>;
+template class MWWorld::ESM4Store<ESM4::Armor>;
+//template class MWWorld::Store<ESM::Attribute>;
+///template class MWWorld::ESM4Store<ESM4::BirthSign>;
+template class MWWorld::ESM4Store<ESM4::BodyPart>;
+template class MWWorld::ESM4Store<ESM4::Book>;
+//template class MWWorld::Store<ESM::Cell>;
+template class MWWorld::ESM4Store<ESM4::Class>;
+template class MWWorld::ESM4Store<ESM4::Clothing>;
+template class MWWorld::ESM4Store<ESM4::Container>;
+template class MWWorld::ESM4Store<ESM4::Creature>;
+template class MWWorld::ESM4Store<ESM4::Door>;/*
+template class MWWorld::ESM4Store<ESM4::CreatureLevList>;
+template class MWWorld::ESM4Store<ESM4::Dialogue>;
+template class MWWorld::ESM4Store<ESM4::Enchantment>;
+template class MWWorld::ESM4Store<ESM4::Faction>;
+template class MWWorld::ESM4Store<ESM4::GameSetting>;
+template class MWWorld::ESM4Store<ESM4::Global>;*/
+template class MWWorld::ESM4Store<ESM4::Ingredient>;
+///template class MWWorld::ESM4Store<ESM4::ItemLevList>;
+//template class MWWorld::Store<ESM::Land>;
+//template class MWWorld::Store<ESM::LandTexture>;
+template class MWWorld::ESM4Store<ESM4::Light>;
+///template class MWWorld::ESM4Store<ESM4::Lockpick>;
+//template class MWWorld::Store<ESM::MagicEffect>;
+///template class MWWorld::ESM4Store<ESM4::Miscellaneous>;
+///template class MWWorld::ESM4Store<ESM4::NPC>;
+//template class MWWorld::Store<ESM::Pathgrid>;
+template class MWWorld::ESM4Store<ESM4::Potion>;
+///template class MWWorld::ESM4Store<ESM4::Probe>;
+template class MWWorld::ESM4Store<ESM4::Race>;
+template class MWWorld::ESM4Store<ESM4::Region>;
+////template class MWWorld::ESM4Store<ESM4::Repair>;
+template class MWWorld::ESM4Store<ESM4::Script>;
+//template class MWWorld::Store<ESM::Skill>;
+template class MWWorld::ESM4Store<ESM4::Sound>;
+/*
+template class MWWorld::ESM4Store<ESM4::SoundGenerator>;
+template class MWWorld::ESM4Store<ESM4::Spell>;
+template class MWWorld::ESM4Store<ESM4::StartScript>;*/
+template class MWWorld::ESM4Store<ESM4::Static>;
+template class MWWorld::ESM4Store<ESM4::Weapon>;
+
+template class MWWorld::ESM4Store<ESM4::Hair>;
+template class MWWorld::ESM4Store<ESM4::Land>;
+template class MWWorld::ESM4Store<ESM4::LandTexture>;
+template class MWWorld::ESM4Store<ESM4::Cell>;
+
+template class MWWorld::ESM4Store<ESM4::Npc>;
+template class MWWorld::ESM4Store<ESM4::HeadPart>;
+template class MWWorld::ESM4Store<ESM4::BirthSign>;
+template class MWWorld::ESM4Store<ESM4::Dialog>;
+template class MWWorld::ESM4Store<ESM4::DialogBranch>;
+template class MWWorld::ESM4Store<ESM4::Info>;
+template class MWWorld::ESM4Store<ESM4::Quest>;
+template class MWWorld::ESM4Store<ESM4::ActorCharacter>;
+template class MWWorld::ESM4Store<ESM4::ActorCreature>;
+template class MWWorld::ESM4Store<ESM4::Grass>;
+template class MWWorld::ESM4Store<ESM4::Flora>;
+template class MWWorld::ESM4Store<ESM4::Ammo>;
+template class MWWorld::ESM4Store<ESM4::AnimObject>;
+template class MWWorld::ESM4Store<ESM4::Eyes>;
+template class MWWorld::ESM4Store<ESM4::Global>;
+template class MWWorld::ESM4Store<ESM4::Note>;
+
+template class MWWorld::ESM4Store<ESM4:: ArmorAddon>;
+template class MWWorld::ESM4Store<ESM4::Furniture>;
+template class MWWorld::ESM4Store<ESM4::Faction>;
+template class MWWorld::ESM4Store<ESM4::Reference>;

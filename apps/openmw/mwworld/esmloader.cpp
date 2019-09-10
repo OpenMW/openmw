@@ -57,6 +57,7 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index, std::v
         ESM::ESM4Reader *esm = new ESM::ESM4Reader(isTes4); // NOTE: TES4 headers are 4 bytes shorter
 
         esm->setEncoder(mEncoder);
+        esm->reader().setLocale("French");//TOFIX
 
         esm->setTESIndex(tesVerIndex);
 

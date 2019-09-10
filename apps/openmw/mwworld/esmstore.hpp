@@ -5,6 +5,8 @@
 #include <stdexcept>
 
 #include <components/esm/records.hpp>
+#include <extern/esm4/common.hpp>
+
 #include "store.hpp"
 
 namespace Loading
@@ -16,6 +18,55 @@ namespace MWWorld
 {
     class ESMStore
     {
+        ESM4Store<ESM4::Book>            mBooks2;
+        ESM4Store<ESM4::Activator>     mActivators2;
+        ESM4Store<ESM4::Potion>     mPotions2;
+        ESM4Store<ESM4::Apparatus>       mAppas2;
+        ESM4Store<ESM4::Armor>           mArmors2;
+        ESM4Store<ESM4::BodyPart>        mBodyParts2;
+        ESM4Store<ESM4::Class>           mClasses2;
+        ESM4Store<ESM4::Clothing>        mClothes2;
+        ESM4Store<ESM4::Container>       mContainers2;
+        ESM4Store<ESM4::Creature>        mCreatures2;
+        ESM4Store<ESM4::Door>            mDoors2;
+        ESM4Store<ESM4::Ingredient>      mIngreds2;
+        ESM4Store<ESM4::Light>           mLights2;
+        ESM4Store<ESM4::Race>            mRaces2;
+        ESM4Store<ESM4::Region>          mRegions2;
+        ESM4Store<ESM4::Sound>           mSounds2;
+        ESM4Store<ESM4::Static>          mStatics2;
+        ESM4Store<ESM4::Weapon>          mWeapons2;
+        ESM4Store<ESM4::Script>          mScripts2;
+
+        // Lists that need special rules
+        ESM4Store<ESM4::Cell>        mCells2;
+        ESM4Store<ESM4::Land>        mLands2;
+        ESM4Store<ESM4::LandTexture> mLandTextures2;
+        ESM4Store<ESM4::Npc>        mNpcs2;
+        ESM4Store<ESM4::Hair>       mHairs2;
+        ESM4Store<ESM4::HeadPart>   mHeadParts2;
+        ESM4Store<ESM4::Quest> mQuests2;
+
+
+        ESM4Store<ESM4::BirthSign>   mBirthSigns2;
+        ESM4Store<ESM4::Dialog>   mDialogs2;
+        ESM4Store<ESM4::DialogBranch>   mDialogBranchs2;
+        ESM4Store<ESM4::Info>   mDialogInfo2;
+        //ESM4Store<ESM4::DialogView>   mDialogViews2;
+        ESM4Store<ESM4::ActorCharacter>   mActorCharacters2;
+        ESM4Store<ESM4::ActorCreature>   mActorCreatures2;
+        ESM4Store<ESM4::Grass> mGrasses2;
+        ESM4Store<ESM4::Flora> mFloras2;
+        ESM4Store<ESM4::Ammo> mAmmos2;
+        ESM4Store<ESM4::AnimObject> mAnimObjects2;
+        ESM4Store<ESM4::Eyes> mEyes2;
+        ESM4Store<ESM4::Global>   mGlobals2;
+        ESM4Store<ESM4::Note>   mNotes2;
+        ESM4Store<ESM4::ArmorAddon>   mArmorAddons2;
+        ESM4Store<ESM4::Furniture>   mFurnitures2;
+        ESM4Store<ESM4::Faction>   mFactions2;
+ESM4Store<ESM4::Reference> mPersistantrefs2;
+
         Store<ESM::Activator>       mActivators;
         Store<ESM::Potion>          mPotions;
         Store<ESM::Apparatus>       mAppas;
@@ -69,6 +120,7 @@ namespace MWWorld
         // maps the id name to the record type.
         std::map<std::string, int> mIds;
         std::map<int, StoreBase *> mStores;
+        std::map<int, StoreBase *> mESM4Stores;
 
         ESM::NPC mPlayerTemplate;
 
@@ -84,11 +136,16 @@ namespace MWWorld
         iterator begin() const {
             return mStores.begin();
         }
-
         iterator end() const {
             return mStores.end();
         }
+        iterator beginESM4() const {
+            return mESM4Stores.begin();
+        }
 
+        iterator endESM4() const {
+            return mESM4Stores.end();
+        }
         /// Look up the given ID in 'all'. Returns 0 if not found.
         /// \note id must be in lower case.
         int find(const std::string &id) const
@@ -143,12 +200,84 @@ namespace MWWorld
             mStores[ESM::REC_STAT] = &mStatics;
             mStores[ESM::REC_WEAP] = &mWeapons;
 
+
+            mESM4Stores[ESM4::REC_DIAL] = &mDialogs2;
+
+            mESM4Stores[ESM4::REC_BSGN] = &mBirthSigns2;
+
+            mESM4Stores[ESM4::REC_BOOK] = &mBooks2;
+            mESM4Stores[ESM4::REC_ACTI] = &mActivators2;
+            mESM4Stores[ESM4::REC_ALCH] = &mPotions2;
+            mESM4Stores[ESM4::REC_APPA] = &mAppas2;
+            mESM4Stores[ESM4::REC_ARMO] = &mArmors2;
+            mESM4Stores[ESM4::REC_CELL] = &mCells2;
+            mESM4Stores[ESM4::REC_CLAS] = &mClasses2;
+            mESM4Stores[ESM4::REC_CLOT] = &mClothes2;
+            mESM4Stores[ESM4::REC_CONT] = &mContainers2;
+            mESM4Stores[ESM4::REC_CREA] = &mCreatures2;
+            mESM4Stores[ESM4::REC_DOOR] = &mDoors2;
+           /// mESM4Stores[ESM4::REC_ENCH] = &mEnchants2;
+           /// mESM4Stores[ESM4::REC_FACT] = &mFactions2;
+          ///  mESM4Stores[ESM4::REC_GLOB] = &mGlobals2;
+          //  mESM4Stores[ESM4::REC_GMST] = &mGameSettings;
+            mESM4Stores[ESM4::REC_INGR] = &mIngreds2;
+            mESM4Stores[ESM4::REC_LAND] = &mLands2;
+           // mESM4Stores[ESM4::REC_LEVC] = &mCreatureLists;
+          //  mESM4Stores[ESM4::REC_LEVI] = &mItemLists;
+            mESM4Stores[ESM4::REC_LIGH] = &mLights2;
+           // mESM4Stores[ESM4::REC_LOCK] = &mLockpicks;
+            mESM4Stores[ESM4::REC_LTEX] = &mLandTextures2;
+          ///  mESM4Stores[ESM4::REC_MISC] = &mMiscItems2;
+          ///
+            mESM4Stores[ESM4::REC_DIAL] = &mDialogs2;
+            mESM4Stores[ESM4::REC_DLBR] = &mDialogBranchs2;
+            mESM4Stores[ESM4::REC_INFO] = &mDialogInfo2;
+            mESM4Stores[ESM4::REC_ACHR] = &mActorCharacters2;
+            mESM4Stores[ESM4::REC_ACRE] = &mActorCreatures2;
+           // mESM4Stores[ESM4::REC_DLVW] = &mDialogViews2;
+
+
+            mESM4Stores[ESM4::REC_HDPT] = &mHeadParts2;
+          mESM4Stores[ESM4::REC_HAIR] = &mHairs2;
+          mESM4Stores[ESM4::REC_NPC_] = &mNpcs2;
+          mESM4Stores[ESM4::REC_QUST] = &mQuests2;
+          mESM4Stores[ESM4::REC_GRAS] = &mGrasses2;
+          mESM4Stores[ESM4::REC_FLOR] = &mFloras2;
+          mESM4Stores[ESM4::REC_AMMO] = &mAmmos2;
+          mESM4Stores[ESM4::REC_ANIO] = &mAnimObjects2;
+          mESM4Stores[ESM4::REC_EYES] = &mEyes2;
+          mESM4Stores[ESM4::REC_GLOB] = &mGlobals2;
+          mESM4Stores[ESM4::REC_NOTE] = &mNotes2;
+
+         ///   mESM4Stores[ESM4::REC_PGRD] = &mPathgrids2;
+          //  mESM4Stores[ESM4::REC_PROB] = &mProbes;
+            mESM4Stores[ESM4::REC_RACE] = &mRaces2;
+            mESM4Stores[ESM4::REC_REGN] = &mRegions2;
+           // mESM4Stores[ESM4::REC_REPA] = &mRepairs;
+            mESM4Stores[ESM4::REC_SCPT] = &mScripts2;
+          //  mESM4Stores[ESM4::REC_SNDG] = &mSoundGens;
+            mESM4Stores[ESM4::REC_SOUN] = &mSounds2;
+           /// mESM4Stores[ESM4::REC_SPEL] = &mSpells2;
+            //mESM4Stores[ESM::REC_SSCR] = &mStartScripts2;
+            mESM4Stores[ESM4::REC_STAT] = &mStatics2;
+            mESM4Stores[ESM4::REC_WEAP] = &mWeapons2;
+            mESM4Stores[ESM4::REC_ARMA] = &mArmorAddons2;
+            mESM4Stores[ESM4::REC_FURN] = &mFurnitures2;
+            mESM4Stores[ESM4::REC_LIGH] = &mLights2;
+            mESM4Stores[ESM4::REC_FACT] = &mFactions2;
+            mESM4Stores[ESM4::REC_REFR] = &mPersistantrefs2;
+
+
+
             mPathgrids.setCells(mCells);
         }
 
         void clearDynamic ()
         {
             for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
+                it->second->clearDynamic();
+
+            for (std::map<int, StoreBase *>::iterator it = mESM4Stores.begin(); it != mESM4Stores.end(); ++it)
                 it->second->clearDynamic();
 
             mNpcs.insert(mPlayerTemplate);
@@ -168,6 +297,11 @@ namespace MWWorld
             throw std::runtime_error("Storage for this type not exist");
         }
 
+        template <class T>
+        const ESM4Store<T> &getESM4() const {
+            throw std::runtime_error("ESM4Store for this type not exist");
+        }
+
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
         template <class T>
         const T *insert(const T &x)
@@ -180,6 +314,7 @@ namespace MWWorld
                 const std::string msg = "Try to override existing record '" + id + "'";
                 throw std::runtime_error(msg);
             }
+
             T record = x;
 
             record.mId = id;
@@ -190,6 +325,7 @@ namespace MWWorld
                     mIds[ptr->mId] = it->first;
                 }
             }
+
             return ptr;
         }
 
@@ -200,6 +336,11 @@ namespace MWWorld
 
             T *ptr = store.insert(x);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            for (iterator it = mESM4Stores.begin(); it != mESM4Stores.end(); ++it) {
                 if (it->second == &store) {
                     mIds[ptr->mId] = it->first;
                 }
@@ -222,6 +363,11 @@ namespace MWWorld
 
             T *ptr = store.insertStatic(record);
             for (iterator it = mStores.begin(); it != mStores.end(); ++it) {
+                if (it->second == &store) {
+                    mIds[ptr->mId] = it->first;
+                }
+            }
+            for (iterator it = mESM4Stores.begin(); it != mESM4Stores.end(); ++it) {
                 if (it->second == &store) {
                     mIds[ptr->mId] = it->first;
                 }
@@ -482,6 +628,299 @@ namespace MWWorld
     inline const Store<ESM::Attribute> &ESMStore::get<ESM::Attribute>() const {
         return mAttributes;
     }
+
+    ///ESM4
+    template <>
+    inline const ESM4Store<ESM4::Activator> &ESMStore::getESM4<ESM4::Activator>() const {
+        return mActivators2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Potion> &ESMStore::getESM4<ESM4::Potion>() const {
+        return mPotions2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Apparatus> &ESMStore::getESM4<ESM4::Apparatus>() const {
+        return mAppas2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Armor> &ESMStore::getESM4<ESM4::Armor>() const {
+        return mArmors2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::BodyPart> &ESMStore::getESM4<ESM4::BodyPart>() const {
+        return mBodyParts2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Book> &ESMStore::getESM4<ESM4::Book>() const {
+        return mBooks2;
+    }
+
+
+
+    template <>
+    inline const ESM4Store<ESM4::Class> &ESMStore::getESM4<ESM4::Class>() const {
+        return mClasses2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Clothing> &ESMStore::getESM4<ESM4::Clothing>() const {
+        return mClothes2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Container> &ESMStore::getESM4<ESM4::Container>() const {
+        return mContainers2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Creature> &ESMStore::getESM4<ESM4::Creature>() const {
+        return mCreatures2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Door> &ESMStore::getESM4<ESM4::Door>() const {
+        return mDoors2;
+    }
+
+
+    template <>
+    inline const ESM4Store<ESM4::Ingredient> &ESMStore::getESM4<ESM4::Ingredient>() const {
+        return mIngreds2;
+    }
+
+
+    template <>
+    inline const ESM4Store<ESM4::Light> &ESMStore::getESM4<ESM4::Light>() const {
+        return mLights2;
+    }
+
+
+    template <>
+    inline const ESM4Store<ESM4::Race> &ESMStore::getESM4<ESM4::Race>() const {
+        return mRaces2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Region> &ESMStore::getESM4<ESM4::Region>() const {
+        return mRegions2;
+    }
+
+
+    template <>
+    inline const ESM4Store<ESM4::Sound> &ESMStore::getESM4<ESM4::Sound>() const {
+        return mSounds2;
+    }
+
+
+    template <>
+    inline const ESM4Store<ESM4::Static> &ESMStore::getESM4<ESM4::Static>() const {
+        return mStatics2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Weapon> &ESMStore::getESM4<ESM4::Weapon>() const {
+        return mWeapons2;
+    }
+
+
+
+    template <>
+    inline const ESM4Store<ESM4::Script> &ESMStore::getESM4<ESM4::Script>() const {
+        return mScripts2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Cell> &ESMStore::getESM4<ESM4::Cell>() const {
+        return mCells2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Land> &ESMStore::getESM4<ESM4::Land>() const {
+        return mLands2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::LandTexture> &ESMStore::getESM4<ESM4::LandTexture>() const {
+        return mLandTextures2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Npc> &ESMStore::getESM4<ESM4::Npc>() const {
+        return mNpcs2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::BirthSign> &ESMStore::getESM4<ESM4::BirthSign>() const {
+        return mBirthSigns2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Dialog> &ESMStore::getESM4<ESM4::Dialog>() const {
+        return mDialogs2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::DialogBranch> &ESMStore::getESM4<ESM4::DialogBranch>() const {
+        return mDialogBranchs2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Hair> &ESMStore::getESM4<ESM4::Hair>() const {
+        return mHairs2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::HeadPart> &ESMStore::getESM4<ESM4::HeadPart>() const {
+        return mHeadParts2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Quest> &ESMStore::getESM4<ESM4::Quest>() const {
+        return mQuests2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Info> &ESMStore::getESM4<ESM4::Info>() const {
+        return mDialogInfo2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::ActorCharacter> &ESMStore::getESM4<ESM4::ActorCharacter>() const {
+        return mActorCharacters2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Grass> &ESMStore::getESM4<ESM4::Grass>() const {
+        return mGrasses2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Flora> &ESMStore::getESM4<ESM4::Flora>() const {
+        return mFloras2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Ammo> &ESMStore::getESM4<ESM4::Ammo>() const {
+        return mAmmos2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::AnimObject> &ESMStore::getESM4<ESM4::AnimObject>() const {
+        return mAnimObjects2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Eyes> &ESMStore::getESM4<ESM4::Eyes>() const {
+        return mEyes2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Global> &ESMStore::getESM4<ESM4::Global>() const {
+        return mGlobals2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Note> &ESMStore::getESM4<ESM4::Note>() const {
+        return mNotes2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::ArmorAddon> &ESMStore::getESM4<ESM4::ArmorAddon>() const {
+        return mArmorAddons2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Furniture> &ESMStore::getESM4<ESM4::Furniture>() const {
+        return mFurnitures2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Faction> &ESMStore::getESM4<ESM4::Faction>() const {
+        return mFactions2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Reference> &ESMStore::getESM4<ESM4::Reference>() const {
+        return mPersistantrefs2;
+    }
+
+ /*  template <>
+    inline const ESM4Store<ESM4::Enchantment> &ESMStore::get<ESM4::Enchantment>() const {
+        return mEnchants2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Dialogue> &ESMStore::get<ESM4::Dialogue>() const {
+        return mDialogs2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Faction> &ESMStore::get<ESM4::Faction>() const {
+        return mFactions2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Global> &ESMStore::get<ESM4::Global>() const {
+        return mGlobals2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::CreatureLevList> &ESMStore::get<ESM4::CreatureLevList>() const {
+        return mCreatureLists2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::ItemLevList> &ESMStore::get<ESM4::ItemLevList>() const {
+        return mItemLists2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Lockpick> &ESMStore::get<ESM4::Lockpick>() const {
+        return mLockpicks2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Miscellaneous> &ESMStore::get<ESM4::Miscellaneous>() const {
+        return mMiscItems2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Probe> &ESMStore::get<ESM4::Probe>() const {
+        return mProbes2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Repair> &ESMStore::get<ESM4::Repair>() const {
+        return mRepairs2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::SoundGenerator> &ESMStore::get<ESM4::SoundGenerator>() const {
+        return mSoundGens2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Spell> &ESMStore::get<ESM4::Spell>() const {
+        return mSpells2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::StartScript> &ESMStore::get<ESM4::StartScript>() const {
+        return mStartScripts2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::GameSetting> &ESMStore::getESM4<ESM4::GameSetting>() const {
+        return mGameSettings2;
+    }
+    template <>
+    inline const ESM4Store<ESM4::Pathgrid> &ESMStore::getESM4<ESM4::Pathgrid>() const {
+        return mPathgrids2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::MagicEffect> &ESMStore::getESM4<ESM4::MagicEffect>() const {
+        return mMagicEffects2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Skill> &ESMStore::getESM4<ESM4::Skill>() const {
+        return mSkills2;
+    }
+
+    template <>
+    inline const ESM4Store<ESM4::Attribute> &ESMStore::getESM4<ESM4::Attribute>() const {
+        return mAttributes2;
+    }*/
 }
 
 #endif
