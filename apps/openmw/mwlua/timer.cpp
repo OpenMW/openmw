@@ -1,4 +1,4 @@
-#include "luatimer.hpp"
+#include "timer.hpp"
 
 #include <algorithm>
 
@@ -6,7 +6,7 @@
 
 #include "luamanager.hpp"
 
-#include "luautil.hpp"
+#include "util.hpp"
 
 namespace MWLua
 {

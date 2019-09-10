@@ -1,7 +1,7 @@
 #include "loadedgame.hpp"
 
 #include "luamanager.hpp"
-#include "luautil.hpp"
+#include "util.hpp"
 
 //#include "TES3MobilePlayer.h"
 //#include "TES3Reference.h"

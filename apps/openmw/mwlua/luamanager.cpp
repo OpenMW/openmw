@@ -13,10 +13,10 @@
 #include "BuildDate.h"
 */
 
-#include "luatimer.hpp"
-#include "luautil.hpp"
-#include "luascript.hpp"
-#include "tes3utillua.hpp"
+#include "timer.hpp"
+#include "util.hpp"
+#include "script.hpp"
+#include "tes3util.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -263,8 +263,8 @@ namespace MWLua
     void LuaManager::bindData()
     {
         // Bind our LuaScript type, which is used for holding script contexts.
-        mLuaState.new_usertype<LuaScript>("LuaScript",
-            sol::constructors<LuaScript()>(),
+        mLuaState.new_usertype<Script>("LuaScript",
+            sol::constructors<Script()>(),
 
             // Implement dynamic object metafunctions.
             sol::meta_function::index, &DynamicLuaObject::dynamic_get,
@@ -272,8 +272,8 @@ namespace MWLua
             sol::meta_function::length, [](DynamicLuaObject& d) { return d.entries.size(); },
 
             // Set up read-only properties.
-            "script", sol::readonly(&LuaScript::script),
-            "reference", sol::readonly(&LuaScript::reference)//,
+            "script", sol::readonly(&Script::mScript),
+            "reference", sol::readonly(&Script::mReference)//,
             //"context", sol::readonly_property([](LuaScript& self) { return std::shared_ptr<ScriptContext>(new ScriptContext(self.script)); })
 
             );

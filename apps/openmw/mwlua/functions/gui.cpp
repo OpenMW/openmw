@@ -5,7 +5,7 @@
 #include <extern/sol2/sol.hpp>
 
 #include "../luamanager.hpp"
-#include "../luautil.hpp"
+#include "../util.hpp"
 
 #include "../../mwbase/environment.hpp"
 #include "../../mwbase/windowmanager.hpp"

@@ -11,15 +11,15 @@
 
 namespace MWLua
 {
-    struct LuaScript : public DynamicLuaObject
+    struct Script : public DynamicLuaObject
     {
-        LuaScript() :
-            script(nullptr),
-            reference(MWWorld::Ptr())
+        Script() :
+            mScript(nullptr),
+            mReference(MWWorld::Ptr())
         {
         }
-        ESM::Script* script;
-        MWWorld::Ptr reference;
+        ESM::Script* mScript;
+        MWWorld::Ptr mReference;
     };
 }
 
