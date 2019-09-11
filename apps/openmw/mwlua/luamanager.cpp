@@ -25,6 +25,7 @@
 
 #include "structs/activator.hpp"
 #include "structs/apparatus.hpp"
+#include "structs/armor.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
 #include "structs/static.hpp"
@@ -38,10 +39,8 @@
 #include "ScriptUtilLua.h"
 #include "StringUtilLua.h"
 #include "TES3ActionDataLua.h"
-#include "TES3ActivatorLua.h"
 #include "TES3AILua.h"
 #include "TES3AlchemyLua.h"
-#include "TES3ArmorLua.h"
 #include "TES3AttachmentLua.h"
 #include "TES3AudioControllerLua.h"
 #include "TES3BodyPartLua.h"
@@ -257,6 +256,7 @@ namespace MWLua
 
         bindTES3Activator();
         bindTES3Apparatus();
+        bindTES3Armor();
         bindTES3MagicEffect();
         bindTES3Reference();
         bindTES3Static();
@@ -268,7 +268,6 @@ namespace MWLua
         bindTES3ActionData();
         bindTES3AI();
         bindTES3Alchemy();
-        bindTES3Armor();
         bindTES3Attachment();
         bindTES3AudioController();
         bindTES3BodyPart();

@@ -7,9 +7,6 @@
 
 #include "../../mwworld/esmstore.hpp"
 
-#include <components/esm/effectlist.hpp>
-#include <components/esm/loadmgef.hpp>
-
 namespace MWLua
 {
     void bindTES3MagicEffect()

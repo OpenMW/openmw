@@ -2,9 +2,7 @@
 
 #include "../luamanager.hpp"
 
-#include "../../mwworld/esmstore.hpp"
-
-#include <components/esm/loadstat.hpp>
+#include <components/esm/loadappa.hpp>
 
 namespace MWLua
 {

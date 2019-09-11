@@ -2,8 +2,6 @@
 
 #include "../luamanager.hpp"
 
-#include "../../mwworld/esmstore.hpp"
-
 #include <components/esm/loadacti.hpp>
 
 namespace MWLua
