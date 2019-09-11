@@ -352,6 +352,7 @@ void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
 void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>& vertexCoords, bool dragOperation)
 {
     int r = mBrushSize / 2;
+    if (r == 0) r = 1; // Prevent division by zero later, which might happen when mBrushSize == 1
 
     std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
     CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
@@ -409,7 +410,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                     float smoothedByDistance = 0.0f;
                     if (mShapeEditTool == 0) smoothedByDistance = mTotalDiffY - mTotalDiffY * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
                     if (mShapeEditTool == 1 || mShapeEditTool == 2) smoothedByDistance = (r + mShapeEditToolStrength) - (r + mShapeEditToolStrength) * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
-                    if (distance < r)
+                    if (distance <= r)
                     {
                         if (mShapeEditTool >= 0 && mShapeEditTool < 3) alterHeight(cellCoords, x, y, smoothedByDistance);
                         if (mShapeEditTool == 3) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
@@ -978,7 +979,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
                 int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (distance < r) selections.emplace_back(std::make_pair(i, j));
+                if (distance <= r) selections.emplace_back(std::make_pair(i, j));
             }
         }
     }
