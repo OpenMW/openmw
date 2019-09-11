@@ -32,6 +32,7 @@
 #include "structs/light.hpp"
 #include "structs/lockpick.hpp"
 #include "structs/magiceffect.hpp"
+#include "structs/probe.hpp"
 #include "structs/ptr.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
@@ -261,6 +262,7 @@ namespace MWLua
         bindTES3Light();
         bindTES3Lockpick();
         bindTES3MagicEffect();
+        bindTES3Probe();
         bindTES3Reference();
         bindTES3Static();
         bindTES3Vectors();
@@ -304,7 +306,6 @@ namespace MWLua
         bindTES3MobileProjectile();
         bindTES3Moon();
         bindTES3NPC();
-        bindTES3Probe();
         bindTES3Race();
         bindTES3Reference();
         bindTES3ReferenceList();

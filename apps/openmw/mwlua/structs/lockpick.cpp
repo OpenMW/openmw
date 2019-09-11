@@ -24,6 +24,9 @@ namespace MWLua
         usertypeDefinition.set("script", &ESM::Lockpick::mScript);
         usertypeDefinition.set("name", &ESM::Lockpick::mName);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Lockpick::mId);
+
         usertypeDefinition.set("quality", sol::property(
             [](ESM::Lockpick& self) { return self.mData.mQuality; },
             [](ESM::Lockpick& self, float value) { self.mData.mQuality = value; }
