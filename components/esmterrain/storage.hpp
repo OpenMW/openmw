@@ -1,7 +1,12 @@
 #ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
+#include <cassert>
+
 #include <OpenThreads/Mutex>
+
+#include <osg/Image>
+#include <osg/Plane>
 
 #include <components/terrain/storage.hpp>
 
@@ -13,10 +18,13 @@ namespace VFS
     class Manager;
 }
 
+namespace CSVRender
+{
+    class TerrainStorage;
+}
+
 namespace ESMTerrain
 {
-
-    class LandCache;
 
     /// @brief Wrapper around Land Data with reference counting. The wrapper needs to be held as long as the data is still in use
     class LandObject : public osg::Object
@@ -48,6 +56,13 @@ namespace ESMTerrain
         ESM::Land::LandData mData;
     };
 
+    class LandCache
+    {
+    public:
+        typedef std::map<std::pair<int, int>, osg::ref_ptr<const LandObject> > Map;
+        Map mMap;
+    };
+    
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
     ///        into the terrain component, converting it on the fly as needed.
     class Storage : public Terrain::Storage
@@ -110,14 +125,6 @@ namespace ESMTerrain
     private:
         const VFS::Manager* mVFS;
 
-        inline void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
-        inline void fixColour (osg::Vec4ub& colour, int cellX, int cellY, int col, int row, LandCache& cache);
-        inline void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
-
-        inline float getVertexHeight (const ESM::Land::LandData* data, int x, int y);
-
-        inline const LandObject* getLand(int cellX, int cellY, LandCache& cache);
-
         // Since plugins can define new texture palettes, we need to know the plugin index too
         // in order to retrieve the correct texture name.
         // pair  <texture id, plugin id>
@@ -137,6 +144,103 @@ namespace ESMTerrain
         bool mAutoUseSpecularMaps;
 
         Terrain::LayerInfo getLayerInfo(const std::string& texture);
+
+    protected:
+
+        inline void fixNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache)
+        {
+            while (col >= ESM::Land::LAND_SIZE-1)
+            {
+                ++cellY;
+                col -= ESM::Land::LAND_SIZE-1;
+            }
+            while (row >= ESM::Land::LAND_SIZE-1)
+            {
+                ++cellX;
+                row -= ESM::Land::LAND_SIZE-1;
+            }
+            while (col < 0)
+            {
+                --cellY;
+                col += ESM::Land::LAND_SIZE-1;
+            }
+            while (row < 0)
+            {
+                --cellX;
+                row += ESM::Land::LAND_SIZE-1;
+            }
+
+            const LandObject* land = getLand(cellX, cellY, cache);
+            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : 0;
+            if (data)
+            {
+                normal.x() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3];
+                normal.y() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+1];
+                normal.z() = data->mNormals[col*ESM::Land::LAND_SIZE*3+row*3+2];
+                normal.normalize();
+            }
+            else
+                normal = osg::Vec3f(0,0,1);
+        };
+
+        inline void fixColour (osg::Vec4ub& color, int cellX, int cellY, int col, int row, LandCache& cache)
+        {
+            if (col == ESM::Land::LAND_SIZE-1)
+            {
+                ++cellY;
+                col = 0;
+            }
+            if (row == ESM::Land::LAND_SIZE-1)
+            {
+                ++cellX;
+                row = 0;
+            }
+
+            const LandObject* land = getLand(cellX, cellY, cache);
+            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : 0;
+            if (data)
+            {
+                color.r() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3];
+                color.g() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+1];
+                color.b() = data->mColours[col*ESM::Land::LAND_SIZE*3+row*3+2];
+            }
+            else
+            {
+                color.r() = 255;
+                color.g() = 255;
+                color.b() = 255;
+            }
+        };
+
+        inline void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache)
+        {
+            osg::Vec3f n1,n2,n3,n4;
+            fixNormal(n1, cellX, cellY, col+1, row, cache);
+            fixNormal(n2, cellX, cellY, col-1, row, cache);
+            fixNormal(n3, cellX, cellY, col, row+1, cache);
+            fixNormal(n4, cellX, cellY, col, row-1, cache);
+            normal = (n1+n2+n3+n4);
+            normal.normalize();
+        };
+
+        inline float getVertexHeight (const ESM::Land::LandData* data, int x, int y)
+        {
+            assert(x < ESM::Land::LAND_SIZE);
+            assert(y < ESM::Land::LAND_SIZE);
+            return data->mHeights[y * ESM::Land::LAND_SIZE + x];
+        };
+
+        inline const LandObject* getLand(int cellX, int cellY, LandCache& cache)
+        {
+            LandCache::Map::iterator found = cache.mMap.find(std::make_pair(cellX, cellY));
+            if (found != cache.mMap.end())
+                return found->second;
+            else
+            {
+                found = cache.mMap.insert(std::make_pair(std::make_pair(cellX, cellY), getLand(cellX, cellY))).first;
+                return found->second;
+            }
+        };
     };
 
 }

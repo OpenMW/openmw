@@ -158,6 +158,8 @@
     Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
+    Feature #4840: Editor: Transient terrain change support
+    Feature #????: Editor: Land shape editing, land selection
     Feature #4859: Make water reflections more configurable
     Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
