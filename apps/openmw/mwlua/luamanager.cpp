@@ -25,6 +25,8 @@
 
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
+#include "structs/static.hpp"
+#include "structs/vectors.hpp"
 #include "structs/weapontype.hpp"
 
 /*
@@ -288,8 +290,10 @@ namespace MWLua
         mLuaState["omw"]["gameTimers"] = mGameTimers;
 
         bindTES3MagicEffect();
-        bindTES3WeaponType();
         bindTES3Reference();
+        bindTES3Static();
+        bindTES3Vectors();
+        bindTES3WeaponType();
 
         // Bind TES3 data types.
         /*
@@ -348,10 +352,8 @@ namespace MWLua
         bindTES3Sound();
         bindTES3Spell();
         bindTES3SpellList();
-        bindTES3Static();
         bindTES3Statistic();
         bindTES3TArray();
-        bindTES3Vectors();
         bindTES3Weapon();
         bindTES3Weather();
         bindTES3WeatherController();
