@@ -23,6 +23,7 @@
 
 #include "../mwworld/timestamp.hpp"
 
+#include "structs/activator.hpp"
 #include "structs/apparatus.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
@@ -254,6 +255,7 @@ namespace MWLua
         mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
         mLuaState["omw"]["gameTimers"] = mGameTimers;
 
+        bindTES3Activator();
         bindTES3Apparatus();
         bindTES3MagicEffect();
         bindTES3Reference();
@@ -264,7 +266,6 @@ namespace MWLua
         // Bind TES3 data types.
         /*
         bindTES3ActionData();
-        bindTES3Activator();
         bindTES3AI();
         bindTES3Alchemy();
         bindTES3Armor();
