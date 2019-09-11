@@ -30,6 +30,7 @@
 #include "structs/door.hpp"
 #include "structs/clothing.hpp"
 #include "structs/light.hpp"
+#include "structs/lockpick.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
 #include "structs/static.hpp"
@@ -68,7 +69,6 @@
 #include "TES3InputControllerLua.h"
 #include "TES3InventoryLua.h"
 #include "TES3LeveledListLua.h"
-#include "TES3LockpickLua.h"
 #include "TES3MagicEffectLua.h"
 #include "TES3MiscLua.h"
 #include "TES3MobileActorLua.h"
@@ -259,6 +259,7 @@ namespace MWLua
         bindTES3Clothing();
         bindTES3Door();
         bindTES3Light();
+        bindTES3Lockpick();
         bindTES3MagicEffect();
         bindTES3Reference();
         bindTES3Static();
@@ -293,7 +294,6 @@ namespace MWLua
         bindTES3InputController();
         bindTES3Inventory();
         bindTES3LeveledList();
-        bindTES3Lockpick();
         bindTES3MagicEffectInstance();
         bindTES3MagicSourceInstance();
         bindTES3Misc();
