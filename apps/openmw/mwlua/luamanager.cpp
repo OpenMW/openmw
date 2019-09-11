@@ -27,6 +27,7 @@
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
 #include "structs/book.hpp"
+#include "structs/door.hpp"
 #include "structs/clothing.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
@@ -92,7 +93,6 @@
 #include "TES3SpellListLua.h"
 #include "TES3MagicEffectInstanceLua.h"
 #include "TES3MagicSourceInstanceLua.h"
-#include "TES3StaticLua.h"
 #include "TES3StatisticLua.h"
 #include "TES3TArrayLua.h"
 #include "TES3UIElementLua.h"
@@ -100,7 +100,6 @@
 #include "TES3UIManagerLua.h"
 #include "TES3UIMenuControllerLua.h"
 #include "TES3UIWidgetsLua.h"
-#include "TES3VectorsLua.h"
 #include "TES3WeaponLua.h"
 #include "TES3WeatherControllerLua.h"
 #include "TES3WeatherLua.h"
@@ -260,6 +259,7 @@ namespace MWLua
         bindTES3Armor();
         bindTES3Book();
         bindTES3Clothing();
+        bindTES3Door();
         bindTES3MagicEffect();
         bindTES3Reference();
         bindTES3Static();
@@ -283,7 +283,6 @@ namespace MWLua
         bindTES3Creature();
         bindTES3DataHandler();
         bindTES3Dialogue();
-        bindTES3Door();
         bindTES3Enchantment();
         bindTES3Faction();
         bindTES3Fader();
