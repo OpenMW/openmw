@@ -17,6 +17,8 @@ namespace MWLua
             // Start our usertype. We must finish this with state.set_usertype.
             auto usertypeDefinition = state.create_simple_usertype<MWWorld::Ptr>();
 
+            usertypeDefinition.set("new", sol::no_constructor);
+
             // Finish up our usertype.
             state.set_usertype("tes3reference", usertypeDefinition);
         }

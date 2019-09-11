@@ -191,6 +191,22 @@ osg::Vec4f colourFromRGBA(unsigned int value)
                       makeOsgColorComponent(value, 16), makeOsgColorComponent(value, 24));
 }
 
+unsigned int colourToRGBA(osg::Vec4f& value)
+{
+    int r = std::max(std::min(1.f, value[0]), 0.f) * 255;
+    int g = std::max(std::min(1.f, value[1]), 0.f) * 255;
+    int b = std::max(std::min(1.f, value[2]), 0.f) * 255;
+    int a = std::max(std::min(1.f, value[3]), 0.f) * 255;
+
+    unsigned int result = 0;
+    result += r;
+    result += g << 8;
+    result += b << 16;
+    result += a << 24;
+
+    return result;
+}
+
 float makeOsgColorComponent(unsigned int value, unsigned int shift)
 {
     return float((value >> shift) & 0xFFu) / 255.0f;

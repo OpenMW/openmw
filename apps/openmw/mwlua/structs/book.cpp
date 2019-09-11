@@ -15,7 +15,7 @@ namespace MWLua
         // Start our usertype. We must finish this with state.set_usertype.
         auto usertypeDefinition = state.create_simple_usertype<ESM::Book>();
 
-        usertypeDefinition.set("new", &ESM::Book::blank);
+        usertypeDefinition.set("new", sol::no_constructor);
 
         // Basic property binding.
         usertypeDefinition.set("id", &ESM::Book::mId);
