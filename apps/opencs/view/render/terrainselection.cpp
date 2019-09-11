@@ -249,13 +249,11 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
     int localX = x - cellX * (ESM::Land::LAND_SIZE - 1);
     int localY = y - cellY * (ESM::Land::LAND_SIZE - 1);
 
-    std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
+    CSMWorld::CellCoordinates coords (cellX, cellY);
 
-    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
-    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-    const CSMWorld::LandHeightsColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+    float landHeight = 0.f;
+    if (CSVRender::Cell* cell = dynamic_cast<CSVRender::Cell*>(mWorldspaceWidget->getCell(coords)))
+        landHeight = cell->getSumOfAlteredAndTrueHeight(cellX, cellY, localX, localY);
 
-    return mPointer[localY*ESM::Land::LAND_SIZE + localX];
+    return landHeight;
 }

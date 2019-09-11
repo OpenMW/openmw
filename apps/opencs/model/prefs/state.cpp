@@ -170,7 +170,7 @@ void CSMPrefs::State::declare()
         "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
-    
+
     declareDouble ("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
     declareDouble ("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
     declareSeparator();
@@ -178,7 +178,7 @@ void CSMPrefs::State::declare()
     declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
     declareDouble ("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
-    declareDouble ("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);    
+    declareDouble ("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
     declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
     declareSeparator();
 
@@ -247,6 +247,8 @@ void CSMPrefs::State::declare()
     declareEnum ("outside-visible-landedit", "Handling land edit outside of visible cells", showAndLandEdit).
         addValues (landeditOutsideVisibleCell);
     declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
+        setMin (1);
+    declareInt ("shapebrush-maximumsize", "Maximum texture brush size", 100).
         setMin (1);
     declareBool ("open-list-view", "Open displays list view", false).
         setTooltip ("When opening a reference from the scene view, it will open the"

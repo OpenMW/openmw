@@ -124,6 +124,16 @@ namespace CSVRender
 
             virtual Cell* getCell(const osg::Vec3d& point) const;
 
+            virtual Cell* getCell(const CSMWorld::CellCoordinates& coords) const;
+
+            void setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height);
+
+            float* getCellAlteredHeights(const CSMWorld::CellCoordinates& coords);
+
+            float* getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY);
+
+            void resetAllAlteredHeights();
+
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const;
 
