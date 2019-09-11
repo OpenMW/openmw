@@ -41,7 +41,7 @@ add_openmw_dir (mwlua/functions
     )
 
 add_openmw_dir (mwlua/structs
-    activator apparatus armor book clothing door light lockpick magiceffect probe ptr static vectors weapontype
+    activator apparatus armor book clothing door light lockpick magiceffect probe ptr repairtool static vectors weapontype
     )
 
 add_openmw_dir (mwgui

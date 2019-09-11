@@ -34,6 +34,7 @@
 #include "structs/magiceffect.hpp"
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
+#include "structs/repairtool.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
 #include "structs/weapontype.hpp"
@@ -84,7 +85,6 @@
 #include "TES3ReferenceLua.h"
 #include "TES3ReferenceListLua.h"
 #include "TES3RegionLua.h"
-#include "TES3RepairToolLua.h"
 #include "TES3ScriptLua.h"
 #include "TES3SkillLua.h"
 #include "TES3SoundLua.h"
@@ -264,6 +264,7 @@ namespace MWLua
         bindTES3MagicEffect();
         bindTES3Probe();
         bindTES3Reference();
+        bindTES3RepairTool();
         bindTES3Static();
         bindTES3Vectors();
         bindTES3WeaponType();
@@ -307,10 +308,8 @@ namespace MWLua
         bindTES3Moon();
         bindTES3NPC();
         bindTES3Race();
-        bindTES3Reference();
         bindTES3ReferenceList();
         bindTES3Region();
-        bindTES3RepairTool();
         bindTES3Script();
         bindTES3Skill();
         bindTES3Sound();
