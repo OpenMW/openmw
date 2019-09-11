@@ -41,7 +41,7 @@ namespace MWLua
             [](ESM::Armor& self) { return self.mData.mHealth; },
             [](ESM::Armor& self, int value) { self.mData.mHealth = value; }
         ));
-         usertypeDefinition.set("enchantCapacity", sol::property(
+        usertypeDefinition.set("enchantCapacity", sol::property(
             [](ESM::Armor& self) { return self.mData.mEnchant; },
             [](ESM::Armor& self, int value) { self.mData.mEnchant = value; }
         ));
