@@ -26,6 +26,9 @@ namespace MWLua
         usertypeDefinition.set("enchantment", &ESM::Book::mEnchant);
         usertypeDefinition.set("text", &ESM::Book::mText);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Book::mId);
+
         usertypeDefinition.set("weight", sol::property(
             [](ESM::Book& self) { return self.mData.mWeight; },
             [](ESM::Book& self, float value) { self.mData.mWeight = value; }

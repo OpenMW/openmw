@@ -25,6 +25,9 @@ namespace MWLua
         usertypeDefinition.set("name", &ESM::Clothing::mName);
         usertypeDefinition.set("enchantment", &ESM::Clothing::mEnchant);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Clothing::mId);
+
         usertypeDefinition.set("slot", sol::property(
             [](ESM::Clothing& self) { return self.mData.mType; },
             [](ESM::Clothing& self, int value) { self.mData.mType = value; }

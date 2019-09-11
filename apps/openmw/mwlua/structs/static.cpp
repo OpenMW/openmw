@@ -21,6 +21,9 @@ namespace MWLua
         usertypeDefinition.set("id", &ESM::Static::mId);
         usertypeDefinition.set("mesh", &ESM::Static::mModel);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Static::mId);
+
         // Finish up our usertype.
         state.set_usertype("tes3static", usertypeDefinition);
     }

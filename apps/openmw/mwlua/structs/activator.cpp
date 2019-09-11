@@ -22,6 +22,9 @@ namespace MWLua
         usertypeDefinition.set("mesh", &ESM::Activator::mModel);
         usertypeDefinition.set("script", &ESM::Activator::mScript);
 
+         // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Activator::mId);
+
         // Finish up our usertype.
         state.set_usertype("tes3activator", usertypeDefinition);
     }

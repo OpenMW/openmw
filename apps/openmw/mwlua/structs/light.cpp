@@ -27,6 +27,9 @@ namespace MWLua
         usertypeDefinition.set("sound", &ESM::Light::mSound);
         usertypeDefinition.set("name", &ESM::Light::mName);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Light::mId);
+
         usertypeDefinition.set("flags", sol::property(
             [](ESM::Light& self) { return self.mData.mFlags; },
             [](ESM::Light& self, int value) { self.mData.mFlags = value; }

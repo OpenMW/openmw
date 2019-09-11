@@ -24,6 +24,9 @@ namespace MWLua
         usertypeDefinition.set("script", &ESM::Apparatus::mScript);
         usertypeDefinition.set("name", &ESM::Apparatus::mName);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Apparatus::mId);
+
         usertypeDefinition.set("type", sol::property(
             [](ESM::Apparatus& self) { return self.mData.mType; },
             [](ESM::Apparatus& self, int value) { self.mData.mType = value; }

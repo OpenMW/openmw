@@ -25,6 +25,9 @@ namespace MWLua
         usertypeDefinition.set("openSound", &ESM::Door::mOpenSound);
         usertypeDefinition.set("closeSound", &ESM::Door::mCloseSound);
 
+        // Allow object to be converted to strings using their object ID.
+        usertypeDefinition.set(sol::meta_function::to_string, &ESM::Door::mId);
+
         // Finish up our usertype.
         state.set_usertype("tes3door", usertypeDefinition);
     }
