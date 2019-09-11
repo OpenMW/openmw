@@ -23,6 +23,7 @@
 
 #include "../mwworld/timestamp.hpp"
 
+#include "structs/apparatus.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
 #include "structs/static.hpp"
@@ -30,41 +31,6 @@
 #include "structs/weapontype.hpp"
 
 /*
-#include "TES3Defines.h"
-#include "TES3Actor.h"
-#include "TES3ActorAnimationData.h"
-#include "TES3Alchemy.h"
-#include "TES3Book.h"
-#include "TES3CombatSession.h"
-#include "TES3Creature.h"
-#include "TES3CrimeEvent.h"
-#include "TES3DataHandler.h"
-#include "TES3Dialogue.h"
-#include "TES3DialogueInfo.h"
-#include "TES3Fader.h"
-#include "TES3Game.h"
-#include "TES3GameFile.h"
-#include "TES3GameSetting.h"
-#include "TES3InputController.h"
-#include "TES3ItemData.h"
-#include "TES3LeveledList.h"
-#include "TES3MagicEffectController.h"
-#include "TES3MagicEffectInstance.h"
-#include "TES3Misc.h"
-#include "TES3MobController.h"
-#include "TES3MobileActor.h"
-#include "TES3MobileCreature.h"
-#include "TES3MobilePlayer.h"
-#include "TES3MobileProjectile.h"
-#include "TES3Reference.h"
-#include "TES3SoulGemData.h"
-#include "TES3Spell.h"
-#include "TES3UIElement.h"
-#include "TES3UIInventoryTile.h"
-#include "TES3UIManager.h"
-#include "TES3UIMenuController.h"
-#include "TES3WorldController.h"
-
 // Lua binding files. These are split out rather than kept here to help with compile times.
 #include "MemoryUtilLua.h"
 #include "StackLua.h"
@@ -74,7 +40,6 @@
 #include "TES3ActivatorLua.h"
 #include "TES3AILua.h"
 #include "TES3AlchemyLua.h"
-#include "TES3ApparatusLua.h"
 #include "TES3ArmorLua.h"
 #include "TES3AttachmentLua.h"
 #include "TES3AudioControllerLua.h"
@@ -289,6 +254,7 @@ namespace MWLua
         mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
         mLuaState["omw"]["gameTimers"] = mGameTimers;
 
+        bindTES3Apparatus();
         bindTES3MagicEffect();
         bindTES3Reference();
         bindTES3Static();
@@ -301,7 +267,6 @@ namespace MWLua
         bindTES3Activator();
         bindTES3AI();
         bindTES3Alchemy();
-        bindTES3Apparatus();
         bindTES3Armor();
         bindTES3Attachment();
         bindTES3AudioController();

@@ -14,19 +14,16 @@ namespace MWLua
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;
 
-        // Binding for ESM::Static
-        {
-            // Start our usertype. We must finish this with state.set_usertype.
-            auto usertypeDefinition = state.create_simple_usertype<ESM::Static>();
+        // Start our usertype. We must finish this with state.set_usertype.
+        auto usertypeDefinition = state.create_simple_usertype<ESM::Static>();
 
-            usertypeDefinition.set("new", &ESM::Static::blank);
+        usertypeDefinition.set("new", &ESM::Static::blank);
 
-            // Basic property binding.
-            usertypeDefinition.set("id", &ESM::Static::mId);
-            usertypeDefinition.set("mesh", &ESM::Static::mModel);
+        // Basic property binding.
+        usertypeDefinition.set("id", &ESM::Static::mId);
+        usertypeDefinition.set("mesh", &ESM::Static::mModel);
 
-            // Finish up our usertype.
-            state.set_usertype("tes3static", usertypeDefinition);
-        }
+        // Finish up our usertype.
+        state.set_usertype("tes3static", usertypeDefinition);
     }
 }
