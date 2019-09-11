@@ -53,6 +53,10 @@ Running the Morrowind Installation Wizard
 	Switch to the "Data Files" tab and check the box to the left of ``Morrowind.esm``.
 #.	You are now ready to play!
 
+	.. note::
+		If your water doesn't look right your water shader may not be on. 
+		While in game go to the graphics settings and turn it on.
+
 Installing Morrowind
 ====================
 
