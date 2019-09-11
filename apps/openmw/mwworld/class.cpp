@@ -160,7 +160,7 @@ namespace MWWorld
 
     bool Class::canLock(const ConstPtr &ptr) const
     {
-        return hasToolTip(ptr);
+        return false;
     }
 
     void Class::setRemainingUsageTime (const Ptr& ptr, float duration) const
