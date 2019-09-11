@@ -46,8 +46,8 @@ namespace MWLua
             [](ESM::Armor& self, int value) { self.mData.mEnchant = value; }
         ));
         usertypeDefinition.set("armorRating", sol::property(
-            [](ESM::Armor& self) { return self.mData.mEnchant; },
-            [](ESM::Armor& self, int value) { self.mData.mEnchant = value; }
+            [](ESM::Armor& self) { return self.mData.mArmor; },
+            [](ESM::Armor& self, int value) { self.mData.mArmor = value; }
         ));
 
         // FIXME: bodyparts are not mapped yet

@@ -26,6 +26,7 @@
 #include "structs/activator.hpp"
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
+#include "structs/book.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/ptr.hpp"
 #include "structs/static.hpp"
@@ -257,6 +258,7 @@ namespace MWLua
         bindTES3Activator();
         bindTES3Apparatus();
         bindTES3Armor();
+        bindTES3Book();
         bindTES3MagicEffect();
         bindTES3Reference();
         bindTES3Static();
@@ -271,7 +273,6 @@ namespace MWLua
         bindTES3Attachment();
         bindTES3AudioController();
         bindTES3BodyPart();
-        bindTES3Book();
         bindTES3Cell();
         bindTES3Class();
         bindTES3Clothing();
