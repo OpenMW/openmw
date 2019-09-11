@@ -24,12 +24,13 @@ namespace MWLua
 
             // Basic property binding.
             usertypeDefinition.set("areaVisualEffect", &ESM::MagicEffect::mArea);
+            usertypeDefinition.set("boltVisualEffect", &ESM::MagicEffect::mBolt);
+            usertypeDefinition.set("castVisualEffect", &ESM::MagicEffect::mCasting);
+            usertypeDefinition.set("hitVisualEffect", &ESM::MagicEffect::mHit);
             usertypeDefinition.set("baseMagickaCost", sol::property(
                 [](ESM::MagicEffect& self) { return self.mData.mBaseCost; },
                 [](ESM::MagicEffect& self, int value) { self.mData.mBaseCost = value; }
             ));
-            usertypeDefinition.set("boltVisualEffect", &ESM::MagicEffect::mBolt);
-            usertypeDefinition.set("castVisualEffect", &ESM::MagicEffect::mCasting);
             usertypeDefinition.set("description", &ESM::MagicEffect::mDescription);
 
             // FIXME: it is unclear, why there are two flags structs in Morrowind
@@ -37,7 +38,7 @@ namespace MWLua
                 [](ESM::MagicEffect& self) { return self.mData.mFlags; },
                 [](ESM::MagicEffect& self, double value) { self.mData.mFlags = (int) value; }
             ));
-            usertypeDefinition.set("hitVisualEffect", &ESM::MagicEffect::mHit);
+
             usertypeDefinition.set("id", sol::readonly_property(&ESM::MagicEffect::mId));
             usertypeDefinition.set("lightingBlue", sol::property(
                 [](ESM::MagicEffect& self) { return self.mData.mBlue; },
@@ -74,7 +75,7 @@ namespace MWLua
                 [](ESM::MagicEffect& self, double value) { self.mData.mFlags = (int) value; }
             ));
 
-            // User-friendly access to those base effects.
+            // User-friendly access to those flags.
             usertypeDefinition.set("targetsSkills", sol::property(
                 [](ESM::MagicEffect& self) { return (self.mData.mFlags & ESM::MagicEffect::TargetSkill) != 0; },
                 [](ESM::MagicEffect& self, bool set) { set ? self.mData.mFlags |= ESM::MagicEffect::TargetSkill : self.mData.mFlags &= ~ESM::MagicEffect::TargetSkill; }
