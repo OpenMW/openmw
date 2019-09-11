@@ -35,6 +35,7 @@
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
 #include "structs/repairtool.hpp"
+#include "structs/skill.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
 #include "structs/weapontype.hpp"
@@ -86,7 +87,6 @@
 #include "TES3ReferenceListLua.h"
 #include "TES3RegionLua.h"
 #include "TES3ScriptLua.h"
-#include "TES3SkillLua.h"
 #include "TES3SoundLua.h"
 #include "TES3SpellLua.h"
 #include "TES3SpellListLua.h"
@@ -265,6 +265,7 @@ namespace MWLua
         bindTES3Probe();
         bindTES3Reference();
         bindTES3RepairTool();
+        bindTES3Skill();
         bindTES3Static();
         bindTES3Vectors();
         bindTES3WeaponType();
@@ -311,7 +312,6 @@ namespace MWLua
         bindTES3ReferenceList();
         bindTES3Region();
         bindTES3Script();
-        bindTES3Skill();
         bindTES3Sound();
         bindTES3Spell();
         bindTES3SpellList();
