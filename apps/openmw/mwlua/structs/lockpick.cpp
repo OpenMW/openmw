@@ -20,7 +20,10 @@ namespace MWLua
         // Basic property binding.
         usertypeDefinition.set("id", &ESM::Lockpick::mId);
         usertypeDefinition.set("mesh", &ESM::Lockpick::mModel);
-        usertypeDefinition.set("icon", &ESM::Lockpick::mIcon);
+        usertypeDefinition.set("icon", sol::property(
+            [](ESM::Lockpick& self) { return self.mIcon; },
+            [](ESM::Lockpick& self, const char* value) { if (strlen(value) < 32) self.mIcon = value; }
+        ));
         usertypeDefinition.set("script", &ESM::Lockpick::mScript);
         usertypeDefinition.set("name", &ESM::Lockpick::mName);
 

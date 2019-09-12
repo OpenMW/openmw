@@ -21,7 +21,10 @@ namespace MWLua
 
         // Basic property binding.
         usertypeDefinition.set("id", &ESM::Light::mId);
-        usertypeDefinition.set("icon", &ESM::Light::mIcon);
+        usertypeDefinition.set("icon", sol::property(
+            [](ESM::Light& self) { return self.mIcon; },
+            [](ESM::Light& self, const char* value) { if (strlen(value) < 32) self.mIcon = value; }
+        ));
         usertypeDefinition.set("mesh", &ESM::Light::mModel);
         usertypeDefinition.set("script", &ESM::Light::mScript);
         usertypeDefinition.set("sound", &ESM::Light::mSound);
