@@ -281,11 +281,15 @@ namespace NifOsg
 
     class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
-    private:
-        Vec3Interpolator mData;
-
     public:
-        MaterialColorController(const Nif::NiPosData *data);
+        enum TargetColor
+        {
+            Ambient  = 0,
+            Diffuse  = 1,
+            Specular = 2,
+            Emissive = 3
+        };
+        MaterialColorController(const Nif::NiPosData *data, TargetColor color);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
@@ -294,6 +298,10 @@ namespace NifOsg
         virtual void setDefaults(osg::StateSet* stateset);
 
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
+
+    private:
+        Vec3Interpolator mData;
+        TargetColor mTargetColor;
     };
 
     class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
