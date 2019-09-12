@@ -39,6 +39,7 @@
 #include "structs/skill.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
+#include "structs/weapon.hpp"
 #include "structs/weapontype.hpp"
 
 /*
@@ -99,7 +100,6 @@
 #include "TES3UIManagerLua.h"
 #include "TES3UIMenuControllerLua.h"
 #include "TES3UIWidgetsLua.h"
-#include "TES3WeaponLua.h"
 #include "TES3WeatherControllerLua.h"
 #include "TES3WeatherLua.h"
 #include "TES3WorldControllerLua.h"
@@ -269,6 +269,7 @@ namespace MWLua
         bindTES3Skill();
         bindTES3Static();
         bindTES3Vectors();
+        bindTES3Weapon();
         bindTES3WeaponType();
 
         // Bind TES3 data types.
@@ -317,7 +318,6 @@ namespace MWLua
         bindTES3SpellList();
         bindTES3Statistic();
         bindTES3TArray();
-        bindTES3Weapon();
         bindTES3Weather();
         bindTES3WeatherController();
         bindTES3WorldController();
