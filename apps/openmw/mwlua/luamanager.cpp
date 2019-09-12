@@ -27,15 +27,16 @@
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
 #include "structs/book.hpp"
-#include "structs/door.hpp"
 #include "structs/clothing.hpp"
+#include "structs/door.hpp"
+#include "structs/ingredient.hpp"
 #include "structs/light.hpp"
 #include "structs/lockpick.hpp"
 #include "structs/magiceffect.hpp"
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
-#include "structs/repairtool.hpp"
 #include "structs/race.hpp"
+#include "structs/repairtool.hpp"
 #include "structs/skill.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
@@ -70,7 +71,6 @@
 #include "TES3GameFileLua.h"
 #include "TES3GameSettingLua.h"
 #include "TES3GlobalVariableLua.h"
-#include "TES3IngredientLua.h"
 #include "TES3InputControllerLua.h"
 #include "TES3InventoryLua.h"
 #include "TES3LeveledListLua.h"
@@ -259,6 +259,7 @@ namespace MWLua
         bindTES3Book();
         bindTES3Clothing();
         bindTES3Door();
+        bindTES3Ingredient();
         bindTES3Light();
         bindTES3Lockpick();
         bindTES3MagicEffect();
@@ -296,7 +297,6 @@ namespace MWLua
         bindTES3GameFile();
         bindTES3GameSetting();
         bindTES3GlobalVariable();
-        bindTES3Ingredient();
         bindTES3InputController();
         bindTES3Inventory();
         bindTES3LeveledList();
