@@ -24,6 +24,7 @@
 #include "../mwworld/timestamp.hpp"
 
 #include "structs/activator.hpp"
+#include "structs/alchemy.hpp"
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
 #include "structs/book.hpp"
@@ -53,7 +54,6 @@
 #include "StringUtilLua.h"
 #include "TES3ActionDataLua.h"
 #include "TES3AILua.h"
-#include "TES3AlchemyLua.h"
 #include "TES3AttachmentLua.h"
 #include "TES3AudioControllerLua.h"
 #include "TES3BodyPartLua.h"
@@ -250,6 +250,7 @@ namespace MWLua
         mLuaState["omw"]["gameTimers"] = mGameTimers;
 
         bindTES3Activator();
+        bindTES3Alchemy();
         bindTES3Apparatus();
         bindTES3Armor();
         bindTES3Book();
@@ -275,7 +276,6 @@ namespace MWLua
         /*
         bindTES3ActionData();
         bindTES3AI();
-        bindTES3Alchemy();
         bindTES3Attachment();
         bindTES3AudioController();
         bindTES3BodyPart();
