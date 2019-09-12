@@ -42,7 +42,7 @@ add_openmw_dir (mwlua/functions
 
 add_openmw_dir (mwlua/structs
     activator apparatus armor book clothing door ingredient light lockpick magiceffect probe ptr race
-    repairtool skill static vectors weapon weapontype
+    repairtool skill spell static vectors weapon weapontype
     )
 
 add_openmw_dir (mwgui

@@ -38,6 +38,7 @@
 #include "structs/race.hpp"
 #include "structs/repairtool.hpp"
 #include "structs/skill.hpp"
+#include "structs/spell.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
 #include "structs/weapon.hpp"
@@ -74,7 +75,6 @@
 #include "TES3InputControllerLua.h"
 #include "TES3InventoryLua.h"
 #include "TES3LeveledListLua.h"
-#include "TES3MagicEffectLua.h"
 #include "TES3MiscLua.h"
 #include "TES3MobileActorLua.h"
 #include "TES3MobileCreatureLua.h"
@@ -83,14 +83,10 @@
 #include "TES3MobileProjectileLua.h"
 #include "TES3MoonLua.h"
 #include "TES3NPCLua.h"
-#include "TES3ProbeLua.h"
-#include "TES3ReferenceLua.h"
 #include "TES3ReferenceListLua.h"
 #include "TES3RegionLua.h"
 #include "TES3ScriptLua.h"
 #include "TES3SoundLua.h"
-#include "TES3SpellLua.h"
-#include "TES3SpellListLua.h"
 #include "TES3MagicEffectInstanceLua.h"
 #include "TES3MagicSourceInstanceLua.h"
 #include "TES3StatisticLua.h"
@@ -268,6 +264,7 @@ namespace MWLua
         bindTES3Reference();
         bindTES3RepairTool();
         bindTES3Skill();
+        bindTES3Spell();
         bindTES3Static();
         bindTES3Vectors();
         bindTES3Weapon();
@@ -314,8 +311,6 @@ namespace MWLua
         bindTES3Region();
         bindTES3Script();
         bindTES3Sound();
-        bindTES3Spell();
-        bindTES3SpellList();
         bindTES3Statistic();
         bindTES3TArray();
         bindTES3Weather();
@@ -405,6 +400,9 @@ namespace MWLua
     {
         initSimulationTime();
 
+        // FIXME: temporary register data before init
+        bindTES3Util();
+
         // Execute init.lua
         sol::protected_function_result result = mLuaState.safe_script_file("scripts/init.lua");
         if (!result.valid())
@@ -419,7 +417,7 @@ namespace MWLua
         //bindMWSEStack();
         //bindScriptUtil();
         //bindStringUtil();
-        bindTES3Util();
+
 
         // Alter existing libraries.
         //luaState["os"]["exit"] = customOSExit;

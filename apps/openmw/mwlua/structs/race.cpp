@@ -130,7 +130,8 @@ namespace MWLua
                 [](ESM::Race& self, bool set) { set ? self.mData.mFlags |= ESM::Race::Beast : self.mData.mFlags &= ~ESM::Race::Beast; }
             ));
 
-            //SpellList mPowers;
+            // Indirect bindings to unions and arrays.
+            usertypeDefinition.set("powers", sol::readonly_property([](ESM::Race& self) { return self.mPowers.mList; }));
 
             // Finish up our usertype.
             state.set_usertype("tes3race", usertypeDefinition);
