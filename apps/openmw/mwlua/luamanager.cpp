@@ -27,6 +27,7 @@
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
 #include "structs/book.hpp"
+#include "structs/class.hpp"
 #include "structs/clothing.hpp"
 #include "structs/door.hpp"
 #include "structs/ingredient.hpp"
@@ -57,7 +58,6 @@
 #include "TES3AudioControllerLua.h"
 #include "TES3BodyPartLua.h"
 #include "TES3CellLua.h"
-#include "TES3ClassLua.h"
 #include "TES3CollectionsLua.h"
 #include "TES3CollisionLua.h"
 #include "TES3CombatSessionLua.h"
@@ -253,6 +253,7 @@ namespace MWLua
         bindTES3Apparatus();
         bindTES3Armor();
         bindTES3Book();
+        bindTES3Class();
         bindTES3Clothing();
         bindTES3Door();
         bindTES3Ingredient();
@@ -279,7 +280,6 @@ namespace MWLua
         bindTES3AudioController();
         bindTES3BodyPart();
         bindTES3Cell();
-        bindTES3Class();
         bindTES3Collections();
         bindTES3Collision();
         bindTES3CombatSession();
