@@ -72,8 +72,8 @@ public:
     int activeCount;
     std::vector<Particle> particles;
 
-    ExtraPtr affectors;
-    ExtraPtr colliders;
+    NiParticleModifierPtr affectors;
+    NiParticleModifierPtr colliders;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

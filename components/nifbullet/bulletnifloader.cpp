@@ -260,18 +260,13 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         Log(Debug::Info) << "RootCollisionNode is not attached to the root node in " << fileName << ". Treating it as a common NiTriShape.";
 
     // Check for extra data
-    Nif::Extra const *e = node;
-    while (!e->extra.empty())
+    for (Nif::ExtraPtr e = node->extra; !e.empty(); e = e->next)
     {
-        // Get the next extra data in the list
-        e = e->extra.getPtr();
-        assert(e != nullptr);
-
         if (e->recType == Nif::RC_NiStringExtraData)
         {
             // String markers may contain important information
             // affecting the entire subtree of this node
-            Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
+            Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e.getPtr();
 
             if (Misc::StringUtils::ciCompareLen(sd->string, "NC", 2) == 0)
             {

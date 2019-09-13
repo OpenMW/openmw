@@ -211,15 +211,10 @@ namespace
         value.extra = Nif::ExtraPtr(nullptr);
     }
 
-    void init(Nif::Controlled& value)
-    {
-        init(static_cast<Nif::Extra&>(value));
-        value.controller = Nif::ControllerPtr(nullptr);
-    }
-
     void init(Nif::Named& value)
     {
-        init(static_cast<Nif::Controlled&>(value));
+        value.extra = Nif::ExtraPtr(nullptr);
+        value.controller = Nif::ControllerPtr(nullptr);
     }
 
     void init(Nif::Node& value)
@@ -254,7 +249,7 @@ namespace
         value.phase = 0;
         value.timeStart = 0;
         value.timeStop = 0;
-        value.target = Nif::ControlledPtr(nullptr);
+        value.target = Nif::NamedPtr(nullptr);
     }
 
     void copy(const btTransform& src, Nif::Transformation& dst)
