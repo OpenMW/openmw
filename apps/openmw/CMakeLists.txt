@@ -41,8 +41,8 @@ add_openmw_dir (mwlua/functions
     )
 
 add_openmw_dir (mwlua/structs
-    activator alchemy apparatus armor birthsign book class clothing creature door ingredient light lockpick magiceffect probe ptr race
-    repairtool skill spell static vectors weapon weapontype
+    activator alchemy apparatus armor birthsign book class clothing creature door enchantment ingredient light lockpick
+    magiceffect probe ptr race repairtool skill spell static vectors weapon weapontype
     )
 
 add_openmw_dir (mwgui
