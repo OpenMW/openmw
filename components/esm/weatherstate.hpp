@@ -16,6 +16,20 @@ namespace ESM
         std::vector<char> mChances;
     };
 
+    enum WeatherType
+    {
+        Clear = 0,
+        Cloudy = 1,
+        Foggy = 2,
+        Overcast = 3,
+        Rain = 4,
+        Thunder = 5,
+        Ash = 6,
+        Blight = 7,
+        Snow = 8,
+        Blizzard = 9
+    };
+
     struct WeatherState
     {
         std::string mCurrentRegion;

@@ -2,6 +2,7 @@
 
 #include <components/esm/loadregn.hpp>
 #include <components/esm/loadfact.hpp>
+#include <components/esm/weatherstate.hpp>
 
 #include "idcollection.hpp"
 #include "pathgrid.hpp"
@@ -1037,16 +1038,16 @@ namespace CSMWorld
         {
             switch (subRowIndex)
             {
-                case 0: return region.mData.mClear;
-                case 1: return region.mData.mCloudy;
-                case 2: return region.mData.mFoggy;
-                case 3: return region.mData.mOvercast;
-                case 4: return region.mData.mRain;
-                case 5: return region.mData.mThunder;
-                case 6: return region.mData.mAsh;
-                case 7: return region.mData.mBlight;
-                case 8: return region.mData.mA; // Snow
-                case 9: return region.mData.mB; // Blizzard
+                case ESM::WeatherType::Clear: return region.mData.mClear;
+                case ESM::WeatherType::Cloudy: return region.mData.mCloudy;
+                case ESM::WeatherType::Foggy: return region.mData.mFoggy;
+                case ESM::WeatherType::Overcast: return region.mData.mOvercast;
+                case ESM::WeatherType::Rain: return region.mData.mRain;
+                case ESM::WeatherType::Thunder: return region.mData.mThunder;
+                case ESM::WeatherType::Ash: return region.mData.mAsh;
+                case ESM::WeatherType::Blight: return region.mData.mBlight;
+                case ESM::WeatherType::Snow: return region.mData.mA; // Snow
+                case ESM::WeatherType::Blizzard: return region.mData.mB; // Blizzard
                 default: break;
             }
         }

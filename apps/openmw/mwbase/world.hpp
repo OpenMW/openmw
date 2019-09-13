@@ -232,6 +232,8 @@ namespace MWBase
             virtual void setMoonColour (bool red) = 0;
 
             virtual void modRegion(const std::string &regionid, const std::vector<char> &chances) = 0;
+            virtual void modRegion(const std::string &regionid, unsigned int weatherId, char chance) = 0;
+            virtual void getWeatherChance(const std::string &regionid, unsigned int weatherId) = 0;
 
             virtual float getTimeScaleFactor() const = 0;
 

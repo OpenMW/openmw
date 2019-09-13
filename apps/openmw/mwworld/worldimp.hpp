@@ -348,6 +348,8 @@ namespace MWWorld
             void setMoonColour (bool red) override;
 
             void modRegion(const std::string &regionid, const std::vector<char> &chances) override;
+            void modRegion(const std::string &regionid, unsigned int weatherId, char chance) override;
+            void getWeatherChance(const std::string &regionid, unsigned int weatherId) override;
 
             float getTimeScaleFactor() const override;
 

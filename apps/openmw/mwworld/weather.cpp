@@ -311,6 +311,41 @@ void RegionWeather::setChances(const std::vector<char>& chances)
     }
 }
 
+void RegionWeather::setChance(unsigned int weatherId, char chance)
+{
+    if (chance < 0) chance = 0;
+    if (chance > 100) chance = 100;
+
+    unsigned int currentSize = mChances.size();
+    if(currentSize < weatherId + 1)
+    {
+        mChances.reserve(weatherId + 1);
+        for(unsigned int i = currentSize; i < weatherId; i++)
+        {
+            mChances[i] = 0;
+        }
+    }
+
+    mChances[weatherId] = chance;
+
+    // Regional weather no longer supports the current type, select a new weather pattern.
+    if(mChances[mWeather] == 0)
+    {
+        chooseNewWeather();
+    }
+}
+
+char RegionWeather::getChance(unsigned int weatherId)
+{
+    unsigned int currentSize = mChances.size();
+    if(currentSize < weatherId + 1)
+    {
+        return 0;
+    }
+
+    return mChances[weatherId];
+}
+
 void RegionWeather::setWeather(int weatherID)
 {
     mWeather = weatherID;
@@ -647,6 +682,29 @@ void WeatherManager::modRegion(const std::string& regionID, const std::vector<ch
         it->second.setChances(chances);
         regionalWeatherChanged(it->first, it->second);
     }
+}
+
+void WeatherManager::modRegion(const std::string& regionID, unsigned int weatherId, const char chance)
+{
+    std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
+    std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+    if(it != mRegions.end())
+    {
+        it->second.setChance(weatherId, chance);
+        regionalWeatherChanged(it->first, it->second);
+    }
+}
+
+char WeatherManager::getChance(const std::string& regionID, unsigned int weatherId)
+{
+    std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
+    std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+    if(it != mRegions.end())
+    {
+        return it->second.getChance(weatherId);
+    }
+
+    return -1;
 }
 
 void WeatherManager::playerTeleported(const std::string& playerRegion, bool isExterior)

@@ -2075,6 +2075,16 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
+    void World::modRegion(const std::string &regionid, unsigned int weatherId, char chance)
+    {
+        mWeatherManager->modRegion(regionid, weatherId, chance);
+    }
+
+    void World::getWeatherChance(const std::string &regionid, unsigned int weatherId)
+    {
+        mWeatherManager->getChance(regionid, weatherId);
+    }
+
     osg::Vec2f World::getNorthVector (const CellStore* cell)
     {
         MWWorld::ConstPtr northmarker = cell->searchConst("northmarker");

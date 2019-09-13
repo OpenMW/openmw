@@ -213,6 +213,8 @@ namespace MWWorld
         operator ESM::RegionWeatherState() const;
 
         void setChances(const std::vector<char>& chances);
+        char getChance(unsigned int weatherId);
+        void setChance(unsigned int weatherId, char chance);
 
         void setWeather(int weatherID);
 
@@ -269,6 +271,8 @@ namespace MWWorld
          */
         void changeWeather(const std::string& regionID, const unsigned int weatherID);
         void modRegion(const std::string& regionID, const std::vector<char>& chances);
+        void modRegion(const std::string& regionID, unsigned int weatherId, const char chance);
+        char getChance(const std::string& regionID, unsigned int weatherId);
         void playerTeleported(const std::string& playerRegion, bool isExterior);
 
         /**

@@ -42,7 +42,7 @@ add_openmw_dir (mwlua/functions
 
 add_openmw_dir (mwlua/structs
     activator alchemy apparatus armor birthsign book class clothing creature door enchantment gamesetting global faction ingredient light lockpick
-    magiceffect misc npc probe ptr race repairtool skill sound spell static vectors weapon weapontype
+    magiceffect misc npc probe ptr race region repairtool skill sound spell static vectors weapon weapontype
     )
 
 add_openmw_dir (mwgui

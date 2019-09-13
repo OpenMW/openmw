@@ -4,10 +4,7 @@
 
 #include "../luamanager.hpp"
 
-#include "../../mwbase/environment.hpp"
-#include "../../mwbase/world.hpp"
-
-#include "../../mwworld/esmstore.hpp"
+#include <components/esm/loadrace.hpp>
 
 namespace MWLua
 {

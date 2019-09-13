@@ -42,6 +42,7 @@
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
 #include "structs/race.hpp"
+#include "structs/region.hpp"
 #include "structs/repairtool.hpp"
 #include "structs/skill.hpp"
 #include "structs/sound.hpp"
@@ -82,7 +83,6 @@
 #include "TES3MobileProjectileLua.h"
 #include "TES3MoonLua.h"
 #include "TES3ReferenceListLua.h"
-#include "TES3RegionLua.h"
 #include "TES3ScriptLua.h"
 #include "TES3MagicEffectInstanceLua.h"
 #include "TES3MagicSourceInstanceLua.h"
@@ -268,6 +268,7 @@ namespace MWLua
         bindTES3NPC();
         bindTES3Probe();
         bindTES3Race();
+        bindTES3Region();
         bindTES3Reference();
         bindTES3RepairTool();
         bindTES3Skill();
@@ -307,7 +308,6 @@ namespace MWLua
         bindTES3MobileProjectile();
         bindTES3Moon();
         bindTES3ReferenceList();
-        bindTES3Region();
         bindTES3Script();
         bindTES3Statistic();
         bindTES3TArray();
