@@ -30,6 +30,7 @@
 #include "structs/book.hpp"
 #include "structs/class.hpp"
 #include "structs/clothing.hpp"
+#include "structs/creature.hpp"
 #include "structs/door.hpp"
 #include "structs/ingredient.hpp"
 #include "structs/light.hpp"
@@ -62,7 +63,6 @@
 #include "TES3CollisionLua.h"
 #include "TES3CombatSessionLua.h"
 #include "TES3ContainerLua.h"
-#include "TES3CreatureLua.h"
 #include "TES3DataHandlerLua.h"
 #include "TES3DialogueLua.h"
 #include "TES3EnchantmentLua.h"
@@ -256,6 +256,7 @@ namespace MWLua
         bindTES3Book();
         bindTES3Class();
         bindTES3Clothing();
+        bindTES3Creature();
         bindTES3Door();
         bindTES3Ingredient();
         bindTES3Light();
@@ -284,7 +285,6 @@ namespace MWLua
         bindTES3Collision();
         bindTES3CombatSession();
         bindTES3Container();
-        bindTES3Creature();
         bindTES3DataHandler();
         bindTES3Dialogue();
         bindTES3Enchantment();

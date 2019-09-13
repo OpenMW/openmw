@@ -121,6 +121,6 @@ namespace MWLua
         usertypeDefinition.set(sol::meta_function::to_string, &ESM::Potion::mId);
 
         // Finish up our usertype.
-        state.set_usertype("tes3ingredient", usertypeDefinition);
+        state.set_usertype("tes3alchemy", usertypeDefinition);
     }
 }
