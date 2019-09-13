@@ -35,6 +35,7 @@
 #include "structs/door.hpp"
 #include "structs/enchantment.hpp"
 #include "structs/global.hpp"
+#include "structs/faction.hpp"
 #include "structs/ingredient.hpp"
 #include "structs/light.hpp"
 #include "structs/lockpick.hpp"
@@ -68,7 +69,6 @@
 #include "TES3ContainerLua.h"
 #include "TES3DataHandlerLua.h"
 #include "TES3DialogueLua.h"
-#include "TES3FactionLua.h"
 #include "TES3FaderLua.h"
 #include "TES3GameLua.h"
 #include "TES3GameFileLua.h"
@@ -262,6 +262,7 @@ namespace MWLua
         bindTES3Door();
         bindTES3Enchantment();
         bindTES3GlobalVariable();
+        bindTES3Faction();
         bindTES3Ingredient();
         bindTES3Light();
         bindTES3Lockpick();
@@ -291,7 +292,6 @@ namespace MWLua
         bindTES3Container();
         bindTES3DataHandler();
         bindTES3Dialogue();
-        bindTES3Faction();
         bindTES3Fader();
         bindTES3Game();
         bindTES3GameFile();
