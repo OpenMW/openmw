@@ -3,14 +3,10 @@
 #include <components/debug/debuglog.hpp>
 
 /*
-#include "mwOffsets.h"
-#include "Log.h"
-#include "TES3Util.h"
 #include "MemoryUtil.h"
 #include "ScriptUtil.h"
 #include "UIUtil.h"
 #include "MWSEDefs.h"
-#include "BuildDate.h"
 */
 
 #include "timer.hpp"
@@ -40,6 +36,7 @@
 #include "structs/light.hpp"
 #include "structs/lockpick.hpp"
 #include "structs/magiceffect.hpp"
+#include "structs/npc.hpp"
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
 #include "structs/race.hpp"
@@ -83,7 +80,6 @@
 #include "TES3MobilePlayerLua.h"
 #include "TES3MobileProjectileLua.h"
 #include "TES3MoonLua.h"
-#include "TES3NPCLua.h"
 #include "TES3ReferenceListLua.h"
 #include "TES3RegionLua.h"
 #include "TES3ScriptLua.h"
@@ -267,6 +263,7 @@ namespace MWLua
         bindTES3Light();
         bindTES3Lockpick();
         bindTES3MagicEffect();
+        bindTES3NPC();
         bindTES3Probe();
         bindTES3Race();
         bindTES3Reference();
@@ -308,7 +305,6 @@ namespace MWLua
         bindTES3MobilePlayer();
         bindTES3MobileProjectile();
         bindTES3Moon();
-        bindTES3NPC();
         bindTES3ReferenceList();
         bindTES3Region();
         bindTES3Script();
