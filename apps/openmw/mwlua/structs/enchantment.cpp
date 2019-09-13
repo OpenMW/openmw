@@ -32,7 +32,7 @@ namespace MWLua
             [](ESM::Enchantment& self) { return self.mData.mCharge; },
             [](ESM::Enchantment& self, int value) { self.mData.mCharge = value; }
         ));
-         usertypeDefinition.set("autoCalc", sol::property(
+        usertypeDefinition.set("autoCalc", sol::property(
             [](ESM::Enchantment& self) { return self.mData.mAutocalc > 0; },
             [](ESM::Enchantment& self, bool value) { self.mData.mAutocalc = value; }
         ));
