@@ -27,6 +27,7 @@
 #include "structs/alchemy.hpp"
 #include "structs/apparatus.hpp"
 #include "structs/armor.hpp"
+#include "structs/birthsign.hpp"
 #include "structs/book.hpp"
 #include "structs/class.hpp"
 #include "structs/clothing.hpp"
@@ -253,6 +254,7 @@ namespace MWLua
         bindTES3Alchemy();
         bindTES3Apparatus();
         bindTES3Armor();
+        bindTES3BirthSign();
         bindTES3Book();
         bindTES3Class();
         bindTES3Clothing();
