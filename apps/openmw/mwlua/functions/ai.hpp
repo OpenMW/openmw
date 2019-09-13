@@ -1,9 +1,9 @@
-#ifndef GAME_MWLUA_AI_H
-#define GAME_MWLUA_AI_H
+#ifndef GAME_MWLUA_AI_FUNC_H
+#define GAME_MWLUA_AI_FUNC_H
 
 namespace MWLua
 {
-    void bindTES3AI();
+    void bindTES3AIFunctions();
 }
 
 #endif

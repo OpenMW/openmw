@@ -1,9 +1,9 @@
-#ifndef GAME_MWLUA_WORLD_H
-#define GAME_MWLUA_WORLD_H
+#ifndef GAME_MWLUA_WORLD_FUNC_H
+#define GAME_MWLUA_WORLD_FUNC_H
 
 namespace MWLua
 {
-    void bindTES3World();
+    void bindTES3WorldFunctions();
 }
 
 #endif

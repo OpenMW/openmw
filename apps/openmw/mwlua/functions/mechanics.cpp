@@ -23,7 +23,7 @@
 
 namespace MWLua
 {
-    void bindTES3Mechanics()
+    void bindTES3MechanicsFunctions()
     {
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;

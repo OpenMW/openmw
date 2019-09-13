@@ -12,7 +12,7 @@
 
 namespace MWLua
 {
-    void bindTES3GUI()
+    void bindTES3GUIFunctions()
     {
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;

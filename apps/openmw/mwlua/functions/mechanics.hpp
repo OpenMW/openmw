@@ -1,9 +1,9 @@
-#ifndef GAME_MWLUA_MECHANICS_H
-#define GAME_MWLUA_MECHANICS_H
+#ifndef GAME_MWLUA_MECHANICS_FUNC_H
+#define GAME_MWLUA_MECHANICS_FUNC_H
 
 namespace MWLua
 {
-    void bindTES3Mechanics();
+    void bindTES3MechanicsFunctions();
 }
 
 #endif

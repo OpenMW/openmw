@@ -21,7 +21,7 @@
 
 namespace MWLua
 {
-    void bindTES3AI()
+    void bindTES3AIFunctions()
     {
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;

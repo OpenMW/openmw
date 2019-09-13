@@ -79,11 +79,11 @@ namespace MWLua
         //auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         //sol::state& state = stateHandle.state;
 
-        bindTES3AI();
-        bindTES3Mechanics();
+        bindTES3AIFunctions();
+        bindTES3MechanicsFunctions();
         bindTES3SoundFunctions();
-        bindTES3GUI();
-        bindTES3World();
+        bindTES3GUIFunctions();
+        bindTES3WorldFunctions();
 
         /*
         // Bind function: tes3.getMobilePlayer
