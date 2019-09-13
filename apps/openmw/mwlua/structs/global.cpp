@@ -20,10 +20,6 @@ namespace MWLua
         usertypeDefinition.set("new", sol::no_constructor);
 
         usertypeDefinition.set("id", &ESM::Global::mId);
-
-        // Basic property binding.
-        usertypeDefinition.set("value", &ESM::Global::mValue);
-
         usertypeDefinition.set("value", sol::property(
             [](ESM::Global& self)
             {
