@@ -81,7 +81,7 @@ namespace MWLua
 
         bindTES3AI();
         bindTES3Mechanics();
-        bindTES3Sound();
+        bindTES3SoundFunctions();
         bindTES3GUI();
         bindTES3World();
 

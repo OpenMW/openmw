@@ -1,9 +1,9 @@
-#ifndef GAME_MWLUA_SOUND_H
-#define GAME_MWLUA_SOUND_H
+#ifndef GAME_MWLUA_FUNC_SOUND_H
+#define GAME_MWLUA_FUNC_SOUND_H
 
 namespace MWLua
 {
-    void bindTES3Sound();
+    void bindTES3SoundFunctions();
 }
 
 #endif

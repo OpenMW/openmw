@@ -43,6 +43,7 @@
 #include "structs/race.hpp"
 #include "structs/repairtool.hpp"
 #include "structs/skill.hpp"
+#include "structs/sound.hpp"
 #include "structs/spell.hpp"
 #include "structs/static.hpp"
 #include "structs/vectors.hpp"
@@ -83,7 +84,6 @@
 #include "TES3ReferenceListLua.h"
 #include "TES3RegionLua.h"
 #include "TES3ScriptLua.h"
-#include "TES3SoundLua.h"
 #include "TES3MagicEffectInstanceLua.h"
 #include "TES3MagicSourceInstanceLua.h"
 #include "TES3StatisticLua.h"
@@ -270,6 +270,7 @@ namespace MWLua
         bindTES3Reference();
         bindTES3RepairTool();
         bindTES3Skill();
+        bindTES3Sound();
         bindTES3Spell();
         bindTES3Static();
         bindTES3Vectors();
@@ -308,7 +309,6 @@ namespace MWLua
         bindTES3ReferenceList();
         bindTES3Region();
         bindTES3Script();
-        bindTES3Sound();
         bindTES3Statistic();
         bindTES3TArray();
         bindTES3Weather();

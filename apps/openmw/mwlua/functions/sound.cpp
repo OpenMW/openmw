@@ -15,7 +15,7 @@
 
 namespace MWLua
 {
-    void bindTES3Sound()
+    void bindTES3SoundFunctions()
     {
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;
