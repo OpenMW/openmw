@@ -37,6 +37,7 @@
 #include "structs/light.hpp"
 #include "structs/lockpick.hpp"
 #include "structs/magiceffect.hpp"
+#include "structs/misc.hpp"
 #include "structs/npc.hpp"
 #include "structs/probe.hpp"
 #include "structs/ptr.hpp"
@@ -74,7 +75,6 @@
 #include "TES3InputControllerLua.h"
 #include "TES3InventoryLua.h"
 #include "TES3LeveledListLua.h"
-#include "TES3MiscLua.h"
 #include "TES3MobileActorLua.h"
 #include "TES3MobileCreatureLua.h"
 #include "TES3MobileNPCLua.h"
@@ -264,6 +264,7 @@ namespace MWLua
         bindTES3Light();
         bindTES3Lockpick();
         bindTES3MagicEffect();
+        bindTES3Misc();
         bindTES3NPC();
         bindTES3Probe();
         bindTES3Race();
@@ -299,7 +300,6 @@ namespace MWLua
         bindTES3LeveledList();
         bindTES3MagicEffectInstance();
         bindTES3MagicSourceInstance();
-        bindTES3Misc();
         bindTES3MobileActor();
         bindTES3MobileCreature();
         bindTES3MobileNPC();
