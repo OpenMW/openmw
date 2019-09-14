@@ -1,6 +1,8 @@
 #ifndef GAME_MWLUA_UTIL_H
 #define GAME_MWLUA_UTIL_H
 
+#include <osg/Node>
+
 #include <extern/sol2/sol.hpp>
 #include "luamanager.hpp"
 
@@ -73,6 +75,8 @@ namespace MWLua
     MWWorld::Ptr getOptionalParamExecutionReference(sol::optional<sol::table> maybeParams);
 
     sol::optional<osg::Vec3f> getOptionalParamVector3(sol::optional<sol::table> maybeParams, const char* key);
+
+    sol::object makeLuaNiPointer(osg::Node* object);
 }
 
 #endif

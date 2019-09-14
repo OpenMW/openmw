@@ -13,8 +13,6 @@ namespace MWLua
 {
     void bindTES3Vectors()
     {
-        // FIXME: only the "tes3vector3.func(vec, vec2)" or vec.func(vec, vec2) syntax works. The vec.func(vec2) causes crashes because of null argument.
-
         // Get our lua state.
         auto stateHandle = LuaManager::getInstance().getThreadSafeStateHandle();
         sol::state& state = stateHandle.state;

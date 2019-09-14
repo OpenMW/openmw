@@ -3,6 +3,7 @@
 #include "functions/ai.hpp"
 #include "functions/gui.hpp"
 #include "functions/mechanics.hpp"
+#include "functions/scene.hpp"
 #include "functions/sound.hpp"
 #include "functions/world.hpp"
 
@@ -80,9 +81,10 @@ namespace MWLua
         //sol::state& state = stateHandle.state;
 
         bindTES3AIFunctions();
-        bindTES3MechanicsFunctions();
-        bindTES3SoundFunctions();
         bindTES3GUIFunctions();
+        bindTES3MechanicsFunctions();
+        bindTES3SceneFunctions();
+        bindTES3SoundFunctions();
         bindTES3WorldFunctions();
 
         /*
@@ -790,13 +792,6 @@ namespace MWLua
             else {
                 throw std::exception("tes3.removeEffects: Must pass either 'effect' or 'castType' parameter!");
             }
-        };
-
-        state["tes3"]["loadMesh"] = [](const char* relativePath) -> sol::object {
-            std::string path = "Meshes\\";
-            path += relativePath;
-
-            return makeLuaNiPointer(TES3::DataHandler::get()->nonDynamicData->meshData->loadMesh(path.c_str()));
         };
 
         state["tes3"]["playVoiceover"] = [](sol::table params) -> bool {

@@ -222,6 +222,11 @@ namespace MWWorld
         mWorldScene.reset(new Scene(*mRendering.get(), mPhysics.get(), *mNavigator));
     }
 
+    Resource::ResourceSystem* World::getResourceSystem()
+    {
+        return mResourceSystem;
+    }
+
     void World::fillGlobalVariables()
     {
         mGlobalVariables.fill (mStore);

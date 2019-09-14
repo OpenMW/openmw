@@ -203,6 +203,8 @@ namespace MWWorld
 
             virtual ~World();
 
+            Resource::ResourceSystem* getResourceSystem() override;
+
             void startNewGame (bool bypass) override;
             ///< \param bypass Bypass regular game start.
 

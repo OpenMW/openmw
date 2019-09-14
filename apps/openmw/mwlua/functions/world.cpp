@@ -2,8 +2,6 @@
 
 #include <MyGUI_InputManager.h>
 
-#include <extern/sol2/sol.hpp>
-
 #include "../luamanager.hpp"
 #include "../util.hpp"
 

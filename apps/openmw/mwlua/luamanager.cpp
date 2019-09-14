@@ -19,6 +19,8 @@
 
 #include "../mwworld/timestamp.hpp"
 
+#include "scene/node.hpp"
+
 #include "structs/activator.hpp"
 #include "structs/alchemy.hpp"
 #include "structs/apparatus.hpp"
@@ -246,6 +248,7 @@ namespace MWLua
         mLuaState["omw"]["simulateTimers"] = mSimulateTimers;
         mLuaState["omw"]["gameTimers"] = mGameTimers;
 
+        // Bind TES3 data types.
         bindTES3Activator();
         bindTES3Alchemy();
         bindTES3Apparatus();
@@ -280,7 +283,9 @@ namespace MWLua
         bindTES3Weapon();
         bindTES3WeaponType();
 
-        // Bind TES3 data types.
+        // Bind NI data types.
+        bindNINode();
+
         /*
         bindTES3ActionData();
         bindTES3AI();
@@ -321,12 +326,9 @@ namespace MWLua
         bindTES3UIMenuController();
         bindTES3UIWidgets();
 
-        // Bind NI data types.
         bindNICamera();
         bindNICollisionSwitch();
         bindNIColor();
-        bindNINode();
-        bindNIObject();
         bindNILight();
         bindNIPick();
         bindNIPixelData();

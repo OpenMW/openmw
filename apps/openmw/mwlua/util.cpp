@@ -1,5 +1,9 @@
 #include "util.hpp"
 
+#include <osg/Group>
+
+#include "scene/pointer.hpp"
+
 #include <components/debug/debuglog.hpp>
 
 namespace MWLua
@@ -126,5 +130,22 @@ namespace MWLua
         }
 
         return sol::optional<osg::Vec3f>();
+    }
+
+    sol::object makeLuaNiPointer(osg::Node* object)
+    {
+        if (object == nullptr)
+        {
+            return sol::nil;
+        }
+
+        LuaManager& luaManager = LuaManager::getInstance();
+        auto stateHandle = luaManager.getThreadSafeStateHandle();
+        sol::state& state = stateHandle.state;
+        osg::Group* group = object->asGroup();
+        if (group != nullptr)
+            return sol::make_object(state, Pointer<osg::Group>(group));
+
+        return sol::make_object(state, Pointer<osg::Node>(object));
     }
 }

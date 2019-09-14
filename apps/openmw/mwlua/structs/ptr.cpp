@@ -1,8 +1,11 @@
 #include "ptr.hpp"
 
 #include "../luamanager.hpp"
+#include "../util.hpp"
 
 #include "../../mwworld/ptr.hpp"
+
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 namespace MWLua
 {
@@ -18,6 +21,8 @@ namespace MWLua
             auto usertypeDefinition = state.create_simple_usertype<MWWorld::Ptr>();
 
             usertypeDefinition.set("new", sol::no_constructor);
+
+            usertypeDefinition.set("sceneNode", sol::readonly_property([](MWWorld::Ptr& self) { return makeLuaNiPointer(self.getRefData().getBaseNode()->getChild(0)); }));
 
             // Finish up our usertype.
             state.set_usertype("tes3reference", usertypeDefinition);

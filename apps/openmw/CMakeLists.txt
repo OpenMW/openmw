@@ -37,7 +37,11 @@ add_openmw_dir (mwlua/events
     )
 
 add_openmw_dir (mwlua/functions
-    ai gui mechanics sound world
+    ai gui mechanics scene sound world
+    )
+
+add_openmw_dir (mwlua/scene
+    node pointer
     )
 
 add_openmw_dir (mwlua/structs
