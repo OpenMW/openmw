@@ -619,11 +619,6 @@ namespace MWLua
             mwscript::RunOriginalOpCode(NULL, NULL, OpCode::MGEDisallowKey);
         };
 
-        // TODO: tes3.getTopMenu is deprecated.
-        state["tes3"]["getTopMenu"] = []() {
-            return tes3::ui::getTopMenu();
-        };
-
         state["tes3"]["getCumulativeDaysForMonth"] = [](int month) -> sol::optional<int> {
             TES3::WorldController * worldController = TES3::WorldController::get();
             if (worldController) {
@@ -1280,20 +1275,6 @@ namespace MWLua
             // Ensure the reference is flagged as modified.
             if (mobile->reference) {
                 mobile->reference->setObjectModified(true);
-            }
-
-            return true;
-        };
-
-        state["tes3"]["addSoulGem"] = [](sol::table params) {
-            TES3::Misc * item = getOptionalParamObject<TES3::Misc>(params, "item");
-            if (item == nullptr) {
-                return false;
-            }
-
-            auto data = mwse::tes3::addCustomSoulGem(item);
-            if (data == nullptr) {
-                return false;
             }
 
             return true;
