@@ -6,6 +6,7 @@
 #include "../../mwbase/environment.hpp"
 #include "../../mwbase/world.hpp"
 
+#include "../../mwworld/action.hpp"
 #include "../../mwworld/class.hpp"
 #include "../../mwworld/esmstore.hpp"
 
@@ -26,8 +27,51 @@ namespace MWLua
 
             usertypeDefinition.set("new", sol::no_constructor);
             usertypeDefinition.set("sceneNode", sol::readonly_property([](MWWorld::Ptr& self) { return makeLuaNiPointer(self.getRefData().getBaseNode()->getChild(0)); }));
+            usertypeDefinition.set("name", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getName(self); }));
+            usertypeDefinition.set("upSound", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getUpSoundId(self); }));
+            usertypeDefinition.set("downSound", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getDownSoundId(self); }));
+            usertypeDefinition.set("value", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getValue(self); }));
+            usertypeDefinition.set("capacity", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getCapacity(self); }));
+            usertypeDefinition.set("encumbrance", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getEncumbrance(self); }));
+            usertypeDefinition.set("equipmentSkill", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getEquipmentSkill(self); }));
+            usertypeDefinition.set("charge", sol::property(
+                [](MWWorld::Ptr& self)
+                {
+                    return self.getCellRef().getEnchantmentCharge();
+                },
+                [](MWWorld::Ptr& self, float charge)
+                {
+                    self.getCellRef().setEnchantmentCharge(charge);
+                }
+            ));
+            usertypeDefinition.set("condition", sol::property(
+                [](MWWorld::Ptr& self) -> float
+                {
+                    if (self.getTypeName() == typeid(ESM::Light).name())
+                        return self.getClass().getRemainingUsageTime(self);
 
-            // TODO: check for empty
+                    return self.getClass().getItemHealth(self);
+                },
+                [](MWWorld::Ptr& self, float value)
+                {
+                    if (self.getTypeName() == typeid(ESM::Light).name())
+                        self.getClass().setRemainingUsageTime(self, value);
+
+                    self.getCellRef().setCharge(value);
+                }
+            ));
+            usertypeDefinition.set("maxCondition", sol::readonly_property([](MWWorld::Ptr& self)
+            {
+                if (self.getTypeName() == typeid(ESM::Light).name())
+                {
+                    const MWWorld::LiveCellRef<ESM::Light> *ref = self.get<ESM::Light>();
+                    return ref->mBase->mData.mTime;
+                }
+
+                return self.getClass().getItemMaxHealth(self);
+            }));
+
+            // TODO: consider empty pointers to be nil
 
             // Access to other objects that need to be packaged.
             /*
@@ -88,32 +132,24 @@ namespace MWLua
 
             // Basic function binding.
             usertypeDefinition.set("activate", [](MWWorld::Ptr& self, MWWorld::Ptr& target) { MWBase::Environment::get().getWorld()->activate(target, self); });
+            usertypeDefinition.set("respawn", [](MWWorld::Ptr& self) { self.getClass().respawn(self); });
+            usertypeDefinition.set("restock", [](MWWorld::Ptr& self) { self.getClass().restock(self); });
+            usertypeDefinition.set("use", [](MWWorld::Ptr& self, MWWorld::Ptr& target)
+            {
+                std::shared_ptr<MWWorld::Action> action = self.getClass().use(self);
+                action->execute(target);
+            });
 
-            /*
-            usertypeDefinition.set("clearActionFlag", &TES3::Reference::clearActionFlag);
-            usertypeDefinition.set("clone", &TES3::Reference::clone);
-            usertypeDefinition.set("deleteDynamicLightAttachment", &TES3::Reference::deleteDynamicLightAttachment);
-            usertypeDefinition.set("detachDynamicLightFromAffectedNodes", &TES3::Reference::detachDynamicLightFromAffectedNodes);
-            */
+            //usertypeDefinition.set("clone", &TES3::Reference::clone);
             usertypeDefinition.set("disable", [](MWWorld::Ptr& self) { MWBase::Environment::get().getWorld()->disable(self); });
             usertypeDefinition.set("enable", [](MWWorld::Ptr& self) { MWBase::Environment::get().getWorld()->disable(self); });
-
-            /*
-            usertypeDefinition.set("getAttachedDynamicLight", &TES3::Reference::getAttachedDynamicLight);
-            usertypeDefinition.set("getOrCreateAttachedDynamicLight", &TES3::Reference::getOrCreateAttachedDynamicLight);
-            usertypeDefinition.set("setActionFlag", &TES3::Reference::setActionFlag);
-            usertypeDefinition.set("testActionFlag", &TES3::Reference::testActionFlag);
-            */
 
             //usertypeDefinition.set("updateEquipment", &TES3::Reference::updateBipedParts);
 
             // Functions exposed as properties.
-            //usertypeDefinition.set("activationReference", sol::property(&TES3::Reference::getActionReference, &TES3::Reference::setActionReference));
             //usertypeDefinition.set("attachments", sol::readonly_property(&TES3::Reference::getAttachments));
             //usertypeDefinition.set("context", sol::readonly_property(&getContext));
             //usertypeDefinition.set("data", sol::readonly_property(&TES3::Reference::getLuaTable));
-            //usertypeDefinition.set("isEmpty", sol::property(&TES3::Reference::getEmptyInventoryFlag, &TES3::Reference::setEmptyInventoryFlag));
-            //usertypeDefinition.set("isRespawn", sol::readonly_property(&TES3::Reference::isRespawn));
             usertypeDefinition.set("orientation", sol::property(
                 [](MWWorld::Ptr& self)
                 {
@@ -181,7 +217,6 @@ namespace MWLua
                 self.setObjectModified(true);
             });
             */
-
 
             // Finish up our usertype.
             state.set_usertype("tes3reference", usertypeDefinition);
