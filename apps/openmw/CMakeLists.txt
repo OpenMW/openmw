@@ -41,7 +41,7 @@ add_openmw_dir (mwlua/functions
     )
 
 add_openmw_dir (mwlua/structs
-    activator alchemy apparatus armor birthsign book class clothing creature door enchantment gamesetting global faction ingredient light lockpick
+    activator alchemy apparatus armor birthsign book class clothing container creature door enchantment gamesetting global faction ingredient light lockpick
     magiceffect misc npc probe ptr race region repairtool skill sound spell static vectors weapon weapontype
     )
 
