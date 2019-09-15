@@ -3,10 +3,8 @@
 #include <components/debug/debuglog.hpp>
 
 /*
-#include "MemoryUtil.h"
 #include "ScriptUtil.h"
 #include "UIUtil.h"
-#include "MWSEDefs.h"
 */
 
 #include "timer.hpp"
@@ -57,13 +55,9 @@
 
 /*
 // Lua binding files. These are split out rather than kept here to help with compile times.
-#include "MemoryUtilLua.h"
-#include "StackLua.h"
 #include "ScriptUtilLua.h"
-#include "StringUtilLua.h"
 #include "TES3ActionDataLua.h"
 #include "TES3AILua.h"
-#include "TES3AttachmentLua.h"
 #include "TES3AudioControllerLua.h"
 #include "TES3BodyPartLua.h"
 #include "TES3CellLua.h"
@@ -102,7 +96,6 @@
 #include "NICameraLua.h"
 #include "NICollisionSwitchLua.h"
 #include "NIColorLua.h"
-#include "NINodeLua.h"
 #include "NIObjectLua.h"
 #include "NILightLua.h"
 #include "NIPickLua.h"
