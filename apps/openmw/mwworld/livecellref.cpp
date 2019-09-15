@@ -11,7 +11,7 @@
 #include "esmstore.hpp"
 
 MWWorld::LiveCellRefBase::LiveCellRefBase(const std::string& type, const ESM::CellRef &cref)
-  : mClass(&Class::get(type)), mRef(cref), mData(cref)
+  : mClass(&Class::get(type)), mRef(cref), mData(cref), mCustomData(sol::nil)
 {
 }
 
@@ -52,6 +52,8 @@ void MWWorld::LiveCellRefBase::loadImp (const ESM::ObjectState& state)
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
         mRef.setSoul(std::string());
     }
+
+    // TODO: read the mCustomData
 }
 
 void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
@@ -63,6 +65,8 @@ void MWWorld::LiveCellRefBase::saveImp (ESM::ObjectState& state) const
     mData.write (state, mClass->getScript (ptr));
 
     mClass->writeAdditionalState (ptr, state);
+
+    // TODO: serialize the mCustomData
 }
 
 bool MWWorld::LiveCellRefBase::checkStateImp (const ESM::ObjectState& state)

@@ -30,6 +30,10 @@ namespace MWWorld
             {
             }
 
+            sol::object& getCustomData() const;
+
+            void setCustomData (sol::object& customData);
+
             bool isEmpty() const
             {
                 return mRef == 0;

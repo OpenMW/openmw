@@ -5,6 +5,8 @@
 
 #include "cellref.hpp"
 
+#include <extern/sol2/sol.hpp>
+
 #include "refdata.hpp"
 
 namespace ESM
@@ -30,6 +32,8 @@ namespace MWWorld
 
         /** runtime-data */
         RefData mData;
+
+        sol::object mCustomData;
 
         LiveCellRefBase(const std::string& type, const ESM::CellRef &cref=ESM::CellRef());
         /* Need this for the class to be recognized as polymorphic */

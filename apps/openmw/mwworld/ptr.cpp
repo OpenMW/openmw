@@ -43,6 +43,18 @@ void MWWorld::Ptr::setContainerStore (ContainerStore *store)
     mContainerStore = store;
 }
 
+sol::object& MWWorld::Ptr::getCustomData() const
+{
+    assert(mRef);
+
+    return mRef->mCustomData;
+}
+
+void MWWorld::Ptr::setCustomData (sol::object& customData)
+{
+    mRef->mCustomData = customData;
+}
+
 MWWorld::ContainerStore *MWWorld::Ptr::getContainerStore() const
 {
     return mContainerStore;

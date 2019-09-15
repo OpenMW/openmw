@@ -34,6 +34,16 @@ namespace MWLua
             usertypeDefinition.set("capacity", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getCapacity(self); }));
             usertypeDefinition.set("encumbrance", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getEncumbrance(self); }));
             usertypeDefinition.set("equipmentSkill", sol::readonly_property([](MWWorld::Ptr& self) { return self.getClass().getEquipmentSkill(self); }));
+            usertypeDefinition.set("customData", sol::property(
+                [](MWWorld::Ptr& self)
+                {
+                    return self.getCustomData();
+                },
+                [](MWWorld::Ptr& self, sol::object data)
+                {
+                    self.setCustomData(data);
+                }
+            ));
             usertypeDefinition.set("charge", sol::property(
                 [](MWWorld::Ptr& self)
                 {
