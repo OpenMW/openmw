@@ -454,18 +454,15 @@ namespace MWClass
             // otherwise wait until death animation
             if(stats.isDeathAnimationFinished())
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
-
-            // death animation is not finished, do nothing
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
         }
+        else if (!stats.getAiSequence().isInCombat() && !stats.getKnockedDown())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
 
-        if(stats.getAiSequence().isInCombat())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        // Tribunal and some mod companions oddly enough must use open action as fallback
+        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
 
-        if(stats.getKnockedDown())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
-
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
