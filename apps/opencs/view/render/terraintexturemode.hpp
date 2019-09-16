@@ -4,6 +4,7 @@
 #include "editmode.hpp"
 
 #include <string>
+#include <memory>
 
 #include <QWidget>
 #include <QEvent>
@@ -18,6 +19,13 @@
 #include "../../model/world/landtexture.hpp"
 #endif
 
+#include "terrainselection.hpp"
+
+namespace osg
+{
+    class Group;
+}
+
 namespace CSVWidget
 {
     class SceneToolTextureBrush;
@@ -25,15 +33,23 @@ namespace CSVWidget
 
 namespace CSVRender
 {
-
     class TerrainTextureMode : public EditMode
     {
         Q_OBJECT
 
         public:
 
+            enum InteractionType
+            {
+                InteractionType_PrimaryEdit,
+                InteractionType_PrimarySelect,
+                InteractionType_SecondaryEdit,
+                InteractionType_SecondarySelect,
+                InteractionType_None
+            };
+
             /// \brief Editmode for terrain texture grid
-            TerrainTextureMode(WorldspaceWidget*, QWidget* parent = nullptr);
+            TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
             void primaryOpenPressed (const WorldspaceHitResult& hit);
 
@@ -68,6 +84,12 @@ namespace CSVRender
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
 
+            /// \brief Check if global selection coordinate belongs to cell in view
+            bool isInCellSelection(int globalSelectionX, int globalSelectionY);
+
+            /// \brief Handle brush mechanics for texture selection
+            void selectTerrainTextures (const std::pair<int, int>& texCoords, unsigned char selectMode, bool dragOperation);
+
             /// \brief Push texture edits to command macro
             void pushEditToCommand (CSMWorld::LandTexturesColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, std::string cellId);
@@ -83,7 +105,12 @@ namespace CSVRender
             std::string mBrushTexture;
             int mBrushSize;
             int mBrushShape;
+            std::vector<std::pair<int, int>> mCustomBrushShape;
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
+            int mDragMode;
+            osg::Group* mParentNode;
+            bool mIsEditing;
+            std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
             const int landSize {ESM::Land::LAND_SIZE};
