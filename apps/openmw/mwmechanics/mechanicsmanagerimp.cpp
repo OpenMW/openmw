@@ -950,6 +950,7 @@ namespace MWMechanics
             return true;
 
         const MWWorld::CellRef& cellref = target.getCellRef();
+
         // there is no harm to use unlocked doors
         int lockLevel = cellref.getLockLevel();
         if (target.getClass().isDoor() &&
@@ -1004,6 +1005,10 @@ namespace MWMechanics
 
         if (!cellref.getOwner().empty())
             victim = MWBase::Environment::get().getWorld()->searchPtr(cellref.getOwner(), true, false);
+
+        // A special case for evidence chest - we should not allow to take items even if it is technically permitted
+        if (Misc::StringUtils::ciEqual(cellref.getRefId(), "stolen_goods"))
+            return false;
 
         return (!isOwned && !isFactionOwned);
     }

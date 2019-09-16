@@ -275,9 +275,11 @@ namespace MWClass
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
 
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "stolen_goods"))
+                text += "\nYou can not use evidence chests";
         }
 
         info.text = text;
