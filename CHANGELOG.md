@@ -141,6 +141,7 @@
     Bug #5149: Failing lock pick attempts isn't always a crime
     Bug #5159: NiMaterialColorController can only control the diffuse color
     Bug #5161: Creature companions can't be activated when they are knocked down
+    Bug #5164: Faction owned items handling is incorrect
     Bug #5188: Objects without a name don't fallback to their ID
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
