@@ -3023,7 +3023,7 @@ namespace MWWorld
             target = getFacedObject();
 
         // if the faced object can not be activated, do not use it
-        if (!target.isEmpty() && !target.getClass().canBeActivated(target))
+        if (!target.isEmpty() && !target.getClass().hasToolTip(target))
             target = nullptr;
 
         if (target.isEmpty())
@@ -3082,7 +3082,7 @@ namespace MWWorld
                 {
                     target = result2.mHitObject;
                     hitPosition = result2.mHitPointWorld;
-                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
+                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().hasToolTip(target))
                         target = nullptr;
                 }
             }
@@ -3650,7 +3650,7 @@ namespace MWWorld
             if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect

@@ -138,6 +138,7 @@
     Bug #5134: Doors rotation by "Lock" console command is inconsistent
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Bug #5149: Failing lock pick attempts isn't always a crime
+    Bug #5188: Objects without a name don't fallback to their ID
     Bug #5161: Creature companions can't be activated when they are knocked down
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI

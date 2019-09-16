@@ -531,7 +531,9 @@ namespace MWClass
         }
 
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
@@ -1071,7 +1073,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
-        if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
+        if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
             info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);

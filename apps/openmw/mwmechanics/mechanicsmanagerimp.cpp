@@ -959,7 +959,7 @@ namespace MWMechanics
             return true;
         }
 
-        if (!target.getClass().canBeActivated(target))
+        if (!target.getClass().hasToolTip(target))
             return true;
 
         // TODO: implement a better check to check if target is owned bed

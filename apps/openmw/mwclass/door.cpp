@@ -102,8 +102,9 @@ namespace MWClass
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
@@ -281,19 +282,12 @@ namespace MWClass
         registerClass (typeid (ESM::Door).name(), instance);
     }
 
-    bool Door::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
 
