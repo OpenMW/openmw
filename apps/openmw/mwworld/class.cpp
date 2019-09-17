@@ -144,20 +144,6 @@ namespace MWWorld
         return false;
     }
 
-    void Class::lock (const Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Class::unlock (const Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
-    }
-
     bool Class::canLock(const ConstPtr &ptr) const
     {
         return false;

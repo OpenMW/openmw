@@ -181,7 +181,7 @@ namespace MWClass
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
             if(isLocked)
-                unlock(ptr);
+                ptr.getCellRef().unlock();
             // using a key disarms the trap
             if(isTrapped)
             {

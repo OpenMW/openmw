@@ -50,7 +50,7 @@ namespace MWMechanics
         {
             if (Misc::Rng::roll0to99() <= x)
             {
-                lock.getClass().unlock(lock);
+                lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
