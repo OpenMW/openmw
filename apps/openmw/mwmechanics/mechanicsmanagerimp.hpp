@@ -130,7 +130,7 @@ namespace MWMechanics
              * @return was the crime seen?
              */
             virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0, bool victimAware=false) override;
+                                      OffenseType type, const std::string& factionId="", int arg=0, bool victimAware=false) override;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) override;
 
@@ -247,7 +247,7 @@ namespace MWMechanics
             bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);
 
             bool reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0);
+                                      OffenseType type, const std::string& factionId, int arg=0);
     };
 }
 

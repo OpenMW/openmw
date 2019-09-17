@@ -39,6 +39,11 @@ namespace MWClass
         return "";
     }
 
+    bool CreatureLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const
+    {
+        return false;
+    }
+
     void CreatureLevList::respawn(const MWWorld::Ptr &ptr) const
     {
         ensureCustomData(ptr);

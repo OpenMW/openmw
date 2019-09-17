@@ -9,6 +9,7 @@
     Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
     Bug #3550: Companion from mod attacks the air after combat has ended
+    Bug #3609: Items from evidence chest are not considered to be stolen if player is allowed to use the chest
     Bug #3623: Display scaling breaks mouse recognition
     Bug #3725: Using script function in a non-conditional expression breaks script compilation
     Bug #3733: Normal maps are inverted on mirrored UVs
@@ -139,11 +140,16 @@
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Bug #5149: Failing lock pick attempts isn't always a crime
     Bug #5155: Lock/unlock behavior differs from vanilla
+    Bug #5159: NiMaterialColorController can only control the diffuse color
+    Bug #5161: Creature companions can't be activated when they are knocked down
+    Bug #5164: Faction owned items handling is incorrect
+    Bug #5188: Objects without a name don't fallback to their ID
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
     Feature #3610: Option to invert X axis
+    Feature #3871: Editor: Terrain Selection
     Feature #3893: Implicit target for "set" function in console
     Feature #3980: In-game option to disable controller
     Feature #3999: Shift + Double Click should maximize/restore menu size

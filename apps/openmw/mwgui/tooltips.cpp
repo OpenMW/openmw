@@ -651,9 +651,22 @@ namespace MWGui
     {
         std::string ret;
         ret += getMiscString(cellref.getOwner(), "Owner");
-        ret += getMiscString(cellref.getFaction(), "Faction");
-        if (cellref.getFactionRank() > 0)
-            ret += getValueString(cellref.getFactionRank(), "Rank");
+        const std::string factionId = cellref.getFaction();
+        ret += getMiscString(factionId, "Faction");
+        if (!factionId.empty() && cellref.getFactionRank() >= 0)
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Faction *fact = store.get<ESM::Faction>().search(factionId);
+            if (fact != nullptr)
+            {
+                int rank = cellref.getFactionRank();
+                const std::string rankName = fact->mRanks[rank];
+                if (rankName.empty())
+                    ret += getValueString(cellref.getFactionRank(), "Rank");
+                else
+                    ret += getMiscString(rankName, "Rank");
+            }
+        }
 
         std::vector<std::pair<std::string, int> > itemOwners =
                 MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
