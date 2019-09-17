@@ -130,8 +130,8 @@ namespace MWBase
              *                    If this parameter is false, it will be determined by a line-of-sight and awareness check.
              * @return was the crime seen?
              */
-            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0, bool victimAware=false) = 0;
+            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
+                                      const std::string& factionId="", int arg=0, bool victimAware=false) = 0;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
 
