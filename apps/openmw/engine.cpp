@@ -112,8 +112,8 @@ bool OMW::Engine::frame(float frametime)
         bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()==
-            MWBase::StateManager::State_Running)
+        if (mEnvironment.getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
         {
             if (!paused)
             {
