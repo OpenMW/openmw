@@ -163,7 +163,7 @@ namespace MWClass
             if(actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             if(isLocked)
-                unlock(ptr); //Call the function here. because that makes sense.
+                ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
             // using a key disarms the trap
             if(isTrapped)
             {
@@ -239,20 +239,6 @@ namespace MWClass
             action->setSound(lockedSound);
             return action;
         }
-    }
-
-    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Door::unlock (const MWWorld::Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
     }
 
     bool Door::canLock(const MWWorld::ConstPtr &ptr) const

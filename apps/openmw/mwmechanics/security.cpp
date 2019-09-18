@@ -30,7 +30,7 @@ namespace MWMechanics
     {
         if (lock.getCellRef().getLockLevel() <= 0 ||
             lock.getCellRef().getLockLevel() == ESM::UnbreakableLock ||
-            !lock.getClass().canLock(lock)) //If it's unlocked or can not be unlocked back out immediately
+            !lock.getClass().hasToolTip(lock)) //If it's unlocked or can not be unlocked back out immediately
             return;
 
         int lockStrength = lock.getCellRef().getLockLevel();
@@ -50,7 +50,7 @@ namespace MWMechanics
         {
             if (Misc::Rng::roll0to99() <= x)
             {
-                lock.getClass().unlock(lock);
+                lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);

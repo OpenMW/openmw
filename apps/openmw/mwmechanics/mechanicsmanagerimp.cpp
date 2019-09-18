@@ -1154,7 +1154,7 @@ namespace MWMechanics
             store.remove(*it, toMove, player);
         }
         // TODO: unhardcode the locklevel
-        targetContainer.getClass().lock(targetContainer,50);
+        targetContainer.getCellRef().lock(50);
     }
 
     void MechanicsManager::itemTaken(const MWWorld::Ptr &ptr, const MWWorld::Ptr &item, const MWWorld::Ptr& container,
