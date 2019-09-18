@@ -18,11 +18,6 @@ namespace VFS
     class Manager;
 }
 
-namespace CSVRender
-{
-    class TerrainStorage;
-}
-
 namespace ESMTerrain
 {
 
@@ -62,7 +57,7 @@ namespace ESMTerrain
         typedef std::map<std::pair<int, int>, osg::ref_ptr<const LandObject> > Map;
         Map mMap;
     };
-    
+
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
     ///        into the terrain component, converting it on the fly as needed.
     class Storage : public Terrain::Storage
