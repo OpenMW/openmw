@@ -16,7 +16,6 @@ namespace ESM
 
             esm.writeHNT ("CAST", params.mCasterActorId);
             esm.writeHNString ("DISP", params.mDisplayName);
-            esm.writeHNT ("TIME", params.mTimeStamp);
 
             for (std::vector<ActiveEffect>::const_iterator effectIt = params.mEffects.begin(); effectIt != params.mEffects.end(); ++effectIt)
             {
@@ -25,12 +24,15 @@ namespace ESM
                     esm.writeHNT ("ARG_", effectIt->mArg);
                 esm.writeHNT ("MAGN", effectIt->mMagnitude);
                 esm.writeHNT ("DURA", effectIt->mDuration);
+                esm.writeHNT ("LEFT", effectIt->mTimeLeft);
             }
         }
     }
 
     void ActiveSpells::load(ESMReader &esm)
     {
+        int format = esm.getFormat();
+
         while (esm.isNextSub("ID__"))
         {
             std::string spellId = esm.getHString();
@@ -38,7 +40,10 @@ namespace ESM
             ActiveSpellParams params;
             esm.getHNT (params.mCasterActorId, "CAST");
             params.mDisplayName = esm.getHNString ("DISP");
-            esm.getHNT (params.mTimeStamp, "TIME");
+
+            // spell casting timestamp, no longer used
+            if (esm.isNextSub("TIME"))
+                esm.skipHSub();
 
             while (esm.isNextSub("MGEF"))
             {
@@ -48,6 +53,11 @@ namespace ESM
                 esm.getHNOT(effect.mArg, "ARG_");
                 esm.getHNT (effect.mMagnitude, "MAGN");
                 esm.getHNT (effect.mDuration, "DURA");
+                if (format < 9)
+                    effect.mTimeLeft = effect.mDuration;
+                else
+                    esm.getHNT (effect.mTimeLeft, "LEFT");
+
                 params.mEffects.push_back(effect);
             }
             mSpells.insert(std::make_pair(spellId, params));

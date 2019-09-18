@@ -1622,6 +1622,8 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
+                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
                 // For dead actors we need to remove looping spell particles
                 if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                     ctrl->updateContinuousVfx();

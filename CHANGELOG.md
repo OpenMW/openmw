@@ -6,6 +6,7 @@
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
     Bug #5108: Savegame bloating due to inefficient fog textures format
+    Bug #5165: Active spells should use real time intead of timestamps
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
@@ -188,8 +189,8 @@
     Bug #5158: Objects without a name don't fallback to their ID
     Bug #5159: NiMaterialColorController can only control the diffuse color
     Bug #5161: Creature companions can't be activated when they are knocked down
-    Bug #5164: Faction owned items handling is incorrect
     Bug #5163: UserData is not copied during node cloning
+    Bug #5164: Faction owned items handling is incorrect
     Bug #5166: Scripts still should be executed after player's death
     Bug #5167: Player can select and cast spells before magic menu is enabled
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
