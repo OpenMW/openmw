@@ -1312,6 +1312,9 @@ namespace MWInput
         if (!checkAllowedToUseItems())
             return;
 
+        if (MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")!=-1)
+            return;
+
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
             MWBase::Environment::get().getWindowManager()->activateQuickKey (index);
     }
