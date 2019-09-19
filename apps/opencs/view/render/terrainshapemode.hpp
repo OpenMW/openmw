@@ -93,15 +93,16 @@ namespace CSVRender
             /// Do a single flattening height alteration for transient shape edit map
             void flattenHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, int toolStrength, int targetHeight);
 
-            /// Update the key values used in height calculations
+            /// Get altered height values around one vertex
             void updateKeyHeightValues(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float* thisHeight,
-                float* thisAlteredHeight, float* leftHeight, float* leftAlteredHeight, float* upHeight, float* upAlteredHeight);
+                float* thisAlteredHeight, float* leftHeight, float* leftAlteredHeight, float* upHeight, float* upAlteredHeight,
+                float* rightHeight, float* rightAlteredHeight, float* downHeight, float* downAlteredHeight);
 
             /// Bind edge vertices to next cells
             void fixEdges(const CSMWorld::CellCoordinates& cellCoords);
 
             /// Check that the edit doesn't break save format limits, fix if necessary
-            void limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords);
+            void limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode = false);
 
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
@@ -145,7 +146,6 @@ namespace CSVRender
             void passBrushTexture(std::string brushTexture);
 
         public slots:
-            //void handleDropEvent(QDropEvent *event);
             void setBrushSize(int brushSize);
             void setBrushShape(int brushShape);
             void setShapeEditTool(int shapeEditTool);
