@@ -145,6 +145,7 @@
     Bug #5161: Creature companions can't be activated when they are knocked down
     Bug #5164: Faction owned items handling is incorrect
     Bug #5166: Scripts still should be executed after player's death
+    Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
