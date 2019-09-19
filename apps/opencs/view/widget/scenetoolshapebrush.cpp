@@ -118,6 +118,7 @@ CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidge
     mToolStrengthSlider->setTickInterval(8);
     mToolStrengthSlider->setRange(8, 128);
     mToolStrengthSlider->setSingleStep(8);
+    mToolStrengthSlider->setValue(8);
 
     layoutMain->addWidget(mHorizontalGroupBox);
     layoutMain->addWidget(mSizeSliders);

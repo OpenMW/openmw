@@ -50,7 +50,7 @@ CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidge
     mIsEditing(false),
     mTotalDiffY(0),
     mShapeEditTool(0),
-    mShapeEditToolStrength(0),
+    mShapeEditToolStrength(8),
     mTargetHeight(0)
 {
 }
@@ -656,10 +656,9 @@ void CSVRender::TerrainShapeMode::smoothHeight(const CSMWorld::CellCoordinates& 
             float averageHeight = (upHeight + downHeight + rightHeight + leftHeight +
                 upAlteredHeight + downAlteredHeight + rightAlteredHeight + leftAlteredHeight) / 4;
             if ((thisHeight + thisAlteredHeight) != averageHeight) mAlteredCells.emplace_back(cellCoords);
-            if (toolStrength > abs(thisHeight + thisAlteredHeight - averageHeight) && toolStrength > 8.0f) toolStrength =
-                abs(thisHeight + thisAlteredHeight - averageHeight); //Cut down excessive changes
-            if (thisHeight + thisAlteredHeight > averageHeight) alterHeight(cellCoords, inCellX, inCellY, -toolStrength);
-            if (thisHeight + thisAlteredHeight < averageHeight) alterHeight(cellCoords, inCellX, inCellY, +toolStrength);
+            if (toolStrength > abs(thisHeight + thisAlteredHeight - averageHeight)) toolStrength = abs(thisHeight + thisAlteredHeight - averageHeight);
+            if (thisHeight + thisAlteredHeight > averageHeight) alterHeight(cellCoords, inCellX, inCellY, - toolStrength);
+            if (thisHeight + thisAlteredHeight < averageHeight) alterHeight(cellCoords, inCellX, inCellY, + toolStrength);
         }
     }
 }
@@ -694,8 +693,8 @@ void CSVRender::TerrainShapeMode::flattenHeight(const CSMWorld::CellCoordinates&
 
     if (toolStrength > abs(thisHeight - targetHeight) && toolStrength > 8.0f) toolStrength =
         abs(thisHeight - targetHeight); //Cut down excessive changes
-    if (thisHeight + thisAlteredHeight > targetHeight) alterHeight(cellCoords, inCellX, inCellY, -toolStrength);
-    if (thisHeight + thisAlteredHeight < targetHeight) alterHeight(cellCoords, inCellX, inCellY, +toolStrength);
+    if (thisHeight + thisAlteredHeight > targetHeight) alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight - toolStrength);
+    if (thisHeight + thisAlteredHeight < targetHeight) alterHeight(cellCoords, inCellX, inCellY, thisAlteredHeight + toolStrength);
 }
 
 void CSVRender::TerrainShapeMode::updateKeyHeightValues(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float* thisHeight,
