@@ -1333,9 +1333,9 @@ namespace MWRender
         return mCurrentCameraPos;
     }
 
-    void RenderingManager::togglePOV()
+    void RenderingManager::togglePOV(bool force)
     {
-        mCamera->toggleViewMode();
+        mCamera->toggleViewMode(force);
     }
 
     void RenderingManager::togglePreviewMode(bool enable)

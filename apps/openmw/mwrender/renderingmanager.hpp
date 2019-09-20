@@ -204,7 +204,7 @@ namespace MWRender
         float getCameraDistance() const;
         Camera* getCamera();
         const osg::Vec3f& getCameraPosition() const;
-        void togglePOV();
+        void togglePOV(bool force = false);
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
