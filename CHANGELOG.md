@@ -4,6 +4,7 @@
     Bug #1515: Opening console masks dialogue, inventory menu
     Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
     Bug #2969: Scripted items can stack
+    Bug #2976: Data lines in global openmw.cfg take priority over user openmw.cfg
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
@@ -122,6 +123,7 @@
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5078: DisablePlayerLooking is broken
     Bug #5082: Scrolling with controller in GUI mode is broken
+    Bug #5087: Some valid script names can't be used as string arguments
     Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
@@ -146,6 +148,7 @@
     Bug #5164: Faction owned items handling is incorrect
     Bug #5166: Scripts still should be executed after player's death
     Bug #5167: Player can select and cast spells before magic menu is enabled
+    Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

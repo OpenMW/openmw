@@ -2395,9 +2395,9 @@ namespace MWWorld
         return mPhysics->isOnGround(ptr);
     }
 
-    void World::togglePOV()
+    void World::togglePOV(bool force)
     {
-        mRendering->togglePOV();
+        mRendering->togglePOV(force);
     }
 
     bool World::isFirstPerson() const
