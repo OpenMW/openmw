@@ -4,6 +4,7 @@
     Bug #1515: Opening console masks dialogue, inventory menu
     Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
     Bug #2969: Scripted items can stack
+    Bug #2976: Data lines in global openmw.cfg take priority over user openmw.cfg
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
