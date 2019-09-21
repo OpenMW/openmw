@@ -185,7 +185,6 @@
     Feature #4812: Support NiSwitchNode
     Feature #4836: Daytime node switch
     Feature #4840: Editor: Transient terrain change support
-    Feature #????: Editor: Land shape editing, land selection
     Feature #4859: Make water reflections more configurable
     Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
@@ -212,6 +211,7 @@
     Feature #5132: Unique animations for different weapon types
     Feature #5146: Safe Dispose corpse
     Feature #5147: Show spell magicka cost in spell buying window
+    Feature #5170: Editor: Land shape editing, land selection
     Feature #5193: Weapon sheathing
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
