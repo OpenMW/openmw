@@ -149,6 +149,7 @@
     Bug #5166: Scripts still should be executed after player's death
     Bug #5167: Player can select and cast spells before magic menu is enabled
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
+    Bug #5169: Nested levelled items/creatures have significantly higher chance not to spawn
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
