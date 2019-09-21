@@ -137,10 +137,6 @@ namespace CSVRender
             int mShapeEditToolStrength;
             int mTargetHeight;
 
-            const int cellSize {ESM::Land::REAL_SIZE};
-            const int landSize {ESM::Land::LAND_SIZE};
-            const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
-
             PagedWorldspaceWidget& getPagedWorldspaceWidget();
 
         signals:
