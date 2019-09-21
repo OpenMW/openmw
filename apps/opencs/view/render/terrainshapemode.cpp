@@ -15,6 +15,7 @@
 #include <osg/Group>
 
 #include <components/esm/loadland.hpp>
+#include <components/debug/debuglog.hpp>
 
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
@@ -236,17 +237,36 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
 
         QUndoStack& undoStack = document.getUndoStack();
 
-        undoStack.beginMacro ("Edit shape and normal records");
+        bool passing = false;
+        int passes = 0;
 
-        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+        while (passing == false) // Multiple passes are needed when steepness problems arise for both x and y axis simultaneously
         {
-            limitAlteredHeights(cellCoordinates);
+            passing = true;
+            for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+            {
+                limitAlteredHeights(cellCoordinates);
+            }
+            std::reverse(mAlteredCells.begin(), mAlteredCells.end()); //Instead of alphabetical order, this should be fixed to sort cells by cell coordinates
+            for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+            {
+                if (!limitAlteredHeights(cellCoordinates, true)) passing = false;
+            }
+            ++passes;
+            if (passes > 2)
+            {
+                Log(Debug::Warning) << "Warning: User edit exceeds accepted slope steepness. Automatic limiting has failed, edit has been discarded.";
+                if (CSVRender::PagedWorldspaceWidget *paged =
+                    dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+                {
+                    paged->resetAllAlteredHeights();
+                    mAlteredCells.clear();
+                    return;
+                }
+            }
         }
-        std::reverse(mAlteredCells.begin(), mAlteredCells.end()); //Instead of alphabetical order, this should be fixed to sort cells by cell coordinates
-        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-        {
-            limitAlteredHeights(cellCoordinates, true);
-        }
+
+        undoStack.beginMacro ("Edit shape and normal records");
 
         for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
         {
@@ -335,12 +355,8 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
         undoStack.endMacro();
         mAlteredCells.clear();
 
-        if (CSVRender::PagedWorldspaceWidget *paged =
-            dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-        {
+        if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
             paged->resetAllAlteredHeights();
-            mTotalDiffY = 0;
-        }
     }
 }
 
@@ -464,12 +480,12 @@ void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& c
 
     if(allowLandShapeEditing(cellId)==true)
     {
-        if (useTool) mAlteredCells.emplace_back(cellCoords);
         if (CSVRender::PagedWorldspaceWidget *paged =
             dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
         {
             if (useTool)
             {
+                mAlteredCells.emplace_back(cellCoords);
                 if (mShapeEditTool == 0)
                 {
                     // Get distance from modified land, alter land change based on zoom
@@ -490,32 +506,44 @@ void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& c
             {
                 if(allowLandShapeEditing(cellUpLeftId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(-1, -1));
-                    paged->setCellAlteredHeight(cellCoords.move(-1, -1), landSize - 1, landSize - 1, alteredHeight);
+                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, -1);
+                    if (useTool) mAlteredCells.emplace_back(cornerCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(cornerCellCoords);
+                    paged->setCellAlteredHeight(cornerCellCoords, landSize - 1, landSize - 1, alteredHeight);
                 }
             }
             else if (inCellX == 0 && inCellY == landSize - 1)
             {
                 if(allowLandShapeEditing(cellDownLeftId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(-1, 1));
-                    paged->setCellAlteredHeight(cellCoords.move(-1, 1), landSize - 1, 0, alteredHeight);
+                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, 1);
+                    if (useTool) mAlteredCells.emplace_back(cornerCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(cornerCellCoords);
+                    paged->setCellAlteredHeight(cornerCellCoords, landSize - 1, 0, alteredHeight);
                 }
             }
             else if (inCellX == landSize - 1 && inCellY == 0)
             {
                 if(allowLandShapeEditing(cellUpRightId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(1, -1));
-                    paged->setCellAlteredHeight(cellCoords.move(1, -1), 0, landSize - 1, alteredHeight);
+                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, -1);
+                    if (useTool) mAlteredCells.emplace_back(cornerCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(cornerCellCoords);
+                    paged->setCellAlteredHeight(cornerCellCoords, 0, landSize - 1, alteredHeight);
                 }
             }
             else if (inCellX == landSize - 1 && inCellY == landSize -1)
             {
                 if(allowLandShapeEditing(cellDownRightId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(1, 1));
-                    paged->setCellAlteredHeight(cellCoords.move(1, 1), 0, 0, alteredHeight);
+                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, 1);
+                    if (useTool) mAlteredCells.emplace_back(cornerCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(cornerCellCoords);
+                    paged->setCellAlteredHeight(cornerCellCoords, 0, 0, alteredHeight);
                 }
             }
 
@@ -524,16 +552,22 @@ void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& c
             {
                 if(allowLandShapeEditing(cellLeftId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(-1, 0));
-                    paged->setCellAlteredHeight(cellCoords.move(-1, 0), landSize - 1, inCellY, alteredHeight);
+                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(-1, 0);
+                    if (useTool) mAlteredCells.emplace_back(edgeCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(edgeCellCoords);
+                    paged->setCellAlteredHeight(edgeCellCoords, landSize - 1, inCellY, alteredHeight);
                 }
             }
             if (inCellY == 0)
             {
                 if(allowLandShapeEditing(cellUpId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(0, -1));
-                    paged->setCellAlteredHeight(cellCoords.move(0, -1), inCellX, landSize - 1, alteredHeight);
+                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, -1);
+                    if (useTool) mAlteredCells.emplace_back(edgeCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(edgeCellCoords);
+                    paged->setCellAlteredHeight(edgeCellCoords, inCellX, landSize - 1, alteredHeight);
                 }
             }
 
@@ -541,16 +575,22 @@ void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& c
             {
                 if(allowLandShapeEditing(cellRightId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(1, 0));
-                    paged->setCellAlteredHeight(cellCoords.move(1, 0), 0, inCellY, alteredHeight);
+                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(1, 0);
+                    if (useTool) mAlteredCells.emplace_back(edgeCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(edgeCellCoords);
+                    paged->setCellAlteredHeight(edgeCellCoords, 0, inCellY, alteredHeight);
                 }
             }
             if (inCellY == landSize - 1)
             {
-                if(allowLandShapeEditing(cellUpId)==true)
+                if(allowLandShapeEditing(cellDownId)==true)
                 {
-                    if (useTool) mAlteredCells.emplace_back(cellCoords.move(0, 1));
-                    paged->setCellAlteredHeight(cellCoords.move(0, 1), inCellX, 0, alteredHeight);
+                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, 1);
+                    if (useTool) mAlteredCells.emplace_back(edgeCellCoords);
+                    else if (!(std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) != mAlteredCells.end()))
+                        mAlteredCells.emplace_back(edgeCellCoords);
+                    paged->setCellAlteredHeight(edgeCellCoords, inCellX, 0, alteredHeight);
                 }
             }
 
@@ -910,8 +950,7 @@ void CSVRender::TerrainShapeMode::compareAndLimit(const CSMWorld::CellCoordinate
 bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (*document.getData().getTableModel(CSMWorld::UniversalId::Type_Land));
     int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
 
     std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
@@ -963,7 +1002,8 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
                     delete limitedAlteredHeightXAxis;
-                    delete limitedAlteredHeightYAxis;                }
+                    delete limitedAlteredHeightYAxis;
+                }
             }
         }
 
@@ -993,7 +1033,8 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
                     // Limit altered height value based on x or y, whichever is the smallest
                     compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
                     delete limitedAlteredHeightXAxis;
-                    delete limitedAlteredHeightYAxis;                }
+                    delete limitedAlteredHeightYAxis;
+                }
             }
         }
     }
