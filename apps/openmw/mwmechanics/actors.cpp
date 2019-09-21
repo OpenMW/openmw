@@ -1637,6 +1637,20 @@ namespace MWMechanics
         ++mDeathCount[Misc::StringUtils::lowerCase(actor.getCellRef().getRefId())];
     }
 
+    void Actors::resurrect(const MWWorld::Ptr &ptr)
+    {
+        PtrActorMap::iterator iter = mActors.find(ptr);
+        if(iter != mActors.end())
+        {
+            if(iter->second->getCharacterController()->isDead())
+            {
+                // Actor has been resurrected. Notify the CharacterController and re-enable collision.
+                MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
+                iter->second->getCharacterController()->resurrect();
+            }
+        }
+    }
+
     void Actors::killDeadActors()
     {
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
@@ -1645,17 +1659,7 @@ namespace MWMechanics
             CreatureStats &stats = cls.getCreatureStats(iter->first);
 
             if(!stats.isDead())
-            {
-                if(iter->second->getCharacterController()->isDead())
-                {
-                    // Actor has been resurrected. Notify the CharacterController and re-enable collision.
-                    MWBase::Environment::get().getWorld()->enableActorCollision(iter->first, true);
-                    iter->second->getCharacterController()->resurrect();
-                }
-
-                if(!stats.isDead())
-                    continue;
-            }
+                continue;
 
             MWBase::Environment::get().getWorld()->removeActorPath(iter->first);
             CharacterController::KillResult killResult = iter->second->getCharacterController()->kill();
