@@ -197,7 +197,7 @@ namespace MWMechanics
 
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
 
-            virtual void keepPlayerAlive() override;
+            virtual void resurrect(const MWWorld::Ptr& ptr) override;
 
             virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const override;
 

@@ -1820,12 +1820,14 @@ namespace MWMechanics
         return (fight >= 100);
     }
 
-    void MechanicsManager::keepPlayerAlive()
+    void MechanicsManager::resurrect(const MWWorld::Ptr &ptr)
     {
-        MWWorld::Ptr player = getPlayer();
-        CreatureStats& stats = player.getClass().getCreatureStats(player);
+        CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (stats.isDead())
+        {
             stats.resurrect();
+            mActors.resurrect(ptr);
+        }
     }
 
     bool MechanicsManager::isCastingSpell(const MWWorld::Ptr &ptr) const

@@ -198,9 +198,6 @@ namespace MWMechanics
             mDynamic[index].setModifier(0);
             mDynamic[index].setCurrentModifier(0);
             mDynamic[index].setCurrent(0);
-
-            if (MWBase::Environment::get().getWorld()->getGodModeState())
-                MWBase::Environment::get().getMechanicsManager()->keepPlayerAlive();
         }
     }
 

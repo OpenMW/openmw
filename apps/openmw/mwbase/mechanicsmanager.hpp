@@ -225,7 +225,7 @@ namespace MWBase
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
 
             /// Resurrects the player if necessary
-            virtual void keepPlayerAlive() = 0;
+            virtual void resurrect(const MWWorld::Ptr& ptr) = 0;
 
             virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const = 0;
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;

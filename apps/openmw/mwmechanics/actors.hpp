@@ -94,6 +94,8 @@ namespace MWMechanics
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
 
+            void resurrect (const MWWorld::Ptr& ptr);
+
             void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
 
             void updateActor(const MWWorld::Ptr &old, const MWWorld::Ptr& ptr);
