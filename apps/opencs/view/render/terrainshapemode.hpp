@@ -98,9 +98,6 @@ namespace CSVRender
                 float* thisAlteredHeight, float* leftHeight, float* leftAlteredHeight, float* upHeight, float* upAlteredHeight,
                 float* rightHeight, float* rightAlteredHeight, float* downHeight, float* downAlteredHeight);
 
-            /// Bind edge vertices to next cells
-            void fixEdges(const CSMWorld::CellCoordinates& cellCoords);
-
             ///Limit steepness based on either X or Y and return false if steepness is limited
             void compareAndLimit(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float* limitedAlteredHeightXAxis,
                 float* limitedAlteredHeightYAxis, bool* steepnessIsWithinLimits);
