@@ -877,7 +877,37 @@ void CSVRender::TerrainShapeMode::fixEdges(const CSMWorld::CellCoordinates& cell
     }
 }
 
-void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode)
+void CSVRender::TerrainShapeMode::compareAndLimit(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float* limitedAlteredHeightXAxis, float* limitedAlteredHeightYAxis, bool* steepnessIsWithinLimits)
+{
+    if (limitedAlteredHeightXAxis)
+    {
+        if (limitedAlteredHeightYAxis)
+        {
+            if(std::abs(*limitedAlteredHeightXAxis) >= std::abs(*limitedAlteredHeightYAxis))
+            {
+                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
+                *steepnessIsWithinLimits = false;
+            }
+            else
+            {
+                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
+                *steepnessIsWithinLimits = false;
+            }
+        }
+        else
+        {
+            alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
+            *steepnessIsWithinLimits = false;
+        }
+    }
+    else if (limitedAlteredHeightYAxis)
+    {
+        alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
+        *steepnessIsWithinLimits = false;
+    }
+}
+
+bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
@@ -889,11 +919,23 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
     int limitHeightChange = 1016.0f; // Limited by save format
     bool noCell = document.getData().getCells().searchId (cellId) == -1;
     bool noLand = document.getData().getLand().searchId (cellId) == -1;
+    bool steepnessIsWithinLimits = true;
 
     if (!noCell && !noLand)
     {
         const CSMWorld::LandHeightsColumn::DataType landShapePointer =
             landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+        float thisHeight = 0.0f;
+        float thisAlteredHeight = 0.0f;
+        float leftHeight = 0.0f;
+        float leftAlteredHeight = 0.0f;
+        float upHeight = 0.0f;
+        float upAlteredHeight = 0.0f;
+        float rightHeight = 0.0f;
+        float rightAlteredHeight = 0.0f;
+        float downHeight = 0.0f;
+        float downAlteredHeight = 0.0f;
 
         if (reverseMode == false)
         {
@@ -901,19 +943,8 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
             {
                 for(int inCellX = 0; inCellX < landSize; ++inCellX)
                 {
-                    float thisHeight = 0.0f;
-                    float thisAlteredHeight = 0.0f;
-                    float leftHeight = 0.0f;
-                    float leftAlteredHeight = 0.0f;
-                    float upHeight = 0.0f;
-                    float upAlteredHeight = 0.0f;
-                    float rightHeight = 0.0f;
-                    float rightAlteredHeight = 0.0f;
-                    float downHeight = 0.0f;
-                    float downAlteredHeight = 0.0f;
                     float* limitedAlteredHeightXAxis = nullptr;
                     float* limitedAlteredHeightYAxis = nullptr;
-
                     updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight, &rightHeight, &rightAlteredHeight, &downHeight, &downAlteredHeight);
 
@@ -930,25 +961,9 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
                         limitedAlteredHeightYAxis = new float(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
-                    if (limitedAlteredHeightXAxis)
-                    {
-                        if (limitedAlteredHeightYAxis)
-                        {
-                            if(std::abs(*limitedAlteredHeightXAxis) >= std::abs(*limitedAlteredHeightYAxis))
-                                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
-                            else
-                                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
-                        }
-                        else
-                            alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
-                    }
-                    else if (limitedAlteredHeightYAxis)
-                    {
-                        alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
-                    }
+                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
                     delete limitedAlteredHeightXAxis;
-                    delete limitedAlteredHeightYAxis;
-                }
+                    delete limitedAlteredHeightYAxis;                }
             }
         }
 
@@ -958,19 +973,8 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
             {
                 for(int inCellX = landSize - 1; inCellX >= 0; --inCellX)
                 {
-                    float thisHeight = 0.0f;
-                    float thisAlteredHeight = 0.0f;
-                    float leftHeight = 0.0f;
-                    float leftAlteredHeight = 0.0f;
-                    float upHeight = 0.0f;
-                    float upAlteredHeight = 0.0f;
-                    float rightHeight = 0.0f;
-                    float rightAlteredHeight = 0.0f;
-                    float downHeight = 0.0f;
-                    float downAlteredHeight = 0.0f;
                     float* limitedAlteredHeightXAxis = nullptr;
                     float* limitedAlteredHeightYAxis = nullptr;
-
                     updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight, &rightHeight, &rightAlteredHeight, &downHeight, &downAlteredHeight);
 
@@ -987,27 +991,13 @@ void CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
                         limitedAlteredHeightYAxis = new float(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
 
                     // Limit altered height value based on x or y, whichever is the smallest
-                    if (limitedAlteredHeightXAxis)
-                    {
-                        if (limitedAlteredHeightYAxis)
-                        {
-                            if(std::abs(*limitedAlteredHeightXAxis) >= std::abs(*limitedAlteredHeightYAxis))
-                                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
-                            else
-                                alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
-                        }
-                        else
-                            alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightXAxis, false);
-                    }
-                    else if (limitedAlteredHeightYAxis)
-                    {
-                        alterHeight(cellCoords, inCellX, inCellY, *limitedAlteredHeightYAxis, false);
-                    }
+                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
                     delete limitedAlteredHeightXAxis;
                     delete limitedAlteredHeightYAxis;                }
             }
         }
     }
+    return steepnessIsWithinLimits;
 }
 
 void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation)

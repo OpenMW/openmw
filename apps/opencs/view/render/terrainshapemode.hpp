@@ -101,8 +101,12 @@ namespace CSVRender
             /// Bind edge vertices to next cells
             void fixEdges(const CSMWorld::CellCoordinates& cellCoords);
 
-            /// Check that the edit doesn't break save format limits, fix if necessary
-            void limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode = false);
+            ///Limit steepness based on either X or Y and return false if steepness is limited
+            void compareAndLimit(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float* limitedAlteredHeightXAxis,
+                float* limitedAlteredHeightYAxis, bool* steepnessIsWithinLimits);
+
+            /// Check that the edit doesn't break save format limits, fix if necessary, return true if slope steepness is within limits
+            bool limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode = false);
 
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
