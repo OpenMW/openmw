@@ -1625,7 +1625,8 @@ void SkyManager::updateRainParameters()
 {
     if (mRainShooter)
     {
-        float windFactor = mWindSpeed/3.f;
+        // Note: an arbitrary value. An original engine seems to use a different approach to rotate raindrops.
+        float windFactor = mWindSpeed/32.f;
         float angle = windFactor * osg::PI/4;
         mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * windFactor, -mRainSpeed));
         mRainShooter->setAngle(angle);
