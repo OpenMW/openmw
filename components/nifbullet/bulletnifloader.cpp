@@ -78,7 +78,7 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
             continue;
 
         unsigned short a = strip[0], b = strip[0], c = strip[1];
-        for (int i = 2; i < static_cast<int>(strip.size()); i++)
+        for (size_t i = 2; i < strip.size(); i++)
         {
             a = b;
             b = c;
@@ -86,9 +86,21 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
             if (a != b && b != c && a != c)
             {
                 if (i%2==0)
-                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[b]), getbtVector(vertices[c]));
+                {
+                    mesh.addTriangle(
+                        getbtVector(vertices[a] * transform),
+                        getbtVector(vertices[b] * transform),
+                        getbtVector(vertices[c] * transform)
+                    );
+                }
                 else
-                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[c]), getbtVector(vertices[b]));
+                {
+                    mesh.addTriangle(
+                        getbtVector(vertices[a] * transform),
+                        getbtVector(vertices[c] * transform),
+                        getbtVector(vertices[b] * transform)
+                    );
+                }
             }
         }
     }
