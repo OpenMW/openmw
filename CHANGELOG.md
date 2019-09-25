@@ -127,6 +127,7 @@
     Bug #5089: Swimming/Underwater creatures only swim around ground level
     Bug #5092: NPCs with enchanted weapons play sound when out of charges
     Bug #5093: Hand to hand sound plays on knocked out enemies
+    Bug #5097: String arguments can't be parsed as number literals in scripts
     Bug #5099: Non-swimming enemies will enter water if player is water walking
     Bug #5103: Sneaking state behavior is still inconsistent
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
