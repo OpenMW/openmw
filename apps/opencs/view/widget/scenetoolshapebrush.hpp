@@ -30,8 +30,6 @@ namespace CSVRender
 
 namespace CSVWidget
 {
-    class SceneToolShapeBrush;
-
     /// \brief Layout-box for some brush button settings
     class ShapeBrushSizeControls : public QGroupBox
     {
@@ -48,8 +46,6 @@ namespace CSVWidget
         friend class SceneToolShapeBrush;
         friend class CSVRender::TerrainShapeMode;
     };
-
-    class SceneToolShapeBrush;
 
     /// \brief Brush settings window
     class ShapeBrushWindow : public QFrame
