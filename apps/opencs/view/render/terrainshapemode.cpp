@@ -80,12 +80,6 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainShapeMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
-    if(mShapeBrushScenetool)
-    {
-        toolbar->removeTool (mShapeBrushScenetool);
-        delete mShapeBrushScenetool;
-        mShapeBrushScenetool = 0;
-    }
     EditMode::deactivate(toolbar);
 }
 
@@ -429,7 +423,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                     cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
                     int distanceX = abs(i - vertexCoords.first);
                     int distanceY = abs(j - vertexCoords.second);
-                    int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                    float distance = sqrt(pow(distanceX, 2)+pow(distanceY, 2));
                     int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
                     int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
                     float distancePerRadius = 1.0f * distance / r;
