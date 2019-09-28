@@ -210,7 +210,6 @@ public:
 private:
     Terrain::Storage* mStorage;
 
-    float mLodFactor;
     float mMinX, mMaxX, mMinY, mMaxY;
     float mMinSize;
 
