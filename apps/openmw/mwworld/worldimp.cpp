@@ -1649,7 +1649,6 @@ namespace MWWorld
                 }
 
                 // we need to undo the rotation
-                rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
                 reached = false;
             }
         }
@@ -1671,6 +1670,8 @@ namespace MWWorld
                 if (!closeSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, closeSound))
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
+
+            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
         }
 
         // the rotation order we want to use
