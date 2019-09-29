@@ -62,13 +62,13 @@ void Settings::SettingsFileParser::loadSettingsFile(const std::string& file, Cat
     }
 }
 
-void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, CategorySettingValueMap& settings)
+void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, const CategorySettingValueMap& settings)
 {
     using CategorySettingStatusMap = std::map<CategorySetting, bool>;
 
     // No options have been written to the file yet.
     CategorySettingStatusMap written;
-    for (CategorySettingValueMap::iterator it = settings.begin(); it != settings.end(); ++it) {
+    for (auto it = settings.begin(); it != settings.end(); ++it) {
         written[it->first] = false;
     }
 
@@ -133,8 +133,8 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, Cat
             for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
                 if (mit->second == false && mit->first.first == currentCategory) {
                     Log(Debug::Verbose) << "Added new setting: [" << currentCategory << "] "
-                            << mit->first.second << " = " << settings[mit->first];
-                    ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
+                            << mit->first.second << " = " << settings.at(mit->first);
+                    ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
                     mit->second = true;
                     changed = true;
                 }
@@ -200,13 +200,13 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, Cat
 
         // Write the current value of the setting to the file.  The key must exist in the
         // settings map because of how written was initialized and finder != end().
-        ostream << setting << " = " << settings[key] << std::endl;
+        ostream << setting << " = " << settings.at(key) << std::endl;
         // Mark that setting as written.
         finder->second = true;
         // Did we really change it?
-        if (value != settings[key]) {
+        if (value != settings.at(key)) {
             Log(Debug::Verbose) << "Changed setting: [" << currentCategory << "] "
-                    << setting << " = " << settings[key];
+                    << setting << " = " << settings.at(key);
             changed = true;
         }
         // No need to write the current line, because we just emitted a replacement.
@@ -223,8 +223,8 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, Cat
     for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
         if (mit->second == false && mit->first.first == currentCategory) {
             Log(Debug::Verbose) << "Added new setting: [" << mit->first.first << "] "
-                    << mit->first.second << " = " << settings[mit->first];
-            ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
+                    << mit->first.second << " = " << settings.at(mit->first);
+            ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
             mit->second = true;
             changed = true;
         }
@@ -256,9 +256,9 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, Cat
                 ostream << "[" << currentCategory << "]" << std::endl;
             }
             Log(Debug::Verbose) << "Added new setting: [" << mit->first.first << "] "
-                    << mit->first.second << " = " << settings[mit->first];
+                    << mit->first.second << " = " << settings.at(mit->first);
             // Then write the setting.  No need to mark it as written because we're done.
-            ostream << mit->first.second << " = " << settings[mit->first] << std::endl;
+            ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
             changed = true;
         }
     }

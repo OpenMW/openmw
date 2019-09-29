@@ -12,7 +12,7 @@ namespace Settings
     public:
         void loadSettingsFile(const std::string& file, CategorySettingValueMap& settings);
 
-        void saveSettingsFile(const std::string& file, CategorySettingValueMap& settings);
+        void saveSettingsFile(const std::string& file, const CategorySettingValueMap& settings);
 
     private:
         /// Increment i until it longer points to a whitespace character
