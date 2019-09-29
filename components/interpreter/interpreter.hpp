@@ -11,7 +11,6 @@ namespace Interpreter
 {
     class Opcode0;
     class Opcode1;
-    class Opcode2;
 
     class Interpreter
     {
@@ -19,10 +18,8 @@ namespace Interpreter
             bool mRunning;
             Runtime mRuntime;
             std::map<int, Opcode1 *> mSegment0;
-            std::map<int, Opcode2 *> mSegment1;
             std::map<int, Opcode1 *> mSegment2;
             std::map<int, Opcode1 *> mSegment3;
-            std::map<int, Opcode2 *> mSegment4;
             std::map<int, Opcode0 *> mSegment5;
 
             // not implemented
@@ -48,16 +45,10 @@ namespace Interpreter
             void installSegment0 (int code, Opcode1 *opcode);
             ///< ownership of \a opcode is transferred to *this.
 
-            void installSegment1 (int code, Opcode2 *opcode);
-            ///< ownership of \a opcode is transferred to *this.
-
             void installSegment2 (int code, Opcode1 *opcode);
             ///< ownership of \a opcode is transferred to *this.
 
             void installSegment3 (int code, Opcode1 *opcode);
-            ///< ownership of \a opcode is transferred to *this.
-
-            void installSegment4 (int code, Opcode2 *opcode);
             ///< ownership of \a opcode is transferred to *this.
 
             void installSegment5 (int code, Opcode0 *opcode);

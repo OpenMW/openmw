@@ -25,16 +25,6 @@ namespace Interpreter
             virtual ~Opcode1() {}
     };
 
-    /// opcode for 2 arguments
-    class Opcode2
-    {
-        public:
-        
-            virtual void execute (Runtime& runtime, unsigned int arg1, unsigned int arg2) = 0;
-            
-            virtual ~Opcode2() {}
-    };
-
 }
 
 #endif
