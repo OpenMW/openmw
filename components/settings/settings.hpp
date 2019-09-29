@@ -1,16 +1,14 @@
 #ifndef COMPONENTS_SETTINGS_H
 #define COMPONENTS_SETTINGS_H
 
+#include "categories.hpp"
+
 #include <set>
 #include <map>
 #include <string>
 
 namespace Settings
 {
-    typedef std::pair < std::string, std::string > CategorySetting; 
-    typedef std::set< std::pair<std::string, std::string> > CategorySettingVector;
-    typedef std::map < CategorySetting, std::string > CategorySettingValueMap;
-
     ///
     /// \brief Settings management (can change during runtime)
     ///
