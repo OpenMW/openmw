@@ -134,6 +134,17 @@ void ESM::CreatureStats::load (ESMReader &esm)
         for (int i=0; i<4; ++i)
             mAiSettings[i].load(esm);
     }
+
+    while (esm.isNextSub("CORP"))
+    {
+        std::string id = esm.getHString();
+
+        CorprusStats stats;
+        esm.getHNT(stats.mWorsenings, "WORS");
+        esm.getHNT(stats.mNextWorsening, "TIME");
+
+        mCorprusSpells[id] = stats;
+    }
 }
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
@@ -218,6 +229,15 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
         for (int i=0; i<4; ++i)
             mAiSettings[i].save(esm);
     }
+
+    for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
+    {
+        esm.writeHNString("CORP", it->first);
+
+        const CorprusStats & stats = it->second;
+        esm.writeHNT("WORS", stats.mWorsenings);
+        esm.writeHNT("TIME", stats.mNextWorsening);
+    }
 }
 
 void ESM::CreatureStats::blank()
@@ -245,4 +265,5 @@ void ESM::CreatureStats::blank()
     mDrawState = 0;
     mDeathAnimation = -1;
     mLevel = 1;
+    mCorprusSpells.clear();
 }

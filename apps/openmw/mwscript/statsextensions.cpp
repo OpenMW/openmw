@@ -499,6 +499,7 @@ namespace MWScript
                             creatureStats.getSpells().purgeEffect(effect.first.mId);
                     }
 
+                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, id);
                     creatureStats.getSpells().remove (id);
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();

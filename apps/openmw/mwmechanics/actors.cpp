@@ -176,6 +176,49 @@ namespace MWMechanics
         }
     };
 
+    class GetCurrentMagnitudes : public MWMechanics::EffectSourceVisitor
+    {
+        std::string mSpellId;
+
+    public:
+        GetCurrentMagnitudes(const std::string& spellId)
+            : mSpellId(spellId)
+        {
+        }
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (magnitude <= 0)
+                return;
+
+            if (sourceId != mSpellId)
+                return;
+
+            mMagnitudes.push_back(std::make_pair(key, magnitude));
+        }
+
+        std::vector<std::pair<MWMechanics::EffectKey, float>> mMagnitudes;
+    };
+
+    class GetCorprusSpells : public MWMechanics::EffectSourceVisitor
+    {
+
+    public:
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (key.mId != ESM::MagicEffect::Corprus)
+                return;
+
+            mSpells.push_back(sourceId);
+        }
+
+        std::vector<std::string> mSpells;
+    };
+
     class SoulTrap : public MWMechanics::EffectSourceVisitor
     {
         MWWorld::Ptr mCreature;
@@ -942,20 +985,74 @@ namespace MWMechanics
         if (creatureStats.needToRecalcDynamicStats())
             calculateDynamicStats(ptr);
 
+        if (ptr == getPlayer())
         {
-            Spells & spells = creatureStats.getSpells();
-            for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
-            {
-                if (spells.getCorprusSpells().find(it->first) != spells.getCorprusSpells().end())
-                {
-                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.getCorprusSpells().at(it->first).mNextWorsening)
-                    {
-                        spells.worsenCorprus(it->first);
+            GetCorprusSpells getCorprusSpellsVisitor;
+            creatureStats.getSpells().visitEffectSources(getCorprusSpellsVisitor);
+            creatureStats.getActiveSpells().visitEffectSources(getCorprusSpellsVisitor);
+            ptr.getClass().getInventoryStore(ptr).visitEffectSources(getCorprusSpellsVisitor);
+            std::vector<std::string> corprusSpells = getCorprusSpellsVisitor.mSpells;
+            std::vector<std::string> corprusSpellsToRemove;
 
-                        if (ptr == getPlayer())
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
-                    }
+            for (auto it = creatureStats.getCorprusSpells().begin(); it != creatureStats.getCorprusSpells().end(); ++it)
+            {
+                if(std::find(corprusSpells.begin(), corprusSpells.end(), it->first) == corprusSpells.end())
+                {
+                    // Corprus effect expired, remove entry and restore stats.
+                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, it->first);
+                    corprusSpellsToRemove.push_back(it->first);
+                    corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
+                    continue;
                 }
+
+                corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
+
+                if (MWBase::Environment::get().getWorld()->getTimeStamp() >= it->second.mNextWorsening)
+                {
+                    it->second.mNextWorsening += CorprusStats::sWorseningPeriod;
+                    GetCurrentMagnitudes getMagnitudesVisitor (it->first);
+                    creatureStats.getSpells().visitEffectSources(getMagnitudesVisitor);
+                    creatureStats.getActiveSpells().visitEffectSources(getMagnitudesVisitor);
+                    ptr.getClass().getInventoryStore(ptr).visitEffectSources(getMagnitudesVisitor);
+                    for (auto& effectMagnitude : getMagnitudesVisitor.mMagnitudes)
+                    {
+                        if (effectMagnitude.first.mId == ESM::MagicEffect::FortifyAttribute)
+                        {
+                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
+                            attr.damage(-effectMagnitude.second);
+                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
+                            it->second.mWorsenings[effectMagnitude.first.mArg] = 0;
+                        }
+                        else if (effectMagnitude.first.mId == ESM::MagicEffect::DrainAttribute)
+                        {
+                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
+                            int currentDamage = attr.getDamage();
+                            if (currentDamage >= 0)
+                                it->second.mWorsenings[effectMagnitude.first.mArg] = std::min(it->second.mWorsenings[effectMagnitude.first.mArg], currentDamage);
+
+                            it->second.mWorsenings[effectMagnitude.first.mArg] += effectMagnitude.second;
+                            attr.damage(effectMagnitude.second);
+                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
+                        }
+                    }
+
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
+                }
+            }
+
+            for (std::string& oldCorprusSpell : corprusSpellsToRemove)
+            {
+                 creatureStats.removeCorprusSpell(oldCorprusSpell);
+            }
+
+            for (std::string& newCorprusSpell : corprusSpells)
+            {
+                CorprusStats corprus;
+                for (int i=0; i<ESM::Attribute::Length; ++i)
+                    corprus.mWorsenings[i] = 0;
+                corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
+
+                creatureStats.addCorprusSpell(newCorprusSpell, corprus);
             }
         }
 

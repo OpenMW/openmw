@@ -12,6 +12,8 @@
 #include "aisequence.hpp"
 #include "drawstate.hpp"
 
+#include <components/esm/attr.hpp>
+
 namespace ESM
 {
     struct CreatureStats;
@@ -19,6 +21,14 @@ namespace ESM
 
 namespace MWMechanics
 {
+    struct CorprusStats
+    {
+        static const int sWorseningPeriod = 24;
+
+        int mWorsenings[ESM::Attribute::Length];
+        MWWorld::TimeStamp mNextWorsening;
+    };
+
     /// \brief Common creature stats
     ///
     ///
@@ -26,7 +36,7 @@ namespace MWMechanics
     {
         static int sActorId;
         DrawState_ mDrawState;
-        AttributeValue mAttributes[8];
+        AttributeValue mAttributes[ESM::Attribute::Length];
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         Spells mSpells;
         ActiveSpells mActiveSpells;
@@ -78,6 +88,8 @@ namespace MWMechanics
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
         std::vector<int> mSummonGraveyard;
+
+        std::map<std::string, CorprusStats> mCorprusSpells;
 
     protected:
         int mLevel;
@@ -280,6 +292,12 @@ namespace MWMechanics
         /// assigned this function will return false).
 
         static void cleanup();
+
+        std::map<std::string, CorprusStats> & getCorprusSpells();
+
+        void addCorprusSpell(const std::string& sourceId, CorprusStats& stats);
+
+        void removeCorprusSpell(const std::string& sourceId);
     };
 }
 
