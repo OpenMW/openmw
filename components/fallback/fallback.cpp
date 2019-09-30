@@ -1,8 +1,8 @@
 #include "fallback.hpp"
 
-#include <components/debug/debuglog.hpp>
+#include <sstream>
 
-#include <boost/lexical_cast.hpp>
+#include <components/debug/debuglog.hpp>
 
 namespace Fallback
 {
@@ -28,16 +28,10 @@ namespace Fallback
         const std::string& fallback = getString(fall);
         if (!fallback.empty())
         {
-            try
-            {
-                // We have to rely on Boost because std::stof from C++11 uses the current locale
-                // for separators (which is undesired) and it often silently ignores parsing errors.
-                return boost::lexical_cast<float>(fallback);
-            }
-            catch (boost::bad_lexical_cast&)
-            {
-                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is not a valid number, using 0 as a fallback";
-            }
+            std::stringstream stream(fallback);
+            float number = 0.f;
+            stream >> number;
+            return number;
         }
 
         return 0;
@@ -48,18 +42,10 @@ namespace Fallback
         const std::string& fallback = getString(fall);
         if (!fallback.empty())
         {
-            try
-            {
-                return std::stoi(fallback);
-            }
-            catch (const std::invalid_argument&)
-            {
-                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is not a valid number, using 0 as a fallback";
-            }
-            catch (const std::out_of_range&)
-            {
-                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << fallback << ") is out of range, using 0 as a fallback";
-            }
+            std::stringstream stream(fallback);
+            int number = 0;
+            stream >> number;
+            return number;
         }
 
         return 0;
