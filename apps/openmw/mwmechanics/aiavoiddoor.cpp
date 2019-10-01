@@ -1,5 +1,7 @@
 #include "aiavoiddoor.hpp"
 
+#include <components/misc/rng.hpp>
+
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -11,8 +13,10 @@
 #include "actorutil.hpp"
 #include "steering.hpp"
 
+static const int MAX_DIRECTIONS = 4;
+
 MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::ConstPtr& doorPtr)
-: AiPackage(), mDuration(1), mDoorPtr(doorPtr), mLastPos(ESM::Position()), mAdjAngle(0)
+: AiPackage(), mDuration(1), mDoorPtr(doorPtr), mDirection(0)
 {
 
 }
@@ -22,25 +26,18 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
 
     ESM::Position pos = actor.getRefData().getPosition();
     if(mDuration == 1) //If it just started, get the actor position as the stuck detection thing
-        mLastPos = pos;
+        mLastPos = pos.asVec3();
 
     mDuration -= duration; //Update timer
 
-    if(mDuration < 0) {
-        float x = pos.pos[0] - mLastPos.pos[0];
-        float y = pos.pos[1] - mLastPos.pos[1];
-        float z = pos.pos[2] - mLastPos.pos[2];
-        float distance = x * x + y * y + z * z;
-        if(distance < 10 * 10) { //Got stuck, didn't move
-            if(mAdjAngle == 0) //Try going in various directions
-                mAdjAngle = osg::PI / 2;
-            else if (mAdjAngle == osg::PI / 2)
-                mAdjAngle = -osg::PI / 2;
-            else
-                mAdjAngle = 0;
+    if (mDuration < 0)
+    {
+        if (isStuck(pos.asVec3()))
+        {
+            adjustDirection();
             mDuration = 1; //reset timer
         }
-        else //Not stuck
+        else
             return true; // We have tried backing up for more than one second, we've probably cleared it
     }
 
@@ -54,7 +51,7 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
     actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     // Turn away from the door and move when turn completed
-    if (zTurn(actor, std::atan2(x,y) + mAdjAngle, osg::DegreesToRadians(5.f)))
+    if (zTurn(actor, std::atan2(x,y) + getAdjustedAngle(), osg::DegreesToRadians(5.f)))
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     else
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
@@ -90,4 +87,17 @@ unsigned int MWMechanics::AiAvoidDoor::getPriority() const
  return 2;
 }
 
+bool MWMechanics::AiAvoidDoor::isStuck(const osg::Vec3f& actorPos) const
+{
+    return (actorPos - mLastPos).length2() < 10 * 10;
+}
 
+void MWMechanics::AiAvoidDoor::adjustDirection()
+{
+    mDirection = Misc::Rng::rollDice(MAX_DIRECTIONS);
+}
+
+float MWMechanics::AiAvoidDoor::getAdjustedAngle() const
+{
+    return 2 * osg::PI / MAX_DIRECTIONS * mDirection;
+}
