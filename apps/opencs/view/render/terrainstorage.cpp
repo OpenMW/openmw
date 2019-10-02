@@ -50,13 +50,7 @@ namespace CSVRender
 
     void TerrainStorage::resetHeights()
     {
-        for (int x = 0; x < ESM::Land::LAND_SIZE; ++x)
-        {
-            for (int y = 0; y < ESM::Land::LAND_SIZE; ++y)
-            {
-                mAlteredHeight[y*ESM::Land::LAND_SIZE + x] = 0;
-            }
-        }
+        std::fill(std::begin(mAlteredHeight), std::end(mAlteredHeight), 0);
     }
 
     float TerrainStorage::getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY)
