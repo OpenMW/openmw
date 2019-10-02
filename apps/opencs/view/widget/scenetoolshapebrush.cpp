@@ -59,7 +59,7 @@ CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, 
 CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
     mBrushShape(0),
-    mBrushSize(0),
+    mBrushSize(1),
     mDocument(document)
 {
     mButtonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);
