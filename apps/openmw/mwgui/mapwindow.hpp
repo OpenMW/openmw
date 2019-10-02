@@ -222,6 +222,8 @@ namespace MWGui
         // reveals this cell's map on the global map
         void cellExplored(int x, int y);
 
+        void cleanupCameras();
+
         void setGlobalMapPlayerPosition (float worldX, float worldY);
         void setGlobalMapPlayerDir(const float x, const float y);
 

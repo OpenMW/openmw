@@ -1040,6 +1040,9 @@ namespace MWGui
 
         mDragAndDrop->onFrame();
 
+        if (!mMap->isVisible())
+            mMap->cleanupCameras();
+
         mHud->onFrame(frameDuration);
 
         mDebugWindow->onFrame(frameDuration);

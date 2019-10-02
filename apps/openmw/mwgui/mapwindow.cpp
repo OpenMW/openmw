@@ -856,13 +856,18 @@ namespace MWGui
 
     void MapWindow::cellExplored(int x, int y)
     {
-        mGlobalMapRender->cleanupCameras();
         mGlobalMapRender->exploreCell(x, y, mLocalMapRender->getMapTexture(x, y));
+    }
+
+    void MapWindow::cleanupCameras()
+    {
+        mGlobalMapRender->cleanupCameras();
     }
 
     void MapWindow::onFrame(float dt)
     {
         LocalMapBase::onFrame(dt);
+        cleanupCameras();
         NoDrop::onFrame(dt);
     }
 
