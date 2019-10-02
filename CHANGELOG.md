@@ -116,6 +116,7 @@
     Bug #5050: Invalid spell effects are not handled gracefully
     Bug #5055: Mark, Recall, Intervention magic effect abilities have no effect when added and removed in the same frame
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
+    Bug #5059: Modded animation with combined attack keys always does max damage and can double damage
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
     Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
