@@ -81,8 +81,14 @@ namespace CSVRender
             virtual void dragWheel (int diff, double speedFactor);
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
+            /// Move pending alteredHeights changes to omwgame/omeaddon -data
+            void applyTerrainEditChanges();
+
             /// Handle brush mechanics for shape editing
             void editTerrainShapeGrid (const std::pair<int, int>& vertexCoords, bool dragOperation);
+
+            /// set the target height for flatten tool
+            void setFlattenToolTargetHeight(const WorldspaceHitResult& hit);
 
             /// Do a single height alteration for transient shape edit map
             void alterHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float alteredHeight, bool useTool = true);

@@ -796,26 +796,21 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const CSMWorld::CellC
     if (searchResult != mCells.end())
         return searchResult->second;
     else
-        return 0;
+        return nullptr;
 }
 
 void CSVRender::PagedWorldspaceWidget::setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height)
 {
     std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) searchResult->second->setAlteredHeight(inCellX, inCellY, height);
-}
-
-float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeights(const CSMWorld::CellCoordinates& coords)
-{
-    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) return searchResult->second->getAlteredHeights();
-    return nullptr;
+    if (searchResult != mCells.end())
+        searchResult->second->setAlteredHeight(inCellX, inCellY, height);
 }
 
 float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY)
 {
     std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
-    if (searchResult != mCells.end()) return searchResult->second->getAlteredHeight(inCellX, inCellY);
+    if (searchResult != mCells.end())
+        return searchResult->second->getAlteredHeight(inCellX, inCellY);
     return nullptr;
 }
 

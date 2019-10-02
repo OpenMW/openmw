@@ -124,8 +124,6 @@ namespace CSVRender
 
             float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
 
-            float* getAlteredHeights();
-
             float* getAlteredHeight(int inCellX, int inCellY);
 
             void resetAlteredHeights();

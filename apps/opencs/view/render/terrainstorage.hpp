@@ -1,6 +1,8 @@
 #ifndef OPENCS_RENDER_TERRAINSTORAGE_H
 #define OPENCS_RENDER_TERRAINSTORAGE_H
 
+#include <array>
+
 #include <components/esmterrain/storage.hpp>
 
 #include "../../model/world/data.hpp"
@@ -16,11 +18,10 @@ namespace CSVRender
     {
     public:
         TerrainStorage(const CSMWorld::Data& data);
-        float mAlteredHeight[ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE + ESM::Land::LAND_SIZE];
+        std::array<float, ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE> mAlteredHeight;
         void setAlteredHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
         float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
-        float* getAlteredHeights();
         float* getAlteredHeight(int inCellX, int inCellY);
 
     private:

@@ -73,11 +73,6 @@ namespace CSVRender
 
     }
 
-    float* TerrainStorage::getAlteredHeights()
-    {
-        return mAlteredHeight;
-    }
-
     float* TerrainStorage::getAlteredHeight(int inCellX, int inCellY)
     {
         return &mAlteredHeight[inCellY*ESM::Land::LAND_SIZE + inCellX];

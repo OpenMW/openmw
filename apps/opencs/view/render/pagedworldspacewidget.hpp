@@ -128,8 +128,6 @@ namespace CSVRender
 
             void setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height);
 
-            float* getCellAlteredHeights(const CSMWorld::CellCoordinates& coords);
-
             float* getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY);
 
             void resetAllAlteredHeights();

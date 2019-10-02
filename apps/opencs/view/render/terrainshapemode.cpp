@@ -93,6 +93,24 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
 
     if (hit.hit && hit.tag == 0)
     {
+        if (mShapeEditTool == 4)
+            setFlattenToolTargetHeight(hit);
+        if (mDragMode == InteractionType_PrimaryEdit && mShapeEditTool > 0)
+        {
+            std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
+            if (mShapeEditTool > 0) editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
+            applyTerrainEditChanges();
+        }
+
+        if (mDragMode == InteractionType_PrimarySelect)
+        {
+            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
+        }
+
+        if (mDragMode == InteractionType_SecondarySelect)
+        {
+            selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
+        }
     }
     if (CSVRender::PagedWorldspaceWidget *paged =
         dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
@@ -131,21 +149,7 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag (const QPoint& pos)
         mEditingPos = hit.worldPos;
         mIsEditing = true;
         if (mShapeEditTool == 4)
-        {
-            std::pair<int, int> vertexCoords = CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos);
-            std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
-            int inCellX = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
-            int inCellY = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
-
-            CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-            CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-                *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-            int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-            const CSMWorld::LandHeightsColumn::DataType landShapePointer =
-                landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-
-            mTargetHeight = landShapePointer[inCellY * ESM::Land::LAND_SIZE + inCellX];
-        }
+            setFlattenToolTargetHeight(hit);
     }
 
     return true;
@@ -216,138 +220,7 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
             mIsEditing = false;
         }
 
-        std::sort(mAlteredCells.begin(), mAlteredCells.end());
-        std::set<CSMWorld::CellCoordinates> removeDuplicates(mAlteredCells.begin(), mAlteredCells.end());
-        mAlteredCells.assign(removeDuplicates.begin(), removeDuplicates.end());
-
-        CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
-            *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
-        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-            *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
-        int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-        int landnormalsColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandNormalsIndex);
-
-        QUndoStack& undoStack = document.getUndoStack();
-
-        bool passing = false;
-        int passes = 0;
-
-        while (passing == false) // Multiple passes are needed when steepness problems arise for both x and y axis simultaneously
-        {
-            passing = true;
-            for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-            {
-                limitAlteredHeights(cellCoordinates);
-            }
-            std::reverse(mAlteredCells.begin(), mAlteredCells.end()); //Instead of alphabetical order, this should be fixed to sort cells by cell coordinates
-            for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-            {
-                if (!limitAlteredHeights(cellCoordinates, true)) passing = false;
-            }
-            ++passes;
-            if (passes > 2)
-            {
-                Log(Debug::Warning) << "Warning: User edit exceeds accepted slope steepness. Automatic limiting has failed, edit has been discarded.";
-                if (CSVRender::PagedWorldspaceWidget *paged =
-                    dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-                {
-                    paged->resetAllAlteredHeights();
-                    mAlteredCells.clear();
-                    return;
-                }
-            }
-        }
-
-        undoStack.beginMacro ("Edit shape and normal records");
-
-        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-        {
-            std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
-            undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
-            const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-            CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
-            for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
-            {
-                for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
-                {
-                    if (CSVRender::PagedWorldspaceWidget *paged =
-                        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-                    {
-                        if (paged->getCellAlteredHeight(cellCoordinates, i, j))
-                            landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + *paged->getCellAlteredHeight(cellCoordinates, i, j);
-                        else
-                            landShapeNew[j * ESM::Land::LAND_SIZE + i] = 0;
-                    }
-                }
-            }
-            if (allowLandShapeEditing(cellId) == true) pushEditToCommand(landShapeNew, document, landTable, cellId);
-        }
-
-        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
-        {
-            std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
-            const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-            const CSMWorld::LandHeightsColumn::DataType landRightShapePointer = landTable.data(landTable.getModelIndex(CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY()), landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-            const CSMWorld::LandHeightsColumn::DataType landDownShapePointer = landTable.data(landTable.getModelIndex(CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1), landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-            const CSMWorld::LandNormalsColumn::DataType landNormalsPointer = landTable.data(landTable.getModelIndex(cellId, landnormalsColumn)).value<CSMWorld::LandNormalsColumn::DataType>();
-            CSMWorld::LandNormalsColumn::DataType landNormalsNew(landNormalsPointer);
-
-            for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
-            {
-                for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
-                {
-                    float v1[3];
-                    float v2[3];
-                    float normal[3];
-                    float hyp;
-
-                    v1[0] = 128;
-                    v1[1] = 0;
-                    if (i < ESM::Land::LAND_SIZE - 1) v1[2] = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                    else
-                    {
-                        bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
-                        bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
-                        if (!noLand && !noCell)
-                            v1[2] = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                        else
-                            v1[2] = 0;
-                    }
-
-                    v2[0] = 0;
-                    v2[1] = 128;
-                    if (j < ESM::Land::LAND_SIZE - 1) v2[2] = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                    else
-                    {
-                        bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
-                        bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
-                        if (!noLand && !noCell)
-                            v2[2] = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                        else
-                            v2[2] = 0;
-                    }
-
-                    normal[1] = v1[2]*v2[0] - v1[0]*v2[2];
-                    normal[0] = v1[1]*v2[2] - v1[2]*v2[1];
-                    normal[2] = v1[0]*v2[1] - v1[1]*v2[0];
-
-                    hyp = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]) / 127.0f;
-
-                    normal[0] /= hyp;
-                    normal[1] /= hyp;
-                    normal[2] /= hyp;
-
-                    landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 0] = normal[0];
-                    landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 1] = normal[1];
-                    landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 2] = normal[2];
-                }
-            }
-            if (allowLandShapeEditing(cellId) == true) pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
-        }
-        undoStack.endMacro();
-        mAlteredCells.clear();
+        applyTerrainEditChanges();
 
         if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
             paged->resetAllAlteredHeights();
@@ -367,6 +240,143 @@ void CSVRender::TerrainShapeMode::dragAborted()
 
 void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
 {
+}
+
+
+void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
+{
+    std::sort(mAlteredCells.begin(), mAlteredCells.end());
+    std::set<CSMWorld::CellCoordinates> removeDuplicates(mAlteredCells.begin(), mAlteredCells.end());
+    mAlteredCells.assign(removeDuplicates.begin(), removeDuplicates.end());
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+
+    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+    int landnormalsColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandNormalsIndex);
+
+    QUndoStack& undoStack = document.getUndoStack();
+
+    bool passing = false;
+    int passes = 0;
+
+    while (passing == false) // Multiple passes are needed when steepness problems arise for both x and y axis simultaneously
+    {
+        passing = true;
+        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+        {
+            limitAlteredHeights(cellCoordinates);
+        }
+        std::reverse(mAlteredCells.begin(), mAlteredCells.end()); //Instead of alphabetical order, this should be fixed to sort cells by cell coordinates
+        for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+        {
+            if (!limitAlteredHeights(cellCoordinates, true)) passing = false;
+        }
+        ++passes;
+        if (passes > 2)
+        {
+            Log(Debug::Warning) << "Warning: User edit exceeds accepted slope steepness. Automatic limiting has failed, edit has been discarded.";
+            if (CSVRender::PagedWorldspaceWidget *paged =
+                dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+            {
+                paged->resetAllAlteredHeights();
+                mAlteredCells.clear();
+                return;
+            }
+        }
+    }
+
+    undoStack.beginMacro ("Edit shape and normal records");
+
+    for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+    {
+        std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
+        undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
+        const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+        CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
+        for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
+        {
+            for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
+            {
+                if (CSVRender::PagedWorldspaceWidget *paged =
+                    dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+                {
+                    if (paged->getCellAlteredHeight(cellCoordinates, i, j))
+                        landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + *paged->getCellAlteredHeight(cellCoordinates, i, j);
+                    else
+                        landShapeNew[j * ESM::Land::LAND_SIZE + i] = 0;
+                }
+            }
+        }
+        if (allowLandShapeEditing(cellId) == true) pushEditToCommand(landShapeNew, document, landTable, cellId);
+    }
+
+    for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
+    {
+        std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
+        const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+        const CSMWorld::LandHeightsColumn::DataType landRightShapePointer = landTable.data(landTable.getModelIndex(CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY()), landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+        const CSMWorld::LandHeightsColumn::DataType landDownShapePointer = landTable.data(landTable.getModelIndex(CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1), landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+        const CSMWorld::LandNormalsColumn::DataType landNormalsPointer = landTable.data(landTable.getModelIndex(cellId, landnormalsColumn)).value<CSMWorld::LandNormalsColumn::DataType>();
+        CSMWorld::LandNormalsColumn::DataType landNormalsNew(landNormalsPointer);
+
+        for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
+        {
+            for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
+            {
+                float v1[3];
+                float v2[3];
+                float normal[3];
+                float hyp;
+
+                v1[0] = 128;
+                v1[1] = 0;
+                if (i < ESM::Land::LAND_SIZE - 1) v1[2] = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                else
+                {
+                    bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
+                    bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
+                    if (!noLand && !noCell)
+                        v1[2] = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                    else
+                        v1[2] = 0;
+                }
+
+                v2[0] = 0;
+                v2[1] = 128;
+                if (j < ESM::Land::LAND_SIZE - 1) v2[2] = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                else
+                {
+                    bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
+                    bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
+                    if (!noLand && !noCell)
+                        v2[2] = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                    else
+                        v2[2] = 0;
+                }
+
+                normal[1] = v1[2]*v2[0] - v1[0]*v2[2];
+                normal[0] = v1[1]*v2[2] - v1[2]*v2[1];
+                normal[2] = v1[0]*v2[1] - v1[1]*v2[0];
+
+                hyp = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]) / 127.0f;
+
+                normal[0] /= hyp;
+                normal[1] /= hyp;
+                normal[2] /= hyp;
+
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 0] = normal[0];
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 1] = normal[1];
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 2] = normal[2];
+            }
+        }
+        if (allowLandShapeEditing(cellId) == true) pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
+    }
+    undoStack.endMacro();
+    mAlteredCells.clear();
 }
 
 void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>& vertexCoords, bool dragOperation)
@@ -459,6 +469,24 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
 
     }
 }
+
+void CSVRender::TerrainShapeMode::setFlattenToolTargetHeight(const WorldspaceHitResult& hit)
+{
+    std::pair<int, int> vertexCoords = CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos);
+    std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
+    int inCellX = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
+    int inCellY = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+    int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+    const CSMWorld::LandHeightsColumn::DataType landShapePointer =
+        landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+
+    mTargetHeight = landShapePointer[inCellY * ESM::Land::LAND_SIZE + inCellX];
+}
+
 
 void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float alteredHeight, bool useTool)
 {

@@ -360,11 +360,6 @@ float CSVRender::Cell::getSumOfAlteredAndTrueHeight(int cellX, int cellY, int in
     return mTerrainStorage->getSumOfAlteredAndTrueHeight(cellX, cellY, inCellX, inCellY);
 }
 
-float* CSVRender::Cell::getAlteredHeights()
-{
-    return mTerrainStorage->getAlteredHeights();
-}
-
 float* CSVRender::Cell::getAlteredHeight(int inCellX, int inCellY)
 {
     return mTerrainStorage->getAlteredHeight(inCellX, inCellY);
