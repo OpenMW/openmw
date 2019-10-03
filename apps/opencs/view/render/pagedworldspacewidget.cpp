@@ -816,13 +816,8 @@ float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeight(const CSMWorld::Ce
 
 void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
 {
-    std::map<CSMWorld::CellCoordinates, Cell *>::iterator iter (mCells.begin());
-
-    while (iter!=mCells.end())
-    {
-        iter->second->resetAlteredHeights();
-        ++iter;
-    }
+    for (const auto& cell : mCells)
+        cell.second->resetAlteredHeights();
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (
