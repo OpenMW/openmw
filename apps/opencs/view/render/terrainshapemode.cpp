@@ -977,27 +977,25 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
             {
                 for(int inCellX = 0; inCellX < ESM::Land::LAND_SIZE; ++inCellX)
                 {
-                    float* limitedAlteredHeightXAxis = nullptr;
-                    float* limitedAlteredHeightYAxis = nullptr;
+                    std::unique_ptr<float> limitedAlteredHeightXAxis(nullptr);
+                    std::unique_ptr<float> limitedAlteredHeightYAxis(nullptr);
                     updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight, &rightHeight, &rightAlteredHeight, &downHeight, &downAlteredHeight);
 
                     // Check for height limits on x-axis
                     if (leftHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis = new float(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightXAxis.reset(new float(leftHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
                     else if (leftHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis = new float(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightXAxis.reset(new float(leftHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
 
                     // Check for height limits on y-axis
                     if (upHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis = new float(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightYAxis.reset(new float(upHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
                     else if (upHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis = new float(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightYAxis.reset(new float(upHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
 
                     // Limit altered height value based on x or y, whichever is the smallest
-                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
-                    delete limitedAlteredHeightXAxis;
-                    delete limitedAlteredHeightYAxis;
+                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
                 }
             }
         }
@@ -1008,27 +1006,25 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
             {
                 for(int inCellX = ESM::Land::LAND_SIZE - 1; inCellX >= 0; --inCellX)
                 {
-                    float* limitedAlteredHeightXAxis = nullptr;
-                    float* limitedAlteredHeightYAxis = nullptr;
+                    std::unique_ptr<float> limitedAlteredHeightXAxis(nullptr);
+                    std::unique_ptr<float> limitedAlteredHeightYAxis(nullptr);
                     updateKeyHeightValues(cellCoords, inCellX, inCellY, &thisHeight, &thisAlteredHeight, &leftHeight, &leftAlteredHeight,
                         &upHeight, &upAlteredHeight, &rightHeight, &rightAlteredHeight, &downHeight, &downAlteredHeight);
 
                     // Check for height limits on x-axis
                     if (rightHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightXAxis = new float(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightXAxis.reset(new float(rightHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
                     else if (rightHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightXAxis = new float(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightXAxis.reset(new float(rightHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
 
                     // Check for height limits on y-axis
                     if (downHeight - thisHeight > limitHeightChange)
-                        limitedAlteredHeightYAxis = new float(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightYAxis.reset(new float(downHeight - limitHeightChange - (thisHeight - thisAlteredHeight)));
                     else if (downHeight - thisHeight < -limitHeightChange)
-                        limitedAlteredHeightYAxis = new float(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight));
+                        limitedAlteredHeightYAxis.reset(new float(downHeight + limitHeightChange - (thisHeight - thisAlteredHeight)));
 
                     // Limit altered height value based on x or y, whichever is the smallest
-                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis, limitedAlteredHeightYAxis, &steepnessIsWithinLimits);
-                    delete limitedAlteredHeightXAxis;
-                    delete limitedAlteredHeightYAxis;
+                    compareAndLimit(cellCoords, inCellX, inCellY, limitedAlteredHeightXAxis.get(), limitedAlteredHeightYAxis.get(), &steepnessIsWithinLimits);
                 }
             }
         }
