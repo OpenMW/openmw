@@ -9,8 +9,6 @@
 
 namespace CSVRender
 {
-    class LandCache;
-
     /**
      * @brief A bridge between the terrain component and OpenCS's terrain data storage.
      */
@@ -30,13 +28,10 @@ namespace CSVRender
         virtual osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY) override;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) override;
 
-        /// Draws temporarily altered land (transient change support)
-        void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
-                        osg::ref_ptr<osg::Vec3Array> positions,
-                        osg::ref_ptr<osg::Vec3Array> normals,
-                        osg::ref_ptr<osg::Vec4ubArray> colours) override;
-
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
+
+        void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const override;
+        float getAlteredHeight(int col, int row) const override;
     };
 
 }
