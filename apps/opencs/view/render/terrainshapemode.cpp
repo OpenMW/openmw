@@ -247,8 +247,7 @@ void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
 void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
 {
     std::sort(mAlteredCells.begin(), mAlteredCells.end());
-    std::set<CSMWorld::CellCoordinates> removeDuplicates(mAlteredCells.begin(), mAlteredCells.end());
-    mAlteredCells.assign(removeDuplicates.begin(), removeDuplicates.end());
+    mAlteredCells.erase(std::unique(mAlteredCells.begin(), mAlteredCells.end()), mAlteredCells.end());
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> (
