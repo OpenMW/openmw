@@ -30,6 +30,18 @@ namespace CSVRender
 
         virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
 
+        int getThisHeight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getLeftHeight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getRightHeight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getUpHeight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getDownHeight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getHeightDifferenceToLeft(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData *heightData) const;
+        int getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData *heightData) const;
+        bool LeftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
+        bool RightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
+
         void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const override;
         float getAlteredHeight(int col, int row) const override;
     };

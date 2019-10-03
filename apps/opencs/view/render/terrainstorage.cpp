@@ -78,27 +78,74 @@ namespace CSVRender
         throw std::runtime_error("getBounds not implemented");
     }
 
+    int TerrainStorage::getThisHeight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
+            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)];
+    }
+
+    int TerrainStorage::getLeftHeight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row - 1] +
+            mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row - 1)];
+    }
+
+    int TerrainStorage::getRightHeight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return heightData->mHeights[col*ESM::Land::LAND_SIZE + row + 1] +
+            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row + 1)];
+    }
+
+    int TerrainStorage::getUpHeight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return heightData->mHeights[(col - 1)*ESM::Land::LAND_SIZE + row] +
+            mAlteredHeight[static_cast<unsigned int>((col - 1)*ESM::Land::LAND_SIZE + row)];
+    }
+
+    int TerrainStorage::getDownHeight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return heightData->mHeights[(col + 1)*ESM::Land::LAND_SIZE + row] +
+            mAlteredHeight[static_cast<unsigned int>((col + 1)*ESM::Land::LAND_SIZE + row)];
+    }
+
+    int TerrainStorage::getHeightDifferenceToLeft(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return abs(getThisHeight(col, row, heightData) - getLeftHeight(col, row, heightData));
+    }
+
+    int TerrainStorage::getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return abs(getThisHeight(col, row, heightData) - getRightHeight(col, row, heightData));
+    }
+
+    int TerrainStorage::getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return abs(getThisHeight(col, row, heightData) - getUpHeight(col, row, heightData));
+    }
+
+    int TerrainStorage::getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData *heightData) const
+    {
+        return abs(getThisHeight(col, row, heightData) - getDownHeight(col, row, heightData));
+    }
+
+    bool TerrainStorage::LeftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
+    {
+        return getHeightDifferenceToLeft(col, row, heightData) >= heightWarningLimit ||
+            getHeightDifferenceToUp(col, row, heightData) >= heightWarningLimit;
+    }
+
+    bool TerrainStorage::RightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
+    {
+        return getHeightDifferenceToRight(col, row, heightData) >= heightWarningLimit ||
+            getHeightDifferenceToDown(col, row, heightData) >= heightWarningLimit;
+    }
+
     void TerrainStorage::adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const
     {
         // Highlight broken height changes
-        if ( ((col > 0 && row > 0) &&
-            ((abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
-            (heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row - 1] +
-            mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row - 1)])) >= 1024 ) ||
-            abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
-            (heightData->mHeights[(col - 1)*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>((col - 1)*ESM::Land::LAND_SIZE + row)]))  >= 1024 )) ||
-            ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1) &&
-            ((abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
-            (heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row + 1] +
-            mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row + 1)])) >= 1024 ) ||
-            abs(heightData->mHeights[col*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>(col*ESM::Land::LAND_SIZE + row)] -
-            (heightData->mHeights[(col + 1)*ESM::Land::LAND_SIZE + row] +
-            mAlteredHeight[static_cast<unsigned int>((col + 1)*ESM::Land::LAND_SIZE + row)]))  >= 1024 )))
+        int heightWarningLimit = 1024;
+        if (((col > 0 && row > 0) && LeftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData)) ||
+            ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1) && RightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData)))
         {
             color.r() = 255;
             color.g() = 0;
