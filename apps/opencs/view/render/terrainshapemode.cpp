@@ -13,6 +13,7 @@
 #include <QDrag>
 
 #include <osg/Group>
+#include <osg/Vec3f>
 
 #include <components/esm/loadland.hpp>
 #include <components/debug/debuglog.hpp>
@@ -327,50 +328,48 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
             {
-                float v1[3];
-                float v2[3];
-                float normal[3];
+                osg::Vec3f v1;
+                osg::Vec3f v2;
+                osg::Vec3f normal;
                 float hyp;
 
-                v1[0] = 128;
-                v1[1] = 0;
-                if (i < ESM::Land::LAND_SIZE - 1) v1[2] = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                v1.x() = 128;
+                v1.y() = 0;
+                if (i < ESM::Land::LAND_SIZE - 1) v1.z() = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
                     bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
                     bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY())) == -1;
                     if (!noLand && !noCell)
-                        v1[2] = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                        v1.z() = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                     else
-                        v1[2] = 0;
+                        v1.z() = 0;
                 }
 
-                v2[0] = 0;
-                v2[1] = 128;
-                if (j < ESM::Land::LAND_SIZE - 1) v2[2] = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                v2.x() = 0;
+                v2.y() = 128;
+                if (j < ESM::Land::LAND_SIZE - 1) v2.z() = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
                     bool noCell = document.getData().getCells().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
                     bool noLand = document.getData().getLand().searchId (CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1)) == -1;
                     if (!noLand && !noCell)
-                        v2[2] = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
+                        v2.z() = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                     else
-                        v2[2] = 0;
+                        v2.z() = 0;
                 }
 
-                normal[1] = v1[2]*v2[0] - v1[0]*v2[2];
-                normal[0] = v1[1]*v2[2] - v1[2]*v2[1];
-                normal[2] = v1[0]*v2[1] - v1[1]*v2[0];
+                normal.y() = v1.z()*v2.x() - v1.x()*v2.z();
+                normal.x() = v1.y()*v2.z() - v1.z()*v2.y();
+                normal.z() = v1.x()*v2.y() - v1.y()*v2.x();
 
-                hyp = sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]) / 127.0f;
+                hyp = normal.length() / 127.0f;
 
-                normal[0] /= hyp;
-                normal[1] /= hyp;
-                normal[2] /= hyp;
+                normal /= hyp;
 
-                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 0] = normal[0];
-                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 1] = normal[1];
-                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 2] = normal[2];
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 0] = normal.x();
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 1] = normal.y();
+                landNormalsNew[(j * ESM::Land::LAND_SIZE + i) * 3 + 2] = normal.z();
             }
         }
         if (allowLandShapeEditing(cellId) == true) pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
