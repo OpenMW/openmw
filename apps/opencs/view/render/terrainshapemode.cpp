@@ -45,7 +45,7 @@
 CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain | Mask_Reference, "Terrain land editing", parent),
     mBrushSize(0),
-    mBrushShape(0),
+    mBrushShape(BrushShape_Point),
     mShapeBrushScenetool(0),
     mDragMode(InteractionType_None),
     mParentNode(parentNode),
