@@ -48,10 +48,10 @@ namespace CSVRender
 
             enum BrushShape
             {
-                BrushShape_Point = 1,
-                BrushShape_Square = 2,
-                BrushShape_Circle = 3,
-                BrushShape_Custom = 4
+                BrushShape_Point = 0,
+                BrushShape_Square = 1,
+                BrushShape_Circle = 2,
+                BrushShape_Custom = 3
             };
 
             /// Editmode for terrain shape grid
