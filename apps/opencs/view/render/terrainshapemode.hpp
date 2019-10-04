@@ -46,6 +46,14 @@ namespace CSVRender
                 InteractionType_None
             };
 
+            enum BrushShape
+            {
+                BrushShape_Point = 1,
+                BrushShape_Square = 2,
+                BrushShape_Circle = 3,
+                BrushShape_Custom = 4
+            };
+
             /// Editmode for terrain shape grid
             TerrainShapeMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 

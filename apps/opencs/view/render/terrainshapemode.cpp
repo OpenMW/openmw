@@ -393,7 +393,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
 
     if(allowLandShapeEditing(cellId)==true)
     {
-        if (mBrushShape == 0)
+        if (mBrushShape == BrushShape_Point)
         {
             int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
             int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
@@ -403,7 +403,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             if (mShapeEditTool == 4) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
         }
 
-        if (mBrushShape == 1)
+        if (mBrushShape == BrushShape_Square)
         {
             for(int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
             {
@@ -421,7 +421,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             }
         }
 
-        if (mBrushShape == 2)
+        if (mBrushShape == BrushShape_Circle)
         {
             for(int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
             {
@@ -447,7 +447,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 }
             }
         }
-        if (mBrushShape == 3)
+        if (mBrushShape == BrushShape_Custom)
         {
             if(!mCustomBrushShape.empty())
             {
@@ -1037,12 +1037,12 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
     int r = mBrushSize / 2;
     std::vector<std::pair<int, int>> selections;
 
-    if (mBrushShape == 0)
+    if (mBrushShape == BrushShape_Point)
     {
         selections.emplace_back(vertexCoords);
     }
 
-    if (mBrushShape == 1)
+    if (mBrushShape == BrushShape_Square)
     {
         for(int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
         {
@@ -1053,7 +1053,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         }
     }
 
-    if (mBrushShape == 2)
+    if (mBrushShape == BrushShape_Circle)
     {
         for(int i = vertexCoords.first - r; i <= vertexCoords.first + r; ++i)
         {
@@ -1067,7 +1067,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         }
     }
 
-    if (mBrushShape == 3)
+    if (mBrushShape == BrushShape_Custom)
     {
         if(!mCustomBrushShape.empty())
         {
@@ -1196,7 +1196,7 @@ void CSVRender::TerrainShapeMode::setBrushShape(int brushShape)
     mBrushShape = brushShape;
 
     //Set custom brush shape
-    if (mBrushShape == 3 && !mTerrainShapeSelection->getTerrainSelection().empty())
+    if (mBrushShape == BrushShape_Custom && !mTerrainShapeSelection->getTerrainSelection().empty())
     {
         auto terrainSelection = mTerrainShapeSelection->getTerrainSelection();
         int selectionCenterX = 0;
