@@ -58,7 +58,7 @@ CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, 
 
 CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
-    mBrushShape(0),
+    mBrushShape(BrushShape_Point),
     mBrushSize(1),
     mDocument(document)
 {
@@ -151,10 +151,10 @@ void CSVWidget::ShapeBrushWindow::setBrushSize(int brushSize)
 
 void CSVWidget::ShapeBrushWindow::setBrushShape()
 {
-    if(mButtonPoint->isChecked()) mBrushShape = 0;
-    if(mButtonSquare->isChecked()) mBrushShape = 1;
-    if(mButtonCircle->isChecked()) mBrushShape = 2;
-    if(mButtonCustom->isChecked()) mBrushShape = 3;
+    if(mButtonPoint->isChecked()) mBrushShape = BrushShape_Point;
+    if(mButtonSquare->isChecked()) mBrushShape = BrushShape_Square;
+    if(mButtonCircle->isChecked()) mBrushShape = BrushShape_Circle;
+    if(mButtonCustom->isChecked()) mBrushShape = BrushShape_Custom;
     emit passBrushShape(mBrushShape);
 }
 

@@ -53,6 +53,15 @@ namespace CSVWidget
         Q_OBJECT
 
         public:
+
+            enum BrushShape
+            {
+                BrushShape_Point = 0,
+                BrushShape_Square = 1,
+                BrushShape_Circle = 2,
+                BrushShape_Custom = 3
+            };
+
             ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
             void configureButtonInitialSettings(QPushButton *button);
 
