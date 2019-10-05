@@ -241,7 +241,6 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     }
 
     return ptr1 != ptr2 // an item never stacks onto itself
-        && ptr1.getCellRef().getOwner() == ptr2.getCellRef().getOwner()
         && ptr1.getCellRef().getSoul() == ptr2.getCellRef().getSoul()
 
         && ptr1.getClass().getRemainingUsageTime(ptr1) == ptr2.getClass().getRemainingUsageTime(ptr2)
@@ -259,30 +258,14 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &id, int count, const Ptr &actorPtr)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), count, actorPtr, true);
+    return add(ref.getPtr(), count, actorPtr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
     Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-    MWWorld::ContainerStoreIterator it = end();
-
-    // HACK: Set owner on the original item, then reset it after we have copied it
-    // If we set the owner on the copied item, it would not stack correctly...
-    std::string oldOwner = itemPtr.getCellRef().getOwner();
-    if (!setOwner || actorPtr == MWMechanics::getPlayer()) // No point in setting owner to the player - NPCs will not respect this anyway
-    {
-        itemPtr.getCellRef().setOwner("");
-    }
-    else
-    {
-        itemPtr.getCellRef().setOwner(actorPtr.getCellRef().getRefId());
-    }
-
-    it = addImp(itemPtr, count);
-
-    itemPtr.getCellRef().setOwner(oldOwner);
+    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
@@ -298,7 +281,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     pos.pos[2] = 0;
     item.getCellRef().setPosition(pos);
 
-    // reset ownership stuff, owner was already handled above
+    // We do not need to store owners for items in container stores - we do not use it anyway.
+    item.getCellRef().setOwner("");
     item.getCellRef().resetGlobalVariable();
     item.getCellRef().setFaction("");
     item.getCellRef().setFactionRank(-1);
