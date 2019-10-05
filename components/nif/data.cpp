@@ -102,12 +102,12 @@ void NiTriStripsData::read(NIFStream *nif)
     std::vector<unsigned short> lengths;
     nif->getUShorts(lengths, numStrips);
 
+    if (!numStrips)
+        return;
+
+    strips.resize(numStrips);
     for (int i = 0; i < numStrips; i++)
-    {
-        std::vector<unsigned short> strip;
-        nif->getUShorts(strip, lengths[i]);
-        strips.emplace_back(strip);
-    }
+        nif->getUShorts(strips[i], lengths[i]);
 }
 
 void NiAutoNormalParticlesData::read(NIFStream *nif)
