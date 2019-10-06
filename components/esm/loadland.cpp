@@ -342,10 +342,7 @@ namespace ESM
         std::swap (mContext, land.mContext);
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mLandData, land.mLandData);
-        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
-        {
-            std::swap (mWnam[i], land.mWnam[i]);
-        }
+        std::swap (mWnam, land.mWnam);
     }
 
     const Land::LandData *Land::getLandData (int flags) const
