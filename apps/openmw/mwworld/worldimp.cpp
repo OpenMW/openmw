@@ -1649,7 +1649,6 @@ namespace MWWorld
                 }
 
                 // we need to undo the rotation
-                rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
                 reached = false;
             }
         }
@@ -1671,6 +1670,8 @@ namespace MWWorld
                 if (!closeSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, closeSound))
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
+
+            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
         }
 
         // the rotation order we want to use
@@ -2395,9 +2396,9 @@ namespace MWWorld
         return mPhysics->isOnGround(ptr);
     }
 
-    void World::togglePOV()
+    void World::togglePOV(bool force)
     {
-        mRendering->togglePOV();
+        mRendering->togglePOV(force);
     }
 
     bool World::isFirstPerson() const
@@ -3023,7 +3024,7 @@ namespace MWWorld
             target = getFacedObject();
 
         // if the faced object can not be activated, do not use it
-        if (!target.isEmpty() && !target.getClass().canBeActivated(target))
+        if (!target.isEmpty() && !target.getClass().hasToolTip(target))
             target = nullptr;
 
         if (target.isEmpty())
@@ -3082,7 +3083,7 @@ namespace MWWorld
                 {
                     target = result2.mHitObject;
                     hitPosition = result2.mHitPointWorld;
-                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
+                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().hasToolTip(target))
                         target = nullptr;
                 }
             }
@@ -3650,7 +3651,7 @@ namespace MWWorld
             if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect

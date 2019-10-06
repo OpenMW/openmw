@@ -109,11 +109,6 @@ namespace MWWorld
         throw std::runtime_error("class cannot block");
     }
 
-    bool Class::canBeActivated(const Ptr& ptr) const
-    {
-        return !getName(ptr).empty();
-    }
-
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
     {
         throw std::runtime_error("class cannot be hit");
@@ -142,16 +137,6 @@ namespace MWWorld
     bool Class::hasInventoryStore(const Ptr &ptr) const
     {
         return false;
-    }
-
-    void Class::lock (const Ptr& ptr, int lockLevel) const
-    {
-        throw std::runtime_error ("class does not support locking");
-    }
-
-    void Class::unlock (const Ptr& ptr) const
-    {
-        throw std::runtime_error ("class does not support unlocking");
     }
 
     bool Class::canLock(const ConstPtr &ptr) const
@@ -298,7 +283,7 @@ namespace MWWorld
 
     bool Class::hasToolTip (const ConstPtr& ptr) const
     {
-        return false;
+        return true;
     }
 
     std::string Class::getEnchantment (const ConstPtr& ptr) const

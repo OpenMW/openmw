@@ -222,9 +222,9 @@ namespace NifOsg
 
             extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), target.mTextKeys);
 
-            extra = extra->extra;
+            extra = extra->next;
             Nif::ControllerPtr ctrl = seq->controller;
-            for(;!extra.empty() && !ctrl.empty();(extra=extra->extra),(ctrl=ctrl->next))
+            for(;!extra.empty() && !ctrl.empty();(extra=extra->next),(ctrl=ctrl->next))
             {
                 if(extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
@@ -524,7 +524,7 @@ namespace NifOsg
             node->getOrCreateUserDataContainer()->addUserObject(
                 new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
 
-            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->extra)
+            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {
                 if(e->recType == Nif::RC_NiTextKeyExtraData && textKeys)
                 {
@@ -750,7 +750,13 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr()));
+                    // Two bits that correspond to the controlled material color.
+                    // 00: Ambient
+                    // 01: Diffuse
+                    // 10: Specular
+                    // 11: Emissive
+                    MaterialColorController::TargetColor targetColor = static_cast<MaterialColorController::TargetColor>((matctrl->flags >> 4) & 3);
+                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr(), targetColor));
                     setupController(matctrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -802,13 +808,13 @@ namespace NifOsg
             }
         }
 
-        void handleParticlePrograms(Nif::ExtraPtr affectors, Nif::ExtraPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
+        void handleParticlePrograms(Nif::NiParticleModifierPtr affectors, Nif::NiParticleModifierPtr colliders, osg::Group *attachTo, osgParticle::ParticleSystem* partsys, osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
             osgParticle::ModularProgram* program = new osgParticle::ModularProgram;
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
-            for (; !affectors.empty(); affectors = affectors->extra)
+            for (; !affectors.empty(); affectors = affectors->next)
             {
                 if (affectors->recType == Nif::RC_NiParticleGrowFade)
                 {
@@ -833,7 +839,7 @@ namespace NifOsg
                 else
                     Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
             }
-            for (; !colliders.empty(); colliders = colliders->extra)
+            for (; !colliders.empty(); colliders = colliders->next)
             {
                 if (colliders->recType == Nif::RC_NiPlanarCollider)
                 {

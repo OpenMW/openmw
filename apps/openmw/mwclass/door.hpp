@@ -25,27 +25,17 @@ namespace MWClass
             virtual bool useAnim() const;
 
             virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
-            ///< \return name (the one that is to be presented to the user; not the internal one);
-            /// can return an empty string.
+            ///< \return name or ID; can return an empty string.
 
             virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
-
-            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
             static std::string getDestination (const MWWorld::LiveCellRef<ESM::Door>& door);
             ///< @return destination cell name or token
-
-            virtual void lock (const MWWorld::Ptr& ptr, int lockLevel = 0) const;
-            ///< Lock object
-
-            virtual void unlock (const MWWorld::Ptr& ptr) const;
-            ///< Unlock object
 
             virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
 

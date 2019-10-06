@@ -531,7 +531,9 @@ namespace MWClass
         }
 
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
@@ -884,22 +886,22 @@ namespace MWClass
             // otherwise wait until death animation
             if(stats.isDeathAnimationFinished())
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+        }
+        else if (!stats.getAiSequence().isInCombat())
+        {
+            if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
 
-            // death animation is not finished, do nothing
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+            // Can't talk to werewolves
+            if (!getNpcStats(ptr).isWerewolf())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
         }
 
-        if(stats.getAiSequence().isInCombat())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        // Tribunal and some mod companions oddly enough must use open action as fallback
+        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
 
-        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
-
-        // Can't talk to werewolfs
-        if(getNpcStats(ptr).isWerewolf())
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
-
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+        return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -1071,7 +1073,7 @@ namespace MWClass
         MWGui::ToolTipInfo info;
 
         info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
-        if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
+        if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
             info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);

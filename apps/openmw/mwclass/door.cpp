@@ -102,8 +102,9 @@ namespace MWClass
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
@@ -162,7 +163,7 @@ namespace MWClass
             if(actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
             if(isLocked)
-                unlock(ptr); //Call the function here. because that makes sense.
+                ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
             // using a key disarms the trap
             if(isTrapped)
             {
@@ -240,20 +241,6 @@ namespace MWClass
         }
     }
 
-    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Door::unlock (const MWWorld::Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
-    }
-
     bool Door::canLock(const MWWorld::ConstPtr &ptr) const
     {
         return true;
@@ -281,19 +268,12 @@ namespace MWClass
         registerClass (typeid (ESM::Door).name(), instance);
     }
 
-    bool Door::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
 

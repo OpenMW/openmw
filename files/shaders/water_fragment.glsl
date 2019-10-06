@@ -48,11 +48,6 @@ const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
 const float RAIN_RIPPLE_GAPS = 5.0;
 const float RAIN_RIPPLE_RADIUS = 0.1;
 
-int modulo(int v1, int v2)
-{
-  return v1 - v2 * int(floor(float(v1) / float(v2)));
-}
-
 vec2 randOffset(vec2 c)
 {
   return fract(vec2(
@@ -170,8 +165,6 @@ void main(void)
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);
 
-    vec2 nCoord = vec2(0.0);
-
     #define waterTimer osg_SimulationTime
 
     vec3 normal0 = 2.0 * texture2D(normalMap,normalCoords(UV, 0.05, 0.04, waterTimer, -0.015, -0.005, vec3(0.0,0.0,0.0))).rgb - 1.0;
@@ -195,100 +188,66 @@ void main(void)
     vec2 smallWaves = mix(vec2(SMALL_WAVES_X,SMALL_WAVES_Y),vec2(SMALL_WAVES_RAIN_X,SMALL_WAVES_RAIN_Y),rainIntensity);
     float bump = mix(BUMP,BUMP_RAIN,rainIntensity);
 
-    vec3 normal = (normal0 * bigWaves.x + normal1 * bigWaves.y +
-                   normal2 * midWaves.x + normal3 * midWaves.y +
-                   normal4 * smallWaves.x + normal5 * smallWaves.y +
-                   rippleAdd);
-
-    normal = normalize(vec3(normal.x * bump, normal.y * bump, normal.z));
-
-    normal = vec3(-normal.x, -normal.y, normal.z);
-
-    // normal for sunlight scattering
-    vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 +
-                    normal2 * midWaves.x * 0.2 + normal3 * midWaves.y * 0.2 +
-                    normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 +
-                    rippleAdd).xyz;
-
-    lNormal = normalize(vec3(lNormal.x * bump, lNormal.y * bump, lNormal.z));
-    lNormal = vec3(-lNormal.x, -lNormal.y, lNormal.z);
+    vec3 normal = (normal0 * bigWaves.x + normal1 * bigWaves.y + normal2 * midWaves.x +
+                   normal3 * midWaves.y + normal4 * smallWaves.x + normal5 * smallWaves.y + rippleAdd);
+    normal = normalize(vec3(-normal.x * bump, -normal.y * bump, normal.z));
 
     vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(gl_LightSource[0].position.xyz, 0.0)).xyz);
 
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 vVec = normalize(position.xyz - cameraPos.xyz);
 
-    float isUnderwater = (cameraPos.z > 0.0) ? 0.0 : 1.0;
-
-    // sunlight scattering
-    vec3 pNormal = vec3(0,0,1);
-    vec3 lR = reflect(lVec, lNormal);
-    vec3 llR = reflect(lVec, pNormal);
-
-    float sunHeight = lVec.z;
     float sunFade = length(gl_LightModel.ambient.xyz);
-
-    float s = clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0);
-    float lightScatter = shadow * clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * s * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
-    vec3 scatterColour = mix(vec3(SCATTER_COLOUR)*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
 
     // fresnel
     float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
-    float fresnel = fresnel_dielectric(vVec, normal, ior);
+    float fresnel = clamp(fresnel_dielectric(vVec, normal, ior), 0.0, 1.0);
 
-    fresnel = clamp(fresnel, 0.0, 1.0);
-
+    vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if REFRACTION
     float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x);
-    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-(normal.xy*REFR_BUMP)).x);
+    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x);
     float surfaceDepth = linearizeDepth(gl_FragCoord.z);
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
-    float shore = clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
-#else
-    float shore = 1.0;
+    screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #endif
-    vec2 screenCoordsOffset = normal.xy * REFL_BUMP * shore;
-
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
 
-    // refraction
+    // specular
+    float specular = pow(max(dot(reflect(vVec, normal), lVec), 0.0),SPEC_HARDNESS) * shadow;
+
+    vec3 waterColor = WATER_COLOR * sunFade;
+
 #if REFRACTION
+    // refraction
     vec3 refraction = texture2D(refractionMap, screenCoords - screenCoordsOffset).rgb;
 
     // brighten up the refraction underwater
-    refraction = (cameraPos.z < 0.0) ? clamp(refraction * 1.5, 0.0, 1.0) : refraction;
-#endif
-    // specular
-    vec3 R = reflect(vVec, normal);
-    float specular = pow(max(dot(R, lVec), 0.0),SPEC_HARDNESS) * shadow;
-
-    vec3 waterColor = WATER_COLOR;
-    waterColor = waterColor * length(gl_LightModel.ambient.xyz);
-
-#if REFRACTION
-    if (cameraPos.z > 0.0)
+    if (cameraPos.z < 0.0)
+        refraction = clamp(refraction * 1.5, 0.0, 1.0);
+    else
         refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
 
-    gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * gl_LightSource[0].specular.xyz;
+    // sunlight scattering
+    // normal for sunlight scattering
+    vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
+                    normal3 * midWaves.y * 0.2 + normal4 * smallWaves.x * 0.1 + normal5 * smallWaves.y * 0.1 + rippleAdd);
+    lNormal = normalize(vec3(-lNormal.x * bump, -lNormal.y * bump, lNormal.z));
+    float sunHeight = lVec.z;
+    vec3 scatterColour = mix(SCATTER_COLOUR*vec3(1.0,0.4,0.0), SCATTER_COLOUR, clamp(1.0-exp(-sunHeight*SUN_EXT), 0.0, 1.0));
+    vec3 lR = reflect(lVec, lNormal);
+    float lightScatter = shadow * clamp(dot(lVec,lNormal)*0.7+0.3, 0.0, 1.0) * clamp(dot(lR, vVec)*2.0-1.2, 0.0, 1.0) * SCATTER_AMOUNT * sunFade * clamp(1.0-exp(-sunHeight), 0.0, 1.0);
+    gl_FragData[0].xyz = mix( mix(refraction,  scatterColour,  lightScatter),  reflection,  fresnel) + specular * gl_LightSource[0].specular.xyz + vec3(rainRipple.w) * 0.2;
+    gl_FragData[0].w = 1.0;
 #else
-    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz;
+    gl_FragData[0].xyz = mix(reflection,  waterColor,  (1.0-fresnel)*0.5) + specular * gl_LightSource[0].specular.xyz + vec3(rainRipple.w) * 0.7;
+    gl_FragData[0].w = clamp(fresnel*6.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
 #endif
+
     // fog
     float fogValue = clamp((depthPassthrough - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz,  gl_Fog.color.xyz,  fogValue);
-
-#if REFRACTION
-    gl_FragData[0].xyz += vec3(rainRipple.w) * 0.2;
-#else
-    gl_FragData[0].xyz += vec3(rainRipple.w) * 0.7;
-#endif
-
-#if REFRACTION
-    gl_FragData[0].w = 1.0;
-#else
-    gl_FragData[0].w = clamp(fresnel*6.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);     //clamp(fresnel*2.0 + specular * gl_LightSource[0].specular.w, 0.0, 1.0);
-#endif
 
     applyShadowDebugOverlay();
 }

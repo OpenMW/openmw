@@ -78,7 +78,7 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
             continue;
 
         unsigned short a = strip[0], b = strip[0], c = strip[1];
-        for (int i = 2; i < static_cast<int>(strip.size()); i++)
+        for (size_t i = 2; i < strip.size(); i++)
         {
             a = b;
             b = c;
@@ -86,9 +86,21 @@ void fillTriangleMeshWithTransform(btTriangleMesh& mesh, const Nif::NiTriStripsD
             if (a != b && b != c && a != c)
             {
                 if (i%2==0)
-                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[b]), getbtVector(vertices[c]));
+                {
+                    mesh.addTriangle(
+                        getbtVector(vertices[a] * transform),
+                        getbtVector(vertices[b] * transform),
+                        getbtVector(vertices[c] * transform)
+                    );
+                }
                 else
-                    mesh.addTriangle(getbtVector(vertices[a]), getbtVector(vertices[c]), getbtVector(vertices[b]));
+                {
+                    mesh.addTriangle(
+                        getbtVector(vertices[a] * transform),
+                        getbtVector(vertices[c] * transform),
+                        getbtVector(vertices[b] * transform)
+                    );
+                }
             }
         }
     }
@@ -260,18 +272,13 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         Log(Debug::Info) << "RootCollisionNode is not attached to the root node in " << fileName << ". Treating it as a common NiTriShape.";
 
     // Check for extra data
-    Nif::Extra const *e = node;
-    while (!e->extra.empty())
+    for (Nif::ExtraPtr e = node->extra; !e.empty(); e = e->next)
     {
-        // Get the next extra data in the list
-        e = e->extra.getPtr();
-        assert(e != nullptr);
-
         if (e->recType == Nif::RC_NiStringExtraData)
         {
             // String markers may contain important information
             // affecting the entire subtree of this node
-            Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e;
+            Nif::NiStringExtraData *sd = (Nif::NiStringExtraData*)e.getPtr();
 
             if (Misc::StringUtils::ciCompareLen(sd->string, "NC", 2) == 0)
             {

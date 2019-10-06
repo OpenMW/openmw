@@ -89,9 +89,7 @@ namespace MWClass
 
     bool Activator::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
-
-        return (ref->mBase->mName != "");
+        return !getName(ptr).empty();
     }
 
     bool Activator::allowTelekinesis(const MWWorld::ConstPtr &ptr) const {
@@ -103,7 +101,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Activator> *ref = ptr.get<ESM::Activator>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

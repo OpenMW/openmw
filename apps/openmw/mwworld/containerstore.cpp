@@ -477,50 +477,64 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
                                               int count, bool topLevel, const std::string& levItem)
 {
     if (count == 0) return; //Don't restock with nothing.
-    try {
+    try
+    {
         ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
-
-        if (ref.getPtr().getTypeName()==typeid (ESM::ItemLevList).name())
+        if (ref.getPtr().getClass().getScript(ref.getPtr()).empty())
         {
-            const ESM::ItemLevList* levItemList = ref.getPtr().get<ESM::ItemLevList>()->mBase;
-
-            if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
-            {
-                for (int i=0; i<std::abs(count); ++i)
-                    addInitialItem(id, owner, count > 0 ? 1 : -1, true, levItemList->mId);
-                return;
-            }
-            else
-            {
-                std::string itemId = MWMechanics::getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
-                if (itemId.empty())
-                    return;
-                addInitialItem(itemId, owner, count, false, levItemList->mId);
-            }
+            addInitialItemImp(ref.getPtr(), owner, count, topLevel, levItem);
         }
         else
         {
-            // A negative count indicates restocking items
-            // For a restocking levelled item, remember what we spawned so we can delete it later when the merchant restocks
-            if (!levItem.empty() && count < 0)
-            {
-                //If there is no item in map, insert it
-                std::map<std::pair<std::string, std::string>, int>::iterator itemInMap =
-                    mLevelledItemMap.insert(std::make_pair(std::make_pair(id, levItem), 0)).first;
-                //Update spawned count
-                itemInMap->second += std::abs(count);
-            }
-            count = std::abs(count);
-
-            ref.getPtr().getCellRef().setOwner(owner);
-            addImp (ref.getPtr(), count);
+            // Adding just one item per time to make sure there isn't a stack of scripted items
+            for (int i = 0; i < abs(count); i++)
+                addInitialItemImp(ref.getPtr(), owner, count < 0 ? -1 : 1, topLevel, levItem);
         }
     }
     catch (const std::exception& e)
     {
         Log(Debug::Warning) << "Warning: MWWorld::ContainerStore::addInitialItem: " << e.what();
     }
+}
 
+void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner,
+                                               int count, bool topLevel, const std::string& levItem)
+{
+    if (ptr.getTypeName()==typeid (ESM::ItemLevList).name())
+    {
+        const ESM::ItemLevList* levItemList = ptr.get<ESM::ItemLevList>()->mBase;
+
+        if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
+        {
+            for (int i=0; i<std::abs(count); ++i)
+                addInitialItem(ptr.getCellRef().getRefId(), owner, count > 0 ? 1 : -1, true, levItemList->mId);
+            return;
+        }
+        else
+        {
+            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false);
+            if (itemId.empty())
+                return;
+            addInitialItem(itemId, owner, count, false, levItemList->mId);
+        }
+    }
+    else
+    {
+        // A negative count indicates restocking items
+        // For a restocking levelled item, remember what we spawned so we can delete it later when the merchant restocks
+        if (!levItem.empty() && count < 0)
+        {
+            //If there is no item in map, insert it
+            std::map<std::pair<std::string, std::string>, int>::iterator itemInMap =
+                mLevelledItemMap.insert(std::make_pair(std::make_pair(ptr.getCellRef().getRefId(), levItem), 0)).first;
+            //Update spawned count
+            itemInMap->second += std::abs(count);
+        }
+        count = std::abs(count);
+
+        ptr.getCellRef().setOwner(owner);
+        addImp (ptr, count);
+    }
 }
 
 void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner)

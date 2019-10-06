@@ -1184,7 +1184,7 @@ namespace MWScript
 
                     if (ptr == MWMechanics::getPlayer())
                     {
-                        ptr.getClass().getCreatureStats(ptr).resurrect();
+                        MWBase::Environment::get().getMechanicsManager()->resurrect(ptr);
                         if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Ended)
                             MWBase::Environment::get().getStateManager()->resumeGame();
                     }

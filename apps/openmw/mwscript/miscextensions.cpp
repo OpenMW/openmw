@@ -182,7 +182,7 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    ptr.getClass().lock (ptr, lockLevel);
+                    ptr.getCellRef().lock (lockLevel);
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
@@ -202,7 +202,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().unlock (ptr);
+                    ptr.getCellRef().unlock ();
                 }
         };
 
@@ -358,7 +358,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (!MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 
@@ -367,7 +367,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 

@@ -518,7 +518,7 @@ namespace MWWorld
 
             osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const override;
 
-            void togglePOV() override;
+            void togglePOV(bool force = false) override;
 
             bool isFirstPerson() const override;
 

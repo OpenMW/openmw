@@ -190,9 +190,7 @@ namespace Interpreter
                     throw std::runtime_error (
                         "random: argument out of range (Don't be so negative!)");
 
-                Type_Integer value = Misc::Rng::rollDice(limit); // [o, limit)
-
-                runtime[0].mInteger = value;
+                runtime[0].mFloat = static_cast<Type_Float>(Misc::Rng::rollDice(limit)); // [o, limit)
             }
     };
 

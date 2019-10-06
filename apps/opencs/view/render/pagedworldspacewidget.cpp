@@ -140,7 +140,7 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
         "terrain-shape");
     tool->addButton (
-        new TerrainTextureMode (this, tool),
+        new TerrainTextureMode (this, mRootNode, tool),
         "terrain-texture");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
