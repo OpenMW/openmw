@@ -102,6 +102,7 @@ Editor Bug Fixes:
 - Cloned, added, or moved instances no longer disappear at load-time (#4748)
 - "Clear" function in the content selector no longer tries to execute a "Remove" action on an empty file list (#4757)
 - Engine no longer tries to swap buffers of windows which weren't exposed to Qt's window management system (#4911)
+- Minimap doesn't get corrupted, when editing new omwgame (#5177)
 
 Miscellaneous:
 - Upgraded to FFMPEG3 for media decoding (#4686)
