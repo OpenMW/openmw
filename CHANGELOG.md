@@ -154,6 +154,7 @@
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
     Bug #5169: Nested levelled items/creatures have significantly higher chance not to spawn
     Bug #5175: Random script function returns an integer value
+    Bug #5177: Editor: Unexplored map tiles get corrupted after a file with terrain is saved
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
