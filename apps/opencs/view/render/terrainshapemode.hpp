@@ -12,11 +12,11 @@
 #ifndef Q_MOC_RUN
 #include "../../model/world/data.hpp"
 #include "../../model/world/land.hpp"
-
 #include "../../model/doc/document.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
+#include "../widget/brushshapes.hpp"
 #endif
 
 #include "terrainselection.hpp"
@@ -46,12 +46,13 @@ namespace CSVRender
                 InteractionType_None
             };
 
-            enum BrushShape
+            enum ShapeEditTool
             {
-                BrushShape_Point = 0,
-                BrushShape_Square = 1,
-                BrushShape_Circle = 2,
-                BrushShape_Custom = 3
+                ShapeEditTool_Drag = 0,
+                ShapeEditTool_PaintToRaise = 1,
+                ShapeEditTool_PaintToLower = 2,
+                ShapeEditTool_Smooth = 3,
+                ShapeEditTool_Flatten = 4
             };
 
             /// Editmode for terrain shape grid
@@ -124,20 +125,24 @@ namespace CSVRender
 
             /// Push terrain shape edits to command macro
             void pushEditToCommand (const CSMWorld::LandHeightsColumn::DataType& newLandGrid, CSMDoc::Document& document,
-                CSMWorld::IdTable& landTable, std::string cellId);
+                CSMWorld::IdTable& landTable, const std::string& cellId);
 
             /// Push land normals edits to command macro
             void pushNormalsEditToCommand(const CSMWorld::LandNormalsColumn::DataType& newLandGrid, CSMDoc::Document& document,
-                CSMWorld::IdTable& landTable, std::string cellId);
+                CSMWorld::IdTable& landTable, const std::string& cellId);
+
+            /// Generate new land map LOD
+            void pushLodToCommand(const CSMWorld::LandMapLodColumn::DataType& newLandMapLod, CSMDoc::Document& document,
+                CSMWorld::IdTable& landTable, const std::string& cellId);
 
             /// Create new cell and land if needed
-            bool allowLandShapeEditing(std::string textureFileName);
+            bool allowLandShapeEditing(const std::string& textureFileName);
 
         private:
             std::string mCellId;
             std::string mBrushTexture;
             int mBrushSize;
-            int mBrushShape;
+            CSVWidget::BrushShape mBrushShape;
             std::vector<std::pair<int, int>> mCustomBrushShape;
             CSVWidget::SceneToolShapeBrush *mShapeBrushScenetool;
             int mDragMode;
@@ -158,7 +163,7 @@ namespace CSVRender
 
         public slots:
             void setBrushSize(int brushSize);
-            void setBrushShape(int brushShape);
+            void setBrushShape(CSVWidget::BrushShape brushShape);
             void setShapeEditTool(int shapeEditTool);
             void setShapeEditToolStrength(int shapeEditToolStrength);
     };

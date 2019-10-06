@@ -16,6 +16,7 @@
 #include <QPushButton>
 
 #ifndef Q_MOC_RUN
+#include "brushshapes.hpp"
 #include "scenetool.hpp"
 
 #include "../../model/doc/document.hpp"
@@ -54,24 +55,16 @@ namespace CSVWidget
 
         public:
 
-            enum BrushShape
-            {
-                BrushShape_Point = 0,
-                BrushShape_Square = 1,
-                BrushShape_Circle = 2,
-                BrushShape_Custom = 3
-            };
-
             ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
             void configureButtonInitialSettings(QPushButton *button);
 
             const QString toolTipPoint = "Paint single point";
             const QString toolTipSquare = "Paint with square brush";
             const QString toolTipCircle = "Paint with circle brush";
-            const QString toolTipCustom = "Paint custom selection (not implemented yet)";
+            const QString toolTipCustom = "Paint with custom brush, defined by terrain selection";
 
         private:
-            int mBrushShape;
+            CSVWidget::BrushShape mBrushShape;
             int mBrushSize;
             CSMDoc::Document& mDocument;
             QGroupBox *mHorizontalGroupBox;
@@ -92,7 +85,7 @@ namespace CSVWidget
 
         signals:
             void passBrushSize (int brushSize);
-            void passBrushShape(int brushShape);
+            void passBrushShape(CSVWidget::BrushShape brushShape);
     };
 
     class SceneToolShapeBrush : public SceneTool
@@ -122,7 +115,7 @@ namespace CSVWidget
         friend class CSVRender::TerrainShapeMode;
 
         public slots:
-            void setButtonIcon(int brushShape);
+            void setButtonIcon(CSVWidget::BrushShape brushShape);
             void clicked (const QModelIndex& index);
             virtual void activate();
 

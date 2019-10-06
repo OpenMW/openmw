@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QSizePolicy>
 
+#include "brushshapes.hpp"
 #include "scenetool.hpp"
 
 #include "../../model/doc/document.hpp"
@@ -58,7 +59,7 @@ CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, 
 
 CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
-    mBrushShape(BrushShape_Point),
+    mBrushShape(CSVWidget::BrushShape_Point),
     mBrushSize(1),
     mDocument(document)
 {
@@ -169,7 +170,7 @@ CSVWidget::SceneToolShapeBrush::SceneToolShapeBrush (SceneToolbar *parent, const
     mShapeBrushWindow(new ShapeBrushWindow(document, this))
 {
     setAcceptDrops(true);
-    connect(mShapeBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setButtonIcon(int)));
+    connect(mShapeBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setButtonIcon(CSVWidget::BrushShape)));
     setButtonIcon(mShapeBrushWindow->mBrushShape);
 
     mPanel = new QFrame (this, Qt::Popup);
@@ -199,31 +200,31 @@ CSVWidget::SceneToolShapeBrush::SceneToolShapeBrush (SceneToolbar *parent, const
 
 }
 
-void CSVWidget::SceneToolShapeBrush::setButtonIcon (int brushShape)
+void CSVWidget::SceneToolShapeBrush::setButtonIcon (CSVWidget::BrushShape brushShape)
 {
     QString tooltip = "Change brush settings <p>Currently selected: ";
 
     switch (brushShape)
     {
-        case 0:
+        case BrushShape_Point:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
             tooltip += mShapeBrushWindow->toolTipPoint;
             break;
 
-        case 1:
+        case BrushShape_Square:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
             tooltip += mShapeBrushWindow->toolTipSquare;
             break;
 
-        case 2:
+        case BrushShape_Circle:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
             tooltip += mShapeBrushWindow->toolTipCircle;
             break;
 
-        case 3:
+        case BrushShape_Custom:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
             tooltip += mShapeBrushWindow->toolTipCustom;

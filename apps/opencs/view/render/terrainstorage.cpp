@@ -128,13 +128,13 @@ namespace CSVRender
         return abs(getThisHeight(col, row, heightData) - getDownHeight(col, row, heightData));
     }
 
-    bool TerrainStorage::LeftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
+    bool TerrainStorage::leftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
     {
         return getHeightDifferenceToLeft(col, row, heightData) >= heightWarningLimit ||
             getHeightDifferenceToUp(col, row, heightData) >= heightWarningLimit;
     }
 
-    bool TerrainStorage::RightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
+    bool TerrainStorage::rightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const
     {
         return getHeightDifferenceToRight(col, row, heightData) >= heightWarningLimit ||
             getHeightDifferenceToDown(col, row, heightData) >= heightWarningLimit;
@@ -144,8 +144,8 @@ namespace CSVRender
     {
         // Highlight broken height changes
         int heightWarningLimit = 1024;
-        if (((col > 0 && row > 0) && LeftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData)) ||
-            ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1) && RightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData)))
+        if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData)) ||
+            ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1) && rightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData)))
         {
             color.r() = 255;
             color.g() = 0;

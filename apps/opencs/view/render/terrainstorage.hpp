@@ -39,8 +39,8 @@ namespace CSVRender
         int getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData *heightData) const;
         int getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData *heightData) const;
         int getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData *heightData) const;
-        bool LeftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
-        bool RightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
+        bool leftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
+        bool rightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
 
         void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const override;
         float getAlteredHeight(int col, int row) const override;
