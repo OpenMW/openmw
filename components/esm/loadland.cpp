@@ -324,10 +324,7 @@ namespace ESM
       mContext (land.mContext), mDataTypes (land.mDataTypes),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
     {
-        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
-        {
-            mWnam[i] = static_cast<signed char>(land.mWnam[i]);
-        }
+        std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
     }
 
     Land& Land::operator= (Land land)
