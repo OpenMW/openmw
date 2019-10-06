@@ -61,7 +61,8 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     // Detect Morrowind configuration files
     QStringList iniPaths;
 
-    foreach (const QString &path, mGameSettings.getDataDirs()) {
+    for (const QString &path : mGameSettings.getDataDirs())
+    {
         QDir dir(path);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
 
