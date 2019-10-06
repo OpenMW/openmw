@@ -127,7 +127,7 @@ namespace ESM
         if (mLandData)
         {
             if (mDataTypes & Land::DATA_VNML) {
-                esm.writeHNT("VNML", mLandData->mNormals, sizeof(mLandData->mNormals));
+                esm.writeHNT("VNML", mLandData->mNormals);
             }
             if (mDataTypes & Land::DATA_VHGT) {
                 VHGT offsets;
@@ -175,18 +175,18 @@ namespace ESM
                     wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
                 }
             }
-            esm.writeHNT("WNAM", wnam, 81);
+            esm.writeHNT("WNAM", wnam);
         }
 
         if (mLandData)
         {
             if (mDataTypes & Land::DATA_VCLR) {
-                esm.writeHNT("VCLR", mLandData->mColours, 3*LAND_NUM_VERTS);
+                esm.writeHNT("VCLR", mLandData->mColours);
             }
             if (mDataTypes & Land::DATA_VTEX) {
                 uint16_t vtex[LAND_NUM_TEXTURES];
                 transposeTextureData(mLandData->mTextures, vtex);
-                esm.writeHNT("VTEX", vtex, sizeof(vtex));
+                esm.writeHNT("VTEX", vtex);
             }
         }
 
