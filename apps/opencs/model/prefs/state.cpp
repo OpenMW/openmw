@@ -248,7 +248,7 @@ void CSMPrefs::State::declare()
         addValues (landeditOutsideVisibleCell);
     declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
         setMin (1);
-    declareInt ("shapebrush-maximumsize", "Maximum texture brush size", 100).
+    declareInt ("shapebrush-maximumsize", "Maximum shape brush size", 100).
         setMin (1);
     declareBool ("open-list-view", "Open displays list view", false).
         setTooltip ("When opening a reference from the scene view, it will open the"
