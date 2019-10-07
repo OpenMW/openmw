@@ -82,6 +82,16 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
 
 void CSVRender::TerrainShapeMode::deactivate(CSVWidget::SceneToolbar* toolbar)
 {
+    if(mShapeBrushScenetool)
+    {
+        toolbar->removeTool (mShapeBrushScenetool);
+    }
+
+    if (mTerrainShapeSelection)
+    {
+        mTerrainShapeSelection.reset();
+    }
+
     EditMode::deactivate(toolbar);
 }
 
