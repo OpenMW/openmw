@@ -22,6 +22,27 @@
 
 #include <osg/Quat>
 
+namespace MWMechanics
+{
+    static float distance(const osg::Vec2f& lhs, const osg::Vec2f& rhs)
+    {
+        return (lhs - rhs).length2();
+    }
+
+    static float distanceIgnoreZ(const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        return distance(osg::Vec2f(lhs.x(), lhs.y()), osg::Vec2f(rhs.x(), rhs.y()));
+    }
+
+    static float distance(const osg::Vec3f& lhs, const osg::Vec3f& rhs, const MWWorld::Ptr& actor)
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        if (world->isSwimming(actor) || world->isFlying(actor))
+            return distance(lhs, rhs);
+        return distanceIgnoreZ(lhs, rhs);
+    }
+}
+
 MWMechanics::AiPackage::~AiPackage() {}
 
 MWMechanics::AiPackage::AiPackage() :
@@ -133,7 +154,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         if (!mIsShortcutting)
         {
-            if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
+            if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
@@ -328,11 +349,11 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoin
     return false;
 }
 
-bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell)
+bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::Ptr& actor) const
 {
     return mPathFinder.getPath().empty()
-        || (distance(mPathFinder.getPath().back(), newDest) > 10)
-        || mPathFinder.getPathCell() != currentCell;
+        || distance(mPathFinder.getPath().back(), newDest, actor) > 10
+        || mPathFinder.getPathCell() != actor.getCell();
 }
 
 bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)

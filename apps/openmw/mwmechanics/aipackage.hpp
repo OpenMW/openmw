@@ -120,7 +120,7 @@ namespace MWMechanics
             /// Check if the way to the destination is clear, taking into account actor speed
             bool checkWayIsClearForActor(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint, const MWWorld::Ptr& actor);
 
-            bool doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell);
+            bool doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::Ptr& actor) const;
 
             void evadeObstacles(const MWWorld::Ptr& actor);
 
