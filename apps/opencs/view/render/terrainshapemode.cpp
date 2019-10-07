@@ -311,6 +311,8 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         const CSMWorld::LandMapLodColumn::DataType landMapLodPointer = landTable.data(landTable.getModelIndex(cellId, landMapLodColumn)).value<CSMWorld::LandMapLodColumn::DataType>();
         CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
         CSMWorld::LandMapLodColumn::DataType mapLodShapeNew(landMapLodPointer);
+
+        // Generate land height record
         for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
@@ -325,9 +327,24 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
                 }
             }
         }
-        for(int i = 0; i < ESM::Land::LAND_GLOBAL_MAP_LOD_SIZE; ++i)
+
+        // Generate WNAM record
+        int sqrtLandGlobalMapLodSize = sqrt(ESM::Land::LAND_GLOBAL_MAP_LOD_SIZE);
+        for(int i = 0; i < sqrtLandGlobalMapLodSize; ++i)
         {
-            mapLodShapeNew[i] = landMapLodPointer[i]; //TO-DO: generate a new mWnam based on new heights
+            for(int j = 0; j < sqrtLandGlobalMapLodSize; ++j)
+            {
+                int col = (static_cast<float>(j) / sqrtLandGlobalMapLodSize) * (ESM::Land::LAND_SIZE - 1);
+                int row = (static_cast<float>(i) / sqrtLandGlobalMapLodSize) * (ESM::Land::LAND_SIZE - 1);
+                signed char lodHeight = 0;
+                float floatLodHeight = 0;
+                if (landShapeNew[col * ESM::Land::LAND_SIZE + row] > 0) floatLodHeight = landShapeNew[col * ESM::Land::LAND_SIZE + row] / 128;
+                if (landShapeNew[col * ESM::Land::LAND_SIZE + row] <= 0) floatLodHeight = landShapeNew[col * ESM::Land::LAND_SIZE + row] / 16;
+                if (floatLodHeight > std::numeric_limits<signed char>::max()) lodHeight = std::numeric_limits<signed char>::max();
+                else if (floatLodHeight < std::numeric_limits<signed char>::min()) lodHeight = std::numeric_limits<signed char>::min();
+                else lodHeight = static_cast<signed char>(floatLodHeight);
+                mapLodShapeNew[j * sqrtLandGlobalMapLodSize + i] = lodHeight;
+            }
         }
         if (allowLandShapeEditing(cellId) == true)
         {
@@ -345,6 +362,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         const CSMWorld::LandNormalsColumn::DataType landNormalsPointer = landTable.data(landTable.getModelIndex(cellId, landnormalsColumn)).value<CSMWorld::LandNormalsColumn::DataType>();
         CSMWorld::LandNormalsColumn::DataType landNormalsNew(landNormalsPointer);
 
+        // Generate land normals record
         for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
