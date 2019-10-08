@@ -13,8 +13,6 @@
 
 namespace CSVRender
 {
-    const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
-
     TerrainStorage::TerrainStorage(const CSMWorld::Data &data)
         : ESMTerrain::Storage(data.getResourceSystem()->getVFS())
         , mData(data)

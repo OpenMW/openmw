@@ -72,24 +72,25 @@ namespace CSVRender
             void deactivate(CSVWidget::SceneToolbar*);
 
             /// Start shape editing command macro
-            virtual bool primaryEditStartDrag (const QPoint& pos);
+            bool primaryEditStartDrag (const QPoint& pos) final;
 
-            virtual bool secondaryEditStartDrag (const QPoint& pos);
-            virtual bool primarySelectStartDrag (const QPoint& pos);
-            virtual bool secondarySelectStartDrag (const QPoint& pos);
+            bool secondaryEditStartDrag (const QPoint& pos) final;
+            bool primarySelectStartDrag (const QPoint& pos) final;
+            bool secondarySelectStartDrag (const QPoint& pos) final;
 
             /// Handle shape edit behavior during dragging
-            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
+            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) final;
 
             /// End shape editing command macro
-            virtual void dragCompleted(const QPoint& pos);
+            void dragCompleted(const QPoint& pos) final;
 
             /// Cancel shape editing, and reset all pending changes
-            virtual void dragAborted();
+            void dragAborted() final;
 
-            virtual void dragWheel (int diff, double speedFactor);
-            virtual void dragMoveEvent (QDragMoveEvent *event);
+            void dragWheel (int diff, double speedFactor) final;
+            void dragMoveEvent (QDragMoveEvent *event) final;
 
+        private:
             /// Move pending alteredHeights changes to omwgame/omeaddon -data
             void applyTerrainEditChanges();
 
@@ -138,7 +139,6 @@ namespace CSVRender
             /// Create new cell and land if needed
             bool allowLandShapeEditing(const std::string& textureFileName);
 
-        private:
             std::string mCellId;
             std::string mBrushTexture;
             int mBrushSize;
