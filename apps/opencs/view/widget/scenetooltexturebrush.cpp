@@ -33,19 +33,19 @@
 
 
 CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
-    : QGroupBox(title, parent)
+    : QGroupBox(title, parent),
+    mLayoutSliderSize(new QHBoxLayout),
+    mBrushSizeSlider(new QSlider(Qt::Horizontal)),
+    mBrushSizeSpinBox(new QSpinBox)
 {
-    mBrushSizeSlider = new QSlider(Qt::Horizontal);
     mBrushSizeSlider->setTickPosition(QSlider::TicksBothSides);
     mBrushSizeSlider->setTickInterval(10);
     mBrushSizeSlider->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSlider->setSingleStep(1);
 
-    mBrushSizeSpinBox = new QSpinBox;
     mBrushSizeSpinBox->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSpinBox->setSingleStep(1);
 
-    mLayoutSliderSize = new QHBoxLayout;
     mLayoutSliderSize->addWidget(mBrushSizeSlider);
     mLayoutSliderSize->addWidget(mBrushSizeSpinBox);
 

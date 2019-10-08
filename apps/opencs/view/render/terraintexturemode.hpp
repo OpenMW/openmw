@@ -51,36 +51,37 @@ namespace CSVRender
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
-            void primaryOpenPressed (const WorldspaceHitResult& hit);
+            void primaryOpenPressed (const WorldspaceHitResult& hit) final;
 
             /// \brief Create single command for one-click texture editing
-            void primaryEditPressed (const WorldspaceHitResult& hit);
+            void primaryEditPressed (const WorldspaceHitResult& hit) final;
 
             /// \brief Open brush settings window
-            void primarySelectPressed(const WorldspaceHitResult&);
+            void primarySelectPressed(const WorldspaceHitResult&) final;
 
-            void secondarySelectPressed(const WorldspaceHitResult&);
+            void secondarySelectPressed(const WorldspaceHitResult&) final;
 
-            void activate(CSVWidget::SceneToolbar*);
-            void deactivate(CSVWidget::SceneToolbar*);
+            void activate(CSVWidget::SceneToolbar*) final;
+            void deactivate(CSVWidget::SceneToolbar*) final;
 
             /// \brief Start texture editing command macro
-            virtual bool primaryEditStartDrag (const QPoint& pos);
+            bool primaryEditStartDrag (const QPoint& pos) final;
 
-            virtual bool secondaryEditStartDrag (const QPoint& pos);
-            virtual bool primarySelectStartDrag (const QPoint& pos);
-            virtual bool secondarySelectStartDrag (const QPoint& pos);
+            bool secondaryEditStartDrag (const QPoint& pos) final;
+            bool primarySelectStartDrag (const QPoint& pos) final;
+            bool secondarySelectStartDrag (const QPoint& pos) final;
 
             /// \brief Handle texture edit behavior during dragging
-            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
+            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) final;
 
             /// \brief End texture editing command macro
-            virtual void dragCompleted(const QPoint& pos);
+            void dragCompleted(const QPoint& pos) final;
 
-            virtual void dragAborted();
-            virtual void dragWheel (int diff, double speedFactor);
-            virtual void dragMoveEvent (QDragMoveEvent *event);
+            void dragAborted() final;
+            void dragWheel (int diff, double speedFactor) final;
+            void dragMoveEvent (QDragMoveEvent *event) final;
 
+        private:
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
 
@@ -100,7 +101,6 @@ namespace CSVRender
             /// \brief Create new cell and land if needed
             bool allowLandTextureEditing(std::string textureFileName);
 
-        private:
             std::string mCellId;
             std::string mBrushTexture;
             int mBrushSize;
@@ -113,7 +113,6 @@ namespace CSVRender
             std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
-            const int landSize {ESM::Land::LAND_SIZE};
             const int landTextureSize {ESM::Land::LAND_TEXTURE_SIZE};
 
         signals:

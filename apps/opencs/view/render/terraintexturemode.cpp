@@ -43,7 +43,7 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
     mBrushTexture("L0#0"),
     mBrushSize(0),
     mBrushShape(0),
-    mTextureBrushScenetool(0),
+    mTextureBrushScenetool(nullptr),
     mDragMode(InteractionType_None),
     mParentNode(parentNode),
     mIsEditing(false)
@@ -82,7 +82,7 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     {
         toolbar->removeTool (mTextureBrushScenetool);
         delete mTextureBrushScenetool;
-        mTextureBrushScenetool = 0;
+        mTextureBrushScenetool = nullptr;
     }
 
     if (mTerrainTextureSelection)
