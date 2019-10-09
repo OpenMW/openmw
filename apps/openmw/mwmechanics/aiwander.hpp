@@ -25,20 +25,7 @@ namespace MWMechanics
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
     struct AiWanderStorage : AiTemporaryBase
     {
-        // the z rotation angle to reach
-        // when mTurnActorGivingGreetingToFacePlayer is true
-        float mTargetAngleRadians;
-        bool mTurnActorGivingGreetingToFacePlayer;
         float mReaction; // update some actions infrequently
-
-        enum GreetingState
-        {
-            Greet_None,
-            Greet_InProgress,
-            Greet_Done
-        };
-        GreetingState mSaidGreeting;
-        int mGreetingTimer;
 
         const MWWorld::CellStore* mCell; // for detecting cell change
 
@@ -72,11 +59,7 @@ namespace MWMechanics
         int mStuckCount;
 
         AiWanderStorage():
-            mTargetAngleRadians(0),
-            mTurnActorGivingGreetingToFacePlayer(false),
             mReaction(0),
-            mSaidGreeting(Greet_None),
-            mGreetingTimer(0),
             mCell(nullptr),
             mState(Wander_ChooseAction),
             mIsWanderingManually(false),
@@ -136,7 +119,6 @@ namespace MWMechanics
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
-            void playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
             void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
