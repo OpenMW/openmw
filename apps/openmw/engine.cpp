@@ -133,6 +133,7 @@ bool OMW::Engine::frame(float frametime)
             {
                 double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
                 mEnvironment.getWorld()->advanceTime(hours, true);
+                mEnvironment.getWorld()->rechargeItems(frametime, true);
             }
         }
         osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();

@@ -71,6 +71,12 @@ namespace MWWorld
         protected:
             ContainerStoreListener* mListener;
 
+            // (item, max charge)
+            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
+            TRechargingItems mRechargingItems;
+
+            bool mRechargingItemsUpToDate;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -108,6 +114,7 @@ namespace MWWorld
                 ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
+            void updateRechargingItems();
 
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
@@ -155,6 +162,9 @@ namespace MWWorld
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed
+
+            void rechargeItems (float duration);
+            ///< Restore charge on enchanted items. Note this should only be done for the player.
 
             ContainerStoreIterator unstack (const Ptr& ptr, const Ptr& container, int count = 1);
             ///< Unstack an item in this container. The item's count will be set to count, then a new stack will be added with (origCount-count).
