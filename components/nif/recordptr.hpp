@@ -143,31 +143,31 @@ class NiAutoNormalParticlesData;
 class NiPalette;
 struct NiParticleModifier;
 
-typedef RecordPtrT<Node> NodePtr;
-typedef RecordPtrT<Extra> ExtraPtr;
-typedef RecordPtrT<NiUVData> NiUVDataPtr;
-typedef RecordPtrT<NiPosData> NiPosDataPtr;
-typedef RecordPtrT<NiVisData> NiVisDataPtr;
-typedef RecordPtrT<Controller> ControllerPtr;
-typedef RecordPtrT<Named> NamedPtr;
-typedef RecordPtrT<NiSkinData> NiSkinDataPtr;
-typedef RecordPtrT<NiMorphData> NiMorphDataPtr;
-typedef RecordPtrT<NiPixelData> NiPixelDataPtr;
-typedef RecordPtrT<NiFloatData> NiFloatDataPtr;
-typedef RecordPtrT<NiColorData> NiColorDataPtr;
-typedef RecordPtrT<NiKeyframeData> NiKeyframeDataPtr;
-typedef RecordPtrT<NiTriShapeData> NiTriShapeDataPtr;
-typedef RecordPtrT<NiTriStripsData> NiTriStripsDataPtr;
-typedef RecordPtrT<NiSkinInstance> NiSkinInstancePtr;
-typedef RecordPtrT<NiSourceTexture> NiSourceTexturePtr;
-typedef RecordPtrT<NiRotatingParticlesData> NiRotatingParticlesDataPtr;
-typedef RecordPtrT<NiAutoNormalParticlesData> NiAutoNormalParticlesDataPtr;
-typedef RecordPtrT<NiPalette> NiPalettePtr;
-typedef RecordPtrT<NiParticleModifier> NiParticleModifierPtr;
+using NodePtr = RecordPtrT<Node>;
+using ExtraPtr = RecordPtrT<Extra>;
+using NiUVDataPtr = RecordPtrT<NiUVData>;
+using NiPosDataPtr = RecordPtrT<NiPosData>;
+using NiVisDataPtr = RecordPtrT<NiVisData>;
+using ControllerPtr = RecordPtrT<Controller>;
+using NamedPtr = RecordPtrT<Named>;
+using NiSkinDataPtr = RecordPtrT<NiSkinData>;
+using NiMorphDataPtr = RecordPtrT<NiMorphData>;
+using NiPixelDataPtr = RecordPtrT<NiPixelData>;
+using NiFloatDataPtr = RecordPtrT<NiFloatData>;
+using NiColorDataPtr = RecordPtrT<NiColorData>;
+using NiKeyframeDataPtr = RecordPtrT<NiKeyframeData>;
+using NiTriShapeDataPtr = RecordPtrT<NiTriShapeData>;
+using NiTriStripsDataPtr = RecordPtrT<NiTriStripsData>;
+using NiSkinInstancePtr = RecordPtrT<NiSkinInstance>;
+using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
+using NiRotatingParticlesDataPtr = RecordPtrT<NiRotatingParticlesData>;
+using NiAutoNormalParticlesDataPtr = RecordPtrT<NiAutoNormalParticlesData>;
+using NiPalettePtr = RecordPtrT<NiPalette>;
+using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
 
-typedef RecordListT<Node> NodeList;
-typedef RecordListT<Property> PropertyList;
-typedef RecordListT<NiSourceTexture> NiSourceTextureList;
+using NodeList = RecordListT<Node>;
+using PropertyList = RecordListT<Property>;
+using NiSourceTextureList = RecordListT<NiSourceTexture>;
 
 } // Namespace
 #endif
