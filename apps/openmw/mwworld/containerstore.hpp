@@ -131,7 +131,7 @@ namespace MWWorld
 
             bool hasVisibleItems() const;
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.

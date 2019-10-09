@@ -133,9 +133,9 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
