@@ -857,7 +857,17 @@ namespace MWWorld
 
     void World::advanceTime (double hours, bool incremental)
     {
-        MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
+        if (!incremental)
+        {
+            // When we fast-forward time, we should recharge magic items
+            // in all loaded cells, using game world time
+            float duration = hours * 3600;
+            const float timeScaleFactor = getTimeScaleFactor();
+            if (timeScaleFactor != 0.0f)
+                duration /= timeScaleFactor;
+
+            rechargeItems(duration, false);
+        }
 
         mWeatherManager->advanceTime (hours, incremental);
 
@@ -1649,7 +1659,6 @@ namespace MWWorld
                 }
 
                 // we need to undo the rotation
-                rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
                 reached = false;
             }
         }
@@ -1671,6 +1680,8 @@ namespace MWWorld
                 if (!closeSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, closeSound))
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
+
+            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
         }
 
         // the rotation order we want to use
@@ -3304,7 +3315,6 @@ namespace MWWorld
                 closestDistance = distance;
                 closestMarker = marker;
             }
-
         }
 
         return closestMarker;
@@ -3313,6 +3323,22 @@ namespace MWWorld
     void World::rest(double hours)
     {
         mCells.rest(hours);
+    }
+
+    void World::rechargeItems(double duration, bool activeOnly)
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        player.getClass().getInventoryStore(player).rechargeItems(duration);
+
+        if (activeOnly)
+        {
+            for (auto &cell : mWorldScene->getActiveCells())
+            {
+                cell->recharge(duration);
+            }
+        }
+        else
+            mCells.recharge(duration);
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,

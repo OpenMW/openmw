@@ -323,7 +323,9 @@ namespace ESM
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
       mContext (land.mContext), mDataTypes (land.mDataTypes),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
-    {}
+    {
+        std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
+    }
 
     Land& Land::operator= (Land land)
     {
@@ -340,6 +342,7 @@ namespace ESM
         std::swap (mContext, land.mContext);
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mLandData, land.mLandData);
+        std::swap (mWnam, land.mWnam);
     }
 
     const Land::LandData *Land::getLandData (int flags) const

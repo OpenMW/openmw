@@ -101,7 +101,6 @@ MWWorld::InventoryStore::InventoryStore()
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     initSlots (mSlots);
 }
@@ -114,7 +113,6 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  , mFirstAutoEquip(store.mFirstAutoEquip)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     copySlots (store);
 }
@@ -133,9 +131,9 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
 
     // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
@@ -709,12 +707,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
     mFirstAutoEquip = false;
 }
 
-void MWWorld::InventoryStore::flagAsModified()
-{
-    ContainerStore::flagAsModified();
-    mRechargingItemsUpToDate = false;
-}
-
 bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
@@ -953,57 +945,6 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
                 visitor.visit(MWMechanics::EffectKey(effect), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-        }
-    }
-}
-
-void MWWorld::InventoryStore::updateRechargingItems()
-{
-    mRechargingItems.clear();
-    for (ContainerStoreIterator it = begin(); it != end(); ++it)
-    {
-        if (it->getClass().getEnchantment(*it) != "")
-        {
-            std::string enchantmentId = it->getClass().getEnchantment(*it);
-            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
-                        enchantmentId);
-            if (!enchantment)
-            {
-                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId();
-                continue;
-            }
-
-            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
-                    || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                mRechargingItems.push_back(std::make_pair(it, static_cast<float>(enchantment->mData.mCharge)));
-        }
-    }
-}
-
-void MWWorld::InventoryStore::rechargeItems(float duration)
-{
-    if (!mRechargingItemsUpToDate)
-    {
-        updateRechargingItems();
-        mRechargingItemsUpToDate = true;
-    }
-    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
-    {
-        if (it->first->getCellRef().getEnchantmentCharge() == -1
-                || it->first->getCellRef().getEnchantmentCharge() == it->second)
-            continue;
-
-        static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->mValue.getFloat();
-
-        if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
-        {
-            it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
-                                                                  it->second));
-
-            // attempt to restack when fully recharged
-            if (it->first->getCellRef().getEnchantmentCharge() == it->second)
-                it->first = restack(*it->first);
         }
     }
 }

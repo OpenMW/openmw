@@ -41,9 +41,9 @@
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
     mBrushTexture("L0#0"),
-    mBrushSize(0),
+    mBrushSize(1),
     mBrushShape(0),
-    mTextureBrushScenetool(0),
+    mTextureBrushScenetool(nullptr),
     mDragMode(InteractionType_None),
     mParentNode(parentNode),
     mIsEditing(false)
@@ -82,7 +82,7 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     {
         toolbar->removeTool (mTextureBrushScenetool);
         delete mTextureBrushScenetool;
-        mTextureBrushScenetool = 0;
+        mTextureBrushScenetool = nullptr;
     }
 
     if (mTerrainTextureSelection)

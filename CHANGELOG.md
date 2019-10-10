@@ -2,6 +2,7 @@
 ------
 
     Bug #1515: Opening console masks dialogue, inventory menu
+    Bug #1933: Actors can have few stocks of the same item
     Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
     Bug #2969: Scripted items can stack
     Bug #2976: Data lines in global openmw.cfg take priority over user openmw.cfg
@@ -18,6 +19,7 @@
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #3894: Hostile spell effects not detected/present on first frame of OnPCHitMe
+    Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4270: Closing doors while they are obstructed desyncs closing sfx
@@ -28,6 +30,7 @@
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4449: Value returned by GetWindSpeed is incorrect
+    Bug #4456: AiActivate should not be cancelled after target activation
     Bug #4540: Rain delay when exiting water
     Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
@@ -77,6 +80,7 @@
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Bug #4896: Title screen music doesn't loop
     Bug #4902: Using scrollbars in settings causes resolution to change
+    Bug #4904: Editor: Texture painting with duplicate of a base-version texture
     Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4918: Abilities don't play looping VFX when they're initially applied
@@ -116,6 +120,7 @@
     Bug #5050: Invalid spell effects are not handled gracefully
     Bug #5055: Mark, Recall, Intervention magic effect abilities have no effect when added and removed in the same frame
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
+    Bug #5059: Modded animation with combined attack keys always does max damage and can double damage
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
     Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
@@ -140,6 +145,7 @@
     Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
     Bug #5126: Swimming creatures without RunForward animations are motionless during combat
     Bug #5134: Doors rotation by "Lock" console command is inconsistent
+    Bug #5136: LegionUniform script: can not access local variables
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
     Bug #5149: Failing lock pick attempts isn't always a crime
     Bug #5155: Lock/unlock behavior differs from vanilla
@@ -151,6 +157,8 @@
     Bug #5167: Player can select and cast spells before magic menu is enabled
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
     Bug #5169: Nested levelled items/creatures have significantly higher chance not to spawn
+    Bug #5175: Random script function returns an integer value
+    Bug #5177: Editor: Unexplored map tiles get corrupted after a file with terrain is saved
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
