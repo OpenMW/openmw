@@ -32,6 +32,7 @@
     Bug #4449: Value returned by GetWindSpeed is incorrect
     Bug #4456: AiActivate should not be cancelled after target activation
     Bug #4540: Rain delay when exiting water
+    Bug #4594: Actors without AI packages don't use Hello dialogue
     Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog

@@ -17,7 +17,6 @@
 
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
-#include "steering.hpp"
 #include "movement.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
@@ -26,8 +25,6 @@ namespace MWMechanics
 {
     static const int COUNT_BEFORE_RESET = 10;
     static const float DOOR_CHECK_INTERVAL = 1.5f;
-    static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
-    static const int GREETING_SHOULD_END = 10;
 
     // to prevent overcrowding
     static const int DESTINATION_TOLERANCE = 64;
@@ -176,6 +173,17 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_Walking);
         }
 
+        GreetingState greetingState = cStats.getGreetingState();
+        if (greetingState == Greet_InProgress)
+        {
+            if (storage.mState == AiWanderStorage::Wander_Walking)
+            {
+                stopWalking(actor, storage, false);
+                mObstacleCheck.clear();
+                storage.setState(AiWanderStorage::Wander_IdleNow);
+            }
+        }
+
         doPerFrameActionsForState(actor, duration, storage);
 
         float& lastReaction = storage.mReaction;
@@ -245,13 +253,7 @@ namespace MWMechanics
         if(mDistance && cellChange)
             mDistance = 0;
 
-        // Allow interrupting a walking actor to trigger a greeting
         AiWanderStorage::WanderState& wanderState = storage.mState;
-        if ((wanderState == AiWanderStorage::Wander_IdleNow) || (wanderState == AiWanderStorage::Wander_Walking))
-        {
-            playGreetingIfPlayerGetsTooClose(actor, storage);
-        }
-
         if ((wanderState == AiWanderStorage::Wander_MoveNow) && storage.mCanWanderAlongPathGrid)
         {
             // Construct a new path if there isn't one
@@ -416,19 +418,9 @@ namespace MWMechanics
             }
         }
 
-        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
-        if (rotate)
-        {
-            // Reduce the turning animation glitch by using a *HUGE* value of
-            // epsilon...  TODO: a proper fix might be in either the physics or the
-            // animation subsystem
-            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
-                rotate = false;
-        }
-
         // Check if idle animation finished
-        AiWanderStorage::GreetingState& greetingState = storage.mSaidGreeting;
-        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == AiWanderStorage::Greet_Done || greetingState == AiWanderStorage::Greet_None))
+        GreetingState greetingState = actor.getClass().getCreatureStats(actor).getGreetingState();
+        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking);
@@ -517,74 +509,7 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)
-    {
-        // Play a random voice greeting if the player gets too close
-        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
-        float helloDistance = static_cast<float>(hello);
-        static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        helloDistance *= iGreetDistanceMultiplier;
-
-        MWWorld::Ptr player = getPlayer();
-        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-
-        int& greetingTimer = storage.mGreetingTimer;
-        AiWanderStorage::GreetingState& greetingState = storage.mSaidGreeting;
-        if (greetingState == AiWanderStorage::Greet_None)
-        {
-            if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
-                !player.getClass().getCreatureStats(player).isDead() && !actor.getClass().getCreatureStats(actor).isParalyzed()
-                && MWBase::Environment::get().getWorld()->getLOS(player, actor)
-                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                greetingTimer++;
-
-            if (greetingTimer >= GREETING_SHOULD_START)
-            {
-                greetingState = AiWanderStorage::Greet_InProgress;
-                MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                greetingTimer = 0;
-            }
-        }
-
-        if (greetingState == AiWanderStorage::Greet_InProgress)
-        {
-            greetingTimer++;
-
-            if (storage.mState == AiWanderStorage::Wander_Walking)
-            {
-                stopWalking(actor, storage, false);
-                mObstacleCheck.clear();
-                storage.setState(AiWanderStorage::Wander_IdleNow);
-            }
-
-            turnActorToFacePlayer(actorPos, playerPos, storage);
-
-            if (greetingTimer >= GREETING_SHOULD_END)
-            {
-                greetingState = AiWanderStorage::Greet_Done;
-                greetingTimer = 0;
-            }
-        }
-
-        if (greetingState == AiWanderStorage::Greet_Done)
-        {
-            float resetDist = 2 * helloDistance;
-            if ((playerPos - actorPos).length2() >= resetDist*resetDist)
-                greetingState = AiWanderStorage::Greet_None;
-        }
-    }
-
-    void AiWander::turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage)
-    {
-        osg::Vec3f dir = playerPosition - actorPosition;
-
-        float faceAngleRadians = std::atan2(dir.x(), dir.y());
-        storage.mTargetAngleRadians = faceAngleRadians;
-        storage.mTurnActorGivingGreetingToFacePlayer = true;
-    }
 
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {

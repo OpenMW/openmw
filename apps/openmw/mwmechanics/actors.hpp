@@ -121,6 +121,8 @@ namespace MWMechanics
             void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer);
 
             void playIdleDialogue(const MWWorld::Ptr& actor);
+            void updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly);
+            void turnActorToFacePlayer(const MWWorld::Ptr& actor, const osg::Vec3f& dir);
 
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
