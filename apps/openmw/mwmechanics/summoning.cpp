@@ -86,9 +86,10 @@ namespace MWMechanics
         }
 
         // Update summon effects
+        bool casterDead = creatureStats.isDead();
         for (std::map<CreatureStats::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
         {
-            bool found = mActiveEffects.find(it->first) != mActiveEffects.end();
+            bool found = !casterDead && mActiveEffects.find(it->first) != mActiveEffects.end();
             if (!found)
             {
                 // Effect has ended
