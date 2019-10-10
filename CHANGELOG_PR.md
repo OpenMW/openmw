@@ -101,6 +101,7 @@ Editor Bug Fixes:
 - Colour fields in interior-cell records now also use the colour picker widget (#4745)
 - Cloned, added, or moved instances no longer disappear at load-time (#4748)
 - "Clear" function in the content selector no longer tries to execute a "Remove" action on an empty file list (#4757)
+- Terrain texture editing for plugins now correctly handles drags from base file (#4904)
 - Engine no longer tries to swap buffers of windows which weren't exposed to Qt's window management system (#4911)
 - Minimap doesn't get corrupted, when editing new omwgame (#5177)
 
