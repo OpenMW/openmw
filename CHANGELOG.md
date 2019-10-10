@@ -79,6 +79,7 @@
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Bug #4896: Title screen music doesn't loop
     Bug #4902: Using scrollbars in settings causes resolution to change
+    Bug #4904: Editor: Texture painting with duplicate of a base-version texture
     Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4918: Abilities don't play looping VFX when they're initially applied
