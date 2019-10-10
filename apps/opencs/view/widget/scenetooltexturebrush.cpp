@@ -58,7 +58,7 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
 CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
     mBrushShape(0),
-    mBrushSize(0),
+    mBrushSize(1),
     mBrushTexture("L0#0"),
     mDocument(document)
 {
