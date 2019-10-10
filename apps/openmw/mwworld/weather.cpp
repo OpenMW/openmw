@@ -538,6 +538,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::E
     , mMasser("Masser")
     , mSecunda("Secunda")
     , mWindSpeed(0.f)
+    , mCurrentWindSpeed(0.f)
+    , mNextWindSpeed(0.f)
     , mIsStorm(false)
     , mPrecipitation(false)
     , mStormDirection(0,1,0)
@@ -663,6 +665,40 @@ void WeatherManager::playerTeleported(const std::string& playerRegion, bool isEx
     }
 }
 
+osg::Vec3f WeatherManager::calculateStormDirection()
+{
+    osg::Vec3f playerPos (MWMechanics::getPlayer().getRefData().getPosition().asVec3());
+    playerPos.z() = 0;
+    osg::Vec3f redMountainPos (25000, 70000, 0);
+    osg::Vec3f stormDirection = (playerPos - redMountainPos);
+    stormDirection.normalize();
+
+    return stormDirection;
+}
+
+float WeatherManager::calculateWindSpeed(int weatherId, float currentSpeed)
+{
+    float targetSpeed = std::min(8.0f * mWeatherSettings[weatherId].mWindSpeed, 70.f);
+    if (currentSpeed == 0.f)
+        currentSpeed = targetSpeed;
+
+    float multiplier = mWeatherSettings[weatherId].mRainEffect.empty() ? 1.f : 0.5f;
+    float updatedSpeed = (Misc::Rng::rollClosedProbability() - 0.5f) * multiplier * targetSpeed + currentSpeed;
+
+    if (updatedSpeed > 0.5f * targetSpeed && updatedSpeed < 2.f * targetSpeed)
+    {
+        currentSpeed = updatedSpeed;
+    }
+
+    // Take in account direction to the Red Mountain, when needed
+    if (weatherId == 6 || weatherId == 7)
+    {
+        currentSpeed = (calculateStormDirection() * currentSpeed).length();
+    }
+
+    return currentSpeed;
+}
+
 void WeatherManager::update(float duration, bool paused, const TimeStamp& time, bool isExterior)
 {
     MWWorld::ConstPtr player = MWMechanics::getPlayer();
@@ -695,12 +731,21 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     {
         mRendering.setSkyEnabled(false);
         stopSounds();
+        mWindSpeed = 0.f;
+        mCurrentWindSpeed = 0.f;
+        mNextWindSpeed = 0.f;
         return;
     }
 
     calculateWeatherResult(time.getHour(), duration, paused);
 
-    mWindSpeed = mResult.mWindSpeed;
+    if (!paused)
+    {
+        mWindSpeed = mResult.mWindSpeed;
+        mCurrentWindSpeed = mResult.mCurrentWindSpeed;
+        mNextWindSpeed = mResult.mNextWindSpeed;
+    }
+
     mIsStorm = mResult.mIsStorm;
 
     // For some reason Ash Storm is not considered as a precipitation weather in game
@@ -709,11 +754,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     if (mIsStorm)
     {
-        osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
-        playerPos.z() = 0;
-        osg::Vec3f redMountainPos (25000, 70000, 0);
-        mStormDirection = (playerPos - redMountainPos);
-        mStormDirection.normalize();
+        mStormDirection = calculateStormDirection();
         mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }
 
@@ -1096,7 +1137,9 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
 
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mCloudBlendFactor = 0;
-    mResult.mWindSpeed = current.mWindSpeed;
+    mResult.mNextWindSpeed = 0;
+    mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(weatherID, mWindSpeed);
+
     mResult.mCloudSpeed = current.mCloudSpeed;
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
@@ -1180,7 +1223,11 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
     mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
     mResult.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
     mResult.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
-    mResult.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+
+    mResult.mCurrentWindSpeed = calculateWindSpeed(mCurrentWeather, mCurrentWindSpeed);
+    mResult.mNextWindSpeed = calculateWindSpeed(mNextWeather, mNextWindSpeed);
+
+    mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
     mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
     mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
     mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
