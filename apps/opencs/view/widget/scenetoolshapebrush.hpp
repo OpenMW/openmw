@@ -40,9 +40,8 @@ namespace CSVWidget
             ShapeBrushSizeControls(const QString &title, QWidget *parent);
 
         private:
-            QHBoxLayout *mLayoutSliderSize;
-            QSlider *mBrushSizeSlider;
-            QSpinBox *mBrushSizeSpinBox;
+            QSlider *mBrushSizeSlider = new QSlider(Qt::Horizontal);
+            QSpinBox *mBrushSizeSpinBox = new QSpinBox;
 
         friend class SceneToolShapeBrush;
         friend class CSVRender::TerrainShapeMode;
@@ -64,8 +63,8 @@ namespace CSVWidget
             const QString toolTipCustom = "Paint with custom brush, defined by terrain selection";
 
         private:
-            CSVWidget::BrushShape mBrushShape;
-            int mBrushSize;
+            CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
+            int mBrushSize = 1;
             CSMDoc::Document& mDocument;
             QGroupBox *mHorizontalGroupBox;
             QComboBox *mToolSelector;

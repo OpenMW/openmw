@@ -35,10 +35,7 @@
 
 
 CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, QWidget *parent)
-    : QGroupBox(title, parent),
-    mLayoutSliderSize(new QHBoxLayout),
-    mBrushSizeSlider(new QSlider(Qt::Horizontal)),
-    mBrushSizeSpinBox(new QSpinBox)
+    : QGroupBox(title, parent)
 {
     mBrushSizeSlider->setTickPosition(QSlider::TicksBothSides);
     mBrushSizeSlider->setTickInterval(10);
@@ -48,19 +45,18 @@ CSVWidget::ShapeBrushSizeControls::ShapeBrushSizeControls(const QString &title, 
     mBrushSizeSpinBox->setRange(1, CSMPrefs::get()["3D Scene Editing"]["shapebrush-maximumsize"].toInt());
     mBrushSizeSpinBox->setSingleStep(1);
 
-    mLayoutSliderSize->addWidget(mBrushSizeSlider);
-    mLayoutSliderSize->addWidget(mBrushSizeSpinBox);
+    QHBoxLayout *layoutSliderSize = new QHBoxLayout;
+    layoutSliderSize->addWidget(mBrushSizeSlider);
+    layoutSliderSize->addWidget(mBrushSizeSpinBox);
 
     connect(mBrushSizeSlider, SIGNAL(valueChanged(int)), mBrushSizeSpinBox, SLOT(setValue(int)));
     connect(mBrushSizeSpinBox, SIGNAL(valueChanged(int)), mBrushSizeSlider, SLOT(setValue(int)));
 
-    setLayout(mLayoutSliderSize);
+    setLayout(layoutSliderSize);
 }
 
 CSVWidget::ShapeBrushWindow::ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
-    mBrushShape(CSVWidget::BrushShape_Point),
-    mBrushSize(1),
     mDocument(document)
 {
     mButtonPoint = new QPushButton(QIcon (QPixmap (":scenetoolbar/brush-point")), "", this);

@@ -141,20 +141,20 @@ namespace CSVRender
 
             std::string mCellId;
             std::string mBrushTexture;
-            int mBrushSize;
-            CSVWidget::BrushShape mBrushShape;
+            int mBrushSize = 1;
+            CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
             std::vector<std::pair<int, int>> mCustomBrushShape;
-            CSVWidget::SceneToolShapeBrush *mShapeBrushScenetool;
-            int mDragMode;
+            CSVWidget::SceneToolShapeBrush *mShapeBrushScenetool = nullptr;
+            int mDragMode = InteractionType_None;
             osg::Group* mParentNode;
-            bool mIsEditing;
+            bool mIsEditing = false;
             std::unique_ptr<TerrainSelection> mTerrainShapeSelection;
-            int mTotalDiffY;
+            int mTotalDiffY = 0;
             std::vector<CSMWorld::CellCoordinates> mAlteredCells;
             osg::Vec3d mEditingPos;
-            int mShapeEditTool;
-            int mShapeEditToolStrength;
-            int mTargetHeight;
+            int mShapeEditTool = ShapeEditTool_Drag;
+            int mShapeEditToolStrength = 8;
+            int mTargetHeight = 0;
 
             PagedWorldspaceWidget& getPagedWorldspaceWidget();
 
