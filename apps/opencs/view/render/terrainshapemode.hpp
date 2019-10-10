@@ -58,18 +58,18 @@ namespace CSVRender
             /// Editmode for terrain shape grid
             TerrainShapeMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
-            void primaryOpenPressed (const WorldspaceHitResult& hit);
+            void primaryOpenPressed (const WorldspaceHitResult& hit) final;
 
             /// Create single command for one-click shape editing
-            void primaryEditPressed (const WorldspaceHitResult& hit);
+            void primaryEditPressed (const WorldspaceHitResult& hit) final;
 
             /// Open brush settings window
-            void primarySelectPressed(const WorldspaceHitResult&);
+            void primarySelectPressed(const WorldspaceHitResult&) final;
 
-            void secondarySelectPressed(const WorldspaceHitResult&);
+            void secondarySelectPressed(const WorldspaceHitResult&) final;
 
-            void activate(CSVWidget::SceneToolbar*);
-            void deactivate(CSVWidget::SceneToolbar*);
+            void activate(CSVWidget::SceneToolbar*) final;
+            void deactivate(CSVWidget::SceneToolbar*) final;
 
             /// Start shape editing command macro
             bool primaryEditStartDrag (const QPoint& pos) final;
