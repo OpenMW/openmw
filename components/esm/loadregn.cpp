@@ -62,8 +62,10 @@ namespace ESM
                     break;
                 case ESM::FourCC<'S','N','A','M'>::value:
                 {
+                    esm.getSubHeader();
                     SoundRef sr;
-                    esm.getHT(sr, 33);
+                    sr.mSound.assign(esm.getString(32));
+                    esm.getT(sr.mChance);
                     mSoundList.push_back(sr);
                     break;
                 }
@@ -103,7 +105,10 @@ namespace ESM
         esm.writeHNT("CNAM", mMapColor);
         for (std::vector<SoundRef>::const_iterator it = mSoundList.begin(); it != mSoundList.end(); ++it)
         {
-            esm.writeHNT<SoundRef>("SNAM", *it);
+            esm.startSubRecord("SNAM");
+            esm.writeFixedSizeString(it->mSound, 32);
+            esm.writeT(it->mChance);
+            esm.endRecord("NPCO");
         }
     }
 

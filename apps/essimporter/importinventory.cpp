@@ -17,7 +17,7 @@ namespace ESSImport
             esm.getHT(contItem);
 
             InventoryItem item;
-            item.mId = contItem.mItem.toString();
+            item.mId = contItem.mItem;
             item.mCount = contItem.mCount;
             item.mRelativeEquipmentSlot = -1;
             item.mLockLevel = 0;

@@ -924,7 +924,7 @@ namespace MWSound
         {
             if(r - pos < sndref.mChance)
             {
-                playSound(sndref.mSound.toString(), 1.0f, 1.0f);
+                playSound(sndref.mSound, 1.0f, 1.0f);
                 break;
             }
             pos += sndref.mChance;

@@ -1257,7 +1257,7 @@ namespace CSMWorld
 
             switch (subColIndex)
             {
-                case 0: return QString::fromUtf8(content.mItem.toString().c_str());
+                case 0: return QString::fromUtf8(content.mItem.c_str());
                 case 1: return content.mCount;
                 default:
                     throw std::runtime_error("Trying to access non-existing column in the nested table!");
