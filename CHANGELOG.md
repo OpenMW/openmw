@@ -161,6 +161,7 @@
     Bug #5175: Random script function returns an integer value
     Bug #5177: Editor: Unexplored map tiles get corrupted after a file with terrain is saved
     Bug #5182: OnPCEquip doesn't trigger on skipped beast race attempts to equip something not equippable by beasts
+    Bug #5186: Equipped item enchantments don't affect creatures
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
