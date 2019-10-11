@@ -441,7 +441,7 @@ namespace MWScript
 
                     MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
                     effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().isNpc())
+                    if (ptr.getClass().hasInventoryStore(ptr))
                     {
                         MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
                         effects += store.getMagicEffects();

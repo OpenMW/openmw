@@ -667,7 +667,7 @@ namespace MWMechanics
 
         MagicEffects now = creatureStats.getSpells().getMagicEffects();
 
-        if (creature.getClass().isNpc())
+        if (creature.getClass().hasInventoryStore(creature))
         {
             MWWorld::InventoryStore& store = creature.getClass().getInventoryStore (creature);
             now += store.getMagicEffects();
