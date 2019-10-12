@@ -242,14 +242,24 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideCell);
     declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
         addValues (insertOutsideVisibleCell);
-    declareEnum ("outside-landedit", "Handling land edit outside of cells", createAndLandEdit).
+    declareEnum ("outside-landedit", "Handling terrain edit outside of cells", createAndLandEdit).
+        setTooltip("Behavior of terrain editing, if land editing brush reaches an area without cell record.").
         addValues (landeditOutsideCell);
-    declareEnum ("outside-visible-landedit", "Handling land edit outside of visible cells", showAndLandEdit).
+    declareEnum ("outside-visible-landedit", "Handling terrain edit outside of visible cells", showAndLandEdit).
+        setTooltip("Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.").
         addValues (landeditOutsideVisibleCell);
     declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
         setMin (1);
-    declareInt ("shapebrush-maximumsize", "Maximum shape brush size", 100).
+    declareInt ("shapebrush-maximumsize", "Maximum height edit brush size", 100).
+        setTooltip("Setting for the slider range of brush size in terrain height editing.").
         setMin (1);
+    declareBool ("landedit-post-smoothpainting", "Smooth land after painting height", false).
+        setTooltip("Raise and lower tools will leave bumpy finish without this option");
+    declareDouble ("landedit-post-smoothstrength", "Smoothing strength (post-edit)", 0.25).
+        setTooltip("If smoothing land after painting height is used, this is the percentage of smooth applied afterwards. "
+        "Negative values may be used to roughen instead of smooth.").
+        setMin (-1).
+        setMax (1);
     declareBool ("open-list-view", "Open displays list view", false).
         setTooltip ("When opening a reference from the scene view, it will open the"
         " instance list view instead of the individual instance record view.");

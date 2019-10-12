@@ -420,7 +420,12 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
         int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
         int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
         if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
-        if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+        if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
+        {
+            alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+            float smoothMultiplier = static_cast<float>(CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothstrength"].toDouble());
+            if (CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothpainting"].isTrue()) smoothHeight(cellCoords, x, y, mShapeEditToolStrength * smoothMultiplier);
+        }
         if (mShapeEditTool == ShapeEditTool_Smooth) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
         if (mShapeEditTool == ShapeEditTool_Flatten) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
     }
@@ -436,7 +441,12 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
                 int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
                 if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
-                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
+                {
+                    alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+                    float smoothMultiplier = static_cast<float>(CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothstrength"].toDouble());
+                    if (CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothpainting"].isTrue()) smoothHeight(cellCoords, x, y, mShapeEditToolStrength * smoothMultiplier);
+                }
                 if (mShapeEditTool == ShapeEditTool_Smooth) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                 if (mShapeEditTool == ShapeEditTool_Flatten) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
             }
@@ -462,8 +472,13 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) smoothedByDistance = (r + mShapeEditToolStrength) - (r + mShapeEditToolStrength) * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
                 if (distance <= r)
                 {
-                    if (mShapeEditTool == ShapeEditTool_Drag || mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
-                    alterHeight(cellCoords, x, y, smoothedByDistance);
+                    if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, smoothedByDistance);
+                    if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
+                    {
+                        alterHeight(cellCoords, x, y, smoothedByDistance);
+                        float smoothMultiplier = static_cast<float>(CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothstrength"].toDouble());
+                        if (CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothpainting"].isTrue()) smoothHeight(cellCoords, x, y, mShapeEditToolStrength * smoothMultiplier);
+                    }
                     if (mShapeEditTool == ShapeEditTool_Smooth) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                     if (mShapeEditTool == ShapeEditTool_Flatten) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
                 }
@@ -481,7 +496,12 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
                 int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first + value.first);
                 int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second + value.second);
                 if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
-                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower)
+                {
+                    alterHeight(cellCoords, x, y, mShapeEditToolStrength);
+                    float smoothMultiplier = static_cast<float>(CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothstrength"].toDouble());
+                    if (CSMPrefs::get()["3D Scene Editing"]["landedit-post-smoothpainting"].isTrue()) smoothHeight(cellCoords, x, y, mShapeEditToolStrength * smoothMultiplier);
+                }
                 if (mShapeEditTool == ShapeEditTool_Smooth) smoothHeight(cellCoords, x, y, mShapeEditToolStrength);
                 if (mShapeEditTool == ShapeEditTool_Flatten) flattenHeight(cellCoords, x, y, mShapeEditToolStrength, mTargetHeight);
             }
