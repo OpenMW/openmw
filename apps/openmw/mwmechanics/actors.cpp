@@ -298,10 +298,31 @@ namespace MWMechanics
 
         bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual(currentItem->getCellRef().getRefId(), itemId);
 
-        store.remove(itemId, 1, actor, true);
+        store.remove(itemId, 1, actor);
 
         if (actor != MWMechanics::getPlayer())
+        {
+            // Equip a replacement
+            if (!wasEquipped)
+                return;
+
+            std::string type = currentItem->getTypeName();
+            if (type != typeid(ESM::Weapon).name() && type != typeid(ESM::Armor).name() && type != typeid(ESM::Clothing).name())
+                return;
+
+            if (actor.getClass().getCreatureStats(actor).isDead())
+                return;
+
+            if (!actor.getClass().hasInventoryStore(actor) || !actor.getClass().getInventoryStore(actor).canActorAutoEquip(actor))
+                return;
+
+            if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
+                return;
+
+            actor.getClass().getInventoryStore(actor).autoEquip(actor);
+
             return;
+        }
 
         MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
         std::string prevItemId = player.getPreviousItem(itemId);
@@ -1199,7 +1220,7 @@ namespace MWMechanics
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
                     // If we have a torch and can equip it, then equip it now.
-                    if (heldIter == inventoryStore.end())
+                    if (heldIter == inventoryStore.end() && inventoryStore.canActorAutoEquip(ptr))
                     {
                         inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torch, ptr);
                     }
@@ -1807,6 +1828,8 @@ namespace MWMechanics
                 stats.getActiveSpells().clear();
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
+
+                calculateCreatureStatModifiers(iter->first, 0);
 
                 if( iter->first == getPlayer())
                 {

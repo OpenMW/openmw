@@ -135,7 +135,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr,
 {
     const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
 
-    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
+    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
             && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
@@ -208,22 +208,29 @@ MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return findSlot (slot);
 }
 
-bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
+bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor)
 {
-    if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
+    // Treat player as non-trader indifferently from service flags.
+    if (actor == MWMechanics::getPlayer())
         return true;
 
-    // Only autoEquip if we are the original owner of the item.
-    // This stops merchants from auto equipping anything you sell to them.
-    // ...unless this is a companion, he should always equip items given to him.
-    if (!Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
-            (actor.getClass().getScript(actor).empty() ||
-            !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
-            && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
-            )
-    {
-        return false;
-    }
+    static const bool prevent = Settings::Manager::getBool("prevent merchant equipping", "Game");
+    if (!prevent)
+        return true;
+
+    // Corpses can be dressed up by the player as desired.
+    if (actor.getClass().getCreatureStats(actor).isDead())
+        return true;
+
+    // Companions can autoequip items.
+    if (!actor.getClass().getScript(actor).empty() &&
+        actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
+        return true;
+
+    // If the actor is trader, he can auto-equip items only during initial auto-equipping
+    int services = actor.getClass().getServices(actor);
+    if (services & ESM::NPC::AllItems)
+        return mFirstAutoEquip;
 
     return true;
 }
@@ -325,9 +332,6 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
 
         for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
         {
-            if (!canActorAutoEquip(actor, *iter))
-                continue;
-
             const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
             if (MWMechanics::getWeaponType(esmWeapon->mData.mType)->mWeaponClass == ESM::WeaponType::Ammo)
@@ -428,9 +432,6 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
-
-        if (!canActorAutoEquip(actor, test))
-            continue;
 
         switch(test.getClass().canBeEquipped (test, actor).first)
         {
@@ -551,6 +552,9 @@ void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor, TSlots&
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
+    if (!canActorAutoEquip(actor))
+        return;
+
     TSlots slots_;
     initSlots (slots_);
 

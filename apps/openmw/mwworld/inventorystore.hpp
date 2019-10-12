@@ -112,7 +112,6 @@ namespace MWWorld
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
-            bool canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item);
             ContainerStoreIterator findSlot (int slot) const;
 
         public:
@@ -160,6 +159,8 @@ namespace MWWorld
 
             void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
+
+            bool canActorAutoEquip(const MWWorld::Ptr& actor);
 
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
