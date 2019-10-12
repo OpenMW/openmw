@@ -147,7 +147,12 @@ Weather::Weather(const std::string& name,
     , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
-    , mRainFrequency(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mRainMaxRaindrops(Fallback::Map::getFloat("Weather_" + name + "_Max_Raindrops"))
+    , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
+    , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
+    , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
+    , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
     , mParticleEffect(particleEffect)
     , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
     , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
@@ -178,15 +183,6 @@ Weather::Weather(const std::string& name,
 
     if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
         mAmbientLoopSoundID.clear();
-
-    /*
-    Unhandled:
-    Rain Diameter=600 ?
-    Rain Height Min=200 ?
-    Rain Height Max=700 ?
-    Rain Threshold=0.6 ?
-    Max Raindrops=650 ?
-    */
 }
 
 float Weather::transitionDelta() const
@@ -1149,7 +1145,11 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mIsStorm = current.mIsStorm;
 
     mResult.mRainSpeed = current.mRainSpeed;
-    mResult.mRainFrequency = current.mRainFrequency;
+    mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
+    mResult.mRainDiameter = current.mRainDiameter;
+    mResult.mRainMinHeight = current.mRainMinHeight;
+    mResult.mRainMaxHeight = current.mRainMaxHeight;
+    mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
 
     mResult.mParticleEffect = current.mParticleEffect;
     mResult.mRainEffect = current.mRainEffect;
@@ -1234,16 +1234,24 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
 
     mResult.mNight = current.mNight;
 
-    if(factor < 0.5)
+    float threshold = mWeatherSettings[mNextWeather].mRainThreshold;
+    if (threshold <= 0)
+        threshold = 0.5f;
+
+    if(factor < threshold)
     {
         mResult.mIsStorm = current.mIsStorm;
         mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainEffect = current.mRainEffect;
         mResult.mRainSpeed = current.mRainSpeed;
-        mResult.mRainFrequency = current.mRainFrequency;
-        mResult.mAmbientSoundVolume = 1-(factor*2);
+        mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
+        mResult.mAmbientSoundVolume = 1 - factor / threshold;
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        mResult.mRainDiameter = current.mRainDiameter;
+        mResult.mRainMinHeight = current.mRainMinHeight;
+        mResult.mRainMaxHeight = current.mRainMaxHeight;
+        mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
     }
     else
     {
@@ -1251,10 +1259,15 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mParticleEffect = other.mParticleEffect;
         mResult.mRainEffect = other.mRainEffect;
         mResult.mRainSpeed = other.mRainSpeed;
-        mResult.mRainFrequency = other.mRainFrequency;
-        mResult.mAmbientSoundVolume = 2*(factor-0.5f);
+        mResult.mRainEntranceSpeed = other.mRainEntranceSpeed;
+        mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+
+        mResult.mRainDiameter = other.mRainDiameter;
+        mResult.mRainMinHeight = other.mRainMinHeight;
+        mResult.mRainMaxHeight = other.mRainMaxHeight;
+        mResult.mRainMaxRaindrops = other.mRainMaxRaindrops;
     }
 }
 

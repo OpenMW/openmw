@@ -9,6 +9,8 @@
 #include <osg/Vec4f>
 #include <osg/Uniform>
 
+#include <osgParticle/BoxPlacer>
+
 namespace osg
 {
     class Camera;
@@ -39,6 +41,7 @@ namespace MWRender
     class CloudUpdater;
     class Sun;
     class Moon;
+    class RainCounter;
     class RainShooter;
     class RainFader;
     class AlphaFader;
@@ -87,8 +90,12 @@ namespace MWRender
         std::string mRainEffect;
         float mEffectFade;
 
+        float mRainDiameter;
+        float mRainMinHeight;
+        float mRainMaxHeight;
         float mRainSpeed;
-        float mRainFrequency;
+        float mRainEntranceSpeed;
+        int mRainMaxRaindrops;
     };
 
     struct MoonState
@@ -218,6 +225,8 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> mRainNode;
         osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;
+        osg::ref_ptr<osgParticle::BoxPlacer> mPlacer;
+        osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
         osg::ref_ptr<RainFader> mRainFader;
 
@@ -251,7 +260,11 @@ namespace MWRender
         bool mRainEnabled;
         std::string mRainEffect;
         float mRainSpeed;
-        float mRainFrequency;
+        float mRainDiameter;
+        float mRainMinHeight;
+        float mRainMaxHeight;
+        float mRainEntranceSpeed;
+        int mRainMaxRaindrops;
         float mWindSpeed;
 
         bool mEnabled;
