@@ -149,7 +149,6 @@ void CSVRender::Cell::updateLand()
     }
 
     // No land data
-    mLandDeleted = true;
     unloadLand();
 }
 

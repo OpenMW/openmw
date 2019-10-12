@@ -91,7 +91,11 @@ namespace CSVRender
             void dragMoveEvent (QDragMoveEvent *event) final;
 
         private:
-            /// Move pending alteredHeights changes to omwgame/omeaddon -data
+
+            /// Remove duplicates and sort mAlteredCells, then limitAlteredHeights forward and reverse
+            void sortAndLimitAlteredCells();
+
+            /// Move pending alteredHeights changes to omwgame/omwaddon -data
             void applyTerrainEditChanges();
 
             /// Handle brush mechanics for shape editing
@@ -136,10 +140,23 @@ namespace CSVRender
             void pushLodToCommand(const CSMWorld::LandMapLodColumn::DataType& newLandMapLod, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, const std::string& cellId);
 
-            /// Create new cell and land if needed
-            bool allowLandShapeEditing(const std::string& textureFileName);
+            bool noCell(const std::string& cellId);
 
-            std::string mCellId;
+            bool noLand(const std::string& cellId);
+
+            bool noLandLoaded(const std::string& cellId);
+
+            bool isLandLoaded(const std::string& cellId);
+
+            /// Create new blank height record and new normals, if there are valid adjancent cell, take sample points and set the average height based on that
+            void createNewLandData(const CSMWorld::CellCoordinates& cellCoords);
+
+            /// Create new cell and land if needed, only user tools may ask for opening new cells (useTool == false is for automated land changes)
+            bool allowLandShapeEditing(const std::string& textureFileName, bool useTool = true);
+
+            /// Bind the edging vertice to the values of the adjancent cells
+            void fixEdges(CSMWorld::CellCoordinates cellCoords);
+
             std::string mBrushTexture;
             int mBrushSize = 1;
             CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
