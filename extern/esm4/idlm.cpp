@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::IdleMarker::IdleMarker() : mFormId(0), mFlags(0), mIdleFlags(0), mIdleCount(0), mIdleTimer(0.f), mIdleAnim(0)
 {
@@ -93,9 +93,9 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::IdleMarker::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::IdleMarker::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::IdleMarker::blank()
 //{

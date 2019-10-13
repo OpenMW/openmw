@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::ArmorAddon::ArmorAddon() : mFormId(0), mFlags(0)
 {
@@ -40,7 +40,6 @@ ESM4::ArmorAddon::ArmorAddon() : mFormId(0), mFlags(0)
 ESM4::ArmorAddon::~ArmorAddon()
 {
 }
-
 void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 {
     mFormId = reader.hdr().record.id;
@@ -95,9 +94,9 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ArmorAddon::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::ArmorAddon::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::ArmorAddon::blank()
 //{

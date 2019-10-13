@@ -32,7 +32,7 @@
 
 #include "formid.hpp"
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Race::Race() : mFormId(0), mFlags(0), mBoundRadius(0.f)
                    , mHeightMale(1.f), mHeightFemale(1.f), mWeightMale(1.f), mWeightFemale(1.f)
@@ -450,9 +450,9 @@ void ESM4::Race::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Race::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Race::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Race::blank()
 //{

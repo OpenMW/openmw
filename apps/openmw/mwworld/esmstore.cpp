@@ -80,7 +80,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     // Loop through all records
     while(esm.hasMoreRecs())
     {
-        if (isTes4 || isTes5 || isFONV)
+        if (true||isTes4 || isTes5 || isFONV)
         {
             ESM4::Reader& reader = dynamic_cast<ESM::ESM4Reader*>(&esm)->reader();
             //if(reader.getFileOffset()>= reader.getFileSize())break;

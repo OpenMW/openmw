@@ -63,7 +63,7 @@ namespace ESM4
         FormId          currWorld;        // formId of current world - for grouping CELL records
         FormId          currCell;         // formId of current cell
 
-        std::size_t     recHeaderSize;    // normally should be already set correctly, but just in
+        std::size_t     recHeaderSize, mSubRecordHeaderSize;    // normally should be already set correctly, but just in
                                           //  case the file was re-opened.  default = TES5 size,
                                           //  can be reduced for TES4 by setRecHeaderSize()
 
@@ -71,6 +71,25 @@ namespace ESM4
                                           //  the context is restored.
     };
 
+    /*struct ESM_Context
+    {
+      std::string filename;
+      uint32_t leftRec, leftSub;
+      size_t leftFile;
+      NAME recName, subName;
+      // When working with multiple esX files, we will generate lists of all files that
+      //  actually contribute to a specific cell. Therefore, we need to store the index
+      //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
+      int TESindex;
+      int index;
+
+      // True if subName has been read but not used.
+      bool subCached;
+
+      // File position. Only used for stored contexts, not regularly
+      // updated within the reader itself.
+      size_t filePos;
+    };*/
     class Reader
     {
         ReaderObserver *mObserver;        // observer for tracking bytes read
@@ -140,6 +159,7 @@ namespace ESM4
 
         // NOTE: must be called before calling getRecordHeader()
         void setRecHeaderSize(const std::size_t size);
+        void setSubRecordHeaderSize(const std::size_t size){ mCtx.mSubRecordHeaderSize = size;}
 
         inline void loadHeader() { mHeader.load(*this); }
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
@@ -206,6 +226,7 @@ namespace ESM4
 
         // Read 6 bytes of header. The caller can then decide whether to process or skip the data.
         bool getSubRecordHeader();
+
 
         // Manally update (i.e. reduce) the bytes remaining to be read after SUB_XXXX
         inline void updateRecordRemaining(std::uint32_t subSize) { mRecordRemaining -= subSize; }

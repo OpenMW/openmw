@@ -30,7 +30,7 @@
  #include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Faction::Faction() : mFormId(0), mFlags(0)
 {
@@ -158,9 +158,9 @@ void ESM4::Faction::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Faction::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Faction::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Faction::blank()
 //{

@@ -33,7 +33,7 @@
 #include <sstream>
 #include <cstring>
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Npc::Npc() : mFormId(0), mFlags(0), mRace(0), mClass(0), mHair(0), mEyes(0), mHairLength(0.f),
                    mDeathItem(0),
@@ -270,9 +270,9 @@ void ESM4::Npc::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Npc::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Npc::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Npc::blank()
 //{

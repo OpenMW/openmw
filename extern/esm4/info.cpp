@@ -32,7 +32,7 @@
 #include "common.hpp"
 #include "reader.hpp"
 #include "vmad.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Info::Info() : mFormId(0), mFlags(0), mCurrentChoice(nullptr), mCurrentResponse(nullptr)//, mData(0), mAdditionalPart(0)
 {
@@ -192,3 +192,8 @@ void ESM4::Info::load(ESM4::Reader& reader)
 
 }
 
+
+void ESM4::Info::save(ESM4::Writer& reader) const
+{
+
+}

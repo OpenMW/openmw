@@ -32,7 +32,7 @@
 #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 #ifdef NDEBUG // FIXME: debuggigng only
 #undef NDEBUG
@@ -143,9 +143,9 @@ void ESM4::Region::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Region::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Region::save(ESM4::Writer& writer) const
+{
+}
 
 void ESM4::Region::blank()
 {

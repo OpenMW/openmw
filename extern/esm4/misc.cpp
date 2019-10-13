@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::MiscItem::MiscItem() : mFormId(0), mFlags(0), mScript(0), mBoundRadius(0.f)
 {
@@ -93,9 +93,9 @@ void ESM4::MiscItem::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::MiscItem::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::MiscItem::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::MiscItem::blank()
 //{

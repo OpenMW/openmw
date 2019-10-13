@@ -32,7 +32,7 @@
 #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 #ifdef NDEBUG // FIXME: debuggigng only
 #undef NDEBUG
@@ -275,10 +275,10 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Cell::save(ESM4::Writer& writer) const
-//{
-//}
 
+void ESM4::Cell::save(ESM4::Writer& writer) const
+{
+}
 void ESM4::Cell::blank()
 {
 }

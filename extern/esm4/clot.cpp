@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Clothing::Clothing() : mFormId(0), mFlags(0), mBoundRadius(0.f), mClothingFlags(0),
                              mScript(0), mEnchantmentPoints(0), mEnchantment(0)
@@ -91,9 +91,9 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Clothing::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Clothing::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Clothing::blank()
 //{

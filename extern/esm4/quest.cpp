@@ -31,7 +31,7 @@
 
 #include "common.hpp"
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Quest::Quest() : mFormId(0), mFlags(0), mScript(0), mCurrentLogEntry(nullptr), mCurrentStage(nullptr), mCurrentTarget(nullptr)
 {
@@ -177,4 +177,11 @@ void ESM4::Quest::load(ESM4::Reader& reader)
         }
     }
 }
+
+
+void ESM4::Quest::save(ESM4::Writer& reader) const
+{
+
+}
+
 

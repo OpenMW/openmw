@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Terminal::Terminal() : mFormId(0), mFlags(0), mScript(0), mPasswordNote(0), mSound(0)
 {
@@ -112,9 +112,9 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Terminal::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Terminal::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Terminal::blank()
 //{

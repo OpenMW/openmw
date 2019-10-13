@@ -77,7 +77,7 @@ namespace ESM4
         std::vector<std::uint32_t> mModIndicies;
 
         void load (Reader& reader);
-        //void save (Writer& writer);
+        void save (Writer& writer);
     };
 }
 

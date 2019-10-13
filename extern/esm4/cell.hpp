@@ -104,7 +104,7 @@ namespace ESM4
         bool preload(ESM4::Reader& reader);
 
         virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        virtual void save(ESM4::Writer& writer) const;
 
         void blank();
     };

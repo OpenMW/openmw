@@ -31,7 +31,7 @@
 #include <iomanip>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Script::Script() : mFormId(0), mFlags(0) ,mSCDADataBuf(NULL), mSCDADataBufsize(0)
 {
@@ -188,9 +188,9 @@ void ESM4::Script::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Script::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Script::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Script::blank()
 //{

@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Activator::Activator() : mFormId(0), mFlags(0), mScript(0), mSound(0), mBoundRadius(0.f)
 {
@@ -98,10 +98,49 @@ void ESM4::Activator::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Activator::save(ESM4::Writer& writer) const
-//{
-//}
 
+void ESM4::Activator::save(ESM4::Writer& writer)const
+{
+    ESM4::RecordHeader hdr;
+    switch(writer.esmVersion())
+    {
+    case ESM4::VER_132 :
+    case ESM4::VER_133 :
+    case ESM4::VER_134 :
+        //Falout
+
+    case ESM4::VER_080 :
+    case ESM4::VER_100 :
+        //TES4
+
+default:
+        //TES3
+        hdr.record.dataSize=sizeof(mModel)+sizeof(mScript)+writer.getContext().mSubRecordHeaderSize*3;
+    }
+
+    hdr.record.dataSize=sizeof(mModel)+sizeof(mScript)+writer.getContext().mSubRecordHeaderSize*3;
+    hdr.record.typeId=ESM4::REC_ACTI;
+    writer.putRecordHeader(hdr);
+//    writer.putSubRecord( ESM4::SUB_NAME, mId);
+    writer.putSubRecord(ESM4::SUB_DELE,"");
+    writer.putSubRecord(ESM4::SUB_MODL,mModel);
+ //   writer.putSubRecord(ESM4::SUB_FNAM,mName);
+    writer.putSubRecord(ESM4::SUB_SCRI,mScript);
+  /*  void Activator::save(ESMWriter &esm, bool isDeleted) const
+    {
+        esm.writeHNCString("NAME", mId);
+
+        if (isDeleted)
+        {
+            esm.writeHNCString("DELE", "");
+            return;
+        }
+
+        esm.writeHNCString("MODL", mModel);
+        esm.writeHNOCString("FNAM", mName);
+        esm.writeHNOCString("SCRI", mScript);
+    }*/
+}
 //void ESM4::Activator::blank()
 //{
 //}

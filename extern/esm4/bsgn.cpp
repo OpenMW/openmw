@@ -32,7 +32,7 @@
 
 #include "common.hpp"
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::BirthSign::BirthSign() : mFormId(0), mFlags(0)//, mData(0), mAdditionalPart(0)
 {
@@ -127,9 +127,9 @@ reader.getZString(iconname);
     }
 }
 
-//void ESM4::HeadPart::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::BirthSign::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::HeadPart::blank()
 //{

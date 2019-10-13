@@ -33,7 +33,7 @@
 #include <iostream> // FIXME
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 #ifdef NDEBUG // FIXME: debuggigng only
 #undef NDEBUG
@@ -214,9 +214,9 @@ void ESM4::Creature::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Creature::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Creature::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Creature::blank()
 //{

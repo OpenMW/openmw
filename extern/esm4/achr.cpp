@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::ActorCharacter::ActorCharacter() : mFormId(0), mFlags(0), mDisabled(false),  mBaseObj(0),
                                          mScale(1.f), mOwner(0), mGlobal(0)
@@ -46,7 +46,7 @@ ESM4::ActorCharacter::~ActorCharacter()
 }
 
 void ESM4::ActorCharacter::load(ESM4::Reader& reader)
-{
+    {
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
     mFlags  = reader.hdr().record.flags;
@@ -108,9 +108,9 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ActorCharacter::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::ActorCharacter::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::ActorCharacter::blank()
 //{

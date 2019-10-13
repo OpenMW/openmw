@@ -38,6 +38,7 @@ namespace ESM4
     class Writer;
 
     ////refering to  https://en.uesp.net/wiki/Tes4Mod:Mod_File_Format/GLOB
+    ////             https://en.uesp.net/wiki/Tes5Mod:Mod_File_Format/GLOB
     struct Global
     {
 
@@ -59,7 +60,7 @@ namespace ESM4
         virtual ~Global();
 
         virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        virtual void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

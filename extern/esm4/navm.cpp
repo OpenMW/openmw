@@ -31,7 +31,7 @@
 #include <iostream> // FIXME: debugging only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::NavMesh::NavMesh() : mFormId(0), mFlags(0)
 {
@@ -259,9 +259,9 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
     //std::cout << "num nvnm " << std::dec << mData.size() << std::endl; // FIXME
 }
 
-//void ESM4::NavMesh::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::NavMesh::save(ESM4::Writer& writer) const
+{
+}
 
 void ESM4::NavMesh::blank()
 {

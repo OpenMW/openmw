@@ -32,7 +32,7 @@
 #include "formid.hpp" // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Reference::Reference() : mFormId(0), mFlags(0), mDisabled(false), mBaseObj(0), mScale(1.f),
                                mOwner(0), mGlobal(0), mFactionRank(0), mCount(1)
@@ -269,9 +269,9 @@ char tbuff[2048];
     }
 }
 
-//void ESM4::Reference::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Reference::save(ESM4::Writer& writer) const
+{
+}
 
 void ESM4::Reference::blank()
 {

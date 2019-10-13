@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Eyes::Eyes() : mFormId(0), mFlags(0)
 {
@@ -73,9 +73,9 @@ void ESM4::Eyes::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Eyes::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Eyes::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Eyes::blank()
 //{

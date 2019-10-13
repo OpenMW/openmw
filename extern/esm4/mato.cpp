@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Material::Material() : mFormId(0), mFlags(0)
 {
@@ -67,9 +67,9 @@ void ESM4::Material::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Material::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Material::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Material::blank()
 //{

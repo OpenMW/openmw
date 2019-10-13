@@ -33,6 +33,7 @@
 namespace ESM4
 {
     class Reader;
+    class Writer;
     typedef std::uint32_t FormId;
 
     struct Subspace
@@ -54,7 +55,7 @@ namespace ESM4
         virtual ~Subspace();
 
         virtual void load(Reader& reader);
-        //virtual void save(Writer& writer) const;
+        virtual void save(Writer& writer) const;
 
         //void blank();
     };

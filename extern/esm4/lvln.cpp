@@ -30,7 +30,7 @@
 #include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::LeveledActor::LeveledActor() : mFormId(0), mFlags(0), mChanceNone(0), mLvlActorFlags(0), mListCount(0)
 {
@@ -105,9 +105,9 @@ void ESM4::LeveledActor::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::LeveledActor::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::LeveledActor::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::LeveledActor::blank()
 //{

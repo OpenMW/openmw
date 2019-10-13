@@ -272,7 +272,11 @@ bool ESM4::Reader::getSubRecordHeader()
     if (mRecordRemaining >= sizeof(mSubRecordHeader))
     {
         result = get(mSubRecordHeader);
+
         size_t dec=(sizeof(mSubRecordHeader) + static_cast<size_t>(mSubRecordHeader.dataSize));
+        if(mCtx.recHeaderSize<=16) {
+            uint16_t s; get(s); dec+=2;
+         }
         if(dec>mRecordRemaining)
         {
             std::cerr<<" ESM4::Reader::getSubRecordHeader: parsing of REC_"<<printName(mRecordHeader.record.typeId)<<" stopped: no space in record for SUB_"<<printName(mSubRecordHeader.typeId)<<": remaining"<<mRecordRemaining<< "< required"<<dec<<std::endl;
@@ -427,10 +431,10 @@ void ESM4::Reader::getRecordData()
             throw std::runtime_error("ESM4::Reader::getRecordData - inflateInit failed");
 
         strm.avail_out = bufSize;
-        mRecordRemaining = bufSize;
         strm.next_out = mDataBuf.get();
         ret = inflate(&strm, Z_NO_FLUSH);
         assert(ret != Z_STREAM_ERROR && "ESM4::Reader::getRecordData - inflate - state clobbered");
+
         switch (ret)
         {
         case Z_NEED_DICT:
@@ -447,6 +451,7 @@ void ESM4::Reader::getRecordData()
             throw std::runtime_error("ESM4::Reader::getRecordData - inflate failed");
         }
         assert(ret == Z_OK || ret == Z_STREAM_END);
+        mRecordRemaining = bufSize;
     // For debugging only
 #if 0
         std::ostringstream ss;
@@ -466,8 +471,7 @@ void ESM4::Reader::getRecordData()
         inflateEnd(&strm);
 
         mSavedStream = mStream;
-     //   mStream = Ogre::DataStreamPtr(new Ogre::MemoryDataStream(mDataBuf.get(), bufSize, false, true));
-       // membuf fok((char*)mDataBuf.get(),(char*)mDataBuf.get()+bufSize);
+       // std::streambuf msbuf; msbuf.setg((char*)mDataBuf.get(), (char*)mDataBuf.get(), (char*)mDataBuf.get()+bufSize);
         membuf* fok = new membuf((char*)mDataBuf.get(),(char*)mDataBuf.get()+bufSize); //leak? TODO
       //  fok.setg((char*)mDataBuf.get(),(char*)mDataBuf.get(),(char*)mDataBuf.get()+bufSize);
 

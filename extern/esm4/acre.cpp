@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::ActorCreature::ActorCreature() : mFormId(0), mFlags(0), mDisabled(false), mBaseObj(0), mScale(1.f),
                                        mOwner(0), mGlobal(0), mFactionRank(0)
@@ -84,9 +84,10 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::ActorCreature::save(ESM4::Writer& writer) const
-//{
-//}
+
+void ESM4::ActorCreature::save(ESM4::Writer& reader)const
+{
+}
 
 //void ESM4::ActorCreature::blank()
 //{

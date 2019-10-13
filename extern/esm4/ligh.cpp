@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Light::Light() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScript(0), mSound(0),
                        mFade(0.f)
@@ -118,9 +118,9 @@ void ESM4::Light::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Light::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Light::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Light::blank()
 //{

@@ -34,7 +34,7 @@
 #include "common.hpp"
 #include "formid.hpp"
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 #ifdef NDEBUG // FIXME: debuggigng only
 #undef NDEBUG
@@ -49,8 +49,96 @@ void ESM4::Header::load(ESM4::Reader& reader)
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
         switch (subHdr.typeId)
         {
+      /*  // General error checking
+        if (mCtx.leftFile < 12)
+            fail("End of file while reading record header");
+        if (mCtx.leftRec)
+            fail("Previous record contains unread bytes");
+
+        getUint(mCtx.leftRec);
+        getUint(flags);// This header entry is always zero
+        getUint(flags);
+        mCtx.leftFile -= 12;
+
+        // Check that sizes add up
+        if (mCtx.leftFile < mCtx.leftRec)
+            fail("Record size is larger than rest of file");
+
+        // Adjust number of bytes mCtx.left in file
+        mCtx.leftFile -= mCtx.leftRec;*/
+     /*   if (esm.isNextSub ("FORM"))
+        {
+            esm.getHT (mFormat);
+            if (mFormat<0)
+                esm.fail ("invalid format code");
+        }
+        else
+            mFormat = 0;
+
+        if (esm.isNextSub("HEDR"))
+        {
+           // if(esm.getRecName() == "TES3")
+            {
+          esm.getSubHeader();
+          esm.getT(mData.version);
+          esm.getT(mData.type);
+          mData.author.assign( esm.getString(32) );
+          mData.desc.assign( esm.getString(256) );
+          esm.getT(mData.records);
+            }
+    #if 0
+            else
+            {
+                //TES4
+
+                esm.getSubHeader();
+                esm.getT(mData.version);
+                esm.getT(mData.records);
+                esm.getT(mData.nextObjectId);
+             /*   mData.author.assign( esm.getString(32) );
+                mData.desc.assign( esm.getString(256) );* /
+            }
+    #endif
+        }
+
+
+        if (esm.isNextSub("GMDT"))
+        {
+            esm.getHT(mGameData);
+        }
+        if (esm.isNextSub("SCRD"))
+        {
+            esm.getSubHeader();
+            mSCRD.resize(esm.getSubSize());
+            if (!mSCRD.empty())
+                esm.getExact(&mSCRD[0], mSCRD.size());
+        }
+        if (esm.isNextSub("SCRS"))
+        {
+            esm.getSubHeader();
+            mSCRS.resize(esm.getSubSize());
+            if (!mSCRS.empty())
+                esm.getExact(&mSCRS[0], mSCRS.size());
+        }*/
             case ESM4::SUB_HEDR:
             {
+            if(reader.hdr().record.typeId == MKTAG('T','E','S','3'))
+             {
+reader.get(mData.version);
+std::uint32_t typ;
+reader.get(typ) ;
+char author[32];char desc[256];
+reader.get(author,32);
+reader.get(desc, 256);
+reader.get(mData.records) ;
+//reader.skipSubRecordData();
+// reader.get(mData.type) ;
+// reader.getZString(mData.author) ;
+      //  reader.getZString(mData.desc) ;
+
+break;
+
+             }
                 if (!reader.get(mData.version) || !reader.get(mData.records) || !reader.get(mData.nextObjectId))
                     throw std::runtime_error("TES4 HEDR data read error");
 
@@ -118,6 +206,6 @@ void ESM4::Header::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Header::save(ESM4::Writer& writer)
-//{
-//}
+void ESM4::Header::save(ESM4::Writer& writer)
+{
+}

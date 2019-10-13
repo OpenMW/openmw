@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Weapon::Weapon() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScript(0),
                          mEnchantmentPoints(0), mEnchantment(0)
@@ -199,9 +199,9 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Weapon::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Weapon::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Weapon::blank()
 //{

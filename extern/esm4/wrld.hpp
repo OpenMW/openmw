@@ -117,7 +117,7 @@ namespace ESM4
         virtual ~World();
 
         virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        virtual void save(ESM4::Writer& writer) const;
     };
 }
 

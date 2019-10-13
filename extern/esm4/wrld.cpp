@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::World::World() : mFormId(0), mFlags(0), mParent(0), mWorldFlags(0), mClimate(0), mWater(0),
                        mLandLevel(-2700.f), mWaterLevel(-14000.f),
@@ -180,6 +180,6 @@ void ESM4::World::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::World::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::World::save(ESM4::Writer& writer) const
+{
+}

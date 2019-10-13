@@ -61,6 +61,9 @@ set(ESM4_SOURCE_FILES
     info.cpp
     glob.cpp
     faction.cpp
+    variant.cpp
+    variantimp.cpp
+    gmst.cpp
     sgst.cpp
     slgm.cpp
     keym.cpp
@@ -89,6 +92,7 @@ set(ESM4_SOURCE_FILES
     scpt.cpp
     formid.cpp
     reader.cpp
+    writer.cpp
 )
 
 add_library(${ESM4_LIBRARY} STATIC ${ESM4_SOURCE_FILES})

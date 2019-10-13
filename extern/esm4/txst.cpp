@@ -30,7 +30,7 @@
 #include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::TextureSet::TextureSet() : mFormId(0), mFlags(0)
 {
@@ -83,9 +83,9 @@ void ESM4::TextureSet::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::TextureSet::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::TextureSet::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::TextureSet::blank()
 //{

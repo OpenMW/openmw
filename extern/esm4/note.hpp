@@ -49,7 +49,7 @@ namespace ESM4
         virtual ~Note();
 
         virtual void load(ESM4::Reader& reader);
-        //virtual void save(ESM4::Writer& writer) const;
+        virtual void save(ESM4::Writer& writer) const;
 
         //void blank();
     };

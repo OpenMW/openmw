@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::IdleAnimation::IdleAnimation() : mFormId(0), mFlags(0), mParent(0), mPrevious(0)
 {
@@ -75,9 +75,9 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::IdleAnimation::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::IdleAnimation::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::IdleAnimation::blank()
 //{

@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::LeveledCreature::LeveledCreature() : mFormId(0), mFlags(0), mScript(0), mTemplate(0),
                                            mChanceNone(0), mLvlCreaFlags(0)
@@ -96,9 +96,9 @@ void ESM4::LeveledCreature::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::LeveledCreature::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::LeveledCreature::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::LeveledCreature::blank()
 //{

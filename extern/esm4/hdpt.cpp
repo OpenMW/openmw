@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::HeadPart::HeadPart() : mFormId(0), mFlags(0), mData(0), mAdditionalPart(0)
 {
@@ -85,9 +85,9 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::HeadPart::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::HeadPart::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::HeadPart::blank()
 //{

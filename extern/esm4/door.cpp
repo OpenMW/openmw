@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Door::Door() : mFormId(0), mFlags(0), mDoorFlags(0), mBoundRadius(0.f), mScript(0),
                      mOpenSound(0), mCloseSound(0), mLoopSound(0), mRandomTeleport(0)
@@ -92,9 +92,9 @@ void ESM4::Door::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Door::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Door::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Door::blank()
 //{

@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Container::Container() : mFormId(0), mFlags(0), mBoundRadius(0.f), mDataFlags(0), mWeight(0.f),
                                mOpenSound(0), mCloseSound(0), mScript(0)
@@ -106,9 +106,9 @@ void ESM4::Container::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Container::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Container::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Container::blank()
 //{

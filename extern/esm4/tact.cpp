@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::TalkingActivator::TalkingActivator() : mFormId(0), mFlags(0), mScript(0), mVoiceType(0), mSound(0)
 {
@@ -86,9 +86,9 @@ void ESM4::TalkingActivator::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::TalkingActivator::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::TalkingActivator::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::TalkingActivator::blank()
 //{

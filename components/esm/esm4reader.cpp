@@ -29,6 +29,23 @@ void ESM::ESM4Reader::openTes4File(const std::string &name)
 
         mReader.buildLStringIndex(); // for localised strings in Skyrim
     }
+   else if (mReader.hdr().record.typeId == MKTAG('T','E','S','3'))//ESM4::REC_TES3)
+    {
+        mReader.saveGroupStatus();//hackish: dummy group to avoid assertion guard in skiprecord
+        mReader.loadHeader();
+        mCtx.leftFile -= mReader.hdr().record.dataSize;
+
+  //      mReader.setRecHeaderSize(8);
+       /* mReader.getRecordHeader();
+        mReader.loadHeader();
+        mCtx.leftFile -= mReader.hdr().record.dataSize;*/
+
+        // Hack: copy over values to TES3 header for getVer() and getRecordCount() to work
+        mHeader.mData.version = mReader.esmVersion();
+        mHeader.mData.records = mReader.numRecords();
+
+        mReader.buildLStringIndex(); // for localised strings in Skyrim
+    }
     else
         fail("Unknown file format");
 }

@@ -32,7 +32,7 @@
 #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 #ifdef NDEBUG // FIXME: debuggigng only
 #undef NDEBUG
@@ -213,9 +213,9 @@ void ESM4::Land::load(ESM4::Reader& reader)
         mDataTypes |= LAND_VTEX;
 }
 
-//void ESM4::Land::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Land::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Land::blank()
 //{

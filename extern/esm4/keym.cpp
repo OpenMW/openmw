@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Key::Key() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScript(0)
 {
@@ -91,9 +91,9 @@ void ESM4::Key::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::Key::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::Key::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::Key::blank()
 //{

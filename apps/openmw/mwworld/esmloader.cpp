@@ -43,18 +43,20 @@ void EsmLoader::load(const boost::filesystem::path& filepath, int& index, std::v
     bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_17;
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
-    if (isTes4 || isTes5 || isFONV)
+    if (true||isTes4 || isTes5 || isFONV)
     {
         if (isTes4)
             tesVerIndex = 1;
         else if (isTes5)
             tesVerIndex = 2;
-        else
+        else if (isFONV)
             tesVerIndex = 3;
 
         lEsm->close();
         delete lEsm;
         ESM::ESM4Reader *esm = new ESM::ESM4Reader(isTes4); // NOTE: TES4 headers are 4 bytes shorter
+        esm->reader().setRecHeaderSize(isTes4?sizeof(ESM4::RecordHeader)-4 : sizeof(ESM4::RecordHeader));
+        if(tesVerIndex==0)esm->reader().setRecHeaderSize(16);
 
         esm->setEncoder(mEncoder);
         esm->reader().setLocale("French");//TOFIX

@@ -32,7 +32,7 @@
 #include "common.hpp"
 #include "reader.hpp"
 #include "vmad.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::Dialog::Dialog() : mFormId(0), mFlags(0)//, mData(0), mAdditionalPart(0)
 {
@@ -154,6 +154,9 @@ void ESM4::Dialog::load(ESM4::Reader& reader)
 
 }
 
+void ESM4::Dialog::save(ESM4::Writer& writer) const
+{
+}
 
 ESM4::DialogBranch::DialogBranch()
 {
@@ -199,4 +202,8 @@ void ESM4::DialogBranch::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::DialogBranch::load - Unknown subrecord " + ESM4::printName(subHdr.typeId));
         }
     }
+}
+
+void ESM4::DialogBranch::save(ESM4::Writer& writer) const
+{
 }

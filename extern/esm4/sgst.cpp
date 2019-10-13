@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::SigilStone::SigilStone() : mFormId(0), mFlags(0), mBoundRadius(0.f), mScript(0)
 {
@@ -109,9 +109,9 @@ void ESM4::SigilStone::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::SigilStone::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::SigilStone::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::SigilStone::blank()
 //{

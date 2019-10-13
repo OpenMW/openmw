@@ -30,7 +30,7 @@
 //#include <iostream> // FIXME: for debugging
 
 #include "reader.hpp"
-//#include "writer.hpp"
+#include "writer.hpp"
 
 ESM4::LeveledItem::LeveledItem() : mFormId(0), mFlags(0), mChanceNone(0), mLvlItemFlags(0), mData(0)
 {
@@ -96,9 +96,9 @@ void ESM4::LeveledItem::load(ESM4::Reader& reader)
     }
 }
 
-//void ESM4::LeveledItem::save(ESM4::Writer& writer) const
-//{
-//}
+void ESM4::LeveledItem::save(ESM4::Writer& writer) const
+{
+}
 
 //void ESM4::LeveledItem::blank()
 //{
