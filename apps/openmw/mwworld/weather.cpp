@@ -804,7 +804,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     mRendering.setAmbientColour(mResult.mAmbientColor);
     mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade);
 
-    mRendering.getSkyManager()->setWeather(mResult);
+    mRendering.getSkyManager()->setWeather(mResult, duration, paused);
 
     // Play sounds
     if (mPlayingSoundID != mResult.mAmbientLoopSoundID)
@@ -1141,6 +1141,8 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mRainMaxHeight = current.mRainMaxHeight;
     mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
 
+    mResult.mFastForwardRain = false;
+
     mResult.mParticleEffect = current.mParticleEffect;
     mResult.mRainEffect = current.mRainEffect;
 
@@ -1208,6 +1210,8 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
     mResult.mSunColor = lerp(current.mSunColor, other.mSunColor, factor);
     mResult.mSkyColor = lerp(current.mSkyColor, other.mSkyColor, factor);
 
+    mResult.mFastForwardRain = true;
+
     mResult.mAmbientColor = lerp(current.mAmbientColor, other.mAmbientColor, factor);
     mResult.mSunDiscColor = lerp(current.mSunDiscColor, other.mSunDiscColor, factor);
     mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
@@ -1228,7 +1232,7 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
     if (threshold <= 0)
         threshold = 0.5f;
 
-    if(factor < threshold)
+    if(factor <= threshold)
     {
         mResult.mIsStorm = current.mIsStorm;
         mResult.mParticleEffect = current.mParticleEffect;

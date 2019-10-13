@@ -3147,6 +3147,11 @@ namespace MWWorld
             mProjectileManager->launchProjectile(actor, projectile, worldPos, orient, bow, speed, attackStrength);
     }
 
+    void World::emitWaterRipple(const osg::Vec3f& pos)
+    {
+        mRendering->emitWaterRipple(pos);
+    }
+
     void World::launchMagicBolt (const std::string &spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection)
     {
         mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);

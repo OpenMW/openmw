@@ -47,6 +47,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "vismask.hpp"
 #include "renderbin.hpp"
 
@@ -386,49 +388,6 @@ public:
 
 private:
     int mMeshType;
-};
-
-/// @brief Hides the node subgraph if the eye point is below water.
-/// @note Must be added as cull callback.
-/// @note Meant to be used on a node that is child of a CameraRelativeTransform.
-/// The current view point must be retrieved by the CameraRelativeTransform since we can't get it anymore once we are in camera-relative space.
-class UnderwaterSwitchCallback : public osg::NodeCallback
-{
-public:
-    UnderwaterSwitchCallback(CameraRelativeTransform* cameraRelativeTransform)
-        : mCameraRelativeTransform(cameraRelativeTransform)
-        , mEnabled(true)
-        , mWaterLevel(0.f)
-    {
-    }
-
-    bool isUnderwater()
-    {
-        osg::Vec3f viewPoint = mCameraRelativeTransform->getLastViewPoint();
-        return mEnabled && viewPoint.z() < mWaterLevel;
-    }
-
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        if (isUnderwater())
-            return;
-
-        traverse(node, nv);
-    }
-
-    void setEnabled(bool enabled)
-    {
-        mEnabled = enabled;
-    }
-    void setWaterLevel(float waterLevel)
-    {
-        mWaterLevel = waterLevel;
-    }
-
-private:
-    osg::ref_ptr<CameraRelativeTransform> mCameraRelativeTransform;
-    bool mEnabled;
-    float mWaterLevel;
 };
 
 /// A base class for the sun and moons.
@@ -1114,7 +1073,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mCloudBlendFactor(0.0f)
     , mCloudSpeed(0.0f)
     , mStarsOpacity(0.0f)
-    , mRemainingTransitionTime(0.0f)
     , mRainEnabled(false)
     , mRainSpeed(0)
     , mRainDiameter(0)
@@ -1123,8 +1081,13 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRainEntranceSpeed(1)
     , mRainMaxRaindrops(0)
     , mWindSpeed(0.f)
+    , mRaindropsToCreate(0)
+    , mWaterHeight(0)
+    , mAmbientSoundVolume(1)
+    , mPreviousCameraPosition(osg::Vec3f(0, 0, 0))
     , mEnabled(true)
     , mSunEnabled(true)
+    , mWaterEnabled(true)
     , mWeatherAlpha(0.f)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
@@ -1146,7 +1109,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mEarlyRenderBinRoot->getOrCreateStateSet()->setMode(GL_CLIP_PLANE0, osg::StateAttribute::OFF);
     mRootNode->addChild(mEarlyRenderBinRoot);
 
-    mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+    mPreviousCameraPosition = mRootNode->getLastViewPoint();
 }
 
 void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
@@ -1461,67 +1424,8 @@ void SkyManager::createRain()
 
     mRainNode = new osg::Group;
 
-    mRainParticleSystem = new osgParticle::ParticleSystem;
-    osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight+mRainMaxHeight)/2.f);
-
-    mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
-    mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
-    mRainParticleSystem->setAlignVectorY(osg::Vec3f(0,0,1));
-
-    osg::ref_ptr<osg::StateSet> stateset (mRainParticleSystem->getOrCreateStateSet());
-
-    osg::ref_ptr<osg::Texture2D> raindropTex (new osg::Texture2D(mSceneManager->getImageManager()->getImage("textures/tx_raindrop_01.dds")));
-    raindropTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-    raindropTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-
-    stateset->setTextureAttributeAndModes(0, raindropTex, osg::StateAttribute::ON);
-    stateset->setNestRenderBins(false);
-    stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-    stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-    stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-
-    osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
-    particleTemplate.setSizeRange(osgParticle::rangef(5.f, 15.f));
-    particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 1.f));
-    particleTemplate.setLifeTime(1);
-
-    osg::ref_ptr<osgParticle::ModularEmitter> emitter (new osgParticle::ModularEmitter);
-    emitter->setParticleSystem(mRainParticleSystem);
-
-    osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-rainRange.x() / 2, rainRange.x() / 2);
-    placer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
-    placer->setZRange(-rainRange.z() / 2, rainRange.z() / 2);
-    emitter->setPlacer(placer);
-    mPlacer = placer;
-
-    // FIXME: vanilla engine does not use a particle system to handle rain, it uses a NIF-file with 20 raindrops in it.
-    // It spawns the (maxRaindrops-getParticleSystem()->numParticles())*dt/rainEntranceSpeed batches every frame (near 1-2).
-    // Since the rain is a regular geometry, it produces water ripples, also in theory it can be removed if collides with something.
-    osg::ref_ptr<RainCounter> counter (new RainCounter);
-    counter->setNumberOfParticlesPerSecondToCreate(mRainMaxRaindrops/mRainEntranceSpeed*20);
-    emitter->setCounter(counter);
-    mCounter = counter;
-
-    osg::ref_ptr<RainShooter> shooter (new RainShooter);
-    mRainShooter = shooter;
-    emitter->setShooter(shooter);
-
-    osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater (new osgParticle::ParticleSystemUpdater);
-    updater->addParticleSystem(mRainParticleSystem);
-
-    osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
-    program->addOperator(new WrapAroundOperator(mCamera,rainRange));
-    program->setParticleSystem(mRainParticleSystem);
-    mRainNode->addChild(program);
-
-    mRainNode->addChild(emitter);
-    mRainNode->addChild(mRainParticleSystem);
-    mRainNode->addChild(updater);
-
     mRainFader = new RainFader(&mWeatherAlpha);
     mRainNode->addUpdateCallback(mRainFader);
-    mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
 
     mRootNode->addChild(mRainNode);
@@ -1529,15 +1433,13 @@ void SkyManager::createRain()
 
 void SkyManager::destroyRain()
 {
+    mRaindropsToCreate = 0;
+
     if (!mRainNode)
         return;
 
     mRootNode->removeChild(mRainNode);
     mRainNode = nullptr;
-    mPlacer = nullptr;
-    mCounter = nullptr;
-    mRainParticleSystem = nullptr;
-    mRainShooter = nullptr;
     mRainFader = nullptr;
 }
 
@@ -1590,8 +1492,6 @@ void SkyManager::update(float duration)
             mRainIntensityUniform->set((float) mWeatherAlpha);
     }
 
-    switchUnderwaterRain();
-
     if (mIsStorm)
     {
         osg::Quat quat;
@@ -1636,34 +1536,117 @@ void SkyManager::setMoonColour (bool red)
     mSecunda->setColor(red ? mMoonScriptColor : osg::Vec4f(1,1,1,1));
 }
 
-void SkyManager::updateRainParameters()
+void SkyManager::updateRainParameters(float duration, bool paused)
 {
-    if (mRainShooter)
+    if (paused || !mRainNode) return;
+
+    osg::Vec3f viewPoint = mRootNode->getLastViewPoint();
+    if (!mWaterEnabled || viewPoint.z() < mWaterHeight)
     {
-        float angle = -std::atan(mWindSpeed/50.f);
-        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed*std::sin(angle), -mRainSpeed/std::cos(angle)));
-        mRainShooter->setAngle(angle);
+        mRainNode->setNodeMask(0);
+        return;
+    }
 
-        osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight+mRainMaxHeight)/2.f);
+    mRainNode->setNodeMask(Mask_WeatherParticles);
 
-        mPlacer->setXRange(-rainRange.x() / 2, rainRange.x() / 2);
-        mPlacer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
-        mPlacer->setZRange(-rainRange.z() / 2, rainRange.z() / 2);
+    float radius = sqrt(Misc::Rng::rollClosedProbability()) * mRainDiameter / 2.f;
+    float angle = sqrt(Misc::Rng::rollProbability()) * 2 * osg::PI;
 
-        mCounter->setNumberOfParticlesPerSecondToCreate(mRainMaxRaindrops/mRainEntranceSpeed*20);
+    float x = radius * cos(angle);
+    float y = radius * sin(angle);
+    float z = mRainMinHeight + (mRainMaxHeight - mRainMinHeight) * Misc::Rng::rollClosedProbability();
+
+    mRaindropsToCreate += (mRainMaxRaindrops - mRainNode->getNumChildren()) * duration / mRainEntranceSpeed * mAmbientSoundVolume;
+
+    float rainAngle = -std::atan(mWindSpeed/50.f);
+    osg::Vec3f velocity(0, mRainSpeed*std::sin(rainAngle) * duration, -mRainSpeed/std::cos(rainAngle) * duration);
+    osg::Quat rotate;
+    rotate.makeRotate(rainAngle, 0, 1, 0);
+
+    for (int i = 0; i < std::max(0, int(mRaindropsToCreate)); i++)
+    {
+        osg::ref_ptr<osg::PositionAttitudeTransform> pat;
+        for (unsigned int i=0; i<mRainNode->getNumChildren(); ++i)
+        {
+            osg::Node* node = mRainNode->getChild(i);
+            if (node->getNodeMask() == 0)
+            {
+                node->setNodeMask(Mask_WeatherParticles);
+                pat = static_cast<osg::PositionAttitudeTransform*>(node);
+            }
+        }
+
+        if (pat == nullptr)
+        {
+            if (mRainNode->getNumChildren() >= mRainMaxRaindrops)
+                break;
+
+            pat = new osg::PositionAttitudeTransform;
+
+            osg::ref_ptr<osg::Node> raindrop = mSceneManager->getInstance(mRainEffect, pat);
+            mRainNode->addChild(pat);
+        }
+
+        pat->setPosition(osg::Vec3f(x, y, z));
+        pat->setAttitude(rotate);
+
+        mRaindropsToCreate -= 1.f;
+    }
+
+    for (unsigned int i=0; i<mRainNode->getNumChildren(); ++i)
+    {
+        osg::Node* node = mRainNode->getChild(i);
+        if (node->getNodeMask() == 0) continue;
+
+        osg::PositionAttitudeTransform* pat = static_cast<osg::PositionAttitudeTransform*>(node);
+        pat->setPosition(pat->getPosition() + velocity - viewPoint + mPreviousCameraPosition);
+
+        osg::Vec3f wrapPos(mRainDiameter, mRainDiameter, mRainMaxHeight - mRainMinHeight);
+        for (int j = 0; j < 3; ++j)  // wrap-around in all 3 dimensions
+        {
+            osg::Vec3 pos = pat->getPosition();
+
+            if (pos[j] < -wrapPos[j] / 2.f)
+                pos[j] = wrapPos[j] / 2.f + fmod(pos[j] - wrapPos[j] / 2.f, wrapPos[j]);
+            else if (pos[j] > wrapPos[j] / 2.f)
+                pos[j] = fmod(pos[j] + wrapPos[j] / 2.f, wrapPos[j]) - wrapPos[j] / 2.f;
+
+            pat->setPosition(pos);
+        }
+
+        osg::Vec3f worldCoords = viewPoint + pat->getPosition();
+
+        if (worldCoords.z() <= mWaterHeight - 20.f)
+        {
+            node->setNodeMask(0);
+
+            /* FIXME: Morrowind uses custom settings for precip ripples
+             fallback=Weather_Snow_Ripples,0
+             fallback=Weather_Snow_Ripple_Radius,1024
+             fallback=Weather_Snow_Ripples_Per_Flake,1
+             fallback=Weather_Snow_Ripple_Scale,0.3
+             fallback=Weather_Snow_Ripple_Speed,1.0
+            */
+
+            //MWBase::Environment::get().getWorld()->emitWaterRipple(worldCoords);
+
+            continue;
+        }
+
+        osg::Vec3f origCoords = worldCoords;
+        origCoords[2] += 8192;
+
+        if (MWBase::Environment::get().getWorld()->castRay (
+            origCoords.x(), origCoords.y(), origCoords.z(),
+            worldCoords.x(), worldCoords.y(), worldCoords.z(),
+            MWPhysics::CollisionType_World|MWPhysics::CollisionType_HeightMap))
+        {
+            node->setNodeMask(0);
+        }
     }
 }
 
-void SkyManager::switchUnderwaterRain()
-{
-    if (!mRainParticleSystem)
-        return;
-
-    bool freeze = mUnderwaterSwitch->isUnderwater();
-    mRainParticleSystem->setFrozen(freeze);
-}
-
-void SkyManager::setWeather(const WeatherResult& weather)
+void SkyManager::setWeather(const WeatherResult& weather, float duration, bool paused)
 {
     if (!mCreated) return;
 
@@ -1674,6 +1657,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
     mRainMaxHeight = weather.mRainMaxHeight;
     mRainSpeed = weather.mRainSpeed;
     mWindSpeed = weather.mWindSpeed;
+    mAmbientSoundVolume = weather.mAmbientSoundVolume;
 
     if (mRainEffect != weather.mRainEffect)
     {
@@ -1681,6 +1665,14 @@ void SkyManager::setWeather(const WeatherResult& weather)
         if (!mRainEffect.empty())
         {
             createRain();
+
+            // Fast-forward rain
+            float left = weather.mFastForwardRain ? 0.f : 1.f;
+            while (left > 0)
+            {
+                updateRainParameters(duration, false);
+                left -= duration;
+            }
         }
         else
         {
@@ -1688,7 +1680,9 @@ void SkyManager::setWeather(const WeatherResult& weather)
         }
     }
 
-    updateRainParameters();
+    updateRainParameters(duration, paused);
+
+    mPreviousCameraPosition = mRootNode->getLastViewPoint();
 
     mIsStorm = weather.mIsStorm;
 
@@ -1717,7 +1711,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
             if (!mParticleNode)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
-                mParticleNode->addCullCallback(mUnderwaterSwitch);
                 mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
@@ -1895,7 +1888,7 @@ void SkyManager::setGlareTimeOfDayFade(float val)
 
 void SkyManager::setWaterHeight(float height)
 {
-    mUnderwaterSwitch->setWaterLevel(height);
+    mWaterHeight = height;
 }
 
 void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
@@ -1910,6 +1903,7 @@ void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vect
     models.push_back("meshes\\blightcloud.nif");
     models.push_back("meshes\\snow.nif");
     models.push_back("meshes\\blizzard.nif");
+    models.push_back("meshes\\raindrop.nif");
 
     textures.push_back("textures/tx_mooncircle_full_s.dds");
     textures.push_back("textures/tx_mooncircle_full_m.dds");
@@ -1934,13 +1928,11 @@ void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vect
 
     textures.push_back("textures/tx_sun_05.dds");
     textures.push_back("textures/tx_sun_flash_grey_05.dds");
-
-    textures.push_back("textures/tx_raindrop_01.dds");
 }
 
 void SkyManager::setWaterEnabled(bool enabled)
 {
-    mUnderwaterSwitch->setEnabled(enabled);
+    mWaterEnabled = enabled;
 }
 
 }

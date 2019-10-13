@@ -615,6 +615,8 @@ namespace MWBase
 
             /// Return physical half extents of the given actor to be used in pathfinding
             virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
+
+            virtual void emitWaterRipple(const osg::Vec3f& pos) = 0;
     };
 }
 

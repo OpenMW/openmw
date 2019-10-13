@@ -44,7 +44,7 @@ namespace MWRender
     class RainShooter;
     class RainFader;
     class AlphaFader;
-    class UnderwaterSwitchCallback;
+    class CameraRelativeTransform;
 
     struct WeatherResult
     {
@@ -81,6 +81,7 @@ namespace MWRender
         float mNightFade; // fading factor for night skybox
 
         bool mIsStorm;
+        bool mFastForwardRain;
 
         std::string mAmbientLoopSoundID;
         float mAmbientSoundVolume;
@@ -89,12 +90,13 @@ namespace MWRender
         std::string mRainEffect;
         float mEffectFade;
 
+
         float mRainDiameter;
         float mRainMinHeight;
         float mRainMaxHeight;
         float mRainSpeed;
         float mRainEntranceSpeed;
-        int mRainMaxRaindrops;
+        unsigned int mRainMaxRaindrops;
     };
 
     struct MoonState
@@ -148,7 +150,7 @@ namespace MWRender
         void setMoonColour (bool red);
         ///< change Secunda colour to red
 
-        void setWeather(const WeatherResult& weather);
+        void setWeather(const WeatherResult& weather, float duration, bool paused);
 
         void sunEnable();
 
@@ -187,21 +189,19 @@ namespace MWRender
 
         void createRain();
         void destroyRain();
-        void switchUnderwaterRain();
-        void updateRainParameters();
+        void updateRainParameters(float duration, bool paused);
 
         Resource::SceneManager* mSceneManager;
 
         osg::Camera *mCamera;
         osg::Uniform *mRainIntensityUniform;
 
-        osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<CameraRelativeTransform> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
         std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
-        osg::ref_ptr<UnderwaterSwitchCallback> mUnderwaterSwitch;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
 
@@ -223,10 +223,6 @@ namespace MWRender
         std::unique_ptr<Moon> mSecunda;
 
         osg::ref_ptr<osg::Group> mRainNode;
-        osg::ref_ptr<osgParticle::ParticleSystem> mRainParticleSystem;
-        osg::ref_ptr<osgParticle::BoxPlacer> mPlacer;
-        osg::ref_ptr<RainCounter> mCounter;
-        osg::ref_ptr<RainShooter> mRainShooter;
         osg::ref_ptr<RainFader> mRainFader;
 
         bool mCreated;
@@ -254,8 +250,6 @@ namespace MWRender
 
         std::string mCurrentParticleEffect;
 
-        float mRemainingTransitionTime;
-
         bool mRainEnabled;
         std::string mRainEffect;
         float mRainSpeed;
@@ -263,11 +257,16 @@ namespace MWRender
         float mRainMinHeight;
         float mRainMaxHeight;
         float mRainEntranceSpeed;
-        int mRainMaxRaindrops;
+        unsigned int mRainMaxRaindrops;
         float mWindSpeed;
+        float mRaindropsToCreate;
+        float mWaterHeight;
+        float mAmbientSoundVolume;
+        osg::Vec3 mPreviousCameraPosition;
 
         bool mEnabled;
         bool mSunEnabled;
+        bool mWaterEnabled;
 
         float mWeatherAlpha;
 

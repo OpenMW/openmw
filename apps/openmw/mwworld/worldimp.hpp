@@ -720,6 +720,8 @@ namespace MWWorld
 
             /// Return physical half extents of the given actor to be used in pathfinding
             osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
+
+            void emitWaterRipple(const osg::Vec3f& pos) override;
     };
 }
 
