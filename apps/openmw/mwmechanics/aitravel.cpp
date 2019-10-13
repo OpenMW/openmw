@@ -43,11 +43,16 @@ namespace MWMechanics
 
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
+        auto& stats = actor.getClass().getCreatureStats(actor);
+
+        if (stats.isTurningToPlayer() || stats.getGreetingState() == Greet_InProgress)
+            return false;
+
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         const osg::Vec3f targetPos(mX, mY, mZ);
 
-        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        stats.setMovementFlag(CreatureStats::Flag_Run, false);
+        stats.setDrawState(DrawState_Nothing);
 
         if (!isWithinMaxRange(targetPos, actorPos))
             return false;

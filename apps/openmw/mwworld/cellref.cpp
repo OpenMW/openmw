@@ -225,6 +225,19 @@ namespace MWWorld
         }
     }
 
+    void CellRef::lock(int lockLevel)
+    {
+        if(lockLevel != 0)
+            setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
+        else
+            setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
+    }
+
+    void CellRef::unlock()
+    {
+        setLockLevel(-abs(mCellRef.mLockLevel)); //Makes lockLevel negative
+    }
+
     std::string CellRef::getKey() const
     {
         return mCellRef.mKey;

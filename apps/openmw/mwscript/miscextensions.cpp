@@ -182,19 +182,13 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    ptr.getClass().lock (ptr, lockLevel);
+                    ptr.getCellRef().lock (lockLevel);
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
                     if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
                     {
-                        MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
-
-                        float xr = ptr.getCellRef().getPosition().rot[0];
-                        float yr = ptr.getCellRef().getPosition().rot[1];
-                        float zr = ptr.getCellRef().getPosition().rot[2];
-
-                        MWBase::Environment::get().getWorld()->rotateObject(ptr, xr, yr, zr);
+                        MWBase::Environment::get().getWorld()->activateDoor(ptr, MWWorld::DoorState::Idle);
                     }
                 }
         };
@@ -208,7 +202,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().unlock (ptr);
+                    ptr.getCellRef().unlock ();
                 }
         };
 
@@ -364,7 +358,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (!MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 
@@ -373,7 +367,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 
@@ -443,7 +437,16 @@ namespace MWScript
                     if(key < 0 || key > 32767 || *end != '\0')
                         key = ESM::MagicEffect::effectStringToId(effect);
 
-                    const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+                    const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
+
+                    MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
+                    effects += stats.getActiveSpells().getMagicEffects();
+                    if (ptr.getClass().hasInventoryStore(ptr))
+                    {
+                        MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
+                        effects += store.getMagicEffects();
+                    }
+
                     for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
                     {
                         if (it->first.mId == key && it->second.getModifier() > 0)

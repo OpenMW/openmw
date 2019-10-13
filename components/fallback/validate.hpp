@@ -39,10 +39,7 @@ namespace Fallback
             std::string key(temp.substr(0, sep));
             std::string value(temp.substr(sep + 1));
 
-            if (map->mMap.find(key) == map->mMap.end())
-            {
-                map->mMap.insert(std::make_pair(key, value));
-            }
+            map->mMap[key] = value;
         }
     }
 }

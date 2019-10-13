@@ -229,23 +229,18 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-            {
                 attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
-                const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
 
-                bool unaware = !sequence.isInCombat()
-                    && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
-
-                if (unaware)
-                {
-                    damage *= gmst.find("fCombatCriticalStrikeMult")->mValue.getFloat();
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-                }
-            }
-
-            if (victim.getClass().getCreatureStats(victim).getKnockedDown())
+            const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
+            bool unaware = attacker == getPlayer() && !sequence.isInCombat()
+                && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
+            bool knockedDown = victim.getClass().getCreatureStats(victim).getKnockedDown();
+            if (knockedDown || unaware)
+            {
                 damage *= gmst.find("fCombatKODamageMult")->mValue.getFloat();
+                if (!knockedDown)
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
         }
 
         reduceWeaponCondition(damage, validVictim, weapon, attacker);

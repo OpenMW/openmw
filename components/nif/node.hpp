@@ -156,6 +156,29 @@ struct NiTriShape : Node
     }
 };
 
+struct NiTriStrips : Node
+{
+    NiTriStripsDataPtr data;
+    NiSkinInstancePtr skin;
+
+    void read(NIFStream *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        skin.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+        skin.post(nif);
+        if (!skin.empty())
+            nif->setUseSkinning(true);
+    }
+};
+
+
 struct NiCamera : Node
 {
     struct Camera

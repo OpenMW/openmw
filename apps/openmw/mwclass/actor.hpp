@@ -42,8 +42,6 @@ namespace MWClass
 
         virtual bool isActor() const;
 
-        virtual bool canBeActivated(const MWWorld::Ptr& ptr) const;
-
         // not implemented
         Actor(const Actor&);
         Actor& operator= (const Actor&);

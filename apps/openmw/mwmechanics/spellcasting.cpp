@@ -26,6 +26,7 @@
 #include "npcstats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -241,7 +242,7 @@ namespace MWMechanics
         float castChance = 100.f;
         if (spell != nullptr && !caster.isEmpty() && caster.getClass().isActor())
         {
-            castChance = getSpellSuccessChance(spell, caster, nullptr, false); // Uncapped casting chance
+            castChance = getSpellSuccessChance(spell, caster, nullptr, false, false); // Uncapped casting chance
         }
         if (castChance > 0)
             x *= 50 / castChance;
@@ -695,7 +696,7 @@ namespace MWMechanics
                 {
                     if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
-                    target.getClass().lock(target, static_cast<int>(magnitude));
+                    target.getCellRef().lock(static_cast<int>(magnitude));
                 }
                 return true;
             }
@@ -711,17 +712,18 @@ namespace MWMechanics
                     if (target.getCellRef().getLockLevel() > 0)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
-                        if (!caster.isEmpty())
-                            MWBase::Environment::get().getMechanicsManager()->objectOpened(getPlayer(), target);
-                            // Use the player instead of the caster for vanilla crime compatibility
 
                         if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getClass().unlock(target);
+                    target.getCellRef().unlock();
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
+
+                if (!caster.isEmpty())
+                    MWBase::Environment::get().getMechanicsManager()->unlockAttempted(getPlayer(), target);
+                    // Use the player instead of the caster for vanilla crime compatibility
                 return true;
             }
         }
@@ -826,8 +828,9 @@ namespace MWMechanics
         bool isProjectile = false;
         if (item.getTypeName() == typeid(ESM::Weapon).name())
         {
-            const ESM::Weapon* ref = item.get<ESM::Weapon>()->mBase;
-            isProjectile = ref->mData.mType >= ESM::Weapon::MarksmanThrown;
+            int type = item.get<ESM::Weapon>()->mBase->mData.mType;
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
         }
         int type = enchantment->mData.mType;
 
@@ -939,7 +942,7 @@ namespace MWMechanics
                 bool fail = false;
 
                 // Check success
-                float successChance = getSpellSuccessChance(spell, mCaster);
+                float successChance = getSpellSuccessChance(spell, mCaster, nullptr, true, false);
                 if (Misc::Rng::roll0to99() >= successChance)
                 {
                     if (mCaster == getPlayer())

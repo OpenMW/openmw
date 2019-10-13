@@ -526,7 +526,11 @@ namespace MWGui
 
                 if (canEquip.first == 0)
                 {
-                    MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                    /// If PCSkipEquip is set, set OnPCEquip to 1 and don't message anything
+                    if (!script.empty() && ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1)
+                        ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+                    else
+                        MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
                     updateItemView();
                     return;
                 }

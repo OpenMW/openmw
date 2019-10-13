@@ -204,11 +204,10 @@ namespace MWRender
         float getCameraDistance() const;
         Camera* getCamera();
         const osg::Vec3f& getCameraPosition() const;
-        void togglePOV();
+        void togglePOV(bool force = false);
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
-        void togglePlayerLooking(bool enable);
         void changeVanityModeScale(float factor);
 
         /// temporarily override the field of view with given value.

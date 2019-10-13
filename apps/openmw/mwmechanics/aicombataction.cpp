@@ -18,6 +18,7 @@
 #include "combat.hpp"
 #include "weaponpriority.hpp"
 #include "spellpriority.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -125,8 +126,7 @@ namespace MWMechanics
         }
 
         const ESM::Weapon* weapon = mWeapon.get<ESM::Weapon>()->mBase;
-
-        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        if (MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass != ESM::WeaponType::Melee)
         {
             isRanged = true;
             return fProjectileMaxSpeed;
@@ -194,11 +194,12 @@ namespace MWMechanics
                 if (rating > bestActionRating)
                 {
                     const ESM::Weapon* weapon = it->get<ESM::Weapon>()->mBase;
+                    int ammotype = getWeaponType(weapon->mData.mType)->mAmmoType;
 
                     MWWorld::Ptr ammo;
-                    if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
+                    if (ammotype == ESM::Weapon::Arrow)
                         ammo = bestArrow;
-                    else if (weapon->mData.mType == ESM::Weapon::MarksmanCrossbow)
+                    else if (ammotype == ESM::Weapon::Bolt)
                         ammo = bestBolt;
 
                     bestActionRating = rating;
@@ -367,7 +368,7 @@ namespace MWMechanics
         else if (!activeWeapon.isEmpty())
         {
             const ESM::Weapon* esmWeap = activeWeapon.get<ESM::Weapon>()->mBase;
-            if (esmWeap->mData.mType >= ESM::Weapon::MarksmanBow)
+            if (MWMechanics::getWeaponType(esmWeap->mData.mType)->mWeaponClass != ESM::WeaponType::Melee)
             {
                 static const float fTargetSpellMaxSpeed = gmst.find("fProjectileMaxSpeed")->mValue.getFloat();
                 dist = fTargetSpellMaxSpeed;

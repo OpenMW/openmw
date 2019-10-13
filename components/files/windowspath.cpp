@@ -85,7 +85,7 @@ boost::filesystem::path WindowsPath::getLocalPath() const
 
     if (GetModuleFileNameW(nullptr, path, MAX_PATH + 1) > 0)
     {
-        localPath = boost::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path();
+        localPath = boost::filesystem::path(bconv::utf_to_utf<char>(path)).parent_path() / "/";
     }
 
     // lookup exe path
