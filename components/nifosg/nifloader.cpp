@@ -366,39 +366,38 @@ namespace NifOsg
 
         void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
         {
-            if (nifNode->recType == Nif::RC_NiLight)
+            if (nifNode->recType == Nif::RC_NiLight || nifNode->recType == Nif::RC_NiPointLight || nifNode->recType == Nif::RC_NiSpotLight)
             {
                 const Nif::NiLight* nilight = static_cast<const Nif::NiLight*>(nifNode);
                 //TOFIX
-                float radius = std::max(1000.0f, nilight->boundXYZ.length());
+                float radius = std::max(1000.f, nilight->boundXYZ.length());
                 //store osg::LightSource and convert it at instanciation to SceneUtil::LightSource
                 osg::ref_ptr<osg::LightSource> lightSource (new osg::LightSource);
                 //record this arbitrary radius for instanciation setup
                 lightSource->setUserData(new osg::FloatValueObject("radius",radius));
                 osg::ref_ptr<osg::Light> light (new osg::Light);
 
-                const Nif::NiPointLight* nipointlight = dynamic_cast<const Nif::NiPointLight*>(nifNode);
-
-                if(nipointlight)
+                if (nifNode->recType == Nif::RC_NiPointLight || nifNode->recType == Nif::RC_NiSpotLight)
                 {
-                    light->setPosition(osg::Vec4(0.f,0.f,0.f,1.f));
+                    const Nif::NiPointLight* nipointlight = static_cast<const Nif::NiPointLight*>(nifNode);
+                    light->setPosition(osg::Vec4(0.f, 0.f, 0.f, 1.f));
                     light->setConstantAttenuation(nipointlight->constantAttenuation);
                     light->setLinearAttenuation(nipointlight->linearAttenuation);
                     light->setQuadraticAttenuation(nipointlight->quadraticAttenuation);
-                    const Nif::NiSpotLight* nispotlight = dynamic_cast<const Nif::NiSpotLight*>(nifNode);
-                    if(nispotlight)
+                    if (nifNode->recType == Nif::RC_NiSpotLight)
                     {
-                        light->setDirection(osg::Vec3(1,0,0));
+                        const Nif::NiSpotLight* nispotlight = static_cast<const Nif::NiSpotLight*>(nifNode);
+                        light->setDirection(osg::Vec3(1.f, 0.f, 0.f));
                         light->setSpotCutoff(nispotlight->cutoff);
                         light->setSpotExponent(nispotlight->exponent);
                     }
                 }
                 else
-                    light->setPosition(osg::Vec4(1.f,0.f,0.f,0.f));
+                    light->setPosition(osg::Vec4(1.f, 0.f, 0.f, 0.f));
 
-                osg::Vec4f ambient(nilight->ambient * nilight->dimmer, 1.0f);
-                osg::Vec4f diffuse(nilight->diffuse * nilight->dimmer, 1.0f);
-                osg::Vec4f specular(nilight->specular * nilight->dimmer, 1.0f);
+                osg::Vec4f ambient(nilight->ambient * nilight->dimmer, 1.f);
+                osg::Vec4f diffuse(nilight->diffuse * nilight->dimmer, 1.f);
+                osg::Vec4f specular(nilight->specular * nilight->dimmer, 1.f);
 
                 light->setAmbient(ambient);
                 light->setDiffuse(diffuse);

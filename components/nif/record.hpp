@@ -69,6 +69,8 @@ enum RecordType
   RC_NiFlipController,
   RC_NiBSAnimationNode,
   RC_NiLight,
+  RC_NiPointLight,
+  RC_NiSpotLight,
   RC_NiTextureEffect,
   RC_NiVertWeightsExtraData,
   RC_NiTextKeyExtraData,
