@@ -175,9 +175,6 @@ namespace CSVRender
 
             PagedWorldspaceWidget& getPagedWorldspaceWidget();
 
-        signals:
-            void passBrushTexture(std::string brushTexture);
-
         public slots:
             void setBrushSize(int brushSize);
             void setBrushShape(CSVWidget::BrushShape brushShape);
