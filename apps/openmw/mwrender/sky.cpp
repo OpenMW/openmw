@@ -18,6 +18,7 @@
 #include <osg/PolygonOffset>
 #include <osg/observer_ptr>
 
+#include <osgParticle/BoxPlacer>
 #include <osgParticle/ModularEmitter>
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>

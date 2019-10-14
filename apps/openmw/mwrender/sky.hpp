@@ -9,8 +9,6 @@
 #include <osg/Vec4f>
 #include <osg/Uniform>
 
-#include <osgParticle/BoxPlacer>
-
 namespace osg
 {
     class Camera;
@@ -27,6 +25,7 @@ namespace osg
 namespace osgParticle
 {
     class ParticleSystem;
+    class BoxPlacer;
 }
 
 namespace Resource
