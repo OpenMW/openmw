@@ -22,6 +22,7 @@
     Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
+    Bug #4262: Rain settings are hardcoded
     Bug #4270: Closing doors while they are obstructed desyncs closing sfx
     Bug #4276: Resizing character window differs from vanilla
     Bug #4329: Removed birthsign abilities are restored after reloading the save
