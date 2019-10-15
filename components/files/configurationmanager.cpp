@@ -51,9 +51,6 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     bool silent = mSilent;
     mSilent = quiet;
 
-    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
-    boost::program_options::notify(variables);
-
     // read either local or global config depending on type of installation
     bool loaded = loadConfig(mFixedPath.getLocalPath(), variables, description);
     boost::program_options::notify(variables);
@@ -62,6 +59,10 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
         loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
         boost::program_options::notify(variables);
     }
+
+    // User config has the highest priority.
+    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
+    boost::program_options::notify(variables);
 
     mSilent = silent;
 }

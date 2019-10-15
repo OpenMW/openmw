@@ -375,7 +375,8 @@ namespace MWGui
             if (!mEffectParams.mKnown)
             {
                 mTextWidget->setCaption ("?");
-                mRequestedWidth = mTextWidget->getTextSize().width + 24;
+                mTextWidget->setCoord(sIconOffset / 2, mTextWidget->getCoord().top, mTextWidget->getCoord().width, mTextWidget->getCoord().height); // Compensates for the missing image when effect is not known
+                mRequestedWidth = mTextWidget->getTextSize().width + sIconOffset;
                 mImageWidget->setImageTexture ("");
                 return;
             }
@@ -466,7 +467,7 @@ namespace MWGui
             }
 
             mTextWidget->setCaptionWithReplacing(spellLine);
-            mRequestedWidth = mTextWidget->getTextSize().width + 24;
+            mRequestedWidth = mTextWidget->getTextSize().width + sIconOffset;
 
             mImageWidget->setImageTexture(MWBase::Environment::get().getWindowManager()->correctIconPath(magicEffect->mIcon));
         }

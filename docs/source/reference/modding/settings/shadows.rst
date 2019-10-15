@@ -1,5 +1,5 @@
-Shadow Settings
-###############
+Shadows Settings
+################
 
 Main settings
 *************

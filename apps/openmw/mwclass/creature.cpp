@@ -214,8 +214,9 @@ namespace MWClass
     std::string Creature::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWMechanics::CreatureStats& Creature::getCreatureStats (const MWWorld::Ptr& ptr) const
@@ -454,18 +455,15 @@ namespace MWClass
             // otherwise wait until death animation
             if(stats.isDeathAnimationFinished())
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
-
-            // death animation is not finished, do nothing
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
         }
+        else if (!stats.getAiSequence().isInCombat() && !stats.getKnockedDown())
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
 
-        if(stats.getAiSequence().isInCombat())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        // Tribunal and some mod companions oddly enough must use open action as fallback
+        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
 
-        if(stats.getKnockedDown())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
-
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+        return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
     }
 
     MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
@@ -586,7 +584,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

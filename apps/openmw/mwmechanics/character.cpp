@@ -1629,7 +1629,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         if(mUpperBodyState == UpperCharState_MinAttackToMaxAttack && !isKnockedDown())
         {
             float attackStrength = complete;
-            if (!mPtr.getClass().isNpc())
+            float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
+            float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
+            if (minAttackTime == maxAttackTime)
             {
                 // most creatures don't actually have an attack wind-up animation, so use a uniform random value
                 // (even some creatures that can use weapons don't have a wind-up animation either, e.g. Rieklings)
@@ -1735,7 +1737,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             {
                 // If actor is already stopped preparing attack, do not play the "min attack -> max attack" part.
                 // Happens if the player did not hold the attack button.
-                // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be 1.
+                // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be random.
                 float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
                 float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
                 if (mAttackingOrSpell || minAttackTime == maxAttackTime)
@@ -2580,11 +2582,15 @@ void CharacterController::updateMagicEffects()
     if (!mPtr.getClass().isActor())
         return;
 
-    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
-    mAnimation->setVampire(vampire);
-
     float light = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
     mAnimation->setLightEffect(light);
+
+    // If you're dead you don't care about whether you've started/stopped being a vampire or not
+    if (mPtr.getClass().getCreatureStats(mPtr).isDead())
+        return;
+
+    bool vampire = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0.0f;
+    mAnimation->setVampire(vampire);
 }
 
 void CharacterController::setVisibility(float visibility)

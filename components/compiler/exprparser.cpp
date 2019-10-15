@@ -489,7 +489,7 @@ namespace Compiler
                 parseArguments ("l", scanner);
 
                 Generator::random (mCode);
-                mOperands.push_back ('l');
+                mOperands.push_back ('f');
 
                 mNextOperand = false;
                 return true;

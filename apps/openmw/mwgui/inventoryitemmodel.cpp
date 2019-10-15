@@ -46,11 +46,11 @@ ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool setNewOwner)
+MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, setNewOwner);
+    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor);
 }
 
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
@@ -88,7 +88,7 @@ MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, I
     if (item.mFlags & ItemStack::Flag_Bound)
         return MWWorld::Ptr();
 
-    MWWorld::Ptr ret = otherModel->copyItem(item, count, false);
+    MWWorld::Ptr ret = otherModel->copyItem(item, count);
     removeItem(item, count);
     return ret;
 }

@@ -67,7 +67,7 @@ namespace MWGui
 
         /// @param setNewOwner If true, set the copied item's owner to the actor we are copying to,
         ///                    otherwise reset owner to ""
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count) = 0;
         virtual void removeItem (const ItemStack& item, size_t count) = 0;
 
         /// Is the player allowed to use items from this item model? (default true)
@@ -97,7 +97,7 @@ namespace MWGui
         virtual bool onDropItem(const MWWorld::Ptr &item, int count);
         virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);
 

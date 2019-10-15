@@ -182,13 +182,13 @@ namespace MWScript
                         runtime.pop();
                     }
 
-                    ptr.getClass().lock (ptr, lockLevel);
+                    ptr.getCellRef().lock (lockLevel);
 
                     // Instantly reset door to closed state
                     // This is done when using Lock in scripts, but not when using Lock spells.
                     if (ptr.getTypeName() == typeid(ESM::Door).name() && !ptr.getCellRef().getTeleport())
                     {
-                        MWBase::Environment::get().getWorld()->activateDoor(ptr, 0);
+                        MWBase::Environment::get().getWorld()->activateDoor(ptr, MWWorld::DoorState::Idle);
                     }
                 }
         };
@@ -202,7 +202,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    ptr.getClass().unlock (ptr);
+                    ptr.getCellRef().unlock ();
                 }
         };
 
@@ -358,7 +358,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (!MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 
@@ -367,7 +367,7 @@ namespace MWScript
             virtual void execute (Interpreter::Runtime& runtime)
             {
                 if (MWBase::Environment::get().getWorld()->isFirstPerson())
-                    MWBase::Environment::get().getWorld()->togglePOV();
+                    MWBase::Environment::get().getWorld()->togglePOV(true);
             }
         };
 
@@ -441,7 +441,7 @@ namespace MWScript
 
                     MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
                     effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().isNpc())
+                    if (ptr.getClass().hasInventoryStore(ptr))
                     {
                         MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
                         effects += store.getMagicEffects();

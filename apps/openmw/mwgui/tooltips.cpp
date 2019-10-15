@@ -249,6 +249,9 @@ namespace MWGui
                         int school = MWMechanics::getSpellSchool(spell, player);
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
+                    std::string cost = focus->getUserString("SpellCost");
+                    if (cost != "" && cost != "0")
+                        info.text += MWGui::ToolTips::getValueString(spell->mData.mCost, "#{sCastCost}");
                     info.effects = effects;
                     tooltipSize = createToolTip(info);
                 }
@@ -648,9 +651,25 @@ namespace MWGui
     {
         std::string ret;
         ret += getMiscString(cellref.getOwner(), "Owner");
-        ret += getMiscString(cellref.getFaction(), "Faction");
-        if (cellref.getFactionRank() > 0)
-            ret += getValueString(cellref.getFactionRank(), "Rank");
+        const std::string factionId = cellref.getFaction();
+        if (!factionId.empty())
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Faction *fact = store.get<ESM::Faction>().search(factionId);
+            if (fact != nullptr)
+            {
+                ret += getMiscString(fact->mName.empty() ? factionId : fact->mName, "Owner Faction");
+                if (cellref.getFactionRank() >= 0)
+                {
+                    int rank = cellref.getFactionRank();
+                    const std::string rankName = fact->mRanks[rank];
+                    if (rankName.empty())
+                        ret += getValueString(cellref.getFactionRank(), "Rank");
+                    else
+                        ret += getMiscString(rankName, "Rank");
+                }
+            }
+        }
 
         std::vector<std::pair<std::string, int> > itemOwners =
                 MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());

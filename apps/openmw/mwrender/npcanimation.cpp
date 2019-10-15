@@ -184,7 +184,7 @@ void HeadAnimationTime::update(float dt)
     if (!mEnabled)
         return;
 
-    if (MWBase::Environment::get().getSoundManager()->sayDone(mReference))
+    if (!MWBase::Environment::get().getSoundManager()->sayActive(mReference))
     {
         mBlinkTimer += dt;
 

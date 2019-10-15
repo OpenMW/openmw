@@ -101,7 +101,6 @@ MWWorld::InventoryStore::InventoryStore()
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     initSlots (mSlots);
 }
@@ -114,7 +113,6 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  , mFirstAutoEquip(store.mFirstAutoEquip)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     copySlots (store);
 }
@@ -133,11 +131,11 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr);
 
-    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
+    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
     if (actorPtr != MWMechanics::getPlayer()
             && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
@@ -210,22 +208,29 @@ MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
     return findSlot (slot);
 }
 
-bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
+bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor)
 {
-    if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
+    // Treat player as non-trader indifferently from service flags.
+    if (actor == MWMechanics::getPlayer())
         return true;
 
-    // Only autoEquip if we are the original owner of the item.
-    // This stops merchants from auto equipping anything you sell to them.
-    // ...unless this is a companion, he should always equip items given to him.
-    if (!Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
-            (actor.getClass().getScript(actor).empty() ||
-            !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
-            && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
-            )
-    {
-        return false;
-    }
+    static const bool prevent = Settings::Manager::getBool("prevent merchant equipping", "Game");
+    if (!prevent)
+        return true;
+
+    // Corpses can be dressed up by the player as desired.
+    if (actor.getClass().getCreatureStats(actor).isDead())
+        return true;
+
+    // Companions can autoequip items.
+    if (!actor.getClass().getScript(actor).empty() &&
+        actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
+        return true;
+
+    // If the actor is trader, he can auto-equip items only during initial auto-equipping
+    int services = actor.getClass().getServices(actor);
+    if (services & ESM::NPC::AllItems)
+        return mFirstAutoEquip;
 
     return true;
 }
@@ -327,9 +332,6 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
 
         for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
         {
-            if (!canActorAutoEquip(actor, *iter))
-                continue;
-
             const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
             if (MWMechanics::getWeaponType(esmWeapon->mData.mType)->mWeaponClass == ESM::WeaponType::Ammo)
@@ -430,9 +432,6 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
-
-        if (!canActorAutoEquip(actor, test))
-            continue;
 
         switch(test.getClass().canBeEquipped (test, actor).first)
         {
@@ -553,6 +552,9 @@ void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor, TSlots&
 
 void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
 {
+    if (!canActorAutoEquip(actor))
+        return;
+
     TSlots slots_;
     initSlots (slots_);
 
@@ -707,12 +709,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
     MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(actor);
 
     mFirstAutoEquip = false;
-}
-
-void MWWorld::InventoryStore::flagAsModified()
-{
-    ContainerStore::flagAsModified();
-    mRechargingItemsUpToDate = false;
 }
 
 bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
@@ -953,57 +949,6 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
                 visitor.visit(MWMechanics::EffectKey(effect), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-        }
-    }
-}
-
-void MWWorld::InventoryStore::updateRechargingItems()
-{
-    mRechargingItems.clear();
-    for (ContainerStoreIterator it = begin(); it != end(); ++it)
-    {
-        if (it->getClass().getEnchantment(*it) != "")
-        {
-            std::string enchantmentId = it->getClass().getEnchantment(*it);
-            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
-                        enchantmentId);
-            if (!enchantment)
-            {
-                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId();
-                continue;
-            }
-
-            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
-                    || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                mRechargingItems.push_back(std::make_pair(it, static_cast<float>(enchantment->mData.mCharge)));
-        }
-    }
-}
-
-void MWWorld::InventoryStore::rechargeItems(float duration)
-{
-    if (!mRechargingItemsUpToDate)
-    {
-        updateRechargingItems();
-        mRechargingItemsUpToDate = true;
-    }
-    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
-    {
-        if (it->first->getCellRef().getEnchantmentCharge() == -1
-                || it->first->getCellRef().getEnchantmentCharge() == it->second)
-            continue;
-
-        static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->mValue.getFloat();
-
-        if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
-        {
-            it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
-                                                                  it->second));
-
-            // attempt to restack when fully recharged
-            if (it->first->getCellRef().getEnchantmentCharge() == it->second)
-                it->first = restack(*it->first);
         }
     }
 }

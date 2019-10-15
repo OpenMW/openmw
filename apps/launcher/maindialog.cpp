@@ -329,6 +329,7 @@ bool Launcher::MainDialog::setupGameSettings()
         stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
         mGameSettings.readUserFile(stream);
+        file.close();
     }
 
     // Now the rest - priority: user > local > global
@@ -353,8 +354,8 @@ bool Launcher::MainDialog::setupGameSettings()
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
             mGameSettings.readFile(stream);
+            file.close();
         }
-        file.close();
     }
 
     return true;

@@ -70,9 +70,10 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
-            return "";
+            return std::string();
 
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
@@ -141,9 +142,7 @@ namespace MWClass
 
     bool Light::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-
-        return (ref->mBase->mName != "");
+        return showsInInventory(ptr);
     }
 
     MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -151,7 +150,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = MyGUI::TextIterator::toTagsString(ref->mBase->mName) + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;

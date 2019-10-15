@@ -7,11 +7,14 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+
+#include "../mwscript/interpretercontext.hpp"
 
 #include "countdialog.hpp"
 #include "inventorywindow.hpp"
@@ -229,7 +232,26 @@ namespace MWGui
             if (mPtr.getClass().isPersistent(mPtr))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
             else
+            {
+                MWMechanics::CreatureStats& creatureStats = mPtr.getClass().getCreatureStats(mPtr);
+
+                // If we dispose corpse before end of death animation, we should update death counter counter manually.
+                // Also we should run actor's script - it may react on actor's death.
+                if (creatureStats.isDead() && !creatureStats.isDeathAnimationFinished())
+                {
+                    creatureStats.setDeathAnimationFinished(true);
+                    MWBase::Environment::get().getMechanicsManager()->notifyDied(mPtr);
+
+                    const std::string script = mPtr.getClass().getScript(mPtr);
+                    if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
+                    {
+                        MWScript::InterpreterContext interpreterContext (&mPtr.getRefData().getLocals(), mPtr);
+                        MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+                    }
+                }
+
                 MWBase::Environment::get().getWorld()->deleteObject(mPtr);
+            }
 
             mPtr = MWWorld::Ptr();
         }

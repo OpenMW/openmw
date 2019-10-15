@@ -696,7 +696,7 @@ namespace MWMechanics
                 {
                     if (caster == getPlayer())
                         MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicLockSuccess}");
-                    target.getClass().lock(target, static_cast<int>(magnitude));
+                    target.getCellRef().lock(static_cast<int>(magnitude));
                 }
                 return true;
             }
@@ -712,17 +712,18 @@ namespace MWMechanics
                     if (target.getCellRef().getLockLevel() > 0)
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock", 1.f, 1.f);
-                        if (!caster.isEmpty())
-                            MWBase::Environment::get().getMechanicsManager()->objectOpened(getPlayer(), target);
-                            // Use the player instead of the caster for vanilla crime compatibility
 
                         if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
                     }
-                    target.getClass().unlock(target);
+                    target.getCellRef().unlock();
                 }
                 else
                     MWBase::Environment::get().getSoundManager()->playSound3D(target, "Open Lock Fail", 1.f, 1.f);
+
+                if (!caster.isEmpty())
+                    MWBase::Environment::get().getMechanicsManager()->unlockAttempted(getPlayer(), target);
+                    // Use the player instead of the caster for vanilla crime compatibility
                 return true;
             }
         }

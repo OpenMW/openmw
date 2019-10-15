@@ -72,13 +72,10 @@ can loot during death animation
 :Default:	True
 
 If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, 
-if they are not in combat. However disposing corpses during death animation is not recommended - 
-death counter may not be incremented, and this behaviour can break quests.
-This is how Morrowind behaves.
+if they are not in combat. In this case we have to increment death counter and run disposed actor's script instantly.
 
 If this setting is false, player has to wait until end of death animation in all cases.
-This case is more safe, but makes using of summoned creatures exploit 
-(looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
+Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
 This setting can be toggled in Advanced tab of the launcher.

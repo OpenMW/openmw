@@ -175,6 +175,7 @@ namespace MWGui
       , mHudEnabled(true)
       , mCursorVisible(true)
       , mCursorActive(false)
+      , mPlayerBounty(-1)
       , mPlayerName()
       , mPlayerRaceId()
       , mPlayerAttributes()
@@ -1025,6 +1026,18 @@ namespace MWGui
         if (!gameRunning)
             return;
 
+        // We should display message about crime only once per frame, even if there are several crimes.
+        // Otherwise we will get message spam when stealing several items via Take All button.
+        const MWWorld::Ptr player = MWMechanics::getPlayer();
+        int currentBounty = player.getClass().getNpcStats(player).getBounty();
+        if (currentBounty != mPlayerBounty)
+        {
+            if (mPlayerBounty >= 0 && currentBounty > mPlayerBounty)
+                messageBox("#{sCrimeMessage}");
+
+            mPlayerBounty = currentBounty;
+        }
+
         mDragAndDrop->onFrame();
 
         mHud->onFrame(frameDuration);
@@ -1773,6 +1786,8 @@ namespace MWGui
 
     void WindowManager::clear()
     {
+        mPlayerBounty = -1;
+
         for (WindowBase* window : mWindows)
             window->clear();
 

@@ -52,10 +52,10 @@ namespace MWMechanics
             // FIXME: cast
             const MWWorld::Ptr doorPtr = MWWorld::Ptr(&const_cast<MWWorld::LiveCellRef<ESM::Door> &>(ref), actor.getCell());
 
-            int doorState = doorPtr.getClass().getDoorState(doorPtr);
+            const auto doorState = doorPtr.getClass().getDoorState(doorPtr);
             float doorRot = ref.mData.getPosition().rot[2] - doorPtr.getCellRef().getPosition().rot[2];
 
-            if (doorState != 0 || doorRot != 0)
+            if (doorState != MWWorld::DoorState::Idle || doorRot != 0)
                 continue; // the door is already opened/opening
 
             doorPos.z() = 0;

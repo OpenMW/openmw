@@ -112,8 +112,8 @@ bool OMW::Engine::frame(float frametime)
         bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()==
-            MWBase::StateManager::State_Running)
+        if (mEnvironment.getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
         {
             if (!paused)
             {
@@ -133,6 +133,7 @@ bool OMW::Engine::frame(float frametime)
             {
                 double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
                 mEnvironment.getWorld()->advanceTime(hours, true);
+                mEnvironment.getWorld()->rechargeItems(frametime, true);
             }
         }
         osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
