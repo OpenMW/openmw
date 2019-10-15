@@ -1153,7 +1153,7 @@ namespace MWRender
     {
         mPlayerAnimation = new NpcAnimation(player, player.getRefData().getBaseNode(), mResourceSystem, 0, NpcAnimation::VM_Normal,
                                                 mFirstPersonFieldOfView);
-        if(mPlayerNode->getNumParents()==0)
+        if(mPlayerNode->getNumParents()==0 && player.mCell)
             mObjects->getOrCreateCell(player.getCell())->addChild(mPlayerNode);
         mCamera->setAnimation(mPlayerAnimation.get());
         mCamera->attachTo(player);
@@ -1335,9 +1335,9 @@ namespace MWRender
         return mCurrentCameraPos;
     }
 
-    void RenderingManager::togglePOV()
+    void RenderingManager::togglePOV(bool force)
     {
-        mCamera->toggleViewMode();
+        mCamera->toggleViewMode(force);
     }
 
     void RenderingManager::togglePreviewMode(bool enable)
