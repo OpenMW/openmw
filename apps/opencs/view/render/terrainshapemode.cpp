@@ -39,7 +39,7 @@
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "mask.hpp"
-#include "object.hpp" // Something small needed regarding pointers from here ()
+#include "tagbase.hpp"
 #include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
@@ -252,7 +252,7 @@ void CSVRender::TerrainShapeMode::sortAndLimitAlteredCells()
     std::sort(mAlteredCells.begin(), mAlteredCells.end());
     mAlteredCells.erase(std::unique(mAlteredCells.begin(), mAlteredCells.end()), mAlteredCells.end());
 
-    while (passing == false) // Multiple passes are needed when steepness problems arise for both x and y axis simultaneously
+    while (!passing) // Multiple passes are needed when steepness problems arise for both x and y axis simultaneously
     {
         passing = true;
         for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
@@ -990,7 +990,7 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
         float downHeight = 0.0f;
         float downAlteredHeight = 0.0f;
 
-        if (reverseMode == false)
+        if (!reverseMode)
         {
             for(int inCellY = 0; inCellY < ESM::Land::LAND_SIZE; ++inCellY)
             {
