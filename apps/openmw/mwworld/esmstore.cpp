@@ -211,7 +211,7 @@ void ESMStore::validate()
             const ESM::MagicEffect* mgef = mMagicEffects.search(iter->mEffectID);
             if (!mgef)
             {
-                Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an an invalid effect (index " << iter->mEffectID << ") present, dropping it.";
+                Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index " << iter->mEffectID << ") present. Dropping the effect.";
                 iter = spell.mEffects.mList.erase(iter);
                 changed = true;
                 continue;
@@ -223,7 +223,7 @@ void ESMStore::validate()
                 {
                     iter->mAttribute = -1;
                     Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                        " effect of spell '" << spell.mId << "'  has an attribute argument present, dropping it.";
+                        " effect of spell '" << spell.mId << "' has an attribute argument present. Dropping the argument.";
                     changed = true;
                 }
             }
@@ -233,7 +233,7 @@ void ESMStore::validate()
                 {
                     iter->mSkill = -1;
                     Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                        " effect of spell '" << spell.mId << "' has a skill argument present, dropping it.";
+                        " effect of spell '" << spell.mId << "' has a skill argument present. Dropping the argument.";
                     changed = true;
                 }
             }
@@ -242,7 +242,7 @@ void ESMStore::validate()
                 iter->mSkill = -1;
                 iter->mAttribute = -1;
                 Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) <<
-                    " effect of spell '" << spell.mId << "' has argument(s) present, dropping them.";
+                    " effect of spell '" << spell.mId << "' has argument(s) present. Dropping the argument(s).";
                 changed = true;
             }
 
