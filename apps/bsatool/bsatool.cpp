@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include <filesystem>
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
@@ -12,7 +13,6 @@
 
 // Create local aliases for brevity
 namespace bpo = boost::program_options;
-namespace bfs = boost::filesystem;
 
 struct Arguments
 {
@@ -217,20 +217,20 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     }
 
     // Get the target path (the path the file will be extracted to)
-    bfs::path relPath (extractPath);
-    bfs::path outdir (info.outdir);
+    std::filesystem::path relPath (extractPath);
+    std::filesystem::path outdir (info.outdir);
 
-    bfs::path target;
+    std::filesystem::path target;
     if (info.fullpath)
         target = outdir / relPath;
     else
         target = outdir / relPath.filename();
 
     // Create the directory hierarchy
-    bfs::create_directories(target.parent_path());
+    std::filesystem::create_directories(target.parent_path());
 
-    bfs::file_status s = bfs::status(target.parent_path());
-    if (!bfs::is_directory(s))
+    std::filesystem::file_status s = std::filesystem::status(target.parent_path());
+    if (!std::filesystem::is_directory(s))
     {
         std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
         return 3;
@@ -239,7 +239,7 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     // Get a stream for the file to extract
     Files::IStreamPtr stream = bsa.getFile(archivePath.c_str());
 
-    bfs::ofstream out(target, std::ios::binary);
+    std::ofstream out(target, std::ios::binary);
 
     // Write the file to disk
     std::cout << "Extracting " << info.extractfile << " to " << target << std::endl;
@@ -263,14 +263,14 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
         replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
-        bfs::path target (info.outdir);
+        std::filesystem::path target (info.outdir);
         target /= extractPath;
 
         // Create the directory hierarchy
-        bfs::create_directories(target.parent_path());
+        std::filesystem::create_directories(target.parent_path());
 
-        bfs::file_status s = bfs::status(target.parent_path());
-        if (!bfs::is_directory(s))
+        std::filesystem::file_status s = std::filesystem::status(target.parent_path());
+        if (!std::filesystem::is_directory(s))
         {
             std::cout << "ERROR: " << target.parent_path() << " is not a directory." << std::endl;
             return 3;
@@ -279,7 +279,7 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
         // Get a stream for the file to extract
         // (inefficient because getFile iter on the list again)
         Files::IStreamPtr data = bsa.getFile(archivePath);
-        bfs::ofstream out(target, std::ios::binary);
+        std::ofstream out(target, std::ios::binary);
 
         // Write the file to disk
         std::cout << "Extracting " << target << std::endl;
