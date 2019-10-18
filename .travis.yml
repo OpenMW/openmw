@@ -45,11 +45,6 @@ matrix:
       os: osx
       osx_image: xcode11.2
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-5
-      os: linux
-      dist: xenial
-      sudo: required
-      if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Xenial GCC-8
       os: linux
       dist: xenial
