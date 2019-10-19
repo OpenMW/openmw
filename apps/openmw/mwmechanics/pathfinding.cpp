@@ -18,6 +18,7 @@
 
 #include "pathgrid.hpp"
 #include "coordinateconverter.hpp"
+#include "actorutil.hpp"
 
 namespace
 {
@@ -84,6 +85,13 @@ namespace
 
 namespace MWMechanics
 {
+    float getPathDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        if (canActorMoveByZAxis(actor))
+            return distance(lhs, rhs);
+        return distanceIgnoreZ(lhs, rhs);
+    }
+
     bool checkWayIsClear(const osg::Vec3f& from, const osg::Vec3f& to, float offsetXY)
     {
         osg::Vec3f dir = to - from;
