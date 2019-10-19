@@ -81,13 +81,20 @@ namespace
         const auto realHalfExtents = world->getHalfExtents(actor);
         return 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
     }
+
+    float getHeight(const MWWorld::ConstPtr& actor)
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        const auto halfExtents = world->getHalfExtents(actor);
+        return 2.0 * halfExtents.z();
+    }
 }
 
 namespace MWMechanics
 {
     float getPathDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs)
     {
-        if (canActorMoveByZAxis(actor))
+        if (std::abs(lhs.z() - rhs.z()) > getHeight(actor) || canActorMoveByZAxis(actor))
             return distance(lhs, rhs);
         return distanceIgnoreZ(lhs, rhs);
     }
