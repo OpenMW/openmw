@@ -74,17 +74,17 @@ namespace
         {
             if (mRendered)
             {
-                node->setNodeMask(0);
+                if (mParent->copyResult(static_cast<osg::Camera*>(node), nv->getTraversalNumber()))
+                {
+                    node->setNodeMask(0);
+                    mParent->markForRemoval(static_cast<osg::Camera*>(node));
+                }
                 return;
             }
 
             traverse(node, nv);
 
-            if (!mRendered)
-            {
-                mRendered = true;
-                mParent->markForRemoval(static_cast<osg::Camera*>(node));
-            }
+            mRendered = true;
         }
 
     private:
@@ -325,7 +325,7 @@ namespace MWRender
             imageDest.mImage = image;
             imageDest.mX = x;
             imageDest.mY = y;
-            mPendingImageDest.push_back(imageDest);
+            mPendingImageDest[camera] = imageDest;
         }
 
         // Create a quad rendering the updated texture
@@ -567,6 +567,27 @@ namespace MWRender
         }
     }
 
+    bool GlobalMap::copyResult(osg::Camera *camera, unsigned int frame)
+    {
+        ImageDestMap::iterator it = mPendingImageDest.find(camera);
+        if (it == mPendingImageDest.end())
+            return true;
+        else
+        {
+            ImageDest& imageDest = it->second;
+            if (imageDest.mFrameDone == 0) imageDest.mFrameDone = frame+2; // wait an extra frame to ensure the draw thread has completed its frame.
+            if (imageDest.mFrameDone > frame)
+            {
+                ++it;
+                return false;
+            }
+
+            mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
+            it = mPendingImageDest.erase(it);
+            return true;
+        }
+    }
+
     void GlobalMap::markForRemoval(osg::Camera *camera)
     {
         CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), camera);
@@ -585,21 +606,6 @@ namespace MWRender
             removeCamera(camera);
 
         mCamerasPendingRemoval.clear();
-
-        for (ImageDestVector::iterator it = mPendingImageDest.begin(); it != mPendingImageDest.end();)
-        {
-            ImageDest& imageDest = *it;
-            if (--imageDest.mFramesUntilDone > 0)
-            {
-                ++it;
-                continue;
-            }
-
-            ensureLoaded();
-            mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
-
-            it = mPendingImageDest.erase(it);
-        }
     }
 
     void GlobalMap::removeCamera(osg::Camera *cam)
