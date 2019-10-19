@@ -370,7 +370,6 @@ namespace MWWorld
         bool updateWeatherRegion(const std::string& playerRegion);
         void updateWeatherTransitions(const float elapsedRealSeconds);
         void forceWeather(const int weatherID);
-        osg::Vec3f calculateStormDirection();
 
         bool inTransition();
         void addWeatherTransition(const int weatherID);

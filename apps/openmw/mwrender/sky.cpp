@@ -225,7 +225,7 @@ protected:
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
-        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, mAnimationTimer, 0.f)));
+        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, -mAnimationTimer, 0.f)));
 
         stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         stateset->setTextureAttribute(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -1108,7 +1108,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mMonth(0)
     , mCloudAnimationTimer(0.f)
     , mRainTimer(0.f)
-    , mStormDirection(0,-1,0)
+    , mStormDirection(0,1,0)
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -1597,10 +1597,14 @@ void SkyManager::update(float duration)
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
 
-        if (mParticleNode)
-            mParticleNode->setAttitude(quat);
-
         mCloudNode->setAttitude(quat);
+        if (mParticleNode)
+        {
+            // Morrowind deliberately rotates the blizzard mesh, so so should we.
+            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
+                quat.makeRotate(osg::Vec3f(-1,0,0), mStormDirection);
+            mParticleNode->setAttitude(quat);
+        }
     }
     else
         mCloudNode->setAttitude(osg::Quat());
@@ -1636,7 +1640,7 @@ void SkyManager::updateRainParameters()
 {
     if (mRainShooter)
     {
-        float angle = -std::atan2(1, 50.f/mWindSpeed);
+        float angle = -std::atan(mWindSpeed/50.f);
         mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed*std::sin(angle), -mRainSpeed/std::cos(angle)));
         mRainShooter->setAngle(angle);
 

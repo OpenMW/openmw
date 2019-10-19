@@ -661,17 +661,6 @@ void WeatherManager::playerTeleported(const std::string& playerRegion, bool isEx
     }
 }
 
-osg::Vec3f WeatherManager::calculateStormDirection()
-{
-    osg::Vec3f playerPos (MWMechanics::getPlayer().getRefData().getPosition().asVec3());
-    playerPos.z() = 0;
-    osg::Vec3f redMountainPos (25000, 70000, 0);
-    osg::Vec3f stormDirection = (playerPos - redMountainPos);
-    stormDirection.normalize();
-
-    return stormDirection;
-}
-
 float WeatherManager::calculateWindSpeed(int weatherId, float currentSpeed)
 {
     float targetSpeed = std::min(8.0f * mWeatherSettings[weatherId].mWindSpeed, 70.f);
@@ -682,15 +671,7 @@ float WeatherManager::calculateWindSpeed(int weatherId, float currentSpeed)
     float updatedSpeed = (Misc::Rng::rollClosedProbability() - 0.5f) * multiplier * targetSpeed + currentSpeed;
 
     if (updatedSpeed > 0.5f * targetSpeed && updatedSpeed < 2.f * targetSpeed)
-    {
         currentSpeed = updatedSpeed;
-    }
-
-    // Take in account direction to the Red Mountain, when needed
-    if (weatherId == 6 || weatherId == 7)
-    {
-        currentSpeed = (calculateStormDirection() * currentSpeed).length();
-    }
 
     return currentSpeed;
 }
@@ -750,7 +731,16 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     if (mIsStorm)
     {
-        mStormDirection = calculateStormDirection();
+        osg::Vec3f stormDirection(0, 1, 0);
+        if (mResult.mParticleEffect == "meshes\\ashcloud.nif" || mResult.mParticleEffect == "meshes\\blightcloud.nif")
+        {
+            osg::Vec3f playerPos (MWMechanics::getPlayer().getRefData().getPosition().asVec3());
+            playerPos.z() = 0;
+            osg::Vec3f redMountainPos (25000, 70000, 0);
+            stormDirection = (playerPos - redMountainPos);
+            stormDirection.normalize();
+        }
+        mStormDirection = stormDirection;
         mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }
 
