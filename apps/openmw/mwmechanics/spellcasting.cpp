@@ -830,7 +830,7 @@ namespace MWMechanics
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
-            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo);
         }
         int type = enchantment->mData.mType;
 
