@@ -404,7 +404,7 @@ void CSVDoc::View::updateSubViewIndices(SubView *view)
 
     updateTitle();
 
-    foreach (SubView *subView, mSubViews)
+    for (SubView *subView : mSubViews)
     {
         if (!subView->isFloating())
         {
@@ -546,7 +546,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     // User setting to reuse sub views (on a per top level view basis)
     if (windows["reuse"].isTrue())
     {
-        foreach(SubView *sb, mSubViews)
+        for (SubView *sb : mSubViews)
         {
             bool isSubViewReferenceable =
                 sb->getUniversalId().getType() == CSMWorld::UniversalId::Type_Referenceable;
@@ -975,7 +975,7 @@ void CSVDoc::View::resizeViewHeight (int height)
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
 {
-    foreach (QObject *view, mSubViewWindow.children())
+    for (QObject *view : mSubViewWindow.children())
     {
         if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
             subView->setStatusBar (show);

@@ -217,7 +217,8 @@ bool Wizard::UnshieldWorker::removeDirectory(const QString &dirName)
         QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
                                                QDir::System | QDir::Hidden |
                                                QDir::AllDirs | QDir::Files, QDir::DirsFirst));
-        foreach(QFileInfo info, list) {
+        for (const QFileInfo& info : list)
+        {
             if (info.isDir()) {
                 result = removeDirectory(info.absoluteFilePath());
             } else {
@@ -279,7 +280,8 @@ bool Wizard::UnshieldWorker::copyDirectory(const QString &source, const QString 
                                                  QDir::System | QDir::Hidden |
                                                  QDir::AllDirs | QDir::Files, QDir::DirsFirst));
 
-    foreach (const QFileInfo &info, list) {
+    for (const QFileInfo &info : list)
+    {
         QString relativePath(info.absoluteFilePath());
         relativePath.remove(source);
 
@@ -315,7 +317,8 @@ bool Wizard::UnshieldWorker::installFiles(const QString &fileName, const QString
 
     QStringList files(findFiles(fileName, path, flags));
 
-    foreach (const QString &file, files) {
+    for (const QString &file : files)
+    {
         QFileInfo info(file);
         emit textChanged(tr("Installing: %1").arg(info.fileName()));
 
@@ -339,7 +342,8 @@ bool Wizard::UnshieldWorker::installDirectories(const QString &dirName, const QS
 
     QStringList directories(findDirectories(dirName, path, recursive));
 
-    foreach (const QString &dir, directories) {
+    for (const QString &dir : directories)
+    {
         QFileInfo info(dir);
         emit textChanged(tr("Installing: %1 directory").arg(info.fileName()));
         if (!copyDirectory(info.absoluteFilePath(), getPath() + QDir::separator() + info.fileName(), keepSource))
@@ -460,7 +464,8 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
 
         QStringList list(findFiles(QLatin1String("data1.hdr"), disk.absolutePath()));
 
-        foreach (const QString &file, list) {
+        for (const QString &file : list)
+        {
 
             qDebug() << "current archive: " << file;
 
@@ -579,7 +584,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
                 << QLatin1String("Textures")
                 << QLatin1String("Video");
 
-    foreach (const QString &dir, directories) {
+    for (const QString &dir : directories)
+    {
         if (!installDirectories(dir, temp.absolutePath())) {
             emit error(tr("Could not install directory!"),
                        tr("Installing %1 to %2 failed.").arg(dir, temp.absolutePath()));
@@ -588,7 +594,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     }
 
     // Install directories from disk
-    foreach (const QString &dir, directories) {
+    for (const QString &dir : directories)
+    {
         if (!installDirectories(dir, info.absolutePath(), false, true)) {
             emit error(tr("Could not install directory!"),
                        tr("Installing %1 to %2 failed.").arg(dir, info.absolutePath()));
@@ -603,7 +610,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
                << QLatin1String(".top")
                << QLatin1String(".mrk");
 
-    foreach (const QString &extension, extensions) {
+    for (const QString &extension : extensions)
+    {
         if (!installFiles(extension, info.absolutePath(), Qt::MatchEndsWith)) {
             emit error(tr("Could not install translation file!"),
                        tr("Failed to install *%1 files.").arg(extension));
@@ -617,7 +625,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
         files << QLatin1String("Morrowind.esm")
               << QLatin1String("Morrowind.bsa");
 
-        foreach (const QString &file, files) {
+        for (const QString &file : files)
+        {
             if (!installFile(file, temp.absolutePath())) {
                 emit error(tr("Could not install Morrowind data file!"),
                            tr("Failed to install %1.").arg(file));
@@ -658,7 +667,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
         files << QLatin1String("Tribunal.esm")
               << QLatin1String("Tribunal.bsa");
 
-        foreach (const QString &file, files) {
+        for (const QString &file : files)
+        {
             if (!installFile(file, temp.absolutePath())) {
                 emit error(tr("Could not find Tribunal data file!"),
                            tr("Failed to find %1.").arg(file));
@@ -683,7 +693,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
         files << QLatin1String("Bloodmoon.esm")
               << QLatin1String("Bloodmoon.bsa");
 
-        foreach (const QString &file, files) {
+        for (const QString &file : files)
+        {
             if (!installFile(file, temp.absolutePath())) {
                 emit error(tr("Could not find Bloodmoon data file!"),
                            tr("Failed to find %1.").arg(file));
@@ -696,7 +707,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
 
         emit textChanged(tr("Updating Morrowind configuration file"));
 
-        foreach (const QString &inx, list) {
+        for (const QString &inx : list)
+        {
              mIniSettings.parseInx(inx);
         }
     }
@@ -705,7 +717,8 @@ bool Wizard::UnshieldWorker::installComponent(Component component, const QString
     QStringList datafiles(findDirectories(QLatin1String("Data Files"), temp.absolutePath()));
     datafiles.append(findDirectories(QLatin1String("Data Files"), info.absolutePath()));
 
-    foreach (const QString &dir, datafiles) {
+    for (const QString &dir : datafiles)
+    {
         QFileInfo info(dir);
         emit textChanged(tr("Installing: %1 directory").arg(info.fileName()));
 
@@ -849,7 +862,8 @@ QStringList Wizard::UnshieldWorker::findFiles(const QString &fileName, const QSt
 
     QFileInfoList list(dir.entryInfoList(QDir::NoDotAndDotDot |
                                          QDir::AllDirs | QDir::Files, QDir::DirsFirst));
-    foreach(QFileInfo info, list) {
+    for (const QFileInfo& info : list)
+    {
         if (info.isSymLink())
             continue;
 

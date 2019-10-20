@@ -280,7 +280,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
     paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
-    foreach (const QString &path, paths) {
+    for (const QString &path : paths)
+    {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
         QFile file(path);
         if (file.exists()) {
@@ -338,7 +339,8 @@ bool Launcher::MainDialog::setupGameSettings()
     paths.append(localPath + QString("openmw.cfg"));
     paths.append(userPath + QString("openmw.cfg"));
 
-    foreach (const QString &path2, paths) {
+    for (const QString &path2 : paths)
+    {
         qDebug() << "Loading config file:" << path2.toUtf8().constData();
 
         file.setFileName(path2);
@@ -366,7 +368,8 @@ bool Launcher::MainDialog::setupGameData()
     QStringList dataDirs;
 
     // Check if the paths actually contain data files
-    foreach (const QString path3, mGameSettings.getDataDirs()) {
+    for (const QString& path3 : mGameSettings.getDataDirs())
+    {
         QDir dir(path3);
         QStringList filters;
         filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
