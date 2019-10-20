@@ -133,7 +133,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         if (!mIsShortcutting)
         {
-            if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
+            if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
@@ -328,11 +328,11 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoin
     return false;
 }
 
-bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell)
+bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::Ptr& actor) const
 {
     return mPathFinder.getPath().empty()
-        || (distance(mPathFinder.getPath().back(), newDest) > 10)
-        || mPathFinder.getPathCell() != currentCell;
+        || getPathDistance(actor, mPathFinder.getPath().back(), newDest) > 10
+        || mPathFinder.getPathCell() != actor.getCell();
 }
 
 bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
