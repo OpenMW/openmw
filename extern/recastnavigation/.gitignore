@@ -9,6 +9,16 @@
 *.so
 *.idb
 
+## Linux exes have no extension
+RecastDemo/Bin/RecastDemo
+RecastDemo/Bin/Tests
+
+# Build directory
+RecastDemo/Build
+
+# Ignore meshes
+RecastDemo/Bin/Meshes/*
+
 ## Logs and databases #
 *.log
 *.sql
@@ -27,6 +37,9 @@ Thumbs.db
 
 ## xcode specific
 *xcuserdata*
+
+## SDL contrib
+RecastDemo/Contrib/SDL/*
 
 ## Generated doc files
 Docs/html
