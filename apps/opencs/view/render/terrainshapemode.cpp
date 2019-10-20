@@ -98,7 +98,6 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
             setFlattenToolTargetHeight(hit);
         if (mDragMode == InteractionType_PrimaryEdit && mShapeEditTool != ShapeEditTool_Drag)
         {
-            std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
             editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
             applyTerrainEditChanges();
         }
@@ -190,12 +189,11 @@ void CSVRender::TerrainShapeMode::drag (const QPoint& pos, int diffX, int diffY,
     if (mDragMode == InteractionType_PrimaryEdit)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        std::string cellId = getWorldspaceWidget().getCellId (hit.worldPos);
         mTotalDiffY += diffY;
         if (mIsEditing)
         {
             if (mShapeEditTool == ShapeEditTool_Drag) editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(mEditingPos), true);
-            if (mShapeEditTool != ShapeEditTool_Drag) editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
+                else editTerrainShapeGrid(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), true);
         }
     }
 
@@ -305,14 +303,14 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         const CSMWorld::LandMapLodColumn::DataType landMapLodPointer = landTable.data(landTable.getModelIndex(cellId, landMapLodColumn)).value<CSMWorld::LandMapLodColumn::DataType>();
         CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
         CSMWorld::LandMapLodColumn::DataType mapLodShapeNew(landMapLodPointer);
+        CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget());
 
         // Generate land height record
         for(int i = 0; i < ESM::Land::LAND_SIZE; ++i)
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
             {
-                if (CSVRender::PagedWorldspaceWidget *paged =
-                    dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+                if (paged)
                 {
                     if (paged->getCellAlteredHeight(cellCoordinates, i, j))
                         landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + *paged->getCellAlteredHeight(cellCoordinates, i, j);
@@ -358,38 +356,27 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
             {
-                osg::Vec3f v1;
-                osg::Vec3f v2;
-                osg::Vec3f normal;
-                float hyp;
+                osg::Vec3f v1(128, 0, 0);
+                osg::Vec3f v2(0, 128, 0);
 
-                v1.x() = 128;
-                v1.y() = 0;
                 if (i < ESM::Land::LAND_SIZE - 1) v1.z() = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
                     std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY());
-                    if (!noCell(cellId) && !noLand(cellId) && noLandLoaded(cellId))
+                    if (isLandLoaded(cellId))
                         v1.z() = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                    else
-                        v1.z() = 0;
                 }
 
-                v2.x() = 0;
-                v2.y() = 128;
                 if (j < ESM::Land::LAND_SIZE - 1) v2.z() = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
                     std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1);
-                    if (!noCell(cellId) && !noLand(cellId) && noLandLoaded(cellId))
+                    if (isLandLoaded(cellId))
                         v2.z() = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
-                    else
-                        v2.z() = 0;
                 }
 
-                normal = v1 ^ v2;
-
-                hyp = normal.length() / 127.0f;
+                osg::Vec3f normal = v1 ^ v2;
+                const float hyp = normal.length() / 127.0f;
 
                 normal /= hyp;
 
@@ -533,6 +520,13 @@ void CSVRender::TerrainShapeMode::setFlattenToolTargetHeight(const WorldspaceHit
 void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, float alteredHeight, bool useTool)
 {
     std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY());
+
+    if (!(allowLandShapeEditing(cellId, useTool) && (useTool || (isLandLoaded(cellId)))))
+        return;
+    CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget());
+    if (!paged)
+        return;
+
     std::string cellLeftId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY());
     std::string cellRightId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY());
     std::string cellUpId = CSMWorld::CellCoordinates::generateId(cellCoords.getX(), cellCoords.getY() - 1);
@@ -542,121 +536,114 @@ void CSVRender::TerrainShapeMode::alterHeight(const CSMWorld::CellCoordinates& c
     std::string cellDownLeftId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() - 1, cellCoords.getY() + 1);
     std::string cellDownRightId = CSMWorld::CellCoordinates::generateId(cellCoords.getX() + 1, cellCoords.getY() + 1);
 
-    if (allowLandShapeEditing(cellId, useTool) && (useTool || (isLandLoaded(cellId))))
+    if (useTool)
     {
-        if (CSVRender::PagedWorldspaceWidget *paged =
-            dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+        mAlteredCells.emplace_back(cellCoords);
+        if (mShapeEditTool == ShapeEditTool_Drag)
         {
-            if (useTool)
-            {
-                mAlteredCells.emplace_back(cellCoords);
-                if (mShapeEditTool == ShapeEditTool_Drag)
-                {
-                    // Get distance from modified land, alter land change based on zoom
-                    osg::Vec3d eye, center, up;
-                    paged->getCamera()->getViewMatrixAsLookAt(eye, center, up);
-                    osg::Vec3d distance = eye - mEditingPos;
-                    alteredHeight = alteredHeight * (distance.length() / 500);
-                }
-                if (mShapeEditTool == ShapeEditTool_PaintToRaise) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) + alteredHeight;
-                if (mShapeEditTool == ShapeEditTool_PaintToLower) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) - alteredHeight;
-                if (mShapeEditTool == ShapeEditTool_Smooth) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) + alteredHeight;
-            }
+            // Get distance from modified land, alter land change based on zoom
+            osg::Vec3d eye, center, up;
+            paged->getCamera()->getViewMatrixAsLookAt(eye, center, up);
+            osg::Vec3d distance = eye - mEditingPos;
+            alteredHeight = alteredHeight * (distance.length() / 500);
+        }
+        if (mShapeEditTool == ShapeEditTool_PaintToRaise) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) + alteredHeight;
+        if (mShapeEditTool == ShapeEditTool_PaintToLower) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) - alteredHeight;
+        if (mShapeEditTool == ShapeEditTool_Smooth) alteredHeight = *paged->getCellAlteredHeight(cellCoords, inCellX, inCellY) + alteredHeight;
+    }
 
-            if (inCellX != 0 && inCellY != 0 && inCellX != ESM::Land::LAND_SIZE - 1 && inCellY != ESM::Land::LAND_SIZE - 1)
-                paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+    if (inCellX != 0 && inCellY != 0 && inCellX != ESM::Land::LAND_SIZE - 1 && inCellY != ESM::Land::LAND_SIZE - 1)
+    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
 
-            // Change values of cornering cells
-            if ((inCellX == 0 && inCellY == 0) && (useTool || isLandLoaded(cellUpLeftId)))
-            {
-                if(allowLandShapeEditing(cellUpLeftId, useTool) && allowLandShapeEditing(cellLeftId, useTool) && allowLandShapeEditing(cellUpId, useTool))
-                {
-                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, -1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(cornerCellCoords);
-                    paged->setCellAlteredHeight(cornerCellCoords, ESM::Land::LAND_SIZE - 1, ESM::Land::LAND_SIZE - 1, alteredHeight);
-                } else return;
-            }
-            else if ((inCellX == 0 && inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownLeftId)))
-            {
-                if (allowLandShapeEditing(cellDownLeftId, useTool) && allowLandShapeEditing(cellLeftId, useTool) && allowLandShapeEditing(cellDownId, useTool))
-                {
-                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, 1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(cornerCellCoords);
-                    paged->setCellAlteredHeight(cornerCellCoords, ESM::Land::LAND_SIZE - 1, 0, alteredHeight);
-                } else return;
-            }
-            else if ((inCellX == ESM::Land::LAND_SIZE - 1 && inCellY == 0) && (useTool || isLandLoaded(cellUpRightId)))
-            {
-                if (allowLandShapeEditing(cellUpRightId, useTool) && allowLandShapeEditing(cellRightId, useTool) && allowLandShapeEditing(cellUpId, useTool))
-                {
-                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, -1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(cornerCellCoords);
-                    paged->setCellAlteredHeight(cornerCellCoords, 0, ESM::Land::LAND_SIZE - 1, alteredHeight);
-                } else return;
-            }
-            else if ((inCellX == ESM::Land::LAND_SIZE - 1 && inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownRightId)))
-            {
-                if(allowLandShapeEditing(cellDownRightId, useTool) && allowLandShapeEditing(cellRightId, useTool) && allowLandShapeEditing(cellDownId, useTool))
-                {
-                    CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, 1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(cornerCellCoords);
-                    paged->setCellAlteredHeight(cornerCellCoords, 0, 0, alteredHeight);
-                } else return;
-            }
+    // Change values of cornering cells
+    if ((inCellX == 0 && inCellY == 0) && (useTool || isLandLoaded(cellUpLeftId)))
+    {
+        if(allowLandShapeEditing(cellUpLeftId, useTool) && allowLandShapeEditing(cellLeftId, useTool) && allowLandShapeEditing(cellUpId, useTool))
+        {
+            CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, -1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(cornerCellCoords);
+            paged->setCellAlteredHeight(cornerCellCoords, ESM::Land::LAND_SIZE - 1, ESM::Land::LAND_SIZE - 1, alteredHeight);
+        } else return;
+    }
+    else if ((inCellX == 0 && inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownLeftId)))
+    {
+        if (allowLandShapeEditing(cellDownLeftId, useTool) && allowLandShapeEditing(cellLeftId, useTool) && allowLandShapeEditing(cellDownId, useTool))
+        {
+            CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(-1, 1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(cornerCellCoords);
+            paged->setCellAlteredHeight(cornerCellCoords, ESM::Land::LAND_SIZE - 1, 0, alteredHeight);
+        } else return;
+    }
+    else if ((inCellX == ESM::Land::LAND_SIZE - 1 && inCellY == 0) && (useTool || isLandLoaded(cellUpRightId)))
+    {
+        if (allowLandShapeEditing(cellUpRightId, useTool) && allowLandShapeEditing(cellRightId, useTool) && allowLandShapeEditing(cellUpId, useTool))
+        {
+            CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, -1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(cornerCellCoords);
+            paged->setCellAlteredHeight(cornerCellCoords, 0, ESM::Land::LAND_SIZE - 1, alteredHeight);
+        } else return;
+    }
+    else if ((inCellX == ESM::Land::LAND_SIZE - 1 && inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownRightId)))
+    {
+        if(allowLandShapeEditing(cellDownRightId, useTool) && allowLandShapeEditing(cellRightId, useTool) && allowLandShapeEditing(cellDownId, useTool))
+        {
+            CSMWorld::CellCoordinates cornerCellCoords = cellCoords.move(1, 1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), cornerCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(cornerCellCoords);
+            paged->setCellAlteredHeight(cornerCellCoords, 0, 0, alteredHeight);
+        } else return;
+    }
 
-            // Change values of edging cells
-            if ((inCellX == 0) && (useTool || isLandLoaded(cellLeftId)))
-            {
-                if(allowLandShapeEditing(cellLeftId, useTool))
-                {
-                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(-1, 0);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(edgeCellCoords);
-                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-                    paged->setCellAlteredHeight(edgeCellCoords, ESM::Land::LAND_SIZE - 1, inCellY, alteredHeight);
-                }
-            }
-            if ((inCellY == 0) && (useTool || isLandLoaded(cellUpId)))
-            {
-                if(allowLandShapeEditing(cellUpId, useTool))
-                {
-                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, -1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(edgeCellCoords);
-                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-                    paged->setCellAlteredHeight(edgeCellCoords, inCellX, ESM::Land::LAND_SIZE - 1, alteredHeight);
-                }
-            }
-
-            if ((inCellX == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellRightId)))
-            {
-                if(allowLandShapeEditing(cellRightId, useTool))
-                {
-                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(1, 0);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(edgeCellCoords);
-                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-                    paged->setCellAlteredHeight(edgeCellCoords, 0, inCellY, alteredHeight);
-                }
-            }
-            if ((inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownId)))
-            {
-                if(allowLandShapeEditing(cellDownId, useTool))
-                {
-                    CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, 1);
-                    if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
-                        mAlteredCells.emplace_back(edgeCellCoords);
-                    paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
-                    paged->setCellAlteredHeight(edgeCellCoords, inCellX, 0, alteredHeight);
-                }
-            }
-
+    // Change values of edging cells
+    if ((inCellX == 0) && (useTool || isLandLoaded(cellLeftId)))
+    {
+        if(allowLandShapeEditing(cellLeftId, useTool))
+        {
+            CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(-1, 0);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(edgeCellCoords);
+            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            paged->setCellAlteredHeight(edgeCellCoords, ESM::Land::LAND_SIZE - 1, inCellY, alteredHeight);
         }
     }
+    if ((inCellY == 0) && (useTool || isLandLoaded(cellUpId)))
+    {
+        if(allowLandShapeEditing(cellUpId, useTool))
+        {
+            CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, -1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(edgeCellCoords);
+            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            paged->setCellAlteredHeight(edgeCellCoords, inCellX, ESM::Land::LAND_SIZE - 1, alteredHeight);
+        }
+    }
+
+    if ((inCellX == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellRightId)))
+    {
+        if(allowLandShapeEditing(cellRightId, useTool))
+        {
+            CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(1, 0);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(edgeCellCoords);
+            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            paged->setCellAlteredHeight(edgeCellCoords, 0, inCellY, alteredHeight);
+        }
+    }
+    if ((inCellY == ESM::Land::LAND_SIZE - 1) && (useTool || isLandLoaded(cellDownId)))
+    {
+        if(allowLandShapeEditing(cellDownId, useTool))
+        {
+            CSMWorld::CellCoordinates edgeCellCoords = cellCoords.move(0, 1);
+            if (useTool && std::find(mAlteredCells.begin(), mAlteredCells.end(), edgeCellCoords) == mAlteredCells.end())
+            mAlteredCells.emplace_back(edgeCellCoords);
+            paged->setCellAlteredHeight(cellCoords, inCellX, inCellY, alteredHeight);
+            paged->setCellAlteredHeight(edgeCellCoords, inCellX, 0, alteredHeight);
+        }
+    }
+
 }
 
 void CSVRender::TerrainShapeMode::smoothHeight(const CSMWorld::CellCoordinates& cellCoords, int inCellX, int inCellY, int toolStrength)
