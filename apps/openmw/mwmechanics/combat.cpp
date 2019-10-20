@@ -245,10 +245,8 @@ namespace MWMechanics
 
         reduceWeaponCondition(damage, validVictim, weapon, attacker);
 
-        // Apply "On hit" effect of the weapon & projectile
-        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition, true);
-        if (weapon != projectile)
-            appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
+        // Apply "On hit" effect of the projectile
+        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
 
         if (validVictim)
         {
