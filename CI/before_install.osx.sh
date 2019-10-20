@@ -6,7 +6,7 @@ brew install qt
 brew install ccache
 
 # get latest llvm/clang
-brew install --with-toolchain llvm # llvm but with all the headers
+brew install llvm # llvm but with all the headers
 xcode-select --install # installs additional headers that you might be mimssing.
 echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile # exports the custom llvm path into the shell
 sudo ln -s /usr/local/opt/llvm/bin/clang++ /usr/local/bin/clang++-brew # optional but I like to have a symlink set.
