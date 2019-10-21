@@ -679,7 +679,7 @@ fi
 		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.13/msvc${MSVC_DISPLAY_YEAR}${SUFFIX}"
+		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
