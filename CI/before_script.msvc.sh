@@ -336,10 +336,6 @@ case $CONFIGURATION in
 		;;
 esac
 
-if [ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ]; then
-	GENERATOR="${GENERATOR} Win64"
-fi
-
 if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
 fi
