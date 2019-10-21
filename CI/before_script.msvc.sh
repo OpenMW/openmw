@@ -305,14 +305,12 @@ case $PLATFORM in
 		ARCHNAME="x86-64"
 		ARCHSUFFIX="64"
 		BITS="64"
-		CMAKE_ARCH="x64"
 		;;
 
 	x32|x86|i686|i386|win32|Win32 )
 		ARCHNAME="x86"
 		ARCHSUFFIX="86"
 		BITS="32"
-		CMAKE_ARCH="Win32"
 		;;
 
 	* )
@@ -337,6 +335,10 @@ case $CONFIGURATION in
 		BUILD_CONFIG=RelWithDebInfo
 		;;
 esac
+
+if [ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ]; then
+	GENERATOR="${GENERATOR} Win64"
+fi
 
 if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
@@ -515,7 +517,7 @@ fi
 		fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.1"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
@@ -729,7 +731,7 @@ if [ ! -z $TEST_FRAMEWORK ]; then
 
 	if [ ! -d $GOOGLE_INSTALL_ROOT ]; then
 
-		cmake .. -DCMAKE_BUILD_TYPE="${CONFIGURATION}" -DCMAKE_INSTALL_PREFIX="${GOOGLE_INSTALL_ROOT}" -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "${GENERATOR}" -A "${CMAKE_ARCH}" -DBUILD_SHARED_LIBS=1
+		cmake .. -DCMAKE_BUILD_TYPE="${CONFIGURATION}" -DCMAKE_INSTALL_PREFIX="${GOOGLE_INSTALL_ROOT}" -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "${GENERATOR}" -DBUILD_SHARED_LIBS=1
 		cmake --build . --config "${CONFIGURATION}"
 		cmake --build . --target install --config "${CONFIGURATION}"
 
