@@ -8,13 +8,10 @@ branches:
 
 environment:
     matrix:
-        - msvc: 2015
-          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
         - msvc: 2017
           APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-matrix:
-    allow_failures:
-        - msvc: 2015
+        - msvc: 2019
+          APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 platform:
 #   - Win32

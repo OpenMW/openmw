@@ -247,7 +247,7 @@ if [ -z $CONFIGURATION ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2013"
+	VS_VERSION="2017"
 fi
 
 case $VS_VERSION in
@@ -507,10 +507,10 @@ fi
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 		echo Done.
 	else
-		# Appveyor unstable has all the boost we need already
+		# Appveyor has all the boost we need already
 		BOOST_SDK="c:/Libraries/boost_${BOOST_VER_URL}"
 
-		if [ $MSVC_REAL_VER -eq 15 ]; then
+		if [ $MSVC_REAL_VER -ge 15 ]; then
 			LIB_SUFFIX="1"
 		else
 			LIB_SUFFIX="0"
@@ -641,7 +641,7 @@ echo
 if [ -z $APPVEYOR ]; then
 	printf "Qt 5.7.0... "
 else
-	printf "Qt 5.10 AppVeyor... "
+	printf "Qt 5.13 AppVeyor... "
 fi
 {
 	if [ $BITS -eq 64 ]; then
@@ -679,7 +679,7 @@ fi
 		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.10/msvc${MSVC_DISPLAY_YEAR}${SUFFIX}"
+		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
