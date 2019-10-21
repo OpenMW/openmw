@@ -252,7 +252,7 @@ fi
 
 case $VS_VERSION in
 	16|16.0|2019 )
-		GENERATOR="Visual Studio 16 2019"
+		GENERATOR="Visual Studio 16 2019 -A Win64"
 		TOOLSET="vc142"
 		MSVC_REAL_VER="16"
 		MSVC_VER="14.2"
@@ -264,7 +264,7 @@ case $VS_VERSION in
 		;;
 
 	15|15.0|2017 )
-		GENERATOR="Visual Studio 15 2017"
+		GENERATOR="Visual Studio 15 2017 Win64"
 		TOOLSET="vc141"
 		MSVC_REAL_VER="15"
 		MSVC_VER="14.1"
@@ -513,7 +513,7 @@ fi
 		fi
 
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.1"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
