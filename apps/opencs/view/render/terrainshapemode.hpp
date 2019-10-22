@@ -102,7 +102,7 @@ namespace CSVRender
             void editTerrainShapeGrid (const std::pair<int, int>& vertexCoords, bool dragOperation);
 
             /// Calculate height, when aiming for bump-shaped terrain change
-            float calculateBumpShape(const float& distance, int radius, const float& height);
+            float calculateBumpShape(float distance, int radius, float height);
 
             /// set the target height for flatten tool
             void setFlattenToolTargetHeight(const WorldspaceHitResult& hit);

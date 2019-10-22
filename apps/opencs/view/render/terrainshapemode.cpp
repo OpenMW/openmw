@@ -388,7 +388,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     mAlteredCells.clear();
 }
 
-float CSVRender::TerrainShapeMode::calculateBumpShape(const float& distance, int radius, const float& height)
+float CSVRender::TerrainShapeMode::calculateBumpShape(float distance, int radius, float height)
 {
     float distancePerRadius = distance / radius;
     return height - height * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
