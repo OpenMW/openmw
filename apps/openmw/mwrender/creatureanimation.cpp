@@ -90,6 +90,7 @@ void CreatureWeaponAnimation::updateParts()
 
     updateHolsteredWeapon(!mShowWeapons);
     updateQuiver();
+    updateHolsteredShield(mShowCarriedLeft);
 
     if (mShowWeapons)
         updatePart(mWeapon, MWWorld::InventoryStore::Slot_CarriedRight);

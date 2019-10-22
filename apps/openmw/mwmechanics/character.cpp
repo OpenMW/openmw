@@ -985,7 +985,11 @@ void CharacterController::handleTextKey(const std::string &groupname, const std:
     size_t off = groupname.size()+2;
     size_t len = evt.size() - off;
 
-    if(evt.compare(off, len, "equip attach") == 0)
+    if(groupname == "shield" && evt.compare(off, len, "equip attach") == 0)
+        mAnimation->showCarriedLeft(true);
+    else if(groupname == "shield" && evt.compare(off, len, "unequip detach") == 0)
+        mAnimation->showCarriedLeft(false);
+    else if(evt.compare(off, len, "equip attach") == 0)
         mAnimation->showWeapons(true);
     else if(evt.compare(off, len, "unequip detach") == 0)
         mAnimation->showWeapons(false);
@@ -1193,7 +1197,7 @@ bool CharacterController::updateCarriedLeftVisible(const int weaptype) const
     // Shields/torches shouldn't be visible during any operation involving two hands
     // There seems to be no text keys for this purpose, except maybe for "[un]equip start/stop",
     // but they are also present in weapon drawing animation.
-    return !(getWeaponType(weaptype)->mFlags & ESM::WeaponType::TwoHanded);
+    return mAnimation->updateCarriedLeftVisible(weaptype);
 }
 
 bool CharacterController::updateWeaponState(CharacterState& idle)
@@ -1275,8 +1279,19 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             {
                 // Note: we do not disable unequipping animation automatically to avoid body desync
                 weapgroup = getWeaponAnimation(mWeaponType);
-                mAnimation->play(weapgroup, priorityWeapon,
-                                MWRender::Animation::BlendMask_All, false,
+                int unequipMask = MWRender::Animation::BlendMask_All;
+                bool useShieldAnims = mAnimation->useShieldAnimations();
+                if (useShieldAnims && mWeaponType != ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell && !(mWeaponType == ESM::Weapon::None && weaptype == ESM::Weapon::Spell))
+                {
+                    unequipMask = unequipMask |~MWRender::Animation::BlendMask_LeftArm;
+                    mAnimation->play("shield", Priority_Block,
+                                MWRender::Animation::BlendMask_LeftArm, true,
+                                1.0f, "unequip start", "unequip stop", 0.0f, 0);
+                }
+                else if (mWeaponType == ESM::Weapon::HandToHand)
+                    mAnimation->showCarriedLeft(false);
+
+                mAnimation->play(weapgroup, priorityWeapon, unequipMask, false,
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 mUpperBodyState = UpperCharState_UnEquipingWeap;
 
@@ -1301,7 +1316,10 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             if (weaptype != mWeaponType)
             {
                 forcestateupdate = true;
-                mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
+                bool useShieldAnims = mAnimation->useShieldAnimations();
+                if (!useShieldAnims)
+                    mAnimation->showCarriedLeft(updateCarriedLeftVisible(weaptype));
+
                 weapgroup = getWeaponAnimation(weaptype);
 
                 // Note: controllers for ranged weapon should use time for beginning of animation to play shooting properly,
@@ -1316,8 +1334,16 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                     if (weaptype != ESM::Weapon::None)
                     {
                         mAnimation->showWeapons(false);
-                        mAnimation->play(weapgroup, priorityWeapon,
-                                        MWRender::Animation::BlendMask_All, true,
+                        int equipMask = MWRender::Animation::BlendMask_All;
+                        if (useShieldAnims && weaptype != ESM::Weapon::Spell)
+                        {
+                            equipMask = equipMask |~MWRender::Animation::BlendMask_LeftArm;
+                            mAnimation->play("shield", Priority_Block,
+                                        MWRender::Animation::BlendMask_LeftArm, true,
+                                        1.0f, "equip start", "equip stop", 0.0f, 0);
+                        }
+
+                        mAnimation->play(weapgroup, priorityWeapon, equipMask, true,
                                         1.0f, "equip start", "equip stop", 0.0f, 0);
                         mUpperBodyState = UpperCharState_EquipingWeap;
 

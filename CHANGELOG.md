@@ -210,6 +210,7 @@
     Feature #5132: Unique animations for different weapon types
     Feature #5146: Safe Dispose corpse
     Feature #5147: Show spell magicka cost in spell buying window
+    Feature #5193: Weapon sheathing
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions
