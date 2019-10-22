@@ -402,9 +402,6 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
     int r = mBrushSize / 2;
     if (r == 0) r = 1; // Prevent division by zero later, which might happen when mBrushSize == 1
 
-    std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
-    CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
-
     if (CSVRender::PagedWorldspaceWidget *paged =
         dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
     {
@@ -413,6 +410,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
 
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
+        std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
+        CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
         int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first);
         int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second);
         if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
@@ -432,8 +431,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
         {
             for(int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
             {
-                cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(i, j));
-                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(i, j));
+                CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
                 int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
                 int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
                 if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
@@ -455,8 +454,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
         {
             for(int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
             {
-                cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(i, j));
-                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(i, j));
+                CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
                 int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
                 int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
                 int distanceX = abs(i - vertexCoords.first);
@@ -486,8 +485,8 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
         {
             for(auto const& value: mCustomBrushShape)
             {
-                cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(vertexCoords.first + value.first, vertexCoords.second + value.second));
-                cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(vertexCoords.first + value.first, vertexCoords.second + value.second));
+                CSMWorld::CellCoordinates cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
                 int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.first + value.first);
                 int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(vertexCoords.second + value.second);
                 if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, mTotalDiffY);
