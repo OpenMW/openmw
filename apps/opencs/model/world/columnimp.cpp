@@ -92,9 +92,7 @@ namespace CSMWorld
         if (land.mDataTypes & Land::DATA_WNAM)
         {
             for (int i = 0; i < Size; ++i)
-            {
                 values[i] = land.mWnam[i];
-            }
         }
 
         QVariant variant;
