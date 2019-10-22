@@ -391,6 +391,12 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
     mAlteredCells.clear();
 }
 
+float CSVRender::TerrainShapeMode::calculateBumpShape(const float& distance, int radius, const float& height)
+{
+    float distancePerRadius = distance / radius;
+    return height - height * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
+}
+
 void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>& vertexCoords, bool dragOperation)
 {
     int r = mBrushSize / 2;
@@ -451,15 +457,14 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             {
                 cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(std::make_pair(i, j));
                 cellCoords = CSMWorld::CellCoordinates::fromId(cellId).first;
+                int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
+                int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
                 float distance = sqrt(pow(distanceX, 2)+pow(distanceY, 2));
-                int x = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(i);
-                int y = CSMWorld::CellCoordinates::vertexGlobalToInCellCoords(j);
-                float distancePerRadius = 1.0f * distance / r;
                 float smoothedByDistance = 0.0f;
-                if (mShapeEditTool == ShapeEditTool_Drag) smoothedByDistance = mTotalDiffY - mTotalDiffY * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
-                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) smoothedByDistance = (r + mShapeEditToolStrength) - (r + mShapeEditToolStrength) * (3 * distancePerRadius * distancePerRadius - 2 * distancePerRadius * distancePerRadius * distancePerRadius);
+                if (mShapeEditTool == ShapeEditTool_Drag) smoothedByDistance = calculateBumpShape(distance, r, mTotalDiffY);
+                if (mShapeEditTool == ShapeEditTool_PaintToRaise || mShapeEditTool == ShapeEditTool_PaintToLower) smoothedByDistance = calculateBumpShape(distance, r, r + mShapeEditToolStrength);
                 if (distance <= r)
                 {
                     if (mShapeEditTool == ShapeEditTool_Drag) alterHeight(cellCoords, x, y, smoothedByDistance);
