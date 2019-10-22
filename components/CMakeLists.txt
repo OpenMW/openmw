@@ -29,7 +29,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (settings
-    settings
+    settings parser
     )
 
 add_component_dir (bsa
