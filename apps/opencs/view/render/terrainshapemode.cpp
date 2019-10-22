@@ -310,13 +310,10 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         {
             for(int j = 0; j < ESM::Land::LAND_SIZE; ++j)
             {
-                if (paged)
-                {
-                    if (paged->getCellAlteredHeight(cellCoordinates, i, j))
-                        landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + *paged->getCellAlteredHeight(cellCoordinates, i, j);
-                    else
-                        landShapeNew[j * ESM::Land::LAND_SIZE + i] = 0;
-                }
+                if (paged && paged->getCellAlteredHeight(cellCoordinates, i, j))
+                    landShapeNew[j * ESM::Land::LAND_SIZE + i] = landShapePointer[j * ESM::Land::LAND_SIZE + i] + *paged->getCellAlteredHeight(cellCoordinates, i, j);
+                else
+                    landShapeNew[j * ESM::Land::LAND_SIZE + i] = 0;
             }
         }
 
