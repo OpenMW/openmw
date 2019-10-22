@@ -57,7 +57,7 @@ namespace CSVRender
         osg::ref_ptr<const ESMTerrain::LandObject> land = getLand (cellX, cellY);
         if (land)
         {
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : 0;
+            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
             if (data) height = getVertexHeight(data, inCellX, inCellY);
         }
         else return height;
