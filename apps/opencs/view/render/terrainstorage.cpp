@@ -1,15 +1,9 @@
 #include "terrainstorage.hpp"
 
-#include <set>
-#include <memory>
-
 #include "../../model/world/land.hpp"
 #include "../../model/world/landtexture.hpp"
 
 #include <components/esmterrain/storage.hpp>
-#include <components/debug/debuglog.hpp>
-#include <components/misc/resourcehelpers.hpp>
-#include <components/vfs/manager.hpp>
 
 namespace CSVRender
 {
