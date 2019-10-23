@@ -77,10 +77,10 @@ namespace ESM
             {
                 case ESM::FourCC<'S','C','H','D'>::value:
                 {
-                    SCHD data;
-                    esm.getHT(data, 52);
-                    mData = data.mData;
-                    mId = data.mName.toString();
+                    esm.getSubHeader();
+                    mId = esm.getString(32);
+                    esm.getT(mData);
+
                     hasHeader = true;
                     break;
                 }
@@ -131,13 +131,10 @@ namespace ESM
             for (std::vector<std::string>::const_iterator it = mVarNames.begin(); it != mVarNames.end(); ++it)
                 varNameString.append(*it);
 
-        SCHD data;
-        memset(&data, 0, sizeof(data));
-
-        data.mData = mData;
-        data.mName.assign(mId);
-
-        esm.writeHNT("SCHD", data, 52);
+        esm.startSubRecord("SCHD");
+        esm.writeFixedSizeString(mId, 32);
+        esm.writeT(mData, 20);
+        esm.endRecord("SCHD");
 
         if (isDeleted)
         {

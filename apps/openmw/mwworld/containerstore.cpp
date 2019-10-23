@@ -495,7 +495,7 @@ void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::
     for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
         ++iter)
     {
-        std::string id = Misc::StringUtils::lowerCase(iter->mItem.toString());
+        std::string id = Misc::StringUtils::lowerCase(iter->mItem);
         addInitialItem(id, owner, iter->mCount);
     }
 
@@ -626,10 +626,10 @@ void MWWorld::ContainerStore::restock (const ESM::InventoryList& items, const MW
         if (it->mCount >= 0)
             continue;
 
-        std::string itemOrList = Misc::StringUtils::lowerCase(it->mItem.toString());
+        std::string itemOrList = Misc::StringUtils::lowerCase(it->mItem);
 
         //If it's levelled list, restock if there's need to do so.
-        if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem.toString()))
+        if (MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().search(it->mItem))
         {
             std::map<std::string, int>::iterator listInMap = allowedForReplace.find(itemOrList);
 

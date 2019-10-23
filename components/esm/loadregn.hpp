@@ -37,7 +37,7 @@ struct Region
     // Reference to a sound that is played randomly in this region
     struct SoundRef
     {
-        NAME32 mSound;
+        std::string   mSound;
         unsigned char mChance;
     }; // 33 bytes
 #pragma pack(pop)

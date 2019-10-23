@@ -396,7 +396,7 @@ namespace CSMWorld
         ESM::Region::SoundRef soundRef = soundList[subRowIndex];
         switch (subColIndex)
         {
-            case 0: return QString(soundRef.mSound.toString().c_str());
+            case 0: return QString(soundRef.mSound.c_str());
             case 1: return soundRef.mChance;
             default: throw std::runtime_error("Region sounds subcolumn index out of range");
         }
