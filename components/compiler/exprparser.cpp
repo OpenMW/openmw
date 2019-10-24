@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <stack>
 #include <iterator>
+#include <sstream>
 
 #include <components/misc/stringops.hpp>
 
@@ -324,6 +325,21 @@ namespace Compiler
                 mExplicit = name2;
                 return true;
             }
+
+            // This is terrible, but of course we must have this for legacy content.
+            // Convert the string to a number even if it's impossible and use it as a number literal.
+            // Can't use stof/atof or to_string out of locale concerns.
+            float number;
+            std::stringstream stream(name2);
+            stream >> number;
+            stream.str(std::string());
+            stream.clear();
+            stream << number;
+
+            pushFloatLiteral(number);
+            mTokenLoc = loc;
+            getErrorHandler().warning ("Parsing a non-variable string as a number: " + stream.str(), loc);
+            return true;
         }
         else
         {
