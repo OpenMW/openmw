@@ -40,6 +40,8 @@ New Features:
 
 New Editor Features:
 - "Faction Ranks" table for "Faction" records (#4209)
+- Changes to height editing can be cancelled without changes to data (press esc to cancel) (#4840)
+- Land heightmap/shape editing and vertex selection (#5170)
 
 Bug Fixes:
 - Scripted Items cannot be stacked anymore to avoid multiple script execution (#2969)

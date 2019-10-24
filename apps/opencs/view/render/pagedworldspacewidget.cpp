@@ -25,6 +25,7 @@
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
 #include "terraintexturemode.hpp"
+#include "terrainshapemode.hpp"
 
 bool CSVRender::PagedWorldspaceWidget::adjustCells()
 {
@@ -137,11 +138,9 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
 
     /// \todo replace EditMode with suitable subclasses
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain shape editing"),
-        "terrain-shape");
+        new TerrainShapeMode (this, mRootNode, tool), "terrain-shape");
     tool->addButton (
-        new TerrainTextureMode (this, mRootNode, tool),
-        "terrain-texture");
+        new TerrainTextureMode (this, mRootNode, tool), "terrain-texture");
     tool->addButton (
         new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
         "terrain-vertex");
@@ -789,6 +788,36 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
         return searchResult->second;
     else
         return 0;
+}
+
+CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const CSMWorld::CellCoordinates& coords) const
+{
+    std::map<CSMWorld::CellCoordinates, Cell*>::const_iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        return searchResult->second;
+    else
+        return nullptr;
+}
+
+void CSVRender::PagedWorldspaceWidget::setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height)
+{
+    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        searchResult->second->setAlteredHeight(inCellX, inCellY, height);
+}
+
+float* CSVRender::PagedWorldspaceWidget::getCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY)
+{
+    std::map<CSMWorld::CellCoordinates, Cell*>::iterator searchResult = mCells.find(coords);
+    if (searchResult != mCells.end())
+        return searchResult->second->getAlteredHeight(inCellX, inCellY);
+    return nullptr;
+}
+
+void CSVRender::PagedWorldspaceWidget::resetAllAlteredHeights()
+{
+    for (const auto& cell : mCells)
+        cell.second->resetAlteredHeights();
 }
 
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::PagedWorldspaceWidget::getSelection (

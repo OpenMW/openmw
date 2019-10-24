@@ -255,7 +255,7 @@ namespace ESMTerrain
                         (*positions)[static_cast<unsigned int>(vertX*numVerts + vertY)]
                             = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
                                          (vertY / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
-                                         height);
+                                         height + getAlteredHeight(col, row));
 
                         if (normalData)
                         {
@@ -290,6 +290,8 @@ namespace ESMTerrain
                             color.g() = 255;
                             color.b() = 255;
                         }
+
+                        adjustColor(col, row, heightData, color); //Does nothing by default, override in OpenMW-CS
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
                         if (col == ESM::Land::LAND_SIZE-1 || row == ESM::Land::LAND_SIZE-1)
@@ -521,13 +523,6 @@ namespace ESMTerrain
 
     }
 
-    float Storage::getVertexHeight(const ESM::Land::LandData* data, int x, int y)
-    {
-        assert(x < ESM::Land::LAND_SIZE);
-        assert(y < ESM::Land::LAND_SIZE);
-        return data->mHeights[y * ESM::Land::LAND_SIZE + x];
-    }
-
     const LandObject* Storage::getLand(int cellX, int cellY, LandCache& cache)
     {
         LandCache::Map::iterator found = cache.mMap.find(std::make_pair(cellX, cellY));
@@ -538,6 +533,15 @@ namespace ESMTerrain
             found = cache.mMap.insert(std::make_pair(std::make_pair(cellX, cellY), getLand(cellX, cellY))).first;
             return found->second;
         }
+    }
+
+    void Storage::adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const
+    {
+    }
+
+    float Storage::getAlteredHeight(int col, int row) const
+    {
+        return 0;
     }
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)

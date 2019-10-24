@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
+#include <cassert>
+
 #include <OpenThreads/Mutex>
 
 #include <components/terrain/storage.hpp>
@@ -107,6 +109,13 @@ namespace ESMTerrain
 
         virtual int getBlendmapScale(float chunkSize);
 
+        float getVertexHeight (const ESM::Land::LandData* data, int x, int y)
+        {
+            assert(x < ESM::Land::LAND_SIZE);
+            assert(y < ESM::Land::LAND_SIZE);
+            return data->mHeights[y * ESM::Land::LAND_SIZE + x];
+        }
+
     private:
         const VFS::Manager* mVFS;
 
@@ -114,9 +123,10 @@ namespace ESMTerrain
         inline void fixColour (osg::Vec4ub& colour, int cellX, int cellY, int col, int row, LandCache& cache);
         inline void averageNormal (osg::Vec3f& normal, int cellX, int cellY, int col, int row, LandCache& cache);
 
-        inline float getVertexHeight (const ESM::Land::LandData* data, int x, int y);
-
         inline const LandObject* getLand(int cellX, int cellY, LandCache& cache);
+
+        virtual void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const;
+        virtual float getAlteredHeight(int col, int row) const;
 
         // Since plugins can define new texture palettes, we need to know the plugin index too
         // in order to retrieve the correct texture name.
