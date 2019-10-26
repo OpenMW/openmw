@@ -20,7 +20,7 @@ namespace MWWorld
         mCellRef.mRefNum.unset();
     }
 
-    std::string CellRef::getRefId() const
+    const std::string& CellRef::getRefId() const
     {
         return mCellRef.mRefID;
     }
@@ -30,12 +30,12 @@ namespace MWWorld
         return mCellRef.mTeleport;
     }
 
-    ESM::Position CellRef::getDoorDest() const
+    const ESM::Position& CellRef::getDoorDest() const
     {
         return mCellRef.mDoorDest;
     }
 
-    std::string CellRef::getDestCell() const
+    const std::string& CellRef::getDestCell() const
     {
         return mCellRef.mDestCell;
     }
@@ -54,7 +54,7 @@ namespace MWWorld
         }
     }
 
-    ESM::Position CellRef::getPosition() const
+    const ESM::Position& CellRef::getPosition() const
     {
         return mCellRef.mPos;
     }
@@ -141,12 +141,12 @@ namespace MWWorld
         }
     }
 
-    std::string CellRef::getOwner() const
+    const std::string& CellRef::getOwner() const
     {
         return mCellRef.mOwner;
     }
 
-    std::string CellRef::getGlobalVariable() const
+    const std::string& CellRef::getGlobalVariable() const
     {
         return mCellRef.mGlobalVariable;
     }
@@ -183,7 +183,7 @@ namespace MWWorld
         }
     }
 
-    std::string CellRef::getSoul() const
+    const std::string& CellRef::getSoul() const
     {
         return mCellRef.mSoul;
     }
@@ -197,7 +197,7 @@ namespace MWWorld
         }
     }
 
-    std::string CellRef::getFaction() const
+    const std::string& CellRef::getFaction() const
     {
         return mCellRef.mFaction;
     }
@@ -238,12 +238,12 @@ namespace MWWorld
         setLockLevel(-abs(mCellRef.mLockLevel)); //Makes lockLevel negative
     }
 
-    std::string CellRef::getKey() const
+    const std::string& CellRef::getKey() const
     {
         return mCellRef.mKey;
     }
 
-    std::string CellRef::getTrap() const
+    const std::string& CellRef::getTrap() const
     {
         return mCellRef.mTrap;
     }
