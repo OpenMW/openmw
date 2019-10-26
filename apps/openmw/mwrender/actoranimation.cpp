@@ -111,25 +111,30 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
         MWMechanics::CreatureStats &stats = cls.getCreatureStats(mPtr);
         if (cls.hasInventoryStore(mPtr) && weaptype != ESM::Weapon::Spell)
         {
-            const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
-            const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
-            if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Armor).name() && !getShieldMesh(*shield).empty())
+            SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
+            mObjectRoot->accept(findVisitor);
+            if (findVisitor.mFoundNode)
             {
-                if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
-                    return false;
-
-                if (weapon != inv.end())
+                const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+                if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Armor).name() && !getShieldMesh(*shield).empty())
                 {
-                    const std::string &type = weapon->getTypeName();
-                    if(type == typeid(ESM::Weapon).name())
+                    if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                        return false;
+
+                    if (weapon != inv.end())
                     {
-                        const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-                        ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
-                        return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
+                        const std::string &type = weapon->getTypeName();
+                        if(type == typeid(ESM::Weapon).name())
+                        {
+                            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                            ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                            return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
+                        }
+                        else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                            return true;
                     }
-                    else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
-                        return true;
                 }
             }
         }
