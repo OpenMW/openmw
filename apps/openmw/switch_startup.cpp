@@ -32,51 +32,65 @@ namespace Switch
 {
     std::string username = "";
 
-    void readUsername()
+    // read username from the account with the specified id
+    void readUsername(u128 userId)
     {
-        // get the name of the current user
         auto rc = accountInitialize();
         if (R_FAILED(rc))
             return;
 
-        u128 userId = { 0 };
-        bool accountSelected = false;
-        rc = accountGetLastOpenedUser(&userId, &accountSelected);
+        AccountProfile profile;
+        rc = accountGetProfile(&profile, userId);
 
-        if (R_SUCCEEDED(rc) && accountSelected)
+        if (R_SUCCEEDED(rc))
         {
-            AccountProfile profile;
-            rc = accountGetProfile(&profile, userId);
+            AccountProfileBase pb;
+            rc = accountProfileGet(&profile, nullptr, &pb);
 
             if (R_SUCCEEDED(rc))
             {
-                AccountProfileBase pb;
-                rc = accountProfileGet(&profile, nullptr, &pb);
-
-                if (R_SUCCEEDED(rc))
+                // HACK: check if the username is printable ascii
+                // otherwise throw it out for the time being, since fs seems
+                // allergic to certain UTF-8 characters 
+                bool clean = true;
+                for (size_t i = 0; i < sizeof(pb.username) && pb.username[i]; ++i)
                 {
-                    // HACK: check if the username is printable ascii
-                    // otherwise throw it out for the time being, since fs seems
-                    // allergic to certain UTF-8 characters 
-                    bool clean = true;
-                    for (size_t i = 0; i < sizeof(pb.username) && pb.username[i]; ++i)
+                    if (!std::isprint(pb.username[i]))
                     {
-                        if (!std::isprint(pb.username[i]))
-                        {
-                            clean = false;
-                            break;
-                        }
+                        clean = false;
+                        break;
                     }
-
-                    if (clean)
-                        username = std::string(pb.username);
                 }
 
-                accountProfileClose(&profile);
+                if (clean)
+                    username = std::string(pb.username);
             }
+
+            accountProfileClose(&profile);
         }
 
         accountExit();
+    }
+
+    // taken from Checkpoint's account.cpp
+    // pops up a user selection applet and gets the user id you select
+    u128 selectProfile()
+    {
+        u128 out_id = 0;
+        LibAppletArgs args;
+        libappletArgsCreate(&args, 0x10000);
+        u8 st_in[0xA0]  = {0};
+        u8 st_out[0x18] = {0};
+        size_t repsz;
+        Result res = libappletLaunch(AppletId_playerSelect, &args, st_in, 0xA0, st_out, 0x18, &repsz);
+        if (R_SUCCEEDED(res))
+        {
+            u64 lres = *(u64*)st_out;
+            u128 uid = *(u128*)&st_out[8];
+            if (lres == 0)
+                out_id = uid;
+        }
+        return out_id;
     }
 
     void fatal(const char *fmt, ...)
@@ -178,7 +192,7 @@ namespace Switch
         );
 
         // get and save the username for getUserDataPath
-        readUsername();
+        readUsername(selectProfile());
 
         // unlocked in shutdown()
         appletLockExit();
