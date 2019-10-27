@@ -266,7 +266,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
     return add(ref.getPtr(), count, actorPtr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool /*allowAutoEquip*/)
 {
     Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 

@@ -138,15 +138,13 @@ namespace MWWorld
 
             bool hasVisibleItems() const;
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
-            ///
-            /// @param setOwner Set the owner of the added item to \a actorPtr? If false, the owner is reset to "".
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 

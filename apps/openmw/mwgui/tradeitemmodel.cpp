@@ -1,6 +1,7 @@
 #include "tradeitemmodel.hpp"
 
 #include <components/misc/stringops.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -139,8 +140,9 @@ namespace MWGui
                 throw std::runtime_error("The borrowed item disappeared");
 
             const ItemStack& item = sourceModel->getItem(i);
+            static const bool prevent = Settings::Manager::getBool("prevent merchant equipping", "Game");
             // copy the borrowed items to our model
-            copyItem(item, itemStack.mCount);
+            copyItem(item, itemStack.mCount, !prevent);
             // then remove them from the source model
             sourceModel->removeItem(item, itemStack.mCount);
         }
