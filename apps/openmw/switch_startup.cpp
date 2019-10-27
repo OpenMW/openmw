@@ -39,10 +39,9 @@ namespace Switch
         if (R_FAILED(rc))
             return;
 
-        u128 userId = 0;
-        bool accountSelected = 0;
-
-        rc = accountGetActiveUser(&userId, &accountSelected);
+        u128 userId = { 0 };
+        bool accountSelected = false;
+        rc = accountGetLastOpenedUser(&userId, &accountSelected);
 
         if (R_SUCCEEDED(rc) && accountSelected)
         {
