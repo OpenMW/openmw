@@ -1,10 +1,9 @@
 #include "settings.hpp"
 #include "parser.hpp"
 
-#include <components/debug/debuglog.hpp>
-#include <components/misc/stringops.hpp>
+#include <sstream>
 
-#include <boost/lexical_cast.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Settings
 {
@@ -55,32 +54,20 @@ std::string Manager::getString(const std::string &setting, const std::string &ca
 
 float Manager::getFloat (const std::string& setting, const std::string& category)
 {
-    const std::string value = getString(setting, category);
-    try
-    {
-        // We have to rely on Boost because std::stof from C++11 uses the current locale
-        // for separators (which is undesired) and it often silently ignores parsing errors.
-        return boost::lexical_cast<float>(value);
-    }
-    catch (boost::bad_lexical_cast&)
-    {
-        Log(Debug::Warning) << "Cannot parse setting '" << setting << "' (invalid setting value: " << value << ").";
-        return 0.f;
-    }
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    float number = 0.f;
+    stream >> number;
+    return number;
 }
 
 int Manager::getInt (const std::string& setting, const std::string& category)
 {
-    const std::string value = getString(setting, category);
-    try
-    {
-        return std::stoi(value);
-    }
-    catch(const std::exception& e)
-    {
-        Log(Debug::Warning) << "Cannot parse setting '" << setting << "' (invalid setting value: " << value << ").";
-        return 0;
-    }
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    int number = 0;
+    stream >> number;
+    return number;
 }
 
 bool Manager::getBool (const std::string& setting, const std::string& category)
