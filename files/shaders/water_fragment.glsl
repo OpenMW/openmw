@@ -160,7 +160,7 @@ void main(void)
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
-    float shadow = unshadowedLightRatio();
+    float shadow = unshadowedLightRatio(depthPassthrough);
 
     vec2 screenCoords = screenCoordsPassthrough.xy / screenCoordsPassthrough.z;
     screenCoords.y = (1.0-screenCoords.y);

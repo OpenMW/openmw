@@ -27,6 +27,14 @@ namespace SceneUtil
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
         mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
 
+        const float maximumShadowMapDistance = Settings::Manager::getFloat("maximum shadow map distance", "Shadows");
+        if (maximumShadowMapDistance > 0)
+        {
+            const float shadowFadeStart = std::min(std::max(0.f, Settings::Manager::getFloat("shadow fade start", "Shadows")), 1.f);
+            mShadowSettings->setMaximumShadowMapDistance(maximumShadowMapDistance);
+            mShadowTechnique->setShadowFadeStart(maximumShadowMapDistance * shadowFadeStart);
+        }
+
         mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
         if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
@@ -117,6 +125,8 @@ namespace SceneUtil
 
         definesWithShadows["shadowNormalOffset"] = std::to_string(Settings::Manager::getFloat("normal offset distance", "Shadows"));
 
+        definesWithShadows["limitShadowMapDistance"] = Settings::Manager::getFloat("maximum shadow map distance", "Shadows") > 0 ? "1" : "0";
+
         return definesWithShadows;
     }
 
@@ -137,6 +147,8 @@ namespace SceneUtil
         definesWithoutShadows["disableNormalOffsetShadows"] = "0";
 
         definesWithoutShadows["shadowNormalOffset"] = "0.0";
+
+        definesWithoutShadows["limitShadowMapDistance"] = "0";
 
         return definesWithoutShadows;
     }
