@@ -34,6 +34,9 @@ namespace MWWorld
         // Id of object being referenced
         std::string getRefId() const;
 
+        // Pointer to ID of the object being referenced
+        const std::string* getRefIdPtr() const;
+
         // For doors - true if this door teleports to somewhere else, false
         // if it should open through animation.
         bool getTeleport() const;

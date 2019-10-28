@@ -137,7 +137,7 @@ namespace
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.getRefNum()==state.mRef.mRefNum && iter->mRef.getRefId() == state.mRef.mRefID)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum && *iter->mRef.getRefIdPtr() == state.mRef.mRefID)
                 {
                     // overwrite existing reference
                     iter->load (state);
@@ -390,7 +390,7 @@ namespace MWWorld
         const std::string *mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefId() == *mIdToFind)
+            if (*ptr.getCellRef().getRefIdPtr() == *mIdToFind)
             {
                 mFound = ptr;
                 return false;
