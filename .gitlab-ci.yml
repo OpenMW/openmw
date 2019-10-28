@@ -14,13 +14,7 @@ Debian:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
     - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev
-  # - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
-    - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
+    - apt-get install -y libmygui-dev libbullet-dev
   stage: build
   script: 
     - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
