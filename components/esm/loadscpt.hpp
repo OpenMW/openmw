@@ -33,7 +33,7 @@ public:
     {
         std::string         mName;
         Script::SCHDstruct  mData;
-    }; // 52 bytes
+    };
 
     std::string mId;
 
