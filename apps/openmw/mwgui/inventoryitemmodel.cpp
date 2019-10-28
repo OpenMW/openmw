@@ -46,11 +46,11 @@ ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
     return -1;
 }
 
-MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count)
+MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
 {
     if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor);
+    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, allowAutoEquip);
 }
 
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)

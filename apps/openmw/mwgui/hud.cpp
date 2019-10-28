@@ -38,7 +38,7 @@ namespace MWGui
     public:
         WorldItemModel(float left, float top) : mLeft(left), mTop(top) {}
         virtual ~WorldItemModel() {}
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count)
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool /*allowAutoEquip*/)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
