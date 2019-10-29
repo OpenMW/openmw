@@ -359,16 +359,16 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
                 if (i < ESM::Land::LAND_SIZE - 1) v1.z() = landShapePointer[j * ESM::Land::LAND_SIZE + i + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
-                    std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY());
-                    if (isLandLoaded(cellId))
+                    std::string shiftedCellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX() + 1, cellCoordinates.getY());
+                    if (isLandLoaded(shiftedCellId))
                         v1.z() = landRightShapePointer[j * ESM::Land::LAND_SIZE + 1] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 }
 
                 if (j < ESM::Land::LAND_SIZE - 1) v2.z() = landShapePointer[(j + 1) * ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 else
                 {
-                    std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1);
-                    if (isLandLoaded(cellId))
+                    std::string shiftedCellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY() + 1);
+                    if (isLandLoaded(shiftedCellId))
                         v2.z() = landDownShapePointer[ESM::Land::LAND_SIZE + i] - landShapePointer[j * ESM::Land::LAND_SIZE + i];
                 }
 
