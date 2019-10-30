@@ -56,6 +56,7 @@ struct SDL_Window;
 
 namespace MWInput
 {
+    const float ZOOM_SCALE = 120.f; /// Used for scrolling camera in and out
 
     /**
     * @brief Class that handles all input and key bindings for OpenMW.
@@ -120,6 +121,8 @@ namespace MWInput
         virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id );
         virtual void mouseMoved( const SDLUtil::MouseMotionEvent &arg );
 
+        virtual void mouseWheelMoved( const SDL_MouseWheelEvent &arg);
+
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg);
@@ -133,14 +136,17 @@ namespace MWInput
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
-        virtual void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
-
         virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , SDL_Scancode key, ICS::Control::ControlChangingDirection direction);
 
+        virtual void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
+
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction);
+
+        virtual void mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+            , ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction);
 
         virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
             , int axis, ICS::Control::ControlChangingDirection direction);
@@ -268,33 +274,33 @@ namespace MWInput
 
             A_Unused,
 
-            A_Screenshot,     // Take a screenshot
+            A_Screenshot,               // Take a screenshot
 
-            A_Inventory,      // Toggle inventory screen
+            A_Inventory,                // Toggle inventory screen
 
-            A_Console,        // Toggle console screen
+            A_Console,                  // Toggle console screen
 
-            A_MoveLeft,       // Move player left / right
+            A_MoveLeft,                 // Move player left / right
             A_MoveRight,
-            A_MoveForward,    // Forward / Backward
+            A_MoveForward,              // Forward / Backward
             A_MoveBackward,
 
             A_Activate,
 
-            A_Use,        //Use weapon, spell, etc.
+            A_Use,                      //Use weapon, spell, etc.
             A_Jump,
-            A_AutoMove,   //Toggle Auto-move forward
-            A_Rest,       //Rest
-            A_Journal,    //Journal
-            A_Weapon,     //Draw/Sheath weapon
-            A_Spell,      //Ready/Unready Casting
-            A_Run,        //Run when held
-            A_CycleSpellLeft, //cycling through spells
+            A_AutoMove,                 //Toggle Auto-move forward
+            A_Rest,                     //Rest
+            A_Journal,                  //Journal
+            A_Weapon,                   //Draw/Sheath weapon
+            A_Spell,                    //Ready/Unready Casting
+            A_Run,                      //Run when held
+            A_CycleSpellLeft,           //cycling through spells
             A_CycleSpellRight,
-            A_CycleWeaponLeft,//Cycling through weapons
+            A_CycleWeaponLeft,          //Cycling through weapons
             A_CycleWeaponRight,
-            A_ToggleSneak,    //Toggles Sneak
-            A_AlwaysRun, //Toggle Walking/Running
+            A_ToggleSneak,              //Toggles Sneak
+            A_AlwaysRun,                //Toggle Walking/Running
             A_Sneak,
 
             A_QuickSave,
@@ -322,12 +328,15 @@ namespace MWInput
 
             A_ToggleDebug,
 
-            A_LookUpDown,         //Joystick look
+            A_LookUpDown,               //Joystick look
             A_LookLeftRight,
             A_MoveForwardBackward,
             A_MoveLeftRight,
 
-            A_Last            // Marker for the last item
+            A_ZoomIn,
+            A_ZoomOut,
+
+            A_Last                      // Marker for the last item
         };
     };
 }

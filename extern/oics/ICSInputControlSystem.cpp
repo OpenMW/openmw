@@ -226,6 +226,15 @@ namespace ICS
 
 				loadJoystickButtonBinders(xmlControl);
 
+				/* ----------------------------------------------------------------------------------------
+				 * OPENMW CODE STARTS HERE
+				 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+				loadMouseWheelBinders(xmlControl);
+
+				/* OPENMW CODE ENDS HERE
+				 * ------------------------------------------------------------------------------------- */
+
 				// Attach controls to channels
 				TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");
 				while(xmlChannel)
@@ -306,6 +315,15 @@ namespace ICS
 		mControlsKeyBinderMap.clear();
 		mControlsMouseButtonBinderMap.clear();
 		mControlsJoystickButtonBinderMap.clear();
+
+		/* ----------------------------------------------------------------------------------------
+		 * OPENMW CODE STARTS HERE
+		 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+		mControlsMouseWheelBinderMap.clear();
+
+		/* OPENMW CODE ENDS HERE
+		 * ------------------------------------------------------------------------------------- */
 
 		ICS_LOG(" - InputControlSystem deleted - ");
 	}
@@ -490,6 +508,67 @@ namespace ICS
 				binder.SetAttribute( "direction", "DECREASE" );
 				control.InsertEndChild(binder);
 			}
+
+			/* ----------------------------------------------------------------------------------------
+			 * OPENMW CODE STARTS HERE
+			 * Mouse Wheel support added by Stomy */
+
+			if(getMouseWheelBinding(*o, Control::INCREASE) != MouseWheelClick::UNASSIGNED)
+			{
+				TiXmlElement binder( "MouseWheelBinder" );
+				MouseWheelClick click = getMouseWheelBinding(*o, Control::INCREASE);
+				bool skip = false;
+				switch (click) {
+					case MouseWheelClick::UP: {
+						binder.SetAttribute("button", "UP");
+					} break;
+					case MouseWheelClick::DOWN: {
+						binder.SetAttribute("button", "DOWN");
+					} break;
+					case MouseWheelClick::RIGHT: {
+						binder.SetAttribute("button", "RIGHT");
+					} break;
+					case MouseWheelClick::LEFT: {
+						binder.SetAttribute("button", "LEFT");
+					} break;
+					default: {
+						skip = true;
+					} break;
+				}
+				binder.SetAttribute( "direction", "INCREASE" );
+				if (!skip)
+					control.InsertEndChild(binder);
+			}
+
+			if(getMouseWheelBinding(*o, Control::DECREASE) != MouseWheelClick::UNASSIGNED)
+			{
+				TiXmlElement binder( "MouseWheelBinder" );
+				MouseWheelClick click = getMouseWheelBinding(*o, Control::INCREASE);
+				bool skip = false;
+				switch (click) {
+					case MouseWheelClick::UP: {
+						binder.SetAttribute("button", "UP");
+					} break;
+					case MouseWheelClick::DOWN: {
+						binder.SetAttribute("button", "DOWN");
+					} break;
+					case MouseWheelClick::RIGHT: {
+						binder.SetAttribute("button", "RIGHT");
+					} break;
+					case MouseWheelClick::LEFT: {
+						binder.SetAttribute("button", "LEFT");
+					} break;
+					default: {
+						skip = true;
+					} break;
+				}
+				binder.SetAttribute( "direction", "DECREASE" );
+				if (!skip)
+					control.InsertEndChild(binder);
+			}
+
+			/* OPENMW CODE ENDS HERE
+			 * ------------------------------------------------------------------------------------- */
 
 			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
 				!= ICS_MAX_DEVICE_BUTTONS)

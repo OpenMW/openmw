@@ -464,6 +464,14 @@ namespace MWInput
             case A_ToggleDebug:
                 MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
                 break;
+            case A_ZoomIn:
+                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    MWBase::Environment::get().getWorld()->setCameraDistance(ZOOM_SCALE, true, true);
+                break;
+            case A_ZoomOut:
+                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    MWBase::Environment::get().getWorld()->setCameraDistance(-ZOOM_SCALE, true, true);
+                break;
             case A_QuickSave:
                 quickSave();
                 break;
@@ -750,7 +758,9 @@ namespace MWInput
                 actionIsActive(A_MoveRight) ||
                 actionIsActive(A_Jump) ||
                 actionIsActive(A_Sneak) ||
-                actionIsActive(A_TogglePOV))
+                actionIsActive(A_TogglePOV) ||
+                actionIsActive(A_ZoomIn) ||
+                actionIsActive(A_ZoomOut) )
             {
                 resetIdleTime();
             } else {
@@ -938,6 +948,14 @@ namespace MWInput
         }
     }
 
+    void InputManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
+    {
+        if (mInputBinder->detectingBindingState() || !mControlsDisabled)
+            mInputBinder->mouseWheelMoved(arg);
+
+        mJoystickLastUsed = false;
+    }
+
     void InputManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
@@ -985,9 +1003,6 @@ namespace MWInput
             if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(static_cast<float>(arg.zrel));
-
-                if (Settings::Manager::getBool("allow third person zoom", "Input"))
-                    MWBase::Environment::get().getWorld()->setCameraDistance(static_cast<float>(arg.zrel), true, true);
             }
         }
     }
@@ -1447,6 +1462,10 @@ namespace MWInput
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
         defaultMouseButtonBindings[A_Use] = SDL_BUTTON_LEFT;
 
+        std::map<int, ICS::InputControlSystem::MouseWheelClick> defaultMouseWheelBindings;
+        defaultMouseWheelBindings[A_ZoomIn] = ICS::InputControlSystem::MouseWheelClick::UP;
+        defaultMouseWheelBindings[A_ZoomOut] = ICS::InputControlSystem::MouseWheelClick::DOWN;
+
         for (int i = 0; i < A_Last; ++i)
         {
             ICS::Control* control;
@@ -1465,6 +1484,7 @@ namespace MWInput
             if (!controlExists || force ||
                     ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
                       && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                      && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED
                       ))
             {
                 clearAllKeyBindings(control);
@@ -1480,6 +1500,12 @@ namespace MWInput
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                }
+                else if (defaultMouseWheelBindings.find(i) != defaultMouseWheelBindings.end()
+                        && (force || !mInputBinder->isMouseWheelBound(defaultMouseWheelBindings[i])))
+                {
+                    control->setInitialValue(0.f);
+                    mInputBinder->addMouseWheelBinding(control, defaultMouseWheelBindings[i], ICS::Control::INCREASE);
                 }
 
                 if (i == A_LookLeftRight && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_4) && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_6))
@@ -1571,6 +1597,10 @@ namespace MWInput
 
         if (action == A_Screenshot)
             return "Screenshot";
+        else if (action == A_ZoomIn)
+            return "Zoom In";
+        else if (action == A_ZoomOut)
+            return "Zoom Out";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -1623,10 +1653,25 @@ namespace MWInput
 
         SDL_Scancode key = mInputBinder->getKeyBinding (c, ICS::Control::INCREASE);
         unsigned int mouse = mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE);
+        ICS::InputControlSystem::MouseWheelClick wheel = mInputBinder->getMouseWheelBinding(c, ICS::Control::INCREASE);
         if (key != SDL_SCANCODE_UNKNOWN)
             return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + std::to_string(mouse);
+        else if (wheel != ICS::InputControlSystem::MouseWheelClick::UNASSIGNED)
+            switch (wheel)
+            {
+                case ICS::InputControlSystem::MouseWheelClick::UP:
+                    return "Mouse Wheel Up";
+                case ICS::InputControlSystem::MouseWheelClick::DOWN:
+                    return "Mouse Wheel Down";
+                case ICS::InputControlSystem::MouseWheelClick::RIGHT:
+                    return "Mouse Wheel Right";
+                case ICS::InputControlSystem::MouseWheelClick::LEFT:
+                    return "Mouse Wheel Left";
+                default:
+                    return "#{sNone}";
+            }
         else
             return "#{sNone}";
     }
@@ -1713,6 +1758,8 @@ namespace MWInput
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
+        ret.push_back(A_ZoomIn);
+        ret.push_back(A_ZoomOut);
         ret.push_back(A_Run);
         ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
@@ -1751,6 +1798,8 @@ namespace MWInput
     {
         std::vector<int> ret;
         ret.push_back(A_TogglePOV);
+        ret.push_back(A_ZoomIn);
+        ret.push_back(A_ZoomOut);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_Use);
@@ -1790,13 +1839,6 @@ namespace MWInput
         mInputBinder->enableDetectingBindingState (c, ICS::Control::INCREASE);
     }
 
-    void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-        , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction)
-    {
-        // we don't want mouse movement bindings
-        return;
-    }
-
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , SDL_Scancode key, ICS::Control::ControlChangingDirection direction)
     {
@@ -1828,6 +1870,13 @@ namespace MWInput
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
 
+    void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction)
+    {
+        // we don't want mouse movement bindings
+        return;
+    }
+
     void InputManager::mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
@@ -1837,6 +1886,17 @@ namespace MWInput
         control->setInitialValue(0.0f);
         ICS::DetectingBindingListener::mouseButtonBindingDetected (ICS, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction)
+    {
+        if(!mDetectingKeyboard)
+            return;
+        clearAllKeyBindings(control);
+        control->setInitialValue(0.0f);
+        ICS::DetectingBindingListener::mouseWheelBindingDetected(ICS, control, click, direction);
+        MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
     }
 
     void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
@@ -1873,6 +1933,8 @@ namespace MWInput
             mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));
+        if (mInputBinder->getMouseWheelBinding (control, ICS::Control::INCREASE) != ICS::InputControlSystem::MouseWheelClick::UNASSIGNED)
+            mInputBinder->removeMouseWheelBinding (mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE));
     }
 
     void InputManager::clearAllControllerBindings (ICS::Control* control)

@@ -77,6 +77,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     break;
                 case SDL_MOUSEWHEEL:
                     mMouseListener->mouseMoved(_packageMouseMotion(evt));
+                    mMouseListener->mouseWheelMoved(evt.wheel);
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     mMouseListener->mousePressed(evt.button, evt.button.button);

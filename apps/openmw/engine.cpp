@@ -500,8 +500,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         if(boost::filesystem::exists(input2)) {
             boost::filesystem::copy_file(input2, keybinderUser);
             keybinderUserExists = boost::filesystem::exists(keybinderUser);
+            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
         }
     }
+    else
+        Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
 
     // find correct path to the game controller bindings
     // File format for controller mappings is different for SDL <= 2.0.4, 2.0.5, and >= 2.0.6

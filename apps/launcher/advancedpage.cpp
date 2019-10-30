@@ -84,7 +84,6 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
 
     // Input Settings
-    loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     loadSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 
@@ -145,7 +144,6 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
 
     // Input Settings
-    saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
     saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     saveSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 

@@ -44,6 +44,7 @@ New Editor Features:
 - Land heightmap/shape editing and vertex selection (#5170)
 
 Bug Fixes:
+- The Mouse Wheel can now be used for key bindings (#2679)
 - Scripted Items cannot be stacked anymore to avoid multiple script execution (#2969)
 - Stray text after an "else" statement is now ignored, like in the original engine, to handle mods which erroneously use "else if" statements (#3006)
 - "SetPos" and "SetPosition" commands now more closely replicate the original engine's behaviour (#3109)
