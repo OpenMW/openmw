@@ -9,6 +9,8 @@
 #include <osg/LightSource>
 #include <osg/PolygonMode>
 
+#include <osgDB/ReadFile>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm/fogstate.hpp>
 #include <components/esm/loadcell.hpp>
@@ -16,6 +18,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -538,10 +541,11 @@ bool LocalMap::isPositionExplored (float nX, float nY, int x, int y)
     nX = std::max(0.f, std::min(1.f, nX));
     nY = std::max(0.f, std::min(1.f, nY));
 
-    int texU = static_cast<int>((ESM::FogTexture::sFogOfWarResolution - 1) * nX);
-    int texV = static_cast<int>((ESM::FogTexture::sFogOfWarResolution - 1) * nY);
+    int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
+    int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
 
-    uint8_t alpha = ((const uint8_t*)segment.mFogOfWarImage->data())[texV * ESM::FogTexture::sFogOfWarResolution + texU];
+    uint32_t clr = ((const uint32_t*)segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
+    uint8_t alpha = (clr >> 24);
     return alpha < 200;
 }
 
@@ -576,9 +580,9 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
     }
 
     // explore radius (squared)
-    const float exploreRadius = 0.17f * (ESM::FogTexture::sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
+    const float exploreRadius = 0.17f * (sFogOfWarResolution-1); // explore radius from 0 to sFogOfWarResolution-1
     const float sqrExploreRadius = square(exploreRadius);
-    const float exploreRadiusUV = exploreRadius / ESM::FogTexture::sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
+    const float exploreRadiusUV = exploreRadius / sFogOfWarResolution; // explore radius from 0 to 1 (UV space)
 
     // change the affected fog of war textures (in a 3x3 grid around the player)
     for (int mx = -mCellDistance; mx<=mCellDistance; ++mx)
@@ -607,21 +611,23 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
             if (!segment.mFogOfWarImage || !segment.mMapTexture)
                 continue;
 
-            uint8_t* data = (uint8_t*)segment.mFogOfWarImage->data();
+            uint32_t* data = (uint32_t*)segment.mFogOfWarImage->data();
             bool changed = false;
-            for (int texV = 0; texV<ESM::FogTexture::sFogOfWarResolution; ++texV)
+            for (int texV = 0; texV<sFogOfWarResolution; ++texV)
             {
-                for (int texU = 0; texU<ESM::FogTexture::sFogOfWarResolution; ++texU)
+                for (int texU = 0; texU<sFogOfWarResolution; ++texU)
                 {
-                    float sqrDist = square((texU + mx*(ESM::FogTexture::sFogOfWarResolution-1)) - u*(ESM::FogTexture::sFogOfWarResolution-1))
-                            + square((texV + my*(ESM::FogTexture::sFogOfWarResolution-1)) - v*(ESM::FogTexture::sFogOfWarResolution-1));
+                    float sqrDist = square((texU + mx*(sFogOfWarResolution-1)) - u*(sFogOfWarResolution-1))
+                            + square((texV + my*(sFogOfWarResolution-1)) - v*(sFogOfWarResolution-1));
 
-                    uint8_t alpha = *data;
+                    uint32_t clr = *(uint32_t*)data;
+                    uint8_t alpha = (clr >> 24);
 
                     alpha = std::min( alpha, (uint8_t) (std::max(0.f, std::min(1.f, (sqrDist/sqrExploreRadius)))*255) );
-                    if ( *data != alpha)
+                    uint32_t val = (uint32_t) (alpha << 24);
+                    if ( *data != val)
                     {
-                        *data = alpha;
+                        *data = val;
                         changed = true;
                     }
 
@@ -664,7 +670,15 @@ void LocalMap::MapSegment::createFogOfWarTexture()
 
 void LocalMap::MapSegment::initFogOfWar()
 {
-    mFogOfWarImage = ESM::FogState::initFogOfWar();
+    mFogOfWarImage = new osg::Image;
+    // Assign a PixelBufferObject for asynchronous transfer of data to the GPU
+    mFogOfWarImage->setPixelBufferObject(new osg::PixelBufferObject);
+    mFogOfWarImage->allocateImage(sFogOfWarResolution, sFogOfWarResolution, 1, GL_RGBA, GL_UNSIGNED_BYTE);
+    assert(mFogOfWarImage->isDataContiguous());
+    std::vector<uint32_t> data;
+    data.resize(sFogOfWarResolution*sFogOfWarResolution, 0xff000000);
+
+    memcpy(mFogOfWarImage->data(), &data[0], data.size()*4);
 
     createFogOfWarTexture();
     mFogOfWarTexture->setImage(mFogOfWarImage);
@@ -672,9 +686,34 @@ void LocalMap::MapSegment::initFogOfWar()
 
 void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
 {
-    mFogOfWarImage = ESM::FogState::loadFogOfWar(esm);
-    if (!mFogOfWarImage)
+    const std::vector<char>& data = esm.mImageData;
+    if (data.empty())
+    {
+        initFogOfWar();
         return;
+    }
+
+    // TODO: deprecate tga and use raw data instead
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    if (!readerwriter)
+    {
+        Log(Debug::Error) << "Error: Unable to load fog, can't find a tga ReaderWriter" ;
+        return;
+    }
+
+    Files::IMemStream in(&data[0], data.size());
+
+    osgDB::ReaderWriter::ReadResult result = readerwriter->readImage(in);
+    if (!result.success())
+    {
+        Log(Debug::Error) << "Error: Failed to read fog: " << result.message() << " code " << result.status();
+        return;
+    }
+
+    mFogOfWarImage = result.getImage();
+    mFogOfWarImage->flipVertical();
+    mFogOfWarImage->dirty();
 
     createFogOfWarTexture();
     mFogOfWarTexture->setImage(mFogOfWarImage);
@@ -686,7 +725,27 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
     if (!mFogOfWarImage)
         return;
 
-    ESM::FogState::saveFogOfWar(mFogOfWarImage, fog);
+    std::ostringstream ostream;
+
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    if (!readerwriter)
+    {
+        Log(Debug::Error) << "Error: Unable to write fog, can't find a tga ReaderWriter";
+        return;
+    }
+
+    // extra flips are unfortunate, but required for compatibility with older versions
+    mFogOfWarImage->flipVertical();
+    osgDB::ReaderWriter::WriteResult result = readerwriter->writeImage(*mFogOfWarImage, ostream);
+    if (!result.success())
+    {
+        Log(Debug::Error) << "Error: Unable to write fog: " << result.message() << " code " << result.status();
+        return;
+    }
+    mFogOfWarImage->flipVertical();
+
+    std::string data = ostream.str();
+    fog.mImageData = std::vector<char>(data.begin(), data.end());
 }
 
 }

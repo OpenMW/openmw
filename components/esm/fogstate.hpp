@@ -3,11 +3,6 @@
 
 #include <vector>
 
-namespace osg
-{
-    class Image;
-}
-
 namespace ESM
 {
     class ESMReader;
@@ -17,8 +12,6 @@ namespace ESM
     {
         int mX, mY; // Only used for interior cells
         std::vector<char> mImageData;
-        // the dynamic texture is a bottleneck, so don't set this too high
-        static const int sFogOfWarResolution = 32;
     };
 
     // format 0, saved games only
@@ -39,11 +32,6 @@ namespace ESM
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm, bool interiorCell) const;
-
-        static void saveFogOfWar(osg::Image* fogImage, ESM::FogTexture &fog);
-        static osg::Image* loadFogOfWar(const ESM::FogTexture &esm);
-        static void convertFogOfWar(std::vector<char>& imageData);
-        static osg::Image* initFogOfWar();
     };
 }
 

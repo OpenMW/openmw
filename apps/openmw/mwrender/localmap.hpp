@@ -136,6 +136,9 @@ namespace MWRender
 
         int mMapResolution;
 
+        // the dynamic texture is a bottleneck, so don't set this too high
+        static const int sFogOfWarResolution = 32;
+
         // size of a map segment (for exteriors, 1 cell)
         float mMapWorldSize;
 
