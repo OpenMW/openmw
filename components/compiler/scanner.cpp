@@ -1,8 +1,6 @@
 #include "scanner.hpp"
 
 #include <cassert>
-#include <cctype>
-#include <sstream>
 #include <iterator>
 
 #include "exception.hpp"
@@ -14,14 +12,12 @@
 
 namespace Compiler
 {
-    bool Scanner::get (char& c)
+    bool Scanner::get (MultiChar& c)
     {
-        mStream.get (c);
-
-        if (!mStream.good())
+        if (!c.getFrom(mStream))
             return false;
 
-        mPrevLoc =mLoc;
+        mPrevLoc = mLoc;
 
         if (c=='\n')
         {
@@ -34,15 +30,15 @@ namespace Compiler
         else
         {
             ++mLoc.mColumn;
-            mLoc.mLiteral += c;
+            c.appendTo(mLoc.mLiteral);
         }
 
         return true;
     }
 
-    void Scanner::putback (char c)
+    void Scanner::putback (MultiChar& c)
     {
-        mStream.putback (c);
+        c.putback(mStream);
         mLoc = mPrevLoc;
     }
 
@@ -80,7 +76,7 @@ namespace Compiler
                 break;
         }
 
-        char c;
+        MultiChar c;
 
         if (!get (c))
         {
@@ -91,7 +87,7 @@ namespace Compiler
         {
             std::string comment;
 
-            comment += c;
+            c.appendTo(comment);
 
             while (get (c))
             {
@@ -101,7 +97,7 @@ namespace Compiler
                     break;
                 }
                 else
-                    comment += c;
+                    c.appendTo(comment);
             }
 
             TokenLoc loc (mLoc);
@@ -109,7 +105,7 @@ namespace Compiler
 
             return parser.parseComment (comment, loc, *this);
         }
-        else if (isWhitespace (c))
+        else if (c.isWhitespace())
         {
             mLoc.mLiteral.clear();
             return true;
@@ -120,7 +116,7 @@ namespace Compiler
             mLoc.mLiteral.clear();
             return true;
         }
-        else if (std::isalpha (c) || c=='_' || c=='"')
+        else if (c.isAlpha() || c=='_' || c=='"')
         {
             bool cont = false;
 
@@ -130,7 +126,7 @@ namespace Compiler
                 return cont;
             }
         }
-        else if (std::isdigit (c))
+        else if (c.isDigit())
         {
             bool cont = false;
 
@@ -162,24 +158,24 @@ namespace Compiler
         throw SourceException();
     }
 
-    bool Scanner::scanInt (char c, Parser& parser, bool& cont)
+    bool Scanner::scanInt (MultiChar& c, Parser& parser, bool& cont)
     {
         assert(c != '\0');
         std::string value;
-        value += c;
+        c.appendTo(value);
 
         bool error = false;
 
         while (get (c))
         {
-            if (std::isdigit (c))
+            if (c.isDigit())
             {
-                value += c;
+                c.appendTo(value);
             }
-            else if (c!='-' && isStringCharacter (c))
+            else if (!c.isMinusSign() && isStringCharacter (c))
             {
                 error = true;
-                value += c;
+                c.appendTo(value);
             }
             else if (c=='.')
             {
@@ -224,19 +220,19 @@ namespace Compiler
     {
         std::string value = intValue + ".";
 
-        char c;
+        MultiChar c;
 
         bool empty = intValue.empty() || intValue=="-";
         bool error = false;
 
         while (get (c))
         {
-            if (std::isdigit (c))
+            if (c.isDigit())
             {
-                value += c;
+                c.appendTo(value);
                 empty = false;
             }
-            else if (std::isalpha (c) || c=='_')
+            else if (c.isAlpha() || c=='_')
                 error = true;
             else
             {
@@ -279,10 +275,10 @@ namespace Compiler
         0
     };
 
-    bool Scanner::scanName (char c, Parser& parser, bool& cont)
+    bool Scanner::scanName (MultiChar& c, Parser& parser, bool& cont)
     {
         std::string name;
-        name += c;
+        c.appendTo(name);
 
         if (!scanName (name))
             return false;
@@ -315,8 +311,8 @@ namespace Compiler
 
         // Russian localization and some mods use a quirk - add newline character directly
         // to compiled bytecode via HEX-editor to implement multiline messageboxes.
-        // Of course, original editor will not compile such script.
-        // Allow messageboxes to bybass the "incomplete string or name" error.
+        // Of course, original editor can not compile such script.
+        // Allow messageboxes to bypass the "incomplete string or name" error.
         if (lowerCase == "messagebox")
             enableIgnoreNewlines();
         else if (isKeyword)
@@ -344,7 +340,7 @@ namespace Compiler
 
     bool Scanner::scanName (std::string& name)
     {
-        char c;
+        MultiChar c;
         bool error = false;
 
         while (get (c))
@@ -353,7 +349,7 @@ namespace Compiler
             {
                 if (c=='"')
                 {
-                    name += c;
+                    c.appendTo(name);
                     break;
                 }
 // ignoring escape sequences for now, because they are messing up stupid Windows path names.
@@ -380,20 +376,20 @@ namespace Compiler
             }
             else if (!(c=='"' && name.empty()))
             {
-                if (!isStringCharacter (c) && !(mTolerantNames && (c=='.' || c=='-')))
+                if (!isStringCharacter (c) && !(mTolerantNames && (c=='.' || c == '-')))
                 {
                     putback (c);
                     break;
                 }
             }
 
-            name += c;
+            c.appendTo(name);
         }
 
         return !error;
     }
 
-    bool Scanner::scanSpecial (char c, Parser& parser, bool& cont)
+    bool Scanner::scanSpecial (MultiChar& c, Parser& parser, bool& cont)
     {
         int special = -1;
 
@@ -410,7 +406,7 @@ namespace Compiler
             {
                 putback (c);
 
-                if (std::isdigit (c))
+                if (c.isDigit())
                     return scanFloat ("", parser, cont);
             }
 
@@ -428,7 +424,7 @@ namespace Compiler
                 else if (c == '>' || c == '<')  // Treat => and =< as ==
                 {
                     special = S_cmpEQ;
-                    mErrorHandler.warning (std::string("invalid operator =") + c + ", treating it as ==", mLoc);
+                    mErrorHandler.warning (std::string("invalid operator =") + c.data() + ", treating it as ==", mLoc);
                 }
                 else
                 {
@@ -463,7 +459,7 @@ namespace Compiler
             else
                 return false;
         }
-        else if (c=='-')
+        else if (c.isMinusSign())
         {
             if (get (c))
             {
@@ -477,32 +473,6 @@ namespace Compiler
             }
             else
                 special = S_minus;
-        }
-        else if (static_cast<unsigned char> (c)==0xe2)
-        {
-            /// Workaround for some translator who apparently can't keep his minus in order
-            /// \todo disable for later script formats
-            if (get (c) && static_cast<unsigned char> (c)==0x80 &&
-                get (c) && static_cast<unsigned char> (c)==0x93)
-            {
-                if (get (c))
-                {
-                    if (c=='>')
-                        special = S_ref;
-                    else
-                    {
-                        putback (c);
-                        special = S_minus;
-                    }
-                }
-                else
-                    special = S_minus;
-            }
-            else
-            {
-                mErrorHandler.error ("Invalid character", mLoc);
-                return false;
-            }
         }
         else if (c=='<')
         {
@@ -582,20 +552,21 @@ namespace Compiler
         return true;
     }
 
-    bool Scanner::isStringCharacter (char c, bool lookAhead)
+    bool Scanner::isStringCharacter (MultiChar& c, bool lookAhead)
     {
-        return std::isalpha (c) || std::isdigit (c) || c=='_' ||
-            /// \todo disable this when doing more stricter compiling
-            c=='`' || c=='\'' ||
+        if (lookAhead && c.isMinusSign())
+        {
             /// \todo disable this when doing more stricter compiling. Also, find out who is
             /// responsible for allowing it in the first place and meet up with that person in
             /// a dark alley.
-            (c=='-' && (!lookAhead || isStringCharacter (mStream.peek(), false)));
-    }
+            MultiChar next;
+            if (next.peek(mStream) && isStringCharacter (next, false))
+                return true;
+        }
 
-    bool Scanner::isWhitespace (char c)
-    {
-        return c==' ' || c=='\t';
+        return c.isAlpha() || c.isDigit() || c=='_' ||
+            /// \todo disable this when doing more stricter compiling
+            c=='`' || c=='\'';
     }
 
     // constructor
