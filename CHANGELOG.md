@@ -132,6 +132,7 @@
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5078: DisablePlayerLooking is broken
+    Bug #5081: OpenMW-CS: Apparatus type "Alembic" is erroneously named "Albemic"
     Bug #5082: Scrolling with controller in GUI mode is broken
     Bug #5087: Some valid script names can't be used as string arguments
     Bug #5089: Swimming/Underwater creatures only swim around ground level
@@ -152,6 +153,7 @@
     Bug #5134: Doors rotation by "Lock" console command is inconsistent
     Bug #5136: LegionUniform script: can not access local variables
     Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
+    Bug #5138: Actors stuck in half closed door
     Bug #5149: Failing lock pick attempts isn't always a crime
     Bug #5155: Lock/unlock behavior differs from vanilla
     Bug #5158: Objects without a name don't fallback to their ID
