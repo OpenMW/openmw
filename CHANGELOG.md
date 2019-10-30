@@ -154,6 +154,7 @@
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
     Bug #5105: NPCs start combat with werewolves from any distance
     Bug #5106: Still can jump even when encumbered
+    Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
     Bug #5113: Unknown alchemy question mark not centered

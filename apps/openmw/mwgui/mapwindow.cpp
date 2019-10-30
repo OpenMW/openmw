@@ -209,6 +209,7 @@ namespace MWGui
                     MyGUI::IntCoord(mx*mMapWidgetSize, my*mMapWidgetSize, mMapWidgetSize, mMapWidgetSize),
                     MyGUI::Align::Top | MyGUI::Align::Left);
                 fog->setDepth(Local_FogLayer);
+                fog->setColour(MyGUI::Colour(0, 0, 0));
 
                 map->setNeedMouseFocus(false);
                 fog->setNeedMouseFocus(false);
