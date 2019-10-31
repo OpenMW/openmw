@@ -556,6 +556,8 @@ namespace MWClass
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
+        moveSpeed *= ptr.getClass().getMovementSettings(ptr).mSpeedFactor;
+
         return moveSpeed;
     }
 

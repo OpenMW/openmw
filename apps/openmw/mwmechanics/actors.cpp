@@ -144,6 +144,7 @@ namespace MWMechanics
 {
     static const int GREETING_SHOULD_START = 4; //how many updates should pass before NPC can greet player
     static const int GREETING_SHOULD_END = 10;
+    static const float DECELERATE_DISTANCE = 512.f;
 
     class GetStuntedMagickaDuration : public MWMechanics::EffectSourceVisitor
     {
@@ -420,6 +421,26 @@ namespace MWMechanics
         static const float fVoiceIdleOdds = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
         if (Misc::Rng::rollProbability() * 10000.f < fVoiceIdleOdds * delta && world->getLOS(getPlayer(), actor))
             MWBase::Environment::get().getDialogueManager()->say(actor, "idle");
+    }
+
+    void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
+    {
+        float previousSpeedFactor = actor.getClass().getMovementSettings(actor).mSpeedFactor;
+        float newSpeedFactor = 1.f;
+
+        CreatureStats &stats = actor.getClass().getCreatureStats(actor);
+        MWMechanics::AiSequence& seq = stats.getAiSequence();
+
+        if (!seq.isEmpty() && seq.getActivePackage()->useVariableSpeed())
+        {
+            osg::Vec3f targetPos = seq.getActivePackage()->getDestination();
+            osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
+            float distance = (targetPos - actorPos).length();
+            if (distance < DECELERATE_DISTANCE)
+                newSpeedFactor = std::max(0.7f, 0.1f * previousSpeedFactor * (distance/64.f + 2.f));
+        }
+
+        actor.getClass().getMovementSettings(actor).mSpeedFactor = newSpeedFactor;
     }
 
     void Actors::updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly)
@@ -1668,6 +1689,7 @@ namespace MWMechanics
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
                                 updateGreetingState(iter->first, timerUpdateHello > 0);
                                 playIdleDialogue(iter->first);
+                                updateMovementSpeed(iter->first);
                             }
                         }
                     }
