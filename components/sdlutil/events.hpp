@@ -30,6 +30,7 @@ public:
     virtual void mouseMoved( const MouseMotionEvent &arg ) = 0;
     virtual void mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
     virtual void mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id ) = 0;
+    virtual void mouseWheelMoved( const SDL_MouseWheelEvent &arg) = 0;
 };
 
 class KeyListener
