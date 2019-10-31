@@ -48,4 +48,5 @@ Copyright 2018 Bret Curtis <psi29a@gmail.com>
  <url type="homepage">https://openmw.org</url>
  <url type="bugtracker">https://gitlab.com/OpenMW/openmw/issues</url>
  <url type="faq">https://openmw.org/faq/</url>
+ <content_rating type="oars-1.1" />
 </component>
