@@ -365,7 +365,6 @@ void Launcher::GraphicsPage::slotFramerateLimitToggled(bool checked)
     framerateLimitSpinBox->setEnabled(checked);
 }
 
-
 void Launcher::GraphicsPage::slotShadowDistLimitToggled(bool checked)
 {
     shadowDistanceSpinBox->setEnabled(checked);
