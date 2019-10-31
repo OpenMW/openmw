@@ -73,6 +73,9 @@ namespace MWMechanics
             /// Higher number is higher priority (0 being the lowest)
             virtual unsigned int getPriority() const {return 0;}
 
+            /// Check if package use movement with variable speed
+            virtual bool useVariableSpeed() const { return false;}
+
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
 
             /// Simulates the passing of time
@@ -98,6 +101,8 @@ namespace MWMechanics
 
             /// Return true if this package should repeat. Currently only used for Wander packages.
             virtual bool getRepeat() const;
+
+            virtual osg::Vec3f getDestination() { return osg::Vec3f(0, 0, 0); }
 
             /// Reset pathfinding state
             void reset();

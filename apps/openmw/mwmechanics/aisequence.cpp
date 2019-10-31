@@ -388,6 +388,11 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
     }
 }
 
+bool MWMechanics::AiSequence::isEmpty() const
+{
+    return mPackages.empty();
+}
+
 AiPackage* MWMechanics::AiSequence::getActivePackage()
 {
     if(mPackages.empty())

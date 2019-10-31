@@ -990,6 +990,8 @@ namespace MWClass
         if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
             moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
 
+        moveSpeed *= ptr.getClass().getMovementSettings(ptr).mSpeedFactor;
+
         return moveSpeed;
     }
 

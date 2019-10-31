@@ -186,6 +186,7 @@
     Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly
     Feature #4360: Improve default controller bindings
+    Feature #4544: Actors movement deceleration
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
     Feature #4730: Native animated containers support

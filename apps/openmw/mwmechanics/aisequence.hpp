@@ -132,6 +132,8 @@ namespace MWMechanics
                 \see ESM::AIPackageList **/
             void fill (const ESM::AIPackageList& list);
 
+            bool isEmpty() const;
+
             void writeState (ESM::AiSequence::AiSequence& sequence) const;
             void readState (const ESM::AiSequence::AiSequence& sequence);
     };
