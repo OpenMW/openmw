@@ -1097,13 +1097,13 @@ namespace MWInput
             {
                 if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
-                    mGamepadZoom = static_cast<float>(arg.value / 10000 * 8.5f);
-                    return; // Do not propogate event.
+                    mGamepadZoom = arg.value * 0.85f / 1000.f;
+                    return; // Do not propagate event.
                 }
                 else if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
                 {
-                    mGamepadZoom = static_cast<float>(-(arg.value / 10000 * 8.5f));
-                    return; // Do not propogate event.
+                    mGamepadZoom = -arg.value * 0.85f / 1000.f;
+                    return; // Do not propagate event.
                 }
             }
         }
