@@ -55,6 +55,14 @@ namespace CSVRender
 
         private:
 
+            bool noCell(const std::string& cellId);
+
+            bool noLand(const std::string& cellId);
+
+            bool noLandLoaded(const std::string& cellId);
+
+            bool isLandLoaded(const std::string& cellId);
+            
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
