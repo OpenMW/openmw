@@ -112,12 +112,7 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
             selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
         }
     }
-    if (CSVRender::PagedWorldspaceWidget *paged =
-        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-    {
-        paged->resetAllAlteredHeights();
-        mTotalDiffY = 0;
-    }
+    clearTransientEdits();
 }
 
 void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -214,28 +209,15 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
 {
     if (mDragMode == InteractionType_PrimaryEdit)
     {
-        if (mIsEditing)
-        {
-            mTotalDiffY = 0;
-            mIsEditing = false;
-        }
-
         applyTerrainEditChanges();
-
-        if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-            paged->resetAllAlteredHeights();
+        clearTransientEdits();
     }
 }
 
 
 void CSVRender::TerrainShapeMode::dragAborted()
 {
-    if (CSVRender::PagedWorldspaceWidget *paged =
-        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-    {
-        paged->resetAllAlteredHeights();
-        mTotalDiffY = 0;
-    }
+     clearTransientEdits();
 }
 
 void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
@@ -266,15 +248,20 @@ void CSVRender::TerrainShapeMode::sortAndLimitAlteredCells()
         if (passes > 2)
         {
             Log(Debug::Warning) << "Warning: User edit exceeds accepted slope steepness. Automatic limiting has failed, edit has been discarded.";
-            if (CSVRender::PagedWorldspaceWidget *paged =
-                dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-            {
-                paged->resetAllAlteredHeights();
-                mAlteredCells.clear();
-                return;
-            }
+            clearTransientEdits();
+            return;
         }
     }
+}
+
+void CSVRender::TerrainShapeMode::clearTransientEdits()
+{
+    mTotalDiffY = 0;
+    mIsEditing = false;
+    mAlteredCells.clear();
+    if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+        paged->resetAllAlteredHeights();
+    mTerrainShapeSelection->update();
 }
 
 void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
@@ -385,7 +372,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
     undoStack.endMacro();
-    mAlteredCells.clear();
+    clearTransientEdits();
 }
 
 float CSVRender::TerrainShapeMode::calculateBumpShape(float distance, int radius, float height)
@@ -498,6 +485,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             }
         }
     }
+    mTerrainShapeSelection->update();
 }
 
 void CSVRender::TerrainShapeMode::setFlattenToolTargetHeight(const WorldspaceHitResult& hit)

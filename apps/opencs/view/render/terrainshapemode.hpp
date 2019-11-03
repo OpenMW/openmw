@@ -95,6 +95,9 @@ namespace CSVRender
             /// Remove duplicates and sort mAlteredCells, then limitAlteredHeights forward and reverse
             void sortAndLimitAlteredCells();
 
+            /// Reset everything in the current edit
+            void clearTransientEdits();
+
             /// Move pending alteredHeights changes to omwgame/omwaddon -data
             void applyTerrainEditChanges();
 

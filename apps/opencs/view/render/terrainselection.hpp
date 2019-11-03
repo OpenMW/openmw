@@ -44,9 +44,9 @@ namespace CSVRender
 
             std::vector<std::pair<int, int>> getTerrainSelection() const;
 
-        protected:
-
             void update();
+
+        protected:
 
             void drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
             void drawTextureSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
