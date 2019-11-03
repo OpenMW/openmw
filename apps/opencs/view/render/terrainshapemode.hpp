@@ -131,6 +131,9 @@ namespace CSVRender
             /// Check that the edit doesn't break save format limits, fix if necessary, return true if slope steepness is within limits
             bool limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode = false);
 
+            /// Check if global selection coordinate belongs to cell in view
+            bool isInCellSelection(int globalSelectionX, int globalSelectionY);
+
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
 
