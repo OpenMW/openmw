@@ -16,7 +16,6 @@ Unlike in the original Morrowind engine, 'Shadow Mapping' is used, which can hav
 Bear in mind that this will force OpenMW to use shaders as if :ref:`force shaders` was enabled.
 A keen developer may be able to implement compatibility with fixed-function mode using the advice of `this post <https://github.com/OpenMW/openmw/pull/1547#issuecomment-369657381>`_, but it may be more difficult than it seems.
 
-
 number of shadow maps
 ---------------------
 
@@ -27,6 +26,28 @@ number of shadow maps
 Control how many shadow maps to use - more of these means each shadow map texel covers less area, producing better-looking shadows, but may decrease performance.
 Using too many shadow maps will lead to them overriding texture slots used for other effects, producing unpleasant artefacts.
 A value of three is recommended in most cases, but other values may produce better results or performance.
+
+maximum shadow map distance
+---------------------------
+
+:Type:		float
+:Range:		The whole range of 32-bit floating point
+:Default:	8192
+
+The maximum distance from the camera shadows cover, limiting their overall area coverage
+and improving their quality and performance at the cost of removing shadows of distant objects or terrain.
+Set this to a non-positive value to remove the limit.
+
+shadow fade start
+-------------------
+
+:Type:		float
+:Range:		0.0-1.0
+:Default:	0.9
+
+The fraction of the maximum shadow map distance at which the shadows will begin to fade away.
+Tweaking it will make the transition proportionally more or less smooth.
+This setting has no effect if the maximum shadow map distance is non-positive (infinite).
 
 allow shadow map overlap
 ------------------------

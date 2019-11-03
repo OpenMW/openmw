@@ -66,7 +66,7 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-    float shadowing = unshadowedLightRatio();
+    float shadowing = unshadowedLightRatio(depth);
 
 #if !PER_PIXEL_LIGHTING
 
