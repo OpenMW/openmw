@@ -169,6 +169,36 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="weaponSheathingCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered weapons (with quivers and scabbards), requires modded assets&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Weapon sheathing</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="shieldSheathingCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Shield sheathing</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="animSourcesCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Use additional animation sources</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
