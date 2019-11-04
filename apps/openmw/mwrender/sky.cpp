@@ -1556,7 +1556,14 @@ void SkyManager::updateRainParameters(float duration, bool paused)
     float y = radius * sin(angle);
     float z = mRainMinHeight + (mRainMaxHeight - mRainMinHeight) * Misc::Rng::rollClosedProbability();
 
-    mRaindropsToCreate += (mRainMaxRaindrops - mRainNode->getNumChildren()) * duration / mRainEntranceSpeed * mAmbientSoundVolume;
+    int numActive = 0;
+    for (unsigned int i = 0; i < mRainNode->getNumChildren(); i++)
+    {
+        if (mRainNode->getChild(i)->getNodeMask() != 0)
+            numActive++;
+    }
+
+    mRaindropsToCreate += (mRainMaxRaindrops - numActive) * duration / mRainEntranceSpeed * mAmbientSoundVolume;
 
     float rainAngle = -std::atan(mWindSpeed/50.f);
     osg::Vec3f velocity(0, mRainSpeed*std::sin(rainAngle) * duration, -mRainSpeed/std::cos(rainAngle) * duration);
