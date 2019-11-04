@@ -242,10 +242,37 @@ void CSVRender::TerrainSelection::drawTextureSelection(const osg::ref_ptr<osg::V
     }
 }
 
+bool CSVRender::TerrainSelection::noCell(const std::string& cellId)
+{
+    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
+    const CSMWorld::IdCollection<CSMWorld::Cell>& cellCollection = document.getData().getCells();
+    return cellCollection.searchId (cellId) == -1;
+}
+
+bool CSVRender::TerrainSelection::noLand(const std::string& cellId)
+{
+    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
+    const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
+    return landCollection.searchId (cellId) == -1;
+}
+
+bool CSVRender::TerrainSelection::noLandLoaded(const std::string& cellId)
+{
+    CSMDoc::Document& document = mWorldspaceWidget->getDocument();
+    const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
+    return !landCollection.getRecord(cellId).get().isDataLoaded(ESM::Land::DATA_VNML);
+}
+
+bool CSVRender::TerrainSelection::isLandLoaded(const std::string& cellId)
+{
+    if (!noCell(cellId) && !noLand(cellId) && !noLandLoaded(cellId)) return true;
+    return false;
+}
+
 int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global vertex coordinates
 {
-    int cellX = std::floor((1.0f*x / (ESM::Land::LAND_SIZE - 1)));
-    int cellY = std::floor((1.0f*y / (ESM::Land::LAND_SIZE - 1)));
+    int cellX = std::floor(static_cast<float>(x) / (ESM::Land::LAND_SIZE - 1));
+    int cellY = std::floor(static_cast<float>(y) / (ESM::Land::LAND_SIZE - 1));
     int localX = x - cellX * (ESM::Land::LAND_SIZE - 1);
     int localY = y - cellY * (ESM::Land::LAND_SIZE - 1);
 
@@ -253,7 +280,18 @@ int CSVRender::TerrainSelection::calculateLandHeight(int x, int y) // global ver
 
     float landHeight = 0.f;
     if (CSVRender::Cell* cell = dynamic_cast<CSVRender::Cell*>(mWorldspaceWidget->getCell(coords)))
+    {
         landHeight = cell->getSumOfAlteredAndTrueHeight(cellX, cellY, localX, localY);
+    }
+    else if (isLandLoaded(CSMWorld::CellCoordinates::generateId(cellX, cellY)))
+    {
+        CSMDoc::Document& document = mWorldspaceWidget->getDocument();
+        CSMWorld::IdTable& landTable = dynamic_cast<CSMWorld::IdTable&> ( *document.getData().getTableModel (CSMWorld::UniversalId::Type_Land));
+        std::string cellId = CSMWorld::CellCoordinates::generateId(cellX, cellY);
+        int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
+        const CSMWorld::LandHeightsColumn::DataType mPointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
+        return mPointer[localY*ESM::Land::LAND_SIZE + localX];
+    }
 
     return landHeight;
 }

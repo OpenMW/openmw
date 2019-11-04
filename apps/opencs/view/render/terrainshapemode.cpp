@@ -112,12 +112,7 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
             selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
         }
     }
-    if (CSVRender::PagedWorldspaceWidget *paged =
-        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-    {
-        paged->resetAllAlteredHeights();
-        mTotalDiffY = 0;
-    }
+    clearTransientEdits();
 }
 
 void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult& hit)
@@ -214,28 +209,15 @@ void CSVRender::TerrainShapeMode::dragCompleted(const QPoint& pos)
 {
     if (mDragMode == InteractionType_PrimaryEdit)
     {
-        if (mIsEditing)
-        {
-            mTotalDiffY = 0;
-            mIsEditing = false;
-        }
-
         applyTerrainEditChanges();
-
-        if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-            paged->resetAllAlteredHeights();
+        clearTransientEdits();
     }
 }
 
 
 void CSVRender::TerrainShapeMode::dragAborted()
 {
-    if (CSVRender::PagedWorldspaceWidget *paged =
-        dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-    {
-        paged->resetAllAlteredHeights();
-        mTotalDiffY = 0;
-    }
+     clearTransientEdits();
 }
 
 void CSVRender::TerrainShapeMode::dragWheel (int diff, double speedFactor)
@@ -266,15 +248,20 @@ void CSVRender::TerrainShapeMode::sortAndLimitAlteredCells()
         if (passes > 2)
         {
             Log(Debug::Warning) << "Warning: User edit exceeds accepted slope steepness. Automatic limiting has failed, edit has been discarded.";
-            if (CSVRender::PagedWorldspaceWidget *paged =
-                dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
-            {
-                paged->resetAllAlteredHeights();
-                mAlteredCells.clear();
-                return;
-            }
+            clearTransientEdits();
+            return;
         }
     }
+}
+
+void CSVRender::TerrainShapeMode::clearTransientEdits()
+{
+    mTotalDiffY = 0;
+    mIsEditing = false;
+    mAlteredCells.clear();
+    if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+        paged->resetAllAlteredHeights();
+    mTerrainShapeSelection->update();
 }
 
 void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
@@ -385,7 +372,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         pushNormalsEditToCommand(landNormalsNew, document, landTable, cellId);
     }
     undoStack.endMacro();
-    mAlteredCells.clear();
+    clearTransientEdits();
 }
 
 float CSVRender::TerrainShapeMode::calculateBumpShape(float distance, int radius, float height)
@@ -498,6 +485,7 @@ void CSVRender::TerrainShapeMode::editTerrainShapeGrid(const std::pair<int, int>
             }
         }
     }
+    mTerrainShapeSelection->update();
 }
 
 void CSVRender::TerrainShapeMode::setFlattenToolTargetHeight(const WorldspaceHitResult& hit)
@@ -1039,6 +1027,17 @@ bool CSVRender::TerrainShapeMode::limitAlteredHeights(const CSMWorld::CellCoordi
     return steepnessIsWithinLimits;
 }
 
+bool CSVRender::TerrainShapeMode::isInCellSelection(int globalSelectionX, int globalSelectionY)
+{
+    if (CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget()))
+    {
+        std::pair<int, int> vertexCoords = std::make_pair(globalSelectionX, globalSelectionY);
+        std::string cellId = CSMWorld::CellCoordinates::vertexGlobalToCellId(vertexCoords);
+        return paged->getCellSelection().has(CSMWorld::CellCoordinates::fromId(cellId).first) && isLandLoaded(cellId);
+    }
+    return false;
+}
+
 void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation)
 {
     int r = mBrushSize / 2;
@@ -1046,7 +1045,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
 
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
-        selections.emplace_back(vertexCoords);
+        if (isInCellSelection(vertexCoords.first, vertexCoords.second)) selections.emplace_back(vertexCoords.first, vertexCoords.second);
     }
 
     if (mBrushShape == CSVWidget::BrushShape_Square)
@@ -1055,7 +1054,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         {
             for(int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
             {
-                selections.emplace_back(std::make_pair(i, j));
+                if (isInCellSelection(i, j)) selections.emplace_back(i, j);
             }
         }
     }
@@ -1069,7 +1068,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
                 int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (distance <= r) selections.emplace_back(std::make_pair(i, j));
+                if (isInCellSelection(i, j) && distance <= r) selections.emplace_back(i, j);
             }
         }
     }
@@ -1080,7 +1079,9 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         {
             for(auto const& value: mCustomBrushShape)
             {
-                selections.emplace_back(std::make_pair(vertexCoords.first + value.first, vertexCoords.second + value.second));
+                std::pair<int, int> localVertexCoords (vertexCoords.first + value.first, vertexCoords.second + value.second);
+                std::string cellId (CSMWorld::CellCoordinates::vertexGlobalToCellId(localVertexCoords));
+                if (isInCellSelection(localVertexCoords.first, localVertexCoords.second)) selections.emplace_back(localVertexCoords);
             }
         }
     }

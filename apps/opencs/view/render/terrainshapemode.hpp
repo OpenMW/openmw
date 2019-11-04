@@ -95,6 +95,9 @@ namespace CSVRender
             /// Remove duplicates and sort mAlteredCells, then limitAlteredHeights forward and reverse
             void sortAndLimitAlteredCells();
 
+            /// Reset everything in the current edit
+            void clearTransientEdits();
+
             /// Move pending alteredHeights changes to omwgame/omwaddon -data
             void applyTerrainEditChanges();
 
@@ -127,6 +130,9 @@ namespace CSVRender
 
             /// Check that the edit doesn't break save format limits, fix if necessary, return true if slope steepness is within limits
             bool limitAlteredHeights(const CSMWorld::CellCoordinates& cellCoords, bool reverseMode = false);
+
+            /// Check if global selection coordinate belongs to cell in view
+            bool isInCellSelection(int globalSelectionX, int globalSelectionY);
 
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
