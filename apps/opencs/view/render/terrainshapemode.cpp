@@ -1095,7 +1095,6 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
             for(auto const& value: mCustomBrushShape)
             {
                 std::pair<int, int> localVertexCoords (vertexCoords.first + value.first, vertexCoords.second + value.second);
-                std::string cellId (CSMWorld::CellCoordinates::vertexGlobalToCellId(localVertexCoords));
                 handleSelection(localVertexCoords.first, localVertexCoords.second, &selections);
             }
         }
