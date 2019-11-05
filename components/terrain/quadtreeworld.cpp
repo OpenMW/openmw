@@ -353,7 +353,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5,y+0.5));
             }
             else
-                mRootNode->traverse(vd, cv->getViewPoint(), mLodCallback, mViewDistance);
+                mRootNode->traverseNodes(vd, cv->getViewPoint(), mLodCallback, mViewDistance);
         }
         else
         {
@@ -446,7 +446,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic
 
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
-    mRootNode->traverse(vd, viewPoint, mLodCallback, mViewDistance);
+    mRootNode->traverseNodes(vd, viewPoint, mLodCallback, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {

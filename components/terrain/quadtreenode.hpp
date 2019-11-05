@@ -92,7 +92,7 @@ namespace Terrain
         const osg::Vec2f& getCenter() const;
 
         /// Traverse nodes according to LOD selection.
-        void traverse(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
+        void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
 
         /// Traverse to a specific node and add only that node.
         void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
