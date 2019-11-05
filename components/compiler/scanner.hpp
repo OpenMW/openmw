@@ -165,7 +165,8 @@ namespace Compiler
 
         std::string data()
         {
-            return mData;
+            // NB: mLength is the number of the last element in the array
+            return std::string(mData, mLength + 1);
         }
 
     private:
