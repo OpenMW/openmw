@@ -90,7 +90,7 @@ namespace MWMechanics
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
                         it->mEffectID);
 
-            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage))
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
