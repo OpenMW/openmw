@@ -32,26 +32,6 @@ namespace MWGui
     {
     }
 
-    bool ItemStack::stacks(const ItemStack &other)
-    {
-        if(mBase == other.mBase)
-            return true;
-
-        // If one of the items is in an inventory and currently equipped, we need to check stacking both ways to be sure
-        if (mBase.getContainerStore() && other.mBase.getContainerStore())
-            return mBase.getContainerStore()->stacks(mBase, other.mBase)
-                    && other.mBase.getContainerStore()->stacks(mBase, other.mBase);
-
-        if (mBase.getContainerStore())
-            return mBase.getContainerStore()->stacks(mBase, other.mBase);
-        if (other.mBase.getContainerStore())
-            return other.mBase.getContainerStore()->stacks(mBase, other.mBase);
-
-        MWWorld::ContainerStore store;
-        return store.stacks(mBase, other.mBase);
-
-    }
-
     bool operator == (const ItemStack& left, const ItemStack& right)
     {
         if (left.mType != right.mType)
