@@ -84,8 +84,11 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
     connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
     loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
-    loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
-    loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
+    if (animSourcesCheckBox->checkState())
+    {
+        loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
+        loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
+    }
 
     // Input Settings
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
@@ -146,11 +149,6 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
     saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
     saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
-    if (animSourcesCheckBox->checkState())
-    {
-        saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
-        saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
-    }
     saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
     saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
     saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
@@ -201,4 +199,9 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
 {
     weaponSheathingCheckBox->setEnabled(checked);
     shieldSheathingCheckBox->setEnabled(checked);
+    if (!checked)
+    {
+        weaponSheathingCheckBox->setCheckState(Qt::Unchecked);
+        shieldSheathingCheckBox->setCheckState(Qt::Unchecked);
+    }
 }

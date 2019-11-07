@@ -198,19 +198,6 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QCheckBox" name="shieldSheathingCheckBox">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="text">
-                <string>Shield sheathing</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <widget class="QCheckBox" name="weaponSheathingCheckBox">
                <property name="enabled">
                 <bool>false</bool>
@@ -220,6 +207,19 @@
                </property>
                <property name="text">
                 <string>Weapon sheathing</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="shieldSheathingCheckBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Render holstered shield, requires modded assets.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="text">
+                <string>Shield sheathing</string>
                </property>
               </widget>
              </item>
