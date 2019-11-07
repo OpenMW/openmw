@@ -807,8 +807,10 @@ std::string magicEffectFlags(int flags)
     if (flags & ESM::MagicEffect::CastSelf) properties += "CastSelf ";
     if (flags & ESM::MagicEffect::CastTouch) properties += "CastTouch ";
     if (flags & ESM::MagicEffect::CastTarget) properties += "CastTarget ";
-    if (flags & ESM::MagicEffect::UncappedDamage) properties += "UncappedDamage ";
+    if (flags & ESM::MagicEffect::AppliedOnce) properties += "AppliedOnce ";
+    if (flags & ESM::MagicEffect::Stealth) properties += "Stealth ";
     if (flags & ESM::MagicEffect::NonRecastable) properties += "NonRecastable ";
+    if (flags & ESM::MagicEffect::IllegalDaedra) properties += "IllegalDaedra ";
     if (flags & ESM::MagicEffect::Unreflectable) properties += "Unreflectable ";
     if (flags & ESM::MagicEffect::CasterLinked) properties += "CasterLinked ";
     if (flags & ESM::MagicEffect::AllowSpellmaking) properties += "AllowSpellmaking ";
