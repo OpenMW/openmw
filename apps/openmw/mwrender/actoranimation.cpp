@@ -113,7 +113,7 @@ bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
         {
             SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
             mObjectRoot->accept(findVisitor);
-            if (findVisitor.mFoundNode)
+            if (findVisitor.mFoundNode || (mPtr == MWMechanics::getPlayer() && mPtr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson()))
             {
                 const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                 const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
