@@ -4,6 +4,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/quickkeys.hpp>
@@ -257,7 +258,12 @@ namespace MWGui
         mSelected->id = item.getCellRef().getRefId();
         mSelected->name = item.getClass().getName(item);
 
-        mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
+        float scale = 1.f;
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture("textures\\menu_icon_select_magic_magic.dds");
+        if (texture)
+            scale = texture->getHeight() / 64.f;
+
+        mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(0, 0, 44*scale, 44*scale));
         mSelected->button->setIcon(item);
 
         mSelected->button->setUserString("ToolTipType", "ItemPtr");
@@ -292,7 +298,12 @@ namespace MWGui
         path.insert(slashPos+1, "b_");
         path = MWBase::Environment::get().getWindowManager()->correctIconPath(path);
 
-        mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
+        float scale = 1.f;
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture("textures\\menu_icon_select_magic.dds");
+        if (texture)
+            scale = texture->getHeight() / 64.f;
+
+        mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(0, 0, 44*scale, 44*scale));
         mSelected->button->setIcon(path);
 
         if (mMagicSelectionDialog)
