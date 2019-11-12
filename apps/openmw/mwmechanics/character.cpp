@@ -1906,6 +1906,17 @@ void CharacterController::update(float duration, bool animationOnly)
     bool isPlayer = mPtr == MWMechanics::getPlayer();
     bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
 
+    float scale = mPtr.getCellRef().getScale();
+
+    static const bool normalizeSpeed = Settings::Manager::getBool("normalise race speed", "Game");
+    if (!normalizeSpeed && mPtr.getClass().isNpc())
+    {
+        const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
+        const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
+        float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
+        scale *= weight;
+    }
+
     if(!cls.isActor())
         updateAnimQueue();
     else if(!cls.getCreatureStats(mPtr).isDead())
@@ -2132,6 +2143,8 @@ void CharacterController::update(float duration, bool animationOnly)
 
             jumpstate = mAnimation->isPlaying(mCurrentJump) ? JumpState_Landing : JumpState_None;
 
+            vec.x() *= scale;
+            vec.y() *= scale;
             vec.z() = 0.0f;
 
             inJump = false;
@@ -2322,19 +2335,8 @@ void CharacterController::update(float duration, bool animationOnly)
     else
         moved = osg::Vec3f(0.f, 0.f, 0.f);
 
-    float scale = mPtr.getCellRef().getScale();
     moved.x() *= scale;
     moved.y() *= scale;
-
-    static const bool normalizeSpeed = Settings::Manager::getBool("normalise race speed", "Game");
-    if (mPtr.getClass().isNpc() && !normalizeSpeed)
-    {
-        const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
-        const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
-        float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
-        moved.x() *= weight;
-        moved.y() *= weight;
-    }
 
     // Ensure we're moving in generally the right direction...
     if(speed > 0.f)
