@@ -85,11 +85,11 @@ compute tight scene bounds
 
 :Type:		boolean
 :Range:		True/False
-:Default:	False
+:Default:	True
 
 With this setting enabled, attempt to better use the shadow map(s) by making them cover a smaller area.
 This can be especially helpful when looking downwards with a high viewing distance but will be less useful with the default value.
-The performance impact of this may be very large.
+May have a minor to major performance impact.
 
 shadow map resolution
 ---------------------
@@ -200,10 +200,10 @@ use front face culling
 
 :Type:		boolean
 :Range:		True/False
-:Default:	True
+:Default:	False
 
 Excludes theoretically unnecessary faces from shadow maps, slightly increasing performance.
-In practice, Peter Panning can be much less visible with these faces included, so if you have high polygon offset values, disabling this may help minimise the side effects.
+In practice, Peter Panning can be much less visible with these faces included, so if you have high polygon offset values, leaving this off may help minimise the side effects.
 
 split point uniform logarithmic ratio
 -------------------------------------
