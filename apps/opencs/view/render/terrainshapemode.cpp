@@ -1227,7 +1227,7 @@ void CSVRender::TerrainShapeMode::createNewLandData(const CSMWorld::CellCoordina
 
             ++averageDivider;
             downCellSampleHeight = landDownShapePointer[ESM::Land::LAND_SIZE / 2];
-            if(paged->getCellAlteredHeight(cellLeftCoords, ESM::Land::LAND_SIZE / 2, 0))
+            if(paged->getCellAlteredHeight(cellDownCoords, ESM::Land::LAND_SIZE / 2, 0))
                 downCellSampleHeight += *paged->getCellAlteredHeight(cellDownCoords, ESM::Land::LAND_SIZE / 2, 0);
         }
     }
