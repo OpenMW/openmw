@@ -539,7 +539,7 @@ std::string NpcAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
             {
                 const ESM::BodyPart *bodypart = 0;
                 bodypart = partStore.search(bodypartName);
-                if (bodypart->mData.mType != ESM::BodyPart::MT_Armor)
+                if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
                     return "";
                 else if (!bodypart->mModel.empty())
                     mesh = "meshes\\" + bodypart->mModel;

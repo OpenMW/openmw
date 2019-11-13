@@ -730,8 +730,12 @@ void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
             selectionCenterY += value.second;
             ++selectionAmount;
         }
-        selectionCenterX /= selectionAmount;
-        selectionCenterY /= selectionAmount;
+
+        if (selectionAmount != 0)
+        {
+            selectionCenterX /= selectionAmount;
+            selectionCenterY /= selectionAmount;
+        }
 
         mCustomBrushShape.clear();
         for (auto const& value: terrainSelection)
