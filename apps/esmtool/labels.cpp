@@ -712,7 +712,7 @@ std::string creatureFlags(int flags)
     if (flags & ESM::Creature::Respawn) properties += "Respawn ";
     if (flags & ESM::Creature::Weapon) properties += "Weapon ";
     if (flags & ESM::Creature::Essential) properties += "Essential ";
-    int unused = (0xFF ^
+    int unused = (0xFFFFFFFF ^
                   (ESM::Creature::Base|
                    ESM::Creature::Walks|
                    ESM::Creature::Swims|

@@ -347,8 +347,6 @@ namespace Compiler
             scanner.putbackName (name, loc);
             return false;
         }
-
-        return Parser::parseName (name, loc, scanner);
     }
 
     bool ExprParser::parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner)
