@@ -36,7 +36,6 @@ namespace Terrain
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags);
 
-        void setCullingActive(bool active) { mCullingActive = active; }
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }
         void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
@@ -65,8 +64,6 @@ namespace Terrain
         unsigned int mCompositeMapSize;
         float mCompositeMapLevel;
         float mMaxCompGeometrySize;
-
-        bool mCullingActive;
     };
 
 }

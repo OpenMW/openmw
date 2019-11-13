@@ -301,7 +301,7 @@ namespace NifOsg
 
     private:
         Vec3Interpolator mData;
-        TargetColor mTargetColor;
+        TargetColor mTargetColor = Ambient;
     };
 
     class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller

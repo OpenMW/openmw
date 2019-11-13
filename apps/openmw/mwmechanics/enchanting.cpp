@@ -21,6 +21,7 @@ namespace MWMechanics
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
+        , mWeaponType(-1)
     {}
 
     void Enchanting::setOldItem(const MWWorld::Ptr& oldItem)
