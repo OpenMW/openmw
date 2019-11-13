@@ -49,7 +49,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
         std::string fname = mast.name;
         int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
-            const std::string &candidate = allPlugins->at(i).getContext().filename;
+            const std::string candidate = allPlugins->at(i).getContext().filename;
             std::string fnamecandidate = boost::filesystem::path(candidate).filename().string();
             if (Misc::StringUtils::ciEqual(fname, fnamecandidate)) {
                 index = i;
