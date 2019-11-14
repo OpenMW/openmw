@@ -135,7 +135,7 @@ bool Launcher::GraphicsPage::loadSettings()
     if (mEngineSettings.getBool("player shadows", "Shadows"))
         playerShadowsCheckBox->setCheckState(Qt::Checked);
     if (mEngineSettings.getBool("terrain shadows", "Shadows"))
-        objectShadowsCheckBox->setCheckState(Qt::Checked);
+        terrainShadowsCheckBox->setCheckState(Qt::Checked);
     if (mEngineSettings.getBool("object shadows", "Shadows"))
         objectShadowsCheckBox->setCheckState(Qt::Checked);
     if (mEngineSettings.getBool("enable indoor shadows", "Shadows"))
