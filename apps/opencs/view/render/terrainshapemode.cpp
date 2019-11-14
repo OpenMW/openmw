@@ -1047,9 +1047,16 @@ void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int glob
         int moduloY = globalSelectionY % (ESM::Land::LAND_SIZE - 1);
         bool xIsAtCellBorder = moduloX == 0;
         bool yIsAtCellBorder = moduloY == 0;
-        if (isInCellSelection(globalSelectionX - 1, globalSelectionY) && xIsAtCellBorder && !yIsAtCellBorder) selections->emplace_back(globalSelectionX, globalSelectionY);
-        if (isInCellSelection(globalSelectionX, globalSelectionY - 1) && !xIsAtCellBorder && yIsAtCellBorder) selections->emplace_back(globalSelectionX, globalSelectionY);
-        if (isInCellSelection(globalSelectionX - 1, globalSelectionY - 1) && xIsAtCellBorder && yIsAtCellBorder) selections->emplace_back(globalSelectionX, globalSelectionY);
+        if (!xIsAtCellBorder && !yIsAtCellBorder)
+            return;
+        int selectionX = globalSelectionX;
+        int selectionY = globalSelectionY;
+        if (xIsAtCellBorder)
+            selectionX--;
+        if (yIsAtCellBorder)
+            selectionY--;
+        if (isInCellSelection(selectionX, selectionY))
+            selections->emplace_back(globalSelectionX, globalSelectionY);
     }
 }
 
