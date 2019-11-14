@@ -1439,8 +1439,12 @@ void CSVRender::TerrainShapeMode::setBrushShape(CSVWidget::BrushShape brushShape
             selectionCenterY = selectionCenterY + value.second;
             ++selectionAmount;
         }
-        selectionCenterX = selectionCenterX / selectionAmount;
-        selectionCenterY = selectionCenterY / selectionAmount;
+
+        if (selectionAmount != 0)
+        {
+            selectionCenterX /= selectionAmount;
+            selectionCenterY /= selectionAmount;
+        }
 
         mCustomBrushShape.clear();
         std::pair<int, int> differentialPos {};
