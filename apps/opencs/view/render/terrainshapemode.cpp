@@ -1038,6 +1038,28 @@ bool CSVRender::TerrainShapeMode::isInCellSelection(int globalSelectionX, int gl
     return false;
 }
 
+void CSVRender::TerrainShapeMode::handleSelection(int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections)
+{
+    if (isInCellSelection(globalSelectionX, globalSelectionY)) selections->emplace_back(globalSelectionX, globalSelectionY);
+    else
+    {
+        int moduloX = globalSelectionX % (ESM::Land::LAND_SIZE - 1);
+        int moduloY = globalSelectionY % (ESM::Land::LAND_SIZE - 1);
+        bool xIsAtCellBorder = moduloX == 0;
+        bool yIsAtCellBorder = moduloY == 0;
+        if (!xIsAtCellBorder && !yIsAtCellBorder)
+            return;
+        int selectionX = globalSelectionX;
+        int selectionY = globalSelectionY;
+        if (xIsAtCellBorder)
+            selectionX--;
+        if (yIsAtCellBorder)
+            selectionY--;
+        if (isInCellSelection(selectionX, selectionY))
+            selections->emplace_back(globalSelectionX, globalSelectionY);
+    }
+}
+
 void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation)
 {
     int r = mBrushSize / 2;
@@ -1045,7 +1067,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
 
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
-        if (isInCellSelection(vertexCoords.first, vertexCoords.second)) selections.emplace_back(vertexCoords.first, vertexCoords.second);
+        handleSelection(vertexCoords.first, vertexCoords.second, &selections);
     }
 
     if (mBrushShape == CSVWidget::BrushShape_Square)
@@ -1054,7 +1076,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
         {
             for(int j = vertexCoords.second - r; j <= vertexCoords.second + r; ++j)
             {
-                if (isInCellSelection(i, j)) selections.emplace_back(i, j);
+                handleSelection(i, j, &selections);
             }
         }
     }
@@ -1068,7 +1090,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
                 int distanceX = abs(i - vertexCoords.first);
                 int distanceY = abs(j - vertexCoords.second);
                 int distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
-                if (isInCellSelection(i, j) && distance <= r) selections.emplace_back(i, j);
+                if (distance <= r) handleSelection(i, j, &selections);
             }
         }
     }
@@ -1080,8 +1102,7 @@ void CSVRender::TerrainShapeMode::selectTerrainShapes(const std::pair<int, int>&
             for(auto const& value: mCustomBrushShape)
             {
                 std::pair<int, int> localVertexCoords (vertexCoords.first + value.first, vertexCoords.second + value.second);
-                std::string cellId (CSMWorld::CellCoordinates::vertexGlobalToCellId(localVertexCoords));
-                if (isInCellSelection(localVertexCoords.first, localVertexCoords.second)) selections.emplace_back(localVertexCoords);
+                handleSelection(localVertexCoords.first, localVertexCoords.second, &selections);
             }
         }
     }

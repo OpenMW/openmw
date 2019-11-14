@@ -134,6 +134,9 @@ namespace CSVRender
             /// Check if global selection coordinate belongs to cell in view
             bool isInCellSelection(int globalSelectionX, int globalSelectionY);
 
+            /// Select vertex at global selection coordinate
+            void handleSelection(int globalSelectionX, int globalSelectionY, std::vector<std::pair<int, int>>* selections);
+
             /// Handle brush mechanics for terrain shape selection
             void selectTerrainShapes (const std::pair<int, int>& vertexCoords, unsigned char selectMode, bool dragOperation);
 
