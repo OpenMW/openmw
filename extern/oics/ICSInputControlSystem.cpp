@@ -97,6 +97,13 @@ namespace ICS
 	            xmlControl = xmlControl->NextSiblingElement("Control");
 	        }
 
+			static const size_t channelsCountLimit = 65536;
+			if (controlChannelCount > channelsCountLimit)
+			{
+				ICS_LOG("Warning: requested channels count (" + ToString<size_t>(controlChannelCount) + ") exceeds allowed maximum (" + ToString<size_t>(channelsCountLimit) + "), clamping it");
+				controlChannelCount = channelsCountLimit;
+			}
+
 			if(controlChannelCount > channelCount)
 			{
 				size_t dif = controlChannelCount - channelCount;
@@ -116,7 +123,13 @@ namespace ICS
 			TiXmlElement* xmlChannelFilter = xmlRoot->FirstChildElement("ChannelFilter");
 			while(xmlChannelFilter)
 			{
-				int ch = FromString<int>(xmlChannelFilter->Attribute("number"));
+				size_t ch = FromString<size_t>(xmlChannelFilter->Attribute("number"));
+				if(ch >= controlChannelCount)
+				{
+					ICS_LOG("ERROR: channel number (ch) is out of range");
+					xmlChannelFilter = xmlChannelFilter->NextSiblingElement("ChannelFilter");
+					continue;
+				}
 
 				TiXmlElement* xmlInterval = xmlChannelFilter->FirstChildElement("Interval");
 				while(xmlInterval)
@@ -149,7 +162,6 @@ namespace ICS
 
 					xmlInterval = xmlInterval->NextSiblingElement("Interval");
 				}
-
 
 				xmlChannelFilter = xmlChannelFilter->NextSiblingElement("ChannelFilter");
 			}
@@ -264,14 +276,21 @@ namespace ICS
 						}
 					}
 
-					int chNumber = FromString<int>(xmlChannel->Attribute("number"));
-					if(std::string(xmlChannel->Attribute("direction")) == "DIRECT")
+					size_t chNumber = FromString<size_t>(xmlChannel->Attribute("number"));
+					if(chNumber >= controlChannelCount)
 					{
-						mControls.back()->attachChannel(mChannels[ chNumber ],Channel::DIRECT, percentage);
+						ICS_LOG("ERROR: channel number (chNumber) is out of range");
 					}
-					else if(std::string(xmlChannel->Attribute("direction")) == "INVERSE")
+					else
 					{
-						mControls.back()->attachChannel(mChannels[ chNumber ],Channel::INVERSE, percentage);
+						if(std::string(xmlChannel->Attribute("direction")) == "DIRECT")
+						{
+							mControls.back()->attachChannel(mChannels[ chNumber ],Channel::DIRECT, percentage);
+						}
+						else if(std::string(xmlChannel->Attribute("direction")) == "INVERSE")
+						{
+							mControls.back()->attachChannel(mChannels[ chNumber ],Channel::INVERSE, percentage);
+						}
 					}
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
