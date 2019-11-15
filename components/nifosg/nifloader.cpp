@@ -341,6 +341,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Switch> switchNode (new osg::Switch);
             switchNode->setName(niSwitchNode->name);
             switchNode->setNewChildDefaultValue(false);
+            switchNode->setSingleChildOn(niSwitchNode->initialIndex);
             return switchNode;
         }
 
@@ -433,7 +434,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Group> node;
             osg::Object::DataVariance dataVariance = osg::Object::UNSPECIFIED;
 
-            // TODO: it is unclear how to handle transformations of LOD and Switch nodes and controllers for them.
+            // TODO: it is unclear how to handle transformations of LOD nodes and controllers for them.
             switch (nifNode->recType)
             {
             case Nif::RC_NiLODNode:
@@ -444,12 +445,6 @@ namespace NifOsg
                 break;
             }
             case Nif::RC_NiSwitchNode:
-            {
-                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
-                node = handleSwitchNode(niSwitchNode);
-                dataVariance = osg::Object::STATIC;
-                break;
-            }
             case Nif::RC_NiTriShape:
             case Nif::RC_NiTriStrips:
             case Nif::RC_NiAutoNormalParticles:
@@ -625,6 +620,19 @@ namespace NifOsg
                     && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
 
+            if (nifNode->recType == Nif::RC_NiSwitchNode)
+            {
+                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
+                osg::ref_ptr<osg::Switch> switchNode = handleSwitchNode(niSwitchNode);
+                node->addChild(switchNode);
+                if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
+                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
+                else if (niSwitchNode->name == Constants::HerbalismLabel && !SceneUtil::hasUserDescription(rootNode, Constants::HerbalismLabel))
+                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
+
+                node = switchNode;
+            }
+
             const Nif::NiNode *ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if(ninode)
             {
@@ -641,16 +649,6 @@ namespace NifOsg
                     if(!children[i].empty())
                         handleNode(children[i].getPtr(), node, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
                 }
-            }
-
-            if (nifNode->recType == Nif::RC_NiSwitchNode)
-            {
-                const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
-                node->asSwitch()->setSingleChildOn(niSwitchNode->initialIndex);
-                if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
-                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
-                else if (niSwitchNode->name == Constants::HerbalismLabel && !SceneUtil::hasUserDescription(rootNode, Constants::HerbalismLabel))
-                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
             }
 
             return node;
