@@ -24,6 +24,8 @@ namespace SceneUtil
         mShadowSettings->setReceivesShadowTraversalMask(~0u);
 
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
+        numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
+
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
         mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
 
