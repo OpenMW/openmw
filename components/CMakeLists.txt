@@ -270,6 +270,8 @@ endif()
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
 target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+find_package(ZLIB REQUIRED)
+target_link_libraries(components ZLIB::ZLIB)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
