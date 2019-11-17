@@ -248,6 +248,12 @@ namespace MWGui
                         MWScript::InterpreterContext interpreterContext (&mPtr.getRefData().getLocals(), mPtr);
                         MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
                     }
+
+                    // Clean up summoned creatures as well
+                    std::map<MWMechanics::CreatureStats::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
+                    for (const auto& creature : creatureMap)
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mPtr, creature.second);
+                    creatureMap.clear();
                 }
 
                 MWBase::Environment::get().getWorld()->deleteObject(mPtr);
