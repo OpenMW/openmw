@@ -172,6 +172,7 @@
     Bug #5186: Equipped item enchantments don't affect creatures
     Bug #5190: On-strike enchantments can be applied to and used with non-projectile ranged weapons
     Bug #5196: Dwarven ghosts do not use idle animations
+    Bug #5206: A "class does not have NPC stats" error when player's follower kills an enemy with damage spell
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
