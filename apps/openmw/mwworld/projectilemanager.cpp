@@ -262,7 +262,7 @@ namespace MWWorld
         {
             // Spawn at 0.75 * ActorHeight
             // Note: we ignore the collision box offset, this is required to make some flying creatures work as intended.
-            pos.z() += mPhysics->getHalfExtents(caster).z() * 2 * 0.75;
+            pos.z() += mPhysics->getRenderingHalfExtents(caster).z() * 2 * 0.75;
         }
 
         if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
