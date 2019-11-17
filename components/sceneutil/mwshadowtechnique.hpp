@@ -261,18 +261,18 @@ namespace SceneUtil {
 
         float                                   _shadowFadeStart = 0.0;
 
-        class DebugHUD : public osg::Referenced
+        class DebugHUD final : public osg::Referenced
         {
         public:
             DebugHUD(int numberOfShadowMapsPerLight);
 
-            virtual void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, const osg::Matrixd &matrix, osgUtil::CullVisitor& cv);
+            void draw(osg::ref_ptr<osg::Texture2D> texture, unsigned int shadowMapNumber, const osg::Matrixd &matrix, osgUtil::CullVisitor& cv);
 
-            virtual void releaseGLObjects(osg::State* state = 0) const;
+            void releaseGLObjects(osg::State* state = 0) const;
 
-            virtual void setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices, unsigned int traversalNumber);
+            void setFrustumVertices(osg::ref_ptr<osg::Vec3Array> vertices, unsigned int traversalNumber);
         protected:
-            virtual void addAnotherShadowMap();
+            void addAnotherShadowMap();
 
             static const int sDebugTextureUnit = 0;
 
