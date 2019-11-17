@@ -633,7 +633,7 @@ namespace MWRender
 
     Animation::~Animation()
     {
-        setLightEffect(0.f);
+        Animation::setLightEffect(0.f);
 
         if (mObjectRoot)
             mInsert->removeChild(mObjectRoot);
