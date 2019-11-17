@@ -1017,7 +1017,7 @@ namespace MWMechanics
                     {
                         if (caster == player || playerFollowers.find(caster) != playerFollowers.end())
                         {
-                            if (caster.getClass().getNpcStats(caster).isWerewolf())
+                            if (caster.getClass().isNpc() && caster.getClass().getNpcStats(caster).isWerewolf())
                                 caster.getClass().getNpcStats(caster).addWerewolfKill();
 
                             MWBase::Environment::get().getMechanicsManager()->actorKilled(ptr, player);
