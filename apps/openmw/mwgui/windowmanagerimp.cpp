@@ -241,7 +241,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        loadUserFonts();
+        WindowManager::loadUserFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation.reset(new KeyboardNavigation());
