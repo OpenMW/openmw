@@ -18,6 +18,9 @@ namespace MWWorld
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
             return;
 
+        if (actor != MWMechanics::getPlayer())
+            return;
+
         if (!MWBase::Environment::get().getMechanicsManager()->onOpen(getTarget()))
             return;
 
