@@ -174,6 +174,7 @@
     Bug #5196: Dwarven ghosts do not use idle animations
     Bug #5206: A "class does not have NPC stats" error when player's follower kills an enemy with damage spell
     Bug #5209: Spellcasting ignores race height
+    Bug #5210: AiActivate allows actors to open dialogue and inventory windows
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
