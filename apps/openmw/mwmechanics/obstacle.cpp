@@ -127,54 +127,39 @@ namespace MWMechanics
             mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor);
 
         const float distSameSpot = mDistSameSpot * duration;
-        const bool samePosition =  (pos - mPrev).length2() <  distSameSpot * distSameSpot;
+        const bool samePosition = (pos - mPrev).length2() < distSameSpot * distSameSpot;
 
         mPrev = pos;
 
-        switch(mWalkState)
+        if (mWalkState != State_Evade)
         {
-            case State_Norm:
+            if(!samePosition)
             {
-                if(!samePosition)
-                    break;
-                else
-                    mWalkState = State_CheckStuck;
+                mWalkState = State_Norm;
+                mStuckDuration = 0;
+                mEvadeDuration = 0;
+                return;
             }
-                /* FALL THROUGH */
-            case State_CheckStuck:
+
+            mWalkState = State_CheckStuck;
+            mStuckDuration += duration;
+            // consider stuck only if position unchanges for a period
+            if(mStuckDuration < DURATION_SAME_SPOT)
+                return; // still checking, note duration added to timer
+            else
             {
-                if(!samePosition)
-                {
-                    mWalkState = State_Norm;
-                    mStuckDuration = 0;
-                    break;
-                }
-                else
-                {
-                    mStuckDuration += duration;
-                    // consider stuck only if position unchanges for a period
-                    if(mStuckDuration < DURATION_SAME_SPOT)
-                        break; // still checking, note duration added to timer
-                    else
-                    {
-                        mStuckDuration = 0;
-                        mWalkState = State_Evade;
-                        chooseEvasionDirection();
-                    }
-                }
+                mStuckDuration = 0;
+                mWalkState = State_Evade;
+                chooseEvasionDirection();
             }
-                /* FALL THROUGH */
-            case State_Evade:
-            {
-                mEvadeDuration += duration;
-                if(mEvadeDuration >= DURATION_TO_EVADE)
-                {
-                    // tried to evade, assume all is ok and start again
-                    mWalkState = State_Norm;
-                    mEvadeDuration = 0;
-                }
-            }
-            /* NO DEFAULT CASE */
+        }
+
+        mEvadeDuration += duration;
+        if(mEvadeDuration >= DURATION_TO_EVADE)
+        {
+            // tried to evade, assume all is ok and start again
+            mWalkState = State_Norm;
+            mEvadeDuration = 0;
         }
     }
 
