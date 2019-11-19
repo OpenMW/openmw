@@ -210,12 +210,7 @@ dtNavMesh::~dtNavMesh()
 {
 	for (int i = 0; i < m_maxTiles; ++i)
 	{
-		if (m_tiles[i].flags & DT_TILE_FREE_DATA)
-		{
-			dtFree(m_tiles[i].data);
-			m_tiles[i].data = 0;
-			m_tiles[i].dataSize = 0;
-		}
+		m_tiles[i].~dtMeshTile();
 	}
 	dtFree(m_posLookup);
 	dtFree(m_tiles);
@@ -234,13 +229,16 @@ dtStatus dtNavMesh::init(const dtNavMeshParams* params)
 	if (!m_tileLutSize) m_tileLutSize = 1;
 	m_tileLutMask = m_tileLutSize-1;
 	
-	m_tiles = (dtMeshTile*)dtAlloc(sizeof(dtMeshTile)*m_maxTiles, DT_ALLOC_PERM);
-	if (!m_tiles)
+	void* mem = dtAlloc(sizeof(dtMeshTile)*m_maxTiles, DT_ALLOC_PERM);
+	if (!mem)
 		return DT_FAILURE | DT_OUT_OF_MEMORY;
+
+	memset(mem, 0, sizeof(dtMeshTile)*m_maxTiles);
+	m_tiles = ::new(mem) dtMeshTile[m_maxTiles];
+
 	m_posLookup = (dtMeshTile**)dtAlloc(sizeof(dtMeshTile*)*m_tileLutSize, DT_ALLOC_PERM);
 	if (!m_posLookup)
 		return DT_FAILURE | DT_OUT_OF_MEMORY;
-	memset(m_tiles, 0, sizeof(dtMeshTile)*m_maxTiles);
 	memset(m_posLookup, 0, sizeof(dtMeshTile*)*m_tileLutSize);
 	m_nextFree = 0;
 	for (int i = m_maxTiles-1; i >= 0; --i)

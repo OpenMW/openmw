@@ -306,6 +306,19 @@ struct dtMeshTile
 	int dataSize;							///< Size of the tile data.
 	int flags;								///< Tile flags. (See: #dtTileFlags)
 	dtMeshTile* next;						///< The next free tile, or the next tile in the spatial grid.
+
+	dtMeshTile() {}
+
+	~dtMeshTile()
+	{
+		if(flags & DT_TILE_FREE_DATA)
+		{
+			dtFree(data);
+			data = 0;
+			dataSize = 0;
+		}
+	}
+
 private:
 	dtMeshTile(const dtMeshTile&);
 	dtMeshTile& operator=(const dtMeshTile&);
