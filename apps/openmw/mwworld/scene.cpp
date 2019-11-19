@@ -683,11 +683,9 @@ namespace MWWorld
     void Scene::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(cellName);
-        bool loadcell = (mCurrentCell == nullptr);
-        if(!loadcell)
-            loadcell = *mCurrentCell != *cell;
-
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+        bool useFading = (mCurrentCell != nullptr);
+        if (useFading)
+            MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
@@ -695,7 +693,7 @@ namespace MWWorld
         loadingListener->setLabel(loadingInteriorText, false, messagesCount > 0);
         Loading::ScopedLoad load(loadingListener);
 
-        if(!loadcell)
+        if(mCurrentCell != nullptr && *mCurrentCell == *cell)
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
             world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
@@ -734,7 +732,8 @@ namespace MWWorld
         if (changeEvent)
             mCellChanged = true;
 
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+        if (useFading)
+            MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
     }
