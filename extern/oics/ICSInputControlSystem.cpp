@@ -148,7 +148,7 @@ namespace ICS
                         float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
-							+ ToString<int>(ch) + ", startX="
+							+ ToString<size_t>(ch) + ", startX="
 							+ ToString<float>(startX) + ", startY="
 							+ ToString<float>(startY) + ", midX="
 							+ ToString<float>(midX) + ", midY="
