@@ -125,6 +125,7 @@ namespace ESMTerrain
 
         inline const LandObject* getLand(int cellX, int cellY, LandCache& cache);
 
+        virtual bool useAlteration() const { return false; }
         virtual void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const;
         virtual float getAlteredHeight(int col, int row) const;
 
