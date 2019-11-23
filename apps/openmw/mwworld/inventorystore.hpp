@@ -101,25 +101,17 @@ namespace MWWorld
             // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
             ContainerStoreIterator mSelectedEnchantItem;
 
-            // (item, max charge)
-            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
-            TRechargingItems mRechargingItems;
-
-            bool mRechargingItemsUpToDate;
-
             void copySlots (const InventoryStore& store);
 
             void initSlots (TSlots& slots_);
 
             void updateMagicEffects(const Ptr& actor);
-            void updateRechargingItems();
 
             void fireEquipmentChangedEvent(const Ptr& actor);
 
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
-            bool canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item);
             ContainerStoreIterator findSlot (int slot) const;
 
         public:
@@ -132,16 +124,14 @@ namespace MWWorld
 
             virtual InventoryStore* clone() { return new InventoryStore(*this); }
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
-            /// Auto-equip items if specific conditions are fulfilled (see the implementation).
+            /// Auto-equip items if specific conditions are fulfilled and allowAutoEquip is true (see the implementation).
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
-            ///
-            /// @param setOwner Set the owner of the added item to \a actorPtr?
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -170,10 +160,6 @@ namespace MWWorld
 
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
-
-            virtual void flagAsModified();
-            ///< \attention This function is internal to the world model and should not be called from
-            /// outside.
 
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
@@ -215,9 +201,6 @@ namespace MWWorld
             InventoryStoreListener* getInvListener();
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
-
-            void rechargeItems (float duration);
-            ///< Restore charge on enchanted items. Note this should only be done for the player.
 
             void purgeEffect (short effectId);
             ///< Remove a magic effect

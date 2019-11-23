@@ -48,7 +48,6 @@ namespace MWRender
       mAnimation(nullptr),
       mFirstPersonView(true),
       mPreviewMode(false),
-      mFreeLook(true),
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
@@ -391,11 +390,6 @@ namespace MWRender
 
         osg::Vec3d offset = orient * osg::Vec3d(0, isFirstPerson() ? 0 : -mCameraDistance, 0);
         camera = focal + offset;
-    }
-
-    void Camera::togglePlayerLooking(bool enable)
-    {
-        mFreeLook = enable;
     }
 
     bool Camera::isVanityOrPreviewModeEnabled()

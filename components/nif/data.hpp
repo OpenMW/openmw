@@ -53,6 +53,15 @@ public:
     void read(NIFStream *nif);
 };
 
+class NiTriStripsData : public ShapeData
+{
+public:
+    // Triangle strips, series of vertex indices.
+    std::vector<std::vector<unsigned short>> strips;
+
+    void read(NIFStream *nif);
+};
+
 class NiAutoNormalParticlesData : public ShapeData
 {
 public:
@@ -107,6 +116,7 @@ public:
         NIPXFMT_RGB8,
         NIPXFMT_RGBA8,
         NIPXFMT_PAL8,
+        NIPXFMT_PALA8,
         NIPXFMT_DXT1,
         NIPXFMT_DXT3,
         NIPXFMT_DXT5,
@@ -114,8 +124,10 @@ public:
     };
     Format fmt;
 
-    unsigned int rmask, gmask, bmask, amask;
-    int bpp, numberOfMipmaps;
+    unsigned int rmask, gmask, bmask, amask, bpp;
+
+    NiPalettePtr palette;
+    unsigned int numberOfMipmaps;
 
     struct Mipmap
     {
@@ -127,6 +139,7 @@ public:
     std::vector<unsigned char> data;
 
     void read(NIFStream *nif);
+    void post(NIFFile *nif);
 };
 
 class NiColorData : public Record
@@ -206,6 +219,15 @@ struct NiKeyframeData : public Record
 
     Vector3KeyMapPtr mTranslations;
     FloatKeyMapPtr mScales;
+
+    void read(NIFStream *nif);
+};
+
+class NiPalette : public Record
+{
+public:
+    // 32-bit RGBA colors that correspond to 8-bit indices
+    std::vector<unsigned int> colors;
 
     void read(NIFStream *nif);
 };

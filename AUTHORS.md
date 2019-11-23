@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex Rice
     Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
@@ -85,6 +86,7 @@ Programmers
     Jacob Essex (Yacoby)
     Jake Westrip (16bitint)
     James Carty (MrTopCat)
+    James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)
     Jan Borsodi (am0s)
     Jason Hooks (jhooks)

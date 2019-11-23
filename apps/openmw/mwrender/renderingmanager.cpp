@@ -1377,9 +1377,9 @@ namespace MWRender
         return mCurrentCameraPos;
     }
 
-    void RenderingManager::togglePOV()
+    void RenderingManager::togglePOV(bool force)
     {
-        mCamera->toggleViewMode();
+        mCamera->toggleViewMode(force);
     }
 
     void RenderingManager::togglePreviewMode(bool enable)
@@ -1395,11 +1395,6 @@ namespace MWRender
     void RenderingManager::allowVanityMode(bool allow)
     {
         mCamera->allowVanityMode(allow);
-    }
-
-    void RenderingManager::togglePlayerLooking(bool enable)
-    {
-        mCamera->togglePlayerLooking(enable);
     }
 
     void RenderingManager::changeVanityModeScale(float factor)

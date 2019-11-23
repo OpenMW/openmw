@@ -23,6 +23,7 @@ namespace MWMechanics
 
             std::string mNewItemName;
             std::string mObjectType;
+            int mWeaponType;
 
         public:
             Enchanting();

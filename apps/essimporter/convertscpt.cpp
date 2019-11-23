@@ -9,7 +9,7 @@ namespace ESSImport
 
     void convertSCPT(const SCPT &scpt, ESM::GlobalScript &out)
     {
-        out.mId = Misc::StringUtils::lowerCase(scpt.mSCHD.mName.toString());
+        out.mId = Misc::StringUtils::lowerCase(scpt.mSCHD.mName);
         out.mRunning = scpt.mRunning;
         convertSCRI(scpt.mSCRI, out.mLocals);
     }

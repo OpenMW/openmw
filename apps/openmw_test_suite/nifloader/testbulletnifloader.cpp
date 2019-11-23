@@ -208,18 +208,13 @@ namespace
 
     void init(Nif::Extra& value)
     {
-        value.extra = Nif::ExtraPtr(nullptr);
-    }
-
-    void init(Nif::Controlled& value)
-    {
-        init(static_cast<Nif::Extra&>(value));
-        value.controller = Nif::ControllerPtr(nullptr);
+        value.next = Nif::ExtraPtr(nullptr);
     }
 
     void init(Nif::Named& value)
     {
-        init(static_cast<Nif::Controlled&>(value));
+        value.extra = Nif::ExtraPtr(nullptr);
+        value.controller = Nif::ControllerPtr(nullptr);
     }
 
     void init(Nif::Node& value)
@@ -254,7 +249,7 @@ namespace
         value.phase = 0;
         value.timeStart = 0;
         value.timeStop = 0;
-        value.target = Nif::ControlledPtr(nullptr);
+        value.target = Nif::NamedPtr(nullptr);
     }
 
     void copy(const btTransform& src, Nif::Transformation& dst)
@@ -884,7 +879,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_not_first_extra_data_string_starting_with_nc_should_return_shape_with_null_collision_shape)
     {
-        mNiStringExtraData.extra = Nif::ExtraPtr(&mNiStringExtraData2);
+        mNiStringExtraData.next = Nif::ExtraPtr(&mNiStringExtraData2);
         mNiStringExtraData2.string = "NC___";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);

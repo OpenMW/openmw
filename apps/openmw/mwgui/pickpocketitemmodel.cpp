@@ -98,7 +98,7 @@ namespace MWGui
         if (pickpocket.finish())
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             mPickpocketDetected = true;
         }
@@ -126,7 +126,7 @@ namespace MWGui
         if (pickpocket.pick(item, count))
         {
             MWBase::Environment::get().getMechanicsManager()->commitCrime(
-                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, 0, true);
+                        player, mActor, MWBase::MechanicsManager::OT_Pickpocket, std::string(), 0, true);
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Container);
             mPickpocketDetected = true;
             return false;

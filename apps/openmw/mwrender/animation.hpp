@@ -4,6 +4,7 @@
 #include "../mwworld/ptr.hpp"
 
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/util.hpp>
 
 namespace ESM
 {
@@ -34,7 +35,6 @@ namespace MWRender
 
 class ResetAccumRootCallback;
 class RotateController;
-class GlowUpdater;
 class TransparencyUpdater;
 
 class EffectAnimationTime : public SceneUtil::ControllerSource
@@ -153,6 +153,8 @@ public:
 
     void setTextKeyListener(TextKeyListener* listener);
 
+    virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; };
+
 protected:
     class AnimationTime : public SceneUtil::ControllerSource
     {
@@ -266,7 +268,7 @@ protected:
     bool mHasMagicEffects;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
-    osg::ref_ptr<GlowUpdater> mGlowUpdater;
+    osg::ref_ptr<SceneUtil::GlowUpdater> mGlowUpdater;
     osg::ref_ptr<TransparencyUpdater> mTransparencyUpdater;
 
     float mAlpha;
@@ -329,10 +331,6 @@ protected:
      * so they get cleaned up properly on the next controller rebuild. A controller rebuild may be necessary to ensure correct ordering.
      */
     virtual void addControllers();
-
-    osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
-
-    void addGlow(osg::ref_ptr<osg::Node> node, osg::Vec4f glowColor, float glowDuration = -1);
 
     /// Set the render bin for this animation's object root. May be customized by subclasses.
     virtual void setRenderBin();
@@ -457,6 +455,7 @@ public:
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 
+    virtual bool useShieldAnimations() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}

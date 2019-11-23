@@ -17,10 +17,10 @@
 #include <osg/PolygonOffset>
 #include <osg/observer_ptr>
 
+#include <osgParticle/BoxPlacer>
+#include <osgParticle/ModularEmitter>
 #include <osgParticle/ParticleSystem>
 #include <osgParticle/ParticleSystemUpdater>
-#include <osgParticle/ModularEmitter>
-#include <osgParticle/BoxPlacer>
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/RadialShooter>
 
@@ -224,7 +224,7 @@ protected:
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
-        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, mAnimationTimer, 0.f)));
+        texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, -mAnimationTimer, 0.f)));
 
         stateset->setTextureAttribute(0, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         stateset->setTextureAttribute(1, mTexture, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -1118,7 +1118,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mMonth(0)
     , mCloudAnimationTimer(0.f)
     , mRainTimer(0.f)
-    , mStormDirection(0,-1,0)
+    , mStormDirection(0,1,0)
     , mClouds()
     , mNextClouds()
     , mCloudBlendFactor(0.0f)
@@ -1127,7 +1127,11 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRemainingTransitionTime(0.0f)
     , mRainEnabled(false)
     , mRainSpeed(0)
-    , mRainFrequency(1)
+    , mRainDiameter(0)
+    , mRainMinHeight(0)
+    , mRainMaxHeight(0)
+    , mRainEntranceSpeed(1)
+    , mRainMaxRaindrops(0)
     , mWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
@@ -1468,7 +1472,7 @@ void SkyManager::createRain()
     mRainNode = new osg::Group;
 
     mRainParticleSystem = new osgParticle::ParticleSystem;
-    osg::Vec3 rainRange = osg::Vec3(600,600,600);
+    osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight+mRainMaxHeight)/2.f);
 
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
     mRainParticleSystem->setAlignVectorX(osg::Vec3f(0.1,0,0));
@@ -1495,14 +1499,19 @@ void SkyManager::createRain()
     emitter->setParticleSystem(mRainParticleSystem);
 
     osg::ref_ptr<osgParticle::BoxPlacer> placer (new osgParticle::BoxPlacer);
-    placer->setXRange(-rainRange.x() / 2, rainRange.x() / 2); // Rain_Diameter
+    placer->setXRange(-rainRange.x() / 2, rainRange.x() / 2);
     placer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
-    placer->setZRange(300, 300);
+    placer->setZRange(-rainRange.z() / 2, rainRange.z() / 2);
     emitter->setPlacer(placer);
+    mPlacer = placer;
 
+    // FIXME: vanilla engine does not use a particle system to handle rain, it uses a NIF-file with 20 raindrops in it.
+    // It spawns the (maxRaindrops-getParticleSystem()->numParticles())*dt/rainEntranceSpeed batches every frame (near 1-2).
+    // Since the rain is a regular geometry, it produces water ripples, also in theory it can be removed if collides with something.
     osg::ref_ptr<RainCounter> counter (new RainCounter);
-    counter->setNumberOfParticlesPerSecondToCreate(600.0);
+    counter->setNumberOfParticlesPerSecondToCreate(mRainMaxRaindrops/mRainEntranceSpeed*20);
     emitter->setCounter(counter);
+    mCounter = counter;
 
     osg::ref_ptr<RainShooter> shooter (new RainShooter);
     mRainShooter = shooter;
@@ -1535,6 +1544,8 @@ void SkyManager::destroyRain()
 
     mRootNode->removeChild(mRainNode);
     mRainNode = nullptr;
+    mPlacer = nullptr;
+    mCounter = nullptr;
     mRainParticleSystem = nullptr;
     mRainShooter = nullptr;
     mRainFader = nullptr;
@@ -1596,10 +1607,14 @@ void SkyManager::update(float duration)
         osg::Quat quat;
         quat.makeRotate(osg::Vec3f(0,1,0), mStormDirection);
 
-        if (mParticleNode)
-            mParticleNode->setAttitude(quat);
-
         mCloudNode->setAttitude(quat);
+        if (mParticleNode)
+        {
+            // Morrowind deliberately rotates the blizzard mesh, so so should we.
+            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
+                quat.makeRotate(osg::Vec3f(-1,0,0), mStormDirection);
+            mParticleNode->setAttitude(quat);
+        }
     }
     else
         mCloudNode->setAttitude(osg::Quat());
@@ -1635,10 +1650,17 @@ void SkyManager::updateRainParameters()
 {
     if (mRainShooter)
     {
-        float windFactor = mWindSpeed/3.f;
-        float angle = windFactor * osg::PI/4;
-        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed * windFactor, -mRainSpeed));
+        float angle = -std::atan(mWindSpeed/50.f);
+        mRainShooter->setVelocity(osg::Vec3f(0, mRainSpeed*std::sin(angle), -mRainSpeed/std::cos(angle)));
         mRainShooter->setAngle(angle);
+
+        osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight+mRainMaxHeight)/2.f);
+
+        mPlacer->setXRange(-rainRange.x() / 2, rainRange.x() / 2);
+        mPlacer->setYRange(-rainRange.y() / 2, rainRange.y() / 2);
+        mPlacer->setZRange(-rainRange.z() / 2, rainRange.z() / 2);
+
+        mCounter->setNumberOfParticlesPerSecondToCreate(mRainMaxRaindrops/mRainEntranceSpeed*20);
     }
 }
 
@@ -1655,6 +1677,14 @@ void SkyManager::setWeather(const WeatherResult& weather)
 {
     if (!mCreated) return;
 
+    mRainEntranceSpeed = weather.mRainEntranceSpeed;
+    mRainMaxRaindrops = weather.mRainMaxRaindrops;
+    mRainDiameter = weather.mRainDiameter;
+    mRainMinHeight = weather.mRainMinHeight;
+    mRainMaxHeight = weather.mRainMaxHeight;
+    mRainSpeed = weather.mRainSpeed;
+    mWindSpeed = weather.mWindSpeed;
+
     if (mRainEffect != weather.mRainEffect)
     {
         mRainEffect = weather.mRainEffect;
@@ -1668,9 +1698,6 @@ void SkyManager::setWeather(const WeatherResult& weather)
         }
     }
 
-    mRainFrequency = weather.mRainFrequency;
-    mRainSpeed = weather.mRainSpeed;
-    mWindSpeed = weather.mWindSpeed;
     updateRainParameters();
 
     mIsStorm = weather.mIsStorm;

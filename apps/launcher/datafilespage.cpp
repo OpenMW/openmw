@@ -95,7 +95,7 @@ bool Launcher::DataFilesPage::loadSettings()
 
     qDebug() << "The current profile is: " << currentProfile;
 
-    foreach (const QString &item, profiles)
+    for (const QString &item : profiles)
         addProfile (item, false);
 
     // Hack: also add the current profile
@@ -114,7 +114,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!mDataLocal.isEmpty())
         paths.insert(0, mDataLocal);
 
-    foreach(const QString &path, paths)
+    for (const QString &path : paths)
         mSelector->addFiles(path);
 
     PathIterator pathIterator(paths);
@@ -127,7 +127,7 @@ QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, 
     QStringList files = mLauncherSettings.getContentListFiles(profileName);
     QStringList filepaths;
 
-    foreach(const QString& file, files)
+    for (const QString& file : files)
     {
         QString filepath = pathIterator.findFirstPath(file);
 
@@ -152,7 +152,8 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());
 
     QStringList fileNames;
-    foreach(const ContentSelectorModel::EsmFile *item, items) {
+    for (const ContentSelectorModel::EsmFile *item : items)
+    {
         fileNames.append(item->fileName());
     }
     mLauncherSettings.setContentList(profileName, fileNames);
@@ -164,7 +165,8 @@ QStringList Launcher::DataFilesPage::selectedFilePaths()
     //retrieve the files selected for the profile
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList filePaths;
-    foreach(const ContentSelectorModel::EsmFile *item, items) {
+    for (const ContentSelectorModel::EsmFile *item : items)
+    {
         filePaths.append(item->filePath());
     }
     return filePaths;

@@ -72,8 +72,8 @@ public:
     int activeCount;
     std::vector<Particle> particles;
 
-    ExtraPtr affectors;
-    ExtraPtr colliders;
+    NiParticleModifierPtr affectors;
+    NiParticleModifierPtr colliders;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);
@@ -112,7 +112,7 @@ class NiUVController : public Controller
 {
 public:
     NiUVDataPtr data;
-    int uvSet;
+    unsigned int uvSet;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

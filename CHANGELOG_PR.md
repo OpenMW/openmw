@@ -40,8 +40,11 @@ New Features:
 
 New Editor Features:
 - "Faction Ranks" table for "Faction" records (#4209)
+- Changes to height editing can be cancelled without changes to data (press esc to cancel) (#4840)
+- Land heightmap/shape editing and vertex selection (#5170)
 
 Bug Fixes:
+- The Mouse Wheel can now be used for key bindings (#2679)
 - Scripted Items cannot be stacked anymore to avoid multiple script execution (#2969)
 - Stray text after an "else" statement is now ignored, like in the original engine, to handle mods which erroneously use "else if" statements (#3006)
 - "SetPos" and "SetPosition" commands now more closely replicate the original engine's behaviour (#3109)
@@ -101,7 +104,9 @@ Editor Bug Fixes:
 - Colour fields in interior-cell records now also use the colour picker widget (#4745)
 - Cloned, added, or moved instances no longer disappear at load-time (#4748)
 - "Clear" function in the content selector no longer tries to execute a "Remove" action on an empty file list (#4757)
+- Terrain texture editing for plugins now correctly handles drags from base file (#4904)
 - Engine no longer tries to swap buffers of windows which weren't exposed to Qt's window management system (#4911)
+- Minimap doesn't get corrupted, when editing new omwgame (#5177)
 
 Miscellaneous:
 - Upgraded to FFMPEG3 for media decoding (#4686)

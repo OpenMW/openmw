@@ -14,24 +14,26 @@
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "actorutil.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
+        , mWeaponType(-1)
     {}
 
     void Enchanting::setOldItem(const MWWorld::Ptr& oldItem)
     {
         mOldItemPtr=oldItem;
+        mWeaponType = -1;
+        mObjectType.clear();
         if(!itemEmpty())
         {
             mObjectType = mOldItemPtr.getTypeName();
-        }
-        else
-        {
-            mObjectType="";
+            if (mObjectType == typeid(ESM::Weapon).name())
+                mWeaponType = mOldItemPtr.get<ESM::Weapon>()->mBase->mData.mType;
         }
     }
 
@@ -119,7 +121,7 @@ namespace MWMechanics
                     return;
             }
         }
-        else if(mObjectType == typeid(ESM::Weapon).name())
+        else if (mWeaponType != -1)
         { // Weapon
             switch(mCastStyle)
             {
@@ -129,11 +131,13 @@ namespace MWMechanics
                 case ESM::Enchantment::WhenUsed:
                     if (powerfulSoul)
                         mCastStyle = ESM::Enchantment::ConstantEffect;
-                    else
+                    else if (getWeaponType(mWeaponType)->mWeaponClass != ESM::WeaponType::Ranged)
                         mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
                 default: // takes care of Constant effect too
-                    mCastStyle = ESM::Enchantment::WhenStrikes;
+                    mCastStyle = ESM::Enchantment::WhenUsed;
+                    if (getWeaponType(mWeaponType)->mWeaponClass != ESM::WeaponType::Ranged)
+                        mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
             }
         }

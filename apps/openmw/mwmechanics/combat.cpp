@@ -20,6 +20,7 @@
 #include "spellcasting.hpp"
 #include "difficultyscaling.hpp"
 #include "actorutil.hpp"
+#include "pathfinding.hpp"
 
 namespace
 {
@@ -229,31 +230,24 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-            {
                 attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
-                const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
 
-                bool unaware = !sequence.isInCombat()
-                    && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
-
-                if (unaware)
-                {
-                    damage *= gmst.find("fCombatCriticalStrikeMult")->mValue.getFloat();
-                    MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
-                }
-            }
-
-            if (victim.getClass().getCreatureStats(victim).getKnockedDown())
+            const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
+            bool unaware = attacker == getPlayer() && !sequence.isInCombat()
+                && !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(attacker, victim);
+            bool knockedDown = victim.getClass().getCreatureStats(victim).getKnockedDown();
+            if (knockedDown || unaware)
+            {
                 damage *= gmst.find("fCombatKODamageMult")->mValue.getFloat();
+                if (!knockedDown)
+                    MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+            }
         }
 
         reduceWeaponCondition(damage, validVictim, weapon, attacker);
 
-        // Apply "On hit" effect of the weapon & projectile
-        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, weapon, hitPosition, true);
-        if (weapon != projectile)
-            appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
+        // Apply "On hit" effect of the projectile
+        bool appliedEnchantment = applyOnStrikeEnchantment(attacker, victim, projectile, hitPosition, true);
 
         if (validVictim)
         {
@@ -472,13 +466,8 @@ namespace MWMechanics
     {
         osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
         osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
-        if (canActorMoveByZAxis(actor2))
-        {
-            pos1.z() = 0.f;
-            pos2.z() = 0.f;
-        }
 
-        float d = (pos1 - pos2).length();
+        float d = getAggroDistance(actor2, pos1, pos2);
 
         static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->mValue.getInteger();
@@ -493,5 +482,12 @@ namespace MWMechanics
         const MagicEffects& magicEffects = target.getClass().getCreatureStats(target).getMagicEffects();
         return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
             || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+    }
+
+    float getAggroDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        if (canActorMoveByZAxis(actor))
+            return distanceIgnoreZ(lhs, rhs);
+        return distance(lhs, rhs);
     }
 }

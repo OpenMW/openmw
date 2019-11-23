@@ -82,9 +82,15 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
     loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
     loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
+    connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
+    loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
+    if (animSourcesCheckBox->checkState())
+    {
+        loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
+        loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
+    }
 
     // Input Settings
-    loadSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     loadSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 
@@ -143,9 +149,11 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
     saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
     saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
+    saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
+    saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
+    saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
 
     // Input Settings
-    saveSettingBool(allowThirdPersonZoomCheckBox, "allow third person zoom", "Input");
     saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");
     saveSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
 
@@ -185,4 +193,15 @@ void Launcher::AdvancedPage::saveSettingBool(QCheckBox *checkbox, const std::str
 void Launcher::AdvancedPage::slotLoadedCellsChanged(QStringList cellNames)
 {
     loadCellsForAutocomplete(cellNames);
+}
+
+void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
+{
+    weaponSheathingCheckBox->setEnabled(checked);
+    shieldSheathingCheckBox->setEnabled(checked);
+    if (!checked)
+    {
+        weaponSheathingCheckBox->setCheckState(Qt::Unchecked);
+        shieldSheathingCheckBox->setCheckState(Qt::Unchecked);
+    }
 }

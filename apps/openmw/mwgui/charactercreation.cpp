@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -25,34 +26,52 @@
 
 namespace
 {
+    struct Response
+    {
+        const std::string mText;
+        const ESM::Class::Specialization mSpecialization;
+    };
+
     struct Step
     {
         const std::string mText;
-        const std::string mButtons[3];
+        const Response mResponses[3];
         const std::string mSound;
     };
 
-    const ESM::Class::Specialization mSpecializations[3]={ESM::Class::Combat, ESM::Class::Magic, ESM::Class::Stealth}; // The specialization for each answer
     Step sGenerateClassSteps(int number)
     {
         number++;
-        Step step = {
-            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_Question"),
-            {Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerOne"),
-            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerTwo"),
-            Fallback::Map::getString("Question_"+MyGUI::utility::toString(number)+"_AnswerThree")},
-            "vo\\misc\\chargen qa"+MyGUI::utility::toString(number)+".wav"
-        };
-        return step;
-    }
 
-    struct ClassPoint
-    {
-        const char *id;
-        // Specialization points to match, in order: Stealth, Combat, Magic
-        // Note: Order is taken from http://www.uesp.net/wiki/Morrowind:Class_Quiz
-        unsigned int points[3];
-    };
+        std::string question = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_Question");
+        std::string answer0 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerOne");
+        std::string answer1 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerTwo");
+        std::string answer2 = Fallback::Map::getString("Question_" + MyGUI::utility::toString(number) + "_AnswerThree");
+        std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
+
+        Response r0 = {answer0, ESM::Class::Combat};
+        Response r1 = {answer1, ESM::Class::Magic};
+        Response r2 = {answer2, ESM::Class::Stealth};
+
+        // randomize order in which responses are displayed
+        int order = Misc::Rng::rollDice(6);
+
+        switch (order)
+        {
+            case 0:
+                return {question, {r0, r1, r2}, sound};
+            case 1:
+                return {question, {r0, r2, r1}, sound};
+            case 2:
+                return {question, {r1, r0, r2}, sound};
+            case 3:
+                return {question, {r1, r2, r0}, sound};
+            case 4:
+                return {question, {r2, r0, r1}, sound};
+            default:
+                return {question, {r2, r1, r0}, sound};
+        }
+    }
 
     void updatePlayerHealth()
     {
@@ -80,6 +99,9 @@ namespace MWGui
         , mGenerateClassStep(0)
     {
         mCreationStage = CSE_NotStarted;
+        mGenerateClassResponses[0] = ESM::Class::Combat;
+        mGenerateClassResponses[1] = ESM::Class::Magic;
+        mGenerateClassResponses[2] = ESM::Class::Stealth;
         mGenerateClassSpecializations[0] = 0;
         mGenerateClassSpecializations[1] = 0;
         mGenerateClassSpecializations[2] = 0;
@@ -538,12 +560,12 @@ namespace MWGui
             return;
         }
 
-        ESM::Class::Specialization specialization = mSpecializations[_index];
-        if (specialization == ESM::Class::Stealth)
+        ESM::Class::Specialization specialization = mGenerateClassResponses[_index];
+        if (specialization == ESM::Class::Combat)
             ++mGenerateClassSpecializations[0];
-        else if (specialization == ESM::Class::Combat)
-            ++mGenerateClassSpecializations[1];
         else if (specialization == ESM::Class::Magic)
+            ++mGenerateClassSpecializations[1];
+        else if (specialization == ESM::Class::Stealth)
             ++mGenerateClassSpecializations[2];
         ++mGenerateClassStep;
         showClassQuestionDialog();
@@ -553,57 +575,96 @@ namespace MWGui
     {
         if (mGenerateClassStep == 10)
         {
-            static std::array<ClassPoint, 23> classes = { {
-                {"Acrobat",     {6, 2, 2}},
-                {"Agent",       {6, 1, 3}},
-                {"Archer",      {3, 5, 2}},
-                {"Archer",      {5, 5, 0}},
-                {"Assassin",    {6, 3, 1}},
-                {"Barbarian",   {3, 6, 1}},
-                {"Bard",        {3, 3, 3}},
-                {"Battlemage",  {1, 3, 6}},
-                {"Crusader",    {1, 6, 3}},
-                {"Healer",      {3, 1, 6}},
-                {"Knight",      {2, 6, 2}},
-                {"Monk",        {5, 3, 2}},
-                {"Nightblade",  {4, 2, 4}},
-                {"Pilgrim",     {5, 2, 3}},
-                {"Rogue",       {3, 4, 3}},
-                {"Rogue",       {4, 4, 2}},
-                {"Rogue",       {5, 4, 1}},
-                {"Scout",       {2, 5, 3}},
-                {"Sorcerer",    {2, 2, 6}},
-                {"Spellsword",  {2, 4, 4}},
-                {"Spellsword",  {5, 1, 4}},
-                {"Witchhunter", {2, 3, 5}},
-                {"Witchhunter", {5, 0, 5}}
-            } };
+            unsigned combat = mGenerateClassSpecializations[0];
+            unsigned magic = mGenerateClassSpecializations[1];
+            unsigned stealth = mGenerateClassSpecializations[2];
 
-            int match = -1;
-            for (unsigned i = 0; i < classes.size(); ++i)
+            if (combat > 7)
             {
-                if (mGenerateClassSpecializations[0] == classes[i].points[0] &&
-                    mGenerateClassSpecializations[1] == classes[i].points[1] &&
-                    mGenerateClassSpecializations[2] == classes[i].points[2])
-                {
-                    match = i;
-                    mGenerateClass = classes[i].id;
-                    break;
-                }
+                mGenerateClass = "Warrior";
             }
-
-            if (match == -1)
+            else if (magic > 7)
             {
-                if (mGenerateClassSpecializations[0] >= 7)
-                    mGenerateClass = "Thief";
-                else if (mGenerateClassSpecializations[1] >= 7)
-                    mGenerateClass = "Warrior";
-                else if (mGenerateClassSpecializations[2] >= 7)
-                    mGenerateClass = "Mage";
-                else
+                mGenerateClass = "Mage";
+            }
+            else if (stealth > 7)
+            {
+                mGenerateClass = "Thief";
+            }
+            else
+            {
+                switch (combat)
                 {
-                    Log(Debug::Warning) << "Failed to deduce class from chosen answers in generate class dialog.";
-                    mGenerateClass = "Thief";
+                    case 4:
+                        mGenerateClass = "Rogue";
+                        break;
+                    case 5:
+                        if (stealth == 3)
+                            mGenerateClass = "Scout";
+                        else
+                            mGenerateClass = "Archer";
+                        break;
+                    case 6:
+                        if (stealth == 1)
+                            mGenerateClass = "Barbarian";
+                        else if (stealth == 3)
+                            mGenerateClass = "Crusader";
+                        else
+                            mGenerateClass = "Knight";
+                        break;
+                    case 7:
+                        mGenerateClass = "Warrior";
+                        break;
+                    default:
+                        switch (magic)
+                        {
+                            case 4:
+                                mGenerateClass = "Spellsword";
+                                break;
+                            case 5:
+                                mGenerateClass = "Witchhunter";
+                                break;
+                            case 6:
+                                if (combat == 2)
+                                    mGenerateClass = "Sorcerer";
+                                else if (combat == 3)
+                                    mGenerateClass = "Healer";
+                                else
+                                    mGenerateClass = "Battlemage";
+                                break;
+                            case 7:
+                                mGenerateClass = "Mage";
+                                break;
+                            default:
+                                switch (stealth)
+                                {
+                                    case 3:
+                                        if (magic == 3)
+                                            mGenerateClass = "Bard"; // unreachable
+                                        else
+                                            mGenerateClass = "Warrior";
+                                        break;
+                                    case 5:
+                                        if (magic == 3)
+                                            mGenerateClass = "Monk";
+                                        else
+                                            mGenerateClass = "Pilgrim";
+                                        break;
+                                    case 6:
+                                        if (magic == 1)
+                                            mGenerateClass = "Agent";
+                                        else if (magic == 3)
+                                            mGenerateClass = "Assassin";
+                                        else
+                                            mGenerateClass = "Acrobat";
+                                        break;
+                                    case 7:
+                                        mGenerateClass = "Thief";
+                                        break;
+                                    default:
+                                        mGenerateClass = "Warrior";
+                                }
+                        }
                 }
             }
 
@@ -630,16 +691,21 @@ namespace MWGui
 
         mGenerateClassQuestionDialog = new InfoBoxDialog();
 
+        Step step = sGenerateClassSteps(mGenerateClassStep);
+        mGenerateClassResponses[0] = step.mResponses[0].mSpecialization;
+        mGenerateClassResponses[1] = step.mResponses[1].mSpecialization;
+        mGenerateClassResponses[2] = step.mResponses[2].mSpecialization;
+
         InfoBoxDialog::ButtonList buttons;
-        mGenerateClassQuestionDialog->setText(sGenerateClassSteps(mGenerateClassStep).mText);
-        buttons.push_back(sGenerateClassSteps(mGenerateClassStep).mButtons[0]);
-        buttons.push_back(sGenerateClassSteps(mGenerateClassStep).mButtons[1]);
-        buttons.push_back(sGenerateClassSteps(mGenerateClassStep).mButtons[2]);
+        mGenerateClassQuestionDialog->setText(step.mText);
+        buttons.push_back(step.mResponses[0].mText);
+        buttons.push_back(step.mResponses[1].mText);
+        buttons.push_back(step.mResponses[2].mText);
         mGenerateClassQuestionDialog->setButtons(buttons);
         mGenerateClassQuestionDialog->eventButtonSelected += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
         mGenerateClassQuestionDialog->setVisible(true);
 
-        MWBase::Environment::get().getSoundManager()->say(sGenerateClassSteps(mGenerateClassStep).mSound);
+        MWBase::Environment::get().getSoundManager()->say(step.mSound);
     }
 
     void CharacterCreation::selectGeneratedClass()

@@ -75,8 +75,9 @@ namespace MWGui
 
     //Class generation vars
     unsigned mGenerateClassStep;                 // Keeps track of current step in Generate Class dialog
+    ESM::Class::Specialization mGenerateClassResponses[3];
     unsigned mGenerateClassSpecializations[3];   // A counter for each specialization which is increased when an answer is chosen
-    std::string mGenerateClass;                  // In order: Stealth, Combat, Magic
+    std::string mGenerateClass;                  // In order: Combat, Magic, Stealth
 
     ////Dialog events
     //Name dialog

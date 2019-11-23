@@ -176,12 +176,12 @@ recast scale factor
 
 :Type:		floating point
 :Range:		> 0.0
-:Default:	0.017647058823529415
+:Default:	0.023529411764705882
 
 Scale of nav mesh coordinates to world coordinates. Recastnavigation builds voxels for world geometry.
 Basically voxel size is 1 / "cell size". To reduce amount of voxels we apply scale factor, to make voxel size
 "recast scale factor" / "cell size". Default value calculates by this equation:
-sStepSizeUp * "recast scale factor" / "cell size" = 3 (max climb height should be equal to 3 voxels).
+sStepSizeUp * "recast scale factor" / "cell size" = 4 (max climb height should be equal to 4 voxels).
 Changing this value will change generated nav mesh. Some locations may become unavailable for NPC and creatures.
 Pay attention to slopes and roofs when change it. Increasing this value will reduce nav mesh update latency.
 

@@ -118,7 +118,7 @@ namespace MWWorld
 
             int mActivationDistanceOverride;
 
-            std::map<MWWorld::Ptr, int> mDoorStates;
+            std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
             std::string mStartCell;
@@ -145,6 +145,8 @@ namespace MWWorld
             void removeContainerScripts(const Ptr& reference) override;
     private:
             void PCDropped (const Ptr& item);
+
+            bool rotateDoor(const Ptr door, DoorState state, float duration);
 
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
@@ -516,7 +518,7 @@ namespace MWWorld
 
             osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const override;
 
-            void togglePOV() override;
+            void togglePOV(bool force = false) override;
 
             bool isFirstPerson() const override;
 
@@ -525,8 +527,6 @@ namespace MWWorld
             bool toggleVanityMode(bool enable) override;
 
             void allowVanityMode(bool allow) override;
-
-            void togglePlayerLooking(bool enable) override;
 
             void changeVanityModeScale(float factor) override;
 
@@ -542,7 +542,7 @@ namespace MWWorld
             /// update movement state of a non-teleport door as specified
             /// @param state see MWClass::setDoorState
             /// @note throws an exception when invoked on a teleport door
-            void activateDoor(const MWWorld::Ptr& door, int state) override;
+            void activateDoor(const MWWorld::Ptr& door, MWWorld::DoorState state) override;
 
             void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) override; ///< get a list of actors standing on \a object
             bool getPlayerStandingOn (const MWWorld::ConstPtr& object) override; ///< @return true if the player is standing on \a object
@@ -574,6 +574,7 @@ namespace MWWorld
             ///< check if the player is allowed to rest
 
             void rest(double hours) override;
+            void rechargeItems(double duration, bool activeOnly) override;
 
             /// \todo Probably shouldn't be here
             MWRender::Animation* getAnimation(const MWWorld::Ptr &ptr) override;
@@ -719,6 +720,8 @@ namespace MWWorld
 
             /// Return physical half extents of the given actor to be used in pathfinding
             osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
+
+            bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
     };
 }
 

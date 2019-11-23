@@ -89,7 +89,7 @@ namespace CSMWorld
 
         DataType values(Size, 0);
 
-        if (land.isDataLoaded(Land::DATA_WNAM))
+        if (land.mDataTypes & Land::DATA_WNAM)
         {
             for (int i = 0; i < Size; ++i)
                 values[i] = land.mWnam[i];

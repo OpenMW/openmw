@@ -114,7 +114,7 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
-    float shadowing = unshadowedLightRatio();
+    float shadowing = unshadowedLightRatio(depth);
 
 #if !PER_PIXEL_LIGHTING
 

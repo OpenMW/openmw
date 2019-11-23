@@ -23,6 +23,8 @@ namespace Gui
         /// Set mImageNormal, mImageHighlighted and mImagePushed based on file convention (image_idle.ext, image_over.ext and image_pressed.ext)
         void setImage(const std::string& image);
 
+        void setTextureRect(MyGUI::IntCoord coord);
+
     private:
         void updateImage();
 
@@ -44,6 +46,9 @@ namespace Gui
         bool mMouseFocus;
         bool mMousePress;
         bool mKeyFocus;
+        bool mUseWholeTexture;
+
+        MyGUI::IntCoord mTextureRect;
     };
 
 }

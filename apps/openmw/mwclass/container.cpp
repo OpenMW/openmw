@@ -181,7 +181,7 @@ namespace MWClass
         {
             MWBase::Environment::get().getWindowManager ()->messageBox (keyName + " #{sKeyUsed}");
             if(isLocked)
-                unlock(ptr);
+                ptr.getCellRef().unlock();
             // using a key disarms the trap
             if(isTrapped)
             {
@@ -224,8 +224,9 @@ namespace MWClass
     std::string Container::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
@@ -252,18 +253,10 @@ namespace MWClass
 
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        if (getName(ptr).empty())
-            return false;
-
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
             return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
 
         return true;
-    }
-
-    bool Container::canBeActivated(const MWWorld::Ptr& ptr) const
-    {
-        return hasToolTip(ptr);
     }
 
     MWGui::ToolTipInfo Container::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -271,7 +264,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
@@ -282,9 +275,11 @@ namespace MWClass
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
 
-        if (MWBase::Environment::get().getWindowManager()->getFullHelp()) {
-            text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
+        if (MWBase::Environment::get().getWindowManager()->getFullHelp())
+        {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
             text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            if (Misc::StringUtils::ciEqual(ptr.getCellRef().getRefId(), "stolen_goods"))
+                text += "\nYou can not use evidence chests";
         }
 
         info.text = text;
@@ -305,23 +300,10 @@ namespace MWClass
         return getContainerStore (ptr).getWeight();
     }
 
-    void Container::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Container::unlock (const MWWorld::Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
-    }
-
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
     {
-        return true;
+        const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
+        return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

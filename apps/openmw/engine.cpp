@@ -112,8 +112,8 @@ bool OMW::Engine::frame(float frametime)
         bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
 
         osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()==
-            MWBase::StateManager::State_Running)
+        if (mEnvironment.getStateManager()->getState()!=
+            MWBase::StateManager::State_NoGame)
         {
             if (!paused)
             {
@@ -133,6 +133,7 @@ bool OMW::Engine::frame(float frametime)
             {
                 double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
                 mEnvironment.getWorld()->advanceTime(hours, true);
+                mEnvironment.getWorld()->rechargeItems(frametime, true);
             }
         }
         osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
@@ -499,8 +500,11 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         if(boost::filesystem::exists(input2)) {
             boost::filesystem::copy_file(input2, keybinderUser);
             keybinderUserExists = boost::filesystem::exists(keybinderUser);
+            Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
         }
     }
+    else
+        Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
 
     // find correct path to the game controller bindings
     // File format for controller mappings is different for SDL <= 2.0.4, 2.0.5, and >= 2.0.6
@@ -515,8 +519,17 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         controllerFileName = "gamecontrollerdb.txt";
     }
 
+    const std::string userdefault = mCfgMgr.getUserConfigPath().string() + "/" + controllerFileName;
     const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
     const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
+
+    std::string userGameControllerdb;
+    if (boost::filesystem::exists(userdefault)){
+        userGameControllerdb = userdefault;
+    }
+    else
+        userGameControllerdb = "";
+
     std::string gameControllerdb;
     if (boost::filesystem::exists(localdefault))
         gameControllerdb = localdefault;
@@ -525,7 +538,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, gameControllerdb, mGrab);
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
     mEnvironment.setInputManager (input);
 
     std::string myguiResources = (mResDir / "mygui").string();

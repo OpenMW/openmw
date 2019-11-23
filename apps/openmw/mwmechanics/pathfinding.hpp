@@ -13,16 +13,28 @@ namespace MWWorld
 {
     class CellStore;
     class ConstPtr;
+    class Ptr;
 }
 
 namespace MWMechanics
 {
     class PathgridGraph;
 
-    inline float distance(const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    template <class T>
+    inline float distance(const T& lhs, const T& rhs)
     {
+        static_assert(std::is_same<T, osg::Vec2f>::value
+                      || std::is_same<T, osg::Vec3f>::value,
+                      "T is not a position");
         return (lhs - rhs).length();
     }
+
+    inline float distanceIgnoreZ(const osg::Vec3f& lhs, const osg::Vec3f& rhs)
+    {
+        return distance(osg::Vec2f(lhs.x(), lhs.y()), osg::Vec2f(rhs.x(), rhs.y()));
+    }
+
+    float getPathDistance(const MWWorld::Ptr& actor, const osg::Vec3f& lhs, const osg::Vec3f& rhs);
 
     inline float getZAngleToDir(const osg::Vec3f& dir)
     {
@@ -83,6 +95,9 @@ namespace MWMechanics
             void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
                 const DetourNavigator::Flags flags);
+
+            void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
+                const DetourNavigator::Flags flags, const float pointTolerance);
 
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance);

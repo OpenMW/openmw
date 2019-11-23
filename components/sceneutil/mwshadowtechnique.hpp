@@ -76,6 +76,8 @@ namespace SceneUtil {
 
         virtual void setPolygonOffset(float factor, float units);
 
+        virtual void setShadowFadeStart(float shadowFadeStart);
+
         virtual void enableFrontFaceCulling();
 
         virtual void disableFrontFaceCulling();
@@ -266,7 +268,10 @@ namespace SceneUtil {
         float                                   _polygonOffsetUnits = 4.0;
 
         bool                                    _useFrontFaceCulling = true;
-        unsigned int _sceneMask, _OQMask, _computeFarMask;
+        float                                   _shadowFadeStart = 0.0;
+
+        unsigned int                            _sceneMask, _OQMask, _computeFarMask;
+        
         class DebugHUD : public osg::Referenced
         {
         public:

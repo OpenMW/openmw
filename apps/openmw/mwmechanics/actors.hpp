@@ -71,6 +71,8 @@ namespace MWMechanics
             PtrActorMap::const_iterator begin() { return mActors.begin(); }
             PtrActorMap::const_iterator end() { return mActors.end(); }
 
+            void notifyDied(const MWWorld::Ptr &actor);
+
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
             bool isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer);
@@ -91,6 +93,8 @@ namespace MWMechanics
             ///< Deregister an actor for stats management
             ///
             /// \note Ignored, if \a ptr is not a registered actor.
+
+            void resurrect (const MWWorld::Ptr& ptr);
 
             void castSpell(const MWWorld::Ptr& ptr, const std::string spellId, bool manualSpell=false);
 
@@ -117,6 +121,9 @@ namespace MWMechanics
             void engageCombat(const MWWorld::Ptr& actor1, const MWWorld::Ptr& actor2, std::map<const MWWorld::Ptr, const std::set<MWWorld::Ptr> >& cachedAllies, bool againstPlayer);
 
             void playIdleDialogue(const MWWorld::Ptr& actor);
+            void updateMovementSpeed(const MWWorld::Ptr& actor);
+            void updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly);
+            void turnActorToFacePlayer(const MWWorld::Ptr& actor, const osg::Vec3f& dir);
 
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);

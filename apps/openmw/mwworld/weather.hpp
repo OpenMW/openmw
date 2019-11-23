@@ -170,7 +170,20 @@ namespace MWWorld
         float mRainSpeed;
 
         // How often does a new rain mesh spawn?
-        float mRainFrequency;
+        float mRainEntranceSpeed;
+
+        // Maximum count of rain particles
+        int mRainMaxRaindrops;
+
+        // Radius of rain effect
+        float mRainDiameter;
+
+        // Transition threshold to spawn rain
+        float mRainThreshold;
+
+        // Height of rain particles spawn
+        float mRainMinHeight;
+        float mRainMaxHeight;
 
         std::string mParticleEffect;
 
@@ -325,6 +338,8 @@ namespace MWWorld
         MoonModel mSecunda;
 
         float mWindSpeed;
+        float mCurrentWindSpeed;
+        float mNextWindSpeed;
         bool mIsStorm;
         bool mPrecipitation;
         osg::Vec3f mStormDirection;
@@ -362,6 +377,7 @@ namespace MWWorld
         void calculateWeatherResult(const float gameHour, const float elapsedSeconds, const bool isPaused);
         void calculateResult(const int weatherID, const float gameHour);
         void calculateTransitionResult(const float factor, const float gameHour);
+        float calculateWindSpeed(int weatherId, float currentSpeed);
     };
 }
 

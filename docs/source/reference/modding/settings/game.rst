@@ -72,13 +72,10 @@ can loot during death animation
 :Default:	True
 
 If this setting is true, the player is allowed to loot actors (e.g. summoned creatures) during death animation, 
-if they are not in combat. However disposing corpses during death animation is not recommended - 
-death counter may not be incremented, and this behaviour can break quests.
-This is how Morrowind behaves.
+if they are not in combat. In this case we have to increment death counter and run disposed actor's script instantly.
 
 If this setting is false, player has to wait until end of death animation in all cases.
-This case is more safe, but makes using of summoned creatures exploit 
-(looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
+Makes using of summoned creatures exploit (looting summoned Dremoras and Golden Saints for expensive weapons) a lot harder.
 Conflicts with mannequin mods, which use SkipAnim to prevent end of death animation.
 
 This setting can be toggled in Advanced tab of the launcher.
@@ -186,6 +183,22 @@ Make player followers and escorters start combat with enemies who have started c
 Otherwise they wait for the enemies or the player to do an attack first.
 Please note this setting has not been extensively tested and could have side effects with certain quests.
 This setting can be toggled in Advanced tab of the launcher.
+
+shield sheathing
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If this setting is true, OpenMW will utilize shield sheathing-compatible assets to display holstered shields.
+
+To make use of this, you need to have an xbase_anim_sh.nif file with weapon bones that will be injected into the skeleton.
+Also you can use additional _sh meshes for more precise shield placement.
+Warning: this feature may conflict with mods that use pseudo-shields to emulate item in actor's hand (e.g. books, baskets, pick axes).
+To avoid conflicts, you can use _sh mesh without "Bip01 Sheath" node for such "shields" meshes, or declare its bodypart as Clothing type, not as Armor.
+Also you can use an _sh node with empty "Bip01 Sheath" node.
+In this case the engine will use basic shield model, but will use transformations from the "Bip01 Sheath" node.
 
 weapon sheathing
 ----------------

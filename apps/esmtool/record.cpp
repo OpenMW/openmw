@@ -607,7 +607,7 @@ void Record<ESM::Container>::print()
     std::cout << "  Weight: " << mData.mWeight << std::endl;
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
@@ -653,7 +653,7 @@ void Record<ESM::Creature>::print()
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
         std::cout << "  Spell: " << spell << std::endl;
@@ -1073,7 +1073,7 @@ void Record<ESM::NPC>::print()
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
         std::cout << "  Spell: " << spell << std::endl;
@@ -1192,7 +1192,7 @@ void Record<ESM::Region>::print()
     if (!mData.mSleepList.empty())
         std::cout << "  Sleep List: " << mData.mSleepList << std::endl;
     for (const ESM::Region::SoundRef &soundref : mData.mSoundList)
-        std::cout << "  Sound: " << (int)soundref.mChance << " = " << soundref.mSound.toString() << std::endl;
+        std::cout << "  Sound: " << (int)soundref.mChance << " = " << soundref.mSound << std::endl;
 }
 
 template<>

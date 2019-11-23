@@ -13,6 +13,8 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
+#include "../mwphysics/collisiontype.hpp"
+
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
@@ -133,7 +135,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         if (!mIsShortcutting)
         {
-            if (wasShortcutting || doesPathNeedRecalc(dest, actor.getCell())) // if need to rebuild path
+            if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
@@ -222,8 +224,28 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
     }
 }
 
+namespace
+{
+    bool isDoorOnTheWay(const MWWorld::Ptr& actor, const MWWorld::Ptr& door, const osg::Vec3f& nextPathPoint)
+    {
+        const auto world = MWBase::Environment::get().getWorld();
+        const auto halfExtents = world->getHalfExtents(actor);
+        const auto position = actor.getRefData().getPosition().asVec3() + osg::Vec3f(0, 0, halfExtents.z());
+        const auto destination = nextPathPoint + osg::Vec3f(0, 0, halfExtents.z());
+
+        return world->hasCollisionWithDoor(door, position, destination);
+    }
+}
+
 void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 {
+    // note: AiWander currently does not open doors
+    if (getTypeId() == TypeIdWander)
+        return;
+
+    if (mPathFinder.getPathSize() == 0)
+        return;
+
     MWBase::World* world = MWBase::Environment::get().getWorld();
     static float distance = world->getMaxActivationDistance();
 
@@ -231,9 +253,11 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     if (door == MWWorld::Ptr())
         return;
 
-    // note: AiWander currently does not open doors
-    if (getTypeId() != TypeIdWander && !door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == 0)
+    if (!door.getCellRef().getTeleport() && door.getClass().getDoorState(door) == MWWorld::DoorState::Idle)
     {
+        if (!isDoorOnTheWay(actor, door, mPathFinder.getPath().front()))
+            return;
+
         if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0 ))
         {
             world->activate(door, actor);
@@ -301,7 +325,7 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoin
         return true;
 
     const float actorSpeed = actor.getClass().getSpeed(actor);
-    const float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / MAX_VEL_ANGULAR_RADIANS * 2; // *2 - for reliability
+    const float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / getAngularVelocity(actorSpeed) * 2; // *2 - for reliability
     const float distToTarget = osg::Vec2f(endPoint.x(), endPoint.y()).length();
 
     const float offsetXY = distToTarget > maxAvoidDist*1.5? maxAvoidDist : maxAvoidDist/2;
@@ -328,11 +352,11 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoin
     return false;
 }
 
-bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::CellStore* currentCell)
+bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const MWWorld::Ptr& actor) const
 {
     return mPathFinder.getPath().empty()
-        || (distance(mPathFinder.getPath().back(), newDest) > 10)
-        || mPathFinder.getPathCell() != currentCell;
+        || getPathDistance(actor, mPathFinder.getPath().back(), newDest) > 10
+        || mPathFinder.getPathCell() != actor.getCell();
 }
 
 bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
@@ -363,7 +387,7 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
     // get actor's shortest radius for moving in circle
     float speed = actor.getClass().getSpeed(actor);
     speed += speed * 0.1f; // 10% real speed inaccuracy
-    float radius = speed / MAX_VEL_ANGULAR_RADIANS;
+    float radius = speed / getAngularVelocity(speed);
 
     // get radius direction to the center
     const float* rot = actor.getRefData().getPosition().rot;

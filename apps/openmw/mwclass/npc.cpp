@@ -1,4 +1,4 @@
-#include "npc.hpp"
+﻿#include "npc.hpp"
 
 #include <memory>
 
@@ -26,7 +26,7 @@
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/autocalcspell.hpp"
 #include "../mwmechanics/difficultyscaling.hpp"
-#include "../mwmechanics/character.hpp"
+#include "../mwmechanics/weapontype.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/ptr.hpp"
@@ -37,6 +37,7 @@
 #include "../mwworld/customdata.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/localscripts.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -530,7 +531,9 @@ namespace MWClass
         }
 
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats (const MWWorld::Ptr& ptr) const
@@ -883,22 +886,22 @@ namespace MWClass
             // otherwise wait until death animation
             if(stats.isDeathAnimationFinished())
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
+        }
+        else if (!stats.getAiSequence().isInCombat())
+        {
+            if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
 
-            // death animation is not finished, do nothing
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
+            // Can't talk to werewolves
+            if (!getNpcStats(ptr).isWerewolf())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
         }
 
-        if(stats.getAiSequence().isInCombat())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
+        // Tribunal and some mod companions oddly enough must use open action as fallback
+        if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
+            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr));
 
-        if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
-            return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
-
-        // Can't talk to werewolfs
-        if(getNpcStats(ptr).isWerewolf())
-            return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
-
-        return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
+        return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
     }
 
     MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
@@ -939,10 +942,9 @@ namespace MWClass
         const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
 
         bool swimming = world->isSwimming(ptr);
+        bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
+        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
-        bool sneaking = stats.getStance(MWMechanics::CreatureStats::Stance_Sneak);
-        sneaking = sneaking && (inair || MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));
-        bool running =  stats.getStance(MWMechanics::CreatureStats::Stance_Run);
         running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
         float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
@@ -987,6 +989,8 @@ namespace MWClass
 
         if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
             moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
+
+        moveSpeed *= ptr.getClass().getMovementSettings(ptr).mSpeedFactor;
 
         return moveSpeed;
     }
@@ -1070,11 +1074,11 @@ namespace MWClass
         bool fullHelp = MWBase::Environment::get().getWindowManager()->getFullHelp();
         MWGui::ToolTipInfo info;
 
-        info.caption = getName(ptr);
-        if(fullHelp && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
+        if(fullHelp && !ref->mBase->mName.empty() && ptr.getRefData().getCustomData() && ptr.getRefData().getCustomData()->asNpcCustomData().mNpcStats.isWerewolf())
         {
             info.caption += " (";
-            info.caption += ref->mBase->mName;
+            info.caption += MyGUI::TextIterator::toTagsString(ref->mBase->mName);
             info.caption += ")";
         }
 
@@ -1180,7 +1184,7 @@ namespace MWClass
                 MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
 
         // Race weight should not affect 1st-person meshes, otherwise it will change hand proportions and can break aiming.
-        if (ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson())
+        if (ptr == MWMechanics::getPlayer() && ptr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson())
         {
             if (ref->mBase->isMale())
                 scale *= race->mData.mHeight.mMale;
@@ -1227,9 +1231,9 @@ namespace MWClass
                 if (getNpcStats(ptr).isWerewolf()
                         && getCreatureStats(ptr).getStance(MWMechanics::CreatureStats::Stance_Run))
                 {
-                    MWMechanics::WeaponType weaponType = MWMechanics::WeapType_None;
-                    MWMechanics::getActiveWeapon(getCreatureStats(ptr), getInventoryStore(ptr), &weaponType);
-                    if (weaponType == MWMechanics::WeapType_None)
+                    int weaponType = ESM::Weapon::None;
+                    MWMechanics::getActiveWeapon(ptr, &weaponType);
+                    if (weaponType == ESM::Weapon::None)
                         return std::string();
                 }
 
@@ -1376,7 +1380,12 @@ namespace MWClass
             if (ptr.getCellRef().hasContentFile())
             {
                 if (ptr.getRefData().getCount() == 0)
+                {
                     ptr.getRefData().setCount(1);
+                    const std::string& script = getScript(ptr);
+                    if (!script.empty())
+                        MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
+                }
 
                 MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
                 ptr.getRefData().setCustomData(nullptr);

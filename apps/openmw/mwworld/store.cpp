@@ -1091,6 +1091,18 @@ namespace MWWorld
         return RecordId(dialogue.mId, isDeleted);
     }
 
+    template<>
+    bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
+    {
+        auto it = mStatic.find(Misc::StringUtils::lowerCase(id));
+
+        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+            mStatic.erase(it);
+        }
+
+        return true;
+    }
+
 }
 
 template class MWWorld::Store<ESM::Activator>;

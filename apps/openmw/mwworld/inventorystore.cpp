@@ -7,7 +7,6 @@
 #include <components/esm/loadench.hpp>
 #include <components/esm/inventorystate.hpp>
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -16,7 +15,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
-
+#include "../mwmechanics/weapontype.hpp"
 
 #include "esmstore.hpp"
 #include "class.hpp"
@@ -101,7 +100,6 @@ MWWorld::InventoryStore::InventoryStore()
  , mUpdatesEnabled (true)
  , mFirstAutoEquip(true)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     initSlots (mSlots);
 }
@@ -114,7 +112,6 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
  , mFirstAutoEquip(store.mFirstAutoEquip)
  , mPermanentMagicEffectMagnitudes(store.mPermanentMagicEffectMagnitudes)
  , mSelectedEnchantItem(end())
- , mRechargingItemsUpToDate(false)
 {
     copySlots (store);
 }
@@ -133,12 +130,12 @@ MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStor
     return *this;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip)
 {
-    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, setOwner);
+    const MWWorld::ContainerStoreIterator& retVal = MWWorld::ContainerStore::add(itemPtr, count, actorPtr, allowAutoEquip);
 
-    // Auto-equip items if an armor/clothing or weapon item is added, but not for the player nor werewolves
-    if (actorPtr != MWMechanics::getPlayer()
+    // Auto-equip items if an armor/clothing item is added, but not for the player nor werewolves
+    if (allowAutoEquip && actorPtr != MWMechanics::getPlayer()
             && actorPtr.getClass().isNpc() && !actorPtr.getClass().getNpcStats(actorPtr).isWerewolf())
     {
         std::string type = itemPtr.getTypeName();
@@ -208,26 +205,6 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot)
 MWWorld::ConstContainerStoreIterator MWWorld::InventoryStore::getSlot (int slot) const
 {
     return findSlot (slot);
-}
-
-bool MWWorld::InventoryStore::canActorAutoEquip(const MWWorld::Ptr& actor, const MWWorld::Ptr& item)
-{
-    if (!Settings::Manager::getBool("prevent merchant equipping", "Game"))
-        return true;
-
-    // Only autoEquip if we are the original owner of the item.
-    // This stops merchants from auto equipping anything you sell to them.
-    // ...unless this is a companion, he should always equip items given to him.
-    if (!Misc::StringUtils::ciEqual(item.getCellRef().getOwner(), actor.getCellRef().getRefId()) &&
-            (actor.getClass().getScript(actor).empty() ||
-            !actor.getRefData().getLocals().getIntVar(actor.getClass().getScript(actor), "companion"))
-            && !actor.getClass().getCreatureStats(actor).isDead() // Corpses can be dressed up by the player as desired
-            )
-    {
-        return false;
-    }
-
-    return true;
 }
 
 MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) const
@@ -327,12 +304,9 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
 
         for (ContainerStoreIterator iter(begin(ContainerStore::Type_Weapon)); iter!=end(); ++iter)
         {
-            if (!canActorAutoEquip(actor, *iter))
-                continue;
-
             const ESM::Weapon* esmWeapon = iter->get<ESM::Weapon>()->mBase;
 
-            if (esmWeapon->mData.mType == ESM::Weapon::Arrow || esmWeapon->mData.mType == ESM::Weapon::Bolt)
+            if (MWMechanics::getWeaponType(esmWeapon->mData.mType)->mWeaponClass == ESM::WeaponType::Ammo)
                 continue;
 
             if (iter->getClass().getEquipmentSkill(*iter) == weaponSkills[maxWeaponSkill])
@@ -357,31 +331,21 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
             }
         }
 
-        bool isBow = false;
-        bool isCrossbow = false;
-        if (weapon != end())
-        {
-            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
-            ESM::Weapon::Type type = (ESM::Weapon::Type)ref->mBase->mData.mType;
-
-            if (type == ESM::Weapon::MarksmanBow)
-                isBow = true;
-            else if (type == ESM::Weapon::MarksmanCrossbow)
-                isCrossbow = true;
-        }
-
         if (weapon != end() && weapon->getClass().canBeEquipped(*weapon, actor).first)
         {
             // Do not equip ranged weapons, if there is no suitable ammo
             bool hasAmmo = true;
-            if (isBow == true)
+            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+            int type = ref->mBase->mData.mType;
+            int ammotype = MWMechanics::getWeaponType(type)->mAmmoType;
+            if (ammotype == ESM::Weapon::Arrow)
             {
                 if (arrow == end())
                     hasAmmo = false;
                 else
                     slots_[Slot_Ammunition] = arrow;
             }
-            if (isCrossbow == true)
+            else if (ammotype == ESM::Weapon::Bolt)
             {
                 if (bolt == end())
                     hasAmmo = false;
@@ -406,7 +370,7 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
                     int slot = itemsSlots.first.front();
                     slots_[slot] = weapon;
 
-                    if (!isBow && !isCrossbow)
+                    if (ammotype == ESM::Weapon::None)
                         slots_[Slot_Ammunition] = end();
                 }
 
@@ -440,9 +404,6 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
     {
         Ptr test = *iter;
-
-        if (!canActorAutoEquip(actor, test))
-            continue;
 
         switch(test.getClass().canBeEquipped (test, actor).first)
         {
@@ -719,12 +680,6 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
     mFirstAutoEquip = false;
 }
 
-void MWWorld::InventoryStore::flagAsModified()
-{
-    ContainerStore::flagAsModified();
-    mRechargingItemsUpToDate = false;
-}
-
 bool MWWorld::InventoryStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const
 {
     bool canStack = MWWorld::ContainerStore::stacks(ptr1, ptr2);
@@ -963,57 +918,6 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
                 visitor.visit(MWMechanics::EffectKey(effect), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
-        }
-    }
-}
-
-void MWWorld::InventoryStore::updateRechargingItems()
-{
-    mRechargingItems.clear();
-    for (ContainerStoreIterator it = begin(); it != end(); ++it)
-    {
-        if (it->getClass().getEnchantment(*it) != "")
-        {
-            std::string enchantmentId = it->getClass().getEnchantment(*it);
-            const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(
-                        enchantmentId);
-            if (!enchantment)
-            {
-                Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << it->getCellRef().getRefId();
-                continue;
-            }
-
-            if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
-                    || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                mRechargingItems.push_back(std::make_pair(it, static_cast<float>(enchantment->mData.mCharge)));
-        }
-    }
-}
-
-void MWWorld::InventoryStore::rechargeItems(float duration)
-{
-    if (!mRechargingItemsUpToDate)
-    {
-        updateRechargingItems();
-        mRechargingItemsUpToDate = true;
-    }
-    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
-    {
-        if (it->first->getCellRef().getEnchantmentCharge() == -1
-                || it->first->getCellRef().getEnchantmentCharge() == it->second)
-            continue;
-
-        static float fMagicItemRechargePerSecond = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                    "fMagicItemRechargePerSecond")->mValue.getFloat();
-
-        if (it->first->getCellRef().getEnchantmentCharge() <= it->second)
-        {
-            it->first->getCellRef().setEnchantmentCharge(std::min (it->first->getCellRef().getEnchantmentCharge() + fMagicItemRechargePerSecond * duration,
-                                                                  it->second));
-
-            // attempt to restack when fully recharged
-            if (it->first->getCellRef().getEnchantmentCharge() == it->second)
-                it->first = restack(*it->first);
         }
     }
 }

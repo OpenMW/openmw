@@ -147,7 +147,12 @@ Weather::Weather(const std::string& name,
     , mGlareView(Fallback::Map::getFloat("Weather_" + name + "_Glare_View"))
     , mIsStorm(mWindSpeed > stormWindSpeed)
     , mRainSpeed(rainSpeed)
-    , mRainFrequency(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mRainEntranceSpeed(Fallback::Map::getFloat("Weather_" + name + "_Rain_Entrance_Speed"))
+    , mRainMaxRaindrops(Fallback::Map::getFloat("Weather_" + name + "_Max_Raindrops"))
+    , mRainDiameter(Fallback::Map::getFloat("Weather_" + name + "_Rain_Diameter"))
+    , mRainThreshold(Fallback::Map::getFloat("Weather_" + name + "_Rain_Threshold"))
+    , mRainMinHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Min"))
+    , mRainMaxHeight(Fallback::Map::getFloat("Weather_" + name + "_Rain_Height_Max"))
     , mParticleEffect(particleEffect)
     , mRainEffect(Fallback::Map::getBool("Weather_" + name + "_Using_Precip") ? "meshes\\raindrop.nif" : "")
     , mTransitionDelta(Fallback::Map::getFloat("Weather_" + name + "_Transition_Delta"))
@@ -178,15 +183,6 @@ Weather::Weather(const std::string& name,
 
     if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
         mAmbientLoopSoundID.clear();
-
-    /*
-    Unhandled:
-    Rain Diameter=600 ?
-    Rain Height Min=200 ?
-    Rain Height Max=700 ?
-    Rain Threshold=0.6 ?
-    Max Raindrops=650 ?
-    */
 }
 
 float Weather::transitionDelta() const
@@ -538,6 +534,8 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::E
     , mMasser("Masser")
     , mSecunda("Secunda")
     , mWindSpeed(0.f)
+    , mCurrentWindSpeed(0.f)
+    , mNextWindSpeed(0.f)
     , mIsStorm(false)
     , mPrecipitation(false)
     , mStormDirection(0,1,0)
@@ -663,6 +661,21 @@ void WeatherManager::playerTeleported(const std::string& playerRegion, bool isEx
     }
 }
 
+float WeatherManager::calculateWindSpeed(int weatherId, float currentSpeed)
+{
+    float targetSpeed = std::min(8.0f * mWeatherSettings[weatherId].mWindSpeed, 70.f);
+    if (currentSpeed == 0.f)
+        currentSpeed = targetSpeed;
+
+    float multiplier = mWeatherSettings[weatherId].mRainEffect.empty() ? 1.f : 0.5f;
+    float updatedSpeed = (Misc::Rng::rollClosedProbability() - 0.5f) * multiplier * targetSpeed + currentSpeed;
+
+    if (updatedSpeed > 0.5f * targetSpeed && updatedSpeed < 2.f * targetSpeed)
+        currentSpeed = updatedSpeed;
+
+    return currentSpeed;
+}
+
 void WeatherManager::update(float duration, bool paused, const TimeStamp& time, bool isExterior)
 {
     MWWorld::ConstPtr player = MWMechanics::getPlayer();
@@ -695,12 +708,21 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     {
         mRendering.setSkyEnabled(false);
         stopSounds();
+        mWindSpeed = 0.f;
+        mCurrentWindSpeed = 0.f;
+        mNextWindSpeed = 0.f;
         return;
     }
 
     calculateWeatherResult(time.getHour(), duration, paused);
 
-    mWindSpeed = mResult.mWindSpeed;
+    if (!paused)
+    {
+        mWindSpeed = mResult.mWindSpeed;
+        mCurrentWindSpeed = mResult.mCurrentWindSpeed;
+        mNextWindSpeed = mResult.mNextWindSpeed;
+    }
+
     mIsStorm = mResult.mIsStorm;
 
     // For some reason Ash Storm is not considered as a precipitation weather in game
@@ -709,11 +731,16 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     if (mIsStorm)
     {
-        osg::Vec3f playerPos (player.getRefData().getPosition().asVec3());
-        playerPos.z() = 0;
-        osg::Vec3f redMountainPos (25000, 70000, 0);
-        mStormDirection = (playerPos - redMountainPos);
-        mStormDirection.normalize();
+        osg::Vec3f stormDirection(0, 1, 0);
+        if (mResult.mParticleEffect == "meshes\\ashcloud.nif" || mResult.mParticleEffect == "meshes\\blightcloud.nif")
+        {
+            osg::Vec3f playerPos (MWMechanics::getPlayer().getRefData().getPosition().asVec3());
+            playerPos.z() = 0;
+            osg::Vec3f redMountainPos (25000, 70000, 0);
+            stormDirection = (playerPos - redMountainPos);
+            stormDirection.normalize();
+        }
+        mStormDirection = stormDirection;
         mRendering.getSkyManager()->setStormDirection(mStormDirection);
     }
 
@@ -1096,7 +1123,9 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
 
     mResult.mCloudTexture = current.mCloudTexture;
     mResult.mCloudBlendFactor = 0;
-    mResult.mWindSpeed = current.mWindSpeed;
+    mResult.mNextWindSpeed = 0;
+    mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(weatherID, mWindSpeed);
+
     mResult.mCloudSpeed = current.mCloudSpeed;
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
@@ -1106,7 +1135,11 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mIsStorm = current.mIsStorm;
 
     mResult.mRainSpeed = current.mRainSpeed;
-    mResult.mRainFrequency = current.mRainFrequency;
+    mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
+    mResult.mRainDiameter = current.mRainDiameter;
+    mResult.mRainMinHeight = current.mRainMinHeight;
+    mResult.mRainMaxHeight = current.mRainMaxHeight;
+    mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
 
     mResult.mParticleEffect = current.mParticleEffect;
     mResult.mRainEffect = current.mRainEffect;
@@ -1180,23 +1213,35 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
     mResult.mFogDepth = lerp(current.mFogDepth, other.mFogDepth, factor);
     mResult.mDLFogFactor = lerp(current.mDLFogFactor, other.mDLFogFactor, factor);
     mResult.mDLFogOffset = lerp(current.mDLFogOffset, other.mDLFogOffset, factor);
-    mResult.mWindSpeed = lerp(current.mWindSpeed, other.mWindSpeed, factor);
+
+    mResult.mCurrentWindSpeed = calculateWindSpeed(mCurrentWeather, mCurrentWindSpeed);
+    mResult.mNextWindSpeed = calculateWindSpeed(mNextWeather, mNextWindSpeed);
+
+    mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
     mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
     mResult.mGlareView = lerp(current.mGlareView, other.mGlareView, factor);
     mResult.mNightFade = lerp(current.mNightFade, other.mNightFade, factor);
 
     mResult.mNight = current.mNight;
 
-    if(factor < 0.5)
+    float threshold = mWeatherSettings[mNextWeather].mRainThreshold;
+    if (threshold <= 0)
+        threshold = 0.5f;
+
+    if(factor < threshold)
     {
         mResult.mIsStorm = current.mIsStorm;
         mResult.mParticleEffect = current.mParticleEffect;
         mResult.mRainEffect = current.mRainEffect;
         mResult.mRainSpeed = current.mRainSpeed;
-        mResult.mRainFrequency = current.mRainFrequency;
-        mResult.mAmbientSoundVolume = 1-(factor*2);
+        mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
+        mResult.mAmbientSoundVolume = 1 - factor / threshold;
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
+        mResult.mRainDiameter = current.mRainDiameter;
+        mResult.mRainMinHeight = current.mRainMinHeight;
+        mResult.mRainMaxHeight = current.mRainMaxHeight;
+        mResult.mRainMaxRaindrops = current.mRainMaxRaindrops;
     }
     else
     {
@@ -1204,10 +1249,15 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mParticleEffect = other.mParticleEffect;
         mResult.mRainEffect = other.mRainEffect;
         mResult.mRainSpeed = other.mRainSpeed;
-        mResult.mRainFrequency = other.mRainFrequency;
-        mResult.mAmbientSoundVolume = 2*(factor-0.5f);
+        mResult.mRainEntranceSpeed = other.mRainEntranceSpeed;
+        mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
         mResult.mEffectFade = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
+
+        mResult.mRainDiameter = other.mRainDiameter;
+        mResult.mRainMinHeight = other.mRainMinHeight;
+        mResult.mRainMaxHeight = other.mRainMaxHeight;
+        mResult.mRainMaxRaindrops = other.mRainMaxRaindrops;
     }
 }
 

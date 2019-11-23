@@ -103,7 +103,7 @@ Options:
 		Build unit tests / Google test
 	-u
 		Configure for unity builds.
-	-v <2013/2015/2017>
+	-v <2013/2015/2017/2019>
 		Choose the Visual Studio version to use.
 	-n
 		Produce NMake makefiles instead of a Visual Studio solution.
@@ -247,10 +247,22 @@ if [ -z $CONFIGURATION ]; then
 fi
 
 if [ -z $VS_VERSION ]; then
-	VS_VERSION="2013"
+	VS_VERSION="2017"
 fi
 
 case $VS_VERSION in
+	16|16.0|2019 )
+		GENERATOR="Visual Studio 16 2019"
+		TOOLSET="vc142"
+		MSVC_REAL_VER="16"
+		MSVC_VER="14.2"
+		MSVC_YEAR="2015"
+		MSVC_DISPLAY_YEAR="2019"
+		BOOST_VER="1.71.0"
+		BOOST_VER_URL="1_71_0"
+		BOOST_VER_SDK="107100"
+		;;
+
 	15|15.0|2017 )
 		GENERATOR="Visual Studio 15 2017"
 		TOOLSET="vc141"
@@ -258,6 +270,9 @@ case $VS_VERSION in
 		MSVC_VER="14.1"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2017"
+		BOOST_VER="1.67.0"
+		BOOST_VER_URL="1_67_0"
+		BOOST_VER_SDK="106700"
 		;;
 
 	14|14.0|2015 )
@@ -267,6 +282,9 @@ case $VS_VERSION in
 		MSVC_VER="14.0"
 		MSVC_YEAR="2015"
 		MSVC_DISPLAY_YEAR="2015"
+		BOOST_VER="1.67.0"
+		BOOST_VER_URL="1_67_0"
+		BOOST_VER_SDK="106700"
 		;;
 
 	12|12.0|2013 )
@@ -276,6 +294,9 @@ case $VS_VERSION in
 		MSVC_VER="12.0"
 		MSVC_YEAR="2013"
 		MSVC_DISPLAY_YEAR="2013"
+		BOOST_VER="1.58.0"
+		BOOST_VER_URL="1_58_0"
+		BOOST_VER_SDK="105800"
 		;;
 esac
 
@@ -315,7 +336,7 @@ case $CONFIGURATION in
 		;;
 esac
 
-if [ ${BITS} -eq 64 ]; then
+if [ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ]; then
 	GENERATOR="${GENERATOR} Win64"
 fi
 
@@ -323,7 +344,15 @@ if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
 fi
 
-add_cmake_opts "-G\"$GENERATOR\""
+if [ $MSVC_REAL_VER -ge 16 ]; then
+	if [ $BITS -eq 64 ]; then
+		add_cmake_opts "-G\"$GENERATOR\" -A x64"
+	else
+		add_cmake_opts "-G\"$GENERATOR\" -A Win32"
+	fi
+else
+	add_cmake_opts "-G\"$GENERATOR\""
+fi
 
 if [ -n "$NMAKE" ]; then
 	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
@@ -351,9 +380,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Boost
 	if [ -z $APPVEYOR ]; then
-		download "Boost 1.67.0" \
-			"https://sourceforge.net/projects/boost/files/boost-binaries/1.67.0/boost_1_67_0-msvc-${MSVC_VER}-${BITS}.exe" \
-			"boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe"
+		download "Boost ${BOOST_VER}" \
+			"https://sourceforge.net/projects/boost/files/boost-binaries/${BOOST_VER}/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
+			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
 
 	# Bullet
@@ -444,13 +473,9 @@ echo
 
 # Boost
 if [ -z $APPVEYOR ]; then
-	printf "Boost 1.67.0... "
+	printf "Boost ${BOOST_VER}... "
 else
-	if [ "${MSVC_VER}" -eq 12.0 ]; then
-		printf "Boost 1.58.0 AppVeyor... "
-	else
-		printf "Boost 1.67.0 AppVeyor... "
-	fi
+	printf "Boost ${BOOST_VER} AppVeyor... "
 fi
 {
 	if [ -z $APPVEYOR ]; then
@@ -468,13 +493,13 @@ fi
 			exit 1;
 		fi
 
-		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION 106700" Boost/boost/version.hpp > /dev/null; then
+		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION ${BOOST_VER_SDK}" Boost/boost/version.hpp > /dev/null; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Boost
 			CI_EXTRA_INNO_OPTIONS=""
 			[ -n "$CI" ] && CI_EXTRA_INNO_OPTIONS="//SUPPRESSMSGBOXES //LOG='boost_install.log'"
-			"${DEPS}/boost-1.67.0-msvc${MSVC_VER}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
+			"${DEPS}/boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe" //DIR="${CWD_DRIVE_ROOT}" //VERYSILENT //NORESTART ${CI_EXTRA_INNO_OPTIONS}
 			mv "${CWD_DRIVE_ROOT_BASH}" "${BOOST_SDK}"
 		fi
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
@@ -482,13 +507,10 @@ fi
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 		echo Done.
 	else
-		# Appveyor unstable has all the boost we need already
-		if [ $MSVC_REAL_VER -eq 12 ]; then
-			BOOST_SDK="c:/Libraries/boost_1_58_0"
-		else
-			BOOST_SDK="c:/Libraries/boost_1_67_0"
-		fi
-		if [ $MSVC_REAL_VER -eq 15 ]; then
+		# Appveyor has all the boost we need already
+		BOOST_SDK="c:/Libraries/boost_${BOOST_VER_URL}"
+
+		if [ $MSVC_REAL_VER -ge 15 ]; then
 			LIB_SUFFIX="1"
 		else
 			LIB_SUFFIX="0"
@@ -619,7 +641,7 @@ echo
 if [ -z $APPVEYOR ]; then
 	printf "Qt 5.7.0... "
 else
-	printf "Qt 5.10 AppVeyor... "
+	printf "Qt 5.13 AppVeyor... "
 fi
 {
 	if [ $BITS -eq 64 ]; then
@@ -657,7 +679,7 @@ fi
 		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
 		echo Done.
 	else
-		QT_SDK="C:/Qt/5.10/msvc${MSVC_DISPLAY_YEAR}${SUFFIX}"
+		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"

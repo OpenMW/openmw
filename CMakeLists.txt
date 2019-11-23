@@ -215,6 +215,9 @@ endif()
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
+# Reqiuired for unity build
+add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
+
 # TinyXML
 option(USE_SYSTEM_TINYXML "Use system TinyXML library instead of internal." OFF)
 if (USE_SYSTEM_TINYXML)
@@ -601,9 +604,7 @@ if(WIN32)
 endif(WIN32)
 
 # Extern
-set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
 set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
-set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
 
 add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)

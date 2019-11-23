@@ -24,6 +24,7 @@
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/weapontype.hpp"
 
 #include "npcanimation.hpp"
 #include "vismask.hpp"
@@ -290,55 +291,36 @@ namespace MWRender
 
         MWWorld::InventoryStore &inv = mCharacter.getClass().getInventoryStore(mCharacter);
         MWWorld::ContainerStoreIterator iter = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        std::string groupname;
+        std::string groupname = "inventoryhandtohand";
         bool showCarriedLeft = true;
-        if(iter == inv.end())
-            groupname = "inventoryhandtohand";
-        else
+        if(iter != inv.end())
         {
-            const std::string &typeName = iter->getTypeName();
-            if(typeName == typeid(ESM::Lockpick).name() || typeName == typeid(ESM::Probe).name())
-                groupname = "inventoryweapononehand";
-            else if(typeName == typeid(ESM::Weapon).name())
+            groupname = "inventoryweapononehand";
+            if(iter->getTypeName() == typeid(ESM::Weapon).name())
             {
                 MWWorld::LiveCellRef<ESM::Weapon> *ref = iter->get<ESM::Weapon>();
-
                 int type = ref->mBase->mData.mType;
-                if(type == ESM::Weapon::ShortBladeOneHand ||
-                   type == ESM::Weapon::LongBladeOneHand ||
-                   type == ESM::Weapon::BluntOneHand ||
-                   type == ESM::Weapon::AxeOneHand ||
-                   type == ESM::Weapon::MarksmanThrown)
-                {
-                    groupname = "inventoryweapononehand";
-                }
-                else if(type == ESM::Weapon::MarksmanCrossbow ||
-                        type == ESM::Weapon::MarksmanBow)
-                {
-                    groupname = "inventoryweapononehand";
-                    showCarriedLeft = false;
-                }
-                else if(type == ESM::Weapon::LongBladeTwoHand ||
-                        type == ESM::Weapon::BluntTwoClose ||
-                        type == ESM::Weapon::AxeTwoHand)
-                {
-                    groupname = "inventoryweapontwohand";
-                    showCarriedLeft = false;
-                }
-                else if(type == ESM::Weapon::BluntTwoWide ||
-                        type == ESM::Weapon::SpearTwoWide)
-                {
-                    groupname = "inventoryweapontwowide";
-                    showCarriedLeft = false;
-                }
+                const ESM::WeaponType* weaponInfo = MWMechanics::getWeaponType(type);
+                showCarriedLeft = !(weaponInfo->mFlags & ESM::WeaponType::TwoHanded);
+
+                std::string inventoryGroup = weaponInfo->mLongGroup;
+                inventoryGroup = "inventory" + inventoryGroup;
+
+                // We still should use one-handed animation as fallback
+                if (mAnimation->hasAnimation(inventoryGroup))
+                    groupname = inventoryGroup;
                 else
                 {
-                    groupname = "inventoryhandtohand";
-                    showCarriedLeft = false;
+                    static const std::string oneHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeOneHand)->mLongGroup;
+                    static const std::string twoHandFallback = "inventory" + MWMechanics::getWeaponType(ESM::Weapon::LongBladeTwoHand)->mLongGroup;
+
+                    // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
+                    if (weaponInfo->mFlags & ESM::WeaponType::TwoHanded && weaponInfo->mWeaponClass == ESM::WeaponType::Melee)
+                        groupname = twoHandFallback;
+                    else
+                        groupname = oneHandFallback;
                 }
            }
-           else
-               groupname = "inventoryhandtohand";
         }
 
         mAnimation->showCarriedLeft(showCarriedLeft);

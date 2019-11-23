@@ -36,11 +36,15 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            virtual bool useVariableSpeed() const { return true;}
+
             virtual bool sideWithTarget() const { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
+            virtual osg::Vec3f getDestination() { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             std::string mCellId;
