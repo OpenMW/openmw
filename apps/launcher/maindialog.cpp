@@ -55,6 +55,7 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setFlow(QListView::LeftToRight);
 
     QPushButton *playButton = new QPushButton(tr("Play"));
+    buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
