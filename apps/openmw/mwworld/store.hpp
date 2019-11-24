@@ -314,6 +314,8 @@ namespace MWWorld
         const ESM::Cell *searchExtByRegion(const std::string &id) const;
 
         size_t getSize() const;
+        size_t getExtSize() const;
+        size_t getIntSize() const;
 
         void listIdentifier(std::vector<std::string> &list) const;
 

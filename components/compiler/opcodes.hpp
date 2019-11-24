@@ -75,6 +75,8 @@ namespace Compiler
     namespace Cell
     {
         const int opcodeCellChanged = 0x2000000;
+        const int opcodeTestCells = 0x200030e;
+        const int opcodeTestInteriorCells = 0x200030f;
         const int opcodeCOC = 0x2000026;
         const int opcodeCOE = 0x2000226;
         const int opcodeGetInterior = 0x2000131;

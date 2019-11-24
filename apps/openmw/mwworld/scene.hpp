@@ -85,7 +85,7 @@ namespace MWWorld
 
             osg::Vec3f mLastPlayerPos;
 
-            void insertCell (CellStore &cell, Loading::Listener* loadingListener);
+            void insertCell (CellStore &cell, Loading::Listener* loadingListener, bool test = false);
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
             void changeCellGrid (int playerCellX, int playerCellY, bool changeEvent = true);
@@ -107,9 +107,9 @@ namespace MWWorld
             void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
             void preloadTerrain(const osg::Vec3f& pos);
 
-            void unloadCell (CellStoreCollection::iterator iter);
+            void unloadCell (CellStoreCollection::iterator iter, bool test = false);
 
-            void loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn);
+            void loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn, bool test = false);
 
             void playerMoved (const osg::Vec3f& pos);
 
@@ -151,6 +151,9 @@ namespace MWWorld
             Ptr searchPtrViaActorId (int actorId);
 
             void preload(const std::string& mesh, bool useAnim=false);
+
+            void testExteriorCells();
+            void testInteriorCells();
     };
 }
 
