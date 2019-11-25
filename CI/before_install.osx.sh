@@ -3,7 +3,7 @@
 brew update
 brew outdated pkgconfig || brew upgrade pkgconfig
 brew unlink cmake
-brew install cmake@3.14.2
+brew install cmake@3.14
 brew install qt
 brew install ccache
 
