@@ -1773,23 +1773,25 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                         0, mAttackType+" min attack", mAttackType+" max attack", 0.999f, 0);
                 break;
             case UpperCharState_StartToMinAttack:
-            {
-                // If actor is already stopped preparing attack, do not play the "min attack -> max attack" part.
-                // Happens if the player did not hold the attack button.
-                // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be random.
-                float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
-                float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
-                if (mAttackingOrSpell || minAttackTime == maxAttackTime)
-                {
-                    start = mAttackType+" min attack";
-                    stop = mAttackType+" max attack";
-                    mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
-                    break;
-                }
-                playSwishSound(0.0f);
-            }
-            // Fall-through
             case UpperCharState_MaxAttackToMinHit:
+            {
+                if (mUpperBodyState == UpperCharState_StartToMinAttack)
+                {
+                    // If actor is already stopped preparing attack, do not play the "min attack -> max attack" part.
+                    // Happens if the player did not hold the attack button.
+                    // Note: if the "min attack"->"max attack" is a stub, "play" it anyway. Attack strength will be random.
+                    float minAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"min attack");
+                    float maxAttackTime = mAnimation->getTextKeyTime(mCurrentWeapon+": "+mAttackType+" "+"max attack");
+                    if (mAttackingOrSpell || minAttackTime == maxAttackTime)
+                    {
+                        start = mAttackType+" min attack";
+                        stop = mAttackType+" max attack";
+                        mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
+                        break;
+                    }
+                    playSwishSound(0.0f);
+                }
+
                 if(mAttackType == "shoot")
                 {
                     start = mAttackType+" min hit";
@@ -1802,6 +1804,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 }
                 mUpperBodyState = UpperCharState_MinHitToHit;
                 break;
+            }
             case UpperCharState_MinHitToHit:
                 if(mAttackType == "shoot")
                 {
