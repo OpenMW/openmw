@@ -6,6 +6,8 @@
 #include "settings.hpp"
 #include "objectid.hpp"
 #include "navmeshcacheitem.hpp"
+#include "recastmesh.hpp"
+#include "recastmeshtiles.hpp"
 
 namespace DetourNavigator
 {
@@ -204,6 +206,8 @@ namespace DetourNavigator
          */
         boost::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
             const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
+
+        virtual RecastMeshTiles getRecastMeshTiles() = 0;
     };
 }
 

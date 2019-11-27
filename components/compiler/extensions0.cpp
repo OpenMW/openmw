@@ -327,6 +327,7 @@ namespace Compiler
             extensions.registerInstruction ("toggleactorspaths", "", opcodeToggleActorsPaths);
             extensions.registerInstruction ("setnavmeshnumber", "l", opcodeSetNavMeshNumberToRender);
             extensions.registerFunction ("repairedonme", 'l', "S", opcodeRepairedOnMe, opcodeRepairedOnMeExplicit);
+            extensions.registerInstruction ("togglerecastmesh", "", opcodeToggleRecastMesh);
         }
     }
 

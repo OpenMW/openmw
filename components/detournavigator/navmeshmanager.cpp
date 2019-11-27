@@ -220,6 +220,17 @@ namespace DetourNavigator
         mAsyncNavMeshUpdater.reportStats(frameNumber, stats);
     }
 
+    RecastMeshTiles NavMeshManager::getRecastMeshTiles()
+    {
+        std::vector<TilePosition> tiles;
+        mRecastMeshManager.forEachTilePosition(
+            [&tiles] (const TilePosition& tile) { tiles.push_back(tile); });
+        RecastMeshTiles result;
+        std::transform(tiles.begin(), tiles.end(), std::inserter(result, result.end()),
+            [this] (const TilePosition& tile) { return std::make_pair(tile, mRecastMeshManager.getMesh(tile)); });
+        return result;
+    }
+
     void NavMeshManager::addChangedTiles(const btCollisionShape& shape, const btTransform& transform,
             const ChangeType changeType)
     {
