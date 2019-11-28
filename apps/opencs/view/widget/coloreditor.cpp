@@ -6,6 +6,10 @@
 #include <QPainter>
 #include <QShowEvent>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #include "colorpickerpopup.hpp"
 
 CSVWidget::ColorEditor::ColorEditor(const QColor &color, QWidget *parent, const bool popupOnStart)
@@ -95,7 +99,11 @@ QPoint CSVWidget::ColorEditor::calculatePopupPosition()
 {
     QRect editorGeometry = geometry();
     QRect popupGeometry = mColorPicker->geometry();
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
+#else
     QRect screenGeometry = QApplication::desktop()->screenGeometry();
+#endif
 
     // Center the popup horizontally relative to the editor
     int localPopupX = (editorGeometry.width() - popupGeometry.width()) / 2;
