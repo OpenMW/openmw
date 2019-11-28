@@ -92,6 +92,8 @@ namespace MWWorld
           : mIter(iter)
         {}
 
+        SharedIterator& operator=(const SharedIterator&) = default;
+
         SharedIterator &operator++() {
             ++mIter;
             return *this;
