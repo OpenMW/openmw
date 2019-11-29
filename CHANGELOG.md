@@ -177,6 +177,7 @@
     Bug #5210: AiActivate allows actors to open dialogue and inventory windows
     Bug #5211: Screen fades in if the first loaded save is in interior cell
     Bug #5213: SameFaction script function is broken
+    Bug #5218: Crash when disabling ToggleBorders
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

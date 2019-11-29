@@ -91,8 +91,9 @@ void CellBorder::destroyCellBorderGeometry(int x, int y)
 
 void CellBorder::destroyCellBorderGeometry()
 {
-    for (CellGrid::iterator it = mCellBorderNodes.begin(); it != mCellBorderNodes.end(); ++it)
-        destroyCellBorderGeometry(it->first.first,it->first.second);
+    for (const auto& v : mCellBorderNodes)
+        mRoot->removeChild(v.second);
+    mCellBorderNodes.clear();
 }
 
 }
