@@ -147,7 +147,7 @@ namespace DetourNavigator
         const auto playerTile = getTilePosition(mSettings, toNavMeshCoordinates(mSettings, playerPosition));
         auto& lastRevision = mLastRecastMeshManagerRevision[agentHalfExtents];
         auto lastPlayerTile = mPlayerTile.find(agentHalfExtents);
-        if (lastRevision >= mRecastMeshManager.getRevision() && lastPlayerTile != mPlayerTile.end()
+        if (lastRevision == mRecastMeshManager.getRevision() && lastPlayerTile != mPlayerTile.end()
                 && lastPlayerTile->second == playerTile)
             return;
         lastRevision = mRecastMeshManager.getRevision();
