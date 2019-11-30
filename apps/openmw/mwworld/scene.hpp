@@ -51,6 +51,12 @@ namespace MWWorld
     class CellStore;
     class CellPreloader;
 
+    enum class RotationOrder
+    {
+        direct,
+        inverse
+    };
+
     class Scene
     {
         public:
@@ -137,7 +143,7 @@ namespace MWWorld
             void removeObjectFromScene (const Ptr& ptr);
             ///< Remove an object from the scene, but not from the world model.
 
-            void updateObjectRotation (const Ptr& ptr, bool inverseRotationOrder);
+            void updateObjectRotation(const Ptr& ptr, RotationOrder order);
             void updateObjectScale(const Ptr& ptr);
 
             bool isCellActive(const CellStore &cell);
