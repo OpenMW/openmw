@@ -76,7 +76,14 @@ ParticleShooter::ParticleShooter()
 ParticleShooter::ParticleShooter(const ParticleShooter &copy, const osg::CopyOp &copyop)
     : osgParticle::Shooter(copy, copyop)
 {
-    *this = copy;
+    mMinSpeed = copy.mMinSpeed;
+    mMaxSpeed = copy.mMaxSpeed;
+    mHorizontalDir = copy.mHorizontalDir;
+    mHorizontalAngle = copy.mHorizontalAngle;
+    mVerticalDir = copy.mVerticalDir;
+    mVerticalAngle = copy.mVerticalAngle;
+    mLifetime = copy.mLifetime;
+    mLifetimeRandom = copy.mLifetimeRandom;
 }
 
 void ParticleShooter::shoot(osgParticle::Particle *particle) const
@@ -112,7 +119,9 @@ GrowFadeAffector::GrowFadeAffector()
 GrowFadeAffector::GrowFadeAffector(const GrowFadeAffector& copy, const osg::CopyOp& copyop)
     : osgParticle::Operator(copy, copyop)
 {
-    *this = copy;
+    mGrowTime = copy.mGrowTime;
+    mFadeTime = copy.mFadeTime;
+    mCachedDefaultSize = copy.mCachedDefaultSize;
 }
 
 void GrowFadeAffector::beginOperate(osgParticle::Program *program)
@@ -143,7 +152,7 @@ ParticleColorAffector::ParticleColorAffector()
 ParticleColorAffector::ParticleColorAffector(const ParticleColorAffector &copy, const osg::CopyOp &copyop)
     : osgParticle::Operator(copy, copyop)
 {
-    *this = copy;
+    mData = copy.mData;
 }
 
 void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* dt */)
@@ -172,7 +181,13 @@ GravityAffector::GravityAffector()
 GravityAffector::GravityAffector(const GravityAffector &copy, const osg::CopyOp &copyop)
     : osgParticle::Operator(copy, copyop)
 {
-    *this = copy;
+    mForce = copy.mForce;
+    mType = copy.mType;
+    mPosition = copy.mPosition;
+    mDirection = copy.mDirection;
+    mDecay = copy.mDecay;
+    mCachedWorldPosition = copy.mCachedWorldPosition;
+    mCachedWorldDirection = copy.mCachedWorldDirection;
 }
 
 void GravityAffector::beginOperate(osgParticle::Program* program)
