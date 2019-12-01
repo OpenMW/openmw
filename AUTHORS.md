@@ -74,6 +74,7 @@ Programmers
     Fil Krynicki (filkry)
     Finbar Crago (finbar-crago)
     Florian Weber (Florianjw)
+    Gaëtan Dezeiraud (Brouilles)
     Gašper Sedej
     Gijsbert ter Horst (Ghostbird)
     Gohan1989
