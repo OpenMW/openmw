@@ -1129,7 +1129,9 @@ namespace MWScript
                     return;
                 }
 
-                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetId, false, false);
+                if (target.isEmpty())
+                    return;
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
                 cast.playSpellCastingEffects(spell->mId, false);
