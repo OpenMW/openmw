@@ -1348,13 +1348,13 @@ namespace MWWorld
             mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
     }
 
-    void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
+    void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
         const float pi = static_cast<float>(osg::PI);
 
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
-        if(adjust)
+        if (flags & MWBase::RotationFlag_adjust)
         {
             objRot[0] += rot.x();
             objRot[1] += rot.y();
@@ -1386,7 +1386,9 @@ namespace MWWorld
 
         if(ptr.getRefData().getBaseNode() != 0)
         {
-            mWorldScene->updateObjectRotation(ptr, true);
+            const auto order = flags & MWBase::RotationFlag_inverseOrder
+                ? RotationOrder::inverse : RotationOrder::direct;
+            mWorldScene->updateObjectRotation(ptr, order);
 
             if (const auto object = mPhysics->getObject(ptr))
                 updateNavigatorObject(object);
@@ -1458,9 +1460,9 @@ namespace MWWorld
         }
     }
 
-    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
+    void World::rotateObject (const Ptr& ptr, float x, float y, float z, MWBase::RotationFlags flags)
     {
-        rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
+        rotateObjectImp(ptr, osg::Vec3f(x, y, z), flags);
     }
 
     void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
@@ -1638,7 +1640,7 @@ namespace MWWorld
 
         float diff = duration * osg::DegreesToRadians(90.f);
         float targetRot = std::min(std::max(minRot, oldRot + diff * (state == MWWorld::DoorState::Opening ? 1 : -1)), maxRot);
-        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot);
+        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
 
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
@@ -1682,11 +1684,9 @@ namespace MWWorld
                     MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
             }
 
-            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot);
+            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot, MWBase::RotationFlag_none);
         }
 
-        // the rotation order we want to use
-        mWorldScene->updateObjectRotation(door, false);
         return reached;
     }
 
@@ -2479,7 +2479,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale()); // apply race height
-        rotateObject(player, 0.f, 0.f, 0.f, true);
+        rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());

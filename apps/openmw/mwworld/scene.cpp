@@ -40,6 +40,8 @@
 
 namespace
 {
+    using MWWorld::RotationOrder;
+
     osg::Quat makeActorOsgQuat(const ESM::Position& position)
     {
         return osg::Quat(position.rot[2], osg::Vec3(0, 0, -1));
@@ -67,7 +69,7 @@ namespace
             * osg::Quat(xr, osg::Vec3(-1, 0, 0));
     }
 
-    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, const bool inverseRotationOrder)
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, RotationOrder order)
     {
         if (!ptr.getRefData().getBaseNode())
             return;
@@ -75,7 +77,7 @@ namespace
         rendering.rotateObject(ptr,
             ptr.getClass().isActor()
             ? makeActorOsgQuat(ptr.getRefData().getPosition())
-            : (inverseRotationOrder
+            : (order == RotationOrder::inverse
                 ? makeInversedOrderObjectOsgQuat(ptr.getRefData().getPosition())
                 : makeObjectOsgQuat(ptr.getRefData().getPosition()))
         );
@@ -100,7 +102,7 @@ namespace
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
 
         ptr.getClass().insertObjectRendering(ptr, model, rendering);
-        setNodeRotation(ptr, rendering, false);
+        setNodeRotation(ptr, rendering, RotationOrder::direct);
 
         ptr.getClass().insertObject (ptr, model, physics);
 
@@ -179,9 +181,9 @@ namespace
     }
 
     void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                                    MWRender::RenderingManager& rendering, bool inverseRotationOrder)
+                                    MWRender::RenderingManager& rendering, RotationOrder order)
     {
-        setNodeRotation(ptr, rendering, inverseRotationOrder);
+        setNodeRotation(ptr, rendering, order);
         physics.updateRotation(ptr);
     }
 
@@ -278,9 +280,9 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::updateObjectRotation (const Ptr& ptr, bool inverseRotationOrder)
+    void Scene::updateObjectRotation(const Ptr& ptr, RotationOrder order)
     {
-        ::updateObjectRotation(ptr, *mPhysics, mRendering, inverseRotationOrder);
+        ::updateObjectRotation(ptr, *mPhysics, mRendering, order);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)

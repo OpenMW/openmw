@@ -1,6 +1,8 @@
 #ifndef GAME_MWBASE_WORLD_H
 #define GAME_MWBASE_WORLD_H
 
+#include "rotationflags.hpp"
+
 #include <vector>
 #include <map>
 #include <set>
@@ -280,7 +282,8 @@ namespace MWBase
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr, float x, float y, float z,
+                RotationFlags flags = RotationFlag_inverseOrder) = 0;
 
             virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< Place an object. Makes a copy of the Ptr.
