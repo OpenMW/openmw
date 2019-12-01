@@ -178,6 +178,7 @@
     Bug #5211: Screen fades in if the first loaded save is in interior cell
     Bug #5213: SameFaction script function is broken
     Bug #5218: Crash when disabling ToggleBorders
+    Bug #5220: GetLOS crashes when actor isn't loaded
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

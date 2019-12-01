@@ -382,9 +382,11 @@ namespace MWScript
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
+                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
 
-                    Interpreter::Type_Integer value = MWBase::Environment::get().getMechanicsManager()->isActorDetected(actor, observer);
+                    Interpreter::Type_Integer value = 0;
+                    if (!actor.isEmpty())
+                        value = MWBase::Environment::get().getMechanicsManager()->isActorDetected(actor, observer);
 
                     runtime.push (value);
                 }
@@ -404,9 +406,9 @@ namespace MWScript
                     runtime.pop();
 
 
-                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
+                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
                     bool value = false;
-                    if(dest != MWWorld::Ptr() && source.getClass().isActor() && dest.getClass().isActor())
+                    if (!dest.isEmpty() && source.getClass().isActor() && dest.getClass().isActor())
                     {
                         value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
                     }
@@ -447,8 +449,9 @@ namespace MWScript
                     std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(targetID, true);
-                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
+                    MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetID, true, false);
+                    if (!target.isEmpty())
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
                 }
         };
 
