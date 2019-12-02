@@ -1,5 +1,6 @@
 set (OPENCS_SRC main.cpp
     ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/qt.exe.manifest
     )
 
 opencs_units (. editor)

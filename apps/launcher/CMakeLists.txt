@@ -15,6 +15,7 @@ set(LAUNCHER
     utils/lineedit.cpp
 
     ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
+    ${CMAKE_SOURCE_DIR}/files/windows/qt.exe.manifest
 )
 
 set(LAUNCHER_HEADER

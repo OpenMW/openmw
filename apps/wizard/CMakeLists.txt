@@ -17,6 +17,7 @@ set(WIZARD
 
 if(WIN32)
     list(APPEND WIZARD ${CMAKE_SOURCE_DIR}/files/windows/openmw-wizard.rc)
+    list(APPEND WIZARD ${CMAKE_SOURCE_DIR}/files/windows/qt.exe.manifest)
 endif()
 
 set(WIZARD_HEADER
