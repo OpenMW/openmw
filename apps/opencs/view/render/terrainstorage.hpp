@@ -18,6 +18,8 @@ namespace CSVRender
         TerrainStorage(const CSMWorld::Data& data);
         void setAlteredHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
+
+        virtual bool useAlteration() const { return true; }
         float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
         float* getAlteredHeight(int inCellX, int inCellY);
 
