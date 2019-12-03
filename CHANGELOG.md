@@ -179,6 +179,7 @@
     Bug #5213: SameFaction script function is broken
     Bug #5218: Crash when disabling ToggleBorders
     Bug #5220: GetLOS crashes when actor isn't loaded
+    Bug #5222: Empty cell name subrecords are not saved
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
