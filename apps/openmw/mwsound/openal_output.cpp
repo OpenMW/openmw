@@ -1489,7 +1489,7 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
 
 OpenAL_Output::~OpenAL_Output()
 {
-    deinit();
+    OpenAL_Output::deinit();
 }
 
 }
