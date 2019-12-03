@@ -576,6 +576,13 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
         mCurrentMovement = movementAnimName;
         if(!mCurrentMovement.empty())
         {
+            if (resetIdle)
+            {
+                mAnimation->disable(mCurrentIdle);
+                mIdleState = CharState_None;
+                idle = CharState_None;
+            }
+
             // For non-flying creatures, MW uses the Walk animation to calculate the animation velocity
             // even if we are running. This must be replicated, otherwise the observed speed would differ drastically.
             std::string anim = mCurrentMovement;
@@ -615,9 +622,6 @@ void CharacterController::refreshMovementAnims(const std::string& weapShortGroup
 
             mAnimation->play(mCurrentMovement, Priority_Movement, movemask, false,
                              1.f, "start", "stop", startpoint, ~0ul, true);
-
-            if (resetIdle)
-                mAnimation->disable(mCurrentIdle);
         }
         else
             mMovementState = CharState_None;
@@ -1656,6 +1660,7 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
             mIdleState != CharState_IdleSneak && mIdleState != CharState_IdleSwim)
         {
             mAnimation->disable(mCurrentIdle);
+            mIdleState = CharState_None;
         }
 
         animPlaying = mAnimation->getInfo(mCurrentWeapon, &complete);
