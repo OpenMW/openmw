@@ -409,6 +409,7 @@ void NpcAnimation::setRenderBin()
 void NpcAnimation::rebuild()
 {
     mScabbard.reset();
+    mHolsteredShield.reset();
     updateNpcBase();
 
     MWBase::Environment::get().getMechanicsManager()->forceStateUpdate(mPtr);
