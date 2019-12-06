@@ -13,11 +13,11 @@ namespace ESSImport
     {
         while (esm.isNextSub("NPCO"))
         {
-            ESM::ContItem contItem;
+            ContItem contItem;
             esm.getHT(contItem);
 
             InventoryItem item;
-            item.mId = contItem.mItem;
+            item.mId = contItem.mItem.toString();
             item.mCount = contItem.mCount;
             item.mRelativeEquipmentSlot = -1;
             item.mLockLevel = 0;
