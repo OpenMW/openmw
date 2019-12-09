@@ -116,6 +116,10 @@ void Launcher::MainDialog::createIcons()
 
 void Launcher::MainDialog::createPages()
 {
+    // Avoid creating the widgets twice
+    if (pagesWidget->count() != 0)
+        return;
+
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mEngineSettings, this);
@@ -166,18 +170,20 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         QAbstractButton *skipButton =
                 msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
 
-        Q_UNUSED(skipButton); // Surpress compiler unused warning
-
         msgBox.exec();
 
         if (msgBox.clickedButton() == wizardButton)
         {
-            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
-                return FirstRunDialogResultFailure;
-            } else {
+            if (mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
                 return FirstRunDialogResultWizard;
-            }
         }
+        else if (msgBox.clickedButton() == skipButton)
+        {
+            // Don't bother setting up absent game data.
+            if (setup())
+                return FirstRunDialogResultContinue;
+        }
+        return FirstRunDialogResultFailure;
     }
 
     if (!setup() || !setupGameData()) {
@@ -384,22 +390,23 @@ bool Launcher::MainDialog::setupGameData()
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
                                    The directory containing the data files was not found."));
 
         QAbstractButton *wizardButton =
                 msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
+        QAbstractButton *skipButton =
+                msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+
+        Q_UNUSED(skipButton); // Supress compiler unused warning
 
         msgBox.exec();
 
         if (msgBox.clickedButton() == wizardButton)
         {
-            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
+            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
                 return false;
-            } else {
-                return true;
-            }
         }
     }
 
@@ -582,7 +589,7 @@ void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exi
     // HACK: Ensure the pages are created, else segfault
     setup();
 
-    if (reloadSettings())
+    if (setupGameData() && reloadSettings())
         show();
 }
 
