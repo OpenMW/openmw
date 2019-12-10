@@ -614,8 +614,6 @@ namespace NifOsg
             if (composite->getNumControllers() > 0)
                 node->addUpdateCallback(composite);
 
-            // Note: NiTriShapes are not allowed to have KeyframeControllers (the vanilla engine just crashes when there is one).
-            // We can take advantage of this constraint for optimizations later.
             if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips
                     && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
                 handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
@@ -675,6 +673,17 @@ namespace NifOsg
                     osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->data.getPtr(), texUnits);
                     setupController(niuvctrl, uvctrl, animflags);
                     composite->addController(uvctrl);
+                }
+                else if (ctrl->recType == Nif::RC_NiKeyframeController)
+                {
+                    const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
+                    if(!key->data.empty())
+                    {
+                        osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
+
+                        setupController(key, callback, animflags);
+                        node->addUpdateCallback(callback);
+                    }
                 }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
