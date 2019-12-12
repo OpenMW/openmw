@@ -115,6 +115,7 @@ namespace MWMechanics
         bool needToRecalcDynamicStats();
         void setNeedRecalcDynamicStats(bool val);
 
+        float getFallHeight() const;
         void addToFallHeight(float height);
 
         /// Reset the fall height
