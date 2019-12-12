@@ -2513,7 +2513,9 @@ namespace MWWorld
         if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return Rest_PlayerIsUnderwater;
 
-        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isFlying(player))
+        float fallHeight = player.getClass().getCreatureStats(player).getFallHeight();
+        float epsilon = 1e-4;
+        if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon)) || isFlying(player))
             return Rest_PlayerIsInAir;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())

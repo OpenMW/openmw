@@ -63,6 +63,7 @@
     Bug #4787: Sneaking makes 1st person walking/bobbing animation super-slow
     Bug #4797: Player sneaking and running stances are not accounted for when in air
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
+    Bug #4802: You can rest before taking falling damage from landing from a jump
     Bug #4803: Stray special characters before begin statement break script compilation
     Bug #4804: Particle system with the "Has Sizes = false" causes an exception
     Bug #4805: NPC movement speed calculations do not take race Weight into account
