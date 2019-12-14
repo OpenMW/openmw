@@ -598,7 +598,7 @@ void NpcAnimation::updateParts()
     };
     static const size_t slotlistsize = sizeof(slotlist)/sizeof(slotlist[0]);
 
-    bool wasArrowAttached = (mAmmunition.get() != nullptr);
+    bool wasArrowAttached = isArrowAttached();
     mAmmunition.reset();
 
     const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);

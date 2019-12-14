@@ -779,7 +779,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool fireEvent)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
@@ -811,7 +811,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        fireEquipmentChangedEvent(actor);
+        if (fireEvent)
+            fireEquipmentChangedEvent(actor);
+
         updateMagicEffects(actor);
 
         return retval;
