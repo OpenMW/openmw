@@ -661,6 +661,8 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
                     const Nif::NiUVController *niuvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
+                    if (niuvctrl->data.empty())
+                        continue;
                     const unsigned int uvSet = niuvctrl->uvSet;
                     std::set<int> texUnits;
                     // UVController should work only for textures which use a given UV Set, usually 0.
@@ -728,6 +730,8 @@ namespace NifOsg
 
         void handleVisController(const Nif::NiVisController* visctrl, osg::Node* node, int animflags)
         {
+            if (visctrl->data.empty())
+                return;
             osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
             setupController(visctrl, callback, animflags);
             node->addUpdateCallback(callback);
@@ -735,6 +739,8 @@ namespace NifOsg
 
         void handleRollController(const Nif::NiRollController* rollctrl, osg::Node* node, int animflags)
         {
+            if (rollctrl->data.empty())
+                return;
             osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
             setupController(rollctrl, callback, animflags);
             node->addUpdateCallback(callback);
@@ -749,6 +755,8 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
+                    if (alphactrl->data.empty())
+                        continue;
                     osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr()));
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
@@ -756,6 +764,8 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
+                    if (matctrl->data.empty())
+                        continue;
                     // Two bits that correspond to the controlled material color.
                     // 00: Ambient
                     // 01: Diffuse
@@ -1142,10 +1152,12 @@ namespace NifOsg
                     continue;
                 if(ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    drawable = handleMorphGeometry(static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr()), geom, parentNode, composite, boundTextures, animflags);
+                    const Nif::NiGeomMorpherController* nimorphctrl = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+                    if (nimorphctrl->data.empty())
+                        continue;
+                    drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
 
-                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(
-                                static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr())->data.getPtr());
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl->data.getPtr());
                     setupController(ctrl.getPtr(), morphctrl, animflags);
                     drawable->setUpdateCallback(morphctrl);
                     break;
