@@ -182,6 +182,7 @@
     Bug #5218: Crash when disabling ToggleBorders
     Bug #5220: GetLOS crashes when actor isn't loaded
     Bug #5222: Empty cell name subrecords are not saved
+    Bug #5223: Bow replacement during attack animation removes attached arrow
     Bug #5226: Reputation should be capped
     Bug #5229: Crash if mesh controller node has no data node
     Feature #1774: Handle AvoidNode

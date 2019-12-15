@@ -299,10 +299,10 @@ namespace MWMechanics
 
         bool wasEquipped = currentItem != store.end() && Misc::StringUtils::ciEqual(currentItem->getCellRef().getRefId(), itemId);
 
-        store.remove(itemId, 1, actor);
-
         if (actor != MWMechanics::getPlayer())
         {
+            store.remove(itemId, 1, actor);
+
             // Equip a replacement
             if (!wasEquipped)
                 return;
@@ -329,17 +329,19 @@ namespace MWMechanics
         std::string prevItemId = player.getPreviousItem(itemId);
         player.erasePreviousItem(itemId);
 
-        if (prevItemId.empty())
-            return;
+        if (!prevItemId.empty())
+        {
+            // Find previous item (or its replacement) by id.
+            // we should equip previous item only if expired bound item was equipped.
+            MWWorld::Ptr item = store.findReplacement(prevItemId);
+            if (!item.isEmpty() && wasEquipped)
+            {
+                MWWorld::ActionEquip action(item);
+                action.execute(actor);
+            }
+        }
 
-        // Find previous item (or its replacement) by id.
-        // we should equip previous item only if expired bound item was equipped.
-        MWWorld::Ptr item = store.findReplacement(prevItemId);
-        if (item.isEmpty() || !wasEquipped)
-            return;
-
-        MWWorld::ActionEquip action(item);
-        action.execute(actor);
+        store.remove(itemId, 1, actor);
     }
 
     void Actors::updateActor (const MWWorld::Ptr& ptr, float duration)
