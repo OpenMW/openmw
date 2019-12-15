@@ -1410,7 +1410,7 @@ namespace NifOsg
             return image;
         }
 
-        void handleTextureProperty(const Nif::NiTexturingProperty* texprop, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
+        void handleTextureProperty(const Nif::NiTexturingProperty* texprop, const std::string& nodeName, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
             if (!boundTextures.empty())
             {
@@ -1444,7 +1444,7 @@ namespace NifOsg
                         }
                         default:
                         {
-                            Log(Debug::Info) << "Unhandled texture stage " << i << " in " << mFilename;
+                            Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename;
                             continue;
                         }
                     }
@@ -1452,7 +1452,8 @@ namespace NifOsg
                     const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
                     if(tex.texture.empty() && texprop->controller.empty())
                     {
-                        Log(Debug::Verbose) << "Texture layer " << i << " is in use but empty in " << mFilename;
+                        if (i == 0)
+                            Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
                         continue;
                     }
 
@@ -1640,7 +1641,7 @@ namespace NifOsg
             {
                 const Nif::NiTexturingProperty* texprop = static_cast<const Nif::NiTexturingProperty*>(property);
                 osg::StateSet* stateset = node->getOrCreateStateSet();
-                handleTextureProperty(texprop, stateset, composite, imageManager, boundTextures, animflags);
+                handleTextureProperty(texprop, node->getName(), stateset, composite, imageManager, boundTextures, animflags);
                 break;
             }
             // unused by mw
