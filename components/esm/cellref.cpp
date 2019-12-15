@@ -67,6 +67,10 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 break;
             case ESM::FourCC<'X','S','C','L'>::value:
                 esm.getHT(mScale);
+                if (mScale < 0.5)
+                    mScale = 0.5;
+                else if (mScale > 2)
+                    mScale = 2;
                 break;
             case ESM::FourCC<'A','N','A','M'>::value:
                 mOwner = esm.getHString();
