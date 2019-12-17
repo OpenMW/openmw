@@ -24,10 +24,14 @@ namespace MWWorld
         {
             // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
-            getFollowersToTeleport(actor, followers);
+            std::set<MWWorld::Ptr> *inCombat = new std::set<MWWorld::Ptr>;
+            getFollowersToTeleport(actor, followers, inCombat);
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 teleport(*it);
+            for (std::set<MWWorld::Ptr>::iterator it = inCombat->begin(); it != inCombat->end(); ++it)
+                it->getClass().getCreatureStats(*it).getAiSequence().stopCombat();
+            delete inCombat;
         }
 
         teleport(actor);
@@ -60,8 +64,9 @@ namespace MWWorld
         }
     }
 
-    void ActionTeleport::getFollowersToTeleport(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out) {
+    void ActionTeleport::getFollowersToTeleport(const MWWorld::Ptr& actor, std::set<MWWorld::Ptr>& out, std::set<MWWorld::Ptr>* inCombatSet) {
         std::set<MWWorld::Ptr> followers;
+        MWBase::World* world = MWBase::Environment::get().getWorld();
         MWBase::Environment::get().getMechanicsManager()->getActorsFollowing(actor, followers);
 
         for(std::set<MWWorld::Ptr>::iterator it = followers.begin();it != followers.end();++it)
@@ -71,7 +76,14 @@ namespace MWWorld
             std::string script = follower.getClass().getScript(follower);
             if (!script.empty() && follower.getRefData().getLocals().getIntVar(script, "stayoutside") == 1)
                 continue;
-
+            if (follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(world->getPlayerPtr()))
+            {
+                if(inCombatSet)
+                {
+                    inCombatSet->insert(follower);
+                }
+                continue;
+            } 
             if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2() <= 800*800)
                 out.insert(follower);
         }
