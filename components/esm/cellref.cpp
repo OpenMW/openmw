@@ -145,7 +145,12 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     }
 
     if (mScale != 1.0) {
-        esm.writeHNT("XSCL", mScale);
+        float scale = mScale;
+        if (scale < 0.5)
+            scale = 0.5;
+        else if (scale > 2)
+            scale = 2;
+        esm.writeHNT("XSCL", scale);
     }
 
     esm.writeHNOCString("ANAM", mOwner);
