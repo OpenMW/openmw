@@ -291,7 +291,7 @@ namespace CSMWorld
             { ColumnId_UChar, "Value [0..255]" },
             { ColumnId_NpcMisc, "NPC Misc" },
             { ColumnId_Level, "Level" },
-            { ColumnId_NpcFactionID, "Faction ID" },
+            // { ColumnId_NpcFactionID, "Faction ID" },
             { ColumnId_GenderNpc, "Gender"},
             { ColumnId_Mana, "Mana" },
             { ColumnId_Fatigue, "Fatigue" },

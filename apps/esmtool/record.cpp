@@ -1047,7 +1047,7 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
-        std::cout << "  FactionID: " << (int)mData.mNpdt.mFactionID << std::endl;
+        // std::cout << "  FactionID: " << (int)mData.mNpdt.mFactionID << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
         std::cout << "    Strength: " << (int)mData.mNpdt.mStrength << std::endl;
