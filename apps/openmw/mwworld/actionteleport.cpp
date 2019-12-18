@@ -78,9 +78,7 @@ namespace MWWorld
             if (follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(world->getPlayerPtr()))
             {
                 if(inCombatSet)
-                {
                     inCombatSet->insert(follower);
-                }
                 continue;
             } 
             if ((follower.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3()).length2() <= 800*800)
