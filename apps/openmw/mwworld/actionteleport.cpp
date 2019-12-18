@@ -24,14 +24,13 @@ namespace MWWorld
         {
             // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
-            std::set<MWWorld::Ptr> *inCombat = new std::set<MWWorld::Ptr>;
-            getFollowersToTeleport(actor, followers, inCombat);
+            std::set<MWWorld::Ptr> inCombat;
+            getFollowersToTeleport(actor, followers, &inCombat);
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 teleport(*it);
-            for (std::set<MWWorld::Ptr>::iterator it = inCombat->begin(); it != inCombat->end(); ++it)
+            for (std::set<MWWorld::Ptr>::iterator it = inCombat.begin(); it != inCombat.end(); ++it)
                 it->getClass().getCreatureStats(*it).getAiSequence().stopCombat();
-            delete inCombat;
         }
 
         teleport(actor);
