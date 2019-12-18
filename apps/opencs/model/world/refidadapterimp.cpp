@@ -1096,27 +1096,25 @@ QVariant CSMWorld::NpcMiscRefIdAdapter::getNestedData (const RefIdColumn *column
             case 1: return QVariant(QVariant::UserType);
             case 2: return QVariant(QVariant::UserType);
             case 3: return QVariant(QVariant::UserType);
-            case 4: return QVariant(QVariant::UserType);
-            case 5: return static_cast<int>(record.get().mNpdt.mDisposition);
-            case 6: return static_cast<int>(record.get().mNpdt.mReputation);
-            case 7: return static_cast<int>(record.get().mNpdt.mRank);
-            case 8: return record.get().mNpdt.mGold;
-            case 9: return record.get().mPersistent == true;
+            case 4: return static_cast<int>(record.get().mNpdt.mDisposition);
+            case 5: return static_cast<int>(record.get().mNpdt.mReputation);
+            case 6: return static_cast<int>(record.get().mNpdt.mRank);
+            case 7: return record.get().mNpdt.mGold;
+            case 8: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
     else
         switch (subColIndex)
         {
             case 0: return static_cast<int>(record.get().mNpdt.mLevel);
-            case 1: return static_cast<int>(record.get().mNpdt.mFactionID);
-            case 2: return static_cast<int>(record.get().mNpdt.mHealth);
-            case 3: return static_cast<int>(record.get().mNpdt.mMana);
-            case 4: return static_cast<int>(record.get().mNpdt.mFatigue);
-            case 5: return static_cast<int>(record.get().mNpdt.mDisposition);
-            case 6: return static_cast<int>(record.get().mNpdt.mReputation);
-            case 7: return static_cast<int>(record.get().mNpdt.mRank);
-            case 8: return record.get().mNpdt.mGold;
-            case 9: return record.get().mPersistent == true;
+            case 1: return static_cast<int>(record.get().mNpdt.mHealth);
+            case 2: return static_cast<int>(record.get().mNpdt.mMana);
+            case 3: return static_cast<int>(record.get().mNpdt.mFatigue);
+            case 4: return static_cast<int>(record.get().mNpdt.mDisposition);
+            case 5: return static_cast<int>(record.get().mNpdt.mReputation);
+            case 6: return static_cast<int>(record.get().mNpdt.mRank);
+            case 7: return record.get().mNpdt.mGold;
+            case 8: return record.get().mPersistent == true;
             default: return QVariant(); // throw an exception here?
         }
 }
@@ -1137,27 +1135,25 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
             case 1: return;
             case 2: return;
             case 3: return;
-            case 4: return;
-            case 5: npc.mNpdt.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt.mGold = value.toInt(); break;
-            case 9: npc.mPersistent = value.toBool(); break;
+            case 4: npc.mNpdt.mDisposition = static_cast<signed char>(value.toInt()); break;
+            case 5: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
+            case 6: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
+            case 7: npc.mNpdt.mGold = value.toInt(); break;
+            case 8: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }
     else
         switch(subColIndex)
         {
             case 0: npc.mNpdt.mLevel = static_cast<short>(value.toInt()); break;
-            case 1: npc.mNpdt.mFactionID = static_cast<char>(value.toInt()); break;
-            case 2: npc.mNpdt.mHealth = static_cast<unsigned short>(value.toInt()); break;
-            case 3: npc.mNpdt.mMana = static_cast<unsigned short>(value.toInt()); break;
-            case 4: npc.mNpdt.mFatigue = static_cast<unsigned short>(value.toInt()); break;
-            case 5: npc.mNpdt.mDisposition = static_cast<signed char>(value.toInt()); break;
-            case 6: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
-            case 7: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
-            case 8: npc.mNpdt.mGold = value.toInt(); break;
-            case 9: npc.mPersistent = value.toBool(); break;
+            case 1: npc.mNpdt.mHealth = static_cast<unsigned short>(value.toInt()); break;
+            case 2: npc.mNpdt.mMana = static_cast<unsigned short>(value.toInt()); break;
+            case 3: npc.mNpdt.mFatigue = static_cast<unsigned short>(value.toInt()); break;
+            case 4: npc.mNpdt.mDisposition = static_cast<signed char>(value.toInt()); break;
+            case 5: npc.mNpdt.mReputation = static_cast<signed char>(value.toInt()); break;
+            case 6: npc.mNpdt.mRank = static_cast<signed char>(value.toInt()); break;
+            case 7: npc.mNpdt.mGold = value.toInt(); break;
+            case 8: npc.mPersistent = value.toBool(); break;
             default: return; // throw an exception here?
         }
 
@@ -1166,7 +1162,7 @@ void CSMWorld::NpcMiscRefIdAdapter::setNestedData (const RefIdColumn *column,
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedColumnsCount(const RefIdColumn *column, const RefIdData& data) const
 {
-    return 10; // Level, FactionID, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold, Persist
+    return 9; // Level, Health, Mana, Fatigue, Disposition, Reputation, Rank, Gold, Persist
 }
 
 int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn *column, const RefIdData& data, int index) const
