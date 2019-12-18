@@ -67,6 +67,10 @@ void ESM::CellRef::loadData(ESMReader &esm, bool &isDeleted)
                 break;
             case ESM::FourCC<'X','S','C','L'>::value:
                 esm.getHT(mScale);
+                if (mScale < 0.5)
+                    mScale = 0.5;
+                else if (mScale > 2)
+                    mScale = 2;
                 break;
             case ESM::FourCC<'A','N','A','M'>::value:
                 mOwner = esm.getHString();
@@ -141,7 +145,12 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
     }
 
     if (mScale != 1.0) {
-        esm.writeHNT("XSCL", mScale);
+        float scale = mScale;
+        if (scale < 0.5)
+            scale = 0.5;
+        else if (scale > 2)
+            scale = 2;
+        esm.writeHNT("XSCL", scale);
     }
 
     esm.writeHNOCString("ANAM", mOwner);
