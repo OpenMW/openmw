@@ -1058,7 +1058,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
         std::cout << "  Fatigue: " << mData.mNpdt.mFatigue << std::endl;
-        std::cout << "  Unknown: " << (int)mData.mNpdt.mUnknown << std::endl;
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
 
