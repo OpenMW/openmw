@@ -15,6 +15,10 @@
 #include <QDesktopWidget>
 #include <QScrollBar>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
@@ -1050,7 +1054,7 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
     if (isGrowLimit)
         rect = dw->screenGeometry(this);
     else
-        rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
+        rect = QGuiApplication::screens().at(dw->screenNumber(this))->geometry();
 
     if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
     {
