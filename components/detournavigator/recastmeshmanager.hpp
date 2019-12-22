@@ -30,7 +30,7 @@ namespace DetourNavigator
     public:
         struct Water
         {
-            int mCellSize;
+            int mCellSize = 0;
             btTransform mTransform;
         };
 
