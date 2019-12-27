@@ -106,6 +106,11 @@ namespace MWWorld
             return iter;
         }
 
+        SharedIterator &operator+=(int advance) {
+            mIter += advance;
+            return *this;
+        }
+
         SharedIterator &operator--() {
             --mIter;
             return *this;
