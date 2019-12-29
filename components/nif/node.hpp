@@ -24,7 +24,7 @@ class Node : public Named
 {
 public:
     // Node flags. Interpretation depends somewhat on the type of node.
-    int flags;
+    unsigned int flags;
     Transformation trafo;
     osg::Vec3f velocity; // Unused? Might be a run-time game state
     PropertyList props;
