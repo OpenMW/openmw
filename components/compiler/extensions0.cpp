@@ -89,6 +89,8 @@ namespace Compiler
         void registerExtensions (Extensions& extensions)
         {
             extensions.registerFunction ("cellchanged", 'l', "", opcodeCellChanged);
+            extensions.registerInstruction("testcells", "", opcodeTestCells);
+            extensions.registerInstruction("testinteriorcells", "", opcodeTestInteriorCells);
             extensions.registerInstruction ("coc", "S", opcodeCOC);
             extensions.registerInstruction ("centeroncell", "S", opcodeCOC);
             extensions.registerInstruction ("coe", "ll", opcodeCOE);

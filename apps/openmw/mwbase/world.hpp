@@ -118,6 +118,9 @@ namespace MWBase
 
             virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
 
+            virtual void testExteriorCells() = 0;
+            virtual void testInteriorCells() = 0;
+
             virtual void useDeathCamera() = 0;
 
             virtual void setWaterHeight(const float height) = 0;

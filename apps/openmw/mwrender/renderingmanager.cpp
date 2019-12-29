@@ -15,7 +15,6 @@
 #include <osg/TextureCubeMap>
 
 #include <osgUtil/LineSegmentIntersector>
-#include <osgUtil/IncrementalCompileOperation>
 
 #include <osg/ImageUtils>
 
@@ -389,6 +388,11 @@ namespace MWRender
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
+    }
+
+    osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
+    {
+        return mViewer->getIncrementalCompileOperation();
     }
 
     MWRender::Objects& RenderingManager::getObjects()
