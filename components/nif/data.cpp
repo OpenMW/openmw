@@ -265,7 +265,7 @@ void NiKeyframeData::read(NIFStream *nif)
 {
     mRotations = std::make_shared<QuaternionKeyMap>();
     mRotations->read(nif);
-    if(mRotations->mInterpolationType == Vector3KeyMap::XYZ)
+    if(mRotations->mInterpolationType == InterpolationType_XYZ)
     {
         //Chomp unused float
         nif->getFloat();

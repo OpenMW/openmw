@@ -13,6 +13,16 @@
 namespace Nif
 {
 
+enum InterpolationType
+{
+    InterpolationType_Unknown = 0,
+    InterpolationType_Linear = 1,
+    InterpolationType_Quadratic = 2,
+    InterpolationType_TBC = 3,
+    InterpolationType_XYZ = 4,
+    InterpolationType_Constant = 5
+};
+
 template<typename T>
 struct KeyT {
     T mValue;
@@ -38,17 +48,7 @@ struct KeyMapT {
     using ValueType = T;
     using KeyType = KeyT<T>;
 
-    enum InterpolationType
-    {
-        Unknown = 0,
-        Linear = 1,
-        Quadratic = 2,
-        TBC = 3,
-        XYZ = 4,
-        Constant = 5
-    };
-
-    unsigned int mInterpolationType = Linear;
+    unsigned int mInterpolationType = InterpolationType_Linear;
     MapType mKeys;
 
     //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
@@ -56,7 +56,7 @@ struct KeyMapT {
     {
         assert(nif);
 
-        mInterpolationType = Unknown;
+        mInterpolationType = InterpolationType_Unknown;
 
         size_t count = nif->getUInt();
         if(count == 0 && !force)
@@ -69,7 +69,8 @@ struct KeyMapT {
         KeyT<T> key;
         NIFStream &nifReference = *nif;
 
-        if (mInterpolationType == Linear || mInterpolationType == Constant)
+        if (mInterpolationType == InterpolationType_Linear
+         || mInterpolationType == InterpolationType_Constant)
         {
             for(size_t i = 0;i < count;i++)
             {
@@ -78,7 +79,7 @@ struct KeyMapT {
                 mKeys[time] = key;
             }
         }
-        else if (mInterpolationType == Quadratic)
+        else if (mInterpolationType == InterpolationType_Quadratic)
         {
             for(size_t i = 0;i < count;i++)
             {
@@ -87,7 +88,7 @@ struct KeyMapT {
                 mKeys[time] = key;
             }
         }
-        else if (mInterpolationType == TBC)
+        else if (mInterpolationType == InterpolationType_TBC)
         {
             for(size_t i = 0;i < count;i++)
             {
@@ -97,11 +98,11 @@ struct KeyMapT {
             }
         }
         //XYZ keys aren't actually read here.
-        //data.hpp sees that the last type read was sXYZInterpolation and:
+        //data.hpp sees that the last type read was InterpolationType_XYZ and:
         //    Eats a floating point number, then
         //    Re-runs the read function 3 more times.
-        //        When it does that it's reading in a bunch of sLinearInterpolation keys, not sXYZInterpolation.
-        else if(mInterpolationType == XYZ)
+        //        When it does that it's reading in a bunch of InterpolationType_Linear keys, not InterpolationType_XYZ.
+        else if(mInterpolationType == InterpolationType_XYZ)
         {
             //Don't try to read XYZ keys into the wrong part
             if ( count != 1 )
@@ -112,7 +113,7 @@ struct KeyMapT {
                 nif->file->fail(error.str());
             }
         }
-        else if (mInterpolationType == Unknown)
+        else if (mInterpolationType == InterpolationType_Unknown)
         {
             if (count != 0)
                 nif->file->fail("Interpolation type 0 doesn't work with keys");

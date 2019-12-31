@@ -111,7 +111,7 @@ namespace NifOsg
         {
             switch (type)
             {
-                case 5:
+                case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
                 default:
                     return a.mValue + ((b.mValue - a.mValue) * fraction);
@@ -121,7 +121,7 @@ namespace NifOsg
         {
             switch (type)
             {
-                case 5:
+                case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
                 default:
                 {
