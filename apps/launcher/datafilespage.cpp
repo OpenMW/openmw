@@ -375,7 +375,12 @@ void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
 
     // The following code will run only if there is not another thread currently running it
     CellNameLoader cellNameLoader;
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+    QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
+    QStringList cellNamesList(set.begin(), set.end());
+#else
     QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
+#endif
     std::sort(cellNamesList.begin(), cellNamesList.end());
     emit signalLoadedCellsChanged(cellNamesList);
 }
