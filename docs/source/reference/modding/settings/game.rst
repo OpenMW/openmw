@@ -282,3 +282,19 @@ equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
 This makes the movement speed behavior more fair between different races.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+projectiles enchant multiplier
+------------------------------
+
+:Type:		floating point
+:Range:		0.0 to 1.0
+:Default:	0.0
+
+The value of this setting determines how many projectiles (thrown weapons, arrows and bolts) you can enchant at once according to the following formula:
+
+count = (soul gem charge * projectiles enchant multiplier) / enchantment strength
+
+A value of 0 means that you can only enchant one projectile.
+If you want to have Morrowind Code Patch-like count of projectiles being enchanted at once, set this value to 0.25 (i.e. 25% of the charge).
+
+This setting can only be configured by editing the settings configuration file.
