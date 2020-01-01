@@ -261,7 +261,7 @@ void LowLevelFile::open (char const * filename)
     if (handle == INVALID_HANDLE_VALUE)
     {
         std::ostringstream os;
-        os << "Failed to open '" << filename << "' for reading.";
+        os << "Failed to open '" << filename << "' for reading: " << GetLastError();
         throw std::runtime_error (os.str ());
     }
 
