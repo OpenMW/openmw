@@ -9,7 +9,7 @@ namespace Nif
     {
         Named::read(nif);
 
-        external = !!nif->getChar();
+        external = nif->getChar() != 0;
         if(external)
             filename = nif->getString();
         else

@@ -28,7 +28,7 @@ namespace Nif
     ///Currently specific for 4.0.0.2 and earlier
     bool NIFStream::getBoolean()
     {
-        return !!getInt();
+        return getInt() != 0;
     }
 
     ///Read in a string, either from the string table using the index (currently absent) or from the stream using the specified length

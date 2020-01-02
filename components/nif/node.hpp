@@ -44,7 +44,7 @@ public:
         velocity = nif->getVector3();
         props.read(nif);
 
-        hasBounds = !!nif->getInt();
+        hasBounds = nif->getBoolean();
         if(hasBounds)
         {
             nif->getInt(); // always 1
