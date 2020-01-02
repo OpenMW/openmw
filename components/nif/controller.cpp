@@ -117,12 +117,11 @@ namespace Nif
     {
         Controller::read(nif);
 
-        /*
-           int = 1
-           2xfloat
-           short = 0 or 1
-        */
-        nif->skip(14);
+        bankDirection = nif->getUInt();
+        maxBankAngle = nif->getFloat();
+        smoothing = nif->getFloat();
+        followAxis = nif->getUShort() > 0;
+
         posData.read(nif);
         floatData.read(nif);
     }

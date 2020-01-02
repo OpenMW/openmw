@@ -92,6 +92,11 @@ public:
 class NiPathController : public Controller
 {
 public:
+    int bankDirection;
+    float maxBankAngle;
+    float smoothing;
+    bool followAxis;
+
     NiPosDataPtr posData;
     NiFloatDataPtr floatData;
 
