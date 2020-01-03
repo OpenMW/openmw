@@ -20,7 +20,7 @@ namespace ESM
         int left = esm.getSubSize();
         if (left < s)
             esm.fail("SCVR string list is smaller than specified");
-        esm.getExact(&tmp[0], s);
+        esm.getExact(tmp.data(), s);
         if (left > s)
             esm.skip(left-s); // skip the leftover junk
 
@@ -29,37 +29,47 @@ namespace ESM
 
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
-        char* str = &tmp[0];
+        char* str = tmp.data();
         if (!str && mVarNames.size() > 0)
         {
             Log(Debug::Warning) << "SCVR with no variable names";
             return;
         }
 
+        // Support '\r' terminated strings like vanilla.  See Bug #1324.
+        std::replace(tmp.begin(), tmp.end(), '\r', '\0');
+        // Avoid heap corruption
+        if (!tmp.empty() && tmp[tmp.size()-1] != '\0')
+        {
+            tmp.emplace_back('\0');
+            std::stringstream ss;
+            ss << "Malformed string table";
+            ss << "\n  File: " << esm.getName();
+            ss << "\n  Record: " << esm.getContext().recName.toString();
+            ss << "\n  Subrecord: " << "SCVR";
+            ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
+            Log(Debug::Verbose) << ss.str();
+        }
+
         for (size_t i = 0; i < mVarNames.size(); i++)
         {
-            // Support '\r' terminated strings like vanilla.  See Bug #1324.
-            char *termsym = strchr(str, '\r');
-            if(termsym) *termsym = '\0';
             mVarNames[i] = std::string(str);
             str += mVarNames[i].size() + 1;
-
-            if (str - &tmp[0] > s)
+            if (static_cast<size_t>(str - tmp.data()) > tmp.size())
             {
-                // Apparently SCVR subrecord is not used and variable names are
-                // determined on the fly from the script text.  Therefore don't throw
-                // an exeption, just log an error and continue.
+                // SCVR subrecord is unused and variable names are determined
+                // from the script source, so an overflow is not fatal.
                 std::stringstream ss;
-
                 ss << "String table overflow";
                 ss << "\n  File: " << esm.getName();
                 ss << "\n  Record: " << esm.getContext().recName.toString();
                 ss << "\n  Subrecord: " << "SCVR";
                 ss << "\n  Offset: 0x" << std::hex << esm.getFileOffset();
                 Log(Debug::Verbose) << ss.str();
+                // Get rid of empty strings in the list.
+                mVarNames.resize(i+1);
                 break;
             }
-
         }
     }
 
