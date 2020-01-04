@@ -41,6 +41,7 @@
     Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog
+    Bug #4680: Heap corruption on faulty esp
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
     Bug #4705: Editor: unable to open exterior cell views from Instances table
