@@ -199,7 +199,6 @@ static bool operator ==(const btCollisionShape& lhs, const btCollisionShape& rhs
 namespace
 {
     using namespace testing;
-    using NifBullet::BulletNifLoader;
 
     void init(Nif::Transformation& value)
     {
@@ -278,7 +277,6 @@ namespace
 
     struct TestBulletNifLoader : Test
     {
-        BulletNifLoader mLoader;
         const StrictMock<const NifFileMock> mNifFile;
         Nif::Node mNode;
         Nif::Node mNode2;
@@ -338,7 +336,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_zero_num_roots_should_return_default)
     {
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(0));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -351,7 +349,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&record));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -363,7 +361,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -377,7 +375,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -389,7 +387,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -405,7 +403,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -428,7 +426,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -455,7 +453,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -486,7 +484,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -517,7 +515,7 @@ namespace
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(4, 5, 6);
@@ -539,7 +537,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -553,7 +551,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriShape));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -572,7 +570,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriShape));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
         expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
@@ -588,7 +586,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -606,7 +604,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -626,7 +624,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
@@ -645,7 +643,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -663,7 +661,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriShape));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -689,7 +687,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -720,7 +718,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("xtest.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -756,7 +754,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -790,7 +788,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(1, 2, 3), btVector3(4, 2, 3), btVector3(4, 4.632747650146484375, 1.56172335147857666015625));
@@ -820,7 +818,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
@@ -838,7 +836,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -853,7 +851,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -870,7 +868,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -888,7 +886,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -905,7 +903,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         Resource::BulletShape expected;
 
@@ -925,7 +923,7 @@ namespace
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
         EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
-        const auto result = mLoader.load(mNifFile);
+        const auto result = NifBullet::BulletNifLoader::load(mNifFile);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
