@@ -504,14 +504,10 @@ void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor, TSlots&
             continue;
         if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
             continue;
-        if (iter->getClass().getItemHealth(*iter) <= 0)
-            continue;
         std::pair<std::vector<int>, bool> shieldSlots =
             iter->getClass().getEquipmentSlots(*iter);
-        if (shieldSlots.first.empty())
-            continue;
         int slot = shieldSlots.first[0];
-        const ContainerStoreIterator& shield = mSlots[slot];
+        const ContainerStoreIterator& shield = slots_[slot];
         if (shield != end()
                 && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
         {
