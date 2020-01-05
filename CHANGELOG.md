@@ -28,6 +28,7 @@
     Bug #4262: Rain settings are hardcoded
     Bug #4270: Closing doors while they are obstructed desyncs closing sfx
     Bug #4276: Resizing character window differs from vanilla
+    Bug #4284: ForceSneak behaviour is inconsistent if the target has AiWander package
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn

@@ -2249,7 +2249,7 @@ void CharacterController::update(float duration, bool animationOnly)
         if(movestate != CharState_None && !isTurning())
             clearAnimQueue();
 
-        if(mAnimQueue.empty() || inwater || sneak)
+        if(mAnimQueue.empty() || inwater || (sneak && mIdleState != CharState_SpecialIdle))
         {
             if (inwater)
                 idlestate = CharState_IdleSwim;
