@@ -198,7 +198,7 @@ bool isActualAiPackage(int packageTypeId)
             packageTypeId <= AiPackage::TypeIdActivate);
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration, bool outOfRange)
 {
     if(actor != getPlayer())
     {
@@ -214,7 +214,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         if (isActualAiPackage(packageTypeId))
             mLastAiPackage = packageTypeId;
         // if active package is combat one, choose nearest target
-        if (packageTypeId == AiPackage::TypeIdCombat)
+        if (!outOfRange && packageTypeId == AiPackage::TypeIdCombat)
         {
             std::list<AiPackage *>::iterator itActualCombat;
 
@@ -272,6 +272,10 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
         try
         {
+            if (outOfRange && packageTypeId != AiPackage::TypeIdTravel
+                && packageTypeId != AiPackage::TypeIdInternalTravel)
+                return;
+
             if (package->execute (actor, characterController, mAiState, duration))
             {
                 // Put repeating noncombat AI packages on the end of the stack so they can be used again

@@ -1695,6 +1695,11 @@ namespace MWMechanics
                             }
                         }
                     }
+                    else if (aiActive && iter->first != player && isConscious(iter->first))
+                    {
+                        CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                        stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
+                    }
 
                     if(iter->first.getClass().isNpc())
                     {
@@ -1722,7 +1727,10 @@ namespace MWMechanics
             {
                 const float dist = (playerPos - iter->first.getRefData().getPosition().asVec3()).length();
                 bool isPlayer = iter->first == player;
-                bool inRange = isPlayer || dist <= mActorsProcessingRange;
+                CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                int packageId = stats.getAiSequence().getTypeId();
+                bool travelling = (packageId == AiPackage::TypeIdTravel) || (packageId == AiPackage::TypeIdInternalTravel);
+                bool inRange = isPlayer || dist <= mActorsProcessingRange || travelling;
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
                 if (isPlayer)
                     activeFlag = 2;

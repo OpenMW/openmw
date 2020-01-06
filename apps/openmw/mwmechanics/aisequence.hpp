@@ -110,7 +110,7 @@ namespace MWMechanics
             void stopPursuit();
 
             /// Execute current package, switching if needed.
-            void execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration);
+            void execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration, bool outOfRange=false);
 
             /// Simulate the passing of time using the currently active AI package
             void fastForward(const MWWorld::Ptr &actor);
