@@ -197,6 +197,7 @@
     Feature #3980: In-game option to disable controller
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
+    Feature #4129: Beta Comment to File
     Feature #4209: Editor: Faction rank sub-table
     Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly

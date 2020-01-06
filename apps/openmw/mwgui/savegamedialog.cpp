@@ -400,17 +400,7 @@ namespace MWGui
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
-        // Use system/environment locale settings for datetime formatting
-        char* oldLctime = setlocale(LC_TIME, nullptr);
-        setlocale(LC_TIME, "");
-
-        const int size=1024;
-        char buffer[size];
-        if (std::strftime(buffer, size, "%x %X", timeinfo) > 0)
-            text << buffer << "\n";
-
-        // reset
-        setlocale(LC_TIME, oldLctime);
+        text << std::put_time(timeinfo, "%Y.%m.%d %T") << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";

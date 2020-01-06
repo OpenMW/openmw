@@ -1,9 +1,12 @@
 #include "miscextensions.hpp"
 
 #include <cstdlib>
+#include <iomanip>
 
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -1222,6 +1225,11 @@ namespace MWScript
 
                 std::stringstream msg;
 
+                msg << "Report time: ";
+
+                std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+                msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
+
                 msg << "Content file: ";
 
                 if (!ptr.getCellRef().hasContentFile())
@@ -1262,6 +1270,8 @@ namespace MWScript
                         msg << "Notes: " << notes << std::endl;
                     --arg0;
                 }
+
+                Log(Debug::Warning) << "\n" << msg.str();
 
                 runtime.getContext().report(msg.str());
             }
