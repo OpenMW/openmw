@@ -400,7 +400,7 @@ namespace MWGui
         struct tm* timeinfo;
         timeinfo = localtime(&time);
 
-        text << std::put_time(timeinfo, "%d.%m.%Y %T") << "\n";
+        text << std::put_time(timeinfo, "%Y.%m.%d %T") << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";

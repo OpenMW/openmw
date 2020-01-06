@@ -1228,7 +1228,7 @@ namespace MWScript
                 msg << "Report time: ";
 
                 std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-                msg << std::put_time(std::gmtime(&currentTime), "%d.%m.%Y %T UTC") << std::endl;
+                msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
 
                 msg << "Content file: ";
 
