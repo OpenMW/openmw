@@ -187,6 +187,7 @@
     Bug #5223: Bow replacement during attack animation removes attached arrow
     Bug #5226: Reputation should be capped
     Bug #5229: Crash if mesh controller node has no data node
+    Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
