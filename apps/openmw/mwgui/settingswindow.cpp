@@ -7,8 +7,6 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <SDL_video.h>
 
 #include <iomanip>
@@ -45,10 +43,10 @@ namespace
     void parseResolution (int &x, int &y, const std::string& str)
     {
         std::vector<std::string> split;
-        boost::algorithm::split (split, str, boost::is_any_of("@(x"));
+        Misc::StringUtils::split (str, split, "@(x");
         assert (split.size() >= 2);
-        boost::trim(split[0]);
-        boost::trim(split[1]);
+        Misc::StringUtils::trim(split[0]);
+        Misc::StringUtils::trim(split[1]);
         x = MyGUI::utility::parseInt (split[0]);
         y = MyGUI::utility::parseInt (split[1]);
     }

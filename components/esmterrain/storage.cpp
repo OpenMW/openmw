@@ -7,10 +7,9 @@
 #include <osg/Image>
 #include <osg/Plane>
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/vfs/manager.hpp>
 
 namespace ESMTerrain
@@ -564,7 +563,7 @@ namespace ESMTerrain
         if (mAutoUseNormalMaps)
         {
             std::string texture_ = texture;
-            boost::replace_last(texture_, ".", mNormalHeightMapPattern + ".");
+            Misc::StringUtils::replaceLast(texture_, ".", mNormalHeightMapPattern + ".");
             if (mVFS->exists(texture_))
             {
                 info.mNormalMap = texture_;
@@ -573,7 +572,7 @@ namespace ESMTerrain
             else
             {
                 texture_ = texture;
-                boost::replace_last(texture_, ".", mNormalMapPattern + ".");
+                Misc::StringUtils::replaceLast(texture_, ".", mNormalMapPattern + ".");
                 if (mVFS->exists(texture_))
                     info.mNormalMap = texture_;
             }
@@ -582,7 +581,7 @@ namespace ESMTerrain
         if (mAutoUseSpecularMaps)
         {
             std::string texture_ = texture;
-            boost::replace_last(texture_, ".", mSpecularMapPattern + ".");
+            Misc::StringUtils::replaceLast(texture_, ".", mSpecularMapPattern + ".");
             if (mVFS->exists(texture_))
             {
                 info.mDiffuseMap = texture_;
