@@ -209,12 +209,15 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         }
 
         MWMechanics::AiPackage* package = mPackages.front();
+        if (!package->alwaysActive() && outOfRange)
+            return;
+
         int packageTypeId = package->getTypeId();
         // workaround ai packages not being handled as in the vanilla engine
         if (isActualAiPackage(packageTypeId))
             mLastAiPackage = packageTypeId;
         // if active package is combat one, choose nearest target
-        if (!outOfRange && packageTypeId == AiPackage::TypeIdCombat)
+        if (packageTypeId == AiPackage::TypeIdCombat)
         {
             std::list<AiPackage *>::iterator itActualCombat;
 
@@ -272,10 +275,6 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
         try
         {
-            if (outOfRange && packageTypeId != AiPackage::TypeIdTravel
-                && packageTypeId != AiPackage::TypeIdInternalTravel)
-                return;
-
             if (package->execute (actor, characterController, mAiState, duration))
             {
                 // Put repeating noncombat AI packages on the end of the stack so they can be used again

@@ -104,6 +104,9 @@ namespace MWMechanics
 
             virtual osg::Vec3f getDestination() { return osg::Vec3f(0, 0, 0); }
 
+            // Return true if any loaded actor with this AI package must be active.
+            virtual bool alwaysActive() const { return false; }
+
             /// Reset pathfinding state
             void reset();
 
