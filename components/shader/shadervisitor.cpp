@@ -6,9 +6,8 @@
 
 #include <osgUtil/TangentSpaceGenerator>
 
-#include <boost/algorithm/string.hpp>
-
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -145,7 +144,7 @@ namespace Shader
                 osg::ref_ptr<osg::Image> image;
                 bool normalHeight = false;
                 std::string normalHeightMap = normalMapFileName;
-                boost::replace_last(normalHeightMap, ".", mNormalHeightMapPattern + ".");
+                Misc::StringUtils::replaceLast(normalHeightMap, ".", mNormalHeightMapPattern + ".");
                 if (mImageManager.getVFS()->exists(normalHeightMap))
                 {
                     image = mImageManager.getImage(normalHeightMap);
@@ -153,7 +152,7 @@ namespace Shader
                 }
                 else
                 {
-                    boost::replace_last(normalMapFileName, ".", mNormalMapPattern + ".");
+                    Misc::StringUtils::replaceLast(normalMapFileName, ".", mNormalMapPattern + ".");
                     if (mImageManager.getVFS()->exists(normalMapFileName))
                     {
                         image = mImageManager.getImage(normalMapFileName);
@@ -184,7 +183,7 @@ namespace Shader
             if (mAutoUseSpecularMaps && diffuseMap != nullptr && specularMap == nullptr && diffuseMap->getImage(0))
             {
                 std::string specularMapFileName = diffuseMap->getImage(0)->getFileName();
-                boost::replace_last(specularMapFileName, ".", mSpecularMapPattern + ".");
+                Misc::StringUtils::replaceLast(specularMapFileName, ".", mSpecularMapPattern + ".");
                 if (mImageManager.getVFS()->exists(specularMapFileName))
                 {
                     osg::ref_ptr<osg::Image> image (mImageManager.getImage(specularMapFileName));
