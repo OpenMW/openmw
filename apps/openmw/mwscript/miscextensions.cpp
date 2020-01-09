@@ -1111,10 +1111,7 @@ namespace MWScript
 
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    store.setSelectedEnchantItem(store.end());
-                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
-                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
                     return;
                 }
 
@@ -1122,7 +1119,6 @@ namespace MWScript
                 {
                     MWMechanics::AiCast castPackage(targetId, spellId, true);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
-
                     return;
                 }
 
@@ -1158,10 +1154,7 @@ namespace MWScript
 
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    store.setSelectedEnchantItem(store.end());
-                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
-                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
                     return;
                 }
 
