@@ -27,6 +27,7 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
@@ -87,6 +88,31 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
 std::string ActorAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
 {
     std::string mesh = shield.getClass().getModel(shield);
+    const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
+    const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
+    if (!bodyparts.empty())
+    {
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+
+        // Try to get shield model from bodyparts first, with ground model as fallback
+        for (const auto& part : bodyparts)
+        {
+            // Assume all creatures use the male mesh.
+            if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
+                continue;
+            const ESM::BodyPart *bodypart = partStore.search(part.mMale);
+            if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
+            {
+                mesh = "meshes\\" + bodypart->mModel;
+                break;
+            }
+        }
+    }
+
+    if (mesh.empty())
+        return mesh;
+
     std::string holsteredName = mesh;
     holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");
     if(mResourceSystem->getVFS()->exists(holsteredName))
