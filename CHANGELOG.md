@@ -191,6 +191,7 @@
     Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
     Bug #5241: On-self absorb spells cannot be detected
     Bug #5242: ExplodeSpell behavior differs from Cast behavior
+    Bug #5250: Creatures display shield ground mesh instead of shield body part
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

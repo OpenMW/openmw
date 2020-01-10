@@ -518,14 +518,14 @@ std::string NpcAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
 {
     std::string mesh = shield.getClass().getModel(shield);
     const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
-    std::vector<ESM::PartReference> bodyparts = armor->mParts.mParts;
+    const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
     if (!bodyparts.empty())
     {
         const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
         const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
 
-        // For NPCs try to get shield model from bodyparts first, with ground model as fallback
-        for (auto & part : bodyparts)
+        // Try to get shield model from bodyparts first, with ground model as fallback
+        for (const auto& part : bodyparts)
         {
             if (part.mPart != ESM::PRT_Shield)
                 continue;
@@ -538,15 +538,20 @@ std::string NpcAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
 
             if (!bodypartName.empty())
             {
-                const ESM::BodyPart *bodypart = 0;
-                bodypart = partStore.search(bodypartName);
+                const ESM::BodyPart *bodypart = partStore.search(bodypartName);
                 if (bodypart == nullptr || bodypart->mData.mType != ESM::BodyPart::MT_Armor)
-                    return "";
+                    return std::string();
                 else if (!bodypart->mModel.empty())
+                {
                     mesh = "meshes\\" + bodypart->mModel;
+                    break;
+                }
             }
         }
     }
+
+    if (mesh.empty())
+        return std::string();
 
     std::string holsteredName = mesh;
     holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");

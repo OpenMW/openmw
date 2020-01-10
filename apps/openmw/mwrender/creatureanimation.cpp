@@ -13,11 +13,13 @@
 
 #include <components/misc/stringops.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace MWRender
 {
@@ -114,6 +116,7 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
     MWWorld::ConstPtr item = *it;
 
     std::string bonename;
+    std::string itemModel = item.getClass().getModel(item);
     if (slot == MWWorld::InventoryStore::Slot_CarriedRight)
     {
         if(item.getTypeName() == typeid(ESM::Weapon).name())
@@ -132,11 +135,30 @@ void CreatureWeaponAnimation::updatePart(PartHolderPtr& scene, int slot)
             bonename = "Weapon Bone";
     }
     else
+    {
         bonename = "Shield Bone";
+        if (item.getTypeName() == typeid(ESM::Armor).name())
+        {
+            // Shield body part model should be used if possible.
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            for (const auto& part : item.get<ESM::Armor>()->mBase->mParts.mParts)
+            {
+                // Assume all creatures use the male mesh.
+                if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
+                    continue;
+                const ESM::BodyPart *bodypart = store.get<ESM::BodyPart>().search(part.mMale);
+                if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
+                {
+                    itemModel = "meshes\\" + bodypart->mModel;
+                    break;
+                }
+            }
+        }
+    }
 
     try
     {
-        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(item.getClass().getModel(item));
+        osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(itemModel);
 
         const NodeMap& nodeMap = getNodeMap();
         NodeMap::const_iterator found = nodeMap.find(Misc::StringUtils::lowerCase(bonename));
