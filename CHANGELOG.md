@@ -180,6 +180,7 @@
     Bug #5209: Spellcasting ignores race height
     Bug #5210: AiActivate allows actors to open dialogue and inventory windows
     Bug #5211: Screen fades in if the first loaded save is in interior cell
+    Bug #5212: AiTravel does not work for actors outside of AI processing range
     Bug #5213: SameFaction script function is broken
     Bug #5218: Crash when disabling ToggleBorders
     Bug #5220: GetLOS crashes when actor isn't loaded

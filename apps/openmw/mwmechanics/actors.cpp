@@ -1695,6 +1695,11 @@ namespace MWMechanics
                             }
                         }
                     }
+                    else if (aiActive && iter->first != player && isConscious(iter->first))
+                    {
+                        CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                        stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
+                    }
 
                     if(iter->first.getClass().isNpc())
                     {
@@ -1722,7 +1727,15 @@ namespace MWMechanics
             {
                 const float dist = (playerPos - iter->first.getRefData().getPosition().asVec3()).length();
                 bool isPlayer = iter->first == player;
-                bool inRange = isPlayer || dist <= mActorsProcessingRange;
+                CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
+                // Actors with active AI should be able to move.
+                bool alwaysActive = false;
+                if (!isPlayer && isConscious(iter->first) && !stats.isParalyzed())
+                {
+                    MWMechanics::AiSequence& seq = stats.getAiSequence();
+                    alwaysActive = !seq.isEmpty() && seq.getActivePackage()->alwaysActive();
+                }
+                bool inRange = isPlayer || dist <= mActorsProcessingRange || alwaysActive;
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
                 if (isPlayer)
                     activeFlag = 2;
