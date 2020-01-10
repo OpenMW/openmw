@@ -1109,18 +1109,9 @@ namespace MWScript
                     return;
                 }
 
-                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
-                {
-                    runtime.getContext().report("spellcasting failed: you can only cast spells and powers.");
-                    return;
-                }
-
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    store.setSelectedEnchantItem(store.end());
-                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
-                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
                     return;
                 }
 
@@ -1128,7 +1119,6 @@ namespace MWScript
                 {
                     MWMechanics::AiCast castPackage(targetId, spellId, true);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
-
                     return;
                 }
 
@@ -1152,8 +1142,28 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
+
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                if (!spell)
+                {
+                    runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
+                    return;
+                }
+
+                if (ptr == MWMechanics::getPlayer())
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
+                    return;
+                }
+
+                if (ptr.getClass().isActor())
+                {
+                    MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
+                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    return;
+                }
 
                 MWMechanics::CastSpell cast(ptr, ptr, false, true);
                 cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
