@@ -76,53 +76,6 @@ namespace CSMWorld
         return false;
     }
 
-    /* LandMapLodColumn */
-    LandMapLodColumn::LandMapLodColumn()
-        : Column<Land>(Columns::ColumnId_LandMapLodIndex, ColumnBase::Display_String, 0)
-    {
-    }
-
-    QVariant LandMapLodColumn::get(const Record<Land>& record) const
-    {
-        const int Size = Land::LAND_GLOBAL_MAP_LOD_SIZE;
-        const Land& land = record.get();
-
-        DataType values(Size, 0);
-
-        if (land.mDataTypes & Land::DATA_WNAM)
-        {
-            for (int i = 0; i < Size; ++i)
-                values[i] = land.mWnam[i];
-        }
-
-        QVariant variant;
-        variant.setValue(values);
-        return variant;
-    }
-
-    void LandMapLodColumn::set(Record<Land>& record, const QVariant& data)
-    {
-        DataType values = data.value<DataType>();
-
-        if (values.size() != Land::LAND_GLOBAL_MAP_LOD_SIZE)
-            throw std::runtime_error("invalid land map LOD data");
-
-        Land copy = record.get();
-        copy.add(Land::DATA_WNAM);
-
-        for (int i = 0; i < values.size(); ++i)
-        {
-            copy.mWnam[i] = values[i];
-        }
-
-        record.setModified(copy);
-    }
-
-    bool LandMapLodColumn::isEditable() const
-    {
-        return true;
-    }
-
     /* LandNormalsColumn */
     LandNormalsColumn::LandNormalsColumn()
         : Column<Land>(Columns::ColumnId_LandNormalsIndex, ColumnBase::Display_String, 0)

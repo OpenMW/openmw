@@ -148,10 +148,6 @@ namespace CSVRender
             void pushNormalsEditToCommand(const CSMWorld::LandNormalsColumn::DataType& newLandGrid, CSMDoc::Document& document,
                 CSMWorld::IdTable& landTable, const std::string& cellId);
 
-            /// Generate new land map LOD
-            void pushLodToCommand(const CSMWorld::LandMapLodColumn::DataType& newLandMapLod, CSMDoc::Document& document,
-                CSMWorld::IdTable& landTable, const std::string& cellId);
-
             bool noCell(const std::string& cellId);
 
             bool noLand(const std::string& cellId);
