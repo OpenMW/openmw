@@ -35,16 +35,16 @@ void ShapeData::read(NIFStream *nif)
 {
     int verts = nif->getUShort();
 
-    if(nif->getInt())
+    if (nif->getBoolean())
         nif->getVector3s(vertices, verts);
 
-    if(nif->getInt())
+    if (nif->getBoolean())
         nif->getVector3s(normals, verts);
 
     center = nif->getVector3();
     radius = nif->getFloat();
 
-    if(nif->getInt())
+    if (nif->getBoolean())
         nif->getVector4s(colors, verts);
 
     // Only the first 6 bits are used as a count. I think the rest are
@@ -120,7 +120,7 @@ void NiAutoNormalParticlesData::read(NIFStream *nif)
     particleRadius = nif->getFloat();
     activeCount = nif->getUShort();
 
-    if(nif->getInt())
+    if (nif->getBoolean())
     {
         // Particle sizes
         nif->getFloats(sizes, vertices.size());
@@ -131,7 +131,7 @@ void NiRotatingParticlesData::read(NIFStream *nif)
 {
     NiAutoNormalParticlesData::read(nif);
 
-    if(nif->getInt())
+    if (nif->getBoolean())
     {
         // Rotation quaternions.
         nif->getQuaternions(rotations, vertices.size());
@@ -176,7 +176,7 @@ void NiPixelData::read(NIFStream *nif)
 
     numberOfMipmaps = nif->getUInt();
 
-    // Bytes per pixel, should be bpp * 8
+    // Bytes per pixel, should be bpp / 8
     /* int bytes = */ nif->getUInt();
 
     for(unsigned int i=0; i<numberOfMipmaps; i++)
@@ -228,10 +228,8 @@ void NiSkinData::read(NIFStream *nif)
     nif->getInt(); // -1
 
     bones.resize(boneNum);
-    for(int i=0;i<boneNum;i++)
+    for (BoneInfo &bi : bones)
     {
-        BoneInfo &bi = bones[i];
-
         bi.trafo.rotation = nif->getMatrix3();
         bi.trafo.pos = nif->getVector3();
         bi.trafo.scale = nif->getFloat();
@@ -267,7 +265,7 @@ void NiKeyframeData::read(NIFStream *nif)
 {
     mRotations = std::make_shared<QuaternionKeyMap>();
     mRotations->read(nif);
-    if(mRotations->mInterpolationType == Vector3KeyMap::sXYZInterpolation)
+    if(mRotations->mInterpolationType == InterpolationType_XYZ)
     {
         //Chomp unused float
         nif->getFloat();

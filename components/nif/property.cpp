@@ -14,7 +14,7 @@ void Property::read(NIFStream *nif)
 
 void NiTexturingProperty::Texture::read(NIFStream *nif)
 {
-    inUse = !!nif->getInt();
+    inUse = nif->getBoolean();
     if(!inUse) return;
 
     texture.read(nif);

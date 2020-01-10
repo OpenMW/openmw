@@ -184,14 +184,16 @@ namespace NifOsg
     {
     public:
         /// @param filename used for warning messages.
-        LoaderImpl(const std::string& filename)
-            : mFilename(filename), mFirstRootTextureIndex(-1), mFoundFirstRootTexturingProperty(false)
+        LoaderImpl(const std::string& filename, unsigned int ver, unsigned int userver, unsigned int bethver)
+            : mFilename(filename), mVersion(ver), mUserVersion(userver), mBethVersion(bethver)
         {
 
         }
         std::string mFilename;
-        size_t mFirstRootTextureIndex;
-        bool mFoundFirstRootTexturingProperty;
+        unsigned int mVersion, mUserVersion, mBethVersion;
+
+        size_t mFirstRootTextureIndex = -1;
+        bool mFoundFirstRootTexturingProperty = false;
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
@@ -1846,13 +1848,13 @@ namespace NifOsg
 
     osg::ref_ptr<osg::Node> Loader::load(Nif::NIFFilePtr file, Resource::ImageManager* imageManager)
     {
-        LoaderImpl impl(file->getFilename());
+        LoaderImpl impl(file->getFilename(), file->getVersion(), file->getUserVersion(), file->getBethVersion());
         return impl.load(file, imageManager);
     }
 
     void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)
     {
-        LoaderImpl impl(kf->getFilename());
+        LoaderImpl impl(kf->getFilename(), kf->getVersion(), kf->getUserVersion(), kf->getBethVersion());
         impl.loadKf(kf, target);
     }
 

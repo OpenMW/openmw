@@ -35,16 +35,32 @@ namespace NifOsg
 {
 
     // interpolation of keyframes
-    template <typename MapT, typename InterpolationFunc>
+    template <typename MapT>
     class ValueInterpolator
     {
-    public:
-        typedef typename MapT::ValueType ValueT;
-
-        ValueInterpolator()
-            : mDefaultVal(ValueT())
+        typename MapT::MapType::const_iterator retrieveKey(float time) const
         {
+            // retrieve the current position in the map, optimized for the most common case
+            // where time moves linearly along the keyframe track
+            if (mLastHighKey != mKeys->mKeys.end())
+            {
+                if (time > mLastHighKey->first)
+                {
+                    // try if we're there by incrementing one
+                    ++mLastLowKey;
+                    ++mLastHighKey;
+                }
+                if (mLastHighKey != mKeys->mKeys.end() && time >= mLastLowKey->first && time <= mLastHighKey->first)
+                    return mLastHighKey;
+            }
+
+            return mKeys->mKeys.lower_bound(time);
         }
+
+    public:
+        using ValueT = typename MapT::ValueType;
+
+        ValueInterpolator() = default;
 
         ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
@@ -67,44 +83,21 @@ namespace NifOsg
             if(time <= keys.begin()->first)
                 return keys.begin()->second.mValue;
 
-            // retrieve the current position in the map, optimized for the most common case
-            // where time moves linearly along the keyframe track
-            typename MapT::MapType::const_iterator it = mLastHighKey;
-            if (mLastHighKey != keys.end())
-            {
-                if (time > mLastHighKey->first)
-                {
-                    // try if we're there by incrementing one
-                    ++mLastLowKey;
-                    ++mLastHighKey;
-                    it = mLastHighKey;
-                }
-                if (mLastHighKey == keys.end() || (time < mLastLowKey->first || time > mLastHighKey->first))
-                    it = keys.lower_bound(time); // still not there, reorient by performing lower_bound check on the whole map
-            }
-            else
-                it = keys.lower_bound(time);
+            typename MapT::MapType::const_iterator it = retrieveKey(time);
 
             // now do the actual interpolation
             if (it != keys.end())
             {
-                float aTime = it->first;
-                const typename MapT::KeyType* aKey = &it->second;
-
                 // cache for next time
                 mLastHighKey = it;
+                mLastLowKey = --it;
 
-                typename MapT::MapType::const_iterator last = --it;
-                mLastLowKey = last;
-                float aLastTime = last->first;
-                const typename MapT::KeyType* aLastKey = &last->second;
+                float a = (time - mLastLowKey->first) / (mLastHighKey->first - mLastLowKey->first);
 
-                float a = (time - aLastTime) / (aTime - aLastTime);
-
-                return InterpolationFunc()(aLastKey->mValue, aKey->mValue, a);
+                return interpolate(mLastLowKey->second, mLastHighKey->second, a, mKeys->mInterpolationType);
             }
-            else
-                return keys.rbegin()->second.mValue;
+
+            return keys.rbegin()->second.mValue;
         }
 
         bool empty() const
@@ -113,36 +106,44 @@ namespace NifOsg
         }
 
     private:
+        template <typename ValueType>
+        ValueType interpolate(const Nif::KeyT<ValueType>& a, const Nif::KeyT<ValueType>& b, float fraction, unsigned int type) const
+        {
+            switch (type)
+            {
+                case Nif::InterpolationType_Constant:
+                    return fraction > 0.5f ? b.mValue : a.mValue;
+                default:
+                    return a.mValue + ((b.mValue - a.mValue) * fraction);
+            }
+        }
+        osg::Quat interpolate(const Nif::KeyT<osg::Quat>& a, const Nif::KeyT<osg::Quat>& b, float fraction, unsigned int type) const
+        {
+            switch (type)
+            {
+                case Nif::InterpolationType_Constant:
+                    return fraction > 0.5f ? b.mValue : a.mValue;
+                default:
+                {
+                    osg::Quat result;
+                    result.slerp(fraction, a.mValue, b.mValue);
+                    return result;
+                }
+            }
+        }
+
         mutable typename MapT::MapType::const_iterator mLastLowKey;
         mutable typename MapT::MapType::const_iterator mLastHighKey;
 
         std::shared_ptr<const MapT> mKeys;
 
-        ValueT mDefaultVal;
+        ValueT mDefaultVal = ValueT();
     };
 
-    struct LerpFunc
-    {
-        template <typename ValueType>
-        inline ValueType operator()(const ValueType& a, const ValueType& b, float fraction)
-        {
-            return a + ((b - a) * fraction);
-        }
-    };
-
-    struct QuaternionSlerpFunc
-    {
-        inline osg::Quat operator()(const osg::Quat& a, const osg::Quat& b, float fraction)
-        {
-            osg::Quat result;
-            result.slerp(fraction, a, b);
-            return result;
-        }
-    };
-
-    typedef ValueInterpolator<Nif::QuaternionKeyMap, QuaternionSlerpFunc> QuaternionInterpolator;
-    typedef ValueInterpolator<Nif::FloatKeyMap, LerpFunc> FloatInterpolator;
-    typedef ValueInterpolator<Nif::Vector3KeyMap, LerpFunc> Vec3Interpolator;
+    using QuaternionInterpolator = ValueInterpolator<Nif::QuaternionKeyMap>;
+    using FloatInterpolator = ValueInterpolator<Nif::FloatKeyMap>;
+    using Vec3Interpolator = ValueInterpolator<Nif::Vector3KeyMap>;
+    using Vec4Interpolator = ValueInterpolator<Nif::Vector4KeyMap>;
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {

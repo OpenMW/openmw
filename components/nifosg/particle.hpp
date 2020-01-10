@@ -151,7 +151,6 @@ namespace NifOsg
         float mCachedDefaultSize;
     };
 
-    typedef ValueInterpolator<Nif::Vector4KeyMap, LerpFunc> Vec4Interpolator;
     class ParticleColorAffector : public osgParticle::Operator
     {
     public:
