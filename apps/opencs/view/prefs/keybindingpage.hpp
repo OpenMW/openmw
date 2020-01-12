@@ -29,6 +29,10 @@ namespace CSVPrefs
             QStackedLayout* mStackedLayout;
             QGridLayout* mPageLayout;
             QComboBox* mPageSelector;
+
+        private slots:
+
+            void resetKeyBindings();
     };
 }
 
