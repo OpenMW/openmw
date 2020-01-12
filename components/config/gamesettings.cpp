@@ -202,6 +202,7 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
            || line.contains(QRegExp("^\\s*data\\s*="))
            || line.contains(QRegExp("^\\s*data-local\\s*="))
            || line.contains(QRegExp("^\\s*resources\\s*="))
+           || line.contains(QRegExp("^\\s*groundcover\\s*="))
            || line.contains(QRegExp("^\\s*content\\s*="));
 }
 

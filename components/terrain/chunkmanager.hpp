@@ -35,7 +35,7 @@ namespace Terrain
     public:
         ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager, CompositeMapRenderer* renderer);
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile) override;
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
         void setCompositeMapSize(unsigned int size) { mCompositeMapSize = size; }
         void setCompositeMapLevel(float level) { mCompositeMapLevel = level; }

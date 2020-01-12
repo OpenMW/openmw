@@ -51,21 +51,32 @@ namespace MWRender
         }
     }
 
-    std::string getModel(int type, const std::string& id, const MWWorld::ESMStore& store)
+    std::string getModel(int type, const std::string& id, const MWWorld::ESMStore& store, bool& isGroundcover)
     {
         switch (type)
         {
-          case ESM::REC_STAT:
-            return store.get<ESM::Static>().searchStatic(id)->mModel;
-          case ESM::REC_ACTI:
-            return store.get<ESM::Activator>().searchStatic(id)->mModel;
-          case ESM::REC_DOOR:
-            return store.get<ESM::Door>().searchStatic(id)->mModel;
-          case ESM::REC_CONT:
-            return store.get<ESM::Container>().searchStatic(id)->mModel;
-          default:
-            return std::string();
+            case ESM::REC_STAT:
+            {
+                const ESM::Static* entity = store.get<ESM::Static>().searchStatic(id);
+                isGroundcover = entity->mIsGroundcover;
+                return entity->mModel;
+            }
+            case ESM::REC_ACTI:
+                return store.get<ESM::Activator>().searchStatic(id)->mModel;
+            case ESM::REC_DOOR:
+                return store.get<ESM::Door>().searchStatic(id)->mModel;
+            case ESM::REC_CONT:
+                return store.get<ESM::Container>().searchStatic(id)->mModel;
+            default:
+                return std::string();
         }
+    }
+
+    bool isGroundcover(int type, const std::string& id, const MWWorld::ESMStore& store)
+    {
+        if (type != ESM::REC_STAT) return false;
+
+        return store.get<ESM::Static>().searchStatic(id)->mIsGroundcover;
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
@@ -84,6 +95,15 @@ namespace MWRender
             mCache->addEntryToObjectCache(id, node.get());
             return node;
         }
+    }
+
+    bool needvbo(const osg::Geometry* geom)
+    {
+#if OSG_MIN_VERSION_REQUIRED(3,5,6)
+        return true;
+#else
+        return geom->getUseVertexBufferObjects();
+#endif
     }
 
     class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
@@ -105,6 +125,7 @@ namespace MWRender
         bool mOptimizeBillboards = true;
         float mSqrDistance = 0.f;
         osg::Vec3f mViewVector;
+        bool mGroundcover = false;
         mutable std::vector<const osg::Node*> mNodePath;
 
         void copy(const osg::Node* toCopy, osg::Group* attachTo)
@@ -122,7 +143,29 @@ namespace MWRender
         osg::Node* operator() (const osg::Node* node) const override
         {
             if (const osg::Drawable* d = node->asDrawable())
-                return operator()(d);
+            {
+                osg::Node* clone = operator()(d);
+                osg::Geometry* geom = clone ? clone->asGeometry() : nullptr;
+                if (!mGroundcover || !geom) return clone;
+
+                osg::Array* vertexArray = geom->getVertexArray();
+                if (!vertexArray || vertexArray->getType() != osg::Array::Vec3ArrayType) return clone;
+                osg::Vec3Array* vertices = static_cast<osg::Vec3Array*>(vertexArray);
+
+                // We should keep an original vertex array to animate groundcover page properly
+                osg::ref_ptr<osg::FloatArray> attrs = new osg::FloatArray(vertices->getNumElements());
+                for (unsigned int i = 0; i < vertices->getNumElements(); i++)
+                {
+                    (*attrs)[i] = (*vertices)[i].z();
+                }
+
+                if (needvbo(geom))
+                    attrs->setVertexBufferObject(new osg::VertexBufferObject);
+
+                geom->setVertexAttribArray(1, attrs, osg::Array::BIND_PER_VERTEX);
+
+                return geom;
+            }
 
             if (dynamic_cast<const osgParticle::ParticleProcessor*>(node))
                 return nullptr;
@@ -359,12 +402,13 @@ namespace MWRender
         }
     };
 
-    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
+    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, bool groundcover)
             : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
+         , mGroundcover(groundcover)
          , mRefTrackerLocked(false)
     {
-        mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
+        mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain") || groundcover;
         mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
@@ -374,6 +418,8 @@ namespace MWRender
 
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
+        static const bool groundcoverEnabled = Settings::Manager::getBool("enabled", "Groundcover");
+
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
 
         osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0)*ESM::Land::REAL_SIZE;
@@ -383,12 +429,15 @@ namespace MWRender
         std::vector<ESM::ESMReader> esm;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
+        Misc::ResourceHelpers::DensityCalculator calculator;
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
             {
                 const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
                 if (!cell) continue;
+
+                calculator.reset();
                 for (size_t i=0; i<cell->mContextList.size(); ++i)
                 {
                     try
@@ -407,6 +456,16 @@ namespace MWRender
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
+
+                            if (groundcoverEnabled)
+                            {
+                                // FIXME: per-instance check requires search
+                                if (isGroundcover(type, ref.mRefID, store))
+                                {
+                                    if (!calculator.isInstanceEnabled()) continue;
+                                }
+                            }
+
                             refs[ref.mRefNum] = ref;
                         }
                     }
@@ -428,7 +487,7 @@ namespace MWRender
             }
         }
 
-        if (activeGrid)
+        if (activeGrid && !mGroundcover)
         {
             std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             for (auto ref : getRefTracker().mBlacklist)
@@ -476,8 +535,11 @@ namespace MWRender
                 continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
 
             int type = store.findStatic(ref.mRefID);
-            std::string model = getModel(type, ref.mRefID, store);
+            bool isGroundCover = false;
+            std::string model = getModel(type, ref.mRefID, store, isGroundCover);
             if (model.empty()) continue;
+            if (mGroundcover != isGroundCover) continue;
+
             model = "meshes/" + model;
 
             if (activeGrid && type != ESM::REC_STAT)
@@ -494,18 +556,21 @@ namespace MWRender
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
-            if (activeGrid)
+            if (!mGroundcover)
             {
-                if (cnode->getNumChildrenRequiringUpdateTraversal() > 0 || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel) || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
-                    continue;
-                else
-                    refnumSet->mRefnums.insert(pair.first);
-            }
+                if (activeGrid)
+                {
+                    if (cnode->getNumChildrenRequiringUpdateTraversal() > 0 || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel) || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
+                        continue;
+                    else
+                        refnumSet->mRefnums.insert(pair.first);
+                }
 
-            {
-                std::lock_guard<std::mutex> lock(mRefTrackerMutex);
-                if (getRefTracker().mDisabled.count(pair.first))
-                    continue;
+                {
+                    std::lock_guard<std::mutex> lock(mRefTrackerMutex);
+                    if (getRefTracker().mDisabled.count(pair.first))
+                        continue;
+                }
             }
 
             float radius2 = cnode->getBound().radius2() * ref.mScale*ref.mScale;
@@ -532,7 +597,9 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
+        static const bool useAnimation = Settings::Manager::getBool("animation", "Groundcover");
         CopyOp copyop;
+        copyop.mGroundcover = useAnimation && mGroundcover;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
@@ -644,21 +711,24 @@ namespace MWRender
         }
 
         group->getBound();
-        group->setNodeMask(Mask_Static);
+        group->setNodeMask(mGroundcover ? Mask_Groundcover : Mask_Static);
         osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
-        if (activeGrid)
+        if (activeGrid && !mGroundcover)
         {
             udc->addUserObject(refnumSet);
             group->addCullCallback(new SceneUtil::LightListCallback);
         }
         udc->addUserObject(templateRefs);
 
+        if (mGroundcover)
+            mSceneManager->recreateShaders(group, "groundcover");
+
         return group;
     }
 
     unsigned int ObjectPaging::getNodeMask()
     {
-        return Mask_Static;
+        return mGroundcover ? Mask_Groundcover : Mask_Static;
     }
 
     struct ClearCacheFunctor
@@ -791,7 +861,10 @@ namespace MWRender
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats *stats) const
     {
-        stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+        if (mGroundcover)
+            stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+        else
+            stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
     }
 
 }

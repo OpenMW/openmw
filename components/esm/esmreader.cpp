@@ -80,8 +80,10 @@ void ESMReader::openRaw(const std::string& filename)
     openRaw(Files::openConstrainedFileStream(filename.c_str()), filename);
 }
 
-void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
+void ESMReader::open(Files::IStreamPtr _esm, const std::string &name, bool isGroundcover)
 {
+    mIsGroundcoverFile = isGroundcover;
+
     openRaw(_esm, name);
 
     if (getRecName() != "TES3")
@@ -92,9 +94,9 @@ void ESMReader::open(Files::IStreamPtr _esm, const std::string &name)
     mHeader.load (*this);
 }
 
-void ESMReader::open(const std::string &file)
+void ESMReader::open(const std::string &file, bool isGroundcover)
 {
-    open (Files::openConstrainedFileStream (file.c_str ()), file);
+    open (Files::openConstrainedFileStream (file.c_str ()), file, isGroundcover);
 }
 
 int64_t ESMReader::getHNLong(const char *name)

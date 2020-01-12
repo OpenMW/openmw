@@ -249,6 +249,11 @@ namespace Resource
         node->accept(*shaderVisitor);
     }
 
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
+    {
+        recreateShaders(node, "objects");
+    }
+
     void SceneManager::setClampLighting(bool clamp)
     {
         mClampLighting = clamp;
@@ -510,7 +515,7 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
+            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor("objects"));
             loaded->accept(*shaderVisitor);
 
             // share state

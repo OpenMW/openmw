@@ -102,12 +102,12 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index) override
+        void load(const boost::filesystem::path& filepath, int& index, bool isGroundcover) override
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index);
+                it->second->load(filepath, index, isGroundcover);
             }
             else
             {
@@ -139,6 +139,7 @@ namespace MWWorld
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
         const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles,
+        const std::vector<std::string>& groundcoverFiles,
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride,
         const std::string& startCell, const std::string& startupScript,
         const std::string& resourcePath, const std::string& userDataPath)
@@ -151,7 +152,7 @@ namespace MWWorld
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
-        mEsm.resize(contentFiles.size());
+        mEsm.resize(contentFiles.size() + groundcoverFiles.size());
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();
 
@@ -164,7 +165,7 @@ namespace MWWorld
         gameContentLoader.addLoader(".omwaddon", &esmLoader);
         gameContentLoader.addLoader(".project", &esmLoader);
 
-        loadContentFiles(fileCollections, contentFiles, gameContentLoader);
+        loadContentFiles(fileCollections, contentFiles, groundcoverFiles, gameContentLoader);
 
         listener->loadingOff();
 
@@ -2918,7 +2919,7 @@ namespace MWWorld
     }
 
     void World::loadContentFiles(const Files::Collections& fileCollections,
-        const std::vector<std::string>& content, ContentLoader& contentLoader)
+        const std::vector<std::string>& content, const std::vector<std::string>& groundcover, ContentLoader& contentLoader)
     {
         int idx = 0;
         for (const std::string &file : content)
@@ -2927,11 +2928,27 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx);
+                contentLoader.load(col.getPath(file), idx, false);
             }
             else
             {
                 std::string message = "Failed loading " + file + ": the content file does not exist";
+                throw std::runtime_error(message);
+            }
+            idx++;
+        }
+
+        for (const std::string &file : groundcover)
+        {
+            boost::filesystem::path filename(file);
+            const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
+            if (col.doesExist(file))
+            {
+                contentLoader.load(col.getPath(file), idx, true);
+            }
+            else
+            {
+                std::string message = "Failed loading " + file + ": the groundcover file does not exist";
                 throw std::runtime_error(message);
             }
             idx++;

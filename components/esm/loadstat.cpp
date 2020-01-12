@@ -37,6 +37,8 @@ namespace ESM
 
         if (!hasName)
             esm.fail("Missing NAME subrecord");
+
+        mIsGroundcover = esm.isGroundcoverFile();
     }
     void Static::save(ESMWriter &esm, bool isDeleted) const
     {

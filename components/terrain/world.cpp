@@ -18,7 +18,6 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
-    , mHeightCullCallback(new HeightCullCallback)
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
@@ -40,6 +39,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mParent->addChild(mTerrainRoot);
 
+    mHeightCullCallback = new HeightCullCallback();
+
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
     mChunkManager->setNodeMask(nodeMask);
@@ -49,17 +50,31 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     mResourceSystem->addResourceManager(mTextureManager.get());
 }
 
+World::World(osg::Group* parent, Storage* storage, int nodeMask)
+    : mStorage(storage)
+    , mParent(parent)
+    , mBorderVisible(false)
+{
+    mTerrainRoot = new osg::Group;
+    mTerrainRoot->setNodeMask(nodeMask);
+
+    mParent->addChild(mTerrainRoot);
+}
+
 World::~World()
 {
-    mResourceSystem->removeResourceManager(mChunkManager.get());
-    mResourceSystem->removeResourceManager(mTextureManager.get());
+    if (mResourceSystem && mChunkManager)
+        mResourceSystem->removeResourceManager(mChunkManager.get());
+    if (mResourceSystem && mTextureManager)
+        mResourceSystem->removeResourceManager(mTextureManager.get());
 
     mParent->removeChild(mTerrainRoot);
 
-    mCompositeMapCamera->removeChild(mCompositeMapRenderer);
-    mCompositeMapCamera->getParent(0)->removeChild(mCompositeMapCamera);
-
-    delete mStorage;
+    if (mCompositeMapCamera && mCompositeMapRenderer)
+    {
+        mCompositeMapCamera->removeChild(mCompositeMapRenderer);
+        mCompositeMapCamera->getParent(0)->removeChild(mCompositeMapCamera);
+    }
 }
 
 void World::setWorkQueue(SceneUtil::WorkQueue* workQueue)
@@ -108,16 +123,20 @@ float World::getHeightAt(const osg::Vec3f &worldPos)
 
 void World::updateTextureFiltering()
 {
-    mTextureManager->updateTextureFiltering();
+    if (mTextureManager)
+        mTextureManager->updateTextureFiltering();
 }
 
 void World::clearAssociatedCaches()
 {
-    mChunkManager->clearCache();
+    if (mChunkManager)
+        mChunkManager->clearCache();
 }
 
 osg::Callback* World::getHeightCullCallback(float highz, unsigned int mask)
 {
+    if (!mHeightCullCallback) return nullptr;
+
     mHeightCullCallback->setHighZ(highz);
     mHeightCullCallback->setCullMask(mask);
     return mHeightCullCallback;

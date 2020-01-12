@@ -70,7 +70,7 @@ namespace DetourNavigator
 
 namespace MWRender
 {
-
+    class GroundcoverUpdater;
     class StateUpdater;
 
     class EffectManager;
@@ -263,6 +263,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mSceneRoot;
         Resource::ResourceSystem* mResourceSystem;
 
+        osg::ref_ptr<GroundcoverUpdater> mGroundcoverUpdater;
+
         osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
         osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
@@ -277,8 +279,10 @@ namespace MWRender
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
         std::unique_ptr<Terrain::World> mTerrain;
-        TerrainStorage* mTerrainStorage;
+        std::unique_ptr<Terrain::World> mGroundcoverWorld;
+        std::unique_ptr<TerrainStorage> mTerrainStorage;
         std::unique_ptr<ObjectPaging> mObjectPaging;
+        std::unique_ptr<ObjectPaging> mGroundcoverPaging;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<EffectManager> mEffectManager;

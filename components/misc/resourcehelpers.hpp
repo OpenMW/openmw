@@ -23,6 +23,16 @@ namespace Misc
         std::string correctBookartPath(const std::string &resPath, int width, int height, const VFS::Manager* vfs);
         /// Use "xfoo.nif" instead of "foo.nif" if available
         std::string correctActorModelPath(const std::string &resPath, const VFS::Manager* vfs);
+
+        class DensityCalculator
+        {
+        public:
+            bool isInstanceEnabled();
+            void reset() { mCurrentGroundcover = 0.f; }
+
+        private:
+            float mCurrentGroundcover = 0.f;
+        };
     }
 }
 

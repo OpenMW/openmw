@@ -243,7 +243,7 @@ public:
         setName("RefractionCamera");
         setCullCallback(new InheritViewPointCallback);
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting|Mask_Groundcover);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 

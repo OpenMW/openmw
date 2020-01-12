@@ -257,6 +257,16 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     mChunkManagers.push_back(mChunkManager.get());
 }
 
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, int vertexLodMod)
+    : TerrainGrid(parent, storage, nodeMask)
+    , mViewDataMap(new ViewDataMap)
+    , mQuadTreeBuilt(false)
+    , mLodFactor(lodFactor)
+    , mVertexLodMod(vertexLodMod)
+    , mViewDistance(std::numeric_limits<float>::max())
+{
+}
+
 QuadTreeWorld::~QuadTreeWorld()
 {
 }
@@ -438,7 +448,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         entry.mRenderingNode->accept(nv);
     }
 
-    if (isCullVisitor)
+    if (mHeightCullCallback && isCullVisitor)
         updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
     vd->markUnchanged();
@@ -515,14 +525,15 @@ bool QuadTreeWorld::storeView(const View* view, double referenceTime)
 
 void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
 {
-    stats->setAttribute(frameNumber, "Composite", mCompositeMapRenderer->getCompileSetSize());
+    if (mCompositeMapRenderer)
+        stats->setAttribute(frameNumber, "Composite", mCompositeMapRenderer->getCompileSetSize());
 }
 
 void QuadTreeWorld::loadCell(int x, int y)
 {
     // fallback behavior only for undefined cells (every other is already handled in quadtree)
     float dummy;
-    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+    if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
         TerrainGrid::loadCell(x,y);
     else
         World::loadCell(x,y);
@@ -532,7 +543,7 @@ void QuadTreeWorld::unloadCell(int x, int y)
 {
     // fallback behavior only for undefined cells (every other is already handled in quadtree)
     float dummy;
-    if (!mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
+    if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x+0.5, y+0.5), dummy, dummy))
         TerrainGrid::unloadCell(x,y);
     else
         World::unloadCell(x,y);

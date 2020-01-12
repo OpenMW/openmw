@@ -32,7 +32,7 @@ void main(void)
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting, false);
 #endif
     passColor = gl_Color;
     passNormal = gl_Normal.xyz;

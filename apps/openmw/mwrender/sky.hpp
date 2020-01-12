@@ -69,6 +69,7 @@ namespace MWRender
         float mDLFogFactor;
         float mDLFogOffset;
 
+        float mBaseWindSpeed;
         float mWindSpeed;
         float mCurrentWindSpeed;
         float mNextWindSpeed;
@@ -181,6 +182,8 @@ namespace MWRender
 
         void setRainIntensityUniform(osg::Uniform *uniform);
 
+        float getBaseWindSpeed() const;
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
@@ -265,6 +268,7 @@ namespace MWRender
         float mRainEntranceSpeed;
         int mRainMaxRaindrops;
         float mWindSpeed;
+        float mBaseWindSpeed;
 
         bool mEnabled;
         bool mSunEnabled;

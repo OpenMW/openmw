@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <components/misc/stringops.hpp>
+#include <components/settings/settings.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -38,6 +39,18 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string &path)
         return true;
     }
     return false;
+}
+
+bool Misc::ResourceHelpers::DensityCalculator::isInstanceEnabled()
+{
+    static const float density = Settings::Manager::getFloat("density", "Groundcover");
+
+    mCurrentGroundcover += density;
+    if (mCurrentGroundcover < 1.f) return false;
+
+    mCurrentGroundcover -= 1.f;
+
+    return true;
 }
 
 std::string Misc::ResourceHelpers::correctResourcePath(const std::string &topLevelDirectory, const std::string &resPath, const VFS::Manager* vfs)

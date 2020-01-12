@@ -40,7 +40,7 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile)
+osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
 {
     ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
