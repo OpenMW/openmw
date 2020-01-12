@@ -142,8 +142,9 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
 
 namespace MWMechanics
 {
-    static const int GREETING_SHOULD_START = 4; //how many updates should pass before NPC can greet player
-    static const int GREETING_SHOULD_END = 10;
+    static const int GREETING_SHOULD_START = 4; // how many updates should pass before NPC can greet player
+    static const int GREETING_SHOULD_END = 20;  // how many updates should pass before NPC stops turning to player
+    static const int GREETING_COOLDOWN = 40;    // how many updates should pass before NPC can continue movement
     static const float DECELERATE_DISTANCE = 512.f;
 
     class GetStuntedMagickaDuration : public MWMechanics::EffectSourceVisitor
@@ -519,9 +520,10 @@ namespace MWMechanics
         {
             greetingTimer++;
 
-            turnActorToFacePlayer(actor, dir);
+            if (greetingTimer <= GREETING_SHOULD_END || MWBase::Environment::get().getSoundManager()->sayActive(actor))
+                turnActorToFacePlayer(actor, dir);
 
-            if (greetingTimer >= GREETING_SHOULD_END)
+            if (greetingTimer >= GREETING_COOLDOWN)
             {
                 greetingState = Greet_Done;
                 greetingTimer = 0;
