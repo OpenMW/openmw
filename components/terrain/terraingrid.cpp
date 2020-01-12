@@ -26,6 +26,12 @@ TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::
 {
 }
 
+TerrainGrid::TerrainGrid(osg::Group* parent, Storage* storage, int nodeMask)
+    : Terrain::World(parent, storage, nodeMask)
+    , mNumSplits(4)
+{
+}
+
 TerrainGrid::~TerrainGrid()
 {
     while (!mGrid.empty())
@@ -107,6 +113,8 @@ void TerrainGrid::unloadCell(int x, int y)
 
 void TerrainGrid::updateWaterCulling()
 {
+    if (!mHeightCullCallback) return;
+
     osg::ComputeBoundsVisitor computeBoundsVisitor;
     mTerrainRoot->accept(computeBoundsVisitor);
     float lowZ = computeBoundsVisitor.getBoundingBox()._min.z();

@@ -75,6 +75,7 @@ namespace MWWorld
         // maps the id name to the record type.
         std::map<std::string, int> mIds;
         std::map<std::string, int> mStaticIds;
+        std::map<std::string, std::string> mGroundcovers;
 
         std::map<std::string, int> mRefCount;
 
@@ -119,6 +120,22 @@ namespace MWWorld
                 return 0;
             }
             return it->second;
+        }
+
+        bool isGroundcover(const std::string &id, std::string &model) const
+        {
+            std::map<std::string, std::string>::const_iterator it = mGroundcovers.find(id);
+            if (it == mGroundcovers.end()) {
+                return false;
+            }
+            model = it->second;
+            return true;
+        }
+
+        bool isGroundcover(const std::string &id) const
+        {
+            std::map<std::string, std::string>::const_iterator it = mGroundcovers.find(id);
+            return (it != mGroundcovers.end());
         }
 
         ESMStore()

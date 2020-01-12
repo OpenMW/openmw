@@ -449,6 +449,7 @@
                                     <Property key="AddItem" value="World"/>
                                     <Property key="AddItem" value="Objects"/>
                                     <Property key="AddItem" value="Actors"/>
+                                    <Property key="AddItem" value="Groundcover"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
                                     <Property key="Caption" value="Reflection shader detail"/>

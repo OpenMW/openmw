@@ -398,6 +398,7 @@ namespace MWRender
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
+                            if (store.isGroundcover(ref.mRefID)) continue;
                             refs[ref.mRefNum] = ref;
                         }
                     }

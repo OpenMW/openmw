@@ -36,6 +36,13 @@ namespace MWWorld
 
         virtual bool operator()(const MWWorld::Ptr& ptr)
         {
+            if (ptr.getTypeName()==typeid (ESM::Static).name())
+            {
+                const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
+                if (ref->mBase->mIsGroundcover)
+                    return true;
+            }
+
             ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;

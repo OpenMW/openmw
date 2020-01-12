@@ -15,17 +15,17 @@ EsmLoader::EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& read
 {
 }
 
-void EsmLoader::load(const boost::filesystem::path& filepath, int& index)
+void EsmLoader::load(const boost::filesystem::path& filepath, int& index, bool isGroundcover)
 {
-  ContentLoader::load(filepath.filename(), index);
+    ContentLoader::load(filepath.filename(), index, isGroundcover);
 
-  ESM::ESMReader lEsm;
-  lEsm.setEncoder(mEncoder);
-  lEsm.setIndex(index);
-  lEsm.setGlobalReaderList(&mEsm);
-  lEsm.open(filepath.string());
-  mEsm[index] = lEsm;
-  mStore.load(mEsm[index], &mListener);
+    ESM::ESMReader lEsm;
+    lEsm.setEncoder(mEncoder);
+    lEsm.setIndex(index);
+    lEsm.setGlobalReaderList(&mEsm);
+    lEsm.open(filepath.string(), isGroundcover);
+    mEsm[index] = lEsm;
+    mStore.load(mEsm[index], &mListener);
 }
 
 } /* namespace MWWorld */

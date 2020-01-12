@@ -247,10 +247,12 @@ namespace Resource
         return mForceShaders;
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer)
+    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix, bool translucentFramebuffer, bool forceShadersForNode)
     {
         osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(createShaderVisitor(shaderPrefix, translucentFramebuffer));
         shaderVisitor->setAllowedToModifyStateSets(false);
+        if (forceShadersForNode)
+            shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
     }
 
@@ -512,7 +514,7 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
+            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor("objects"));
             loaded->accept(*shaderVisitor);
 
             // share state

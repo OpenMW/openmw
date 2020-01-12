@@ -22,6 +22,8 @@ namespace Terrain
     public:
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
 
+        QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, float chunkSize);
+
         ~QuadTreeWorld();
 
         void accept(osg::NodeVisitor& nv);
@@ -47,7 +49,7 @@ namespace Terrain
         {
         public:
             virtual ~ChunkManager(){}
-            virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile) = 0;
+            virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) = 0;
             virtual unsigned int getNodeMask() { return 0; }
         };
         void addChunkManager(ChunkManager*);
@@ -66,6 +68,7 @@ namespace Terrain
         float mLodFactor;
         int mVertexLodMod;
         float mViewDistance;
+        float mMinSize;
     };
 
 }

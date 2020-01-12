@@ -62,7 +62,7 @@ reflection detail
 -----------------
 
 :Type:		integer
-:Range:		0, 1, 2, 3, 4
+:Range:		0, 1, 2, 3, 4, 5
 :Default:	2
 
 Controls what kinds of things are rendered in water reflections.
@@ -72,6 +72,7 @@ Controls what kinds of things are rendered in water reflections.
 2: statics, activators, and doors are also reflected
 3: items, containers, and particles are also reflected
 4: actors are also reflected
+5: groundcover objects are also reflected
 
 In interiors the lowest level is 2.
 This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.

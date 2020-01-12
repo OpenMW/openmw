@@ -24,6 +24,8 @@ namespace MWWorld
         /// all methods are known.
         void load (ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore);
 
+        inline bool ignoreInstance (const X* ptr);
+
         LiveRef &insert (const LiveRef &item)
         {
             mList.push_back(item);

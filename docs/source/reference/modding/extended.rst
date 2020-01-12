@@ -223,10 +223,10 @@ For example, to attach a custom weapon bone, you'll need to follow this NIF reco
 
 ::
 
-NiNode "root"
-    NiNode "Bip01 L Hand"
-        NiNode "Weapon Bone Left"
-            NiStringExtraData "BONE"
+    NiNode "root"
+        NiNode "Bip01 L Hand"
+            NiNode "Weapon Bone Left"
+                NiStringExtraData "BONE"
 
 OpenMW will detect ``Weapon Bone Left`` node and attach it to ``Bip01 L Hand`` bone of the target skeleton.
 
@@ -275,6 +275,54 @@ Note that bows can be attached to the "Weapon Bone Left" bone if it is present i
 Also it is possible to add a "Bip01 Arrow" bone to actor skeletons. In this case OpenMW attaches arrows to this bone instead of ArrowBone in the bow mesh.
 Such approach allows to implement better shooting animations (for example, beast races have tail, so quivers should be attached under different angle and
 default arrow fetching animation does not look good).
+
+Groundcover support
+-------------------
+
+Groundcover objects is a special kind of objects (e.g. grass), which can be used to improve visual fidelity.
+They use these assumptions:
+
+1. Each object is independent, so part of objects can be removed from scene without causing graphical artifacts.
+
+2. Groundover should not have collisions.
+
+3. They are not important for some parts of game scene (e.g. local map).
+
+4. They can not be moved or disabled on the fly.
+
+5. They can not be interacted with.
+
+As result, such objects can be treated in the separate way:
+
+1. It is possible to tweak groundcover objects density.
+
+2. It is possible to safely merge such objects even near player.
+
+3. Such objects can be animated (to simulate wind, for example).
+
+4. Some parts of processing can be skipped.
+
+For example, we do not need to have collision or animation objects for groundcover,
+do not need to render groundcover on the map, do not need to render it for the whole visible area (which can be very large with Distant Terrain). It allows to increase performance a lot.
+
+General advices to create assets for this feature:
+1. Alpha properties from Nif files are not used, a unified alpha settings are used (alpha testing, "greater of equal" function, 128/255 threshold).
+2. Use a single NiTriShape in groundocver mesh, or at least use same properties (texture, alpha, material, etc), so OpenMW can merge them on the fly. Otherwise animations may not work properly.
+3. Smooth fading does not work for meshes, which have textures without alpha (e.g. rock).
+
+Groundcover mods can be registered in the openmw.cfg via "groundcover" entries instead of "content" ones:
+
+::
+
+    groundcover=my_grass_mod.esp
+
+Every static from such mod is treated as a groundcover object.
+Also groundcover detection should be enabled via settings.cfg:
+
+::
+
+    [Groundcover]
+    enabled = true
 
 .. _`Graphic Herbalism`: https://www.nexusmods.com/morrowind/mods/46599
 .. _`OpenMW Containers Animated`: https://www.nexusmods.com/morrowind/mods/46232

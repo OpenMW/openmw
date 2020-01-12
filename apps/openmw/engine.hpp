@@ -85,6 +85,7 @@ namespace OMW
             osgViewer::ScreenCaptureHandler::CaptureOperation *mScreenCaptureOperation;
             std::string mCellName;
             std::vector<std::string> mContentFiles;
+            std::vector<std::string> mGroundcoverFiles;
             bool mSkipMenu;
             bool mUseSound;
             bool mCompileAll;
@@ -155,6 +156,7 @@ namespace OMW
              * @param file - filename (extension is required)
              */
             void addContentFile(const std::string& file);
+            void addGroundcoverFile(const std::string& file);
 
             /// Disable or enable all sounds
             void setSoundUsage(bool soundUsage);
