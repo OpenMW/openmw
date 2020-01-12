@@ -1075,7 +1075,7 @@ namespace MWRender
         mIntersectionVisitor->setIntersector(intersector);
 
         int mask = ~0;
-        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water|Mask_SimpleWater);
+        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water|Mask_SimpleWater|Mask_Grass);
         if (ignorePlayer)
             mask &= ~(Mask_Player);
         if (ignoreActors)

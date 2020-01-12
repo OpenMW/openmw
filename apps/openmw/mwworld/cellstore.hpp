@@ -32,6 +32,8 @@
 #include <components/esm/loadmisc.hpp>
 #include <components/esm/loadbody.hpp>
 
+#include "../mwrender/grass.hpp"
+
 #include "timestamp.hpp"
 #include "ptr.hpp"
 
@@ -254,6 +256,10 @@ namespace MWWorld
 
             void setWaterLevel (float level);
 
+            void updateGrassVisibility();
+
+            void insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs);
+
             void setFog (ESM::FogState* fog);
             ///< \note Takes ownership of the pointer
 
@@ -408,6 +414,8 @@ namespace MWWorld
             ///< Make case-adjustments to \a ref and insert it into the respective container.
             ///
             /// Invalid \a ref objects are silently dropped.
+
+            MWRender::Grass mGrass;
     };
 
     template<>

@@ -427,6 +427,8 @@ namespace MWWorld
             // ... then references. This is important for adjustPosition to work correctly.
             insertCell (*cell, loadingListener, test);
 
+            mRendering.getObjects().insertGrass(cell);
+
             mRendering.addCell(cell);
             if (!test)
             {

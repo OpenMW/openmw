@@ -161,6 +161,8 @@ namespace MWWorld
 
             void updateNavigator();
 
+            void updateGrass();
+
             bool updateNavigatorObject(const MWPhysics::Object* object);
 
             void ensureNeededRecords();

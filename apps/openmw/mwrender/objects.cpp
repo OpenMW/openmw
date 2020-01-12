@@ -8,6 +8,7 @@
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/cellstore.hpp"
 
 #include "animation.hpp"
 #include "npcanimation.hpp"
@@ -66,6 +67,24 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
     insert->setScale(scaleVec);
 
     ptr.getRefData().setBaseNode(insert);
+}
+
+void Objects::insertGrass(MWWorld::CellStore* cell)
+{
+    osg::ref_ptr<osg::Group> cellnode;
+
+    CellMap::iterator found = mCellSceneNodes.find(cell);
+    if (found == mCellSceneNodes.end())
+    {
+        cellnode = new osg::Group;
+        cellnode->setName("Cell Root");
+        mRootNode->addChild(cellnode);
+        mCellSceneNodes[cell] = cellnode;
+    }
+    else
+        cellnode = found->second;
+
+    cell->insertGrass(cellnode, mResourceSystem);
 }
 
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
