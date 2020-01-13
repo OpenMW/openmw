@@ -198,6 +198,7 @@
     Bug #5261: Creatures can sometimes become stuck playing idles and never wander again
     Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Bug #5278: Console command Show doesn't fall back to global variable after local var not found
+    Feature #1415: Infinite fall failsafe
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
