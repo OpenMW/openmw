@@ -87,10 +87,10 @@ struct NPC
         // mSkill can grow up to 200, it must be unsigned
         unsigned char mSkills[Skill::Length];
 
-        char mFactionID;
+        char mUnknown1;
         unsigned short mHealth, mMana, mFatigue;
         unsigned char mDisposition, mReputation, mRank;
-        char mUnknown;
+        char mUnknown2;
         int mGold;
     }; // 52 bytes
 

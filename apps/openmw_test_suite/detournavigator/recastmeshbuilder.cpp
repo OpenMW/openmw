@@ -361,9 +361,9 @@ namespace
         );
         const auto recastMesh = builder.create();
         EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
-            0.707107067108154296875, 0, -3.535533905029296875,
-            -0.70710659027099609375, 0, -3.535533905029296875,
-            2.384185791015625e-07, 0, -4.24264049530029296875,
+            1.41421353816986083984375, 0, 1.1920928955078125e-07,
+            -1.41421353816986083984375, 0, -1.1920928955078125e-07,
+            1.1920928955078125e-07, 0, -1.41421353816986083984375,
         }));
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground}));

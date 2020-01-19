@@ -216,9 +216,9 @@ namespace ESM
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;
-        mNpdt.mFactionID = 0;
+        mNpdt.mUnknown1 = 0;
         mNpdt.mRank = 0;
-        mNpdt.mUnknown = 0;
+        mNpdt.mUnknown2 = 0;
         mNpdt.mGold = 0;
     }
 

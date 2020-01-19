@@ -21,12 +21,14 @@
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
     Bug #3894: Hostile spell effects not detected/present on first frame of OnPCHitMe
     Bug #3977: Non-ASCII characters in object ID's are not supported
+    Bug #4009: Launcher does not show data files on the first run after installing
     Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4262: Rain settings are hardcoded
     Bug #4270: Closing doors while they are obstructed desyncs closing sfx
     Bug #4276: Resizing character window differs from vanilla
+    Bug #4284: ForceSneak behaviour is inconsistent if the target has AiWander package
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
@@ -40,6 +42,7 @@
     Bug #4600: Crash when no sound output is available or --no-sound is used.
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog
+    Bug #4680: Heap corruption on faulty esp
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
     Bug #4705: Editor: unable to open exterior cell views from Instances table
@@ -62,6 +65,7 @@
     Bug #4787: Sneaking makes 1st person walking/bobbing animation super-slow
     Bug #4797: Player sneaking and running stances are not accounted for when in air
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
+    Bug #4802: You can rest before taking falling damage from landing from a jump
     Bug #4803: Stray special characters before begin statement break script compilation
     Bug #4804: Particle system with the "Has Sizes = false" causes an exception
     Bug #4805: NPC movement speed calculations do not take race Weight into account
@@ -131,6 +135,7 @@
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
     Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
+    Bug #5073: NPCs open doors in front of them even if they don't have to
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
     Bug #5078: DisablePlayerLooking is broken
@@ -176,17 +181,32 @@
     Bug #5209: Spellcasting ignores race height
     Bug #5210: AiActivate allows actors to open dialogue and inventory windows
     Bug #5211: Screen fades in if the first loaded save is in interior cell
+    Bug #5212: AiTravel does not work for actors outside of AI processing range
     Bug #5213: SameFaction script function is broken
+    Bug #5218: Crash when disabling ToggleBorders
+    Bug #5220: GetLOS crashes when actor isn't loaded
+    Bug #5222: Empty cell name subrecords are not saved
+    Bug #5223: Bow replacement during attack animation removes attached arrow
+    Bug #5226: Reputation should be capped
+    Bug #5229: Crash if mesh controller node has no data node
+    Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
+    Bug #5241: On-self absorb spells cannot be detected
+    Bug #5242: ExplodeSpell behavior differs from Cast behavior
+    Bug #5249: Wandering NPCs start walking too soon after they hello
+    Bug #5250: Creatures display shield ground mesh instead of shield body part
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
+    Feature #3517: Multiple projectiles enchantment
     Feature #3610: Option to invert X axis
     Feature #3871: Editor: Terrain Selection
     Feature #3893: Implicit target for "set" function in console
     Feature #3980: In-game option to disable controller
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
+    Feature #4068: OpenMW-CS: Add a button to reset key bindings to defaults
+    Feature #4129: Beta Comment to File
     Feature #4209: Editor: Faction rank sub-table
     Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly
@@ -227,6 +247,8 @@
     Feature #5147: Show spell magicka cost in spell buying window
     Feature #5170: Editor: Land shape editing, land selection
     Feature #5193: Weapon sheathing
+    Feature #5219: Impelement TestCells console command
+    Feature #5224: Handle NiKeyframeController for NiTriShape
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

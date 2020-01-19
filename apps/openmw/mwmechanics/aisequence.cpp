@@ -198,7 +198,7 @@ bool isActualAiPackage(int packageTypeId)
             packageTypeId <= AiPackage::TypeIdActivate);
 }
 
-void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration)
+void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& characterController, float duration, bool outOfRange)
 {
     if(actor != getPlayer())
     {
@@ -209,6 +209,9 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         }
 
         MWMechanics::AiPackage* package = mPackages.front();
+        if (!package->alwaysActive() && outOfRange)
+            return;
+
         int packageTypeId = package->getTypeId();
         // workaround ai packages not being handled as in the vanilla engine
         if (isActualAiPackage(packageTypeId))

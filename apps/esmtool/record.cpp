@@ -1032,14 +1032,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
-        //Why do we want to print these fields? They are padding in the struct and contain
-        // nothing of real value. Now we don't deal with NPDTstruct12 in runtime either...
-        //std::cout << "  Unknown1: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown1) << std::endl;
-        //std::cout << "  Unknown2: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown2) << std::endl;
-        //std::cout << "  Unknown3: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown3) << std::endl;
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
     else {
@@ -1047,7 +1039,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
-        std::cout << "  FactionID: " << (int)mData.mNpdt.mFactionID << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
         std::cout << "    Strength: " << (int)mData.mNpdt.mStrength << std::endl;
@@ -1067,7 +1058,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
         std::cout << "  Fatigue: " << mData.mNpdt.mFatigue << std::endl;
-        std::cout << "  Unknown: " << (int)mData.mNpdt.mUnknown << std::endl;
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
 

@@ -504,14 +504,10 @@ void MWWorld::InventoryStore::autoEquipShield(const MWWorld::Ptr& actor, TSlots&
             continue;
         if (iter->getClass().canBeEquipped(*iter, actor).first != 1)
             continue;
-        if (iter->getClass().getItemHealth(*iter) <= 0)
-            continue;
         std::pair<std::vector<int>, bool> shieldSlots =
             iter->getClass().getEquipmentSlots(*iter);
-        if (shieldSlots.first.empty())
-            continue;
         int slot = shieldSlots.first[0];
-        const ContainerStoreIterator& shield = mSlots[slot];
+        const ContainerStoreIterator& shield = slots_[slot];
         if (shield != end()
                 && shield.getType() == Type_Armor && shield->get<ESM::Armor>()->mBase->mData.mType == ESM::Armor::Shield)
         {
@@ -779,7 +775,7 @@ int MWWorld::InventoryStore::remove(const Ptr& item, int count, const Ptr& actor
     return retCount;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor)
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, const MWWorld::Ptr& actor, bool fireEvent)
 {
     if (slot<0 || slot>=static_cast<int> (mSlots.size()))
         throw std::runtime_error ("slot number out of range");
@@ -811,7 +807,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipSlot(int slot, c
             }
         }
 
-        fireEquipmentChangedEvent(actor);
+        if (fireEvent)
+            fireEquipmentChangedEvent(actor);
+
         updateMagicEffects(actor);
 
         return retval;

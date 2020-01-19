@@ -447,9 +447,9 @@ namespace MWMechanics
             if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
                 continue;
 
-            // caster needs to be an actor that's not the target for linked effects (e.g. Absorb)
+            // caster needs to be an actor for linked effects (e.g. Absorb)
             if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                    && (caster.isEmpty() || !caster.getClass().isActor() || caster == target))
+                    && (caster.isEmpty() || !caster.getClass().isActor()))
                 continue;
 
             // If player is healing someone, show the target's HP bar
@@ -552,6 +552,15 @@ namespace MWMechanics
                     effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mMagnitude = magnitude;
 
+                    // Avoid applying absorb effects if the caster is the target
+                    // We still need the spell to be added
+                    if (caster == target
+                        && effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute
+                        && effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
+                    {
+                        effect.mMagnitude = 0;
+                    }
+
                     bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
                     if (hasDuration && effectIt->mDuration == 0)
                     {
@@ -600,21 +609,19 @@ namespace MWMechanics
                         // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster != target && caster.getClass().isActor())
                         {
-                            for (int i=0; i<5; ++i)
+                            if (effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute &&
+                                effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
                             {
-                                if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
-                                {
-                                    std::vector<ActiveSpells::ActiveEffect> absorbEffects;
-                                    ActiveSpells::ActiveEffect effect_ = effect;
-                                    effect_.mMagnitude *= -1;
-                                    absorbEffects.push_back(effect_);
-                                    if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
-                                        target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
-                                            absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
-                                    else
-                                        caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                            absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
-                                }
+                                std::vector<ActiveSpells::ActiveEffect> absorbEffects;
+                                ActiveSpells::ActiveEffect effect_ = effect;
+                                effect_.mMagnitude *= -1;
+                                absorbEffects.push_back(effect_);
+                                if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
+                                    target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
+                                        absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
+                                else
+                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                        absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
                             }
                         }
                     }

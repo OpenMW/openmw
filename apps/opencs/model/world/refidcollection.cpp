@@ -536,8 +536,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Level, CSMWorld::ColumnBase::Display_SignedInteger16));
     mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcFactionID, CSMWorld::ColumnBase::Display_SignedInteger8));
-    mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Health, CSMWorld::ColumnBase::Display_UnsignedInteger16));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Mana, CSMWorld::ColumnBase::Display_UnsignedInteger16));

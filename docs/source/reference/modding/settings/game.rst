@@ -103,13 +103,13 @@ actors processing range
 :Range:		3584 to 7168
 :Default:	7168
 
-This setting allows to specify a distance from player in game units, in which OpenMW updates actor's state.
+This setting specifies the actor state update distance from the player in game units.
 Actor state update includes AI, animations, and physics processing.
-Actors near that border start softly fade out instead of just appearing/disapperaing.
-It is not recommended to change this value from default if you use mods with
-long-range AiTravel packages (e.g. patrols, caravans and travellers).
+Actors close to this distance softly fade in and out instead of appearing or disappearing abruptly.
+Keep in mind that actors running Travel AI packages are always active to avoid
+issues in mods with long-range AiTravel packages (for example, patrols, caravans and travellers).
 
-This setting can be controlled in game with the "Actors processing range slider" in the Prefs panel of the Options menu.
+This setting can be controlled in game with the "Actors Processing Range" slider in the Prefs panel of the Options menu.
 
 classic reflected absorb spells behavior
 ----------------------------------------
@@ -282,3 +282,19 @@ equivalent to the one introduced by the equivalent Morrowind Code Patch feature.
 This makes the movement speed behavior more fair between different races.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+projectiles enchant multiplier
+------------------------------
+
+:Type:		floating point
+:Range:		0.0 to 1.0
+:Default:	0.0
+
+The value of this setting determines how many projectiles (thrown weapons, arrows and bolts) you can enchant at once according to the following formula:
+
+count = (soul gem charge * projectiles enchant multiplier) / enchantment strength
+
+A value of 0 means that you can only enchant one projectile.
+If you want to have Morrowind Code Patch-like count of projectiles being enchanted at once, set this value to 0.25 (i.e. 25% of the charge).
+
+This setting can only be configured by editing the settings configuration file.

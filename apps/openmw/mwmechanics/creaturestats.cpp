@@ -426,6 +426,11 @@ namespace MWMechanics
         mFallHeight += height;
     }
 
+    float CreatureStats::getFallHeight() const
+    {
+        return mFallHeight;
+    }
+
     float CreatureStats::land(bool isPlayer)
     {
         if (isPlayer)

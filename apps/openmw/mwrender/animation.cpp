@@ -515,13 +515,11 @@ namespace MWRender
     protected:
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-
             osg::BlendFunc* blendfunc (new osg::BlendFunc);
             stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
             // FIXME: overriding diffuse/ambient/emissive colors
-            material = new osg::Material;
+            osg::Material* material = new osg::Material;
             material->setColorMode(osg::Material::OFF);
             material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,mAlpha));
             material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
@@ -635,7 +633,7 @@ namespace MWRender
 
     Animation::~Animation()
     {
-        setLightEffect(0.f);
+        Animation::setLightEffect(0.f);
 
         if (mObjectRoot)
             mInsert->removeChild(mObjectRoot);

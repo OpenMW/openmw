@@ -344,6 +344,7 @@ namespace MWWorld
             ContainerStoreIteratorBase& operator++ ();
             ContainerStoreIteratorBase operator++ (int);
             ContainerStoreIteratorBase& operator= (const ContainerStoreIteratorBase& rhs);
+            ContainerStoreIteratorBase (const ContainerStoreIteratorBase& rhs) = default;
 
             int getType() const;
             const ContainerStore *getContainerStore() const;

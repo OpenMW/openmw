@@ -1362,7 +1362,7 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        stopMusic();
+        SoundManager::stopMusic();
 
         for(SoundMap::value_type &snd : mActiveSounds)
         {

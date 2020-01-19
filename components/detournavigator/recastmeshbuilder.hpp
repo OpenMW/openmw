@@ -48,6 +48,8 @@ namespace DetourNavigator
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
+        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback);
+
         void addTriangleVertex(const btVector3& worldPosition);
 
         void addVertex(const btVector3& worldPosition);

@@ -167,6 +167,7 @@ using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
+using ExtraList = RecordListT<Extra>;
 using NiSourceTextureList = RecordListT<NiSourceTexture>;
 
 } // Namespace

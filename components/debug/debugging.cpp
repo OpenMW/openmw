@@ -97,9 +97,13 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
     std::streambuf* cout_rdbuf = std::cout.rdbuf ();
     std::streambuf* cerr_rdbuf = std::cerr.rdbuf ();
 
-#if !(defined(_WIN32) && defined(_DEBUG))
+#if defined(_WIN32) && defined(_DEBUG)
+    boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
+#else
     boost::iostreams::stream_buffer<Debug::Tee> coutsb;
     boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
+    std::ostream oldcout(cout_rdbuf);
+    std::ostream oldcerr(cerr_rdbuf);
 #endif
 
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
@@ -113,7 +117,6 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 
 #if defined(_WIN32) && defined(_DEBUG)
         // Redirect cout and cerr to VS debug output when running in debug mode
-        boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
         sb.open(Debug::DebugOutput());
         std::cout.rdbuf (&sb);
         std::cerr.rdbuf (&sb);
@@ -121,8 +124,6 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         // Redirect cout and cerr to the log file
         logfile.open (boost::filesystem::path(cfgMgr.getLogPath() / logName));
 
-        std::ostream oldcout(cout_rdbuf);
-        std::ostream oldcerr(cerr_rdbuf);
         coutsb.open (Debug::Tee(logfile, oldcout));
         cerrsb.open (Debug::Tee(logfile, oldcerr));
 

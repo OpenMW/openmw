@@ -370,7 +370,8 @@ int MWMechanics::NpcStats::getReputation() const
 
 void MWMechanics::NpcStats::setReputation(int reputation)
 {
-    mReputation = reputation;
+    // Reputation is capped in original engine
+    mReputation = std::min(255, std::max(0, reputation));
 }
 
 int MWMechanics::NpcStats::getCrimeId() const

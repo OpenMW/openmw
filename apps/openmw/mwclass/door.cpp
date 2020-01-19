@@ -34,7 +34,7 @@ namespace MWClass
     class DoorCustomData : public MWWorld::CustomData
     {
     public:
-        MWWorld::DoorState mDoorState;
+        MWWorld::DoorState mDoorState = MWWorld::DoorState::Idle;
 
         virtual MWWorld::CustomData *clone() const;
 
@@ -344,8 +344,6 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             std::unique_ptr<DoorCustomData> data(new DoorCustomData);
-
-            data->mDoorState = MWWorld::DoorState::Idle;
             ptr.getRefData().setCustomData(data.release());
         }
     }

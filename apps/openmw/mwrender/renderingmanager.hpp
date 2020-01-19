@@ -7,6 +7,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include "objects.hpp"
 
 #include "renderinginterface.hpp"
@@ -88,6 +90,8 @@ namespace MWRender
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                          const std::string& resourcePath, DetourNavigator::Navigator& navigator);
         ~RenderingManager();
+
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
 
         MWRender::Objects& getObjects();
 

@@ -213,7 +213,7 @@
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 194 137 24" align="Left Bottom" name="ResetControlsButton">
                     <Property key="Caption" value="#{sControlsMenu1}"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 224 360 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 224 380 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="invert x axis"/>
@@ -231,10 +231,10 @@
                         <Property key="Caption" value="#{sMouseFlip}"/>
                     </Widget>
                 </Widget>
-                <Widget type="TextBox" skin="NormalText" position="4 254 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="NormalText" position="4 254 352 18" align="Left Bottom">
                     <Property key="Caption" value="Camera Sensitivity"/>
                 </Widget>
-                <Widget type="ScrollBar" skin="MW_HScroll" position="4 278 336 18" align="HStretch Bottom">
+                <Widget type="ScrollBar" skin="MW_HScroll" position="4 278 352 18" align="HStretch Bottom">
                     <Property key="Range" value="10000"/>
                     <Property key="Page" value="300"/>
                     <UserString key="SettingType" value="Slider"/>
@@ -244,15 +244,15 @@
                     <UserString key="SettingMin" value="0.2"/>
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Left Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 352 18" align="Left Bottom">
                     <Property key="Caption" value="#{sLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
-                <Widget type="TextBox" skin="SandText" position="4 302 336 18" align="Right Bottom">
+                <Widget type="TextBox" skin="SandText" position="4 302 352 18" align="Right Bottom">
                     <Property key="Caption" value="#{sHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
-                <Widget type="HBox" skin="" position="4 324 336 24" align="Left Bottom">
+                <Widget type="HBox" skin="" position="4 324 352 24" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Bottom">
                         <UserString key="SettingCategory" value="Input"/>
                         <UserString key="SettingName" value="enable controller"/>
@@ -306,9 +306,9 @@
                             <Property key="Caption" value="Hint: press F3 to show \nthe current frame rate."/>
                         </Widget>
 
-                        <Widget type="TextBox" skin="NormalText" position="0 198 329 18" align="Left Top" name="FovText">
+                        <Widget type="TextBox" skin="NormalText" position="0 198 352 18" align="Left Top" name="FovText">
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 222 329 18" align="HStretch Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 222 352 18" align="HStretch Top">
                             <Property key="Range" value="81"/>
                             <Property key="Page" value="1"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -320,18 +320,18 @@
                             <UserString key="SettingLabelWidget" value="FovText"/>
                             <UserString key="SettingLabelCaption" value="Field of View (%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 246 352 18" align="Left Top">
                             <Property key="Caption" value="#{sLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 246 329 18" align="Right Top">
+                        <Widget type="TextBox" skin="SandText" position="0 246 352 18" align="Right Top">
                             <Property key="Caption" value="#{sHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="0 268 329 18" align="Left Top" name="GammaText">
+                        <Widget type="TextBox" skin="NormalText" position="0 268 352 18" align="Left Top" name="GammaText">
                             <Property key="Caption" value="#{sGamma_Correction}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 292 329 18" align="HStretch Top" name="GammaSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 292 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
                             <Property key="Page" value="300"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -341,11 +341,11 @@
                             <UserString key="SettingMin" value="0.1"/>
                             <UserString key="SettingMax" value="3.0"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 316 329 18" align="Left Top" name="GammaTextDark">
+                        <Widget type="TextBox" skin="SandText" position="0 316 352 18" align="Left Top" name="GammaTextDark">
                             <Property key="Caption" value="#{sDark_Gamma}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 316 329 18" align="Right Top" name="GammaTextLight">
+                        <Widget type="TextBox" skin="SandText" position="0 316 352 18" align="Right Top" name="GammaTextLight">
                             <Property key="Caption" value="#{sLight_Gamma}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
@@ -373,10 +373,10 @@
                                 <UserString key="SettingLabelCaption" value="Anisotropy (%s)"/>
                             </Widget>
                         </Widget>
-                        <Widget type="TextBox" skin="NormalText" position="4 130 322 18" align="Left Top" name="RenderDistanceLabel">
+                        <Widget type="TextBox" skin="NormalText" position="0 130 352 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="RenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4609"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -388,7 +388,7 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="4 154 322 18" align="Left Top" name="LargeRenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79873"/>
                             <Property key="Page" value="2048"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -400,11 +400,11 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (x%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 178 352 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="4 178 332 18" align="Left Top">
+                        <Widget type="TextBox" skin="SandText" position="0 178 352 18" align="Right Top">
                             <Property key="Caption" value="#{sFar}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>

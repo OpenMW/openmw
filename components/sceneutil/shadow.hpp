@@ -27,23 +27,21 @@ namespace SceneUtil
 
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
+        void setupShadowSettings();
 
-        virtual ~ShadowManager() = default;
-
-        virtual void setupShadowSettings();
         osgShadow::ShadowSettings * getShadowSettings() { return mShadowSettings; }
         inline unsigned int getOutdoorShadowCastingMask() const { return mOutdoorShadowCastingMask; }
         inline void setOutdoorShadowCastingMask( unsigned int m) { mOutdoorShadowCastingMask = m; }
         inline unsigned int getIndoorShadowCastingMask() const { return mIndoorShadowCastingMask; }
         inline void setIndoorShadowCastingMask( unsigned int m) { mIndoorShadowCastingMask = m; }
 
-        virtual Shader::ShaderManager::DefineMap getShadowDefines();
-
-        virtual void enableIndoorMode();
-
-        virtual void enableOutdoorMode();
+        Shader::ShaderManager::DefineMap getShadowDefines();
 
         MWShadowTechnique * getShadowTechnique() { return mShadowTechnique; }
+
+        void enableIndoorMode();
+        void enableOutdoorMode();
+
     protected:
         bool mEnableShadows;
 

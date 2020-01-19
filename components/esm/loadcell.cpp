@@ -160,7 +160,7 @@ namespace ESM
 
     void Cell::save(ESMWriter &esm, bool isDeleted) const
     {
-        esm.writeHNOCString("NAME", mName);
+        esm.writeHNCString("NAME", mName);
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
