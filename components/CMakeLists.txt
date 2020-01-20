@@ -172,6 +172,8 @@ add_component_dir(detournavigator
     recastmeshobject
     navmeshtilescache
     settings
+    navigator
+    findrandompointaroundcircle
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui

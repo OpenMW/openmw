@@ -157,7 +157,6 @@ namespace DetourNavigator
          * @param out the beginning of the destination range.
          * @return Output iterator to the element in the destination range, one past the last element of found path.
          * Equal to out if no path is found.
-         * @throws InvalidArgument if there is no navmesh for given agentHalfExtents.
          */
         template <class OutputIterator>
         OutputIterator findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
@@ -194,6 +193,17 @@ namespace DetourNavigator
         virtual const Settings& getSettings() const = 0;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+
+        /**
+         * @brief findRandomPointAroundCircle returns random location on navmesh within the reach of specified location.
+         * @param agentHalfExtents allows to find navmesh for given actor.
+         * @param start path from given point.
+         * @param maxRadius limit maximum distance from start.
+         * @param includeFlags setup allowed surfaces for actor to walk.
+         * @return not empty optional with position if point is found and empty optional if point is not found.
+         */
+        boost::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
+            const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
     };
 }
 
