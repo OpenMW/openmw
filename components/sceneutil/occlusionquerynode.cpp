@@ -74,9 +74,9 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
 inline void pullUpVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsigned int numPix)
 {
     StaticOcclusionQueryNode *parent = oq;
-    while(parent && static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->getLastQueryNumPixels(cam) == 0)
+    while(parent && static_cast< MWQueryGeometry*>(parent->getQueryGeometry())->getLastQueryNumPixels(cam) == 0)
     {
-        static_cast<MWQueryGeometry*>(parent->getQueryGeometry())->forceQueryResult(cam, numPix);
+        static_cast< MWQueryGeometry*>(parent->getQueryGeometry())->forceQueryResult(cam, numPix);
         parent = dynamic_cast<StaticOcclusionQueryNode*>(parent->getParent(0));
     }
 }
@@ -89,7 +89,7 @@ void pullDownVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsi
     {
         child = dynamic_cast<StaticOcclusionQueryNode*>(oq->getChild(i));
         if(!child) return;
-        static_cast<MWQueryGeometry*>(child->getQueryGeometry())->forceQueryResult(cam, numPix);
+        static_cast< MWQueryGeometry*>(child->getQueryGeometry())->forceQueryResult(cam, numPix);
 
         // OSG_NOTICE<<"pullDownVisibility forcechild"<<std::endl;
         pullDownVisibility(child, cam, numPix);
@@ -108,7 +108,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
     MWQueryGeometry* qg = static_cast< MWQueryGeometry* >( _queryGeode->getDrawable( 0 ) );
 
-    if ( !_validQueryGeometry )
+    if ( !isQueryGeometryValid() )
     {
         // There're cases that the occlusion test result has been retrieved
         // after the query geometry has been changed, it's the result of the
@@ -150,11 +150,11 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         {
             lastQueryFrame = traversalNumber;
             wasVisible = true;
-            qg->forceQueryResult(camera,1000);
+            qg->forceQueryResult(camera, 1000);
             if(isnotLeaf) pullDownVisibility(this, camera, 1000);
             // OSG_NOTICE<<"entering frustum"<<traversalNumber<<" "<<lasttestframe<<std::endl;
             lasttestframe = traversalNumber;
-            passed = true;return passed;
+            passed = true; return passed;
         }
 
         if( ( lastQueryFrame == 0 ) ||
@@ -205,54 +205,51 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     passed = insecurearea || wasVisible;
     return passed;
 }
-osg::BoundingSphere StaticOcclusionQueryNode::computeBound() const
+
+
+void StaticOcclusionQueryNode::resetStaticQueryGeometry()
 {
-    if(!_validQueryGeometry)
+    // Need to make this routine thread-safe. Typically called by the update
+    //   Visitor, or just after the update traversal, but could be called by
+    //   an application thread or by a non-osgViewer application.
+    OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _computeBoundMutex )  ;
+
+    // This is the logical place to put this code, but the method is const. Cast
+    //   away constness to compute the bounding box and modify the query geometry.
+    StaticOcclusionQueryNode* nonConstThis = const_cast<StaticOcclusionQueryNode*>( this );
+
+    osg::ComputeBoundsVisitor cbv;
+    nonConstThis->accept( cbv );
+    osg::BoundingBox bb = cbv.getBoundingBox();
+
+    const bool bbValid = bb.valid();
+
+    _queryGeometryState = bbValid ? USER_DEFINED : INVALID;
+
+    osg::Geometry* geom = static_cast<osg:: Geometry* >( nonConstThis->_queryGeode->getDrawable( 0 ) );
+    osg::ref_ptr<osg::Vec3Array> vert = static_cast<osg::Vec3Array*>(geom->getVertexArray());
+    // Having (0,0,0) as vertices for the case of the invalid query geometry
+    // still isn't quite the right thing. But the query geometry is public
+    // accessible and therefore a user might expect eight vertices, so
+    // it seems safer to keep eight vertices in the geometry.
+    Vec3Array::iterator itv = vert->begin();
+    if (bbValid)
     {
-            // Need to make this routine thread-safe. Typically called by the update
-            //   Visitor, or just after the update traversal, but could be called by
-            //   an application thread or by a non-osgViewer application.
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _computeBoundMutex )  ;
-
-            // This is the logical place to put this code, but the method is const. Cast
-            //   away constness to compute the bounding box and modify the query geometry.
-            StaticOcclusionQueryNode* nonConstThis = const_cast<StaticOcclusionQueryNode*>( this );
-
-            osg::ComputeBoundsVisitor cbv;
-            nonConstThis->accept( cbv );
-            osg::BoundingBox bb = cbv.getBoundingBox();
-
-            const bool bbValid = bb.valid();
-            _validQueryGeometry = bbValid;
-
-            osg::Geometry* geom = static_cast<osg:: Geometry* >( nonConstThis->_queryGeode->getDrawable( 0 ) );
-            osg::ref_ptr<osg::Vec3Array> vert = static_cast<osg::Vec3Array*>(geom->getVertexArray());
-            // Having (0,0,0) as vertices for the case of the invalid query geometry
-            // still isn't quite the right thing. But the query geometry is public
-            // accessible and therefore a user might expect eight vertices, so
-            // it seems safer to keep eight vertices in the geometry.
-            Vec3Array::iterator itv = vert->begin();
-            if (bbValid)
-            {
-                bb._max+=osg::Vec3(_margin,_margin,_margin);
-                bb._min-=osg::Vec3(_margin,_margin,_margin);
-                geom->setInitialBound(bb);
-                (*itv++) = osg::Vec3( bb._min.x(), bb._min.y(), bb._min.z() );
-                (*itv++) = osg::Vec3( bb._max.x(), bb._min.y(), bb._min.z() );
-                (*itv++) = osg::Vec3( bb._max.x(), bb._min.y(), bb._max.z() );
-                (*itv++) = osg::Vec3( bb._min.x(), bb._min.y(), bb._max.z() );
-                (*itv++) = osg::Vec3( bb._max.x(), bb._max.y(), bb._min.z() );
-                (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._min.z() );
-                (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._max.z() );
-                (*itv++) = osg::Vec3( bb._max.x(), bb._max.y(), bb._max.z() );
-                vert->dirty();
-            }
-
+        bb._max+=osg::Vec3(_margin,_margin,_margin);
+        bb._min-=osg::Vec3(_margin,_margin,_margin);
+        geom->setInitialBound(bb);
+        (*itv++) = osg::Vec3( bb._min.x(), bb._min.y(), bb._min.z() );
+        (*itv++) = osg::Vec3( bb._max.x(), bb._min.y(), bb._min.z() );
+        (*itv++) = osg::Vec3( bb._max.x(), bb._min.y(), bb._max.z() );
+        (*itv++) = osg::Vec3( bb._min.x(), bb._min.y(), bb._max.z() );
+        (*itv++) = osg::Vec3( bb._max.x(), bb._max.y(), bb._min.z() );
+        (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._min.z() );
+        (*itv++) = osg::Vec3( bb._min.x(), bb._max.y(), bb._max.z() );
+        (*itv++) = osg::Vec3( bb._max.x(), bb._max.y(), bb._max.z() );
+        vert->dirty();
     }
 
-    return Group::computeBound();
 }
-
 
 void StaticOcclusionQueryNode::createSupportNodes()
 {
@@ -263,8 +260,6 @@ void StaticOcclusionQueryNode::createSupportNodes()
 
     osg::Vec3Array * vert = new osg::Vec3Array(8);
     vert->setDataVariance(Object::STATIC);
-
-    _validQueryGeometry = false;
 
     {
         // Add the test geometry Geode
@@ -720,7 +715,7 @@ void MWQueryGeometry::drawImplementation( osg::RenderInfo& renderInfo ) const
 class OQGetBoundsVisitor : public osg::NodeVisitor
 {
 public:
-    OQGetBoundsVisitor(TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN): osg::NodeVisitor(traversalMode){}
+    OQGetBoundsVisitor(TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN): osg::NodeVisitor(traversalMode) {}
 
     void apply(osg::Transform& transform)
     {
@@ -756,7 +751,7 @@ public:
 
     inline void popMatrix() { _matrixStack.pop_back(); }
 
-    const osg::BoundingSphere& getBoundingSphere(){ return _bb; }
+    const osg::BoundingSphere& getBoundingSphere() { return _bb; }
 
     typedef std::vector<osg::Matrix> MatrixStack;
 
@@ -769,6 +764,7 @@ protected:
 
 void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, StaticOcclusionQueryNode &parent, osg::Group *child, osg::BoundingSphere& childbs)
 {
+    std::vector<StaticOcclusionQueryNode*> invalidbounds;
     osg::Vec3i index =osg::Vec3i(childbs.center()[0]<bs.center()[0]?0:1,
                                  childbs.center()[1]<bs.center()[1]?0:1,
                                  childbs.center()[2]<bs.center()[2]?0:1);
@@ -830,12 +826,16 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
         }
 
         recursivCellAddStaticObject(bsi, *qnode, child, childbs);
-        qnode->invalidateQueryGeometry();
+        invalidbounds.push_back(qnode);
     }
     else
     {
         target->addChild(child);
-        parent.invalidateQueryGeometry();
+        invalidbounds.push_back(&parent);
+    }
+    for(auto qnode:invalidbounds)
+    {
+        qnode->resetStaticQueryGeometry();
     }
 }
 
@@ -866,8 +866,8 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(StaticOcclusionQueryNode & 
         if((removed = pchild->removeChild(childtoremove))) break;
     }
 
-    if(removed){
-
+    if(removed)
+    {
         StaticOcclusionQueryNode* curpar = &parent;
 
         while(curpar && curpar->getParent(0))
@@ -876,10 +876,11 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(StaticOcclusionQueryNode & 
             for(unsigned int i=0; i<8; ++i)
                 capacity += curpar->getChild(i)->asGroup()->getNumChildren();
             /// TODO check other criterion for parent collapse
-            if(capacity==0){
+            if(capacity==0)
+            {
                 ///collapse parent
-                OSG_NOTICE<<"collapse empty OQN"<<std::endl;
-                osg::Group *paparent=curpar->getParent(0);
+                OSG_WARN<<"collapse empty OQN"<<std::endl;
+                osg::Group *paparent = curpar->getParent(0);
                 paparent->setChild(paparent->getChildIndex(curpar), new osg::Group);
                 curpar=dynamic_cast<StaticOcclusionQueryNode*>(paparent);
             }

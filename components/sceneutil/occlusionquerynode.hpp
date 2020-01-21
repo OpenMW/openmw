@@ -77,8 +77,8 @@ class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 public:
 
     StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _securepopdistance(0.0f)
-#if  OSG_VERSION_LESS_THAN(3,6,4)
-      , _validQueryGeometry(false)
+#if  OSG_VERSION_LESS_THAN(3,6,5)
+      , _queryGeometryState(INVALID)
 #endif
     {
         createSupportNodes();
@@ -99,15 +99,18 @@ public:
     inline void setDistancePreventingPopin(float m) { _securepopdistance = m; }
     inline float getDistancePreventingPopin() const { return _securepopdistance; }
 
-
-    inline void invalidateQueryGeometry() {  _validQueryGeometry = false;  }
-
-
     virtual void createSupportNodes();
-    virtual osg::BoundingSphere computeBound() const;
+
     virtual bool getPassed( const osg::Camera* camera, osg::NodeVisitor& nv );
 
+    //a bit hacky.. used during oqn tree traversal to procrastinate dedicated methods..not safe to use
+    inline MWQueryGeometry* getQueryGeometry(){ return static_cast<MWQueryGeometry*>( _queryGeode->getChild(0));}
+
+    //update QueryGeoemtry according
+    void resetStaticQueryGeometry();
+
 protected:
+
     static osg::ref_ptr< osg::StateSet > OQStateSet;
     static osg::ref_ptr< osg::StateSet > OQDebugStateSet;
     osg::StateSet *initMWOQState();
@@ -115,19 +118,20 @@ protected:
 
     float _margin;
     osg::Matrix::value_type _securepopdistance;
-#if  OSG_VERSION_LESS_THAN(3,6,4)
-    mutable bool _validQueryGeometry;
-#endif
     osg::ref_ptr< osg::Camera > _maincam;
     std::map< const osg::Camera*, unsigned int > _lastframes;
+#if  OSG_VERSION_LESS_THAN(3,6,5)
+    enum QueryGeometryState {
+        INVALID,
+        VALID,
+        USER_DEFINED
+    };
+    mutable QueryGeometryState _queryGeometryState;
+    inline bool isQueryGeometryValid() const { return _queryGeometryState != INVALID; }
+    virtual osg::BoundingSphere computeBound() const { return Group::computeBound(); }
+#endif
 };
-struct InvalidateOQNBound : public osg::NodeCallback
-{
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv){
-        static_cast<StaticOcclusionQueryNode*>(node)->invalidateQueryGeometry();
-        node->dirtyBound();
-    }
-};
+
 /// get scene bounding box based on StaticOcclusionQueryNode::getMainViewCamera occlusions result
 class OQComputeBoundsVisitor : public osg::ComputeBoundsVisitor
 {

@@ -1421,7 +1421,7 @@ public:
         osg::Matrix toWorld, toLocal;
 
         std::vector<osg::Matrix> worldMatrices = ps->getWorldMatrices();
- 
+
         if (!worldMatrices.empty())
         {
             toWorld = worldMatrices[0];
@@ -1753,7 +1753,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
                     osgParticle::ParticleSystem *ps = static_cast<osgParticle::ParticleSystem *>(findPSVisitor.mFoundNodes[i]);
-                    
+
                     osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
                     program->addOperator(new WrapAroundOperator(mCamera,osg::Vec3(1024,1024,800)));
                     program->setParticleSystem(ps);

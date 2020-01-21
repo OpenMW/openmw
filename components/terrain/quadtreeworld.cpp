@@ -326,7 +326,8 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
             qnode->addChild(entry.mRenderingNode);
             qnode->getQueryGeometry()->setNodeMask(mOQNSettings.OQMask);
             qnode->getDebugGeometry()->setNodeMask(mOQNSettings.OQMask);
-            qnode->getBound();
+
+            qnode->resetStaticQueryGeometry();
             entry.mRenderingNode = qnode;
         }
     }

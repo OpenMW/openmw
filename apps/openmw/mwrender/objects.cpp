@@ -149,6 +149,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
                 cht->setNodeMask(Mask_Object);//a bit hacky but required for actor to be OQN culled
                 qnode->addChild(cht);
             }
+            qnode->resetStaticQueryGeometry();
             objectNode->removeChildren(0, childc);
             objectNode->addChild(qnode);
             cellnode->addChild(objectNode);
