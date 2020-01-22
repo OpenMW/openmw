@@ -135,6 +135,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     unsigned int traversalNumber = nv.getTraversalNumber();
     bool wasVisible, wasTested;
 
+    StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
     MWQueryGeometry::QueryResult result ;
     {
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
@@ -144,14 +145,13 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
         wasTested =  lasttestframe+1 >= traversalNumber;
         wasVisible = result.lastnumPixels>0 && wasTested;
-        StaticOcclusionQueryNode* isnotLeaf = dynamic_cast<StaticOcclusionQueryNode*>(getChild(0));
 
         if( !wasTested )
         {
             lastQueryFrame = traversalNumber;
             wasVisible = true;
             qg->forceQueryResult(camera, 1000);
-            if(isnotLeaf) pullDownVisibility(this, camera, 1000);
+             if(isnotLeaf) pullDownVisibility(this, camera, 1000);
             // OSG_NOTICE<<"entering frustum"<<traversalNumber<<" "<<lasttestframe<<std::endl;
             lasttestframe = traversalNumber;
             passed = true; return passed;
@@ -163,10 +163,9 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         {
             lasttestframe = traversalNumber;
             passed = true;
+
             return passed;
         }
-
-         /*if(leafOrWasInvisible)            lastQueryFrame = 0;*/
 
         lasttestframe = traversalNumber;
     }
@@ -193,7 +192,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         if (result.valid)
         {
             passed = ( result.numPixels >  _visThreshold );
-            //if(passed && result.lastnumPixels == 0)                pullUpVisibility(this, camera, result.numPixels);
+            if(isnotLeaf) if(!passed)  pullDownVisibility(this,camera,0);
 
 #ifdef PROVOK_OQ_4_PREVIOUSLY_OCCLUDED
         if(passed)
@@ -214,6 +213,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     }
 
     passed = insecurearea || wasVisible;
+    if(isnotLeaf) if(!passed)  pullDownVisibility(this,camera,0);
     return passed;
 }
 
@@ -890,7 +890,7 @@ bool OctreeAddRemove::recursivCellRemoveStaticObject(StaticOcclusionQueryNode & 
             if(capacity==0)
             {
                 ///collapse parent
-                OSG_WARN<<"collapse empty OQN"<<std::endl;
+                OSG_NOTICE<<"collapse empty OQN"<<std::endl;
                 osg::Group *paparent = curpar->getParent(0);
                 paparent->setChild(paparent->getChildIndex(curpar), new osg::Group);
                 curpar=dynamic_cast<StaticOcclusionQueryNode*>(paparent);
