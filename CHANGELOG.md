@@ -37,6 +37,7 @@
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4449: Value returned by GetWindSpeed is incorrect
     Bug #4456: AiActivate should not be cancelled after target activation
+    Bug #4493: If the setup doesn't find what it is expecting, it fails silently and displays the requester again instead of letting the user know what wasn't found.
     Bug #4523: "player->ModCurrentFatigue -0.001" in global script does not cause the running player to fall
     Bug #4540: Rain delay when exiting water
     Bug #4594: Actors without AI packages don't use Hello dialogue
