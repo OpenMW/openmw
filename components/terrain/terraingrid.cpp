@@ -71,6 +71,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(newChunkSize/2.f, -newChunkSize/2.f));
         buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize/2.f, newChunkSize/2.f));
         buildTerrain(group, newChunkSize, chunkCenter + osg::Vec2f(-newChunkSize/2.f, -newChunkSize/2.f));
+        if(mOQNSettings.enable)
+            static_cast<SceneUtil::StaticOcclusionQueryNode*>(group.get())->resetStaticQueryGeometry();
         return group;
     }
     else
@@ -98,6 +100,8 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         }
         if (parent)
             parent->addChild(node);
+        if(mOQNSettings.enable)
+            static_cast<SceneUtil::StaticOcclusionQueryNode*>(node.get())->resetStaticQueryGeometry();
         return node;
     }
 }
