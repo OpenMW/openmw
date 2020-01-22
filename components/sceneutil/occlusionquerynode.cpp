@@ -201,6 +201,17 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         return passed;
         }
     }
+    else
+    {
+        /// force results at safe distance
+        //TOFIX: a bit overkilling (2 mutices locks)
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock( _frameCountMutex );
+            unsigned int& lastQueryFrame( _frameCountMap[ camera ] );
+            lastQueryFrame = traversalNumber;
+        }
+        qg->forceQueryResult(camera, 1000);
+    }
 
     passed = insecurearea || wasVisible;
     return passed;
