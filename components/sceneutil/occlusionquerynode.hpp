@@ -54,12 +54,12 @@ public:
     };
 
     /** return a QueryResult for specified Camera, where the QueryResult.valid is true when query results are available, and in which case the QueryResult.numPixels provides the num of pixels in the query result.*/
-    QueryResult getMWQueryResult( const osg::Camera* cam );
+    QueryResult getMWQueryResult( const osg::Camera* cam ) const;
 
-    unsigned int getLastQueryNumPixels( const osg::Camera* cam );
-    unsigned int getNumPixels( const osg::Camera* cam );
+    unsigned int getLastQueryNumPixels( const osg::Camera* cam ) const;
+    unsigned int getNumPixels( const osg::Camera* cam ) const;
 
-    void forceQueryResult( const osg::Camera* cam, unsigned int numPixels);
+    void forceQueryResult( const osg::Camera* cam, unsigned int numPixels) const;
 
     virtual void releaseGLObjects( osg::State* state = 0 ) const;
 
@@ -77,7 +77,7 @@ class StaticOcclusionQueryNode : public osg::OcclusionQueryNode
 public:
 
     StaticOcclusionQueryNode():osg::OcclusionQueryNode(), _margin(0.0f), _securepopdistance(0.0f)
-#if  OSG_VERSION_LESS_THAN(3,6,5)
+#if OSG_VERSION_LESS_THAN(3,6,5)
       , _queryGeometryState(INVALID)
 #endif
     {
@@ -87,10 +87,9 @@ public:
 
     static osg::Camera * defaultMainCamera;
     //set MainCamera (from which passed is updated)
-    void setMainViewCamera(osg::Camera*cam){ _maincam = cam;}
+    void setMainViewCamera(osg::Camera * cam){ _maincam = cam;}
     const osg::Camera* getMainViewCamera() const { return _maincam; }
 
-    inline osg::Geometry* getDebugGeometry() { return static_cast<osg::Geometry*>(_debugGeode->getChild(0)); }
     inline void setQueryMargin(float m) { _margin = m; }
     inline float getQueryMargin() const { return _margin; }
 
@@ -99,17 +98,20 @@ public:
     inline void setDistancePreventingPopin(float m) { _securepopdistance = m; }
     inline float getDistancePreventingPopin() const { return _securepopdistance; }
 
-    virtual void createSupportNodes();
-
     virtual bool getPassed( const osg::Camera* camera, osg::NodeVisitor& nv );
 
-    //a bit hacky.. used during oqn tree traversal to procrastinate dedicated methods..not safe to use
-    inline MWQueryGeometry* getQueryGeometry(){ return static_cast<MWQueryGeometry*>( _queryGeode->getChild(0));}
-
-    //update QueryGeoemtry according
+    /// rebuild QueryGeometry based on children bounds
     void resetStaticQueryGeometry();
 
+    inline osg::Geometry* getDebugGeometry() { return static_cast<osg::Geometry*>(_debugGeode->getChild(0)); }
+    inline MWQueryGeometry* getQueryGeometry() { return static_cast<MWQueryGeometry*>(_queryGeode->getChild(0)); }
+
 protected:
+
+    virtual void createSupportNodes();
+
+    void pullUpVisibility(const osg::Camera*cam, unsigned int numPix);
+    void pullDownVisibility(const osg::Camera*cam, unsigned int numPix);
 
     static osg::ref_ptr< osg::StateSet > OQStateSet;
     static osg::ref_ptr< osg::StateSet > OQDebugStateSet;

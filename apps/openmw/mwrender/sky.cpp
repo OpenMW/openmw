@@ -565,13 +565,16 @@ private:
         oqn->addChild(mGeom);
         oqn->getBound();
         oqn->removeChildren(0,1);
-
-        oqn->getQueryGeometry()->setDataVariance(osg::Object::STATIC);
+#if OSG_VERSION_LESS_THAN(3,6,5)
+        osg::QueryGeometry* queryGeom = oqn->getQueryGeometry();
+#else
+        osg::QueryGeometry* queryGeom = new SceneUtil::MWQueryGeometry();
+#endif
+        queryGeom->setDataVariance(osg::Object::STATIC);
 
         // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't originally intended to allow this,
         // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
         // circumvent this.
-        osg::Geometry* queryGeom = oqn->getQueryGeometry();
         osg::Geometry* debugGeom = oqn->getDebugGeometry();
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
@@ -587,7 +590,9 @@ private:
         oqn->setComputeBoundingSphereCallback(new DummyComputeBoundCallback);
         // Still need a proper bounding sphere.
         oqn->setInitialBound(queryGeom->getBound());
-
+#if OSG_VERSION_GREATER_OR_EQUAL(3,6,5)
+        oqn->setQueryGeometry(queryGeom);
+#endif
         osg::StateSet* queryStateSet = new osg::StateSet;
         if (queryVisible)
         {
@@ -725,8 +730,8 @@ private:
     protected:
         float getVisibleRatio (osg::Camera* camera)
         {
-            int visible = static_cast<SceneUtil::MWQueryGeometry*>(mOcclusionQueryVisiblePixels->getQueryGeometry())->getNumPixels(camera);
-            int total = static_cast<SceneUtil::MWQueryGeometry*>(mOcclusionQueryTotalPixels->getQueryGeometry())->getNumPixels(camera);
+            int visible = static_cast<const SceneUtil::MWQueryGeometry*>(mOcclusionQueryVisiblePixels->getQueryGeometry())->getNumPixels(camera);
+            int total = static_cast<const SceneUtil::MWQueryGeometry*>(mOcclusionQueryTotalPixels->getQueryGeometry())->getNumPixels(camera);
 
             float visibleRatio = 0.f;
             if (total > 0)

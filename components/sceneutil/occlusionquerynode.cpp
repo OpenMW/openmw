@@ -71,28 +71,32 @@ osg::StateSet* StaticOcclusionQueryNode::initMWOQDebugState()
     return OQDebugStateSet;
 }
 
-inline void pullUpVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsigned int numPix)
+void StaticOcclusionQueryNode::pullUpVisibility( const osg::Camera* cam, unsigned int numPix)
 {
-    StaticOcclusionQueryNode *parent = oq;
-    while(parent && static_cast< MWQueryGeometry*>(parent->getQueryGeometry())->getLastQueryNumPixels(cam) == 0)
+    StaticOcclusionQueryNode *parent = this;
+
+    MWQueryGeometry* qg = parent->getQueryGeometry();
+    while( qg->getLastQueryNumPixels(cam) == 0)
     {
-        static_cast< MWQueryGeometry*>(parent->getQueryGeometry())->forceQueryResult(cam, numPix);
-        parent = dynamic_cast<StaticOcclusionQueryNode*>(parent->getParent(0));
+        qg->forceQueryResult(cam, numPix);
+        parent = dynamic_cast< StaticOcclusionQueryNode* >( parent->getParent(0) );
+        if(!parent) return;
+        qg = parent->getQueryGeometry();
     }
 }
 
-void pullDownVisibility(StaticOcclusionQueryNode*oq, const osg::Camera*cam, unsigned int numPix)
+void StaticOcclusionQueryNode::pullDownVisibility( const osg::Camera* cam, unsigned int numPix)
 {
     StaticOcclusionQueryNode *child;
-    unsigned int numch = oq->getNumChildren();
+    unsigned int numch = getNumChildren();
     for(unsigned int i=0; i<numch; ++i)
     {
-        child = dynamic_cast<StaticOcclusionQueryNode*>(oq->getChild(i));
+        child = dynamic_cast<StaticOcclusionQueryNode*>(getChild(i));
         if(!child) return;
-        static_cast< MWQueryGeometry*>(child->getQueryGeometry())->forceQueryResult(cam, numPix);
 
-        // OSG_NOTICE<<"pullDownVisibility forcechild"<<std::endl;
-        pullDownVisibility(child, cam, numPix);
+        MWQueryGeometry* qg = child->getQueryGeometry();;
+        qg->forceQueryResult(cam, numPix);
+        child->pullDownVisibility(cam, numPix);
     }
 }
 
@@ -143,24 +147,25 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
 
         if( !wasTested )
         {
+#if 0
+            /// force entering frustum to be visible (huge oscillations on far plane narrowing yielding to perf loss)
             lastQueryFrame = traversalNumber;
             wasVisible = true;
             qg->forceQueryResult(camera, 1000);
-             if(isnotLeaf) pullDownVisibility(this, camera, 1000);
-            // OSG_NOTICE<<"entering frustum"<<traversalNumber<<" "<<lasttestframe<<std::endl;
             lasttestframe = traversalNumber;
             passed = true; return passed;
+#else
+            /// only provoke query for entering frustum
+            if(isnotLeaf)
+            {
+                qg->forceQueryResult(camera, 1000);
+                passed = true; return passed;
+            }
+            lastQueryFrame = 0;
+            wasVisible = true;
+#endif
         }
 
-        if( ( lastQueryFrame == 0 ) ||
-            ( (traversalNumber - lastQueryFrame) >  (_queryFrameCount+1 ) )
-                )
-        {
-            lasttestframe = traversalNumber;
-            passed = true;
-
-            return passed;
-        }
 
         lasttestframe = traversalNumber;
     }
@@ -177,7 +182,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     //   the results. Otherwise (near plane inside the BS shell) we are considered
     //   to have passed and don't need to retrieve the query.
     const osg::BoundingSphere& bs = qg->getBound();
-    osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint( bs._center, false );
+    osg::Matrix::value_type distanceToEyePoint = nv.getDistanceToEyePoint(bs._center, false);
 
     osg::Matrix::value_type distance = distanceToEyePoint - nearPlane - bs._radius;
     bool insecurearea =  ( distance <= _securepopdistance );
@@ -187,7 +192,7 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
         if (result.valid)
         {
             passed = ( result.numPixels >  _visThreshold );
-            if(isnotLeaf) if(!passed)  pullDownVisibility(this,camera,0);
+            if(isnotLeaf) if(!passed)  pullDownVisibility(camera, 0);
 
 #ifdef PROVOK_OQ_4_PREVIOUSLY_OCCLUDED
         if(passed)
@@ -205,10 +210,11 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
             lastQueryFrame = traversalNumber;
         }
         qg->forceQueryResult(camera, 1000);
+        if(isnotLeaf)  pullDownVisibility(camera, 1000);
     }
 
     passed = insecurearea || wasVisible;
-    if(isnotLeaf) if(!passed)  pullDownVisibility(this,camera,0);
+    if(isnotLeaf) if(!passed)  pullDownVisibility(camera, 0);
     return passed;
 }
 
@@ -454,12 +460,12 @@ MWQueryGeometry::~MWQueryGeometry()
     reset();
 }
 
-unsigned int MWQueryGeometry::getNumPixels( const osg::Camera* cam )
+unsigned int MWQueryGeometry::getNumPixels( const osg::Camera* cam ) const
 {
     return getMWQueryResult(cam).numPixels;
 }
 
-unsigned int MWQueryGeometry::getLastQueryNumPixels( const osg::Camera* cam )
+unsigned int MWQueryGeometry::getLastQueryNumPixels( const osg::Camera* cam ) const
 {
     return getMWQueryResult(cam).lastnumPixels;
 }
@@ -579,7 +585,7 @@ void MWQueryGeometry::releaseGLObjects( osg::State* state ) const
         }
     }
 }
-MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camera* cam )
+MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camera* cam ) const
 {
     osg::ref_ptr<SceneUtil::TestResult> tr;
     {
@@ -601,7 +607,7 @@ MWQueryGeometry::QueryResult MWQueryGeometry::getMWQueryResult( const osg::Camer
     return QueryResult((tr->_init && !tr->_active ), tr->_numPixels, tr->_lastnumPixels);
 }
 
-void MWQueryGeometry::forceQueryResult( const osg::Camera* cam, unsigned int numPixels)
+void MWQueryGeometry::forceQueryResult( const osg::Camera* cam, unsigned int numPixels) const
 {
     osg::ref_ptr<SceneUtil::TestResult> tr;
     {
@@ -808,10 +814,11 @@ void OctreeAddRemove::recursivCellAddStaticObject(osg::BoundingSphere&bs, Static
                 //OSG_WARN<<"masking high level OQN"<<floor(bsi.radius()/mSettings.minOQNSize)<<std::endl;
                 qnode->getQueryGeometry()->setNodeMask(0);
                 qnode->getDebugGeometry()->setNodeMask(0);
-                qnode->setQueriesEnabled(false);
                 parent.getQueryGeometry()->setNodeMask(0);
                 parent.getDebugGeometry()->setNodeMask(0);
+
                 parent.setQueriesEnabled(false);
+                qnode->setQueriesEnabled(false);
             }
             else
             {
