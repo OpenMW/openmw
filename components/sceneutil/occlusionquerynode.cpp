@@ -126,11 +126,6 @@ bool StaticOcclusionQueryNode::getPassed( const Camera* camera, NodeVisitor& nv 
     bool & passed = ret;
     if(camera == _maincam)
         passed = _passed;
-    //workaround a shadow cam bug (dont enable oq with shadow))
-    if( camera->getReferenceFrame() == osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT)
-    {
-        passed = true; return passed;
-    }
 
     unsigned int traversalNumber = nv.getTraversalNumber();
     bool wasVisible, wasTested;
