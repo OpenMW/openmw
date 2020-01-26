@@ -221,7 +221,7 @@ float makeOsgColorComponent(unsigned int value, unsigned int shift)
 
 unsigned char makeOsgColorUbComponent(unsigned int value, unsigned int shift)
 {
-    return unsigned char((value >> shift) & 0xFFu);
+    return static_cast<unsigned char>((value >> shift) & 0xFFu);
 }
 
 unsigned char makeOsgColorUbComponent(float value)
