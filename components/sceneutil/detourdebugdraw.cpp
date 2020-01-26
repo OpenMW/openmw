@@ -60,7 +60,8 @@ namespace SceneUtil
     {
         mMode = mode;
         mVertices = new osg::Vec3Array;
-        mColors = new osg::Vec4Array;
+        mColors = new osg::Vec4ubArray;
+        mColors->setNormalize(true);
         mSize = size * mRecastInvertedScaleFactor;
     }
 
@@ -77,7 +78,7 @@ namespace SceneUtil
     void DebugDraw::vertex(const float x, const float y, const float z, unsigned color)
     {
         addVertex(osg::Vec3f(x, y, z));
-        addColor(SceneUtil::colourFromRGBA(color));
+        addColor(SceneUtil::colourUbFromRGBA(color));
     }
 
     void DebugDraw::vertex(const float* pos, unsigned color, const float* uv)
@@ -117,7 +118,7 @@ namespace SceneUtil
         mVertices->push_back(position * mRecastInvertedScaleFactor + mShift);
     }
 
-    void DebugDraw::addColor(osg::Vec4f&& value)
+    void DebugDraw::addColor(osg::Vec4ub&& value)
     {
         mColors->push_back(value);
     }

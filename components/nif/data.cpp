@@ -1,5 +1,6 @@
 #include "data.hpp"
 #include "node.hpp"
+#include "components/sceneutil/util.hpp"
 
 namespace Nif
 {
@@ -45,7 +46,15 @@ void ShapeData::read(NIFStream *nif)
     radius = nif->getFloat();
 
     if (nif->getBoolean())
-        nif->getVector4s(colors, verts);
+    {
+        std::vector<osg::Vec4f> colorsFloat;
+        nif->getVector4s(colorsFloat, verts);
+
+        colors.clear();
+        colors.reserve(colorsFloat.size());
+        for (auto& color : colorsFloat)
+            colors.emplace_back(SceneUtil::colourUbFromColourF(color));
+    }
 
     // Only the first 6 bits are used as a count. I think the rest are
     // flags of some sort.

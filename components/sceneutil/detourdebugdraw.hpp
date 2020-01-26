@@ -44,11 +44,11 @@ namespace SceneUtil
         osg::PrimitiveSet::Mode mMode;
         float mSize;
         osg::ref_ptr<osg::Vec3Array> mVertices;
-        osg::ref_ptr<osg::Vec4Array> mColors;
+        osg::ref_ptr<osg::Vec4ubArray> mColors;
 
         void addVertex(osg::Vec3f&& position);
 
-        void addColor(osg::Vec4f&& value);
+        void addColor(osg::Vec4ub&& value);
     };
 }
 

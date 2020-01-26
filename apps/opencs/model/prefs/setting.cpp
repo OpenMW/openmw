@@ -61,6 +61,12 @@ double CSMPrefs::Setting::toDouble() const
     return mValues->getFloat (mKey, mParent->getKey());
 }
 
+float CSMPrefs::Setting::toFloat() const
+{
+    QMutexLocker lock(mMutex);
+    return mValues->getFloat(mKey, mParent->getKey());
+}
+
 std::string CSMPrefs::Setting::toString() const
 {
     QMutexLocker lock (mMutex);

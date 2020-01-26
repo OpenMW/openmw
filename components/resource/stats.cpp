@@ -162,7 +162,7 @@ void StatsHandler::setUpHUDCamera(osgViewer::ViewerBase* viewer)
     _initialized = true;
 }
 
-osg::Geometry* createBackgroundRectangle(const osg::Vec3& pos, const float width, const float height, osg::Vec4& color)
+osg::Geometry* createBackgroundRectangle(const osg::Vec3& pos, const float width, const float height, osg::Vec4ub& color)
 {
     osg::StateSet *ss = new osg::StateSet;
 
@@ -171,7 +171,7 @@ osg::Geometry* createBackgroundRectangle(const osg::Vec3& pos, const float width
     geometry->setUseDisplayList(false);
     geometry->setStateSet(ss);
 
-    osg::Vec3Array* vertices = new osg::Vec3Array;
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
     geometry->setVertexArray(vertices);
 
     vertices->push_back(osg::Vec3(pos.x(), pos.y(), 0));
@@ -179,7 +179,8 @@ osg::Geometry* createBackgroundRectangle(const osg::Vec3& pos, const float width
     vertices->push_back(osg::Vec3(pos.x()+width, pos.y()-height,0));
     vertices->push_back(osg::Vec3(pos.x()+width, pos.y(),0));
 
-    osg::Vec4Array* colors = new osg::Vec4Array;
+    osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray;
+    colors->setNormalize(true);
     colors->push_back(color);
     geometry->setColorArray(colors, osg::Array::BIND_OVERALL);
 
@@ -257,7 +258,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
 #endif
 
     osg::Vec3 pos(_statsWidth-420.f, _statsHeight-500.0f,0.0f);
-    osg::Vec4 backgroundColor(0.0, 0.0, 0.0f, 0.3);
+    osg::Vec4ub backgroundColor(0, 0, 0, 77);
     osg::Vec4 staticTextColor(1.0, 1.0, 0.0f, 1.0);
     osg::Vec4 dynamicTextColor(1.0, 1.0, 1.0f, 1.0);
     float backgroundMargin = 5;

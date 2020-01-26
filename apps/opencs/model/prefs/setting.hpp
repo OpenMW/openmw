@@ -62,6 +62,8 @@ namespace CSMPrefs
 
             double toDouble() const;
 
+            float toFloat() const;
+
             std::string toString() const;
 
             bool isTrue() const;

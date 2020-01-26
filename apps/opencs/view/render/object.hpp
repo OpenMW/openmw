@@ -99,7 +99,7 @@ namespace CSVRender
             int mOverrideFlags;
             osg::ref_ptr<osg::Node> mMarker[3];
             int mSubMode;
-            float mMarkerTransparency;
+            unsigned char mMarkerTransparency;
             std::unique_ptr<Actor> mActor;
 
             /// Not implemented

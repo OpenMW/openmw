@@ -62,8 +62,9 @@ void CSVRender::CellBorder::buildShape(const ESM::Land& esmLand)
     geometry->setVertexArray(vertices);
 
     // Color
-    osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array();
-    colors->push_back(osg::Vec4f(0.f, 0.5f, 0.f, 1.f));
+    osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray();
+    colors->setNormalize(true);
+    colors->push_back(osg::Vec4ub(0, 128, 0, 255));
 
     geometry->setColorArray(colors, osg::Array::BIND_PER_PRIMITIVE_SET);
 

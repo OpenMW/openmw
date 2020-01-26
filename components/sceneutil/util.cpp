@@ -179,9 +179,17 @@ void transformBoundingSphere (const osg::Matrixf& matrix, osg::BoundingSphere& b
 
 osg::Vec4f colourFromRGB(unsigned int clr)
 {
-    osg::Vec4f colour(((clr >> 0) & 0xFF) / 255.0f,
-                      ((clr >> 8) & 0xFF) / 255.0f,
-                      ((clr >> 16) & 0xFF) / 255.0f, 1.f);
+    osg::Vec4f colour(makeOsgColorComponent(clr, 0),
+        makeOsgColorComponent(clr, 8),
+        makeOsgColorComponent(clr, 16), 1.f);
+    return colour;
+}
+
+osg::Vec4ub colourUbFromRGB(unsigned int clr)
+{
+    osg::Vec4ub colour(makeOsgColorUbComponent(clr, 0),
+        makeOsgColorUbComponent(clr, 8),
+        makeOsgColorUbComponent(clr, 16), 255);
     return colour;
 }
 
@@ -191,9 +199,35 @@ osg::Vec4f colourFromRGBA(unsigned int value)
                       makeOsgColorComponent(value, 16), makeOsgColorComponent(value, 24));
 }
 
+osg::Vec4ub colourUbFromRGBA(unsigned int value)
+{
+    return osg::Vec4ub(makeOsgColorUbComponent(value, 0), makeOsgColorUbComponent(value, 8),
+        makeOsgColorUbComponent(value, 16), makeOsgColorUbComponent(value, 24));
+}
+
+osg::Vec4ub colourUbFromColourF(const osg::Vec4f& color)
+{
+    osg::Vec4ub result;
+    for (int i = 0; i < result.num_components; ++i)
+        result[i] = makeOsgColorUbComponent(color[i]);
+
+    return result;
+}
+
 float makeOsgColorComponent(unsigned int value, unsigned int shift)
 {
-    return float((value >> shift) & 0xFFu) / 255.0f;
+    return makeOsgColorUbComponent(value, shift) / 255.0f;
+}
+
+unsigned char makeOsgColorUbComponent(unsigned int value, unsigned int shift)
+{
+    return unsigned char((value >> shift) & 0xFFu);
+}
+
+unsigned char makeOsgColorUbComponent(float value)
+{
+    float component = std::min(1.0f, std::max(0.0f, value));
+    return static_cast<unsigned char>(std::lroundf(component * 255.0f));
 }
 
 bool hasUserDescription(const osg::Node* node, const std::string pattern)

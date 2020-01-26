@@ -904,7 +904,7 @@ namespace NifOsg
                 const osg::Vec3f& position = particledata->vertices.at(particle.vertex);
                 created->setPosition(position);
 
-                osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
+                osg::Vec4ub partcolor (255, 255, 255, 255);
                 if (particle.vertex < int(particledata->colors.size()))
                     partcolor = particledata->colors.at(particle.vertex);
 
@@ -1065,15 +1065,24 @@ namespace NifOsg
             }
         }
 
-        void triCommonToGeometry(osg::Geometry *geometry, const std::vector<osg::Vec3f>& vertices, const std::vector<osg::Vec3f>& normals, const std::vector<std::vector<osg::Vec2f>>& uvlist, const std::vector<osg::Vec4f>& colors, const std::vector<unsigned int>& boundTextures, const std::string& name)
+        void triCommonToGeometry(osg::Geometry *geometry, const std::vector<osg::Vec3f>& vertices, const std::vector<osg::Vec3f>& normals, const std::vector<std::vector<osg::Vec2f>>& uvlist, const std::vector<osg::Vec4ub>& colors, const std::vector<unsigned int>& boundTextures, const std::string& name)
         {
             if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+            {
+                osg::ref_ptr<osg::Vec3Array> vertexBuffer = new osg::Vec3Array(vertices.size(), vertices.data());
+                geometry->setVertexArray(vertexBuffer.get());
+            }
             if (!normals.empty())
-                geometry->setNormalArray(new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+            {
+                osg::ref_ptr<osg::Vec3Array> normalBuffer = new osg::Vec3Array(normals.size(), normals.data());
+                geometry->setNormalArray(normalBuffer.get(), osg::Array::BIND_PER_VERTEX);
+            }
             if (!colors.empty())
-                geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
-
+            {
+                osg::ref_ptr<osg::Vec4ubArray> colorsBuffer = new osg::Vec4ubArray(colors.size(), colors.data());
+                colorsBuffer->setNormalize(true);
+                geometry->setColorArray(colorsBuffer.get(), osg::Array::BIND_PER_VERTEX);
+            }
             int textureStage = 0;
             for (const unsigned int uvSet : boundTextures)
             {

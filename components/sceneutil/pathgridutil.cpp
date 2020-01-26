@@ -59,19 +59,19 @@ namespace SceneUtil
         1, 2, 3, 4
     };
 
-    const osg::Vec4f DiamondColors[DiamondVertexCount] =
+    const osg::Vec4ub DiamondColors[DiamondVertexCount] =
     {
-        osg::Vec4f(0.f, 0.f, 1.f, 1.f),
-        osg::Vec4f(0.f, .05f, .95f, 1.f),
-        osg::Vec4f(0.f, .1f, .95f, 1.f),
-        osg::Vec4f(0.f, .15f, .95f, 1.f),
-        osg::Vec4f(0.f, .2f, .95f, 1.f),
-        osg::Vec4f(0.f, .25f, 9.f, 1.f)
+        osg::Vec4ub(0, 0, 255, 255),
+        osg::Vec4ub(0, 13, 242, 255),
+        osg::Vec4ub(0, 26, 242, 255),
+        osg::Vec4ub(0, 38, 242, 255),
+        osg::Vec4ub(0, 51, 242, 255),
+        osg::Vec4ub(0, 64, 230, 255)
     };
 
-    const osg::Vec4f DiamondEdgeColor = osg::Vec4f(0.5f, 1.f, 1.f, 1.f);
-    const osg::Vec4f DiamondWireColor = osg::Vec4f(0.72f, 0.f, 0.96f, 1.f);
-    const osg::Vec4f DiamondFocusWireColor = osg::Vec4f(0.91f, 0.66f, 1.f, 1.f);
+    const osg::Vec4ub DiamondEdgeColor = osg::Vec4ub(128, 255, 255, 255);
+    const osg::Vec4ub DiamondWireColor = osg::Vec4ub(184, 0, 245, 255);
+    const osg::Vec4ub DiamondFocusWireColor = osg::Vec4ub(232, 168, 255, 255);
 
     osg::ref_ptr<osg::Geometry> createPathgridGeometry(const ESM::Pathgrid& pathgrid)
     {
@@ -86,7 +86,8 @@ namespace SceneUtil
         osg::ref_ptr<osg::Geometry> gridGeometry = new osg::Geometry();
 
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(ColorCount);
+        osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray(ColorCount);
+        colors->setNormalize(true);
         osg::ref_ptr<osg::DrawElementsUShort> pointIndices =
             new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, PointIndexCount);
         osg::ref_ptr<osg::DrawElementsUShort> lineIndices =
@@ -185,7 +186,8 @@ namespace SceneUtil
         osg::ref_ptr<osg::Geometry> wireframeGeometry = new osg::Geometry();
 
         osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array(VertexCount);
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(ColorCount);
+        osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray(ColorCount);
+        colors->setNormalize(true);
         osg::ref_ptr<osg::DrawElementsUShort> indices =
             new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, IndexCount);
 

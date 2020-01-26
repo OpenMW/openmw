@@ -92,8 +92,9 @@ namespace
         texcoords->push_back(osg::Vec2f(1, 1));
         texcoords->push_back(osg::Vec2f(1, 0));
 
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array;
-        colors->push_back(osg::Vec4(1.f, 1.f, 1.f, 1.f));
+        osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray;
+        colors->setNormalize(true);
+        colors->push_back(osg::Vec4ub(255, 255, 255, 255));
         geom->setColorArray(colors, osg::Array::BIND_OVERALL);
 
         for (int i=0; i<numUvSets; ++i)
@@ -356,7 +357,9 @@ public:
         if (!geom)
             return;
 
-        osg::ref_ptr<osg::Vec4Array> colors = new osg::Vec4Array(geom->getVertexArray()->getNumElements());
+        osg::ref_ptr<osg::Vec4ubArray> colors = new osg::Vec4ubArray(geom->getVertexArray()->getNumElements());
+        colors->setNormalize(true);
+
         for (unsigned int i=0; i<colors->size(); ++i)
         {
             float alpha = 1.f;
@@ -378,7 +381,7 @@ public:
                     alpha = 1.f;
             }
 
-            (*colors)[i] = osg::Vec4f(0.f, 0.f, 0.f, alpha);
+            (*colors)[i] = osg::Vec4ub(0, 0, 0, SceneUtil::makeOsgColorUbComponent(alpha));
         }
 
         geom->setColorArray(colors, osg::Array::BIND_PER_VERTEX);

@@ -36,7 +36,7 @@ class ShapeData : public Record
 {
 public:
     std::vector<osg::Vec3f> vertices, normals;
-    std::vector<osg::Vec4f> colors;
+    std::vector<osg::Vec4ub> colors;
     std::vector< std::vector<osg::Vec2f> > uvlist;
     osg::Vec3f center;
     float radius;
