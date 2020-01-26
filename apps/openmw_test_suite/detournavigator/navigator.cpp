@@ -2,10 +2,13 @@
 
 #include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/exceptions.hpp>
+#include <components/misc/rng.hpp>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
+
+#include <boost/optional/optional_io.hpp>
 
 #include <gtest/gtest.h>
 
@@ -654,5 +657,33 @@ namespace
             osg::Vec3f(205.7284698486328125, -205.7284698486328125, -1.5386505126953125),
             osg::Vec3f(215, -215, 1.87718021869659423828125),
         })) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_then_find_random_point_around_circle_should_return_position)
+    {
+        const std::array<btScalar, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape shape(5, 5, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        Misc::Rng::init(42);
+
+        const auto result = mNavigator->findRandomPointAroundCircle(mAgentHalfExtents, mStart, 100.0, Flag_walk);
+
+        ASSERT_EQ(result, boost::optional<osg::Vec3f>(osg::Vec3f(-209.95985412597656, 129.89768981933594, -0.26253718137741089)));
+
+        const auto distance = (*result - mStart).length();
+
+        EXPECT_EQ(distance, 85.260780334472656) << distance;
     }
 }
