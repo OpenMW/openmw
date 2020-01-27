@@ -559,19 +559,19 @@ private:
         osg::ref_ptr<osg::OcclusionQueryNode> oqn = new osg::OcclusionQueryNode;
         oqn->setQueriesEnabled(true);
 #if OSG_VERSION_LESS_THAN(3,6,5)
+        osg::Geometry* queryGeom = oqn->getQueryGeometry();
+#else
+        osg::ref_ptr<osg::QueryGeometry> queryGeom(new osg::QueryGeometry());
+#endif
         // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
         // so that would be pretty bad). STATIC should be safe, since our node's local bounds are static, thus computeBounds() which modifies the queryGeometry
         // is only called once.
         // Note the debug geometry setDebugDisplay(true) is always DYNAMIC and that can't be changed, not a big deal.
-        osg::Geometry* queryGeom = oqn->getQueryGeometry();
         queryGeom->setDataVariance(osg::Object::STATIC);
-
+        
         // Set up the query geometry to match the actual sun's rendering shape. osg::OcclusionQueryNode wasn't originally intended to allow this,
         // normally it would automatically adjust the query geometry to match the sub graph's bounding box. The below hack is needed to
         // circumvent this.
-#else
-        osg::ref_ptr<osg::QueryGeometry> queryGeom(new osg::QueryGeometry());
-#endif
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
         queryGeom->removePrimitiveSet(0, queryGeom->getNumPrimitiveSets());
