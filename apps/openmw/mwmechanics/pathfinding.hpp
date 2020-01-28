@@ -201,7 +201,7 @@ namespace MWMechanics
             void buildPathByPathgridImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
 
-            void buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+            bool buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
                 const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
                 std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };

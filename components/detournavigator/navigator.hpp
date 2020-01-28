@@ -159,7 +159,7 @@ namespace DetourNavigator
          * Equal to out if no path is found.
          */
         template <class OutputIterator>
-        OutputIterator findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
+        boost::optional<OutputIterator> findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
             const osg::Vec3f& end, const Flags includeFlags, OutputIterator out) const
         {
             static_assert(
@@ -171,7 +171,7 @@ namespace DetourNavigator
             );
             const auto navMesh = getNavMesh(agentHalfExtents);
             if (!navMesh)
-                return out;
+                return {};
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
