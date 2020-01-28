@@ -705,7 +705,7 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
                 CSMWorld::Columns::ColumnId_PositionXRot+i));
 
             commands.push (new CSMWorld::ModifyCommand (*model,
-                model->index (recordIndex, column), mPositionOverride.rot[i]));
+                model->index (recordIndex, column), osg::RadiansToDegrees(mPositionOverride.rot[i])));
         }
     }
 
