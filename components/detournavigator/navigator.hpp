@@ -1,4 +1,4 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
+﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
 #include "findsmoothpath.hpp"
@@ -159,8 +159,8 @@ namespace DetourNavigator
          * Equal to out if no path is found.
          */
         template <class OutputIterator>
-        boost::optional<OutputIterator> findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
-            const osg::Vec3f& end, const Flags includeFlags, OutputIterator out) const
+        Status findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
+            const osg::Vec3f& end, const Flags includeFlags, OutputIterator& out) const
         {
             static_assert(
                 std::is_same<
@@ -171,7 +171,7 @@ namespace DetourNavigator
             );
             const auto navMesh = getNavMesh(agentHalfExtents);
             if (!navMesh)
-                return {};
+                return Status::NavMeshNotFound;
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
