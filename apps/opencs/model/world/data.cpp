@@ -443,7 +443,6 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mLand.addColumn (new RecordStateColumn<Land>);
     mLand.addColumn (new FixedRecordTypeColumn<Land>(UniversalId::Type_Land));
     mLand.addColumn (new LandPluginIndexColumn);
-    mLand.addColumn (new LandMapLodColumn);
     mLand.addColumn (new LandNormalsColumn);
     mLand.addColumn (new LandHeightsColumn);
     mLand.addColumn (new LandColoursColumn);
