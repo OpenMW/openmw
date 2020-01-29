@@ -195,6 +195,7 @@
     Bug #5249: Wandering NPCs start walking too soon after they hello
     Bug #5250: Creatures display shield ground mesh instead of shield body part
     Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello
+    Bug #5264: "Damage/Drain Fatigue" Magic Effect Can Bring Fatigue below 0
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls

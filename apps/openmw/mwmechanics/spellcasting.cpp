@@ -1201,8 +1201,9 @@ namespace MWMechanics
 
     void adjustDynamicStat(CreatureStats& creatureStats, int index, float magnitude)
     {
+        static bool negativeFatigue = Settings::Manager::getBool("allow negative fatigue", "Game");
         DynamicStat<float> stat = creatureStats.getDynamic(index);
-        stat.setCurrent(stat.getCurrent() + magnitude, index == 2);
+        stat.setCurrent(stat.getCurrent() + magnitude, index == 2 && negativeFatigue);
         creatureStats.setDynamic(index, stat);
     }
 
