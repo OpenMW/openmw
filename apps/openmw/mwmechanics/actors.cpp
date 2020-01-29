@@ -452,28 +452,23 @@ namespace MWMechanics
             return;
 
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        int hello = stats.getAiSetting(CreatureStats::AI_Hello).getModified();
-        if (hello == 0)
-            return;
-
-        if (MWBase::Environment::get().getWorld()->isSwimming(actor))
-            return;
-
-        MWWorld::Ptr player = getPlayer();
-        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-        osg::Vec3f dir = playerPos - actorPos;
-
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
         int packageId = seq.getTypeId();
 
-        if (seq.isInCombat() || (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
+        if (seq.isInCombat() ||
+            MWBase::Environment::get().getWorld()->isSwimming(actor) ||
+            (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
         {
             stats.setTurningToPlayer(false);
             stats.setGreetingTimer(0);
             stats.setGreetingState(Greet_None);
             return;
         }
+
+        MWWorld::Ptr player = getPlayer();
+        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        osg::Vec3f dir = playerPos - actorPos;
 
         if (stats.isTurningToPlayer())
         {
@@ -492,11 +487,10 @@ namespace MWMechanics
             return;
 
         // Play a random voice greeting if the player gets too close
-        float helloDistance = static_cast<float>(hello);
         static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        helloDistance *= iGreetDistanceMultiplier;
+        float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
 
         int greetingTimer = stats.getGreetingTimer();
         GreetingState greetingState = stats.getGreetingState();
