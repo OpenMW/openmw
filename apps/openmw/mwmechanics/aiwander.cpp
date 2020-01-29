@@ -330,7 +330,7 @@ namespace MWMechanics
             if (!isWaterCreature && !isFlyingCreature)
             {
                 // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
-                if (const auto destination = navigator->findRandomPointAroundCircle(halfExtents, currentPosition, wanderDistance, navigatorFlags))
+                if (const auto destination = navigator->findRandomPointAroundCircle(halfExtents, mInitialActorPosition, wanderDistance, navigatorFlags))
                     mDestination = *destination;
                 else
                     mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
