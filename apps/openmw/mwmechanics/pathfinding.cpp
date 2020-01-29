@@ -314,7 +314,9 @@ namespace MWMechanics
     {
         mPath.clear();
 
-        buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+        // If it's not possible to build path over navmesh due to disabled navmesh generation fallback to straight path
+        if (!buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath)))
+            mPath.push_back(endPoint);
 
         mConstructed = true;
     }
@@ -335,7 +337,7 @@ namespace MWMechanics
         mConstructed = true;
     }
 
-    void PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
+    bool PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
         const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
         std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
@@ -344,7 +346,7 @@ namespace MWMechanics
             const auto world = MWBase::Environment::get().getWorld();
             const auto stepSize = getPathStepSize(actor);
             const auto navigator = world->getNavigator();
-            navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, out);
+            return navigator->findPath(halfExtents, stepSize, startPoint, endPoint, flags, out).is_initialized();
         }
         catch (const DetourNavigator::NavigatorException& exception)
         {
@@ -352,6 +354,7 @@ namespace MWMechanics
                 << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
                 << ") from " << startPoint << " to " << endPoint << " with flags ("
                 << DetourNavigator::WriteFlags {flags} << ")";
+            return true;
         }
     }
 
