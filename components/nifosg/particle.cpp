@@ -203,12 +203,12 @@ void GravityAffector::beginOperate(osgParticle::Program* program)
 
 void GravityAffector::operate(osgParticle::Particle *particle, double dt)
 {
-    const float magic = 1.6f;
+    // Reverse-engineered value.
+    float decayFactor = 1.6f;
     switch (mType)
     {
         case Type_Wind:
         {
-            float decayFactor = 1.f;
             if (mDecay != 0.f)
             {
                 osg::Plane gravityPlane(mCachedWorldDirection, mCachedWorldPosition);
@@ -216,21 +216,19 @@ void GravityAffector::operate(osgParticle::Particle *particle, double dt)
                 decayFactor = std::exp(-1.f * mDecay * distance);
             }
 
-            particle->addVelocity(mCachedWorldDirection * mForce * dt * decayFactor * magic);
+            particle->addVelocity(mCachedWorldDirection * mForce * dt * decayFactor);
 
             break;
         }
         case Type_Point:
         {
             osg::Vec3f diff = mCachedWorldPosition - particle->getPosition();
-
-            float decayFactor = 1.f;
             if (mDecay != 0.f)
                 decayFactor = std::exp(-1.f * mDecay * diff.length());
 
             diff.normalize();
 
-            particle->addVelocity(diff * mForce * dt * decayFactor * magic);
+            particle->addVelocity(diff * mForce * dt * decayFactor);
             break;
         }
     }
