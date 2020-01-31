@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.0)
 
+# for link time optimization, remove if cmake version is >= 3.9
+if(POLICY CMP0069)
+    cmake_policy(SET CMP0069 NEW)
+endif()
+
 project(RecastNavigation)
 
 # lib versions
