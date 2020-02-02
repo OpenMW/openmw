@@ -143,7 +143,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     ver = nif.getUInt();
     // 4.0.0.0 is an older, practically identical version of the format.
     // It's not used by Morrowind assets but Morrowind supports it.
-    if(ver != VER_4_0_0_0 && ver != VER_MW)
+    if(ver != nif.generateVersion(4,0,0,0) && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
     // Number of records
     size_t recNum = nif.getInt();

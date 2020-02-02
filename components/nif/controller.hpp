@@ -78,12 +78,13 @@ public:
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };
-typedef NiParticleSystemController NiBSPArrayController;
+using NiBSPArrayController = NiParticleSystemController;
 
 class NiMaterialColorController : public Controller
 {
 public:
     NiPosDataPtr data;
+    unsigned int targetColor;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

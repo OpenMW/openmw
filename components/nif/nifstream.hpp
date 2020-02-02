@@ -163,6 +163,12 @@ public:
     unsigned int getUserVersion();
     unsigned int getBethVersion();
 
+    // Convert human-readable version numbers into a number that can be compared.
+    uint32_t generateVersion(uint8_t major, uint8_t minor, uint8_t patch, uint8_t rev)
+    {
+        return (major << 24) + (minor << 16) + (patch << 8) + rev;
+    }
+
     ///Read in a string of the given length
     std::string getSizedString(size_t length)
     {

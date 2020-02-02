@@ -225,7 +225,8 @@ void NiSkinData::read(NIFStream *nif)
     trafo.scale = nif->getFloat();
 
     int boneNum = nif->getInt();
-    nif->getInt(); // -1
+    if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_GAMEBRYO)
+        nif->skip(4); // NiSkinPartition link
 
     bones.resize(boneNum);
     for (BoneInfo &bi : bones)
