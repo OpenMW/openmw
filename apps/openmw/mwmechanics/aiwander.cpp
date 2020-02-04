@@ -145,15 +145,6 @@ namespace MWMechanics
 
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        const MWWorld::CellStore*& currentCell = storage.mCell;
-        bool cellChange = currentCell && (actor.getCell() != currentCell);
-        if(!currentCell || cellChange)
-        {
-            stopWalking(actor, storage);
-            currentCell = actor.getCell();
-            storage.mPopulateAvailableNodes = true;
-            mStoredInitialActorPosition = false;
-        }
 
         mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
 
@@ -200,14 +191,13 @@ namespace MWMechanics
         if (AI_REACTION_TIME <= lastReaction)
         {
             lastReaction = 0;
-            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
+            return reactionTimeActions(actor, storage, pos);
         }
         else
             return false;
     }
 
-    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
+    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
     {
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
@@ -229,7 +219,7 @@ namespace MWMechanics
         // Initialization to discover & store allowed node points for this actor.
         if (storage.mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, currentCell->getCell(), storage);
+            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
         }
 
         if (canActorMoveByZAxis(actor) && mDistance > 0) {
@@ -257,10 +247,6 @@ namespace MWMechanics
         if (storage.mIsWanderingManually && mObstacleCheck.isEvading()) {
             completeManualWalking(actor, storage);
         }
-
-        // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && cellChange)
-            mDistance = 0;
 
         AiWanderStorage::WanderState& wanderState = storage.mState;
         if ((wanderState == AiWanderStorage::Wander_MoveNow) && storage.mCanWanderAlongPathGrid)
@@ -529,7 +515,7 @@ namespace MWMechanics
         unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size());
         ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
 
-        ToWorldCoordinates(dest, storage.mCell->getCell());
+        ToWorldCoordinates(dest, actor.getCell()->getCell());
 
         // actor position is already in world coordinates
         const osg::Vec3f start = actorPos.asVec3();
