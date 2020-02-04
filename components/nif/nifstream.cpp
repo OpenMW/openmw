@@ -38,7 +38,7 @@ namespace Nif
     }
 
     // Convenience utility functions: get the versions of the currently read file
-    unsigned int NIFStream::getVersion() { return file->getVersion(); }
-    unsigned int NIFStream::getUserVersion() { return file->getBethVersion(); }
-    unsigned int NIFStream::getBethVersion()  { return file->getBethVersion(); }
+    unsigned int NIFStream::getVersion() const { return file->getVersion(); }
+    unsigned int NIFStream::getUserVersion() const { return file->getBethVersion(); }
+    unsigned int NIFStream::getBethVersion() const { return file->getBethVersion(); }
 }

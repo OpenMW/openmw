@@ -59,7 +59,7 @@ public:
         controller.post(nif);
     }
 };
-typedef Named NiSequenceStreamHelper;
+using NiSequenceStreamHelper = Named;
 
 } // Namespace
 #endif
