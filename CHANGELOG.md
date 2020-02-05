@@ -196,6 +196,7 @@
     Bug #5250: Creatures display shield ground mesh instead of shield body part
     Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello
     Bug #5261: Creatures can sometimes become stuck playing idles and never wander again
+    Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
