@@ -14,7 +14,8 @@ namespace DetourNavigator
         const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, const Settings& settings)
     {
         dtNavMeshQuery navMeshQuery;
-        initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes);
+        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
+            return boost::optional<osg::Vec3f>();
 
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
