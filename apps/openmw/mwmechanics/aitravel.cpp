@@ -54,8 +54,9 @@ namespace MWMechanics
         stats.setMovementFlag(CreatureStats::Flag_Run, false);
         stats.setDrawState(DrawState_Nothing);
 
+        // Note: we should cancel internal "return after combat" package, if original location is too far away
         if (!isWithinMaxRange(targetPos, actorPos))
-            return false;
+            return mHidden;
 
         // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
         // If we got close to target, check for actors nearby. If they are, finish AI package.
