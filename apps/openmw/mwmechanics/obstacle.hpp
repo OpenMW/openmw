@@ -54,6 +54,7 @@ namespace MWMechanics
 
             float mStateDuration;
             int mEvadeDirectionIndex;
+            float mInitialDistance = 0;
 
             void chooseEvasionDirection();
     };
