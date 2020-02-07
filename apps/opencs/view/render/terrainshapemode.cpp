@@ -37,6 +37,7 @@
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
 
+#include "brushdraw.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
 #include "tagbase.hpp"
@@ -47,6 +48,12 @@ CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidge
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain land editing", parent),
     mParentNode(parentNode)
 {
+}
+
+CSVRender::TerrainShapeMode::~TerrainShapeMode ()
+{
+    if (mBrushDraw)
+        mBrushDraw.reset();
 }
 
 void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
@@ -66,6 +73,9 @@ void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
         connect(mShapeBrushScenetool->mShapeBrushWindow->mToolSelector, SIGNAL(currentIndexChanged(int)), this, SLOT(setShapeEditTool(int)));
         connect(mShapeBrushScenetool->mShapeBrushWindow->mToolStrengthSlider, SIGNAL(valueChanged(int)), this, SLOT(setShapeEditToolStrength(int)));
     }
+
+    if (!mBrushDraw)
+        mBrushDraw.reset(new BrushDraw(mParentNode));
 
     EditMode::activate(toolbar);
     toolbar->addTool (mShapeBrushScenetool);
@@ -1380,6 +1390,13 @@ void CSVRender::TerrainShapeMode::fixEdges(CSMWorld::CellCoordinates cellCoords)
 
 void CSVRender::TerrainShapeMode::dragMoveEvent (QDragMoveEvent *event)
 {
+}
+
+void CSVRender::TerrainShapeMode::mouseMoveEvent (QMouseEvent *event)
+{
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->pos(), getInteractionMask());
+    if (hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->update(hit.worldPos, mBrushSize);
+    if (!hit.hit && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->hide();
 }
 
 void CSVRender::TerrainShapeMode::setBrushSize(int brushSize)

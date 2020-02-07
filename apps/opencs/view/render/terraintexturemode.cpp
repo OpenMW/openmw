@@ -707,6 +707,8 @@ void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event)
 {
 }
 
+void CSVRender::TerrainTextureMode::mouseMoveEvent (QMouseEvent *event) {}
+
 void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
 {
     mBrushSize = brushSize;

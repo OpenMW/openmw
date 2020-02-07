@@ -81,6 +81,8 @@ namespace CSVRender
             void dragWheel (int diff, double speedFactor) final;
             void dragMoveEvent (QDragMoveEvent *event) final;
 
+            void mouseMoveEvent (QMouseEvent *event) final;
+
         private:
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);

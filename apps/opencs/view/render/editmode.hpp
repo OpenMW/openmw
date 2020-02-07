@@ -98,6 +98,8 @@ namespace CSVRender
             /// Default-implementation: ignored
             virtual void dragMoveEvent (QDragMoveEvent *event);
 
+            virtual void mouseMoveEvent (QMouseEvent *event);
+
             /// Default: return -1
             virtual int getSubMode() const;
     };

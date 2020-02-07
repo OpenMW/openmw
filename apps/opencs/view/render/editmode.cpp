@@ -73,6 +73,8 @@ void CSVRender::EditMode::dropEvent (QDropEvent *event) {}
 
 void CSVRender::EditMode::dragMoveEvent (QDragMoveEvent *event) {}
 
+void CSVRender::EditMode::mouseMoveEvent (QMouseEvent *event) {}
+
 int CSVRender::EditMode::getSubMode() const
 {
     return -1;
