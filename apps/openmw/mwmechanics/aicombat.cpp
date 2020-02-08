@@ -137,7 +137,10 @@ namespace MWMechanics
             }
 
             storage.updateCombatMove(duration);
+            storage.mRotateMove = false;
             if (storage.mReadyToAttack) updateActorsMovement(actor, duration, storage);
+            if (storage.mRotateMove)
+                return false;
             storage.updateAttack(characterController);
         }
         else
@@ -442,7 +445,7 @@ namespace MWMechanics
         storage.mCurrentAction->getCombatRange(isRangedCombat);
         float eps = isRangedCombat ? osg::DegreesToRadians(0.5) : osg::DegreesToRadians(3.f);
         float targetAngleRadians = storage.mMovement.mRotation[axis];
-        smoothTurn(actor, targetAngleRadians, axis, eps);
+        storage.mRotateMove = !smoothTurn(actor, targetAngleRadians, axis, eps);
     }
 
     MWWorld::Ptr AiCombat::getTarget() const

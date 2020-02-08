@@ -33,6 +33,7 @@ namespace MWMechanics
         bool mAttack;
         float mAttackRange;
         bool mCombatMove;
+        bool mRotateMove;
         osg::Vec3f mLastTargetPos;
         const MWWorld::CellStore* mCell;
         std::shared_ptr<Action> mCurrentAction;
@@ -65,6 +66,7 @@ namespace MWMechanics
         mAttack(false),
         mAttackRange(0.0f),
         mCombatMove(false),
+        mRotateMove(false),
         mLastTargetPos(0,0,0),
         mCell(nullptr),
         mCurrentAction(),
