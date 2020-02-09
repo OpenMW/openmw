@@ -928,16 +928,18 @@ namespace MWScript
                         const Compiler::Locals& locals =
                             MWBase::Environment::get().getScriptManager()->getLocals(script);
                         char type = locals.getType(var);
+                        std::string refId = ptr.getCellRef().getRefId();
+                        if (refId.find(' ') != std::string::npos)
+                            refId = '"' + refId + '"';
                         switch (type)
                         {
                         case 'l':
                         case 's':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getIntVar(script, var);
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getIntVar(script, var);
                             break;
                         case 'f':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getFloatVar(script, var);
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getFloatVar(script, var);
                             break;
-                        // Do nothing otherwise
                         }
                     }
                 }
@@ -949,13 +951,13 @@ namespace MWScript
                     switch (type)
                     {
                     case 's':
-                        output << runtime.getContext().getGlobalShort (var);
+                        output << var << " = " << runtime.getContext().getGlobalShort (var);
                         break;
                     case 'l':
-                        output << runtime.getContext().getGlobalLong (var);
+                        output << var << " = " << runtime.getContext().getGlobalLong (var);
                         break;
                     case 'f':
-                        output << runtime.getContext().getGlobalFloat (var);
+                        output << var << " = " << runtime.getContext().getGlobalFloat (var);
                         break;
                     default:
                         output << "unknown variable";
