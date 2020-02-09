@@ -293,6 +293,11 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
+        if (wanderState == AiWanderStorage::Wander_Walking
+            && (isDestinationHidden(actor, mPathFinder.getPath().back())
+                || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
+            completeManualWalking(actor, storage);
+
         return false; // AiWander package not yet completed
     }
 
