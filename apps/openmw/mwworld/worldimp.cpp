@@ -3914,4 +3914,9 @@ namespace MWWorld
         btVector3 hitNormal;
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
     }
+
+    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
+    }
 }

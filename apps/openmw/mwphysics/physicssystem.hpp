@@ -187,6 +187,8 @@ namespace MWPhysics
                 std::for_each(mAnimatedObjects.begin(), mAnimatedObjects.end(), function);
             }
 
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const;
+
         private:
 
             void updateWater();

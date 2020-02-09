@@ -728,6 +728,8 @@ namespace MWWorld
             osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
 
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
+
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
     };
 }
 

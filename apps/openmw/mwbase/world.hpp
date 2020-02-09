@@ -625,6 +625,8 @@ namespace MWBase
             virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
 
             virtual bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
+
+            virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const = 0;
     };
 }
 

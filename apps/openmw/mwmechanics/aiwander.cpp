@@ -81,6 +81,14 @@ namespace MWMechanics
                 | MWPhysics::CollisionType_Actor;
             return MWBase::Environment::get().getWorld()->castRay(position, visibleDestination, mask, actor);
         }
+
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
+        {
+            const auto world = MWBase::Environment::get().getWorld();
+            const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
+            const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+            return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
+        }
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -349,6 +357,9 @@ namespace MWMechanics
                 continue;
 
             if (isDestinationHidden(actor, mDestination))
+                continue;
+
+            if (isAreaOccupiedByOtherActor(actor, mDestination))
                 continue;
 
             if (isWaterCreature || isFlyingCreature)
