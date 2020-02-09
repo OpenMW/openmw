@@ -923,11 +923,7 @@ namespace MWScript
                 if (!ptr.isEmpty())
                 {
                     const std::string& script = ptr.getClass().getScript(ptr);
-                    if (script.empty())
-                    {
-                        output << ptr.getCellRef().getRefId() << " has no script " << std::endl;
-                    }
-                    else
+                    if (!script.empty())
                     {
                         const Compiler::Locals& locals =
                             MWBase::Environment::get().getScriptManager()->getLocals(script);
@@ -941,13 +937,11 @@ namespace MWScript
                         case 'f':
                             output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getFloatVar(script, var);
                             break;
-                        default:
-                            output << "unknown local '" << var << "' for '" << ptr.getCellRef().getRefId() << "'";
-                            break;
+                        // Do nothing otherwise
                         }
                     }
                 }
-                else
+                if (output.rdbuf()->in_avail() == 0)
                 {
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     char type = world->getGlobalVariableType (var);
@@ -964,7 +958,7 @@ namespace MWScript
                         output << runtime.getContext().getGlobalFloat (var);
                         break;
                     default:
-                        output << "unknown global variable";
+                        output << "unknown variable";
                     }
                 }
                 runtime.getContext().report(output.str());
