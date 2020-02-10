@@ -20,6 +20,14 @@ namespace Terrain
             _parent = intersector;
         }
 
+        TerrainLineIntersector(osgUtil::LineSegmentIntersector* intersector) :
+            osgUtil::LineSegmentIntersector(intersector->getStart(), intersector->getEnd())
+        {
+            setPrecisionHint(intersector->getPrecisionHint());
+            _intersectionLimit = intersector->getIntersectionLimit();
+            _parent = intersector;
+        }
+
         bool intersectAndClip(const osg::BoundingBox& bbInput)
         {
             osg::Vec3d s(_start), e(_end);
@@ -98,7 +106,7 @@ namespace Terrain
         void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
 
         /// Adds all leaf nodes which intersect the line from start to end
-        void intersect(ViewData* vd, TerrainLineIntersector* intersector);
+        void intersect(ViewData* vd, TerrainLineIntersector& intersector);
 
     private:
         QuadTreeNode* mParent;
