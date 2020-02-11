@@ -1011,9 +1011,11 @@ void NpcAnimation::showCarriedLeft(bool show)
             if (!bodyparts.empty())
                 mesh = getShieldBodypartMesh(bodyparts, !mNpc->isMale());
         }
-        if (addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
-                                   mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
+        if (mesh.empty() || addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
+                                        mesh, !iter->getClass().getEnchantment(*iter).empty(), &glowColor))
         {
+            if (mesh.empty())
+                reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
             if (iter->getTypeName() == typeid(ESM::Light).name() && mObjectParts[ESM::PRT_Shield])
                 addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
         }
