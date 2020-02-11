@@ -330,7 +330,7 @@ namespace MWWorld
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
 
-        (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
+        (*iter)->forEach(visitor);
         const auto world = MWBase::Environment::get().getWorld();
         for (const auto& ptr : visitor.mObjects)
         {

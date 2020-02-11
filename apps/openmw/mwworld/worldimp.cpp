@@ -2745,28 +2745,15 @@ namespace MWWorld
         }
     }
 
-    struct ListObjectsVisitor
-    {
-        std::vector<MWWorld::Ptr> mObjects;
-
-        bool operator() (Ptr ptr)
-        {
-            if (ptr.getRefData().getBaseNode())
-                mObjects.push_back(ptr);
-            return true;
-        }
-    };
-
     void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            ListObjectsVisitor visitor;
-            cellstore->forEach(visitor);
-
-            for (const Ptr &object : visitor.mObjects)
-                if (Misc::StringUtils::ciEqual(object.getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(object);
+            cellstore->forEach([&] (const auto& ptr) {
+                if (ptr.getRefData().getBaseNode() && Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    out.push_back(ptr);
+                return true;
+            });
         }
     }
 
