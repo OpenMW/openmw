@@ -97,6 +97,8 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            virtual bool useVariableSpeed() const { return true;}
+
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
@@ -104,6 +106,14 @@ namespace MWMechanics
             bool getRepeat() const;
 
             osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
+
+            virtual osg::Vec3f getDestination() const
+            {
+                if (!mHasDestination)
+                    return osg::Vec3f(0, 0, 0);
+
+                return mDestination;
+            }
 
         private:
             // NOTE: mDistance and mDuration must be set already
