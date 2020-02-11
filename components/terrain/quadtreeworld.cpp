@@ -362,11 +362,17 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             if (!lineIntersector)
                 throw std::runtime_error("Cannot update QuadTreeWorld: node visitor is not LineSegmentIntersector");
 
-            osg::Matrix matrix = osg::Matrix::identity();
             if (lineIntersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
-                matrix = lineIntersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
-            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntersector, matrix));
-            mRootNode->intersect(vd, terrainIntersector);
+            {
+                TerrainLineIntersector terrainIntersector(lineIntersector);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
+            else
+            {
+                osg::Matrix matrix(lineIntersector->getTransformation(*iv, lineIntersector->getCoordinateFrame()));
+                TerrainLineIntersector terrainIntersector(lineIntersector, matrix);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
         }
     }
 
