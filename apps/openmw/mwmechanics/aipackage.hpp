@@ -102,7 +102,7 @@ namespace MWMechanics
             /// Return true if this package should repeat. Currently only used for Wander packages.
             virtual bool getRepeat() const;
 
-            virtual osg::Vec3f getDestination() { return osg::Vec3f(0, 0, 0); }
+            virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }
 
             // Return true if any loaded actor with this AI package must be active.
             virtual bool alwaysActive() const { return false; }

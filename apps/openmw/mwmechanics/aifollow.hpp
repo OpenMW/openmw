@@ -76,7 +76,7 @@ namespace MWMechanics
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state);
 
-            virtual osg::Vec3f getDestination()
+            virtual osg::Vec3f getDestination() const
             {
                 MWWorld::Ptr target = getTarget();
                 if (target.isEmpty())
