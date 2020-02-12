@@ -10,6 +10,7 @@
 #include <osg/Vec3>
 
 #include <components/sceneutil/pathgridutil.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "../../model/world/cell.hpp"
 #include "../../model/world/commands.hpp"
@@ -31,7 +32,7 @@ namespace CSVRender
     };
 
     PathgridTag::PathgridTag(Pathgrid* pathgrid)
-        : TagBase(Mask_Pathgrid), mPathgrid(pathgrid)
+        : TagBase(SceneUtil::Mask_Pathgrid), mPathgrid(pathgrid)
     {
     }
 
@@ -70,7 +71,7 @@ namespace CSVRender
         mBaseNode->setPosition(osg::Vec3f(mCoords.getX() * CoordScalar, mCoords.getY() * CoordScalar, 0.f));
         mBaseNode->setUserData(mTag);
         mBaseNode->setUpdateCallback(new PathgridNodeCallback());
-        mBaseNode->setNodeMask(Mask_Pathgrid);
+        mBaseNode->setNodeMask(SceneUtil::Mask_Pathgrid);
         mParent->addChild(mBaseNode);
 
         mPathgridGeode = new osg::Geode();

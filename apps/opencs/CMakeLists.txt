@@ -97,10 +97,6 @@ opencs_units_noqt (view/render
     cellarrow cellmarker cellborder pathgrid
     )
 
-opencs_hdrs_noqt (view/render
-    mask
-    )
-
 
 opencs_units (view/tools
     reportsubview reporttable searchsubview searchbox merge

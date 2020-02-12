@@ -5,6 +5,7 @@
 #include <osg/Camera>
 
 #include <components/resource/resourcesystem.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "storage.hpp"
 #include "texturemanager.hpp"
@@ -14,14 +15,14 @@
 namespace Terrain
 {
 
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
 {
     mTerrainRoot = new osg::Group;
-    mTerrainRoot->setNodeMask(nodeMask);
+    mTerrainRoot->setNodeMask(SceneUtil::Mask_Terrain);
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
@@ -34,8 +35,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     compositeCam->setProjectionMatrix(osg::Matrix::identity());
     compositeCam->setViewMatrix(osg::Matrix::identity());
     compositeCam->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-    compositeCam->setClearMask(0);
-    compositeCam->setNodeMask(preCompileMask);
+    compositeCam->setClearMask(SceneUtil::Mask_Disabled);
+    compositeCam->setNodeMask(SceneUtil::Mask_PreCompile);
     mCompositeMapCamera = compositeCam;
 
     compileRoot->addChild(compositeCam);
@@ -47,7 +48,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
-    mCellBorder.reset(new CellBorder(this,mTerrainRoot.get(),borderMask));
+    mCellBorder.reset(new CellBorder(this,mTerrainRoot.get()));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());

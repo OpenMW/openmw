@@ -16,6 +16,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -23,8 +24,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-
-#include "vismask.hpp"
 
 namespace
 {
@@ -76,7 +75,7 @@ namespace
             {
                 if (mParent->copyResult(static_cast<osg::Camera*>(node), nv->getTraversalNumber()))
                 {
-                    node->setNodeMask(0);
+                    node->setNodeMask(SceneUtil::Mask_Disabled);
                     mParent->markForRemoval(static_cast<osg::Camera*>(node));
                 }
                 return;
@@ -288,7 +287,7 @@ namespace MWRender
                                                 float srcLeft, float srcTop, float srcRight, float srcBottom)
     {
         osg::ref_ptr<osg::Camera> camera (new osg::Camera);
-        camera->setNodeMask(Mask_RenderToTexture);
+        camera->setNodeMask(SceneUtil::Mask_RenderToTexture);
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         camera->setViewMatrix(osg::Matrix::identity());
         camera->setProjectionMatrix(osg::Matrix::identity());
