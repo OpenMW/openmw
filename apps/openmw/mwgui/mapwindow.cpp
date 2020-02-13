@@ -54,7 +54,7 @@ namespace
 
 
     /// @brief A widget that changes its color when hovered.
-    class MarkerWidget: public MyGUI::Widget
+    class MarkerWidget final : public MyGUI::Widget
     {
         MYGUI_RTTI_DERIVED(MarkerWidget)
 
@@ -74,12 +74,12 @@ namespace
         MyGUI::Colour mNormalColour;
         MyGUI::Colour mHoverColour;
 
-        void onMouseLostFocus(MyGUI::Widget* _new)
+        void onMouseLostFocus(MyGUI::Widget* _new) final
         {
             setColour(mNormalColour);
         }
 
-        void onMouseSetFocus(MyGUI::Widget* _old)
+        void onMouseSetFocus(MyGUI::Widget* _old) final
         {
             setColour(mHoverColour);
         }

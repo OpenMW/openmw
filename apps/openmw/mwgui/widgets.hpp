@@ -90,7 +90,7 @@ namespace MWGui
 
         typedef std::vector<SpellEffectParams> SpellEffectList;
 
-        class MWSkill : public MyGUI::Widget
+        class MWSkill final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSkill )
         public:
@@ -116,7 +116,7 @@ namespace MWGui
         protected:
             virtual ~MWSkill();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
             void onClicked(MyGUI::Widget* _sender);
 
@@ -131,7 +131,7 @@ namespace MWGui
         };
         typedef MWSkill* MWSkillPtr;
 
-        class MWAttribute : public MyGUI::Widget
+        class MWAttribute final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWAttribute )
         public:
@@ -156,7 +156,7 @@ namespace MWGui
         protected:
             virtual ~MWAttribute();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
             void onClicked(MyGUI::Widget* _sender);
 
@@ -175,7 +175,7 @@ namespace MWGui
          * @todo remove this class and use MWEffectList instead
          */
         class MWSpellEffect;
-        class MWSpell : public MyGUI::Widget
+        class MWSpell final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSpell )
         public:
@@ -199,7 +199,7 @@ namespace MWGui
         protected:
             virtual ~MWSpell();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
         private:
             void updateWidgets();
@@ -209,7 +209,7 @@ namespace MWGui
         };
         typedef MWSpell* MWSpellPtr;
 
-        class MWEffectList : public MyGUI::Widget
+        class MWEffectList final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWEffectList )
         public:
@@ -241,7 +241,7 @@ namespace MWGui
         protected:
             virtual ~MWEffectList();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
         private:
             void updateWidgets();
@@ -250,7 +250,7 @@ namespace MWGui
         };
         typedef MWEffectList* MWEffectListPtr;
 
-        class MWSpellEffect : public MyGUI::Widget
+        class MWSpellEffect final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWSpellEffect )
         public:
@@ -265,7 +265,7 @@ namespace MWGui
         protected:
             virtual ~MWSpellEffect();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
         private:
             static const int sIconOffset = 24;
@@ -279,7 +279,7 @@ namespace MWGui
         };
         typedef MWSpellEffect* MWSpellEffectPtr;
 
-        class MWDynamicStat : public MyGUI::Widget
+        class MWDynamicStat final : public MyGUI::Widget
         {
             MYGUI_RTTI_DERIVED( MWDynamicStat )
         public:
@@ -294,7 +294,7 @@ namespace MWGui
         protected:
             virtual ~MWDynamicStat();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
         private:
 
