@@ -1199,10 +1199,10 @@ namespace MWMechanics
         return false;
     }
 
-    void adjustDynamicStat(CreatureStats& creatureStats, int index, float magnitude)
+    void adjustDynamicStat(CreatureStats& creatureStats, int index, float magnitude, bool allowDecreaseBelowZero = false)
     {
         DynamicStat<float> stat = creatureStats.getDynamic(index);
-        stat.setCurrent(stat.getCurrent() + magnitude, index == 2);
+        stat.setCurrent(stat.getCurrent() + magnitude, allowDecreaseBelowZero);
         creatureStats.setDynamic(index, stat);
     }
 
@@ -1241,9 +1241,12 @@ namespace MWMechanics
 
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+        {
+            int index = effectKey.mId-ESM::MagicEffect::DamageHealth;
+            static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
+            adjustDynamicStat(creatureStats, index, -magnitude, index == 2 && uncappedDamageFatigue);
             break;
-
+        }
         case ESM::MagicEffect::AbsorbHealth:
             if (magnitude > 0.f)
                 receivedMagicDamage = true;

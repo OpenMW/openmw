@@ -89,6 +89,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
         loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
     }
+    loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
 
     // Input Settings
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
@@ -152,6 +153,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
     saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
     saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
+    saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
 
     // Input Settings
     saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");

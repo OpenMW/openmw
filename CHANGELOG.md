@@ -196,6 +196,7 @@
     Bug #5250: Creatures display shield ground mesh instead of shield body part
     Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello
     Bug #5261: Creatures can sometimes become stuck playing idles and never wander again
+    Bug #5264: "Damage Fatigue" Magic Effect Can Bring Fatigue below 0
     Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Bug #5278: Console command Show doesn't fall back to global variable after local var not found
     Feature #1415: Infinite fall failsafe
