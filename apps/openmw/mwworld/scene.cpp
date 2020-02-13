@@ -33,6 +33,7 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/heightfield.hpp"
 
+#include "actionteleport.hpp"
 #include "player.hpp"
 #include "localscripts.hpp"
 #include "esmstore.hpp"
@@ -255,12 +256,22 @@ namespace
         }
     }
 
-    struct AdjustPositionVisitor
+    struct PositionVisitor
     {
+        float mLowestPos = std::numeric_limits<float>::max();
+
         bool operator() (const MWWorld::Ptr& ptr)
         {
             if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
+            {
+                if (!ptr.getClass().isActor())
+                {
+                    float objectPosZ = ptr.getRefData().getPosition().pos[2];
+                    if (objectPosZ < mLowestPos)
+                        mLowestPos = objectPosZ;
+                }
                 ptr.getClass().adjustPosition (ptr, false);
+            }
             return true;
         }
     };
@@ -486,6 +497,16 @@ namespace MWWorld
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
+
+        const float fallThreshold = 90.f;
+        if (mCurrentCell && !mCurrentCell->isExterior() && pos.z() < mLowestPos - fallThreshold)
+        {
+            ESM::Position newPos;
+            std::string cellName = mCurrentCell->getCell()->mName;
+            MWBase::Environment::get().getWorld()->findInteriorPosition(cellName, newPos);
+            if (newPos.pos[2] >= mLowestPos - fallThreshold)
+                MWWorld::ActionTeleport(cellName, newPos, false).execute(player);
+        }
 
         if (!mCurrentCell || !mCurrentCell->isExterior())
             return;
@@ -877,8 +898,10 @@ namespace MWWorld
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
-        AdjustPositionVisitor adjustPosVisitor;
-        cell.forEach (adjustPosVisitor);
+        // Also note the lowest object position in the cell to allow infinite fall fail safe to work
+        PositionVisitor posVisitor;
+        cell.forEach (posVisitor);
+        mLowestPos = posVisitor.mLowestPos;
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
