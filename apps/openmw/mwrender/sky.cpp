@@ -16,6 +16,7 @@
 #include <osg/BlendFunc>
 #include <osg/AlphaFunc>
 #include <osg/PolygonOffset>
+#include <osg/Version>
 #include <osg/observer_ptr>
 
 #include <osgParticle/BoxPlacer>
