@@ -498,13 +498,13 @@ namespace MWWorld
         const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
 
-        const float fallThreshold = 90.f;
+        const float fallThreshold = 256.f;
         if (mCurrentCell && !mCurrentCell->isExterior() && pos.z() < mLowestPos - fallThreshold)
         {
             ESM::Position newPos;
             std::string cellName = mCurrentCell->getCell()->mName;
             MWBase::Environment::get().getWorld()->findInteriorPosition(cellName, newPos);
-            if (newPos.pos[2] >= mLowestPos - fallThreshold)
+            if (newPos.pos[2] >= mLowestPos)
                 MWWorld::ActionTeleport(cellName, newPos, false).execute(player);
         }
 
