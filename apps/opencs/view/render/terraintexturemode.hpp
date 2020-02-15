@@ -17,6 +17,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
+#include "../widget/brushshapes.hpp"
+#include "brushdraw.hpp"
 #endif
 
 #include "terrainselection.hpp"
@@ -50,6 +52,7 @@ namespace CSVRender
 
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
+            ~TerrainTextureMode();
 
             void primaryOpenPressed (const WorldspaceHitResult& hit) final;
 
@@ -104,14 +107,15 @@ namespace CSVRender
             bool allowLandTextureEditing(std::string textureFileName);
 
             std::string mCellId;
-            std::string mBrushTexture;
-            int mBrushSize;
-            int mBrushShape;
+            std::string mBrushTexture = "L0#0";
+            int mBrushSize = 1;
+            CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
+            std::unique_ptr<BrushDraw> mBrushDraw;
             std::vector<std::pair<int, int>> mCustomBrushShape;
-            CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
-            int mDragMode;
+            CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool = nullptr;
+            int mDragMode = InteractionType_None;
             osg::Group* mParentNode;
-            bool mIsEditing;
+            bool mIsEditing = false;
             std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};
@@ -123,7 +127,7 @@ namespace CSVRender
         public slots:
             void handleDropEvent(QDropEvent *event);
             void setBrushSize(int brushSize);
-            void setBrushShape(int brushShape);
+            void setBrushShape(CSVWidget::BrushShape brushShape);
             void setBrushTexture(std::string brushShape);
     };
 }

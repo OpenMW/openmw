@@ -93,6 +93,9 @@ void CSVRender::TerrainShapeMode::deactivate(CSVWidget::SceneToolbar* toolbar)
         mTerrainShapeSelection.reset();
     }
 
+    if (mBrushDraw)
+        mBrushDraw.reset();
+
     EditMode::deactivate(toolbar);
 }
 
@@ -1395,7 +1398,7 @@ void CSVRender::TerrainShapeMode::dragMoveEvent (QDragMoveEvent *event)
 void CSVRender::TerrainShapeMode::mouseMoveEvent (QMouseEvent *event)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->pos(), getInteractionMask());
-    if (hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->update(hit.worldPos, mBrushSize);
+    if (hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
     if (!hit.hit && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->hide();
 }
 
