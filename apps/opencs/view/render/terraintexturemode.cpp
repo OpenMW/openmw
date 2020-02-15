@@ -342,9 +342,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
     int brushInt = stoi(mBrushTexture.substr (hashlocation+1))+1; // All indices are offset by +1
 
-    int rf = mBrushSize / 2;
-    int r = mBrushSize / 2 + 1;
-    int distance = 0;
+    int r = static_cast<float>(mBrushSize) / 2;
 
     if (mBrushShape == CSVWidget::BrushShape_Point)
     {
@@ -433,7 +431,6 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                     {
                         for(int j = 0; j < landTextureSize; j++)
                         {
-
                             if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
                             {
                                 int distanceX(0);
@@ -444,7 +441,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float rf = static_cast<float>(mBrushSize) / 2;
                                 if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                             else
@@ -457,7 +455,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float rf = static_cast<float>(mBrushSize) / 2;
                                 if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                         }
@@ -548,7 +547,8 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
             for (int j = -r; j <= r; j++)
             {
                 osg::Vec2f coords(i,j);
-                if (std::round(coords.length()) < r)
+                float rf = static_cast<float>(mBrushSize) / 2;
+                if (std::round(coords.length()) < rf)
                 {
                     int x = i + texCoords.first;
                     int y = j + texCoords.second;
