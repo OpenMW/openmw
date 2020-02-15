@@ -577,7 +577,7 @@ private:
         // circumvent this.
         queryGeom->setVertexArray(mGeom->getVertexArray());
         queryGeom->setTexCoordArray(0, mGeom->getTexCoordArray(0), osg::Array::BIND_PER_VERTEX);
-        queryGeom->removePrimitiveSet(0, oqn->getQueryGeometry()->getNumPrimitiveSets());
+        queryGeom->removePrimitiveSet(0, queryGeom->getNumPrimitiveSets());
         queryGeom->addPrimitiveSet(mGeom->getPrimitiveSet(0));
 
         // Hack to disable unwanted awful code inside OcclusionQueryNode::computeBound.
