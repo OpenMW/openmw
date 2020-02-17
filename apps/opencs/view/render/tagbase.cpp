@@ -1,9 +1,9 @@
 
 #include "tagbase.hpp"
 
-CSVRender::TagBase::TagBase (Mask mask) : mMask (mask) {}
+CSVRender::TagBase::TagBase (SceneUtil::VisMask mask) : mMask (mask) {}
 
-CSVRender::Mask CSVRender::TagBase::getMask() const
+SceneUtil::VisMask CSVRender::TagBase::getMask() const
 {
     return mMask;
 }

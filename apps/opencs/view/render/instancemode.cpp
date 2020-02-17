@@ -14,7 +14,7 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
-#include "mask.hpp"
+#include <components/sceneutil/vismask.hpp>
 
 #include "object.hpp"
 #include "worldspacewidget.hpp"
@@ -90,7 +90,7 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
 }
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain, "Instance editing",
+: EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), SceneUtil::Mask_EditorReference | SceneUtil::Mask_Terrain, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
 {
@@ -137,13 +137,13 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
 
     std::string subMode = mSubMode->getCurrentId();
 
-    getWorldspaceWidget().setSubMode (getSubModeFromId (subMode), Mask_Reference);
+    getWorldspaceWidget().setSubMode (getSubModeFromId (subMode), SceneUtil::Mask_EditorReference);
 }
 
 void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
 {
     mDragMode = DragMode_None;
-    getWorldspaceWidget().reset (Mask_Reference);
+    getWorldspaceWidget().reset (SceneUtil::Mask_EditorReference);
 
     if (mSelectionMode)
     {
@@ -196,7 +196,7 @@ void CSVRender::InstanceMode::secondaryEditPressed (const WorldspaceHitResult& h
 
 void CSVRender::InstanceMode::primarySelectPressed (const WorldspaceHitResult& hit)
 {
-    getWorldspaceWidget().clearSelection (Mask_Reference);
+    getWorldspaceWidget().clearSelection (SceneUtil::Mask_EditorReference);
 
     if (hit.tag)
     {
@@ -231,13 +231,13 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
 
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
 
-    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Reference);
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
     if (selection.empty())
     {
         // Only change selection at the start of drag if no object is already selected
         if (hit.tag && CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue())
         {
-            getWorldspaceWidget().clearSelection (Mask_Reference);
+            getWorldspaceWidget().clearSelection (SceneUtil::Mask_EditorReference);
             if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (hit.tag.get()))
             {
                 CSVRender::Object* object = objectTag->mObject;
@@ -245,7 +245,7 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
             }
         }
 
-        selection = getWorldspaceWidget().getSelection (Mask_Reference);
+        selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
         if (selection.empty())
             return false;
     }
@@ -271,7 +271,7 @@ bool CSVRender::InstanceMode::primaryEditStartDrag (const QPoint& pos)
                 mDragMode = DragMode_Scale;
 
                 // Calculate scale factor
-                std::vector<osg::ref_ptr<TagBase> > editedSelection = getWorldspaceWidget().getEdited (Mask_Reference);
+                std::vector<osg::ref_ptr<TagBase> > editedSelection = getWorldspaceWidget().getEdited (SceneUtil::Mask_EditorReference);
                 osg::Vec3f center = getScreenCoords(getSelectionCenter(editedSelection));
 
                 int widgetHeight = getWorldspaceWidget().height();
@@ -307,7 +307,7 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
     osg::Vec3f offset;
     osg::Quat rotation;
 
-    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (Mask_Reference);
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getEdited (SceneUtil::Mask_EditorReference);
 
     if (mDragMode == DragMode_Move)
     {
@@ -464,7 +464,7 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
 void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
 {
     std::vector<osg::ref_ptr<TagBase> > selection =
-        getWorldspaceWidget().getEdited (Mask_Reference);
+        getWorldspaceWidget().getEdited (SceneUtil::Mask_EditorReference);
 
     QUndoStack& undoStack = getWorldspaceWidget().getDocument().getUndoStack();
 
@@ -496,7 +496,7 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
 
 void CSVRender::InstanceMode::dragAborted()
 {
-    getWorldspaceWidget().reset (Mask_Reference);
+    getWorldspaceWidget().reset (SceneUtil::Mask_EditorReference);
     mDragMode = DragMode_None;
 }
 
@@ -515,7 +515,7 @@ void CSVRender::InstanceMode::dragWheel (int diff, double speedFactor)
         offset *= diff * speedFactor;
 
         std::vector<osg::ref_ptr<TagBase> > selection =
-            getWorldspaceWidget().getEdited (Mask_Reference);
+            getWorldspaceWidget().getEdited (SceneUtil::Mask_EditorReference);
 
         for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin());
             iter!=selection.end(); ++iter)
@@ -657,5 +657,5 @@ void CSVRender::InstanceMode::subModeChanged (const std::string& id)
 {
     mSubModeId = id;
     getWorldspaceWidget().abortDrag();
-    getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
+    getWorldspaceWidget().setSubMode (getSubModeFromId (id), SceneUtil::Mask_EditorReference);
 }

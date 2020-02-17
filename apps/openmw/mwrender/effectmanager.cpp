@@ -6,9 +6,9 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "animation.hpp"
-#include "vismask.hpp"
 #include "util.hpp"
 
 namespace MWRender
@@ -29,7 +29,7 @@ void EffectManager::addEffect(const std::string &model, const std::string& textu
 {
     osg::ref_ptr<osg::Node> node = mResourceSystem->getSceneManager()->getInstance(model);
 
-    node->setNodeMask(Mask_Effect);
+    node->setNodeMask(SceneUtil::Mask_Effect);
 
     Effect effect;
     effect.mAnimTime.reset(new EffectAnimationTime);

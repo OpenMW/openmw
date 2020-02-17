@@ -40,6 +40,7 @@
 #include <components/sceneutil/unrefqueue.hpp>
 #include <components/sceneutil/writescene.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/terrain/terraingrid.hpp>
 #include <components/terrain/quadtreeworld.hpp>
@@ -58,7 +59,6 @@
 #include "sky.hpp"
 #include "effectmanager.hpp"
 #include "npcanimation.hpp"
-#include "vismask.hpp"
 #include "pathgrid.hpp"
 #include "camera.hpp"
 #include "water.hpp"
@@ -215,7 +215,7 @@ namespace MWRender
         , mFieldOfViewOverride(0.f)
         , mBorders(false)
     {
-        resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
+        resourceSystem->getSceneManager()->setParticleSystemMask(SceneUtil::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
@@ -227,21 +227,21 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
-        sceneRoot->setLightingMask(Mask_Lighting);
+        sceneRoot->setLightingMask(SceneUtil::Mask_Lighting);
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        int shadowCastingTraversalMask = Mask_Scene;
+        int shadowCastingTraversalMask = SceneUtil::Mask_Scene;
         if (Settings::Manager::getBool("actor shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Actor;
+            shadowCastingTraversalMask |= SceneUtil::Mask_Actor;
         if (Settings::Manager::getBool("player shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Player;
+            shadowCastingTraversalMask |= SceneUtil::Mask_Player;
         if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-            shadowCastingTraversalMask |= Mask_Terrain;
+            shadowCastingTraversalMask |= SceneUtil::Mask_Terrain;
 
         int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
         if (Settings::Manager::getBool("object shadows", "Shadows"))
-            shadowCastingTraversalMask |= (Mask_Object|Mask_Static);
+            shadowCastingTraversalMask |= (SceneUtil::Mask_Object|SceneUtil::Mask_Static);
 
         mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
 
@@ -305,11 +305,10 @@ namespace MWRender
             float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
             maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
             mTerrain.reset(new Terrain::QuadTreeWorld(
-                sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug,
-                compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+                sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
         }
         else
-            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
+            mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage));
 
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
@@ -319,7 +318,7 @@ namespace MWRender
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
         osg::ref_ptr<osg::LightSource> source = new osg::LightSource;
-        source->setNodeMask(Mask_Lighting);
+        source->setNodeMask(SceneUtil::Mask_Lighting);
         mSunLight = new osg::Light;
         source->setLight(mSunLight);
         mSunLight->setDiffuse(osg::Vec4f(0,0,0,1));
@@ -338,7 +337,7 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
 
-        sceneRoot->setNodeMask(Mask_Scene);
+        sceneRoot->setNodeMask(SceneUtil::Mask_Scene);
         sceneRoot->setName("Scene Root");
 
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
@@ -366,7 +365,7 @@ namespace MWRender
         mViewer->getCamera()->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
         mViewer->getCamera()->setCullingMode(cullingMode);
 
-        mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        mViewer->getCamera()->setCullMask(~(SceneUtil::Mask_UpdateVisitor|SceneUtil::Mask_SimpleWater));
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
@@ -568,12 +567,12 @@ namespace MWRender
         else if (mode == Render_Scene)
         {
             int mask = mViewer->getCamera()->getCullMask();
-            bool enabled = mask&Mask_Scene;
+            bool enabled = mask & SceneUtil::Mask_Scene;
             enabled = !enabled;
             if (enabled)
-                mask |= Mask_Scene;
+                mask |= SceneUtil::Mask_Scene;
             else
-                mask &= ~Mask_Scene;
+                mask &= ~SceneUtil::Mask_Scene;
             mViewer->getCamera()->setCullMask(mask);
             return enabled;
         }
@@ -841,7 +840,7 @@ namespace MWRender
         int maskBackup = mPlayerAnimation->getObjectRoot()->getNodeMask();
 
         if (mCamera->isFirstPerson())
-            mPlayerAnimation->getObjectRoot()->setNodeMask(0);
+            mPlayerAnimation->getObjectRoot()->setNodeMask(SceneUtil::Mask_Disabled);
 
         for (int i = 0; i < 6; ++i)      // for each cubemap side
         {
@@ -915,7 +914,7 @@ namespace MWRender
 
     void RenderingManager::renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h)
     {
-        camera->setNodeMask(Mask_RenderToTexture);
+        camera->setNodeMask(SceneUtil::Mask_RenderToTexture);
         camera->attach(osg::Camera::COLOR_BUFFER, image);
         camera->setRenderOrder(osg::Camera::PRE_RENDER);
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
@@ -968,7 +967,7 @@ namespace MWRender
         rttCamera->addChild(mWater->getReflectionCamera());
         rttCamera->addChild(mWater->getRefractionCamera());
 
-        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~Mask_GUI));
+        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~SceneUtil::Mask_GUI));
 
         rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -981,7 +980,7 @@ namespace MWRender
             return osg::Vec4f();
 
         osg::ComputeBoundsVisitor computeBoundsVisitor;
-        computeBoundsVisitor.setTraversalMask(~(Mask_ParticleSystem|Mask_Effect));
+        computeBoundsVisitor.setTraversalMask(~(SceneUtil::Mask_ParticleSystem|SceneUtil::Mask_Effect));
         ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
 
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
@@ -1053,12 +1052,11 @@ namespace MWRender
         mIntersectionVisitor->setTraversalNumber(mViewer->getFrameStamp()->getFrameNumber());
         mIntersectionVisitor->setIntersector(intersector);
 
-        int mask = ~0;
-        mask &= ~(Mask_RenderToTexture|Mask_Sky|Mask_Debug|Mask_Effect|Mask_Water|Mask_SimpleWater);
+        int mask = ~(SceneUtil::Mask_RenderToTexture|SceneUtil::Mask_Sky|SceneUtil::Mask_Pathgrid|SceneUtil::Mask_Debug|SceneUtil::Mask_Effect|SceneUtil::Mask_Water|SceneUtil::Mask_SimpleWater);
         if (ignorePlayer)
-            mask &= ~(Mask_Player);
+            mask &= ~(SceneUtil::Mask_Player);
         if (ignoreActors)
-            mask &= ~(Mask_Actor|Mask_Player);
+            mask &= ~(SceneUtil::Mask_Actor|SceneUtil::Mask_Player);
 
         mIntersectionVisitor->setTraversalMask(mask);
         return mIntersectionVisitor;
@@ -1138,7 +1136,7 @@ namespace MWRender
         if (!mPlayerNode)
         {
             mPlayerNode = new SceneUtil::PositionAttitudeTransform;
-            mPlayerNode->setNodeMask(Mask_Player);
+            mPlayerNode->setNodeMask(SceneUtil::Mask_Player);
             mPlayerNode->setName("Player Root");
             mSceneRoot->addChild(mPlayerNode);
         }
@@ -1382,7 +1380,7 @@ namespace MWRender
 
         osg::ref_ptr<const osg::Node> node = mResourceSystem->getSceneManager()->getTemplate(modelName);
         osg::ComputeBoundsVisitor computeBoundsVisitor;
-        computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+        computeBoundsVisitor.setTraversalMask(~(SceneUtil::Mask_ParticleSystem|SceneUtil::Mask_Effect));
         const_cast<osg::Node*>(node.get())->accept(computeBoundsVisitor);
         osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();
 

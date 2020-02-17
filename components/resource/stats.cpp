@@ -12,6 +12,7 @@
 #include <osgViewer/Renderer>
 
 #include <components/myguiplatform/myguidatamanager.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 namespace Resource
 {
@@ -103,14 +104,14 @@ void StatsHandler::toggle(osgViewer::ViewerBase *viewer)
 
     if (!_statsType)
     {
-        _camera->setNodeMask(0);
+        _camera->setNodeMask(SceneUtil::Mask_Disabled);
         _switch->setAllChildrenOff();
 
         viewer->getViewerStats()->collectStats("resource", false);
     }
     else
     {
-        _camera->setNodeMask(0xffffffff);
+        _camera->setNodeMask(SceneUtil::Mask_Default);
         _switch->setSingleChildOn(_resourceStatsChildNum);
 
         viewer->getViewerStats()->collectStats("resource", true);

@@ -18,6 +18,7 @@
 #include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/attach.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
 #include <components/settings/settings.hpp>
@@ -43,7 +44,6 @@
 #include "camera.hpp"
 #include "rotatecontroller.hpp"
 #include "renderbin.hpp"
-#include "vismask.hpp"
 
 namespace
 {
@@ -535,7 +535,7 @@ void NpcAnimation::updateNpcBase()
 
         addAnimSource(smodel, smodel);
 
-        mObjectRoot->setNodeMask(Mask_FirstPerson);
+        mObjectRoot->setNodeMask(SceneUtil::Mask_FirstPerson);
         mObjectRoot->addCullCallback(new OverrideFieldOfViewCallback(mFirstPersonFieldOfView));
     }
 

@@ -2,6 +2,7 @@
 
 #include <osgShadow/ShadowedScene>
 
+#include <components/sceneutil/vismask.hpp>
 #include <components/settings/settings.hpp>
 
 namespace SceneUtil
@@ -21,7 +22,7 @@ namespace SceneUtil
         mShadowTechnique->enableShadows();
 
         mShadowSettings->setLightNum(0);
-        mShadowSettings->setReceivesShadowTraversalMask(~0u);
+        mShadowSettings->setReceivesShadowTraversalMask(SceneUtil::Mask_Default);
 
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
         numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
