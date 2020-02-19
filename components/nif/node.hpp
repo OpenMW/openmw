@@ -84,7 +84,8 @@ struct NiNode : Node
     enum Flags {
         Flag_Hidden = 0x0001,
         Flag_MeshCollision = 0x0002,
-        Flag_BBoxCollision = 0x0004
+        Flag_BBoxCollision = 0x0004,
+        Flag_ActiveCollision = 0x0020
     };
     enum BSAnimFlags {
         AnimFlag_AutoPlay = 0x0020

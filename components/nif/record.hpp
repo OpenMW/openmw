@@ -40,6 +40,7 @@ enum RecordType
   RC_NiLODNode,
   RC_NiBillboardNode,
   RC_AvoidNode,
+  RC_NiCollisionSwitch,
   RC_NiTriShape,
   RC_NiTriStrips,
   RC_NiRotatingParticles,
