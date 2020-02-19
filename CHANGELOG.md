@@ -192,6 +192,7 @@
     Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
     Bug #5241: On-self absorb spells cannot be detected
     Bug #5242: ExplodeSpell behavior differs from Cast behavior
+    Bug #5246: Water ripples persist after cell change
     Bug #5249: Wandering NPCs start walking too soon after they hello
     Bug #5250: Creatures display shield ground mesh instead of shield body part
     Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello

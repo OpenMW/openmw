@@ -1106,6 +1106,7 @@ namespace MWRender
     void RenderingManager::notifyWorldSpaceChanged()
     {
         mEffectManager->clear();
+        mWater->clearRipples();
     }
 
     void RenderingManager::clear()
