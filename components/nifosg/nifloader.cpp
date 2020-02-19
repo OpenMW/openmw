@@ -168,6 +168,20 @@ namespace
 
 namespace NifOsg
 {
+    class CollisionSwitch : public osg::Group
+    {
+    public:
+        CollisionSwitch(bool enabled) : osg::Group()
+        {
+            setEnabled(enabled);
+        }
+
+        void setEnabled(bool enabled)
+        {
+            setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Effect);
+        }
+    };
+
     bool Loader::sShowMarkers = false;
 
     void Loader::setShowMarkers(bool show)
@@ -460,6 +474,14 @@ namespace NifOsg
             case Nif::RC_NiBillboardNode:
                 dataVariance = osg::Object::DYNAMIC;
                 break;
+            case Nif::RC_NiCollisionSwitch:
+            {
+                bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
+                node = new CollisionSwitch(enabled);
+                dataVariance = osg::Object::STATIC;
+
+                break;
+            }
             default:
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
