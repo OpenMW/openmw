@@ -21,12 +21,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwscript/interpretercontext.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -507,6 +505,16 @@ namespace MWGui
     void InventoryWindow::useItem(const MWWorld::Ptr &ptr, bool force)
     {
         const std::string& script = ptr.getClass().getScript(ptr);
+        if (!script.empty())
+        {
+            // Don't try to equip the item if PCSkipEquip is set to 1
+            if (ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1)
+            {
+                ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+                return;
+            }
+            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+        }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
@@ -526,43 +534,28 @@ namespace MWGui
 
                 if (canEquip.first == 0)
                 {
-                    /// If PCSkipEquip is set, set OnPCEquip to 1 and don't message anything
-                    if (!script.empty() && ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1)
-                        ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
-                    else
-                        MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
+                    MWBase::Environment::get().getWindowManager()->messageBox(canEquip.second);
                     updateItemView();
                     return;
                 }
             }
         }
 
-        // If the item has a script, set its OnPcEquip to 1
-        if (!script.empty()
-                // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
-                // the next time it is equipped will work normally, but will not set onpcequip
-                && (ptr != mSkippedToEquip || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1))
-            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
-
-        // Give the script a chance to run once before we do anything else
-        // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
-        if (!force && !script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
+        // If the item has a script, set OnPCEquip or PCSkipEquip to 1
+        if (!script.empty())
         {
-            MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+            // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
+            const std::string& type = ptr.getTypeName();
+            bool isBook = type == typeid(ESM::Book).name();
+            if (!isBook && type != typeid(ESM::Ingredient).name() && type != typeid(ESM::Repair).name())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+            // Books must have PCSkipEquip set to 1 instead
+            else if (isBook)
+                ptr.getRefData().getLocals().setVarByInt(script, "pcskipequip", 1);
         }
 
-        mSkippedToEquip = MWWorld::Ptr();
-        if (ptr.getRefData().getCount()) // make sure the item is still there, the script might have removed it
-        {
-            if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
-            {
-                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
-                action->execute(player);
-            }
-            else
-                mSkippedToEquip = ptr;
-        }
+        std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
+        action->execute(player);
 
         if (isVisible())
         {
