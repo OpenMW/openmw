@@ -92,6 +92,7 @@ namespace CSVRender
         private slots:
 
             void subModeChanged (const std::string& id);
+            void deleteSelectedInstances(bool active);
     };
 }
 

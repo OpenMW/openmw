@@ -10,6 +10,7 @@
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
 #include "../../model/world/commandmacro.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
@@ -96,6 +97,9 @@ CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidg
 {
     connect(this, SIGNAL(requestFocus(const std::string&)),
             worldspaceWidget, SIGNAL(requestFocus(const std::string&)));
+
+    CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
+    connect(deleteShortcut, SIGNAL(activated(bool)), this, SLOT(deleteSelectedInstances(bool)));
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -658,4 +662,22 @@ void CSVRender::InstanceMode::subModeChanged (const std::string& id)
     mSubModeId = id;
     getWorldspaceWidget().abortDrag();
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), SceneUtil::Mask_EditorReference);
+}
+
+void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
+{
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
+    if (selection.empty()) return;
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    CSMWorld::IdTable& referencesTable = dynamic_cast<CSMWorld::IdTable&> (
+        *document.getData().getTableModel (CSMWorld::UniversalId::Type_References));
+    QUndoStack& undoStack = document.getUndoStack();
+
+    CSMWorld::CommandMacro macro (undoStack, "Delete Instances");
+    for(osg::ref_ptr<TagBase> tag: selection)
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+            macro.push(new CSMWorld::DeleteCommand(referencesTable, objectTag->mObject->getReferenceId()));
+
+    getWorldspaceWidget().clearSelection (SceneUtil::Mask_EditorReference);
 }
