@@ -73,6 +73,7 @@ namespace
             mSettings.mTrianglesPerChunk = 256;
             mSettings.mMaxPolys = 4096;
             mSettings.mMaxTilesNumber = 512;
+            mSettings.mMinUpdateInterval = std::chrono::milliseconds(50);
             mNavigator.reset(new NavigatorImpl(mSettings));
         }
     };
@@ -765,5 +766,42 @@ namespace
             Vec3fEq(191.3602294921875, -199.9756927490234375, -3.48488140106201171875),
             Vec3fEq(215, -215, 1.8782813549041748046875)
         )) << mPath;
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_changed_multiple_times_object_should_delay_navmesh_change)
+    {
+        const std::vector<btBoxShape> shapes(100, btVector3(64, 64, 64));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+
+        for (std::size_t i = 0; i < shapes.size(); ++i)
+        {
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32, i * 32, i * 32));
+            mNavigator->addObject(ObjectId(&shapes[i]), shapes[i], transform);
+        }
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        const auto start = std::chrono::steady_clock::now();
+        for (std::size_t i = 0; i < shapes.size(); ++i)
+        {
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 1, i * 32 + 1, i * 32 + 1));
+            mNavigator->updateObject(ObjectId(&shapes[i]), shapes[i], transform);
+        }
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        for (std::size_t i = 0; i < shapes.size(); ++i)
+        {
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 32 + 2, i * 32 + 2, i * 32 + 2));
+            mNavigator->updateObject(ObjectId(&shapes[i]), shapes[i], transform);
+        }
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        const auto duration = std::chrono::steady_clock::now() - start;
+
+        EXPECT_GT(duration, mSettings.mMinUpdateInterval)
+            << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(duration).count() << " ms";
     }
 }
