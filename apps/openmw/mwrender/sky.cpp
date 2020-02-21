@@ -563,7 +563,7 @@ private:
         // With OSG 3.6.5, the method of providing user defined query geometry has been completely replaced
         osg::ref_ptr<osg::QueryGeometry> queryGeom = new osg::QueryGeometry(oqn->getName());
 #else
-        auto* queryGeom = oqn->getQueryGeometry();
+        osg::ref_ptr<osg::QueryGeometry> queryGeom = oqn->getQueryGeometry();
 #endif
 
         // Make it fast! A DYNAMIC query geometry means we can't break frame until the flare is rendered (which is rendered after all the other geometry,
