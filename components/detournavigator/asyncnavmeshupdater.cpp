@@ -7,6 +7,8 @@
 
 #include <osg/Stats>
 
+#include <numeric>
+
 namespace
 {
     using DetourNavigator::ChangeType;
@@ -101,7 +103,7 @@ namespace DetourNavigator
     void AsyncNavMeshUpdater::wait()
     {
         std::unique_lock<std::mutex> lock(mMutex);
-        mDone.wait(lock, [&] { return mJobs.empty(); });
+        mDone.wait(lock, [&] { return mJobs.empty() && getTotalThreadJobsUnsafe() == 0; });
     }
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
@@ -110,7 +112,7 @@ namespace DetourNavigator
 
         {
             const std::lock_guard<std::mutex> lock(mMutex);
-            jobs = mJobs.size();
+            jobs = mJobs.size() + getTotalThreadJobsUnsafe();
         }
 
         stats.setAttribute(frameNumber, "NavMesh UpdateJobs", jobs);
@@ -188,12 +190,13 @@ namespace DetourNavigator
 
         while (true)
         {
-            const auto hasJob = [&] { return !mJobs.empty() || !threadQueue.mPushed.empty(); };
+            const auto hasJob = [&] { return !mJobs.empty() || !threadQueue.mJobs.empty(); };
 
             if (!mHasJob.wait_for(lock, std::chrono::milliseconds(10), hasJob))
             {
                 mFirstStart.lock()->reset();
-                mDone.notify_all();
+                if (getTotalThreadJobsUnsafe() == 0)
+                    mDone.notify_all();
                 return boost::none;
             }
 
@@ -326,5 +329,11 @@ namespace DetourNavigator
 
         if (agent->second.empty())
             locked->erase(agent);
+    }
+
+    std::size_t AsyncNavMeshUpdater::getTotalThreadJobsUnsafe() const
+    {
+        return std::accumulate(mThreadsQueues.begin(), mThreadsQueues.end(), std::size_t(0),
+            [] (auto r, const auto& v) { return r + v.second.mJobs.size(); });
     }
 }

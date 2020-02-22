@@ -114,6 +114,8 @@ namespace DetourNavigator
         std::thread::id lockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
         void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
+
+        inline std::size_t getTotalThreadJobsUnsafe() const;
     };
 }
 
