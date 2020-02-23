@@ -23,6 +23,7 @@
     Bug #3977: Non-ASCII characters in object ID's are not supported
     Bug #4009: Launcher does not show data files on the first run after installing
     Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
+    Bug #4141: PCSkipEquip isn't set to 1 when reading books/scrolls
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4262: Rain settings are hardcoded

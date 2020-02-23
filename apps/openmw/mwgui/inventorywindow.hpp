@@ -93,8 +93,6 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
-            MWWorld::Ptr mSkippedToEquip;
-
             GuiMode mGuiMode;
 
             int mLastXSize;
