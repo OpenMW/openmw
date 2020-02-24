@@ -227,6 +227,7 @@
     Feature #4730: Native animated containers support
     Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
+    Feature #4831: Item search in the player's inventory
     Feature #4836: Daytime node switch
     Feature #4840: Editor: Transient terrain change support
     Feature #4859: Make water reflections more configurable

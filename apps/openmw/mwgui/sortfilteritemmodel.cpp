@@ -250,6 +250,10 @@ namespace MWGui
                 return false;
         }
 
+        std::string compare = Misc::StringUtils::lowerCase(item.mBase.getClass().getName(item.mBase));
+        if(compare.find(mNameFilter) == std::string::npos)
+            return false;
+
         return true;
     }
 
@@ -275,6 +279,11 @@ namespace MWGui
     void SortFilterItemModel::setFilter (int filter)
     {
         mFilter = filter;
+    }
+
+    void SortFilterItemModel::setNameFilter (const std::string& filter)
+    {
+        mNameFilter = Misc::StringUtils::lowerCase(filter);
     }
 
     void SortFilterItemModel::update()

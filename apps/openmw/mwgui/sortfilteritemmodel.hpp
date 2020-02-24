@@ -25,6 +25,7 @@ namespace MWGui
 
         void setCategory (int category);
         void setFilter (int filter);
+        void setNameFilter (const std::string& filter);
 
         /// Use ItemStack::Type for sorting?
         void setSortByType(bool sort) { mSortByType = sort; }
@@ -57,6 +58,8 @@ namespace MWGui
         int mCategory;
         int mFilter;
         bool mSortByType;
+
+        std::string mNameFilter; // filter by item name
     };
 
 }

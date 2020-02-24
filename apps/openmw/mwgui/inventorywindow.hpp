@@ -92,6 +92,8 @@ namespace MWGui
             MyGUI::Button* mFilterApparel;
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
+            
+            MyGUI::EditBox* mFilterEdit;
 
             GuiMode mGuiMode;
 
@@ -119,6 +121,7 @@ namespace MWGui
 
             void onWindowResize(MyGUI::Window* _sender);
             void onFilterChanged(MyGUI::Widget* _sender);
+            void onNameFilterChanged(MyGUI::EditBox* _sender);
             void onAvatarClicked(MyGUI::Widget* _sender);
             void onPinToggled();
 
