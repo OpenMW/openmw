@@ -8,6 +8,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 #include <osg/Texture2D>
 
@@ -90,6 +91,7 @@ namespace MWGui
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
         getWidget(mArmorRating, "ArmorRating");
+        getWidget(mFilterEdit, "FilterEdit");
 
         mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
         mAvatarImage->setRenderItemTexture(mPreviewTexture.get());
@@ -104,6 +106,7 @@ namespace MWGui
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMagic->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
+        mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &InventoryWindow::onNameFilterChanged);
 
         mFilterAll->setStateSelected(true);
 
@@ -388,6 +391,11 @@ namespace MWGui
 
     void InventoryWindow::onOpen()
     {
+        // Reset the filter focus when opening the window
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        if (focus == mFilterEdit)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
+
         if (!mPtr.isEmpty())
         {
             updateEncumbranceBar();
@@ -465,6 +473,12 @@ namespace MWGui
                                                                      width*mScaleFactor/float(mPreview->getTextureWidth()), height*mScaleFactor/float(mPreview->getTextureHeight())));
     }
 
+    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
+    }
+
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
     {
         if (_sender == mFilterAll)
@@ -477,7 +491,6 @@ namespace MWGui
             mSortModel->setCategory(SortFilterItemModel::Category_Magic);
         else if (_sender == mFilterMisc)
             mSortModel->setCategory(SortFilterItemModel::Category_Misc);
-
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
         mFilterApparel->setStateSelected(false);

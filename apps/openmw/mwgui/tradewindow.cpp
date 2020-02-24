@@ -69,6 +69,7 @@ namespace MWGui
         getWidget(mTotalBalance, "TotalBalance");
         getWidget(mTotalBalanceLabel, "TotalBalanceLabel");
         getWidget(mBottomPane, "BottomPane");
+        getWidget(mFilterEdit, "FilterEdit");
 
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &TradeWindow::onItemSelected);
@@ -80,6 +81,7 @@ namespace MWGui
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
         mFilterMagic->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
+        mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &TradeWindow::onNameFilterChanged);
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onCancelButtonClicked);
         mOfferButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onOfferButtonClicked);
@@ -135,13 +137,18 @@ namespace MWGui
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
-
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
+        mFilterEdit->setCaption("");
     }
 
     void TradeWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+    }
+
+    void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
