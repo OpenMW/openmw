@@ -202,6 +202,7 @@
     Bug #5264: "Damage Fatigue" Magic Effect Can Bring Fatigue below 0
     Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Bug #5278: Console command Show doesn't fall back to global variable after local var not found
+    Bug #5300: NPCs don't switch from torch to shield when starting combat
     Feature #1415: Infinite fall failsafe
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
