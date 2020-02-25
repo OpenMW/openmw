@@ -493,7 +493,9 @@ bool Wizard::UnshieldWorker::setupComponent(Component component)
 
         }
 
-        if (!found) {
+        if (!found)
+        {
+            emit textChanged(tr("Failed to find a valid archive containing %1.bsa! Retrying.").arg(name));
             QReadLocker readLock(&mLock);
             emit requestFileDialog(component);
             mWait.wait(&mLock);
