@@ -91,6 +91,8 @@ namespace MWGui
         getWidget(mArmorRating, "ArmorRating");
         getWidget(mFilterEdit, "FilterEdit");
 
+        mFilterEdit->setUserString("AcceptTab", "true");
+
         mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
         mAvatarImage->setRenderItemTexture(mPreviewTexture.get());
         mAvatarImage->getSubWidgetMain()->_setUVSet(MyGUI::FloatRect(0.f, 0.f, 1.f, 1.f));
@@ -133,6 +135,8 @@ namespace MWGui
             mSortModel->setSourceModel(mTradeModel);
         else
             mSortModel = new SortFilterItemModel(mTradeModel);
+
+        mSortModel->setNameFilter(mFilterEdit->getCaption());
 
         mItemView->setModel(mSortModel);
 

@@ -45,7 +45,7 @@ namespace MWGui
         getWidget(mEffectBox, "EffectsBox");
         getWidget(mFilterEdit, "FilterEdit");
 
-        mFilterEdit->setUserString("IgnoreTabKey", "y");
+        mFilterEdit->setUserString("AcceptTab", "true");
 
         mSpellView->eventSpellClicked += MyGUI::newDelegate(this, &SpellWindow::onModelIndexSelected);
         mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &SpellWindow::onFilterChanged);

@@ -48,6 +48,9 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
     getWidget(mEncumbranceBar, "EncumbranceBar");
     getWidget(mFilterEdit, "FilterEdit");
     getWidget(mItemView, "ItemView");
+
+    mFilterEdit->setUserString("AcceptTab", "true");
+
     mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &CompanionWindow::onBackgroundSelected);
     mItemView->eventItemClicked += MyGUI::newDelegate(this, &CompanionWindow::onItemSelected);
     mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &CompanionWindow::onNameFilterChanged);
@@ -121,6 +124,7 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
+    mFilterEdit->setCaption(std::string());
     mItemView->setModel(mSortModel);
     mItemView->resetScrollBars();
 
