@@ -168,10 +168,10 @@ namespace
 
 namespace NifOsg
 {
-    class CollisionSwitch : public osg::Group
+    class CollisionSwitch : public osg::MatrixTransform
     {
     public:
-        CollisionSwitch(bool enabled) : osg::Group()
+        CollisionSwitch(const osg::Matrixf& transformations, bool enabled) : osg::MatrixTransform(transformations)
         {
             setEnabled(enabled);
         }
@@ -477,7 +477,7 @@ namespace NifOsg
             case Nif::RC_NiCollisionSwitch:
             {
                 bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
-                node = new CollisionSwitch(enabled);
+                node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
                 dataVariance = osg::Object::STATIC;
 
                 break;
