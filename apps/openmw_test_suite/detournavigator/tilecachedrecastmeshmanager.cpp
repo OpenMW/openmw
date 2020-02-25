@@ -20,6 +20,7 @@ namespace
     struct DetourNavigatorTileCachedRecastMeshManagerTest : Test
     {
         Settings mSettings;
+        std::vector<TilePosition> mChangedTiles;
 
         DetourNavigatorTileCachedRecastMeshManagerTest()
         {
@@ -28,6 +29,11 @@ namespace
             mSettings.mRecastScaleFactor = 0.017647058823529415f;
             mSettings.mTileSize = 64;
             mSettings.mTrianglesPerChunk = 256;
+        }
+
+        void onChangedTile(const TilePosition& tilePosition)
+        {
+            mChangedTiles.push_back(tilePosition);
         }
     };
 
@@ -78,8 +84,10 @@ namespace
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         manager.addObject(ObjectId(&boxShape), boxShape, transform, AreaType::AreaType_ground);
+        EXPECT_TRUE(manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground,
+                                         [&] (const auto& v) { onChangedTile(v); }));
         EXPECT_THAT(
-            manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground),
+            mChangedTiles,
             ElementsAre(TilePosition(-1, -1), TilePosition(-1, 0), TilePosition(0, -1), TilePosition(0, 0),
                         TilePosition(1, -1), TilePosition(1, 0))
         );
@@ -90,10 +98,9 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         manager.addObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
-        EXPECT_EQ(
-            manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground),
-            std::vector<TilePosition>()
-        );
+        EXPECT_FALSE(manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground,
+                                          [&] (const auto& v) { onChangedTile(v); }));
+        EXPECT_EQ(mChangedTiles, std::vector<TilePosition>());
     }
 
     TEST_F(DetourNavigatorTileCachedRecastMeshManagerTest, get_mesh_after_add_object_should_return_recast_mesh_for_each_used_tile)
@@ -127,7 +134,7 @@ namespace
         EXPECT_NE(manager.getMesh(TilePosition(1, 0)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(1, -1)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
         EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
@@ -144,7 +151,7 @@ namespace
         EXPECT_EQ(manager.getMesh(TilePosition(-1, -1)), nullptr);
         EXPECT_EQ(manager.getMesh(TilePosition(-1, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
         EXPECT_EQ(manager.getMesh(TilePosition(1, 0)), nullptr);
         EXPECT_EQ(manager.getMesh(TilePosition(1, -1)), nullptr);
     }
@@ -172,7 +179,7 @@ namespace
         EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(0, 0)), nullptr);
 
-        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
         EXPECT_NE(manager.getMesh(TilePosition(-1, -1)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(-1, 0)), nullptr);
         EXPECT_NE(manager.getMesh(TilePosition(0, -1)), nullptr);
@@ -205,7 +212,7 @@ namespace
         const btTransform transform(btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         manager.addObject(ObjectId(&boxShape), boxShape, transform, AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision + 1);
     }
 
@@ -215,7 +222,7 @@ namespace
         const btBoxShape boxShape(btVector3(20, 20, 100));
         manager.addObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
         const auto beforeUpdateRevision = manager.getRevision();
-        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground);
+        manager.updateObject(ObjectId(&boxShape), boxShape, btTransform::getIdentity(), AreaType::AreaType_ground, [] (auto) {});
         EXPECT_EQ(manager.getRevision(), beforeUpdateRevision);
     }
 
