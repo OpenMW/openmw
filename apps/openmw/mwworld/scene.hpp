@@ -84,7 +84,6 @@ namespace MWWorld
             float mPredictionTime;
 
             osg::Vec3f mLastPlayerPos;
-            float mLowestPos;
 
             void insertCell (CellStore &cell, Loading::Listener* loadingListener, bool test = false);
 
