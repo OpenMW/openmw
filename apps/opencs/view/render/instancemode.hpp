@@ -2,6 +2,7 @@
 #define CSV_RENDER_INSTANCEMODE_H
 
 #include <osg/ref_ptr>
+#include <osg/Group>
 #include <osg/Quat>
 #include <osg/Vec3f>
 
@@ -16,6 +17,7 @@ namespace CSVRender
 {
     class TagBase;
     class InstanceSelectionMode;
+    class Object;
 
     class InstanceMode : public EditMode
     {
@@ -29,6 +31,12 @@ namespace CSVRender
                 DragMode_Scale
             };
 
+            enum DropMode
+            {
+                Coillision_Below,
+                Ground_level
+            };
+
             CSVWidget::SceneToolMode *mSubMode;
             std::string mSubModeId;
             InstanceSelectionMode *mSelectionMode;
@@ -36,6 +44,7 @@ namespace CSVRender
             int mDragAxis;
             bool mLocked;
             float mUnitScaleDist;
+            osg::ref_ptr<osg::Group> mParentNode;
 
             int getSubModeFromId (const std::string& id) const;
 
@@ -44,10 +53,11 @@ namespace CSVRender
 
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
+            void dropInstance(DropMode dropMode, CSVRender::Object* object);
 
         public:
 
-            InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
+            InstanceMode (WorldspaceWidget *worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget *parent = 0);
 
             virtual void activate (CSVWidget::SceneToolbar *toolbar);
 
@@ -93,6 +103,8 @@ namespace CSVRender
 
             void subModeChanged (const std::string& id);
             void deleteSelectedInstances(bool active);
+            void dropSelectedInstances(bool active);
+            void groundlevelSelectedInstances(bool active);
     };
 }
 

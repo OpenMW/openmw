@@ -6,6 +6,10 @@
 
 #include "../../model/prefs/state.hpp"
 
+#include <osg/Group>
+#include <osg/Vec3d>
+#include <osgUtil/LineSegmentIntersector>
+
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/idtree.hpp"
 #include "../../model/world/commands.hpp"
@@ -90,16 +94,20 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
     return pos * combined;
 }
 
-CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent)
+CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg::ref_ptr<osg::Group> parentNode,  QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), SceneUtil::Mask_EditorReference | SceneUtil::Mask_Terrain, "Instance editing",
   parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
-  mDragAxis (-1), mLocked (false), mUnitScaleDist(1)
+  mDragAxis (-1), mLocked (false), mUnitScaleDist(1), mParentNode (parentNode)
 {
     connect(this, SIGNAL(requestFocus(const std::string&)),
             worldspaceWidget, SIGNAL(requestFocus(const std::string&)));
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
     connect(deleteShortcut, SIGNAL(activated(bool)), this, SLOT(deleteSelectedInstances(bool)));
+    CSMPrefs::Shortcut* dropShortcut = new CSMPrefs::Shortcut("scene-instance-drop", worldspaceWidget);
+        connect(dropShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstances(bool)));
+    CSMPrefs::Shortcut* groundlevelShortcut = new CSMPrefs::Shortcut("scene-instance-groundlevel", worldspaceWidget);
+        connect(groundlevelShortcut, SIGNAL(activated(bool)), this, SLOT(groundlevelSelectedInstances(bool)));
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -680,4 +688,76 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
             macro.push(new CSMWorld::DeleteCommand(referencesTable, objectTag->mObject->getReferenceId()));
 
     getWorldspaceWidget().clearSelection (SceneUtil::Mask_EditorReference);
+}
+
+void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object* object)
+{
+    const osg::Vec3d& point = object->getPosition().asVec3();
+    osg::ref_ptr<osg::Group> objectNode = object->getRootNode();
+    osg::Node::NodeMask oldMask = objectNode->getNodeMask();
+    objectNode->setNodeMask(SceneUtil::Mask_Disabled);
+
+    osg::Vec3d start = point;
+    osg::Vec3d end = point;
+    start.z() += 1.0f;
+    end.z() = std::numeric_limits<float>::min();
+
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
+        osgUtil::Intersector::MODEL, start, end) );
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    if (dropMode == Ground_level) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    if (dropMode == Coillision_Below) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
+
+    mParentNode->accept(visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
+    {
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+        ESM::Position position = object->getPosition();
+        object->setEdited (Object::Override_Position);
+        position.pos[2] = intersection.getWorldIntersectPoint().z();
+        object->setPosition(position.pos);
+        objectNode->setNodeMask(oldMask);
+
+        return;
+    }
+
+    objectNode->setNodeMask(oldMask);
+}
+
+void CSVRender::InstanceMode::dropSelectedInstances(bool active)
+{
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
+    if (selection.empty()) return;
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    QUndoStack& undoStack = document.getUndoStack();
+
+    CSMWorld::CommandMacro macro (undoStack, "Drop Instances to next coillision");
+    for(osg::ref_ptr<TagBase> tag: selection)
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            dropInstance(Coillision_Below, objectTag->mObject);
+            objectTag->mObject->apply (macro);
+        }
+}
+
+void CSVRender::InstanceMode::groundlevelSelectedInstances(bool active)
+{
+    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
+    if (selection.empty()) return;
+
+    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
+    QUndoStack& undoStack = document.getUndoStack();
+
+    CSMWorld::CommandMacro macro (undoStack, "Drop Instances to Ground Level");
+    for(osg::ref_ptr<TagBase> tag: selection)
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            dropInstance(Ground_level, objectTag->mObject);
+            objectTag->mObject->apply (macro);
+        }
 }

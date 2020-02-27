@@ -146,6 +146,9 @@ namespace CSVRender
 
             bool getSelected() const;
 
+            /// For direct altering of object rendering
+            osg::ref_ptr<osg::Group> getRootNode();
+
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
             bool referenceableDataChanged (const QModelIndex& topLeft,
