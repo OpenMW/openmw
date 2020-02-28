@@ -3,6 +3,7 @@
 
 #include <QDragEnterEvent>
 #include <QPoint>
+#include <QString>
 
 #include "../../model/prefs/state.hpp"
 
@@ -104,10 +105,16 @@ CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg:
 
     CSMPrefs::Shortcut* deleteShortcut = new CSMPrefs::Shortcut("scene-delete", worldspaceWidget);
     connect(deleteShortcut, SIGNAL(activated(bool)), this, SLOT(deleteSelectedInstances(bool)));
-    CSMPrefs::Shortcut* dropShortcut = new CSMPrefs::Shortcut("scene-instance-drop", worldspaceWidget);
-        connect(dropShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstances(bool)));
-    CSMPrefs::Shortcut* groundlevelShortcut = new CSMPrefs::Shortcut("scene-instance-groundlevel", worldspaceWidget);
-        connect(groundlevelShortcut, SIGNAL(activated(bool)), this, SLOT(groundlevelSelectedInstances(bool)));
+
+    // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and Qt5.14
+    CSMPrefs::Shortcut* dropToCollisionShortcut = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
+        connect(dropToCollisionShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToCollision(bool)));
+    CSMPrefs::Shortcut* dropToTerrainLevelShortcut = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
+        connect(dropToTerrainLevelShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToTerrain(bool)));
+    CSMPrefs::Shortcut* dropToCollisionShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-collision-separately", worldspaceWidget);
+        connect(dropToCollisionShortcut2, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToCollisionSeparately(bool)));
+    CSMPrefs::Shortcut* dropToTerrainLevelShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
+        connect(dropToTerrainLevelShortcut2, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToTerrainSeparately(bool)));
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -707,8 +714,8 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    if (dropMode == Ground_level) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
-    if (dropMode == Coillision_Below) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
+    if (dropMode == Terrain_sep) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    if (dropMode == Collision_sep) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
 
     mParentNode->accept(visitor);
 
@@ -728,24 +735,63 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
     objectNode->setNodeMask(oldMask);
 }
 
-void CSVRender::InstanceMode::dropSelectedInstances(bool active)
+float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Object* object)
 {
-    std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
-    if (selection.empty()) return;
+    const osg::Vec3d& point = object->getPosition().asVec3();
+    osg::ref_ptr<osg::Group> objectNode = object->getRootNode();
+    osg::Node::NodeMask oldMask = objectNode->getNodeMask();
+    objectNode->setNodeMask(SceneUtil::Mask_Disabled);
 
-    CSMDoc::Document& document = getWorldspaceWidget().getDocument();
-    QUndoStack& undoStack = document.getUndoStack();
+    osg::Vec3d start = point;
+    osg::Vec3d end = point;
+    start.z() += 1.0f;
+    end.z() = std::numeric_limits<float>::min();
 
-    CSMWorld::CommandMacro macro (undoStack, "Drop Instances to next coillision");
-    for(osg::ref_ptr<TagBase> tag: selection)
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-        {
-            dropInstance(Coillision_Below, objectTag->mObject);
-            objectTag->mObject->apply (macro);
-        }
+    osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
+        osgUtil::Intersector::MODEL, start, end) );
+    intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
+    osgUtil::IntersectionVisitor visitor(intersector);
+
+    if (dropMode == Terrain) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    if (dropMode == Collision) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
+
+    mParentNode->accept(visitor);
+
+    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+         it != intersector->getIntersections().end(); ++it)
+    {
+        osgUtil::LineSegmentIntersector::Intersection intersection = *it;
+        ESM::Position position = object->getPosition();
+        float dropHeight = intersection.getWorldIntersectPoint().z();
+        objectNode->setNodeMask(oldMask);
+        return position.pos[2] - dropHeight;
+    }
+
+    objectNode->setNodeMask(oldMask);
+    return 0.0f;
 }
 
-void CSVRender::InstanceMode::groundlevelSelectedInstances(bool active)
+void CSVRender::InstanceMode::dropSelectedInstancesToCollision(bool active)
+{
+    handleDropMethod(Collision, "Drop instances to next collision");
+}
+
+void CSVRender::InstanceMode::dropSelectedInstancesToTerrain(bool active)
+{
+    handleDropMethod(Terrain, "Drop instances to terrain level");
+}
+
+void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately(bool active)
+{
+    handleDropMethod(Terrain_sep, "Drop instances to next collision level separately");
+}
+
+void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately(bool active)
+{
+    handleDropMethod(Collision_sep, "Drop instances to terrain level separately");
+}
+
+void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString commandMsg)
 {
     std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
     if (selection.empty()) return;
@@ -753,11 +799,42 @@ void CSVRender::InstanceMode::groundlevelSelectedInstances(bool active)
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     QUndoStack& undoStack = document.getUndoStack();
 
-    CSMWorld::CommandMacro macro (undoStack, "Drop Instances to Ground Level");
-    for(osg::ref_ptr<TagBase> tag: selection)
-        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-        {
-            dropInstance(Ground_level, objectTag->mObject);
-            objectTag->mObject->apply (macro);
-        }
+    CSMWorld::CommandMacro macro (undoStack, commandMsg);
+
+    switch (dropMode)
+    {
+        case Terrain:
+        case Collision:
+            {
+            float smallestDropHeight = std::numeric_limits<float>::max();
+            for(osg::ref_ptr<TagBase> tag: selection)
+                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                {
+                    float thisDrop = getDropHeight(dropMode, objectTag->mObject);
+                    if (thisDrop < smallestDropHeight) smallestDropHeight = thisDrop;
+                }
+            for(osg::ref_ptr<TagBase> tag: selection)
+                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                {
+                    objectTag->mObject->setEdited (Object::Override_Position);
+                    ESM::Position position = objectTag->mObject->getPosition();
+                    position.pos[2] -= smallestDropHeight;
+                    objectTag->mObject->setPosition(position.pos);
+                    objectTag->mObject->apply (macro);
+                }
+            }
+            break;
+
+        case Terrain_sep:
+        case Collision_sep:
+            for(osg::ref_ptr<TagBase> tag: selection)
+                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                {
+                    dropInstance(dropMode, objectTag->mObject);
+                    objectTag->mObject->apply (macro);
+                }
+            break;
+        default:
+            break;
+    }
 }

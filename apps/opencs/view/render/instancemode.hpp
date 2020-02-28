@@ -1,6 +1,8 @@
 #ifndef CSV_RENDER_INSTANCEMODE_H
 #define CSV_RENDER_INSTANCEMODE_H
 
+#include <QString>
+
 #include <osg/ref_ptr>
 #include <osg/Group>
 #include <osg/Quat>
@@ -33,8 +35,10 @@ namespace CSVRender
 
             enum DropMode
             {
-                Coillision_Below,
-                Ground_level
+                Collision,
+                Terrain,
+                Collision_sep,
+                Terrain_sep
             };
 
             CSVWidget::SceneToolMode *mSubMode;
@@ -54,6 +58,7 @@ namespace CSVRender
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
             void dropInstance(DropMode dropMode, CSVRender::Object* object);
+            float getDropHeight(DropMode dropMode, CSVRender::Object* object);
 
         public:
 
@@ -103,8 +108,11 @@ namespace CSVRender
 
             void subModeChanged (const std::string& id);
             void deleteSelectedInstances(bool active);
-            void dropSelectedInstances(bool active);
-            void groundlevelSelectedInstances(bool active);
+            void dropSelectedInstancesToCollision(bool active);
+            void dropSelectedInstancesToTerrain(bool active);
+            void dropSelectedInstancesToCollisionSeparately(bool active);
+            void dropSelectedInstancesToTerrainSeparately(bool active);
+            void handleDropMethod(DropMode dropMode, QString commandMsg);
     };
 }
 
