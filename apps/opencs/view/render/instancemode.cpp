@@ -20,6 +20,7 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/sceneutil/vismask.hpp>
 
 #include "object.hpp"
@@ -700,9 +701,6 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
 void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object* object)
 {
     const osg::Vec3d& point = object->getPosition().asVec3();
-    osg::ref_ptr<osg::Group> objectNode = object->getRootNode();
-    osg::Node::NodeMask oldMask = objectNode->getNodeMask();
-    objectNode->setNodeMask(SceneUtil::Mask_Disabled);
 
     osg::Vec3d start = point;
     osg::Vec3d end = point;
@@ -727,20 +725,15 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
         object->setEdited (Object::Override_Position);
         position.pos[2] = intersection.getWorldIntersectPoint().z();
         object->setPosition(position.pos);
-        objectNode->setNodeMask(oldMask);
 
         return;
     }
-
-    objectNode->setNodeMask(oldMask);
 }
 
 float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Object* object)
 {
     const osg::Vec3d& point = object->getPosition().asVec3();
     osg::ref_ptr<osg::Group> objectNode = object->getRootNode();
-    osg::Node::NodeMask oldMask = objectNode->getNodeMask();
-    objectNode->setNodeMask(SceneUtil::Mask_Disabled);
 
     osg::Vec3d start = point;
     osg::Vec3d end = point;
@@ -763,11 +756,9 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
         ESM::Position position = object->getPosition();
         float dropHeight = intersection.getWorldIntersectPoint().z();
-        objectNode->setNodeMask(oldMask);
         return position.pos[2] - dropHeight;
     }
 
-    objectNode->setNodeMask(oldMask);
     return 0.0f;
 }
 
@@ -801,40 +792,69 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
 
     CSMWorld::CommandMacro macro (undoStack, commandMsg);
 
-    switch (dropMode)
+    std::vector<osg::Node::NodeMask> oldMasks;
+    for(osg::ref_ptr<TagBase> tag: selection)
     {
-        case Terrain:
-        case Collision:
-            {
-            float smallestDropHeight = std::numeric_limits<float>::max();
-            for(osg::ref_ptr<TagBase> tag: selection)
-                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-                {
-                    float thisDrop = getDropHeight(dropMode, objectTag->mObject);
-                    if (thisDrop < smallestDropHeight) smallestDropHeight = thisDrop;
-                }
-            for(osg::ref_ptr<TagBase> tag: selection)
-                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-                {
-                    objectTag->mObject->setEdited (Object::Override_Position);
-                    ESM::Position position = objectTag->mObject->getPosition();
-                    position.pos[2] -= smallestDropHeight;
-                    objectTag->mObject->setPosition(position.pos);
-                    objectTag->mObject->apply (macro);
-                }
-            }
-            break;
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            osg::ref_ptr<osg::Group> objectNode = objectTag->mObject->getRootNode();
+            oldMasks.emplace_back(objectNode->getNodeMask());
+            objectNode->setNodeMask(SceneUtil::Mask_Disabled);
+        }
+    }
 
-        case Terrain_sep:
-        case Collision_sep:
-            for(osg::ref_ptr<TagBase> tag: selection)
-                if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
-                {
-                    dropInstance(dropMode, objectTag->mObject);
-                    objectTag->mObject->apply (macro);
-                }
-            break;
-        default:
-            break;
+    try
+    {
+        switch (dropMode)
+        {
+            case Terrain:
+            case Collision:
+            {
+                float smallestDropHeight = std::numeric_limits<float>::max();
+                    for(osg::ref_ptr<TagBase> tag: selection)
+                        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                        {
+                            float thisDrop = getDropHeight(dropMode, objectTag->mObject);
+                            if (thisDrop < smallestDropHeight) smallestDropHeight = thisDrop;
+                        }
+                    for(osg::ref_ptr<TagBase> tag: selection)
+                        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                        {
+                            objectTag->mObject->setEdited (Object::Override_Position);
+                            ESM::Position position = objectTag->mObject->getPosition();
+                            position.pos[2] -= smallestDropHeight;
+                            objectTag->mObject->setPosition(position.pos);
+                            objectTag->mObject->apply (macro);
+                        }
+            }
+                break;
+
+            case Terrain_sep:
+            case Collision_sep:
+                for(osg::ref_ptr<TagBase> tag: selection)
+                    if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+                    {
+                        dropInstance(dropMode, objectTag->mObject);
+                        objectTag->mObject->apply (macro);
+                    }
+                break;
+            default:
+                break;
+        }
+    }
+    catch (const std::exception& e)
+    {
+        Log(Debug::Error) << "Error in dropping instance: " << e.what();
+    }
+
+    int counter = 0;
+    for(osg::ref_ptr<TagBase> tag: selection)
+    {
+        if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
+        {
+            osg::ref_ptr<osg::Group> objectNode = objectTag->mObject->getRootNode();
+            objectNode->setNodeMask(oldMasks[counter]);
+            counter++;
+        }
     }
 }
