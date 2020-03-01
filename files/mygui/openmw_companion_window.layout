@@ -8,6 +8,7 @@
         <Widget type="HBox"  position="5 5 575 23" align="Left Top HStretch" name="_Filter">
             <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="0 0 0 23" name="FilterEdit">
                 <UserString key="HStretch" value="true"/>
+                <UserString key="AcceptTab" value="true"/>
             </Widget>
         </Widget>
         <!-- Items -->

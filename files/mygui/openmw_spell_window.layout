@@ -24,6 +24,7 @@
 
         <!-- Search box-->
         <Widget type="EditBox" skin="MW_TextBoxEditWithBorder" position="8 535 268 23" align="Left Bottom HStretch" name="FilterEdit">
+            <UserString key="AcceptTab" value="true"/>
         </Widget>
 
     </Widget>

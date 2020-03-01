@@ -71,8 +71,6 @@ namespace MWGui
         getWidget(mBottomPane, "BottomPane");
         getWidget(mFilterEdit, "FilterEdit");
 
-        mFilterEdit->setUserString("AcceptTab", "true");
-
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &TradeWindow::onItemSelected);
 

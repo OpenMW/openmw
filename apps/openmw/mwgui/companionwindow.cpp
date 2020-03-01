@@ -48,9 +48,6 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
     getWidget(mEncumbranceBar, "EncumbranceBar");
     getWidget(mFilterEdit, "FilterEdit");
     getWidget(mItemView, "ItemView");
-
-    mFilterEdit->setUserString("AcceptTab", "true");
-
     mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &CompanionWindow::onBackgroundSelected);
     mItemView->eventItemClicked += MyGUI::newDelegate(this, &CompanionWindow::onItemSelected);
     mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &CompanionWindow::onNameFilterChanged);
