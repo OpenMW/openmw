@@ -75,7 +75,7 @@ namespace Shader
         return newStateSet.get();
     }
 
-    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap" };
+    const char* defaultTextures[] = { "diffuseMap", "normalMap", "emissiveMap", "darkMap", "detailMap", "envMap", "specularMap", "decalMap", "bumpMap" };
     bool isTextureNameRecognized(const std::string& name)
     {
         for (unsigned int i=0; i<sizeof(defaultTextures)/sizeof(defaultTextures[0]); ++i)
@@ -130,6 +130,14 @@ namespace Shader
                                 diffuseMap = texture;
                             else if (texName == "specularMap")
                                 specularMap = texture;
+                            else if (texName == "bumpMap")
+                            {
+                                mRequirements.back().mShaderRequired = true;
+                                if (!writableStateSet)
+                                    writableStateSet = getWritableStateSet(node);
+                                // Bump maps are off by default as well
+                                writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                            }
                         }
                         else
                             Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
