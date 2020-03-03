@@ -482,6 +482,11 @@ osg::ref_ptr<osg::Group> CSVRender::Object::getRootNode()
     return mRootNode;
 }
 
+osg::ref_ptr<osg::Group> CSVRender::Object::getBaseNode()
+{
+    return mBaseNode;
+}
+
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {

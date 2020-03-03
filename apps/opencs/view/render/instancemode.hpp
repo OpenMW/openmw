@@ -58,7 +58,7 @@ namespace CSVRender
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
             void dropInstance(DropMode dropMode, CSVRender::Object* object);
-            float getDropHeight(DropMode dropMode, CSVRender::Object* object);
+            float getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
         public:
 

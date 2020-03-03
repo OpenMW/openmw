@@ -7,6 +7,7 @@
 
 #include "../../model/prefs/state.hpp"
 
+#include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
 #include <osg/Vec3d>
 #include <osgUtil/LineSegmentIntersector>
@@ -704,7 +705,6 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
 
     osg::Vec3d start = point;
     osg::Vec3d end = point;
-    start.z() += 1.0f;
     end.z() = std::numeric_limits<float>::min();
 
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
@@ -730,14 +730,12 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
     }
 }
 
-float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Object* object)
+float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight)
 {
     const osg::Vec3d& point = object->getPosition().asVec3();
-    osg::ref_ptr<osg::Group> objectNode = object->getRootNode();
 
     osg::Vec3d start = point;
     osg::Vec3d end = point;
-    start.z() += 1.0f;
     end.z() = std::numeric_limits<float>::min();
 
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
@@ -754,9 +752,8 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
          it != intersector->getIntersections().end(); ++it)
     {
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
-        ESM::Position position = object->getPosition();
-        float dropHeight = intersection.getWorldIntersectPoint().z();
-        return position.pos[2] - dropHeight;
+        float collisionLevel = intersection.getWorldIntersectPoint().z();
+        return point.z() - collisionLevel + objectHeight;
     }
 
     return 0.0f;
@@ -793,13 +790,25 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
     CSMWorld::CommandMacro macro (undoStack, commandMsg);
 
     std::vector<osg::Node::NodeMask> oldMasks;
+    std::vector<float> objectHeights;
     for(osg::ref_ptr<TagBase> tag: selection)
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
         {
-            osg::ref_ptr<osg::Group> objectNode = objectTag->mObject->getRootNode();
-            oldMasks.emplace_back(objectNode->getNodeMask());
-            objectNode->setNodeMask(SceneUtil::Mask_Disabled);
+            osg::ref_ptr<osg::Group> objectNodeWithGUI = objectTag->mObject->getRootNode();
+            osg::ref_ptr<osg::Group> objectNodeWithoutGUI = objectTag->mObject->getBaseNode();
+
+            osg::ComputeBoundsVisitor computeBounds;
+            computeBounds.setTraversalMask(SceneUtil::Mask_EditorReference);
+            objectNodeWithoutGUI->accept(computeBounds);
+            osg::BoundingBox bounds = computeBounds.getBoundingBox();
+            float boundingBoxOffset = 0.0f;
+            if (bounds.valid()) boundingBoxOffset = bounds.zMin();
+
+            objectHeights.emplace_back(boundingBoxOffset);
+            oldMasks.emplace_back(objectNodeWithGUI->getNodeMask());
+
+            objectNodeWithGUI->setNodeMask(SceneUtil::Mask_Disabled);
         }
     }
 
@@ -811,11 +820,13 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
             case Collision:
             {
                 float smallestDropHeight = std::numeric_limits<float>::max();
+                int counter = 0;
                     for(osg::ref_ptr<TagBase> tag: selection)
                         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
                         {
-                            float thisDrop = getDropHeight(dropMode, objectTag->mObject);
+                            float thisDrop = getDropHeight(dropMode, objectTag->mObject, objectHeights[counter]);
                             if (thisDrop < smallestDropHeight) smallestDropHeight = thisDrop;
+                            counter++;
                         }
                     for(osg::ref_ptr<TagBase> tag: selection)
                         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
@@ -852,8 +863,8 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
     {
         if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
         {
-            osg::ref_ptr<osg::Group> objectNode = objectTag->mObject->getRootNode();
-            objectNode->setNodeMask(oldMasks[counter]);
+            osg::ref_ptr<osg::Group> objectNodeWithGUI = objectTag->mObject->getRootNode();
+            objectNodeWithGUI->setNodeMask(oldMasks[counter]);
             counter++;
         }
     }

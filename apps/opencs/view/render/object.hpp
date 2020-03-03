@@ -146,8 +146,11 @@ namespace CSVRender
 
             bool getSelected() const;
 
-            /// For direct altering of object rendering
+            /// Get object node with GUI graphics
             osg::ref_ptr<osg::Group> getRootNode();
+
+            /// Get object node without GUI graphics
+            osg::ref_ptr<osg::Group> getBaseNode();
 
             /// \return Did this call result in a modification of the visual representation of
             /// this object?
