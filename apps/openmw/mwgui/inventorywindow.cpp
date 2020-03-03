@@ -134,6 +134,8 @@ namespace MWGui
         else
             mSortModel = new SortFilterItemModel(mTradeModel);
 
+        mSortModel->setNameFilter(mFilterEdit->getCaption());
+
         mItemView->setModel(mSortModel);
 
         mFilterAll->setStateSelected(true);

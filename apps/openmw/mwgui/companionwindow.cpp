@@ -121,6 +121,7 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
+    mFilterEdit->setCaption(std::string());
     mItemView->setModel(mSortModel);
     mItemView->resetScrollBars();
 
