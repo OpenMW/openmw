@@ -75,13 +75,18 @@ Morrowind bump-mapping
 **Conversion difficulty:**
 *Varies. Sometimes quick and easy, sometimes time-consuming and hard.*
 
-You might have bumped (pun intended) on a few bump-mapped texture packs for Morrowind that require the
-Morrowind Code Patch (MCP). OpenMW does support the legacy bump-maps,
-but bump-mapped models may look brighter than intended if they were designed with Morrowind Code Patch in mind
-because MCP can optionally apply lighting after environment maps are processed which makes bump-mapped models look a bit better,
-and can make use of the gloss map channel in the bump map. It also makes skinned mesh bump-mapping possible.
-We chose not to replicate the difference in environment map handling, but gloss map channel as well as skinned mesh bump-mapping are supported.
+You might have bumped (pun intended) on a few bump-mapped texture packs for Morrowind that require
+Morrowind Code Patch (MCP). OpenMW supports them, and like MCP can optionally apply lighting after environment maps
+are processed which makes bump-mapped models look a bit better,
+can make use of the gloss map channel in the bump map and can apply bump-mapping to skinned models.
+Add this to settings.cfg_-file:
 
+::
+
+    [Shaders]
+    apply lighting to environment maps = true
+
+But sometimes you may want them to look a bit better than in vanilla.
 Technically you aren't supposed to convert bump maps because they shouldn't be normal maps that are supported by OpenMW as well,
 but artists may use actual normal maps as bump maps either because they look better in vanilla... or because they're lazy.
 In this case you can benefit from OpenMW's normal-mapping support by using these bump maps the way normal maps are used.
@@ -203,7 +208,7 @@ Since we want the glory of normal-mapping in our OpenMW setup, we will go with t
 
 #. Start by downloading Apel's `Various Things - Sacks`_ from Nexus.
 #. Once downloaded, install it the way you'd normally install your mods (**Pro tip**: Install using OpenMW's `Multiple data folders`_ function!).
-#. Now, if you ran the mod right away, your sacks may look... wetter than expected. This is because the mod assumes you have the MCP feature which makes the sacks less shiny enabled. Which you can't have enabled.
+#. Now, if you ran the mod right away, your sacks may look... wetter than expected. This is because the mod assumes you have the MCP feature which makes the sacks less shiny enabled. You can have its equivalent enabled to make the sacks look like in Morrowind with MCP, or you may proceed on the tutorial.
 #. We need to fix this by removing some tags in the model files. You need to download NifSkope_ for this, which, again, only have binaries available for Windows.
 #. Go the place where you installed the mod and go to ``./Meshes/o/`` to find the model files.
     - If you installed the mod like I suggested, finding the files will be easy as a pie, but if you installed it by dropping everything into your main Morrowind Data Files folder, then you'll have to scroll a lot to find them. Check the mod's zip file for the file names of the models if this is the case. The same thing applies to when fixing the textures.

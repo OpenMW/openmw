@@ -41,6 +41,7 @@
 #include <components/sceneutil/skeleton.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/settings/settings.hpp>
 
 #include "particle.hpp"
 #include "userdata.hpp"
@@ -427,12 +428,29 @@ namespace NifOsg
             texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
+            static const bool preLightEnv = Settings::Manager::getBool("apply lighting to environment maps", "Shaders");
             osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
-            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            if (!preLightEnv)
+            {
+                texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+                texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+                texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            }
+            else
+            {
+                texEnv->setCombine_RGB(osg::TexEnvCombine::INTERPOLATE);
+                texEnv->setSource0_RGB(osg::TexEnvCombine::TEXTURE);
+                texEnv->setOperand0_RGB(osg::TexEnvCombine::SRC_COLOR);
+                texEnv->setSource1_RGB(osg::TexEnvCombine::PREVIOUS);
+                texEnv->setOperand1_RGB(osg::TexEnvCombine::SRC_COLOR);
+                texEnv->setSource2_RGB(osg::TexEnvCombine::TEXTURE);
+                texEnv->setOperand2_RGB(osg::TexEnvCombine::SRC_ALPHA);
+                texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+                texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+                texEnv->setOperand0_Alpha(osg::TexEnvCombine::SRC_ALPHA);
+            }
 
             int texUnit = 3; // FIXME
 

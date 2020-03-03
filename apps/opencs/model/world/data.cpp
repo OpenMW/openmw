@@ -81,6 +81,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
     defines["forcePPL"] = "0";
     defines["clamp"] = "1";
+    defines["preLightEnv"] = "0";
     for (const auto& define : shadowDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);
