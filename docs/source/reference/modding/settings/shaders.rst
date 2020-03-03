@@ -134,4 +134,4 @@ apply lighting to environment maps
 
 Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
 Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
-This also affects fixed function pipeline rendering.
+Has no effect in fixed function pipeline.
