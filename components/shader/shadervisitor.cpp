@@ -12,6 +12,7 @@
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
+#include <components/settings/settings.hpp>
 
 #include "shadermanager.hpp"
 
@@ -137,6 +138,12 @@ namespace Shader
                                     writableStateSet = getWritableStateSet(node);
                                 // Bump maps are off by default as well
                                 writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
+                            }
+                            else if (texName == "envMap")
+                            {
+                                static const bool preLightEnv = Settings::Manager::getBool("apply lighting to environment maps", "Shaders");
+                                if (preLightEnv)
+                                    mRequirements.back().mShaderRequired = true;
                             }
                         }
                         else
