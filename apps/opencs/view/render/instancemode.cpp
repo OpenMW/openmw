@@ -110,13 +110,13 @@ CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg:
 
     // Following classes could be simplified by using QSignalMapper, which is obsolete in Qt5.10, but not in Qt4.8 and Qt5.14
     CSMPrefs::Shortcut* dropToCollisionShortcut = new CSMPrefs::Shortcut("scene-instance-drop-collision", worldspaceWidget);
-        connect(dropToCollisionShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToCollision(bool)));
+        connect(dropToCollisionShortcut, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToCollision()));
     CSMPrefs::Shortcut* dropToTerrainLevelShortcut = new CSMPrefs::Shortcut("scene-instance-drop-terrain", worldspaceWidget);
-        connect(dropToTerrainLevelShortcut, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToTerrain(bool)));
+        connect(dropToTerrainLevelShortcut, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToTerrain()));
     CSMPrefs::Shortcut* dropToCollisionShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-collision-separately", worldspaceWidget);
-        connect(dropToCollisionShortcut2, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToCollisionSeparately(bool)));
+        connect(dropToCollisionShortcut2, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToCollisionSeparately()));
     CSMPrefs::Shortcut* dropToTerrainLevelShortcut2 = new CSMPrefs::Shortcut("scene-instance-drop-terrain-separately", worldspaceWidget);
-        connect(dropToTerrainLevelShortcut2, SIGNAL(activated(bool)), this, SLOT(dropSelectedInstancesToTerrainSeparately(bool)));
+        connect(dropToTerrainLevelShortcut2, SIGNAL(activated()), this, SLOT(dropSelectedInstancesToTerrainSeparately()));
 }
 
 void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
@@ -699,13 +699,14 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
     getWorldspaceWidget().clearSelection (SceneUtil::Mask_EditorReference);
 }
 
-void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object* object)
+void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight)
 {
     const osg::Vec3d& point = object->getPosition().asVec3();
 
     osg::Vec3d start = point;
+    start.z() += objectHeight;
     osg::Vec3d end = point;
-    end.z() = std::numeric_limits<float>::min();
+    end.z() = std::numeric_limits<float>::lowest();
 
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
         osgUtil::Intersector::MODEL, start, end) );
@@ -723,7 +724,7 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
         ESM::Position position = object->getPosition();
         object->setEdited (Object::Override_Position);
-        position.pos[2] = intersection.getWorldIntersectPoint().z();
+        position.pos[2] = intersection.getWorldIntersectPoint().z() + objectHeight;
         object->setPosition(position.pos);
 
         return;
@@ -735,8 +736,9 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
     const osg::Vec3d& point = object->getPosition().asVec3();
 
     osg::Vec3d start = point;
+    start.z() += objectHeight;
     osg::Vec3d end = point;
-    end.z() = std::numeric_limits<float>::min();
+    end.z() = std::numeric_limits<float>::lowest();
 
     osg::ref_ptr<osgUtil::LineSegmentIntersector> intersector (new osgUtil::LineSegmentIntersector(
         osgUtil::Intersector::MODEL, start, end) );
@@ -759,22 +761,22 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
     return 0.0f;
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToCollision(bool active)
+void CSVRender::InstanceMode::dropSelectedInstancesToCollision()
 {
     handleDropMethod(Collision, "Drop instances to next collision");
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrain(bool active)
+void CSVRender::InstanceMode::dropSelectedInstancesToTerrain()
 {
     handleDropMethod(Terrain, "Drop instances to terrain level");
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately(bool active)
+void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately()
 {
     handleDropMethod(Terrain_sep, "Drop instances to next collision level separately");
 }
 
-void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately(bool active)
+void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately()
 {
     handleDropMethod(Collision_sep, "Drop instances to terrain level separately");
 }
@@ -842,12 +844,16 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
 
             case Terrain_sep:
             case Collision_sep:
+            {
+                int counter = 0;
                 for(osg::ref_ptr<TagBase> tag: selection)
                     if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
                     {
-                        dropInstance(dropMode, objectTag->mObject);
+                        dropInstance(dropMode, objectTag->mObject, objectHeights[counter]);
                         objectTag->mObject->apply (macro);
+                        counter++;
                     }
+            }
                 break;
             default:
                 break;
