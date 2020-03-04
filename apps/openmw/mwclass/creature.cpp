@@ -813,6 +813,12 @@ namespace MWClass
             return;
         }
 
+        if (ptr.getRefData().getCount() <= 0)
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
 
         customData.mContainerStore->writeState (state2.mInventory);
