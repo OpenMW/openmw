@@ -96,6 +96,7 @@ namespace Shader
             const osg::Texture* diffuseMap = nullptr;
             const osg::Texture* normalMap = nullptr;
             const osg::Texture* specularMap = nullptr;
+            const osg::Texture* bumpMap = nullptr;
             for(unsigned int unit=0;unit<texAttributes.size();++unit)
             {
                 const osg::StateAttribute *attr = stateset->getTextureAttribute(unit, osg::StateAttribute::TEXTURE);
@@ -133,6 +134,7 @@ namespace Shader
                                 specularMap = texture;
                             else if (texName == "bumpMap")
                             {
+                                bumpMap = texture;
                                 mRequirements.back().mShaderRequired = true;
                                 if (!writableStateSet)
                                     writableStateSet = getWritableStateSet(node);
@@ -173,8 +175,11 @@ namespace Shader
                         image = mImageManager.getImage(normalMapFileName);
                     }
                 }
+                // Avoid using the auto-detected normal map if it's already being used as a bump map.
+                // It's probably not an actual normal map.
+                bool hasNamesakeBumpMap = image && bumpMap && bumpMap->getImage(0) && image->getFileName() == bumpMap->getImage(0)->getFileName();
 
-                if (image)
+                if (!hasNamesakeBumpMap && image)
                 {
                     osg::ref_ptr<osg::Texture2D> normalMapTex (new osg::Texture2D(image));
                     normalMapTex->setTextureSize(image->s(), image->t());
