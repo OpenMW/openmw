@@ -19,7 +19,7 @@ namespace CSVRender
             void hide();
 
         private:
-            void buildPointGeometry(const float& radius, const osg::Vec3d& point);
+            void buildPointGeometry(const osg::Vec3d& point);
             void buildSquareGeometry(const float& radius, const osg::Vec3d& point);
             void buildCircleGeometry(const float& radius, const osg::Vec3d& point);
             void buildCustomGeometry(const float& radius, const osg::Vec3d& point);
@@ -28,6 +28,7 @@ namespace CSVRender
             osg::ref_ptr<osg::Group> mParentNode;
             osg::ref_ptr<osg::Group> mBrushDrawNode;
             osg::ref_ptr<osg::Geometry> mGeometry;
+            bool mTextureMode;
             float mLandSizeFactor;
     };
 }
