@@ -44,7 +44,7 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
 : EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain texture editing", parent),
     mBrushTexture("L0#0"),
     mBrushSize(1),
-    mBrushShape(0),
+    mBrushShape(CSVWidget::BrushShape_Point),
     mTextureBrushScenetool(nullptr),
     mDragMode(InteractionType_None),
     mParentNode(parentNode),
