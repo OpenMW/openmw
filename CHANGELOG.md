@@ -204,6 +204,7 @@
     Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Bug #5278: Console command Show doesn't fall back to global variable after local var not found
     Bug #5300: NPCs don't switch from torch to shield when starting combat
+    Bug #5308: World map copying makes save loading much slower
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
