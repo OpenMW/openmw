@@ -692,12 +692,10 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
         return;
     }
 
-    // TODO: deprecate tga and use raw data instead
-
-    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!readerwriter)
     {
-        Log(Debug::Error) << "Error: Unable to load fog, can't find a tga ReaderWriter" ;
+        Log(Debug::Error) << "Error: Unable to load fog, can't find a png ReaderWriter" ;
         return;
     }
 
@@ -726,10 +724,10 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
 
     std::ostringstream ostream;
 
-    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!readerwriter)
     {
-        Log(Debug::Error) << "Error: Unable to write fog, can't find a tga ReaderWriter";
+        Log(Debug::Error) << "Error: Unable to write fog, can't find a png ReaderWriter";
         return;
     }
 
