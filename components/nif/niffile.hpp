@@ -26,7 +26,7 @@ struct File
 
     virtual size_t numRoots() const = 0;
 
-    virtual std::string getString(size_t index) const = 0;
+    virtual std::string getString(uint32_t index) const = 0;
 
     virtual void setUseSkinning(bool skinning) = 0;
 
@@ -129,8 +129,10 @@ public:
     size_t numRoots() const override { return roots.size(); }
 
     /// Get a given string from the file's string table
-    std::string getString(size_t index) const override
+    std::string getString(uint32_t index) const override
     {
+        if (index == std::numeric_limits<uint32_t>::max())
+            return std::string();
         return strings.at(index);
     }
 
