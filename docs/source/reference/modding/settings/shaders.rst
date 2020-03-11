@@ -124,3 +124,14 @@ terrain specular map pattern
 :Default:	_diffusespec
 
 The filename pattern to probe for when detecting terrain specular maps (see 'auto use terrain specular maps')
+
+apply lighting to environment maps
+----------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
+Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
+Affected objects will use shaders.

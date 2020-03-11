@@ -262,6 +262,7 @@
     Feature #5193: Weapon sheathing
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape
+    Feature #5304: Morrowind-style bump-mapping
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

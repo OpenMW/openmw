@@ -93,6 +93,9 @@ public:
 
     std::vector<Texture> textures;
 
+    osg::Vec2f envMapLumaBias;
+    osg::Vec4f bumpMapMatrix;
+
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };

@@ -79,8 +79,9 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
 
     Shader::ShaderManager::DefineMap defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
     Shader::ShaderManager::DefineMap shadowDefines = SceneUtil::ShadowManager::getShadowsDisabledDefines();
-    defines["forcePPL"] = "0";
-    defines["clamp"] = "1";
+    defines["forcePPL"] = "0"; // Don't force per-pixel lighting
+    defines["clamp"] = "1"; // Clamp lighting
+    defines["preLightEnv"] = "0"; // Apply environment maps after lighting like Morrowind
     for (const auto& define : shadowDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);

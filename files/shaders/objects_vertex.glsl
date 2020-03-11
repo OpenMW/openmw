@@ -29,6 +29,10 @@ varying vec4 passTangent;
 varying vec2 envMapUV;
 #endif
 
+#if @bumpMap
+varying vec2 bumpMapUV;
+#endif
+
 #if @specularMap
 varying vec2 specularMapUV;
 #endif
@@ -89,6 +93,10 @@ void main(void)
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
     passTangent = gl_MultiTexCoord7.xyzw;
+#endif
+
+#if @bumpMap
+    bumpMapUV = (gl_TextureMatrix[@bumpMapUV] * gl_MultiTexCoord@bumpMapUV).xy;
 #endif
 
 #if @specularMap
