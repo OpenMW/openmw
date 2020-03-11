@@ -120,6 +120,7 @@ namespace MWMechanics
             mWalkState = WalkState::Norm;
             mStateDuration = 0;
             mPrev = position;
+            mInitialDistance = (destination - position).length();
             return;
         }
 
@@ -129,10 +130,11 @@ namespace MWMechanics
             const float prevDistance = (destination - mPrev).length();
             const float currentDistance = (destination - position).length();
             const float movedDistance = prevDistance - currentDistance;
+            const float movedFromInitialDistance = mInitialDistance - currentDistance;
 
             mPrev = position;
 
-            if (movedDistance >= distSameSpot)
+            if (movedDistance >= distSameSpot && movedFromInitialDistance >= distSameSpot)
             {
                 mWalkState = WalkState::Norm;
                 mStateDuration = 0;
@@ -143,6 +145,7 @@ namespace MWMechanics
             {
                 mWalkState = WalkState::CheckStuck;
                 mStateDuration = duration;
+                mInitialDistance = (destination - position).length();
                 return;
             }
 

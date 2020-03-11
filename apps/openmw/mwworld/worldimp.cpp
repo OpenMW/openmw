@@ -1640,6 +1640,11 @@ namespace MWWorld
         return result.mHit;
     }
 
+    bool World::castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore)
+    {
+        return mPhysics->castRay(from, to, ignore, std::vector<MWWorld::Ptr>(), mask).mHit;
+    }
+
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
     {
         const ESM::Position& objPos = door.getRefData().getPosition();
@@ -3895,5 +3900,10 @@ namespace MWWorld
         btScalar hitDistance = 1;
         btVector3 hitNormal;
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
+    }
+
+    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
     }
 }

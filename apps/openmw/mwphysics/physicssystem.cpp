@@ -45,6 +45,7 @@
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
+#include "hasspherecollisioncallback.hpp"
 
 namespace MWPhysics
 {
@@ -1443,5 +1444,21 @@ namespace MWPhysics
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
         mCollisionWorld->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
                                                     CollisionType_Actor);
+    }
+
+    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        btCollisionObject* object = nullptr;
+        const auto it = mActors.find(ignore);
+        if (it != mActors.end())
+            object = it->second->getCollisionObject();
+        const auto bulletPosition = Misc::Convert::toBullet(position);
+        const auto aabbMin = bulletPosition - btVector3(radius, radius, radius);
+        const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
+        const int mask = MWPhysics::CollisionType_Actor;
+        const int group = 0xff;
+        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
+        mCollisionWorld->getBroadphase()->aabbTest(aabbMin, aabbMax, callback);
+        return callback.getResult();
     }
 }

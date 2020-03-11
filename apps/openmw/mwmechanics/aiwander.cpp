@@ -61,6 +61,34 @@ namespace MWMechanics
             rotation.makeRotate(randomDirection, osg::Vec3f(0.0, 0.0, 1.0));
             return position + osg::Vec3f(distance, 0.0, 0.0) * rotation;
         }
+
+        bool isDestinationHidden(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
+        {
+            const auto position = actor.getRefData().getPosition().asVec3();
+            const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
+            const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            osg::Vec3f direction = destination - position;
+            direction.normalize();
+            const auto visibleDestination = (
+                    isWaterCreature || isFlyingCreature
+                    ? destination
+                    : destination + osg::Vec3f(0, 0, halfExtents.z())
+                ) + direction * std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+            const int mask = MWPhysics::CollisionType_World
+                | MWPhysics::CollisionType_HeightMap
+                | MWPhysics::CollisionType_Door
+                | MWPhysics::CollisionType_Actor;
+            return MWBase::Environment::get().getWorld()->castRay(position, visibleDestination, mask, actor);
+        }
+
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
+        {
+            const auto world = MWBase::Environment::get().getWorld();
+            const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
+            const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+            return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
+        }
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -265,6 +293,11 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
+        if (wanderState == AiWanderStorage::Wander_Walking
+            && (isDestinationHidden(actor, mPathFinder.getPath().back())
+                || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
+            completeManualWalking(actor, storage);
+
         return false; // AiWander package not yet completed
     }
 
@@ -328,7 +361,10 @@ namespace MWMechanics
             if (!isWaterCreature && destinationIsAtWater(actor, mDestination))
                 continue;
 
-            if ((isWaterCreature || isFlyingCreature) && destinationThroughGround(currentPosition, mDestination))
+            if (isDestinationHidden(actor, mDestination))
+                continue;
+
+            if (isAreaOccupiedByOtherActor(actor, mDestination))
                 continue;
 
             if (isWaterCreature || isFlyingCreature)
@@ -355,16 +391,6 @@ namespace MWMechanics
         osg::Vec3f positionBelowSurface = destination;
         positionBelowSurface[2] = positionBelowSurface[2] - heightToGroundOrWater - 1.0f;
         return MWBase::Environment::get().getWorld()->isUnderwater(actor.getCell(), positionBelowSurface);
-    }
-
-    /*
-     * Returns true if the start to end point travels through a collision point (land).
-     */
-    bool AiWander::destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination) {
-        const int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Door;
-        return MWBase::Environment::get().getWorld()->castRay(startPoint.x(), startPoint.y(), startPoint.z(),
-                                                              destination.x(), destination.y(), destination.z(),
-                                                              mask);
     }
 
     void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
