@@ -116,7 +116,7 @@ namespace Compiler
         void registerExtensions (Extensions& extensions)
         {
             extensions.registerInstruction ("additem", "clX", opcodeAddItem, opcodeAddItemExplicit);
-            extensions.registerFunction ("getitemcount", 'l', "c", opcodeGetItemCount,
+            extensions.registerFunction ("getitemcount", 'l', "cX", opcodeGetItemCount,
                 opcodeGetItemCountExplicit);
             extensions.registerInstruction ("removeitem", "clX", opcodeRemoveItem,
                 opcodeRemoveItemExplicit);
