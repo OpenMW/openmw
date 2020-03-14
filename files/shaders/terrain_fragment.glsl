@@ -12,7 +12,8 @@ uniform sampler2D normalMap;
 uniform sampler2D blendMap;
 #endif
 
-varying float depth;
+varying float euclideanDepth;
+varying float linearDepth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -66,7 +67,7 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-    float shadowing = unshadowedLightRatio(depth);
+    float shadowing = unshadowedLightRatio(linearDepth);
 
 #if !PER_PIXEL_LIGHTING
 
@@ -90,7 +91,11 @@ void main()
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;
 
-    float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#if @radialFog
+    float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#else
+    float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
     applyShadowDebugOverlay();
