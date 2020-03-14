@@ -318,7 +318,7 @@ set(Boost_NO_BOOST_CMAKE ON)
 
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.2 REQUIRED)
-find_package(SDL2 REQUIRED)
+find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
 find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollision LinearMath)
 
@@ -393,12 +393,6 @@ copy_resource_file(${OpenMW_SOURCE_DIR}/files/opencs/defaultfilters
 
 configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb.txt
     "${OpenMW_BINARY_DIR}" "gamecontrollerdb.txt")
-
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb_204.txt
-        "${OpenMW_BINARY_DIR}" "gamecontrollerdb_204.txt")
-
-configure_resource_file(${OpenMW_SOURCE_DIR}/files/gamecontrollerdb_205.txt
-        "${OpenMW_BINARY_DIR}" "gamecontrollerdb_205.txt")
 
 if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/openmw.desktop

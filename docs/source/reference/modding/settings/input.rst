@@ -134,3 +134,80 @@ This setting has no effect on the camera rotation speed, which is controlled by 
 camera sensitivity setting.
 
 This setting can only be configured by editing the settings configuration file.
+
+enable gyroscope
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enable the support of camera rotation based on the information supplied from the gyroscope through SDL.
+
+This setting can only be configured by editing the settings configuration file.
+
+gyro horizontal axis
+--------------------
+
+:Type:      string
+:Range:     x, y, z, -x, -y, -z
+:Default:   -x
+
+This setting sets up an axis of the gyroscope as the horizontal camera axis.
+Minus sign swaps the positive and negative direction of the axis.
+Keep in mind that while this setting corresponds to the landscape mode of the display,
+the portrait mode or any other mode will have this axis corrected automatically.
+
+This setting can only be configured by editing the settings configuration file.
+
+gyro vertical axis
+------------------
+
+:Type:      string
+:Range:     x, y, z, -x, -y, -z
+:Default:   y
+
+This setting sets up an axis of the gyroscope as the vertical camera axis.
+Minus sign swaps the positive and negative direction of the axis.
+Keep in mind that while this setting corresponds to the landscape mode of the display,
+the portrait mode or any other mode will have this axis corrected automatically.
+
+This setting can only be configured by editing the settings configuration file.
+
+gyro input threshold
+--------------------
+
+:Type:		floating point
+:Range:		> 0
+:Default:	0.01
+
+This setting determines the minimum value of the rotation that will be accepted.
+It allows to avoid crosshair oscillation due to gyroscope "noise".
+
+This setting can only be configured by editing the settings configuration file.
+
+gyro horizontal sensitivity
+---------------------------
+
+:Type: float
+:Range: >0
+:Default: 1.0
+
+This setting controls the overall gyroscope horizontal sensitivity.
+The smaller this sensitivity is, the less visible effect the device rotation
+will have on the horizontal camera rotation, and vice versa.
+
+This setting can only be configured by editing the settings configuration file.
+
+gyro vertical sensitivity
+-------------------------
+
+:Type: float
+:Range: >0
+:Default: 1.0
+
+This setting controls the overall gyroscope vertical sensitivity.
+The smaller this sensitivity is, the less visible effect the device
+rotation will have on the vertical camera rotation, and vice versa.
+
+This setting can only be configured by editing the settings configuration file.

@@ -3,6 +3,8 @@
 
 #include "../mwgui/mode.hpp"
 
+#include <SDL_sensor.h>
+
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
@@ -65,6 +67,7 @@ namespace MWInput
             public MWBase::InputManager,
             public SDLUtil::KeyListener,
             public SDLUtil::MouseListener,
+            public SDLUtil::SensorListener,
             public SDLUtil::WindowListener,
             public SDLUtil::ControllerListener,
             public ICS::ChannelListener,
@@ -123,6 +126,9 @@ namespace MWInput
 
         virtual void mouseWheelMoved( const SDL_MouseWheelEvent &arg);
 
+        virtual void sensorUpdated(const SDL_SensorEvent &arg);
+        virtual void displayOrientationChanged();
+
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg);
@@ -162,6 +168,17 @@ namespace MWInput
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
+        enum GyroscopeAxis
+        {
+            Unknown = 0,
+            X = 1,
+            Y = 2,
+            Z = 3,
+            Minus_X = -1,
+            Minus_Y = -2,
+            Minus_Z = -3
+        };
+
         SDL_Window* mWindow;
         bool mWindowVisible;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -218,6 +235,16 @@ namespace MWInput
         float mInvUiScalingFactor;
         float mGamepadCursorSpeed;
 
+        float mGyroXSpeed;
+        float mGyroYSpeed;
+        float mGyroUpdateTimer;
+
+        float mGyroHSensitivity;
+        float mGyroVSensitivity;
+        GyroscopeAxis mGyroHAxis;
+        GyroscopeAxis mGyroVAxis;
+        float mGyroInputThreshold;
+
     private:
         void convertMousePosForMyGUI(int& x, int& y);
 
@@ -236,8 +263,13 @@ namespace MWInput
         bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
+        void updateSensors();
+        void correctGyroscopeAxes();
+        GyroscopeAxis mapGyroscopeAxis(const std::string& axis);
 
         bool checkAllowedToUseItems() const;
+
+        float getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const;
 
     private:
         void toggleMainMenu();
@@ -264,6 +296,7 @@ namespace MWInput
         void loadControllerDefaults(bool force = false);
 
         int mFakeDeviceID; //As we only support one controller at a time, use a fake deviceID so we don't lose bindings when switching controllers
+        SDL_Sensor* mGyroscope;
 
     private:
         enum Actions

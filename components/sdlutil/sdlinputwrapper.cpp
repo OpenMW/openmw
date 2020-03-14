@@ -1,6 +1,7 @@
 #include "sdlinputwrapper.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/settings/settings.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -11,6 +12,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         mSDLWindow(window),
         mViewer(viewer),
         mMouseListener(nullptr),
+        mSensorListener(nullptr),
         mKeyboardListener(nullptr),
         mWindowListener(nullptr),
         mConListener(nullptr),
@@ -79,6 +81,9 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     mMouseListener->mouseMoved(_packageMouseMotion(evt));
                     mMouseListener->mouseWheelMoved(evt.wheel);
                     break;
+                case SDL_SENSORUPDATE:
+                    mSensorListener->sensorUpdated(evt.sensor);
+                    break;
                 case SDL_MOUSEBUTTONDOWN:
                     mMouseListener->mousePressed(evt.button, evt.button.button);
                     break;
@@ -109,11 +114,8 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 case SDL_TEXTINPUT:
                     mKeyboardListener->textInput(evt.text);
                     break;
-
-#if SDL_VERSION_ATLEAST(2, 0, 4)
                 case SDL_KEYMAPCHANGED:
                     break;
-#endif
                 case SDL_JOYHATMOTION: //As we manage everything with GameController, don't even bother with these.
                 case SDL_JOYAXISMOTION:
                 case SDL_JOYBUTTONDOWN:
@@ -148,6 +150,17 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                     if (mWindowListener)
                         mWindowListener->windowClosed();
                     break;
+                case SDL_DISPLAYEVENT:
+                    switch (evt.display.event)
+                    {
+                        case SDL_DISPLAYEVENT_ORIENTATION:
+                            if (mSensorListener && evt.display.display == (unsigned int) Settings::Manager::getInt("screen", "Video"))
+                                mSensorListener->displayOrientationChanged();
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
                 case SDL_CLIPBOARDUPDATE:
                     break; // We don't need this event, clipboard is retrieved on demand
 
@@ -158,6 +171,21 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
                 case SDL_DOLLARRECORD:
                 case SDL_MULTIGESTURE:
                     // No use for touch & gesture events
+                    break;
+
+                case SDL_APP_WILLENTERBACKGROUND:
+                case SDL_APP_WILLENTERFOREGROUND:
+                case SDL_APP_DIDENTERBACKGROUND:
+                case SDL_APP_DIDENTERFOREGROUND:
+                    // We do not need background/foreground switch event for mobile devices so far
+                    break;
+
+                case SDL_APP_TERMINATING:
+                    // There is nothing we can do here.
+                    break;
+
+                case SDL_APP_LOWMEMORY:
+                    Log(Debug::Warning) << "System reports that free RAM on device is running low. You may encounter an unexpected behaviour.";
                     break;
 
                 default:
