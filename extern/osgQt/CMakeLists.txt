@@ -4,6 +4,9 @@ set(OSGQT_LIBRARY "osgQt")
 
 set(OSGQT_SOURCE_FILES
     GraphicsWindowQt.cpp
+    osgQOpenGLWidget.cpp
+    osgQOpenGLWindow.cpp
+    OSGRenderer.cpp
 )
 
 add_library(${OSGQT_LIBRARY} STATIC ${OSGQT_SOURCE_FILES})
