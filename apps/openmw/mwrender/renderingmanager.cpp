@@ -66,6 +66,7 @@
 #include "util.hpp"
 #include "navmesh.hpp"
 #include "actorspaths.hpp"
+#include "recastmesh.hpp"
 
 namespace
 {
@@ -260,6 +261,7 @@ namespace MWRender
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
+        mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
@@ -585,6 +587,10 @@ namespace MWRender
         {
             return mActorsPaths->toggle();
         }
+        else if (mode == Render_RecastMesh)
+        {
+            return mRecastMesh->toggle();
+        }
         return false;
     }
 
@@ -651,6 +657,7 @@ namespace MWRender
         }
 
         updateNavMesh();
+        updateRecastMesh();
 
         mCamera->update(dt, paused);
 
@@ -1462,5 +1469,13 @@ namespace MWRender
                 Log(Debug::Error) << "NavMesh render update exception: " << e.what();
             }
         }
+    }
+
+    void RenderingManager::updateRecastMesh()
+    {
+        if (!mRecastMesh->isEnabled())
+            return;
+
+        mRecastMesh->update(mNavigator.getRecastMeshTiles(), mNavigator.getSettings());
     }
 }

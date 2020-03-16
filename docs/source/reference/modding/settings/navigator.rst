@@ -166,6 +166,20 @@ Make visible all NPC's and creaure's plans where they are going.
 Works even if Navigator is disabled.
 Potentially decreases performance.
 
+enable recast mesh render
+----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Render recast mesh that is built as set of culled tiles from physical mesh.
+Should show similar mesh to physical one.
+Little difference can be a result of floating point error.
+Absent pieces usually mean a bug in recast mesh tiles building.
+Allows to do in-game debug.
+Potentially decreases performance.
+
 Expert settings
 ***************
 
