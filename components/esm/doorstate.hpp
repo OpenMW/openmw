@@ -13,6 +13,15 @@ namespace ESM
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
+
+        virtual DoorState& asDoorState()
+        {
+            return *this;
+        }
+        virtual const DoorState& asDoorState() const
+        {
+            return *this;
+        }
     };
 }
 

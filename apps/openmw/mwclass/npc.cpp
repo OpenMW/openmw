@@ -1299,8 +1299,6 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        const ESM::NpcState& state2 = dynamic_cast<const ESM::NpcState&> (state);
-
         if (state.mVersion > 0)
         {
             if (!ptr.getRefData().getCustomData())
@@ -1314,17 +1312,15 @@ namespace MWClass
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-
-        customData.mInventoryStore.readState (state2.mInventory);
-        customData.mNpcStats.readState (state2.mNpcStats);
-        static_cast<MWMechanics::CreatureStats&> (customData.mNpcStats).readState (state2.mCreatureStats);
+        const ESM::NpcState& npcState = state.asNpcState();
+        customData.mInventoryStore.readState (npcState.mInventory);
+        customData.mNpcStats.readState (npcState.mNpcStats);
+        customData.mNpcStats.readState (npcState.mCreatureStats);
     }
 
     void Npc::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
-        ESM::NpcState& state2 = dynamic_cast<ESM::NpcState&> (state);
-
         if (!ptr.getRefData().getCustomData())
         {
             state.mHasCustomState = false;
@@ -1332,10 +1328,10 @@ namespace MWClass
         }
 
         const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
-
-        customData.mInventoryStore.writeState (state2.mInventory);
-        customData.mNpcStats.writeState (state2.mNpcStats);
-        static_cast<const MWMechanics::CreatureStats&> (customData.mNpcStats).writeState (state2.mCreatureStats);
+        ESM::NpcState& npcState = state.asNpcState();
+        customData.mInventoryStore.writeState (npcState.mInventory);
+        customData.mNpcStats.writeState (npcState.mNpcStats);
+        customData.mNpcStats.writeState (npcState.mCreatureStats);
     }
 
     int Npc::getBaseGold(const MWWorld::ConstPtr& ptr) const
