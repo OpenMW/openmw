@@ -1,5 +1,9 @@
 #include "objectstate.hpp"
 
+#include <stdexcept>
+#include <sstream>
+#include <typeinfo>
+
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -82,6 +86,76 @@ void ESM::ObjectState::blank()
     }
     mFlags = 0;
     mHasCustomState = true;
+}
+
+const ESM::NpcState& ESM::ObjectState::asNpcState() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to NpcState";
+    throw std::logic_error(error.str());
+}
+
+ESM::NpcState& ESM::ObjectState::asNpcState()
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to NpcState";
+    throw std::logic_error(error.str());
+}
+
+const ESM::CreatureState& ESM::ObjectState::asCreatureState() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureState";
+    throw std::logic_error(error.str());
+}
+
+ESM::CreatureState& ESM::ObjectState::asCreatureState()
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureState";
+    throw std::logic_error(error.str());
+}
+
+const ESM::ContainerState& ESM::ObjectState::asContainerState() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to ContainerState";
+    throw std::logic_error(error.str());
+}
+
+ESM::ContainerState& ESM::ObjectState::asContainerState()
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to ContainerState";
+    throw std::logic_error(error.str());
+}
+
+const ESM::DoorState& ESM::ObjectState::asDoorState() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to DoorState";
+    throw std::logic_error(error.str());
+}
+
+ESM::DoorState& ESM::ObjectState::asDoorState()
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to DoorState";
+    throw std::logic_error(error.str());
+}
+
+const ESM::CreatureLevListState& ESM::ObjectState::asCreatureLevListState() const
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureLevListState";
+    throw std::logic_error(error.str());
+}
+
+ESM::CreatureLevListState& ESM::ObjectState::asCreatureLevListState()
+{
+    std::stringstream error;
+    error << "bad cast " << typeid(this).name() << " to CreatureLevListState";
+    throw std::logic_error(error.str());
 }
 
 ESM::ObjectState::~ObjectState() {}

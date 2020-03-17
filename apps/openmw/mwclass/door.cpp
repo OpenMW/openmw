@@ -370,11 +370,11 @@ namespace MWClass
     {
         if (!state.mHasCustomState)
             return;
+
         ensureCustomData(ptr);
         DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
-
-        const ESM::DoorState& state2 = dynamic_cast<const ESM::DoorState&>(state);
-        customData.mDoorState = static_cast<MWWorld::DoorState>(state2.mDoorState);
+        const ESM::DoorState& doorState = state.asDoorState();
+        customData.mDoorState = MWWorld::DoorState(doorState.mDoorState);
     }
 
     void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
@@ -384,10 +384,10 @@ namespace MWClass
             state.mHasCustomState = false;
             return;
         }
-        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
 
-        ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
-        state2.mDoorState = static_cast<int>(customData.mDoorState);
+        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
+        ESM::DoorState& doorState = state.asDoorState();
+        doorState.mDoorState = int(customData.mDoorState);
     }
 
 }

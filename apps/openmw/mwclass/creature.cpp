@@ -776,8 +776,6 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        const ESM::CreatureState& state2 = dynamic_cast<const ESM::CreatureState&> (state);
-
         if (state.mVersion > 0)
         {
             if (!ptr.getRefData().getCustomData())
@@ -797,16 +795,14 @@ namespace MWClass
             ensureCustomData(ptr); // in openmw 0.30 savegames not all state was saved yet, so need to load it regardless.
 
         CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-
-        customData.mContainerStore->readState (state2.mInventory);
-        customData.mCreatureStats.readState (state2.mCreatureStats);
+        const ESM::CreatureState& creatureState = state.asCreatureState();
+        customData.mContainerStore->readState (creatureState.mInventory);
+        customData.mCreatureStats.readState (creatureState.mCreatureStats);
     }
 
     void Creature::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
         const
     {
-        ESM::CreatureState& state2 = dynamic_cast<ESM::CreatureState&> (state);
-
         if (!ptr.getRefData().getCustomData())
         {
             state.mHasCustomState = false;
@@ -814,9 +810,9 @@ namespace MWClass
         }
 
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
-
-        customData.mContainerStore->writeState (state2.mInventory);
-        customData.mCreatureStats.writeState (state2.mCreatureStats);
+        ESM::CreatureState& creatureState = state.asCreatureState();
+        customData.mContainerStore->writeState (creatureState.mInventory);
+        customData.mCreatureStats.writeState (creatureState.mCreatureStats);
     }
 
     int Creature::getBaseGold(const MWWorld::ConstPtr& ptr) const
