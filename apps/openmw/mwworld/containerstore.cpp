@@ -290,7 +290,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     item.getCellRef().setOwner("");
     item.getCellRef().resetGlobalVariable();
     item.getCellRef().setFaction("");
-    item.getCellRef().setFactionRank(-1);
+    item.getCellRef().setFactionRank(-2);
 
     // must reset the RefNum on the copied item, so that the RefNum on the original item stays unique
     // maybe we should do this in the copy constructor instead?
