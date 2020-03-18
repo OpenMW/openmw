@@ -21,7 +21,6 @@
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetoolmode.hpp"
 
-#include <components/debug/debuglog.hpp>
 #include <components/sceneutil/vismask.hpp>
 
 #include "object.hpp"
