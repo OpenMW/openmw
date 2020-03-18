@@ -114,6 +114,19 @@ namespace CSVRender
             void dropSelectedInstancesToTerrainSeparately();
             void handleDropMethod(DropMode dropMode, QString commandMsg);
     };
+
+    /// \brief Helper class to handle object mask data in safe way
+    class DropObjectDataHandler
+    {
+        public:
+            DropObjectDataHandler(WorldspaceWidget* worldspacewidget);
+            ~DropObjectDataHandler();
+            std::vector<float> mObjectHeights;
+
+        private:
+            WorldspaceWidget* mWorldspaceWidget;
+            std::vector<osg::Node::NodeMask> mOldMasks;
+    };
 }
 
 #endif
