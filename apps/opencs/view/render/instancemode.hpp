@@ -37,8 +37,8 @@ namespace CSVRender
             {
                 Collision,
                 Terrain,
-                Collision_sep,
-                Terrain_sep
+                CollisionSep,
+                Terrainsep
             };
 
             CSVWidget::SceneToolMode *mSubMode;

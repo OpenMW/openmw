@@ -700,7 +700,7 @@ void CSVRender::InstanceMode::deleteSelectedInstances(bool active)
 
 void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight)
 {
-    const osg::Vec3d& point = object->getPosition().asVec3();
+    osg::Vec3d point = object->getPosition().asVec3();
 
     osg::Vec3d start = point;
     start.z() += objectHeight;
@@ -712,8 +712,10 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    if (dropMode == Terrain_sep) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
-    if (dropMode == Collision_sep) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
+    if (dropMode == TerrainSep)
+        visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    if (dropMode == CollisionSep)
+        visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
 
     mParentNode->accept(visitor);
 
@@ -732,7 +734,7 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
 
 float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight)
 {
-    const osg::Vec3d& point = object->getPosition().asVec3();
+    osg::Vec3d point = object->getPosition().asVec3();
 
     osg::Vec3d start = point;
     start.z() += objectHeight;
@@ -744,8 +746,10 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    if (dropMode == Terrain) visitor.setTraversalMask(SceneUtil::Mask_Terrain);
-    if (dropMode == Collision) visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
+    if (dropMode == Terrain)
+        visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    if (dropMode == Collision)
+        visitor.setTraversalMask(SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference);
 
     mParentNode->accept(visitor);
 
@@ -772,18 +776,19 @@ void CSVRender::InstanceMode::dropSelectedInstancesToTerrain()
 
 void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately()
 {
-    handleDropMethod(Terrain_sep, "Drop instances to next collision level separately");
+    handleDropMethod(TerrainSep, "Drop instances to next collision level separately");
 }
 
 void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately()
 {
-    handleDropMethod(Collision_sep, "Drop instances to terrain level separately");
+    handleDropMethod(CollisionSep, "Drop instances to terrain level separately");
 }
 
 void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString commandMsg)
 {
     std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_EditorReference);
-    if (selection.empty()) return;
+    if (selection.empty())
+        return;
 
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     QUndoStack& undoStack = document.getUndoStack();
@@ -803,7 +808,8 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
                     if (CSVRender::ObjectTag *objectTag = dynamic_cast<CSVRender::ObjectTag *> (tag.get()))
                     {
                         float thisDrop = getDropHeight(dropMode, objectTag->mObject, dropObjectDataHandler.mObjectHeights[counter]);
-                        if (thisDrop < smallestDropHeight) smallestDropHeight = thisDrop;
+                        if (thisDrop < smallestDropHeight)
+                            smallestDropHeight = thisDrop;
                         counter++;
                     }
                 for(osg::ref_ptr<TagBase> tag: selection)
@@ -818,8 +824,8 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
         }
             break;
 
-        case Terrain_sep:
-        case Collision_sep:
+        case TerrainSep:
+        case CollisionSep:
         {
             int counter = 0;
             for(osg::ref_ptr<TagBase> tag: selection)
@@ -830,9 +836,6 @@ void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString comman
                     counter++;
                 }
         }
-            break;
-
-        default:
             break;
     }
 }
@@ -853,7 +856,8 @@ CSVRender::DropObjectDataHandler::DropObjectDataHandler(WorldspaceWidget* worlds
             objectNodeWithoutGUI->accept(computeBounds);
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
             float boundingBoxOffset = 0.0f;
-            if (bounds.valid()) boundingBoxOffset = bounds.zMin();
+            if (bounds.valid())
+                boundingBoxOffset = bounds.zMin();
 
             mObjectHeights.emplace_back(boundingBoxOffset);
             mOldMasks.emplace_back(objectNodeWithGUI->getNodeMask());
