@@ -252,6 +252,7 @@
     Feature #5091: Human-readable light source duration
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
+    Feature #5114: Refresh launcher mod list
     Feature #5121: Handle NiTriStrips and NiTriStripsData
     Feature #5122: Use magic glow for enchanted arrows
     Feature #5131: Custom skeleton bones
