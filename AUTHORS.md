@@ -88,6 +88,7 @@ Programmers
     Jacob Essex (Yacoby)
     Jake Westrip (16bitint)
     James Carty (MrTopCat)
+    James Moore (moore.work)
     James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)
     Jan Borsodi (am0s)

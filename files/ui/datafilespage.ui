@@ -159,6 +159,22 @@
     <string>Uncheck Selection</string>
    </property>
   </action>
+  <action name="refreshDataFilesAction">
+   <property name="icon">
+    <iconset theme="view-refresh">
+     <normaloff/>
+    </iconset>
+   </property>
+   <property name="text">
+    <string>Refresh Data Files</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh Data Files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

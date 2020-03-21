@@ -44,6 +44,9 @@ namespace ContentSelectorView
 
         QWidget *uiWidget() const
             { return ui.contentGroupBox; }
+            
+        QToolButton *refreshButton() const  
+            { return ui.refreshButton; }        
 
 
    private:
