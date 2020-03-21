@@ -587,7 +587,7 @@ void NpcAnimation::updateParts()
         int mBasePriority;
     } slotlist[] = {
         // FIXME: Priority is based on the number of reserved slots. There should be a better way.
-        { MWWorld::InventoryStore::Slot_Robe,         12 },
+        { MWWorld::InventoryStore::Slot_Robe,         11 },
         { MWWorld::InventoryStore::Slot_Skirt,         3 },
         { MWWorld::InventoryStore::Slot_Helmet,        0 },
         { MWWorld::InventoryStore::Slot_Cuirass,       0 },
@@ -641,7 +641,7 @@ void NpcAnimation::updateParts()
             ESM::PartReferenceType parts[] = {
                 ESM::PRT_Groin, ESM::PRT_Skirt, ESM::PRT_RLeg, ESM::PRT_LLeg,
                 ESM::PRT_RUpperarm, ESM::PRT_LUpperarm, ESM::PRT_RKnee, ESM::PRT_LKnee,
-                ESM::PRT_RForearm, ESM::PRT_LForearm
+                ESM::PRT_RForearm, ESM::PRT_LForearm, ESM::PRT_Cuirass
             };
             size_t parts_size = sizeof(parts)/sizeof(parts[0]);
             for(size_t p = 0;p < parts_size;++p)
