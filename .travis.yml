@@ -17,7 +17,7 @@ addons:
       - ubuntu-toolchain-r-test
     packages: [
       # Dev
-      cmake, clang-6, clang-tools-6, gcc-9, g++-9, ccache,
+      cmake, clang-tools, gcc-9, g++-9, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -41,7 +41,7 @@ matrix:
       os: osx
       osx_image: xcode10.2
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-5
+    - name: OpenMW (all) on Ubuntu Xenial GCC-7
       os: linux
       dist: bionic
       sudo: required
