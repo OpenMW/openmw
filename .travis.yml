@@ -58,8 +58,8 @@ matrix:
       dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-6 && CXX=clang++-6"
-        - ANALYZE="scan-build-6 --force-analyze-debug-code --use-cc clang-6 --use-c++ clang++-6"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+        - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
@@ -68,8 +68,8 @@ matrix:
       dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-6 && CXX=clang++-6"
-        - ANALYZE="scan-build-6 --force-analyze-debug-code --use-cc clang-6 --use-c++ clang++-6"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+        - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
         - BUILD_OPENMW="OFF"
       if: branch != coverity_scan
       compiler: clang
