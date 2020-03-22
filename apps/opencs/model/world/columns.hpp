@@ -273,7 +273,7 @@ namespace CSMWorld
             ColumnId_UChar = 250,
             ColumnId_NpcMisc = 251,
             ColumnId_Level = 252,
-            ColumnId_GenderNpc = 254,
+            // unused
             ColumnId_Mana = 255,
             ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,

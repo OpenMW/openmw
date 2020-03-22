@@ -1770,7 +1770,7 @@ namespace CSMWorld
     struct GenderNpcColumn : public Column<ESXRecordT>
     {
         GenderNpcColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc)
+            : Column<ESXRecordT>(Columns::ColumnId_Gender, ColumnBase::Display_GenderNpc)
         {}
 
         virtual QVariant get(const Record<ESXRecordT>& record) const
