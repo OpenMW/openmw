@@ -15,10 +15,9 @@ addons:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-bionic-10
     packages: [
       # Dev
-      cmake, clang-10, clang-tools-10, gcc-9, g++-9, ccache,
+      cmake, clang-6, clang-tools-6, gcc-9, g++-9, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -54,23 +53,23 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Xenial Clang-10 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Xenial Clang-6 with Static Analysis
       os: linux
       dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
-        - ANALYZE="scan-build-10 --force-analyze-debug-code --use-cc clang-10 --use-c++ clang++-10"
+        - MATRIX_EVAL="CC=clang-6 && CXX=clang++-6"
+        - ANALYZE="scan-build-6 --force-analyze-debug-code --use-cc clang-6 --use-c++ clang++-6"
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-10 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-6 with Static Analysis
       os: linux
       dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
-        - ANALYZE="scan-build-10 --force-analyze-debug-code --use-cc clang-10 --use-c++ clang++-10"
+        - MATRIX_EVAL="CC=clang-6 && CXX=clang++-6"
+        - ANALYZE="scan-build-6 --force-analyze-debug-code --use-cc clang-6 --use-c++ clang++-6"
         - BUILD_OPENMW="OFF"
       if: branch != coverity_scan
       compiler: clang
@@ -80,7 +79,7 @@ matrix:
       sudo: required
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-10 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-6 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
