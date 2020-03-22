@@ -15,10 +15,10 @@ addons:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-xenial-7
+      - llvm-toolchain-bionic-10
     packages: [
       # Dev
-      cmake, clang-7, clang-tools-7, gcc-8, g++-8, ccache,
+      cmake, clang-10, clang-tools-10, gcc-9, g++-9, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -44,43 +44,43 @@ matrix:
       if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Xenial GCC-5
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-8
+    - name: OpenMW (all) on Ubuntu Xenial GCC-9
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Xenial Clang-10 with Static Analysis
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+        - ANALYZE="scan-build-10 --force-analyze-debug-code --use-cc clang-10 --use-c++ clang++-10"
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-7 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-10 with Static Analysis
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+        - ANALYZE="scan-build-10 --force-analyze-debug-code --use-cc clang-10 --use-c++ clang++-10"
         - BUILD_OPENMW="OFF"
       if: branch != coverity_scan
       compiler: clang
     - name: OpenMW Components Coverity Scan
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-10 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
