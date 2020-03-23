@@ -14,54 +14,51 @@
 namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
-struct Arguments
-{
-    std::string mode;
-    std::string filename;
-    std::string extractfile;
-    std::string outdir;
+struct Arguments {
+  std::string mode;
+  std::string filename;
+  std::string extractfile;
+  std::string outdir;
 
-    bool longformat{};
-    bool fullpath{};
+  bool longformat{};
+  bool fullpath{};
 };
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
 {
     size_t pos = str.find(needle);
-    while(pos != std::string::npos)
+    while (pos != std::string::npos)
     {
         str.replace(pos, needle.size(), substitute);
         pos = str.find(needle);
     }
 }
 
-bool parseOptions (int argc, char** argv, Arguments &info)
+bool parseOptions(int argc, char** argv, Arguments& info)
 {
     bpo::options_description desc("Inspect and extract files from Bethesda BSA archives\n\n"
-            "Usages:\n"
-            "  bsatool list [-l] archivefile\n"
-            "      List the files presents in the input archive.\n\n"
-            "  bsatool extract [-f] archivefile [file_to_extract] [output_directory]\n"
-            "      Extract a file from the input archive.\n\n"
-            "  bsatool extractall archivefile [output_directory]\n"
-            "      Extract all files from the input archive.\n\n"
-            "Allowed options");
+                                  "Usages:\n"
+                                  "  bsatool list [-l] archivefile\n"
+                                  "      List the files presents in the input archive.\n\n"
+                                  "  bsatool extract [-f] archivefile [file_to_extract] [output_directory]\n"
+                                  "      Extract a file from the input archive.\n\n"
+                                  "  bsatool extractall archivefile [output_directory]\n"
+                                  "      Extract all files from the input archive.\n\n"
+                                  "Allowed options");
 
     desc.add_options()
-        ("help,h", "print help message.")
-        ("version,v", "print version information and quit.")
-        ("long,l", "Include extra information in archive listing.")
-        ("full-path,f", "Create directory hierarchy on file extraction "
-         "(always true for extractall).")
-        ;
+            ("help,h", "print help message.")
+            ("version,v", "print version information and quit.")
+            ("long,l", "Include extra information in archive listing.")
+            ("full-path,f", "Create directory hierarchy on file extraction "
+                            "(always true for extractall).");
 
     // input-file is hidden and used as a positional argument
     bpo::options_description hidden("Hidden Options");
 
     hidden.add_options()
-        ( "mode,m", bpo::value<std::string>(), "bsatool mode")
-        ( "input-file,i", bpo::value< std::vector<std::string> >(), "input file")
-        ;
+            ("mode,m", bpo::value<std::string>(), "bsatool mode")
+            ("input-file,i", bpo::value<std::vector<std::string>>(), "input file");
 
     bpo::positional_options_description p;
     p.add("mode", 1).add("input-file", 3);
@@ -74,24 +71,24 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     try
     {
         bpo::parsed_options valid_opts = bpo::command_line_parser(argc, argv)
-            .options(all).positional(p).run();
+                .options(all).positional(p).run();
         bpo::store(valid_opts, variables);
     }
-    catch(std::exception &e)
+    catch (std::exception& e)
     {
         std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
-            << desc << std::endl;
+                  << desc << std::endl;
         return false;
     }
 
     bpo::notify(variables);
 
-    if (variables.count ("help"))
+    if (variables.count("help"))
     {
         std::cout << desc << std::endl;
         return false;
     }
-    if (variables.count ("version"))
+    if (variables.count("version"))
     {
         std::cout << "BSATool version " << BSATOOL_VERSION << std::endl;
         return false;
@@ -99,7 +96,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     if (!variables.count("mode"))
     {
         std::cout << "ERROR: no mode specified!\n\n"
-            << desc << std::endl;
+                  << desc << std::endl;
         return false;
     }
 
@@ -107,36 +104,36 @@ bool parseOptions (int argc, char** argv, Arguments &info)
     if (!(info.mode == "list" || info.mode == "extract" || info.mode == "extractall"))
     {
         std::cout << std::endl << "ERROR: invalid mode \"" << info.mode << "\"\n\n"
-            << desc << std::endl;
+                  << desc << std::endl;
         return false;
     }
 
     if (!variables.count("input-file"))
     {
         std::cout << "\nERROR: missing BSA archive\n\n"
-            << desc << std::endl;
+                  << desc << std::endl;
         return false;
     }
-    info.filename = variables["input-file"].as< std::vector<std::string> >()[0];
+    info.filename = variables["input-file"].as<std::vector<std::string>>()[0];
 
     // Default output to the working directory
     info.outdir = ".";
 
     if (info.mode == "extract")
     {
-        if (variables["input-file"].as< std::vector<std::string> >().size() < 2)
+        if (variables["input-file"].as<std::vector<std::string>>().size() < 2)
         {
             std::cout << "\nERROR: file to extract unspecified\n\n"
-                << desc << std::endl;
+                      << desc << std::endl;
             return false;
         }
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-            info.extractfile = variables["input-file"].as< std::vector<std::string> >()[1];
-        if (variables["input-file"].as< std::vector<std::string> >().size() > 2)
-            info.outdir = variables["input-file"].as< std::vector<std::string> >()[2];
+        if (variables["input-file"].as<std::vector<std::string>>().size() > 1)
+            info.extractfile = variables["input-file"].as<std::vector<std::string>>()[1];
+        if (variables["input-file"].as<std::vector<std::string>>().size() > 2)
+            info.outdir = variables["input-file"].as<std::vector<std::string>>()[2];
     }
-    else if (variables["input-file"].as< std::vector<std::string> >().size() > 1)
-        info.outdir = variables["input-file"].as< std::vector<std::string> >()[1];
+    else if (variables["input-file"].as<std::vector<std::string>>().size() > 1)
+        info.outdir = variables["input-file"].as<std::vector<std::string>>()[1];
 
     info.longformat = variables.count("long") != 0;
     info.fullpath = variables.count("full-path") != 0;
@@ -153,7 +150,7 @@ int main(int argc, char** argv)
     try
     {
         Arguments info;
-        if(!parseOptions (argc, argv, info))
+        if (!parseOptions(argc, argv, info))
             return 1;
 
         // Open file
@@ -182,10 +179,10 @@ int main(int argc, char** argv)
 int list(Bsa::BSAFile& bsa, Arguments& info)
 {
     // List all files
-    const Bsa::BSAFile::FileList &files = bsa.getList();
-    for(auto file : files)
+    const Bsa::BSAFile::FileList& files = bsa.getList();
+    for (auto file : files)
     {
-        if(info.longformat)
+        if (info.longformat)
         {
             // Long format
             std::ios::fmtflags f(std::cout.flags());
@@ -217,8 +214,8 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     }
 
     // Get the target path (the path the file will be extracted to)
-    bfs::path relPath (extractPath);
-    bfs::path outdir (info.outdir);
+    bfs::path relPath(extractPath);
+    bfs::path outdir(info.outdir);
 
     bfs::path target;
     if (info.fullpath)
@@ -256,14 +253,15 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
     Bsa::BSAFile::FileList list = bsa.getList();
 
     // Iter on the list
-    for(auto & it : list) {
+    for (auto& it : list)
+    {
         const char* archivePath = it.name;
 
-        std::string extractPath (archivePath);
+        std::string extractPath(archivePath);
         replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
-        bfs::path target (info.outdir);
+        bfs::path target(info.outdir);
         target /= extractPath;
 
         // Create the directory hierarchy

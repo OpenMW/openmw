@@ -17,24 +17,24 @@ int main(int argc, char** argv)
         bpo::options_description desc("Syntax: openmw-essimporter <options> infile.ess outfile.omwsave\nAllowed options");
         bpo::positional_options_description p_desc;
         desc.add_options()
-            ("help,h", "produce help message")
-            ("mwsave,m", bpo::value<std::string>(), "morrowind .ess save file")
-            ("output,o", bpo::value<std::string>(), "output file (.omwsave)")
-            ("compare,c", "compare two .ess files")
-            ("encoding", boost::program_options::value<std::string>()->default_value("win1252"), "encoding of the save file")
-        ;
+                ("help,h", "produce help message")
+                ("mwsave,m", bpo::value<std::string>(), "morrowind .ess save file")
+                ("output,o", bpo::value<std::string>(), "output file (.omwsave)")
+                ("compare,c", "compare two .ess files")
+                ("encoding", boost::program_options::value<std::string>()->default_value("win1252"), "encoding of the save file");
         p_desc.add("mwsave", 1).add("output", 1);
 
         bpo::variables_map variables;
 
         bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
-            .options(desc)
-            .positional(p_desc)
-            .run();
+                .options(desc)
+                .positional(p_desc)
+                .run();
 
         bpo::store(parsed, variables);
 
-        if(variables.count("help") || !variables.count("mwsave") || !variables.count("output")) {
+        if (variables.count("help") || !variables.count("mwsave") || !variables.count("output"))
+        {
             std::cout << desc;
             return 0;
         }
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
         {
             const std::string& ext = ".omwsave";
             if (boost::filesystem::exists(boost::filesystem::path(outputFile))
-                    && (outputFile.size() < ext.size() || outputFile.substr(outputFile.size()-ext.size()) != ext))
+                    && (outputFile.size() < ext.size() || outputFile.substr(outputFile.size() - ext.size()) != ext))
             {
                 throw std::runtime_error("Output file already exists and does not end in .omwsave. Did you mean to use --compare?");
             }

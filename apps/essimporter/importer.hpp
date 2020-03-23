@@ -3,23 +3,21 @@
 
 #include <string>
 
-namespace ESSImport
-{
+namespace ESSImport {
 
-    class Importer
-    {
-    public:
-        Importer(std::string  essfile, std::string  outfile, std::string  encoding);
+class Importer {
+public:
+    Importer(std::string essfile, std::string outfile, std::string encoding);
 
-        void run();
+    void run();
 
-        void compare();
+    void compare();
 
-    private:
-        std::string mEssFile;
-        std::string mOutFile;
-        std::string mEncoding;
-    };
+private:
+    std::string mEssFile;
+    std::string mOutFile;
+    std::string mEncoding;
+};
 
 }
 
