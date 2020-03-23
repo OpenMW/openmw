@@ -41,19 +41,19 @@ matrix:
       os: osx
       osx_image: xcode10.2
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-7
+    - name: OpenMW (all) on Ubuntu Bionic GCC-7
       os: linux
       dist: bionic
       sudo: required
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-9
+    - name: OpenMW (all) on Ubuntu Bionic GCC-9
       os: linux
       dist: bionic
       sudo: required
       env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Xenial Clang-6 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
       os: linux
       dist: bionic
       sudo: required
@@ -63,7 +63,7 @@ matrix:
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-6 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Bionic Clang-6 with Static Analysis
       os: linux
       dist: bionic
       sudo: required
@@ -79,7 +79,7 @@ matrix:
       sudo: required
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-6 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
