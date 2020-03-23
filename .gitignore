@@ -92,3 +92,10 @@ extern/recastnavigation/README.md
 extern/recastnavigation/RecastDemo/
 extern/recastnavigation/Tests/
 extern/recastnavigation/appveyor.yml
+
+## ignore conan related files
+conan.lock
+conan_imports_manifest.txt
+conanbuild*
+conaninfo.txt
+graph_info.json

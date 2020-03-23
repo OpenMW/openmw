@@ -1,0 +1,20 @@
+[requires]
+    # zlib override - older packages depend on the same version, but with user and channel suffix
+    zlib/1.2.11
+    gtest/1.10.0
+    boost/1.72.0
+
+[options]
+    gtest:shared=False
+    gtest:build_gmock=True
+    boost:shared=True
+
+[generators]
+    cmake
+    visual_studio
+
+[imports]
+    bin, *.dll -> ./bin
+    lib, *.dylib -> ./lib
+    lib, *.so* -> ./lib
+    lib, *.a -> ./lib

@@ -217,10 +217,10 @@ include_directories(${Bullet_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_IOSTREAMS_LIBRARY}
+        Boost::system
+        Boost::filesystem
+        Boost::program_options
+        Boost::iostreams
     ${OSG_LIBRARIES}
     ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}

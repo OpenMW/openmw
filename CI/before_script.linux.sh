@@ -2,6 +2,8 @@
 
 free -m
 
+pip3 install conan
+
 env GENERATOR='Unix Makefiles' CONFIGURATION=Release CI/build_googletest.sh
 GOOGLETEST_DIR="$(pwd)/googletest/build"
 

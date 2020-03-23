@@ -1,3 +1,9 @@
+# set the minimum required version across the board
+cmake_minimum_required(VERSION 3.1.0)
+project(OpenMW)
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
+include(ModernCMake)
+
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
 option(BUILD_LAUNCHER           "Build Launcher" ON)
@@ -24,11 +30,6 @@ if (USE_QT)
     set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
 endif()
 
-# set the minimum required version across the board
-cmake_minimum_required(VERSION 3.1.0)
-
-project(OpenMW)
-
 # If the user doesn't supply a CMAKE_BUILD_TYPE via command line, choose one for them.
 IF(NOT CMAKE_BUILD_TYPE)
     SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING
@@ -42,8 +43,6 @@ if (APPLE)
 
     set(APP_BUNDLE_DIR "${OpenMW_BINARY_DIR}/${APP_BUNDLE_NAME}")
 endif (APPLE)
-
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/)
 
 if (ANDROID)
     set(CMAKE_FIND_ROOT_PATH ${OPENMW_DEPENDENCIES_DIR} "${CMAKE_FIND_ROOT_PATH}")
@@ -146,6 +145,22 @@ endif(APPLE)
 if (WIN32)
     option(USE_DEBUG_CONSOLE "whether a debug console should be enabled for debug builds, if false debug output is redirected to Visual Studio output" ON)
 endif()
+
+# Conan Deps
+compile_conan_dependencies(conanfile.txt)
+
+expose_package_conan(boost Boost
+        Boost::boost
+        Boost::program_options
+        Boost::system
+        Boost::filesystem
+        Boost::iostreams
+
+        )
+expose_package_conan(gtest)
+expose_package_conan(zlib)
+
+include(CTest)
 
 # Dependencies
 find_package(OpenGL REQUIRED)
@@ -300,7 +315,7 @@ if(QT_STATIC)
 endif()
 
 
-set(BOOST_COMPONENTS system filesystem program_options iostreams)
+#set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale zlib)
 endif(WIN32)
@@ -316,7 +331,7 @@ endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+#find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -325,13 +340,13 @@ find_package(Bullet ${REQUIRED_BULLET_VERSION} REQUIRED COMPONENTS BulletCollisi
 include_directories("."
     SYSTEM
     ${SDL2_INCLUDE_DIR}
-    ${Boost_INCLUDE_DIR}
+    ${CONAN_INCLUDE_DIRS_BOOST}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
     ${Bullet_INCLUDE_DIRS}
 )
 
-link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
+link_directories(${SDL2_LIBRARY_DIRS} ${CONAN_LIB_DIRS_BOOST})
 
 if(MYGUI_STATIC)
    add_definitions(-DMYGUI_STATIC)
