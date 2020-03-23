@@ -4,8 +4,6 @@
 
 #include <components/esm/esmreader.hpp>
 
-#include <components/esm/loadcont.hpp>
-
 namespace ESSImport
 {
 
@@ -13,7 +11,7 @@ namespace ESSImport
     {
         while (esm.isNextSub("NPCO"))
         {
-            ContItem contItem;
+            ContItem contItem{};
             esm.getHT(contItem);
 
             InventoryItem item;

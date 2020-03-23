@@ -20,13 +20,13 @@ class MwIniImporter {
     void    setInputEncoding(const ToUTF8::FromType& encoding);
     void    setVerbose(bool verbose);
     multistrmap  loadIniFile(const boost::filesystem::path& filename) const;
-    static multistrmap  loadCfgFile(const boost::filesystem::path& filename);
-    void    merge(multistrmap &cfg, const multistrmap &ini) const;
-    void    mergeFallback(multistrmap &cfg, const multistrmap &ini) const;
-    void    importGameFiles(multistrmap &cfg, const multistrmap &ini,
-        const boost::filesystem::path& iniFilename) const;
-    void    importArchives(multistrmap &cfg, const multistrmap &ini) const;
-    static void    writeToFile(std::ostream &out, const multistrmap &cfg);
+    multistrmap  loadCfgFile(const boost::filesystem::path& filename) const;
+    void merge(multistrmap &cfg, const multistrmap &ini) const;
+    void mergeFallback(multistrmap &cfg, const multistrmap &ini) const;
+    void importGameFiles(multistrmap &cfg, const multistrmap &ini,
+            const boost::filesystem::path& iniFilename) const;
+    void importArchives(multistrmap &cfg, const multistrmap &ini) const;
+    void writeToFile(std::ostream &out, const multistrmap &cfg) const;
 
     static std::vector<std::string> dependencySort(MwIniImporter::dependencyList source);
 

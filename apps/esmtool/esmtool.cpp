@@ -24,7 +24,7 @@ struct ESMData
 {
     std::string author;
     std::string description;
-    unsigned int version;
+    unsigned int version{};
     std::vector<ESM::Header::MasterData> masters;
 
     std::deque<EsmTool::RecordBase *> mRecords;
@@ -45,16 +45,15 @@ static const int sLabeledRecIds[] = {
     ESM::REC_LEVC, ESM::REC_SNDG, ESM::REC_CELL, ESM::REC_DIAL
 };
 
-const std::set<int> ESMData::sLabeledRec =
-    std::set<int>(sLabeledRecIds, sLabeledRecIds + 34);
+const std::set<int> ESMData::sLabeledRec = std::set<int>(sLabeledRecIds, sLabeledRecIds + 34);
 
 // Based on the legacy struct
 struct Arguments
 {
-    bool raw_given;
-    bool quiet_given;
-    bool loadcells_given;
-    bool plain_given;
+    bool raw_given{};
+    bool quiet_given{};
+    bool loadcells_given{};
+    bool plain_given{};
 
     std::string mode;
     std::string encoding;
@@ -229,8 +228,6 @@ int main(int argc, char**argv)
         std::cerr << "ERROR: " << e.what() << std::endl;
         return 1;
     }
-
-    return 0;
 }
 
 void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
@@ -249,7 +246,7 @@ void loadCell(ESM::Cell &cell, ESM::ESMReader &esm, Arguments& info)
     if(!quiet) std::cout << "  References:\n";
 
     bool deleted = false;
-    while(cell.getNextRef(esm, ref, deleted))
+    while(ESM::Cell::getNextRef(esm, ref, deleted))
     {
         if (save) {
             info.data.mCellRefs[&cell].push_back(std::make_pair(ref, deleted));
@@ -337,8 +334,8 @@ int load(Arguments& info)
             if (!m.empty())
             {
                 std::cout << "Masters:" << std::endl;
-                for(unsigned int i=0;i<m.size();i++)
-                    std::cout << "  " << m[i].name << ", " << m[i].size << " bytes" << std::endl;
+                for(auto & i : m)
+                    std::cout << "  " << i.name << ", " << i.size << " bytes" << std::endl;
             }
         }
 
@@ -350,7 +347,7 @@ int load(Arguments& info)
             esm.getRecHeader(flags);
 
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
-            if (record == 0)
+            if (record == nullptr)
             {
                 if (std::find(skipped.begin(), skipped.end(), n.intval) == skipped.end())
                 {
@@ -493,7 +490,7 @@ int clone(Arguments& info)
         esm.endRecord(typeName.toString());
 
         saved++;
-        int perc = recordCount == 0 ? 100 : (int)((saved / (float)recordCount)*100);
+        int perc = recordCount == 0 ? 100 : (int)(((float)saved / (float)recordCount)*100);
         if (perc % 10 == 0)
         {
             std::cerr << "\r" << perc << "%";
@@ -519,8 +516,8 @@ int comp(Arguments& info)
     Arguments fileOne;
     Arguments fileTwo;
 
-    fileOne.raw_given = 0;
-    fileTwo.raw_given = 0;
+    fileOne.raw_given = false;
+    fileTwo.raw_given = false;
 
     fileOne.mode = "clone";
     fileTwo.mode = "clone";

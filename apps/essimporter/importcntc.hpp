@@ -9,17 +9,12 @@ namespace ESM
 }
 
 namespace ESSImport
-{
-
-    /// Changed container contents
+{    /// Changed container contents
     struct CNTC
     {
-        int mIndex;
-
+        int mIndex{};
         Inventory mInventory;
-
         void load(ESM::ESMReader& esm);
     };
-
 }
 #endif

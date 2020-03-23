@@ -14,7 +14,6 @@ namespace ESSImport
         float scale;
         esm.getHNOT(scale, "XSCL");
 
-
         while (esm.isNextSub("AI_W") || esm.isNextSub("AI_E") || esm.isNextSub("AI_T") || esm.isNextSub("AI_F")
                || esm.isNextSub("AI_A"))
             mAiPackages.add(esm);

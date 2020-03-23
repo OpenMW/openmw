@@ -86,7 +86,7 @@ namespace ESSImport
         bool mHasANIS;
         ANIS mANIS; // scripted animation state
 
-        void load(ESM::ESMReader& esm);
+        virtual void load(ESM::ESMReader& esm);
     };
 
 }

@@ -4,7 +4,6 @@
 
 namespace ESSImport
 {
-
     void SCRI::load(ESM::ESMReader &esm)
     {
         mScript = esm.getHNOString("SCRI");
@@ -51,5 +50,4 @@ namespace ESSImport
             }
         }
     }
-
 }

@@ -52,9 +52,7 @@ namespace
                           // a dynamically created record e.g. player-enchanted weapon
 
         std::string index = indexedRefId.substr(indexedRefId.size()-8);
-        if(index.find_first_not_of("0123456789ABCDEF") == std::string::npos )
-            return true;
-        return false;
+        return index.find_first_not_of("0123456789ABCDEF") == std::string::npos;
     }
 
     void splitIndexedRefId(const std::string& indexedRefId, int& refIndex, std::string& refId)
@@ -100,7 +98,7 @@ namespace ESSImport
 
     void ConvertFMAP::read(ESM::ESMReader &esm)
     {
-        MAPH maph;
+        MAPH maph{};
         esm.getHNT(maph, "MAPH");
         std::vector<char> data;
         esm.getSubNameIs("MAPD");
@@ -139,12 +137,12 @@ namespace ESSImport
         image2->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE);
         memcpy(image2->data(), &data[0], data.size());
 
-        for (std::set<std::pair<int, int> >::const_iterator it = mContext->mExploredCells.begin(); it != mContext->mExploredCells.end(); ++it)
+        for (const auto & mExploredCell : mContext->mExploredCells)
         {
-            if (it->first > mContext->mGlobalMapState.mBounds.mMaxX
-                    || it->first < mContext->mGlobalMapState.mBounds.mMinX
-                    || it->second > mContext->mGlobalMapState.mBounds.mMaxY
-                    || it->second < mContext->mGlobalMapState.mBounds.mMinY)
+            if (mExploredCell.first > mContext->mGlobalMapState.mBounds.mMaxX
+                    || mExploredCell.first < mContext->mGlobalMapState.mBounds.mMinX
+                    || mExploredCell.second > mContext->mGlobalMapState.mBounds.mMaxY
+                    || mExploredCell.second < mContext->mGlobalMapState.mBounds.mMinY)
             {
                 // out of bounds, I think this could happen, since the original engine had a fixed-size map
                 continue;
@@ -152,12 +150,12 @@ namespace ESSImport
 
             int imageLeftSrc = mGlobalMapImage->s()/2;
             int imageTopSrc = mGlobalMapImage->t()/2;
-            imageLeftSrc += it->first * cellSize;
-            imageTopSrc -= it->second * cellSize;
+            imageLeftSrc += mExploredCell.first * cellSize;
+            imageTopSrc -= mExploredCell.second * cellSize;
             int imageLeftDst = width/2;
             int imageTopDst = height/2;
-            imageLeftDst += it->first * cellSize;
-            imageTopDst -= it->second * cellSize;
+            imageLeftDst += mExploredCell.first * cellSize;
+            imageTopDst -= mExploredCell.second * cellSize;
             for (int x=0; x<cellSize; ++x)
                 for (int y=0; y<cellSize; ++y)
                 {
@@ -329,9 +327,8 @@ namespace ESSImport
         csta.mWaterLevel = esmcell.mWater;
         csta.save(esm);
 
-        for (std::vector<CellRef>::const_iterator refIt = cell.mRefs.begin(); refIt != cell.mRefs.end(); ++refIt)
+        for (const auto & cellref : cell.mRefs)
         {
-            const CellRef& cellref = *refIt;
             ESM::CellRef out (cellref);
 
             // TODO: use mContext->mCreatures/mNpcs
@@ -443,10 +440,10 @@ namespace ESSImport
         for (std::map<std::pair<int, int>, Cell>::const_iterator it = mExtCells.begin(); it != mExtCells.end(); ++it)
             writeCell(it->second, esm);
 
-        for (std::vector<ESM::CustomMarker>::const_iterator it = mMarkers.begin(); it != mMarkers.end(); ++it)
+        for (const auto & mMarker : mMarkers)
         {
             esm.startRecord(ESM::REC_MARK);
-            it->save(esm);
+            mMarker.save(esm);
             esm.endRecord(ESM::REC_MARK);
         }
     }

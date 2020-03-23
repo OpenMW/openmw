@@ -22,13 +22,13 @@ namespace ESSImport
     // A running global script
     struct SCPT
     {
-        SCHD mSCHD;
+        SCHD mSCHD{};
 
         // values of local variables
         SCRI mSCRI;
 
-        bool mRunning;
-        int mRefNum; // Targeted reference, -1: no reference
+        bool mRunning{};
+        int mRefNum{}; // Targeted reference, -1: no reference
 
         void load(ESM::ESMReader& esm);
     };

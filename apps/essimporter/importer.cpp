@@ -2,7 +2,6 @@
 
 #include <iomanip>
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <osgDB/ReadFile>
@@ -16,19 +15,17 @@
 #include <components/esm/player.hpp>
 
 #include <components/esm/loadalch.hpp>
-#include <components/esm/loadclas.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadclot.hpp>
 #include <components/esm/loadench.hpp>
-#include <components/esm/loadweap.hpp>
 #include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadglob.hpp>
 
 #include <components/misc/constants.hpp>
 
 #include <components/to_utf8/to_utf8.hpp>
+#include <utility>
 
 #include "importercontext.hpp"
 
@@ -49,7 +46,7 @@ namespace
         image->allocateImage(128, 128, 1, GL_RGB, GL_UNSIGNED_BYTE);
 
         // need to convert pixel format from BGRA to RGB as the jpg readerwriter doesn't support it otherwise
-        std::vector<unsigned char>::const_iterator it = fileHeader.mSCRS.begin();
+        auto it = fileHeader.mSCRS.begin();
         for (int y=0; y<128; ++y)
         {
             for (int x=0; x<128; ++x)
@@ -89,12 +86,11 @@ namespace
 namespace ESSImport
 {
 
-    Importer::Importer(const std::string &essfile, const std::string &outfile, const std::string &encoding)
-        : mEssFile(essfile)
-        , mOutFile(outfile)
-        , mEncoding(encoding)
+    Importer::Importer(std::string essfile, std::string outfile, std::string encoding)
+        : mEssFile(std::move(essfile))
+        , mOutFile(std::move(outfile))
+        , mEncoding(std::move(encoding))
     {
-
     }
 
     struct File
@@ -102,14 +98,14 @@ namespace ESSImport
         struct Subrecord
         {
             std::string mName;
-            size_t mFileOffset;
+            size_t mFileOffset{};
             std::vector<unsigned char> mData;
         };
 
         struct Record
         {
             std::string mName;
-            size_t mFileOffset;
+            size_t mFileOffset{};
             std::vector<Subrecord> mSubrecords;
         };
 
@@ -328,7 +324,7 @@ namespace ESSImport
             ESM::NAME n = esm.getRecName();
             esm.getRecHeader();
 
-            std::map<unsigned int, std::shared_ptr<Converter> >::iterator it = converters.find(n.intval);
+            auto it = converters.find(n.intval);
             if (it != converters.end())
             {
                 it->second->read(esm);
@@ -358,17 +354,15 @@ namespace ESSImport
         writer.setDescription("");
         writer.setRecordCount (0);
 
-        for (std::vector<ESM::Header::MasterData>::const_iterator it = header.mMaster.begin();
-             it != header.mMaster.end(); ++it)
-            writer.addMaster (it->name, 0); // not using the size information anyway -> use value of 0
+        for (const auto & it : header.mMaster)
+            writer.addMaster (it.name, 0); // not using the size information anyway -> use value of 0
 
         writer.save (stream);
 
         ESM::SavedGame profile;
-        for (std::vector<ESM::Header::MasterData>::const_iterator it = header.mMaster.begin();
-             it != header.mMaster.end(); ++it)
+        for (const auto & it : header.mMaster)
         {
-            profile.mContentFiles.push_back(it->name);
+            profile.mContentFiles.push_back(it.name);
         }
         profile.mDescription = esm.getDesc();
         profile.mInGameTime.mDay = context.mDay;

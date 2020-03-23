@@ -9,7 +9,7 @@ namespace ESSImport
     class Importer
     {
     public:
-        Importer(const std::string& essfile, const std::string& outfile, const std::string& encoding);
+        Importer(std::string  essfile, std::string  outfile, std::string  encoding);
 
         void run();
 

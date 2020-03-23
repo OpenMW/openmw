@@ -16,7 +16,7 @@ void SPLM::load(ESM::ESMReader& esm)
 
         while (esm.isNextSub("NPDT"))
         {
-            ActiveEffect effect;
+            ActiveEffect effect{};
             esm.getHT(effect.mNPDT);
 
             // Effect-specific subrecords can follow:

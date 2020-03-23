@@ -73,7 +73,7 @@ namespace ESSImport
 
         while (esm.isNextSub("FNAM"))
         {
-            FNAM fnam;
+            FNAM fnam{};
             esm.getHT(fnam);
             mFactions.push_back(fnam);
         }

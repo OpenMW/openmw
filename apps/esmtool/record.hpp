@@ -20,7 +20,7 @@ namespace EsmTool
     protected:
         std::string mId;
         uint32_t mFlags;
-        ESM::NAME mType;
+        ESM::NAME mType{};
         bool mPrintPlain;
 
     public:
@@ -30,7 +30,7 @@ namespace EsmTool
         {
         }
 
-        virtual ~RecordBase() {}
+        virtual ~RecordBase() = default;
 
         virtual std::string getId() const = 0;
 
@@ -74,7 +74,7 @@ namespace EsmTool
             : mIsDeleted(false)
         {}
 
-        std::string getId() const {
+        std::string getId() const override {
             return mData.mId;
         }
 
@@ -82,15 +82,15 @@ namespace EsmTool
             return mData;
         }
 
-        void save(ESM::ESMWriter &esm) {
+        void save(ESM::ESMWriter &esm) override {
             mData.save(esm, mIsDeleted);
         }
 
-        void load(ESM::ESMReader &esm) {
+        void load(ESM::ESMReader &esm) override {
             mData.load(esm, mIsDeleted);
         }
 
-        void print();
+        void print() override;
     };
     
     template<> std::string Record<ESM::Cell>::getId() const;

@@ -21,8 +21,8 @@ struct Arguments
     std::string extractfile;
     std::string outdir;
 
-    bool longformat;
-    bool fullpath;
+    bool longformat{};
+    bool fullpath{};
 };
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
@@ -183,19 +183,19 @@ int list(Bsa::BSAFile& bsa, Arguments& info)
 {
     // List all files
     const Bsa::BSAFile::FileList &files = bsa.getList();
-    for(unsigned int i=0; i<files.size(); i++)
+    for(auto file : files)
     {
         if(info.longformat)
         {
             // Long format
             std::ios::fmtflags f(std::cout.flags());
-            std::cout << std::setw(50) << std::left << files[i].name;
-            std::cout << std::setw(8) << std::left << std::dec << files[i].fileSize;
-            std::cout << "@ 0x" << std::hex << files[i].offset << std::endl;
+            std::cout << std::setw(50) << std::left << file.name;
+            std::cout << std::setw(8) << std::left << std::dec << file.fileSize;
+            std::cout << "@ 0x" << std::hex << file.offset << std::endl;
             std::cout.flags(f);
         }
         else
-            std::cout << files[i].name << std::endl;
+            std::cout << file.name << std::endl;
     }
 
     return 0;
@@ -256,8 +256,8 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
     Bsa::BSAFile::FileList list = bsa.getList();
 
     // Iter on the list
-    for(Bsa::BSAFile::FileList::iterator it = list.begin(); it != list.end(); ++it) {
-        const char* archivePath = it->name;
+    for(auto & it : list) {
+        const char* archivePath = it.name;
 
         std::string extractPath (archivePath);
         replaceAll(extractPath, "\\", "/");
