@@ -1,4 +1,4 @@
-language: cpp
+language: c
 branches:
   only:
     - master
@@ -11,8 +11,8 @@ env:
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
 cache:
   - ccache
-  directories:
-    - $HOME/.conan/data
+  - directories:
+      - $HOME/.conan/data
 addons:
   apt:
     sources:
