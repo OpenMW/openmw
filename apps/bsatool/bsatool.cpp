@@ -15,13 +15,13 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
 struct Arguments {
-  std::string mode;
-  std::string filename;
-  std::string extractfile;
-  std::string outdir;
+    std::string mode;
+    std::string filename;
+    std::string extractfile;
+    std::string outdir;
 
-  bool longformat{};
-  bool fullpath{};
+    bool longformat{};
+    bool fullpath{};
 };
 
 void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)

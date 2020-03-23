@@ -857,7 +857,7 @@ void MwIniImporter::dependencySortStep(std::string& element, MwIniImporter::depe
             source.end(),
             [&element](std::pair<std::string, std::vector<std::string>>& sourceElement)
             {
-              return sourceElement.first == element;
+                return sourceElement.first == element;
             }
     );
     if (iter != source.end())
@@ -887,7 +887,7 @@ MwIniImporter::findString(std::vector<std::string>& source, const std::string& s
 {
     return std::find_if(source.begin(), source.end(), [&string](const std::string& sourceString)
     {
-      return Misc::StringUtils::ciEqual(sourceString, string);
+        return Misc::StringUtils::ciEqual(sourceString, string);
     });
 }
 
