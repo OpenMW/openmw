@@ -43,6 +43,7 @@
     Bug #4594: Actors without AI packages don't use Hello dialogue
     Bug #4598: Script parser does not support non-ASCII characters
     Bug #4600: Crash when no sound output is available or --no-sound is used.
+    Bug #4601: Filtering referenceables by gender is broken
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog
     Bug #4680: Heap corruption on faulty esp
