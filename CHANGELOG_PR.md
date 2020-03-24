@@ -43,6 +43,7 @@ New Editor Features:
 - Changes to height editing can be cancelled without changes to data (press esc to cancel) (#4840)
 - Land heightmap/shape editing and vertex selection (#5170)
 - Deleting instances with a keypress (#5172)
+- Dropping objects with keyboard shortcuts (#5274)
 
 Bug Fixes:
 - The Mouse Wheel can now be used for key bindings (#2679)
