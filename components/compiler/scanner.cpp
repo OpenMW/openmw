@@ -282,6 +282,8 @@ namespace Compiler
 
         if (!scanName (name))
             return false;
+        else if(name.empty())
+            return true;
 
         TokenLoc loc (mLoc);
         mLoc.mLiteral.clear();
@@ -366,6 +368,13 @@ namespace Compiler
                 {
                     if (mIgnoreNewline)
                         mErrorHandler.warning ("string contains newline character, make sure that it is intended", mLoc);
+                    else if (name.size() == 1 || name.size() == 2 && name[1] == '\r')
+                    {
+                        name.clear();
+                        mLoc.mLiteral.clear();
+                        mErrorHandler.warning ("unterminated empty string", mLoc);
+                        break;
+                    }
                     else
                     {
                         error = true;
