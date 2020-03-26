@@ -118,6 +118,8 @@ namespace DetourNavigator
         public:
             KeyView() = default;
 
+            virtual ~KeyView() = default;
+
             KeyView(const std::string& value)
                 : mValue(&value) {}
 
@@ -160,6 +162,8 @@ namespace DetourNavigator
             {
                 return compare(other.getValue()) < 0;
             }
+
+            virtual ~RecastMeshKeyView() = default;
 
         private:
             std::reference_wrapper<const RecastMesh> mRecastMesh;

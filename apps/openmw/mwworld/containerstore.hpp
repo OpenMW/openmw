@@ -43,6 +43,7 @@ namespace MWWorld
         public:
             virtual void itemAdded(const ConstPtr& item, int count) {}
             virtual void itemRemoved(const ConstPtr& item, int count) {}
+            virtual ~ContainerStoreListener() = default;
     };
 
     class ContainerStore

@@ -45,6 +45,8 @@ namespace ICS
 	{
 	public:
 		virtual void logMessage(const char* text) = 0;
+
+		virtual ~InputControlSystemLog() = default;
 	};
 
     class DllExport InputControlSystem
@@ -261,6 +263,8 @@ namespace ICS
 		virtual void mouseWheelBindingDetected(InputControlSystem* ICS, Control* control,
 		                                       InputControlSystem::MouseWheelClick click,
 		                                       Control::ControlChangingDirection direction);
+
+        virtual ~DetectingBindingListener() = default;
 
 		/* OPENMW CODE ENDS HERE
 		 * ------------------------------------------------------------------------------------- */
