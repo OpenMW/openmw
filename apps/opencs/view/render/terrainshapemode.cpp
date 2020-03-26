@@ -1398,8 +1398,10 @@ void CSVRender::TerrainShapeMode::dragMoveEvent (QDragMoveEvent *event)
 void CSVRender::TerrainShapeMode::mouseMoveEvent (QMouseEvent *event)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->pos(), getInteractionMask());
-    if (hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
-    if (!hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing)) mBrushDraw->hide();
+    if (hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing))
+        mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
+    if (!hit.hit && mBrushDraw && !(mShapeEditTool == ShapeEditTool_Drag && mIsEditing))
+        mBrushDraw->hide();
 }
 
 void CSVRender::TerrainShapeMode::setBrushSize(int brushSize)

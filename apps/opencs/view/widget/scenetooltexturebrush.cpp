@@ -204,10 +204,14 @@ void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
 
 void CSVWidget::TextureBrushWindow::setBrushShape()
 {
-    if(mButtonPoint->isChecked()) mBrushShape = CSVWidget::BrushShape_Point;
-    if(mButtonSquare->isChecked()) mBrushShape = CSVWidget::BrushShape_Square;
-    if(mButtonCircle->isChecked()) mBrushShape = CSVWidget::BrushShape_Circle;
-    if(mButtonCustom->isChecked()) mBrushShape = CSVWidget::BrushShape_Custom;
+    if (mButtonPoint->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Point;
+    if (mButtonSquare->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Square;
+    if (mButtonCircle->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Circle;
+    if (mButtonCustom->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Custom;
     emit passBrushShape(mBrushShape);
 }
 

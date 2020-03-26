@@ -20,7 +20,8 @@ CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textur
     mGeometry = new osg::Geometry();
     mBrushDrawNode->addChild(mGeometry);
     mParentNode->addChild(mBrushDrawNode);
-    if (mTextureMode) mLandSizeFactor = ESM::Land::REAL_SIZE / ESM::Land::LAND_TEXTURE_SIZE;
+    if (mTextureMode)
+        mLandSizeFactor = ESM::Land::REAL_SIZE / ESM::Land::LAND_TEXTURE_SIZE;
     else mLandSizeFactor = ESM::Land::REAL_SIZE / ESM::Land::LAND_SIZE;
 }
 
@@ -254,7 +255,8 @@ void CSVRender::BrushDraw::buildCustomGeometry(const float& radius, const osg::V
 
 void CSVRender::BrushDraw::update(osg::Vec3d point, int brushSize, CSVWidget::BrushShape toolShape)
 {
-    if (mBrushDrawNode->containsNode(mGeometry)) mBrushDrawNode->removeChild(mGeometry);
+    if (mBrushDrawNode->containsNode(mGeometry))
+        mBrushDrawNode->removeChild(mGeometry);
     mBrushDrawNode->setNodeMask (SceneUtil::Mask_GUI);
     float radius = (mLandSizeFactor * brushSize) / 2;
     osg::Vec3d snapToGridPoint = point;
@@ -301,5 +303,6 @@ void CSVRender::BrushDraw::update(osg::Vec3d point, int brushSize, CSVWidget::Br
 
 void CSVRender::BrushDraw::hide()
 {
-    if (mBrushDrawNode->containsNode(mGeometry)) mBrushDrawNode->removeChild(mGeometry);
+    if (mBrushDrawNode->containsNode(mGeometry))
+        mBrushDrawNode->removeChild(mGeometry);
 }
