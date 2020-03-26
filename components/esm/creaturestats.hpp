@@ -36,7 +36,7 @@ namespace ESM
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;
-        unsigned int mGoldPool;
+        int mGoldPool;
         int mActorId;
         //int mHitAttemptActorId;
 
