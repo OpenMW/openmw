@@ -58,7 +58,6 @@ namespace CSVRender
 
             /// Editmode for terrain shape grid
             TerrainShapeMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
-            ~TerrainShapeMode();
 
             void primaryOpenPressed (const WorldspaceHitResult& hit) final;
 

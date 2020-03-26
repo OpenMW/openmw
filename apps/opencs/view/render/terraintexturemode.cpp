@@ -52,12 +52,6 @@ CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceW
 {
 }
 
-CSVRender::TerrainTextureMode::~TerrainTextureMode ()
-{
-    if (mBrushDraw)
-        mBrushDraw.reset();
-}
-
 void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if(!mTextureBrushScenetool)

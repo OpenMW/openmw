@@ -50,12 +50,6 @@ CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidge
 {
 }
 
-CSVRender::TerrainShapeMode::~TerrainShapeMode ()
-{
-    if (mBrushDraw)
-        mBrushDraw.reset();
-}
-
 void CSVRender::TerrainShapeMode::activate(CSVWidget::SceneToolbar* toolbar)
 {
     if (!mTerrainShapeSelection)

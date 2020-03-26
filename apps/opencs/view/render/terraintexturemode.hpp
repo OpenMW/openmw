@@ -52,7 +52,6 @@ namespace CSVRender
 
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
-            ~TerrainTextureMode();
 
             void primaryOpenPressed (const WorldspaceHitResult& hit) final;
 
@@ -107,15 +106,15 @@ namespace CSVRender
             bool allowLandTextureEditing(std::string textureFileName);
 
             std::string mCellId;
-            std::string mBrushTexture = "L0#0";
-            int mBrushSize = 1;
-            CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
+            std::string mBrushTexture;
+            int mBrushSize;
+            CSVWidget::BrushShape mBrushShape;
             std::unique_ptr<BrushDraw> mBrushDraw;
             std::vector<std::pair<int, int>> mCustomBrushShape;
-            CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool = nullptr;
-            int mDragMode = InteractionType_None;
+            CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
+            int mDragMode;
             osg::Group* mParentNode;
-            bool mIsEditing = false;
+            bool mIsEditing;
             std::unique_ptr<TerrainSelection> mTerrainTextureSelection;
 
             const int cellSize {ESM::Land::REAL_SIZE};

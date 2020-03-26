@@ -67,7 +67,7 @@ float CSVRender::BrushDraw::getIntersectionHeight (const osg::Vec3d& point)
 
 void CSVRender::BrushDraw::buildPointGeometry(const osg::Vec3d& point)
 {
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geom (new osg::Geometry());
     osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array());
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array());
     const float brushOutlineHeight (1.0f);
@@ -115,7 +115,7 @@ void CSVRender::BrushDraw::buildPointGeometry(const osg::Vec3d& point)
 
 void CSVRender::BrushDraw::buildSquareGeometry(const float& radius, const osg::Vec3d& point)
 {
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geom (new osg::Geometry());
     osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array());
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array());
 
@@ -212,7 +212,7 @@ void CSVRender::BrushDraw::buildSquareGeometry(const float& radius, const osg::V
 
 void CSVRender::BrushDraw::buildCircleGeometry(const float& radius, const osg::Vec3d& point)
 {
-    osg::ref_ptr<osg::Geometry> geom = new osg::Geometry();
+    osg::ref_ptr<osg::Geometry> geom (new osg::Geometry());
     osg::ref_ptr<osg::Vec3Array> vertices (new osg::Vec3Array());
     osg::ref_ptr<osg::Vec4Array> colors (new osg::Vec4Array());
     const int amountOfPoints = (osg::PI * 2.0f) * radius / 20;
@@ -222,7 +222,7 @@ void CSVRender::BrushDraw::buildCircleGeometry(const float& radius, const osg::V
 
     for (int i = 0; i < amountOfPoints + 2; i++)
     {
-        float angle (static_cast<float>(i) * step);
+        float angle (i * step);
         vertices->push_back(osg::Vec3d(
             point.x() + radius * cosf(angle),
             point.y() + radius * sinf(angle),
