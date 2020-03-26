@@ -264,6 +264,7 @@
     Feature #5170: Editor: Land shape editing, land selection
     Feature #5172: Editor: Delete instances/references with keypress in scene window
     Feature #5193: Weapon sheathing
+    Feature #5201: Editor: Show tool outline in scene view, when using editmodes
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape
     Feature #5274: Editor: Keyboard shortcut to drop objects to ground/obstacle in scene view
