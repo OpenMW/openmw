@@ -269,6 +269,9 @@ void HeadAnimationTime::setBlinkStop(float value)
 NpcAnimation::NpcType NpcAnimation::getNpcType()
 {
     const MWWorld::Class &cls = mPtr.getClass();
+    // Dead vampires should typically stay vampires.
+    if (mNpcType == Type_Vampire && cls.getNpcStats(mPtr).isDead() && !cls.getNpcStats(mPtr).isWerewolf())
+        return mNpcType;
     NpcAnimation::NpcType curType = Type_Normal;
     if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
         curType = Type_Vampire;
