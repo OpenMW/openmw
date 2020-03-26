@@ -24,7 +24,7 @@ struct Arguments {
     bool fullpath{};
 };
 
-void replaceAll(std::string& str, const std::string& needle, const std::string& substitute)
+void replaceAll(std::string &str, const std::string &needle, const std::string &substitute)
 {
     size_t pos = str.find(needle);
     while (pos != std::string::npos)
@@ -34,7 +34,7 @@ void replaceAll(std::string& str, const std::string& needle, const std::string& 
     }
 }
 
-bool parseOptions(int argc, char** argv, Arguments& info)
+bool parseOptions(int argc, char **argv, Arguments &info)
 {
     bpo::options_description desc("Inspect and extract files from Bethesda BSA archives\n\n"
                                   "Usages:\n"
@@ -74,7 +74,7 @@ bool parseOptions(int argc, char** argv, Arguments& info)
                 .options(all).positional(p).run();
         bpo::store(valid_opts, variables);
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
                   << desc << std::endl;
@@ -141,11 +141,11 @@ bool parseOptions(int argc, char** argv, Arguments& info)
     return true;
 }
 
-int list(Bsa::BSAFile& bsa, Arguments& info);
-int extract(Bsa::BSAFile& bsa, Arguments& info);
-int extractAll(Bsa::BSAFile& bsa, Arguments& info);
+int list(Bsa::BSAFile &bsa, Arguments &info);
+int extract(Bsa::BSAFile &bsa, Arguments &info);
+int extractAll(Bsa::BSAFile &bsa, Arguments &info);
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     try
     {
@@ -169,17 +169,17 @@ int main(int argc, char** argv)
             return 1;
         }
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         std::cerr << "ERROR reading BSA archive\nDetails:\n" << e.what() << std::endl;
         return 2;
     }
 }
 
-int list(Bsa::BSAFile& bsa, Arguments& info)
+int list(Bsa::BSAFile &bsa, Arguments &info)
 {
     // List all files
-    const Bsa::BSAFile::FileList& files = bsa.getList();
+    const Bsa::BSAFile::FileList &files = bsa.getList();
     for (auto file : files)
     {
         if (info.longformat)
@@ -198,7 +198,7 @@ int list(Bsa::BSAFile& bsa, Arguments& info)
     return 0;
 }
 
-int extract(Bsa::BSAFile& bsa, Arguments& info)
+int extract(Bsa::BSAFile &bsa, Arguments &info)
 {
     std::string archivePath = info.extractfile;
     replaceAll(archivePath, "/", "\\");
@@ -247,15 +247,15 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
     return 0;
 }
 
-int extractAll(Bsa::BSAFile& bsa, Arguments& info)
+int extractAll(Bsa::BSAFile &bsa, Arguments &info)
 {
     // Get the list of files present in the archive
     Bsa::BSAFile::FileList list = bsa.getList();
 
     // Iter on the list
-    for (auto& it : list)
+    for (auto &it : list)
     {
-        const char* archivePath = it.name;
+        const char *archivePath = it.name;
 
         std::string extractPath(archivePath);
         replaceAll(extractPath, "\\", "/");

@@ -13,12 +13,12 @@ namespace bfs = boost::filesystem;
 MwIniImporter::MwIniImporter()
         :mVerbose(false), mEncoding(ToUTF8::WINDOWS_1250)
 {
-    const char* map[][2] =
+    const char *map[][2] =
             {
                     {"no-sound", "General:Disable Audio"},
                     {nullptr, nullptr}
             };
-    const char* fallback[] = {
+    const char *fallback[] = {
 
             // light
             "LightAttenuation:UseConstant",
@@ -654,7 +654,7 @@ void MwIniImporter::setVerbose(bool verbose)
     mVerbose = verbose;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path& filename) const
+MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::path &filename) const
 {
     std::cout << "load ini file: " << filename << std::endl;
 
@@ -723,7 +723,7 @@ MwIniImporter::multistrmap MwIniImporter::loadIniFile(const boost::filesystem::p
     return map;
 }
 
-MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::path& filename) const
+MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::path &filename) const
 {
     std::cout << "load cfg file: " << filename << std::endl;
 
@@ -764,14 +764,14 @@ MwIniImporter::multistrmap MwIniImporter::loadCfgFile(const boost::filesystem::p
     return map;
 }
 
-void MwIniImporter::merge(multistrmap& cfg, const multistrmap& ini) const
+void MwIniImporter::merge(multistrmap &cfg, const multistrmap &ini) const
 {
     multistrmap::const_iterator iniIt;
-    for (const auto& it : mMergeMap)
+    for (const auto &it : mMergeMap)
     {
         if ((iniIt = ini.find(it.second)) != ini.end())
         {
-            for (const auto& vc : iniIt->second)
+            for (const auto &vc : iniIt->second)
             {
                 cfg.erase(it.first);
                 insertMultistrmap(cfg, it.first, vc);
@@ -780,16 +780,16 @@ void MwIniImporter::merge(multistrmap& cfg, const multistrmap& ini) const
     }
 }
 
-void MwIniImporter::mergeFallback(multistrmap& cfg, const multistrmap& ini) const
+void MwIniImporter::mergeFallback(multistrmap &cfg, const multistrmap &ini) const
 {
     cfg.erase("fallback");
 
     multistrmap::const_iterator iniIt;
-    for (const auto& it : mMergeFallback)
+    for (const auto &it : mMergeFallback)
     {
         if ((iniIt = ini.find(it)) != ini.end())
         {
-            for (const auto& vc : iniIt->second)
+            for (const auto &vc : iniIt->second)
             {
                 std::string value(it);
                 std::replace(value.begin(), value.end(), ' ', '_');
@@ -801,7 +801,7 @@ void MwIniImporter::mergeFallback(multistrmap& cfg, const multistrmap& ini) cons
     }
 }
 
-void MwIniImporter::insertMultistrmap(multistrmap& cfg, const std::string& key, const std::string& value)
+void MwIniImporter::insertMultistrmap(multistrmap &cfg, const std::string &key, const std::string &value)
 {
     const multistrmap::const_iterator it = cfg.find(key);
     if (it == cfg.end())
@@ -811,7 +811,7 @@ void MwIniImporter::insertMultistrmap(multistrmap& cfg, const std::string& key, 
     cfg[key].push_back(value);
 }
 
-void MwIniImporter::importArchives(multistrmap& cfg, const multistrmap& ini) const
+void MwIniImporter::importArchives(multistrmap &cfg, const multistrmap &ini) const
 {
     std::vector<std::string> archives;
     std::string baseArchive("Archives:Archive ");
@@ -830,7 +830,7 @@ void MwIniImporter::importArchives(multistrmap& cfg, const multistrmap& ini) con
             break;
         }
 
-        for (const auto& entry : it->second)
+        for (const auto &entry : it->second)
         {
             archives.push_back(entry);
         }
@@ -843,19 +843,19 @@ void MwIniImporter::importArchives(multistrmap& cfg, const multistrmap& ini) con
     // does not appears in the ini file
     cfg["fallback-archive"].push_back("Morrowind.bsa");
 
-    for (const auto& archive_itr : archives)
+    for (const auto &archive_itr : archives)
     {
         cfg["fallback-archive"].push_back(archive_itr);
     }
 }
 
-void MwIniImporter::dependencySortStep(std::string& element, MwIniImporter::dependencyList& source,
-        std::vector<std::string>& result)
+void MwIniImporter::dependencySortStep(std::string &element, MwIniImporter::dependencyList &source,
+        std::vector<std::string> &result)
 {
     auto iter = std::find_if(
             source.begin(),
             source.end(),
-            [&element](std::pair<std::string, std::vector<std::string>>& sourceElement)
+            [&element](std::pair<std::string, std::vector<std::string>> &sourceElement)
             {
                 return sourceElement.first == element;
             }
@@ -883,17 +883,17 @@ std::vector<std::string> MwIniImporter::dependencySort(MwIniImporter::dependency
 }
 
 std::vector<std::string>::iterator
-MwIniImporter::findString(std::vector<std::string>& source, const std::string& string)
+MwIniImporter::findString(std::vector<std::string> &source, const std::string &string)
 {
-    return std::find_if(source.begin(), source.end(), [&string](const std::string& sourceString)
+    return std::find_if(source.begin(), source.end(), [&string](const std::string &sourceString)
     {
         return Misc::StringUtils::ciEqual(sourceString, string);
     });
 }
 
-void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::vector<std::string> input)
+void MwIniImporter::addPaths(std::vector<boost::filesystem::path> &output, std::vector<std::string> input)
 {
-    for (auto& path : input)
+    for (auto &path : input)
     {
         if (path.front() == '"')
         {
@@ -904,8 +904,8 @@ void MwIniImporter::addPaths(std::vector<boost::filesystem::path>& output, std::
     }
 }
 
-void MwIniImporter::importGameFiles(multistrmap& cfg, const multistrmap& ini,
-        const boost::filesystem::path& iniFilename) const
+void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini,
+        const boost::filesystem::path &iniFilename) const
 {
     std::vector<std::pair<std::time_t, boost::filesystem::path>> contentFiles;
     std::string baseGameFile("Game Files:GameFile");
@@ -931,7 +931,7 @@ void MwIniImporter::importGameFiles(multistrmap& cfg, const multistrmap& ini,
         if (it == ini.end())
             break;
 
-        for (const auto& entry : it->second)
+        for (const auto &entry : it->second)
         {
             std::string filetype(entry.substr(entry.length() - 3));
             Misc::StringUtils::lowerCaseInPlace(filetype);
@@ -939,7 +939,7 @@ void MwIniImporter::importGameFiles(multistrmap& cfg, const multistrmap& ini,
             if (filetype == "esm" || filetype == "esp")
             {
                 bool found = false;
-                for (auto& dataPath : dataPaths)
+                for (auto &dataPath : dataPaths)
                 {
                     boost::filesystem::path path = dataPath / entry;
                     std::time_t time = lastWriteTime(path, defaultTime);
@@ -966,11 +966,11 @@ void MwIniImporter::importGameFiles(multistrmap& cfg, const multistrmap& ini,
 
     ESM::ESMReader reader;
     reader.setEncoder(&encoder);
-    for (auto& file : contentFiles)
+    for (auto &file : contentFiles)
     {
         reader.open(file.second.string());
         std::vector<std::string> dependencies;
-        for (auto& gameFile : reader.getGameFiles())
+        for (auto &gameFile : reader.getGameFiles())
         {
             dependencies.push_back(gameFile.name);
         }
@@ -997,13 +997,13 @@ void MwIniImporter::importGameFiles(multistrmap& cfg, const multistrmap& ini,
         }
     }
 
-    for (auto& file : sortedFiles)
+    for (auto &file : sortedFiles)
         cfg["content"].push_back(file);
 }
 
-void MwIniImporter::writeToFile(std::ostream& out, const multistrmap& cfg) const
+void MwIniImporter::writeToFile(std::ostream &out, const multistrmap &cfg) const
 {
-    for (const auto& it : cfg)
+    for (const auto &it : cfg)
     {
         for (auto entry = it.second.begin(); entry != it.second.end(); ++entry)
         {
@@ -1012,12 +1012,12 @@ void MwIniImporter::writeToFile(std::ostream& out, const multistrmap& cfg) const
     }
 }
 
-void MwIniImporter::setInputEncoding(const ToUTF8::FromType& encoding)
+void MwIniImporter::setInputEncoding(const ToUTF8::FromType &encoding)
 {
     mEncoding = encoding;
 }
 
-std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename, std::time_t defaultTime)
+std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path &filename, std::time_t defaultTime)
 {
     std::time_t writeTime(defaultTime);
     if (boost::filesystem::exists(filename))

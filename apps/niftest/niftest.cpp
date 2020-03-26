@@ -16,7 +16,7 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
 ///See if the file has the named extension
-bool hasExtension(const std::string& filename, std::string extensionToFind)
+bool hasExtension(const std::string &filename, std::string extensionToFind)
 {
     std::string extension = filename.substr(filename.find_last_of('.') + 1);
 
@@ -28,13 +28,13 @@ bool hasExtension(const std::string& filename, std::string extensionToFind)
 }
 
 ///See if the file has the "nif" extension.
-bool isNIF(const std::string& filename)
+bool isNIF(const std::string &filename)
 {
     return hasExtension(filename, "nif");
 }
 
 ///See if the file has the "bsa" extension.
-bool isBSA(const std::string& filename)
+bool isBSA(const std::string &filename)
 {
     return hasExtension(filename, "bsa");
 }
@@ -42,14 +42,14 @@ bool isBSA(const std::string& filename)
 /// Check all the nif files in a given VFS::Archive
 /// \note Takes ownership!
 /// \note Can not read a bsa file inside of a bsa file.
-void readVFS(VFS::Archive* anArchive, const std::string& archivePath = "")
+void readVFS(VFS::Archive *anArchive, const std::string &archivePath = "")
 {
     VFS::Manager myManager(true);
     myManager.addArchive(anArchive);
     myManager.buildIndex();
 
-    std::map<std::string, VFS::File*> files = myManager.getIndex();
-    for (std::map<std::string, VFS::File*>::const_iterator it = files.begin(); it != files.end(); ++it)
+    std::map<std::string, VFS::File *> files = myManager.getIndex();
+    for (std::map<std::string, VFS::File *>::const_iterator it = files.begin(); it != files.end(); ++it)
     {
         std::string name = it->first;
 
@@ -70,14 +70,14 @@ void readVFS(VFS::Archive* anArchive, const std::string& archivePath = "")
                 }
             }
         }
-        catch (std::exception& e)
+        catch (const std::exception &e)
         {
             std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
         }
     }
 }
 
-bool parseOptions(int argc, char** argv, std::vector<std::string>& files)
+bool parseOptions(int argc, char **argv, std::vector<std::string> &files)
 {
     bpo::options_description desc("Ensure that OpenMW can use the provided NIF and BSA files\n\n"
                                   "Usages:\n"
@@ -110,7 +110,7 @@ bool parseOptions(int argc, char** argv, std::vector<std::string>& files)
             return true;
         }
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         std::cout << "ERROR parsing arguments: " << e.what() << "\n\n"
                   << desc << std::endl;
@@ -122,7 +122,7 @@ bool parseOptions(int argc, char** argv, std::vector<std::string>& files)
     return false;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     std::vector<std::string> files;
     if (!parseOptions(argc, argv, files))
@@ -153,7 +153,7 @@ int main(int argc, char** argv)
                 std::cerr << "ERROR:  \"" << name << "\" is not a nif file, bsa file, or directory!" << std::endl;
             }
         }
-        catch (std::exception& e)
+        catch (std::exception &e)
         {
             std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
         }

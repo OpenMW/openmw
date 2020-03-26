@@ -10,7 +10,8 @@ namespace bpo = boost::program_options;
 namespace bfs = boost::filesystem;
 
 #ifndef _WIN32
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 #else
 
 // Include on Windows only
@@ -60,31 +61,31 @@ int wmain(int argc, wchar_t *wargv[]) {
         bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
         bpo::positional_options_description p_desc;
         desc.add_options()
-            ("help,h", "produce help message")
-            ("verbose,v", "verbose output")
-            ("ini,i", bpo::value<std::string>(), "morrowind.ini file")
-            ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
-            ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
-            ("game-files,g", "import esm and esp files")
-            ("no-archives,A", "disable bsa archives import")
-            ("encoding,e", bpo::value<std::string>()-> default_value("win1252"),
-                "Character encoding used in OpenMW game messages:\n"
-                "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-                "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                "\n\twin1252 - Western European (Latin) alphabet, used by default")
-            ;
+                ("help,h", "produce help message")
+                ("verbose,v", "verbose output")
+                ("ini,i", bpo::value<std::string>(), "morrowind.ini file")
+                ("cfg,c", bpo::value<std::string>(), "openmw.cfg file")
+                ("output,o", bpo::value<std::string>()->default_value(""), "openmw.cfg file")
+                ("game-files,g", "import esm and esp files")
+                ("no-archives,A", "disable bsa archives import")
+                ("encoding,e", bpo::value<std::string>()->default_value("win1252"),
+                        "Character encoding used in OpenMW game messages:\n"
+                        "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+                        "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+                        "\n\twin1252 - Western European (Latin) alphabet, used by default");
         p_desc.add("ini", 1).add("cfg", 1);
 
         bpo::variables_map vm;
 
         bpo::parsed_options parsed = bpo::command_line_parser(argc, argv)
-            .options(desc)
-            .positional(p_desc)
-            .run();
+                .options(desc)
+                .positional(p_desc)
+                .run();
 
         bpo::store(parsed, vm);
 
-        if(vm.count("help") || !vm.count("ini") || !vm.count("cfg")) {
+        if (vm.count("help") || !vm.count("ini") || !vm.count("cfg"))
+        {
             std::cout << desc;
             return 0;
         }
@@ -96,15 +97,17 @@ int wmain(int argc, wchar_t *wargv[]) {
 
         // if no output is given, write back to cfg file
         std::string outputFile(vm["output"].as<std::string>());
-        if(vm["output"].defaulted()) {
+        if (vm["output"].defaulted())
+        {
             outputFile = vm["cfg"].as<std::string>();
         }
 
-        if(!boost::filesystem::exists(iniFile)) {
+        if (!boost::filesystem::exists(iniFile))
+        {
             std::cerr << "ini file does not exist" << std::endl;
             return -3;
         }
-        if(!boost::filesystem::exists(cfgFile))
+        if (!boost::filesystem::exists(cfgFile))
             std::cerr << "cfg file does not exist" << std::endl;
 
         MwIniImporter importer;
@@ -120,11 +123,13 @@ int wmain(int argc, wchar_t *wargv[]) {
         importer.merge(cfg, ini);
         importer.mergeFallback(cfg, ini);
 
-        if(vm.count("game-files")) {
+        if (vm.count("game-files"))
+        {
             importer.importGameFiles(cfg, ini, iniFile);
         }
 
-        if(!vm.count("no-archives")) {
+        if (!vm.count("no-archives"))
+        {
             importer.importArchives(cfg, ini);
         }
 
@@ -132,7 +137,7 @@ int wmain(int argc, wchar_t *wargv[]) {
         bfs::ofstream file((bfs::path(outputFile)));
         importer.writeToFile(file, cfg);
     }
-    catch (std::exception& e)
+    catch (std::exception &e)
     {
         std::cerr << "ERROR: " << e.what() << std::endl;
     }
