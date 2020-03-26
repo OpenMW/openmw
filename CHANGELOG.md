@@ -207,6 +207,7 @@
     Bug #5300: NPCs don't switch from torch to shield when starting combat
     Bug #5308: World map copying makes save loading much slower
     Bug #5313: Node properties of identical type are not applied in the correct order
+    Bug #5326: Formatting issues in the settings.cfg
     Bug #5328: Skills aren't properly reset for dead actors
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI

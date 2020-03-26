@@ -77,6 +77,9 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
     // Were there any lines at all in the file?
     bool existing = false;
 
+    // Is an entirely blank line queued to be added?
+    bool emptyLineQueued = false;
+
     // The category/section we're currently in.
     std::string currentCategory;
 
@@ -103,9 +106,19 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         // Don't add additional newlines at the end of the file.
         if (istream.eof()) continue;
 
-        // Copy entirely blank lines.
-        if (!skipWhiteSpace(i, line)) {
-            ostream << line << std::endl;
+        // An empty line was queued.
+        if (emptyLineQueued)
+        {
+            emptyLineQueued = false;
+            // We're still going through the current category, so we should copy it.
+            if (currentCategory.empty() || line[i] != '[')
+                ostream << std::endl;
+        }
+
+        // Queue entirely blank lines to add them if desired.
+        if (!skipWhiteSpace(i, line))
+        {
+            emptyLineQueued = true;
             continue;
         }
 
@@ -128,15 +141,22 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
                 continue;
             }
 
-            // Ensure that all options in the current category have been written.
-            for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit) {
-                if (mit->second == false && mit->first.first == currentCategory) {
-                    Log(Debug::Verbose) << "Added new setting: [" << currentCategory << "] "
-                            << mit->first.second << " = " << settings.at(mit->first);
-                    ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
-                    mit->second = true;
-                    changed = true;
+            if (!currentCategory.empty())
+            {
+                // Ensure that all options in the current category have been written.
+                for (CategorySettingStatusMap::iterator mit = written.begin(); mit != written.end(); ++mit)
+                {
+                    if (mit->second == false && mit->first.first == currentCategory)
+                    {
+                        Log(Debug::Verbose) << "Added new setting: [" << currentCategory << "] "
+                                << mit->first.second << " = " << settings.at(mit->first);
+                        ostream << mit->first.second << " = " << settings.at(mit->first) << std::endl;
+                        mit->second = true;
+                        changed = true;
+                    }
                 }
+                // Add an empty line after the last option in a category.
+                ostream << std::endl;
             }
 
             // Update the current category.
