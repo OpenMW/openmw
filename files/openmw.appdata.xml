@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 Copyright 2015 Alexandre Moine <nobrakal@gmail.com>
-Copyright 2018 Bret Curtis <psi29a@gmail.com>
+Copyright 2020 Bret Curtis <psi29a@gmail.com>
 -->
 <component type="desktop">
- <id>org.openmw.desktop</id>
+ <id>org.openmw.launcher.desktop</id>
  <metadata_license>CC0-1.0</metadata_license>
  <project_license>GPL-3.0 and MIT</project_license>
  <name>OpenMW</name>
@@ -20,6 +20,7 @@ Copyright 2018 Bret Curtis <psi29a@gmail.com>
   You will still need the original game data to play OpenMW.
   </p>
  </description>
+ <launchable type="desktop-id">org.openmw.launcher.desktop</launchable>
  <screenshots>
   <screenshot type="default">
    <image>https://wiki.openmw.org/images/b/b2/Openmw_0.11.1_launcher_1.png</image>
