@@ -103,17 +103,17 @@ void Settings::SettingsFileParser::saveSettingsFile(const std::string& file, con
         // The current character position in the line.
         size_t i = 0;
 
-        // Don't add additional newlines at the end of the file.
-        if (istream.eof()) continue;
-
         // An empty line was queued.
         if (emptyLineQueued)
         {
             emptyLineQueued = false;
             // We're still going through the current category, so we should copy it.
-            if (currentCategory.empty() || line[i] != '[')
+            if (currentCategory.empty() || istream.eof() || line[i] != '[')
                 ostream << std::endl;
         }
+
+        // Don't add additional newlines at the end of the file otherwise.
+        if (istream.eof()) continue;
 
         // Queue entirely blank lines to add them if desired.
         if (!skipWhiteSpace(i, line))
