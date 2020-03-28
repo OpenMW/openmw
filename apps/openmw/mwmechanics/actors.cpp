@@ -1871,7 +1871,8 @@ namespace MWMechanics
 
                 // Reset dynamic stats, attributes and skills
                 calculateCreatureStatModifiers(iter->first, 0);
-                calculateNpcStatModifiers(iter->first, 0);
+                if (iter->first.getClass().isNpc())
+                    calculateNpcStatModifiers(iter->first, 0);
 
                 if( iter->first == getPlayer())
                 {
