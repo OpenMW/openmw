@@ -368,15 +368,28 @@ namespace Compiler
                 {
                     if (mIgnoreNewline)
                         mErrorHandler.warning ("string contains newline character, make sure that it is intended", mLoc);
-                    else if (name.size() == 1 || (name.size() == 2 && name[1] == '\r'))
-                    {
-                        name.clear();
-                        mLoc.mLiteral.clear();
-                        mErrorHandler.warning ("unterminated empty string", mLoc);
-                        break;
-                    }
                     else
                     {
+                        bool allWhitespace = true;
+                        for (size_t i = 1; i < name.size(); i++)
+                        {
+                            //ignore comments
+                            if (name[i] == ';')
+                                break;
+                            else if (name[i] != '\t' && name[i] != ' ' && name[i] != '\r')
+                            {
+                                allWhitespace = false;
+                                break;
+                            }
+                        }
+                        if (allWhitespace)
+                        {
+                            name.clear();
+                            mLoc.mLiteral.clear();
+                            mErrorHandler.warning ("unterminated empty string", mLoc);
+                            return true;
+                        }
+
                         error = true;
                         mErrorHandler.error ("incomplete string or name", mLoc);
                         break;

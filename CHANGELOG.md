@@ -207,6 +207,7 @@
     Bug #5300: NPCs don't switch from torch to shield when starting combat
     Bug #5308: World map copying makes save loading much slower
     Bug #5313: Node properties of identical type are not applied in the correct order
+    Bug #5345: Dopey Necromancy does not work due to a missing quote
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
