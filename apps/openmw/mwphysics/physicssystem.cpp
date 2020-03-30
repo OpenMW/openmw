@@ -48,6 +48,7 @@
 #include "hasspherecollisioncallback.hpp"
 #include "deepestnotmecontacttestresultcallback.hpp"
 #include "closestnotmerayresultcallback.hpp"
+#include "contacttestresultcallback.hpp"
 
 namespace MWPhysics
 {
@@ -881,32 +882,6 @@ namespace MWPhysics
         else
             return osg::Vec3f();
     }
-
-    class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
-    {
-    public:
-        ContactTestResultCallback(const btCollisionObject* testedAgainst)
-            : mTestedAgainst(testedAgainst)
-        {
-        }
-
-        const btCollisionObject* mTestedAgainst;
-
-        std::vector<MWWorld::Ptr> mResult;
-
-        virtual btScalar addSingleResult(btManifoldPoint& cp,
-                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
-                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
-        {
-            const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
-            if (collisionObject == mTestedAgainst)
-                collisionObject = col1Wrap->m_collisionObject;
-            PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
-            if (holder)
-                mResult.push_back(holder->getPtr());
-            return 0.f;
-        }
-    };
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
