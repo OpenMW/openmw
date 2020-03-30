@@ -3,8 +3,9 @@
 
 #include <vector>
 
-#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
+
+class btCollisionObject;
 
 namespace MWPhysics
 {

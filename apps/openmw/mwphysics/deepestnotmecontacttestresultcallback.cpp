@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <BulletCollision/CollisionDispatch/btCollisionObject.h>
+
 #include "../mwworld/class.hpp"
 
 #include "ptrholder.hpp"
