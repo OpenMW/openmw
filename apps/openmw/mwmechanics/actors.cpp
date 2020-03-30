@@ -1850,6 +1850,8 @@ namespace MWMechanics
                     stats.getActiveSpells().visitEffectSources(soulTrap);
                 }
 
+                // Magic effects will be reset later, and the magic effect that could kill the actor
+                // needs to be determined now
                 calculateCreatureStatModifiers(iter->first, 0);
 
                 if (cls.isEssential(iter->first))
@@ -1867,7 +1869,10 @@ namespace MWMechanics
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
+                // Reset dynamic stats, attributes and skills
                 calculateCreatureStatModifiers(iter->first, 0);
+                if (iter->first.getClass().isNpc())
+                    calculateNpcStatModifiers(iter->first, 0);
 
                 if( iter->first == getPlayer())
                 {
