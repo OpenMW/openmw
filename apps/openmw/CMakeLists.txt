@@ -71,7 +71,7 @@ add_openmw_dir (mwworld
 
 add_openmw_dir (mwphysics
     physicssystem trace collisiontype actor convert object heightfield closestnotmerayresultcallback
-    contacttestresultcallback deepestnotmecontacttestresultcallback stepper
+    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver
     )
 
 add_openmw_dir (mwclass
