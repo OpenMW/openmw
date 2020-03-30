@@ -1123,9 +1123,60 @@ namespace MWInput
     {
     }
 
-    void InputManager::windowVisibilityChange(bool visible)
+    class CtxReleaseOperation : public osg::Operation
+    {
+    public:
+        CtxReleaseOperation(osg::GraphicsContext *context)
+        {
+            mContext = context;
+        }
+
+        virtual void operator () (osg::Object* caller)
+        {
+            mContext->releaseContext();
+        }
+
+    private:
+        osg::GraphicsContext *mContext;
+    };
+
+    class CtxAcquireOperation : public osg::Operation
+    {
+    public:
+        CtxAcquireOperation(osg::GraphicsContext *context)
+        {
+            mContext = context;
+        }
+
+        virtual void operator () (osg::Object* caller)
+        {
+            mContext->makeCurrent();
+        }
+
+    private:
+        osg::GraphicsContext *mContext;
+    };
+
+    void InputManager::windowVisibilityChange(bool visible, bool updateContext)
     {
         mWindowVisible = visible;
+
+        if (mViewer == nullptr)
+            return;
+
+        if (!updateContext)
+            return;
+
+        // Some systems (Android, for example) may lose context when game window is minimized.
+        // We need to restore it.
+        osg::GraphicsContext *ctx = mViewer->getCamera()->getGraphicsContext();
+        osg::ref_ptr<osg::Operation> op;
+        if (visible)
+            op = new CtxAcquireOperation(ctx);
+        else
+            op = new CtxReleaseOperation(ctx);
+
+        ctx->add(op);
     }
 
     void InputManager::windowResized(int x, int y)

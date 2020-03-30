@@ -66,6 +66,8 @@ namespace MWBase
             virtual void resetToDefaultKeyBindings() = 0;
             virtual void resetToDefaultControllerBindings() = 0;
 
+            virtual void windowVisibilityChange(bool visible, bool updateContext = false) = 0;
+
             /// Returns if the last used input device was a joystick or a keyboard
             /// @return true if joystick, false otherwise
             virtual bool joystickLastUsed() = 0;

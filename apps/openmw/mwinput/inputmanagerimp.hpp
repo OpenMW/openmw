@@ -129,7 +129,7 @@ namespace MWInput
         virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg);
         virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg);
 
-        virtual void windowVisibilityChange( bool visible );
+        virtual void windowVisibilityChange(bool visible, bool updateContext = false);
         virtual void windowFocusChange( bool have_focus );
         virtual void windowResized (int x, int y);
         virtual void windowClosed ();

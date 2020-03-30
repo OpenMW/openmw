@@ -4,6 +4,9 @@ int stderr = 0; // Hack: fix linker error
 #include <SDL_gamecontroller.h>
 #include <SDL_mouse.h>
 #include <SDL_events.h>
+#include <SDL_hints.h>
+
+#include "mwbase/inputmanager.hpp"
 
 /*******************************************************************************
  Functions called by JNI
@@ -17,13 +20,11 @@ extern int argcData;
 extern const char **argvData;
 void releaseArgv();
 
-
 extern "C" int Java_org_libsdl_app_SDLActivity_getMouseX(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
     SDL_GetMouseState(&ret, nullptr);
     return ret;
 }
-
 
 extern "C" int Java_org_libsdl_app_SDLActivity_getMouseY(JNIEnv *env, jclass cls, jobject obj) {
     int ret = 0;
@@ -52,5 +53,19 @@ extern "C" int Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cl
     // On Android, we use a virtual controller with guid="Virtual"
     SDL_GameControllerAddMapping("5669727475616c000000000000000000,Virtual,a:b0,b:b1,back:b15,dpdown:h0.4,dpleft:h0.8,dpright:h0.2,dpup:h0.1,guide:b16,leftshoulder:b6,leftstick:b13,lefttrigger:a5,leftx:a0,lefty:a1,rightshoulder:b7,rightstick:b14,righttrigger:a4,rightx:a2,righty:a3,start:b11,x:b3,y:b4");
 
+    SDL_SetHint(SDL_HINT_ANDROID_BLOCK_ON_PAUSE, "0");
+
     return 0;
+}
+
+extern "C" void Java_org_libsdl_app_SDLActivity_omwSurfaceDestroyed(JNIEnv *env, jclass cls, jobject obj) {
+    MWBase::InputManager* inp = MWBase::Environment::get().getInputManager();
+    if (inp)
+        inp->windowVisibilityChange(false, true);
+}
+
+extern "C" void Java_org_libsdl_app_SDLActivity_omwSurfaceRecreated(JNIEnv *env, jclass cls, jobject obj) {
+    MWBase::InputManager* inp = MWBase::Environment::get().getInputManager();
+    if (inp)
+        inp->windowVisibilityChange(true, true);
 }
