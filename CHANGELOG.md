@@ -209,6 +209,7 @@
     Bug #5313: Node properties of identical type are not applied in the correct order
     Bug #5326: Formatting issues in the settings.cfg
     Bug #5328: Skills aren't properly reset for dead actors
+    Bug #5345: Dopey Necromancy does not work due to a missing quote
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
