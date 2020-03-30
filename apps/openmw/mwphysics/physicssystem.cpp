@@ -47,6 +47,7 @@
 #include "heightfield.hpp"
 #include "hasspherecollisioncallback.hpp"
 #include "deepestnotmecontacttestresultcallback.hpp"
+#include "closestnotmerayresultcallback.hpp"
 
 namespace MWPhysics
 {
@@ -736,35 +737,6 @@ namespace MWPhysics
         else
             return (point - Misc::Convert::toOsg(cb.m_hitPointWorld)).length();
     }
-
-    class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
-    {
-    public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to)
-            : btCollisionWorld::ClosestRayResultCallback(from, to)
-            , mMe(me), mTargets(targets)
-        {
-        }
-
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
-        {
-            if (rayResult.m_collisionObject == mMe)
-                return 1.f;
-            if (!mTargets.empty())
-            {
-                if ((std::find(mTargets.begin(), mTargets.end(), rayResult.m_collisionObject) == mTargets.end()))
-                {
-                    PtrHolder* holder = static_cast<PtrHolder*>(rayResult.m_collisionObject->getUserPointer());
-                    if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
-                        return 1.f;
-                }
-            }
-            return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
-        }
-    private:
-        const btCollisionObject* mMe;
-        const std::vector<const btCollisionObject*> mTargets;
-    };
 
     PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
