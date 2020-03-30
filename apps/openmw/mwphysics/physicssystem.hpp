@@ -50,9 +50,6 @@ namespace MWPhysics
     class Object;
     class Actor;
 
-    static const float sMaxSlope = 49.0f;
-    static const float sStepSizeUp = 34.0f;
-
     class PhysicsSystem
     {
         public:
