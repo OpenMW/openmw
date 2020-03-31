@@ -461,8 +461,6 @@ namespace NifOsg
                 break;
             }
             case Nif::RC_NiSwitchNode:
-            case Nif::RC_NiTriShape:
-            case Nif::RC_NiTriStrips:
             case Nif::RC_NiAutoNormalParticles:
             case Nif::RC_NiRotatingParticles:
                 // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
