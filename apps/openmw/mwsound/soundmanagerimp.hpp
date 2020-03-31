@@ -112,6 +112,9 @@ namespace MWSound
         Sound *mUnderwaterSound;
         Sound *mNearWaterSound;
 
+        std::string mNextMusic;
+        bool mPlaybackPaused;
+
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
         Sound_Buffer *lookupSound(const std::string &soundId) const;
@@ -133,8 +136,6 @@ namespace MWSound
         void updateRegionSound(float duration);
         void updateWaterSound(float duration);
         void updateMusic(float duration);
-
-        std::string mNextMusic;
 
         float volumeFromType(Type type) const;
 
@@ -249,6 +250,9 @@ namespace MWSound
 
         virtual void resumeSounds(const std::string& blockerId);
         ///< Resumes all previously paused sounds.
+
+        virtual void pausePlayback();
+        virtual void resumePlayback();
 
         virtual void update(float duration);
 

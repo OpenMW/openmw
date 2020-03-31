@@ -1905,9 +1905,15 @@ namespace MWGui
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
             if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+            {
+                mVideoWidget->pause();
                 OpenThreads::Thread::microSleep(5000);
+            }
             else
             {
+                if (mVideoWidget->isPaused())
+                    mVideoWidget->resume();
+
                 mViewer->eventTraversal();
                 mViewer->updateTraversal();
                 mViewer->renderingTraversals();

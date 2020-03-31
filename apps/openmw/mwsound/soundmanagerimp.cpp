@@ -52,6 +52,7 @@ namespace MWSound
         , mListenerUp(0,0,1)
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
+        , mPlaybackPaused(false)
     {
         mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
         mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
@@ -856,7 +857,6 @@ namespace MWSound
         return false;
     }
 
-
     void SoundManager::pauseSounds(const std::string& blockerId, int types)
     {
         if(mOutput->isInitialized())
@@ -885,6 +885,24 @@ namespace MWSound
 
             mOutput->resumeSounds(types);
         }
+    }
+
+    void SoundManager::pausePlayback()
+    {
+        if (mPlaybackPaused)
+            return;
+
+        mPlaybackPaused = true;
+        mOutput->pauseActiveDevice();
+    }
+
+    void SoundManager::resumePlayback()
+    {
+        if (!mPlaybackPaused)
+            return;
+
+        mPlaybackPaused = false;
+        mOutput->resumeActiveDevice();
     }
 
     void SoundManager::updateRegionSound(float duration)
@@ -1209,7 +1227,7 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
-        if(!mOutput->isInitialized())
+        if(!mOutput->isInitialized() || mPlaybackPaused)
             return;
 
         updateSounds(duration);
@@ -1408,5 +1426,6 @@ namespace MWSound
         }
         mActiveTracks.clear();
         mPausedSoundTypes.clear();
+        mPlaybackPaused = false;
     }
 }
