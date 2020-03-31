@@ -168,10 +168,10 @@ namespace MWBase
             ///< Is the given sound currently playing on the given object?
             ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
-            virtual void pauseSounds(int types=static_cast<int>(Type::Mask)) = 0;
+            virtual void pauseSounds(const std::string& blockerId, int types=int(Type::Mask)) = 0;
             ///< Pauses all currently playing sounds, including music.
 
-            virtual void resumeSounds(int types=static_cast<int>(Type::Mask)) = 0;
+            virtual void resumeSounds(const std::string& blockerId) = 0;
             ///< Resumes all previously paused sounds.
 
             virtual void update(float duration) = 0;

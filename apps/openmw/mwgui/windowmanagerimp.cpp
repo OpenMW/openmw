@@ -1893,7 +1893,7 @@ namespace MWGui
         setCursorVisible(false);
 
         if (mVideoWidget->hasAudioStream())
-            MWBase::Environment::get().getSoundManager()->pauseSounds(
+            MWBase::Environment::get().getSoundManager()->pauseSounds("Video",
                 ~MWSound::Type::Movie & MWSound::Type::Mask
             );
         osg::Timer frameTimer;
@@ -1921,7 +1921,7 @@ namespace MWGui
         }
         mVideoWidget->stop();
 
-        MWBase::Environment::get().getSoundManager()->resumeSounds();
+        MWBase::Environment::get().getSoundManager()->resumeSounds("Video");
 
         setKeyFocusWidget(oldKeyFocus);
 

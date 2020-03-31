@@ -107,7 +107,7 @@ namespace MWSound
         osg::Vec3f mListenerDir;
         osg::Vec3f mListenerUp;
 
-        int mPausedSoundTypes;
+        std::unordered_map<std::string, int> mPausedSoundTypes;
 
         Sound *mUnderwaterSound;
         Sound *mNearWaterSound;
@@ -244,10 +244,10 @@ namespace MWSound
         virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
-        virtual void pauseSounds(int types);
+        virtual void pauseSounds(const std::string& blockerId, int types=int(Type::Mask));
         ///< Pauses all currently playing sounds, including music.
 
-        virtual void resumeSounds(int types);
+        virtual void resumeSounds(const std::string& blockerId);
         ///< Resumes all previously paused sounds.
 
         virtual void update(float duration);

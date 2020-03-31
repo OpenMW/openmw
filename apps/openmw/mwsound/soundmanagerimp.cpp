@@ -50,7 +50,6 @@ namespace MWSound
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
-        , mPausedSoundTypes(0)
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
     {
@@ -858,26 +857,35 @@ namespace MWSound
     }
 
 
-    void SoundManager::pauseSounds(int types)
+    void SoundManager::pauseSounds(const std::string& blockerId, int types)
     {
         if(mOutput->isInitialized())
         {
+            auto found = mPausedSoundTypes.find(blockerId);
+            if (found != mPausedSoundTypes.end() && found->second != types)
+                resumeSounds(blockerId);
+
             types = types & Type::Mask;
             mOutput->pauseSounds(types);
-            mPausedSoundTypes |= types;
+            mPausedSoundTypes[blockerId] = types;
         }
     }
 
-    void SoundManager::resumeSounds(int types)
+    void SoundManager::resumeSounds(const std::string& blockerId)
     {
         if(mOutput->isInitialized())
         {
-            types = types & Type::Mask & mPausedSoundTypes;
+            mPausedSoundTypes.erase(blockerId);
+            int types = int(Type::Mask);
+            for (auto& blocker : mPausedSoundTypes)
+            {
+                if (blocker.first != blockerId)
+                    types &= ~blocker.second;
+            }
+
             mOutput->resumeSounds(types);
-            mPausedSoundTypes &= ~types;
         }
     }
-
 
     void SoundManager::updateRegionSound(float duration)
     {
@@ -1399,5 +1407,6 @@ namespace MWSound
             mUnusedStreams.push_back(sound);
         }
         mActiveTracks.clear();
+        mPausedSoundTypes.clear();
     }
 }
