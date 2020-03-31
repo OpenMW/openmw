@@ -8,7 +8,7 @@
 #include "../mwworld/ptr.hpp"
 
 class btCollisionObject;
-class btCollisionObjectWrapper;
+struct btCollisionObjectWrapper;
 
 namespace MWPhysics
 {
