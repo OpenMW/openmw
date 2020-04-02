@@ -42,6 +42,8 @@ namespace Compiler
         public:
             ContextRestore (StreamErrorHandler* handler, const std::string& context);
 
+            ContextRestore (ContextRestore&& other);
+
             ~ContextRestore();
     };
 }

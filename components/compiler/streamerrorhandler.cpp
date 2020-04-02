@@ -72,6 +72,11 @@ namespace Compiler
 
     ContextRestore::ContextRestore(StreamErrorHandler* handler, const std::string& context) : mHandler(handler), mContext(context) {}
 
+    ContextRestore::ContextRestore(ContextRestore&& other) : mHandler(other.mHandler), mContext(other.mContext)
+    {
+        other.mHandler = nullptr;
+    }
+
     ContextRestore::~ContextRestore()
     {
         if(mHandler)
