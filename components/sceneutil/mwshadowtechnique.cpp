@@ -864,14 +864,14 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
         _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 }
 
-void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
+void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager* shaderManager)
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
     
     _castingProgram = new osg::Program();
 
-    _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
-    _castingProgram->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::FRAGMENT));
+    _castingProgram->addShader(shaderManager->getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
+    _castingProgram->addShader(shaderManager->getShader("shadowcasting_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::FRAGMENT));
 }
 
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
@@ -1564,7 +1564,7 @@ void MWShadowTechnique::createShaders()
     }
 
     if (!_castingProgram)
-        OSG_NOTICE << "Shadow casting shader has not been set up. Remember to call setupCastingShader(Shader::ShaderManager &)" << std::endl;
+        OSG_NOTICE << "Shadow casting shader has not been set up. Remember to call setupCastingShader(Shader::ShaderManager *)" << std::endl;
 
     _shadowCastingStateSet->setAttributeAndModes(_castingProgram, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied

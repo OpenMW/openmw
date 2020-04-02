@@ -265,7 +265,7 @@
             </Widget>
             <Widget type="TabItem" skin="" position="4 32 360 308">
                 <Property key="Caption" value="  #{sVideo}  "/>
-                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
+                <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch" name="VideoTabs">
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem" skin="" position="0 28 352 268" align="Stretch">
                         <Property key="Caption" value="  Video  "/>
@@ -455,88 +455,83 @@
                                 </Widget>
                             </Widget>
                         </Widget>
-
                     </Widget>
-                    <!--
-                    <Widget type="TabItem" skin="" position="0 28 352 268">
-                    <Widget type="Widget" skin="" position="0 28 352 268">
-                        <Property key="Visible" value="false"/>
+                    <Widget type="TabItem" skin="" position="0 28 380 268">
                         <Property key="Caption" value="  Shadows  "/>
                         <Widget type="HBox" skin="" position="4 4 350 24">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadowsEnabledButton">
                                 <UserString key="SettingCategory" value="Shadows"/>
-                                <UserString key="SettingName" value="enabled"/>
+                                <UserString key="SettingName" value="enable shadows"/>
                                 <UserString key="SettingType" value="CheckButton"/>
                             </Widget>
                             <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 65 16" align="Left Top">
                                 <Property key="Caption" value="Shadows"/>
                             </Widget>
                         </Widget>
-                        <Widget type="Widget" skin="" position="24 32 300 230">
+                        <Widget type="Widget" skin="" position="24 32 350 300">
                             <Widget type="HBox" skin="" position="4 0 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ShadowsLargeDistance">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="PlayerShadows">
                                     <UserString key="SettingCategory" value="Shadows"/>
-                                    <UserString key="SettingName" value="split"/>
-                                    <UserString key="SettingType" value="CheckButton"/>
-                                </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 182 16" align="Left Top">
-                                    <Property key="Caption" value="Large distance (PSSM3)"/>
-                                </Widget>
-                            </Widget>
-                            <Widget type="HBox" skin="" position="4 28 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="TerrainShadows">
-                                    <UserString key="SettingCategory" value="Shadows"/>
-                                    <UserString key="SettingName" value="terrain shadows"/>
+                                    <UserString key="SettingName" value="player shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 122 16" align="Left Top">
-                                    <Property key="Caption" value="Terrain shadows"/>
+                                    <Property key="Caption" value="Player shadows"/>
                                 </Widget>
                             </Widget>
-                            <Widget type="HBox" skin="" position="4 56 350 24">
+                            <Widget type="HBox" skin="" position="4 28 350 24">
                                 <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ActorShadows">
                                     <UserString key="SettingCategory" value="Shadows"/>
                                     <UserString key="SettingName" value="actor shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 122 16" align="Left Top">
+                                    <Property key="Caption" value="Actor shadow"/>
+                                </Widget>
+                            </Widget>
+                            <Widget type="HBox" skin="" position="4 56 350 24">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="ObjectShadows">
+                                    <UserString key="SettingCategory" value="Shadows"/>
+                                    <UserString key="SettingName" value="object shadows"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 108 16" align="Left Top">
-                                    <Property key="Caption" value="Actor shadows"/>
+                                    <Property key="Caption" value="Object shadows"/>
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 84 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="StaticsShadows">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="TerrainShadows">
                                     <UserString key="SettingCategory" value="Shadows"/>
-                                    <UserString key="SettingName" value="statics shadows"/>
+                                    <UserString key="SettingName" value="terrain shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 111 16" align="Left Top">
-                                    <Property key="Caption" value="World shadows"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 108 16" align="Left Top">
+                                    <Property key="Caption" value="Terrain shadows"/>
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 112 350 24">
-                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="MiscShadows">
+                                <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="IndoorShadows">
                                     <UserString key="SettingCategory" value="Shadows"/>
-                                    <UserString key="SettingName" value="misc shadows"/>
+                                    <UserString key="SettingName" value="enable indoor shadows"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
-                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 102 16" align="Left Top">
-                                    <Property key="Caption" value="Misc shadows"/>
+                                <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 108 16" align="Left Top">
+                                    <Property key="Caption" value="Indoor shadows"/>
                                 </Widget>
                             </Widget>
                             <Widget type="HBox" skin="" position="4 140 350 24">
-                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 60 24" align="Left Top" name="ShadowsTextureSize">
+                                <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 70 24" align="Left Top" name="ShadowsTextureSize">
                                     <Property key="AddItem" value="512"/>
                                     <Property key="AddItem" value="1024"/>
                                     <Property key="AddItem" value="2048"/>
                                     <Property key="AddItem" value="4096"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
-                                    <Property key="Caption" value="Texture size"/>
+                                    <Property key="Caption" value="Shadow map resolution"/>
                                 </Widget>
                             </Widget>
                         </Widget>
                     </Widget>
-                    -->
                 </Widget>
             </Widget>
         </Widget>

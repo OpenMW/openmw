@@ -3,7 +3,6 @@
 #include <osgShadow/ShadowedScene>
 
 #include <components/sceneutil/vismask.hpp>
-#include <components/settings/settings.hpp>
 
 namespace SceneUtil
 {
@@ -19,6 +18,19 @@ namespace SceneUtil
             return;
         }
         
+        mOutdoorShadowCastingMask = SceneUtil::Mask_Scene;
+        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+            mOutdoorShadowCastingMask |= SceneUtil::Mask_Actor;
+        if (Settings::Manager::getBool("player shadows", "Shadows"))
+            mOutdoorShadowCastingMask |= SceneUtil::Mask_Player;
+
+        mIndoorShadowCastingMask = mOutdoorShadowCastingMask;
+
+        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+            mOutdoorShadowCastingMask |= SceneUtil::Mask_Terrain;
+        if (Settings::Manager::getBool("object shadows", "Shadows"))
+            mOutdoorShadowCastingMask |= (SceneUtil::Mask_Object|SceneUtil::Mask_Static);
+
         mShadowTechnique->enableShadows();
 
         mShadowSettings->setLightNum(0);
@@ -66,8 +78,49 @@ namespace SceneUtil
             mShadowTechnique->disableDebugHUD();
     }
 
+    void ShadowManager::processChangedSettings(const Settings::CategorySettingVector &changed, osgViewer::Viewer* viewer, bool isIndoor)
+    {
+        bool reloadSettings = false;
+        bool reloadTechnique = false;
+        for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
+        {
+            if (it->first == "Shadows")
+            {
+                reloadSettings = true;
+
+                if (it->second == "shadow map resolution")
+                    reloadTechnique = true;
+            }
+        }
+
+        if (!reloadSettings)
+            return;
+
+        // Note: only settings from in-game menu are handled.
+        setupShadowSettings();
+
+        if (reloadTechnique)
+        {
+            viewer->stopThreading();
+
+            mShadowTechnique = new MWShadowTechnique();
+            mShadowedScene->setShadowTechnique(mShadowTechnique);
+            mShadowTechnique->setupCastingShader(mShaderManager);
+            mShadowTechnique->createShaders();
+
+            viewer->startThreading();
+        }
+
+        if (isIndoor)
+            enableIndoorMode();
+        else
+            enableOutdoorMode();
+    }
+
     void ShadowManager::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
     {
+        // Shadows do not work on Android so far
+#ifndef ANDROID
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
         numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
 
@@ -85,12 +138,14 @@ namespace SceneUtil
             stateset->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
             stateset->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseShadowTextureUnit)).c_str(), i));
         }
+#endif
     }
 
-    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
+    ShadowManager::ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, Shader::ShaderManager* shaderManager) : mShadowedScene(new osgShadow::ShadowedScene),
         mShadowTechnique(new MWShadowTechnique),
-        mOutdoorShadowCastingMask(outdoorShadowCastingMask),
-        mIndoorShadowCastingMask(indoorShadowCastingMask)
+        mShaderManager(shaderManager),
+        mOutdoorShadowCastingMask(SceneUtil::Mask_Disabled),
+        mIndoorShadowCastingMask(SceneUtil::Mask_Disabled)
     {
         mShadowedScene->setShadowTechnique(mShadowTechnique);
 
@@ -160,7 +215,7 @@ namespace SceneUtil
 
     void ShadowManager::enableIndoorMode()
     {
-        if (Settings::Manager::getBool("enable indoor shadows", "Shadows"))
+        if (mEnableShadows && Settings::Manager::getBool("enable indoor shadows", "Shadows"))
             mShadowSettings->setCastsShadowTraversalMask(mIndoorShadowCastingMask);
         else
             mShadowTechnique->disableShadows();

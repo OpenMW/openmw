@@ -234,19 +234,7 @@ namespace MWRender
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
 
-        int shadowCastingTraversalMask = SceneUtil::Mask_Scene;
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
-            shadowCastingTraversalMask |= SceneUtil::Mask_Actor;
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
-            shadowCastingTraversalMask |= SceneUtil::Mask_Player;
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-            shadowCastingTraversalMask |= SceneUtil::Mask_Terrain;
-
-        int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
-            shadowCastingTraversalMask |= (SceneUtil::Mask_Object|SceneUtil::Mask_Static);
-
-        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, shadowCastingTraversalMask, indoorShadowCastingTraversalMask, mResourceSystem->getSceneManager()->getShaderManager()));
+        mShadowManager.reset(new SceneUtil::ShadowManager(sceneRoot, mRootNode, &mResourceSystem->getSceneManager()->getShaderManager()));
 
         Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -1269,6 +1257,7 @@ namespace MWRender
 
     void RenderingManager::processChangedSettings(const Settings::CategorySettingVector &changed)
     {
+        bool updateShadows = false;
         for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
         {
             if (it->first == "Camera" && it->second == "field of view")
@@ -1289,7 +1278,16 @@ namespace MWRender
                 updateTextureFiltering();
             else if (it->first == "Water")
                 mWater->processChangedSettings(changed);
+            else if (it->first == "Shadows")
+            {
+                bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows");
+                mResourceSystem->getSceneManager()->setForceShaders(forceShaders);
+                updateShadows = true;
+            }
         }
+
+        if (updateShadows)
+            mShadowManager->processChangedSettings(changed, mViewer, !mSky->isEnabled());
     }
 
     float RenderingManager::getNearClipDistance() const

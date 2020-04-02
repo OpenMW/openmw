@@ -5,6 +5,7 @@
 #include <osgShadow/ShadowedScene>
 
 #include <components/shader/shadermanager.hpp>
+#include <components/settings/settings.hpp>
 
 #include "mwshadowtechnique.hpp"
 
@@ -17,11 +18,13 @@ namespace SceneUtil
 
         static Shader::ShaderManager::DefineMap getShadowsDisabledDefines();
 
-        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager);
+        ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, Shader::ShaderManager* shaderManager);
 
         void setupShadowSettings();
 
         Shader::ShaderManager::DefineMap getShadowDefines();
+
+        void processChangedSettings(const Settings::CategorySettingVector &changed, osgViewer::Viewer* viewer, bool isIndoor);
 
         void enableIndoorMode();
 
@@ -32,6 +35,7 @@ namespace SceneUtil
         osg::ref_ptr<osgShadow::ShadowedScene> mShadowedScene;
         osg::ref_ptr<osgShadow::ShadowSettings> mShadowSettings;
         osg::ref_ptr<MWShadowTechnique> mShadowTechnique;
+        Shader::ShaderManager* mShaderManager;
 
         unsigned int mOutdoorShadowCastingMask;
         unsigned int mIndoorShadowCastingMask;

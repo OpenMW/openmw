@@ -6,6 +6,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_TabItem.h>
 
 #include <SDL_video.h>
 
@@ -204,6 +205,7 @@ namespace MWGui
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
+        getWidget(mShadowTextureSize, "ShadowsTextureSize");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -228,6 +230,7 @@ namespace MWGui
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
+        mShadowTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onShadowTextureSizeChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -261,21 +264,38 @@ namespace MWGui
         mTextureFilteringButton->setCaption(textureMipmappingToStr(tmip));
 
         int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
-        if (waterTextureSize >= 512)
-            mWaterTextureSize->setIndexSelected(0);
-        if (waterTextureSize >= 1024)
-            mWaterTextureSize->setIndexSelected(1);
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
+        else if (waterTextureSize >= 1024)
+            mWaterTextureSize->setIndexSelected(1);
+        else if (waterTextureSize >= 512)
+            mWaterTextureSize->setIndexSelected(0);
 
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         waterReflectionDetail = std::min(4, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
+        int shadowsTextureSize = Settings::Manager::getInt ("shadow map resolution", "Shadows");
+        if (shadowsTextureSize >= 4096)
+            mShadowTextureSize->setIndexSelected(3);
+        else if (shadowsTextureSize >= 2048)
+            mShadowTextureSize->setIndexSelected(2);
+        else if (shadowsTextureSize >= 1024)
+            mShadowTextureSize->setIndexSelected(1);
+        else if (shadowsTextureSize >= 512)
+            mShadowTextureSize->setIndexSelected(0);
+
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
         mKeyboardSwitch->setStateSelected(true);
         mControllerSwitch->setStateSelected(false);
+
+#ifdef ANDROID
+        // Shadows do not work on Android so far, so hide shadows tab
+        MyGUI::TabControl *tabControl;
+        getWidget(tabControl, "VideoTabs");
+        tabControl->removeItemAt(3);
+#endif
     }
 
     void SettingsWindow::onTabChanged(MyGUI::TabControl* /*_sender*/, size_t /*index*/)
@@ -355,6 +375,21 @@ namespace MWGui
     {
         unsigned int level = std::min((unsigned int)4, (unsigned int)pos);
         Settings::Manager::setInt("reflection detail", "Water", level);
+        apply();
+    }
+
+    void SettingsWindow::onShadowTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        int size = 0;
+        if (pos == 0)
+            size = 512;
+        else if (pos == 1)
+            size = 1024;
+        else if (pos == 2)
+            size = 2048;
+        else if (pos == 3)
+            size = 4096;
+        Settings::Manager::setInt("shadow map resolution", "Shadows", size);
         apply();
     }
 

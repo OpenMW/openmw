@@ -82,7 +82,7 @@ namespace SceneUtil {
 
         virtual void disableFrontFaceCulling();
 
-        virtual void setupCastingShader(Shader::ShaderManager &shaderManager);
+        virtual void setupCastingShader(Shader::ShaderManager* shaderManager);
 
         class ComputeLightSpaceBounds : public osg::NodeVisitor, public osg::CullStack
         {
