@@ -487,8 +487,6 @@ IF(NOT WIN32 AND NOT APPLE)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw.cfg.install" DESTINATION "${SYSCONFDIR}" RENAME "openmw.cfg" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/resources/version" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
     INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb_204.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/gamecontrollerdb_205.txt" DESTINATION "${SYSCONFDIR}" COMPONENT "openmw")
 
     IF(BUILD_OPENCS)
         INSTALL(FILES "${OpenMW_BINARY_DIR}/openmw-cs.cfg" DESTINATION "${SYSCONFDIR}" COMPONENT "opencs")
