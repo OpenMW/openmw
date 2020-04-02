@@ -7,6 +7,7 @@
 
 namespace Compiler
 {
+    class ContextRestore;
     /// \brief Error handler implementation: Write errors into logging stream
 
     class StreamErrorHandler : public ErrorHandler
@@ -26,12 +27,22 @@ namespace Compiler
 
         public:
 
-            void setContext(const std::string& context);
+            ContextRestore setContext(const std::string& context, bool restore = false);
 
         // constructors
 
             StreamErrorHandler ();
             ///< constructor
+    };
+
+    class ContextRestore
+    {
+            StreamErrorHandler* mHandler;
+            const std::string mContext;
+        public:
+            ContextRestore (StreamErrorHandler* handler, const std::string& context);
+
+            ~ContextRestore();
     };
 }
 

@@ -56,10 +56,25 @@ namespace Compiler
         Log(logLevel) << text.str();
     }
 
-    void StreamErrorHandler::setContext(const std::string &context)
+    ContextRestore StreamErrorHandler::setContext(const std::string &context, bool restore)
     {
+        if (!restore)
+        {
+            mContext = context;
+            return {nullptr, {}};
+        }
+        ContextRestore restorer(this, mContext);
         mContext = context;
+        return restorer;
     }
 
     StreamErrorHandler::StreamErrorHandler()  {}
+
+    ContextRestore::ContextRestore(StreamErrorHandler* handler, const std::string& context) : mHandler(handler), mContext(context) {}
+
+    ContextRestore::~ContextRestore()
+    {
+        if(mHandler)
+            mHandler->setContext(mContext);
+    }
 }
