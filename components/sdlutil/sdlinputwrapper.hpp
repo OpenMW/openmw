@@ -26,6 +26,7 @@ namespace SDLUtil
         ~InputWrapper();
 
         void setMouseEventCallback(MouseListener* listen) { mMouseListener = listen; }
+        void setSensorEventCallback(SensorListener* listen) { mSensorListener = listen; }
         void setKeyboardEventCallback(KeyListener* listen) { mKeyboardListener = listen; }
         void setWindowEventCallback(WindowListener* listen) { mWindowListener = listen; }
         void setControllerEventCallback(ControllerListener* listen) { mConListener = listen; }
@@ -58,6 +59,7 @@ namespace SDLUtil
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
         MouseListener* mMouseListener;
+        SensorListener* mSensorListener;
         KeyListener* mKeyboardListener;
         WindowListener* mWindowListener;
         ControllerListener* mConListener;

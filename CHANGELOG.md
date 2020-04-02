@@ -271,6 +271,7 @@
     Feature #5224: Handle NiKeyframeController for NiTriShape
     Feature #5274: Editor: Keyboard shortcut to drop objects to ground/obstacle in scene view
     Feature #5304: Morrowind-style bump-mapping
+    Feature #5311: Support for gyroscopic input (e.g. Android)
     Feature #5314: Ingredient filter in the alchemy window
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
