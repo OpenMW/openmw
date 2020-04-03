@@ -81,6 +81,7 @@ namespace MWGui
 
         void onFrame(float dt);
         virtual void setAlpha(float alpha);
+        virtual ~NoDrop() = default;
 
     private:
         MyGUI::Widget* mWidget;

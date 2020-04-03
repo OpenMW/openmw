@@ -149,6 +149,8 @@ public:
     public:
         virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
                            const std::multimap<float, std::string>& map) = 0;
+
+        virtual ~TextKeyListener() = default;
     };
 
     void setTextKeyListener(TextKeyListener* listener);

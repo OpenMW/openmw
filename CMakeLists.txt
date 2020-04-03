@@ -704,6 +704,7 @@ if (WIN32)
         # caused by boost
         4191 # 'type cast' : unsafe conversion (1.56, thread_primitives.hpp, normally off)
         4643 # Forward declaring 'X' in namespace std is not permitted by the C++ Standard. (in *_std_fwd.h files)
+        5204 # Class has virtual functions, but its trivial destructor is not virtual
 
         # caused by MyGUI
         4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
