@@ -30,9 +30,11 @@ namespace ESM
         // The tmp buffer is a null-byte separated string list, we
         // just have to pick out one string at a time.
         char* str = tmp.data();
-        if (!str && mVarNames.size() > 0)
+        if (!str)
         {
-            Log(Debug::Warning) << "SCVR with no variable names";
+            if (mVarNames.size() > 0)
+                Log(Debug::Warning) << "SCVR with no variable names";
+
             return;
         }
 
