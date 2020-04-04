@@ -75,8 +75,7 @@ namespace ESM
         mContext = esm.getContext();
 
         mLandData = nullptr;
-        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
-            mWnam[i] = 0;
+        std::fill(std::begin(mWnam), std::end(mWnam), 0);
 
         // Skip the land data here. Load it when the cell is loaded.
         while (esm.hasMoreSubs())
@@ -193,15 +192,13 @@ namespace ESM
     {
         mPlugin = 0;
 
-        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
-            mWnam[i] = 0;
+        std::fill(std::begin(mWnam), std::end(mWnam), 0);
 
         if (!mLandData)
             mLandData = new LandData;
 
         mLandData->mHeightOffset = 0;
-        for (int i = 0; i < LAND_NUM_VERTS; ++i)
-            mLandData->mHeights[i] = 0;
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
@@ -210,14 +207,8 @@ namespace ESM
             mLandData->mNormals[i*3+1] = 0;
             mLandData->mNormals[i*3+2] = 127;
         }
-        for (int i = 0; i < LAND_NUM_TEXTURES; ++i)
-            mLandData->mTextures[i] = 0;
-        for (int i = 0; i < LAND_NUM_VERTS; ++i)
-        {
-            mLandData->mColours[i*3+0] = 255;
-            mLandData->mColours[i*3+1] = 255;
-            mLandData->mColours[i*3+2] = 255;
-        }
+        std::fill(std::begin(mLandData->mTextures), std::end(mLandData->mTextures), 0);
+        std::fill(std::begin(mLandData->mColours), std::end(mLandData->mColours), 255);
         mLandData->mUnk1 = 0;
         mLandData->mUnk2 = 0;
         mLandData->mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM |
