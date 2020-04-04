@@ -1268,19 +1268,23 @@ namespace MWMechanics
             // Use time from the player's light
             if(isPlayer)
             {
-                float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
-
-                // -1 is infinite light source. Other negative values are treated as 0.
-                if(timeRemaining != -1.0f)
+                // But avoid using it up if the light source is hidden
+                MWRender::Animation *anim = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                if (anim && anim->getCarriedLeftShown())
                 {
-                    timeRemaining -= duration;
+                    float timeRemaining = heldIter->getClass().getRemainingUsageTime(*heldIter);
 
-                    if(timeRemaining > 0.0f)
-                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
-                    else
+                    // -1 is infinite light source. Other negative values are treated as 0.
+                    if (timeRemaining != -1.0f)
                     {
-                        inventoryStore.remove(*heldIter, 1, ptr); // remove it
-                        return;
+                        timeRemaining -= duration;
+                        if (timeRemaining <= 0.f)
+                        {
+                            inventoryStore.remove(*heldIter, 1, ptr); // remove it
+                            return;
+                        }
+
+                        heldIter->getClass().setRemainingUsageTime(*heldIter, timeRemaining);
                     }
                 }
             }

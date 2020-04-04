@@ -459,6 +459,7 @@ public:
 
     virtual bool useShieldAnimations() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
+    virtual bool getCarriedLeftShown() const { return false; }
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}
     virtual void setVampire(bool vampire) {}
