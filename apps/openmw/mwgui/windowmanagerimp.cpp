@@ -1162,11 +1162,7 @@ namespace MWGui
 
     void WindowManager::setCursorVisible(bool visible)
     {
-        if (visible == mCursorVisible)
-            return;
         mCursorVisible = visible;
-        if (!visible)
-            mCursorActive = false;
     }
 
     void WindowManager::setCursorActive(bool active)
