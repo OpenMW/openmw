@@ -211,6 +211,7 @@
     Bug #5326: Formatting issues in the settings.cfg
     Bug #5328: Skills aren't properly reset for dead actors
     Bug #5345: Dopey Necromancy does not work due to a missing quote
+    Bug #5350: An attempt to launch magic bolt causes "AL error invalid value" error
     Bug #5352: Light source items' duration is decremented while they aren't visible
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
