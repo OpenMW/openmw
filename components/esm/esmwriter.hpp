@@ -82,17 +82,23 @@ class ESMWriter
             endRecord(name);
         }
 
-private:
+        template<typename T, std::size_t size>
+        void writeHNT(const std::string& name, const T (&data)[size])
+        {
+            startSubRecord(name);
+            writeT(data);
+            endRecord(name);
+        }
+
         // Prevent using writeHNT with strings. This already happened by accident and results in
         // state being discarded without any error on writing or reading it. :(
         // writeHNString and friends must be used instead.
-        void writeHNT(const std::string& name, const std::string& data)
-        {
-        }
-        void writeT(const std::string& data)
-        {
-        }
-public:
+        void writeHNT(const std::string& name, const std::string& data) = delete;
+
+        void writeT(const std::string& data) = delete;
+
+        template<typename T, std::size_t size>
+        void writeHNT(const std::string& name, const T (&data)[size], int) = delete;
 
         template<typename T>
         void writeHNT(const std::string& name, const T& data, int size)
@@ -106,6 +112,12 @@ public:
         void writeT(const T& data)
         {
             write((char*)&data, sizeof(T));
+        }
+
+        template<typename T, std::size_t size>
+        void writeT(const T (&data)[size])
+        {
+            write(reinterpret_cast<const char*>(data), size * sizeof(T));
         }
 
         template<typename T>
