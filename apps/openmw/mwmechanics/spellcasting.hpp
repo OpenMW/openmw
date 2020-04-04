@@ -1,5 +1,5 @@
-#ifndef MWMECHANICS_SPELLSUCCESS_H
-#define MWMECHANICS_SPELLSUCCESS_H
+#ifndef MWMECHANICS_SPELLCASTING_H
+#define MWMECHANICS_SPELLCASTING_H
 
 #include <components/esm/effectlist.hpp>
 #include <components/esm/loadskil.hpp>
@@ -45,24 +45,6 @@ namespace MWMechanics
     /// Get whether or not the given spell contributes to skill progress.
     bool spellIncreasesSkill(const ESM::Spell* spell);
     bool spellIncreasesSkill(const std::string& spellId);
-
-    /// Get the resistance attribute against an effect for a given actor. This will add together
-    /// ResistX and Weakness to X effects relevant against the given effect.
-    float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects);
-
-    /// Get the effective resistance against an effect casted by the given actor in the given spell (optional).
-    /// @return >=100 for fully resisted. can also return negative value for damage amplification.
-    /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
-    ///                being applied (but not applied yet) that should also be considered.
-    float getEffectResistance (short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                               const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
-
-    /// Get an effect multiplier for applying an effect cast by the given actor in the given spell (optional).
-    /// @return effect multiplier from 0 to 2.  (100% net resistance to 100% net weakness)
-    /// @param effects Override the actor's current magicEffects. Useful if there are effects currently
-    ///                being applied (but not applied yet) that should also be considered.
-    float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
-                              const ESM::Spell* spell = nullptr, const MagicEffects* effects = nullptr);
 
     bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
 
