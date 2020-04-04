@@ -27,6 +27,7 @@
 #include "actorutil.hpp"
 #include "aifollow.hpp"
 #include "weapontype.hpp"
+#include "summoning.hpp"
 
 namespace MWMechanics
 {
@@ -1102,15 +1103,6 @@ namespace MWMechanics
         const float result = castCost - (castCost / 100) * (eSkill - 10);
 
         return static_cast<int>((result < 1) ? 1 : result);
-    }
-
-    bool isSummoningEffect(int effectId)
-    {
-        return ((effectId >= ESM::MagicEffect::SummonScamp
-                && effectId <= ESM::MagicEffect::SummonStormAtronach)
-                || effectId == ESM::MagicEffect::SummonCenturionSphere
-                || (effectId >= ESM::MagicEffect::SummonFabricant
-                    && effectId <= ESM::MagicEffect::SummonCreature05));
     }
 
     bool disintegrateSlot (MWWorld::Ptr ptr, int slot, float disintegrate)

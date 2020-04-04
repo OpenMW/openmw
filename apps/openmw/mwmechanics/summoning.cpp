@@ -13,12 +13,18 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "spellcasting.hpp"
 #include "creaturestats.hpp"
 #include "aifollow.hpp"
 
 namespace MWMechanics
 {
+
+    bool isSummoningEffect(int effectId)
+    {
+        return ((effectId >= ESM::MagicEffect::SummonScamp && effectId <= ESM::MagicEffect::SummonStormAtronach)
+             || (effectId == ESM::MagicEffect::SummonCenturionSphere)
+             || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
+    }
 
     std::string getSummonedCreature(int effectId)
     {

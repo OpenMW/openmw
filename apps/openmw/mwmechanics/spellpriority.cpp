@@ -18,6 +18,7 @@
 #include "spellcasting.hpp"
 #include "weapontype.hpp"
 #include "combat.hpp"
+#include "summoning.hpp"
 
 namespace
 {

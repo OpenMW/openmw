@@ -11,6 +11,8 @@ namespace MWMechanics
 {
     class CreatureStats;
 
+    bool isSummoningEffect(int effectId);
+
     std::string getSummonedCreature(int effectId);
 
     struct UpdateSummonedCreatures : public EffectSourceVisitor

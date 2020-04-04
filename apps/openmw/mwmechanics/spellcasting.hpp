@@ -27,8 +27,6 @@ namespace MWMechanics
 
     float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr);
 
-    bool isSummoningEffect(int effectId);
-
     /**
      * @param spell spell to cast
      * @param actor calculate spell success chance for this actor (depends on actor's skills)
