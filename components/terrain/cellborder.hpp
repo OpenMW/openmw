@@ -31,7 +31,6 @@ namespace Terrain
         osg::Group *mRoot;
 
         CellGrid mCellBorderNodes;
-        int mBorderMask;
     };
 }
 

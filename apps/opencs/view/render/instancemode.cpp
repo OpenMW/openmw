@@ -719,16 +719,14 @@ void CSVRender::InstanceMode::dropInstance(DropMode dropMode, CSVRender::Object*
 
     mParentNode->accept(visitor);
 
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
+    osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+    if (it != intersector->getIntersections().end())
     {
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
         ESM::Position position = object->getPosition();
         object->setEdited (Object::Override_Position);
         position.pos[2] = intersection.getWorldIntersectPoint().z() + objectHeight;
         object->setPosition(position.pos);
-
-        return;
     }
 }
 
@@ -753,8 +751,8 @@ float CSVRender::InstanceMode::getDropHeight(DropMode dropMode, CSVRender::Objec
 
     mParentNode->accept(visitor);
 
-    for (osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
-         it != intersector->getIntersections().end(); ++it)
+    osgUtil::LineSegmentIntersector::Intersections::iterator it = intersector->getIntersections().begin();
+    if (it != intersector->getIntersections().end())
     {
         osgUtil::LineSegmentIntersector::Intersection intersection = *it;
         float collisionLevel = intersection.getWorldIntersectPoint().z();
