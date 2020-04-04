@@ -171,7 +171,7 @@ namespace MWScript
         {
             Compiler::Locals locals;
 
-            const Compiler::ContextRestore&& restore = mErrorHandler.setContext(name2 + "[local variables]", true);
+            const Compiler::ContextOverride override(mErrorHandler, name2 + "[local variables]");
 
             std::istringstream stream (script->mScriptText);
             Compiler::QuickFileParser parser (mErrorHandler, mCompilerContext, locals);
