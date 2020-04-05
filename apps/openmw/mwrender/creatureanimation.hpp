@@ -30,6 +30,7 @@ namespace MWRender
 
         virtual void equipmentChanged() { updateParts(); }
 
+        virtual bool getWeaponsShown() const { return mShowWeapons; }
         virtual void showWeapons(bool showWeapon);
 
         virtual bool getCarriedLeftShown() const { return mShowCarriedLeft; }

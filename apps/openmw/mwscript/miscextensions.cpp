@@ -35,6 +35,8 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "../mwrender/animation.hpp"
+
 #include "interpretercontext.hpp"
 #include "ref.hpp"
 
@@ -664,8 +666,32 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    runtime.push((ptr.getClass().hasInventoryStore(ptr) || ptr.getClass().isBipedal(ptr)) &&
-                                ptr.getClass().getCreatureStats (ptr).getDrawState () == MWMechanics::DrawState_Weapon);
+                    if (!ptr.getClass().hasInventoryStore(ptr) && !ptr.getClass().isBipedal(ptr))
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+                    if (ptr.getClass().getCreatureStats(ptr).getDrawState() != MWMechanics::DrawState_Weapon)
+                    {
+                        runtime.push(0);
+                        return;
+                    }
+
+                    // Assume unarmed combat by default
+                    bool weaponAttached = true;
+                    if (ptr.getClass().hasInventoryStore(ptr))
+                    {
+                        const MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+                        MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                        if (weapon != inv.end())
+                        {
+                            // But for armed combat, the weapon should be attached
+                            const MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
+                            weaponAttached = animation && animation->getWeaponsShown();
+                        }
+                    }
+
+                    runtime.push(weaponAttached);
                 }
         };
 

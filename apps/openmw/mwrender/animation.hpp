@@ -458,6 +458,7 @@ public:
     const osg::Node* getNode(const std::string& name) const;
 
     virtual bool useShieldAnimations() const { return false; }
+    virtual bool getWeaponsShown() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
     virtual bool getCarriedLeftShown() const { return false; }
     virtual void showCarriedLeft(bool show) {}

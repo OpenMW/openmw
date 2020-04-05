@@ -128,6 +128,7 @@ public:
     /// to indicate the facing orientation of the character.
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
+    virtual bool getWeaponsShown() const { return mShowWeapons; }
     virtual void showWeapons(bool showWeapon);
 
     virtual bool getCarriedLeftShown() const { return mShowCarriedLeft; }
