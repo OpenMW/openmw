@@ -613,6 +613,8 @@ void CSVRender::WorldspaceWidget::updateOverlay()
 
 void CSVRender::WorldspaceWidget::mouseMoveEvent (QMouseEvent *event)
 {
+    dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent()).mouseMoveEvent (event);
+
     if (mDragging)
     {
         int diffX = event->x() - mDragX;

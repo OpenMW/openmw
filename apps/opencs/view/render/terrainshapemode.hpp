@@ -19,6 +19,7 @@
 #include "../widget/brushshapes.hpp"
 #endif
 
+#include "brushdraw.hpp"
 #include "terrainselection.hpp"
 
 namespace CSVWidget
@@ -89,6 +90,7 @@ namespace CSVRender
 
             void dragWheel (int diff, double speedFactor) final;
             void dragMoveEvent (QDragMoveEvent *event) final;
+            void mouseMoveEvent (QMouseEvent *event) final;
 
         private:
 
@@ -168,6 +170,7 @@ namespace CSVRender
             std::string mBrushTexture;
             int mBrushSize = 1;
             CSVWidget::BrushShape mBrushShape = CSVWidget::BrushShape_Point;
+            std::unique_ptr<BrushDraw> mBrushDraw;
             std::vector<std::pair<int, int>> mCustomBrushShape;
             CSVWidget::SceneToolShapeBrush *mShapeBrushScenetool = nullptr;
             int mDragMode = InteractionType_None;
