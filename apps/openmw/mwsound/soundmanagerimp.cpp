@@ -857,30 +857,29 @@ namespace MWSound
         return false;
     }
 
-    void SoundManager::pauseSounds(const std::string& blockerId, int types)
+    void SoundManager::pauseSounds(BlockerType blocker, int types)
     {
         if(mOutput->isInitialized())
         {
-            auto found = mPausedSoundTypes.find(blockerId);
-            if (found != mPausedSoundTypes.end() && found->second != types)
-                resumeSounds(blockerId);
+            if (mPausedSoundTypes[blocker] != 0)
+                resumeSounds(blocker);
 
             types = types & Type::Mask;
             mOutput->pauseSounds(types);
-            mPausedSoundTypes[blockerId] = types;
+            mPausedSoundTypes[blocker] = types;
         }
     }
 
-    void SoundManager::resumeSounds(const std::string& blockerId)
+    void SoundManager::resumeSounds(BlockerType blocker)
     {
         if(mOutput->isInitialized())
         {
-            mPausedSoundTypes.erase(blockerId);
+            mPausedSoundTypes[blocker] = 0;
             int types = int(Type::Mask);
-            for (auto& blocker : mPausedSoundTypes)
+            for (int currentBlocker = 0; currentBlocker < BlockerType::MaxCount; currentBlocker++)
             {
-                if (blocker.first != blockerId)
-                    types &= ~blocker.second;
+                if (currentBlocker != blocker)
+                    types &= ~mPausedSoundTypes[currentBlocker];
             }
 
             mOutput->resumeSounds(types);
@@ -1425,7 +1424,7 @@ namespace MWSound
             mUnusedStreams.push_back(sound);
         }
         mActiveTracks.clear();
-        mPausedSoundTypes.clear();
         mPlaybackPaused = false;
+        std::fill(std::begin(mPausedSoundTypes), std::end(mPausedSoundTypes), 0);
     }
 }
