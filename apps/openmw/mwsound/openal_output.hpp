@@ -92,6 +92,9 @@ namespace MWSound
         virtual void pauseSounds(int types);
         virtual void resumeSounds(int types);
 
+        virtual void pauseActiveDevice();
+        virtual void resumeActiveDevice();
+
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();
     };

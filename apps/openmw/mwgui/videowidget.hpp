@@ -47,6 +47,10 @@ namespace MWGui
         /// Stop video and free resources (done automatically on destruction)
         void stop();
 
+        void pause();
+        void resume();
+        bool isPaused() const;
+
         /// Adjust the coordinates of this video widget relative to its parent,
         /// based on the dimensions of the playing video.
         /// @param stretch Stretch the video to fill the whole screen? If false,

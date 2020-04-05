@@ -244,6 +244,7 @@
     Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
+    Feature #4944: Pause audio when OpenMW is minimized
     Feature #4958: Support eight blood types
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
