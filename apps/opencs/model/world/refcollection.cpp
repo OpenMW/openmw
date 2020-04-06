@@ -18,10 +18,10 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
     CellRef ref;
     ref.mNew = false;
     ESM::MovedCellRef mref;
+    mref.mRefNum.mIndex = 0;
     bool isDeleted = false;
 
-    // hack to initialise mindex
-    while (!(mref.mRefNum.mIndex = 0) && ESM::Cell::getNextRef(reader, ref, isDeleted, true, &mref))
+    while (ESM::Cell::getNextRef(reader, ref, isDeleted, true, &mref))
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
@@ -59,6 +59,8 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
         }
         else
             ref.mCell = cell2.mId;
+
+        mref.mRefNum.mIndex = 0;
 
         // ignore content file number
         std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
