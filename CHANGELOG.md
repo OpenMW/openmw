@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #5358: ForceGreeting always resets the dialogue window completely
 
 0.46.0
 ------
