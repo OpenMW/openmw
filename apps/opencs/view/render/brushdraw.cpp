@@ -21,8 +21,9 @@ CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textur
     mBrushDrawNode->addChild(mGeometry);
     mParentNode->addChild(mBrushDrawNode);
     if (mTextureMode)
-        mLandSizeFactor = ESM::Land::REAL_SIZE / ESM::Land::LAND_TEXTURE_SIZE;
-    else mLandSizeFactor = ESM::Land::REAL_SIZE / ESM::Land::LAND_SIZE;
+        mLandSizeFactor = static_cast<float>(ESM::Land::REAL_SIZE) / static_cast<float>(ESM::Land::LAND_TEXTURE_SIZE);
+    else
+        mLandSizeFactor = static_cast<float>(ESM::Land::REAL_SIZE) / static_cast<float>(ESM::Land::LAND_SIZE);
 }
 
 CSVRender::BrushDraw::~BrushDraw()
@@ -121,7 +122,7 @@ void CSVRender::BrushDraw::buildSquareGeometry(const float& radius, const osg::V
 
     const float brushOutlineHeight (1.0f);
     float diameter = radius * 2;
-    int resolution = (diameter / mLandSizeFactor) * 2; //half a vertex resolution
+    int resolution = static_cast<int>(2.f * diameter / mLandSizeFactor); //half a vertex resolution
     float resAdjustedLandSizeFactor = mLandSizeFactor / 2;
     osg::Vec4f lineColor(1.0f, 1.0f, 1.0f, 0.6f);
 
