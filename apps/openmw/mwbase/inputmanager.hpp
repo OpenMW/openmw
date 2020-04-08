@@ -47,6 +47,7 @@ namespace MWBase
             virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
 
             virtual void setDragDrop(bool dragDrop) = 0;
+            virtual void setGamepadGuiCursorEnabled(bool enabled) = 0;
 
             virtual void toggleControlSwitch (const std::string& sw, bool value) = 0;
             virtual bool getControlSwitch (const std::string& sw) = 0;
@@ -67,10 +68,15 @@ namespace MWBase
             /// Returns if the last used input device was a joystick or a keyboard
             /// @return true if joystick, false otherwise
             virtual bool joystickLastUsed() = 0;
+            virtual void setJoystickLastUsed(bool enabled) = 0;
 
             virtual int countSavedGameRecords() const = 0;
             virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
             virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
+
+            virtual void setPlayerControlsEnabled(bool enabled) = 0;
+
+            virtual void resetIdleTime() = 0;
     };
 }
 

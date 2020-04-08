@@ -3,7 +3,6 @@
 #include <osgViewer/ViewerEventHandlers>
 
 #include <MyGUI_InputManager.h>
-#include <MyGUI_RenderManager.h>
 #include <MyGUI_Widget.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
@@ -31,6 +30,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "mousemanager.hpp"
 #include "sdlmappings.hpp"
 #include "sensormanager.hpp"
 
@@ -60,18 +60,12 @@ namespace MWInput
         , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
-        , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
-        , mMouseLookEnabled(false)
         , mGuiCursorEnabled(true)
         , mGamepadGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
-        , mGuiCursorX(0)
-        , mGuiCursorY(0)
-        , mMouseWheel(0)
         , mGamepadZoom(0)
         , mUserFileExists(userFileExists)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
@@ -80,12 +74,10 @@ namespace MWInput
         , mSneakGamepadShortcut(false)
         , mSneaking(false)
         , mAttemptJump(false)
-        , mInvUiScalingFactor(1.f)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mFakeDeviceID(1)
     {
         mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
-        mInputManager->setMouseEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setControllerEventCallback(this);
@@ -145,15 +137,8 @@ namespace MWInput
         mSensorManager = new SensorManager();
         mInputManager->setSensorEventCallback (mSensorManager);
 
-        float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        if (uiScale != 0.f)
-            mInvUiScalingFactor = 1.f / uiScale;
-
-        int w,h;
-        SDL_GetWindowSize(window, &w, &h);
-
-        mGuiCursorX = mInvUiScalingFactor * w / 2.f;
-        mGuiCursorY = mInvUiScalingFactor * h / 2.f;
+        mMouseManager = new MouseManager(mInputBinder, mInputManager, window);
+        mInputManager->setMouseEventCallback (mMouseManager);
     }
 
     void InputManager::clear()
@@ -163,6 +148,7 @@ namespace MWInput
             it->second = true;
 
         mSensorManager->clear();
+        mMouseManager->clear();
     }
 
     InputManager::~InputManager()
@@ -529,9 +515,9 @@ namespace MWInput
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
-        if( !is_relative && was_relative != is_relative )
+        if(!is_relative && was_relative != is_relative)
         {
-            mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+            mMouseManager->warpMouse();
         }
     }
 
@@ -571,50 +557,26 @@ namespace MWInput
             float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue()*2.0f-1.0f;
             float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue()*2.0f-1.0f;
             float zAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-            const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
 
             xAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
             yAxis *= (1.5f - mInputBinder->getChannel(A_Use)->getValue());
 
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
-            float xmove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            float ymove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            if (xmove != 0|| ymove != 0 || zAxis != 0)
+            float xMove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
+            float yMove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
+            if (xMove != 0|| yMove != 0 || zAxis != 0)
             {
-                mGuiCursorX += xmove;
-                mGuiCursorY += ymove;
-                mMouseWheel -= static_cast<int>(zAxis * dt * 1500.0f);
+                int mouseWheelMove = static_cast<int>(-zAxis * dt * 1500.0f);
 
-                mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width-1)));
-                mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height-1)));
-
-                MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
-                mInputManager->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+                mMouseManager->injectMouseMove(xMove, yMove, mouseWheelMove);
+                mMouseManager->warpMouse();
                 MWBase::Environment::get().getWindowManager()->setCursorActive(true);
             }
         }
-        if (mMouseLookEnabled)
-        {
-            float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
-            float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
-            if (xAxis != 0 || yAxis != 0)
-            {
-                resetIdleTime();
 
-                float rot[3];
-                rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-                rot[1] = 0.0f;
-                rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
-
-                // Only actually turn player when we're not in vanity mode
-                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && mControlSwitch["playerlooking"])
-                {
-                    mPlayer->yaw(rot[2]);
-                    mPlayer->pitch(rot[0]);
-                }
-            }
-        }
+        if (mMouseManager->update(dt, disableControls))
+            resetIdleTime();
 
         if (mSensorManager->update(dt, mGuiCursorEnabled, mControlSwitch["playerlooking"]))
             resetIdleTime();
@@ -788,10 +750,16 @@ namespace MWInput
         mDragDrop = dragDrop;
     }
 
+    void InputManager::setGamepadGuiCursorEnabled(bool enabled)
+    {
+        mGamepadGuiCursorEnabled = enabled;
+    }
+
     void InputManager::changeInputMode(bool guiMode)
     {
         mGuiCursorEnabled = guiMode;
-        mMouseLookEnabled = !guiMode;
+        mMouseManager->setGuiCursorEnabled(guiMode);
+        mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
         MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (!mJoystickLastUsed || mGamepadGuiCursorEnabled));
@@ -810,9 +778,6 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
-
-            if (it->first == "Input" && it->second == "camera sensitivity")
-                mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
 
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
@@ -916,110 +881,6 @@ namespace MWInput
         mInputBinder->keyReleased (arg);
     }
 
-    void InputManager::mousePressed( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {
-        mJoystickLastUsed = false;
-        bool guiMode = false;
-
-        if (id == SDL_BUTTON_LEFT || id == SDL_BUTTON_RIGHT) // MyGUI only uses these mouse events
-        {
-            guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
-            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
-            {
-                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
-                if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
-                {
-                    MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
-                }
-            }
-            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
-        }
-
-        setPlayerControlsEnabled(!guiMode);
-
-        // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
-        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
-            mInputBinder->mousePressed (arg, id);
-    }
-
-    void InputManager::mouseReleased( const SDL_MouseButtonEvent &arg, Uint8 id )
-    {
-        mJoystickLastUsed = false;
-
-        if(mInputBinder->detectingBindingState())
-        {
-            mInputBinder->mouseReleased (arg, id);
-        } else {
-            bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
-            guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
-
-            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
-
-            setPlayerControlsEnabled(!guiMode);
-            mInputBinder->mouseReleased (arg, id);
-        }
-    }
-
-    void InputManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
-    {
-        if (mInputBinder->detectingBindingState() || !mControlsDisabled)
-            mInputBinder->mouseWheelMoved(arg);
-
-        mJoystickLastUsed = false;
-    }
-
-    void InputManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg )
-    {
-        mInputBinder->mouseMoved (arg);
-
-        mJoystickLastUsed = false;
-        resetIdleTime ();
-
-        if (mGuiCursorEnabled)
-        {
-            if (!mGamepadGuiCursorEnabled)
-                mGamepadGuiCursorEnabled = true;
-            // We keep track of our own mouse position, so that moving the mouse while in
-            // game mode does not move the position of the GUI cursor
-            mGuiCursorX = static_cast<float>(arg.x) * mInvUiScalingFactor;
-            mGuiCursorY = static_cast<float>(arg.y) * mInvUiScalingFactor;
-
-            mMouseWheel = int(arg.z);
-
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
-            // FIXME: inject twice to force updating focused widget states (tooltips) resulting from changing the viewport by scroll wheel
-            MyGUI::InputManager::getInstance().injectMouseMove( int(mGuiCursorX), int(mGuiCursorY), mMouseWheel);
-
-            MWBase::Environment::get().getWindowManager()->setCursorActive(true);
-        }
-
-        if (mMouseLookEnabled && !mControlsDisabled)
-        {
-            resetIdleTime();
-
-            float x = arg.xrel * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
-            float y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
-
-            float rot[3];
-            rot[0] = -y;
-            rot[1] = 0.0f;
-            rot[2] = -x;
-
-            // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && mControlSwitch["playerlooking"])
-            {
-                mPlayer->yaw(x);
-                mPlayer->pitch(y);
-            }
-
-            if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
-            {
-                MWBase::Environment::get().getWorld()->changeVanityModeScale(static_cast<float>(arg.zrel));
-            }
-        }
-    }
-
     void InputManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg )
     {
         if (!mJoystickEnabled || mInputBinder->detectingBindingState())
@@ -1035,7 +896,7 @@ namespace MWInput
                 // Temporary mouse binding until keyboard controls are available:
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
-                    bool mousePressSuccess = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(SDL_BUTTON_LEFT));
+                    bool mousePressSuccess = mMouseManager->injectMouseButtonPress(SDL_BUTTON_LEFT);
                     if (MyGUI::InputManager::getInstance().getMouseFocusWidget())
                     {
                         MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
@@ -1076,7 +937,7 @@ namespace MWInput
                 // Temporary mouse binding until keyboard controls are available:
                 if (arg.button == SDL_CONTROLLER_BUTTON_A) // We'll pretend that A is left click.
                 {
-                    bool mousePressSuccess = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(SDL_BUTTON_LEFT));
+                    bool mousePressSuccess = mMouseManager->injectMouseButtonRelease(SDL_BUTTON_LEFT);
                     if (mInputBinder->detectingBindingState()) // If the player just triggered binding, don't let button release bind.
                         return;
 
