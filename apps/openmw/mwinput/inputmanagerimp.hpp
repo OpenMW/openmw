@@ -21,6 +21,7 @@
 
 namespace MWInput
 {
+    class ActionManager;
     class MouseManager;
     class SensorManager;
 }
@@ -51,18 +52,10 @@ namespace SDLUtil
     class VideoWrapper;
 }
 
-namespace osgViewer
-{
-    class Viewer;
-    class ScreenCaptureHandler;
-}
-
 struct SDL_Window;
 
 namespace MWInput
 {
-    const float ZOOM_SCALE = 120.f; /// Used for scrolling camera in and out
-
     /**
     * @brief Class that handles all input and key bindings for OpenMW.
     */
@@ -167,9 +160,6 @@ namespace MWInput
     private:
         SDL_Window* mWindow;
         bool mWindowVisible;
-        osg::ref_ptr<osgViewer::Viewer> mViewer;
-        osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
-        osgViewer::ScreenCaptureHandler::CaptureOperation *mScreenCaptureOperation;
 
         bool mJoystickLastUsed;
         MWWorld::Player* mPlayer;
@@ -185,9 +175,6 @@ namespace MWInput
 
         bool mGrabCursor;
 
-        bool mInvertX;
-        bool mInvertY;
-
         bool mControlsDisabled;
         bool mJoystickEnabled;
 
@@ -202,12 +189,9 @@ namespace MWInput
         float mOverencumberedMessageDelay;
 
         float mGamepadZoom;
-        bool mUserFileExists;
-        bool mAlwaysRunActive;
         bool mSneakToggles;
         float mSneakToggleShortcutTimer;
         bool mSneakGamepadShortcut;
-        bool mSneaking;
         bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
@@ -215,6 +199,7 @@ namespace MWInput
         float mInvUiScalingFactor;
         float mGamepadCursorSpeed;
 
+        ActionManager* mActionManager;
         MouseManager* mMouseManager;
         SensorManager* mSensorManager;
 
@@ -228,23 +213,6 @@ namespace MWInput
         bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
-
-        bool checkAllowedToUseItems() const;
-
-        void toggleMainMenu();
-        void toggleSpell();
-        void toggleWeapon();
-        void toggleInventory();
-        void toggleConsole();
-        void screenshot();
-        void toggleJournal();
-        void activate();
-        void toggleWalking();
-        void toggleSneaking();
-        void toggleAutoMove();
-        void rest();
-        void quickLoad();
-        void quickSave();
 
         void quickKey (int index);
         void showQuickKeysMenu();

@@ -30,6 +30,7 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include "actionmanager.hpp"
 #include "mousemanager.hpp"
 #include "sdlmappings.hpp"
 #include "sensormanager.hpp"
@@ -41,14 +42,10 @@ namespace MWInput
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler,
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
-            const std::string& userFile, bool userFileExists,
-            const std::string& userControllerBindingsFile,
+            const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
-        , mViewer(viewer)
-        , mScreenCaptureHandler(screenCaptureHandler)
-        , mScreenCaptureOperation(screenCaptureOperation)
         , mJoystickLastUsed(false)
         , mPlayer(nullptr)
         , mInputManager(nullptr)
@@ -56,8 +53,6 @@ namespace MWInput
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
-        , mInvertX (Settings::Manager::getBool("invert x axis", "Input"))
-        , mInvertY (Settings::Manager::getBool("invert y axis", "Input"))
         , mControlsDisabled(false)
         , mJoystickEnabled (Settings::Manager::getBool("enable controller", "Input"))
         , mPreviewPOVDelay(0.f)
@@ -67,12 +62,8 @@ namespace MWInput
         , mDetectingKeyboard(false)
         , mOverencumberedMessageDelay(0.f)
         , mGamepadZoom(0)
-        , mUserFileExists(userFileExists)
-        , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
-        , mSneakToggles(Settings::Manager::getBool("toggle sneak", "Input"))
         , mSneakToggleShortcutTimer(0.f)
         , mSneakGamepadShortcut(false)
-        , mSneaking(false)
         , mAttemptJump(false)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mFakeDeviceID(1)
@@ -139,6 +130,8 @@ namespace MWInput
 
         mMouseManager = new MouseManager(mInputBinder, mInputManager, window);
         mInputManager->setMouseEventCallback (mMouseManager);
+
+        mActionManager = new ActionManager(mInputBinder, screenCaptureOperation, viewer, screenCaptureHandler);
     }
 
     void InputManager::clear()
@@ -147,6 +140,7 @@ namespace MWInput
         for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
             it->second = true;
 
+        mActionManager->clear();
         mSensorManager->clear();
         mMouseManager->clear();
     }
@@ -155,6 +149,8 @@ namespace MWInput
     {
         mInputBinder->save (mUserFile);
 
+        delete mActionManager;
+        delete mMouseManager;
         delete mSensorManager;
 
         delete mInputBinder;
@@ -181,51 +177,6 @@ namespace MWInput
             int pc = playerChannels[i];
             mInputBinder->getChannel(pc)->setEnabled(enabled);
         }
-    }
-
-    bool isLeftOrRightButton(int action, ICS::InputControlSystem* ics, int deviceId, bool joystick)
-    {
-        int mouseBinding = ics->getMouseButtonBinding(ics->getControl(action), ICS::Control::INCREASE);
-        if (mouseBinding != ICS_MAX_DEVICE_BUTTONS)
-            return true;
-        int buttonBinding = ics->getJoystickButtonBinding(ics->getControl(action), deviceId, ICS::Control::INCREASE);
-        if (joystick && (buttonBinding == 0 || buttonBinding == 1))
-            return true;
-        return false;
-    }
-
-    void InputManager::handleGuiArrowKey(int action)
-    {
-        // This is currently keyboard-specific code
-        // TODO: see if GUI controls can be refactored into a single function
-        if (mJoystickLastUsed)
-            return;
-
-        if (SDL_IsTextInputActive())
-            return;
-
-        if (isLeftOrRightButton(action, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
-            return;
-
-        MyGUI::KeyCode key;
-        switch (action)
-        {
-        case A_MoveLeft:
-            key = MyGUI::KeyCode::ArrowLeft;
-            break;
-        case A_MoveRight:
-            key = MyGUI::KeyCode::ArrowRight;
-            break;
-        case A_MoveForward:
-            key = MyGUI::KeyCode::ArrowUp;
-            break;
-        case A_MoveBackward:
-        default:
-            key = MyGUI::KeyCode::ArrowDown;
-            break;
-        }
-
-        MWBase::Environment::get().getWindowManager()->injectKeyPress(key, 0, false);
     }
 
     bool InputManager::gamepadToGuiControl(const SDL_ControllerButtonEvent &arg)
@@ -375,127 +326,7 @@ namespace MWInput
         }
 
         if (currentValue == 1)
-        {
-            // trigger action activated
-            switch (action)
-            {
-            case A_GameMenu:
-                toggleMainMenu ();
-                break;
-            case A_Screenshot:
-                screenshot();
-                break;
-            case A_Inventory:
-                toggleInventory ();
-                break;
-            case A_Console:
-                toggleConsole ();
-                break;
-            case A_Activate:
-                resetIdleTime();
-                activate();
-                break;
-            case A_MoveLeft:
-            case A_MoveRight:
-            case A_MoveForward:
-            case A_MoveBackward:
-                handleGuiArrowKey(action);
-                break;
-            case A_Journal:
-                toggleJournal ();
-                break;
-            case A_AutoMove:
-                toggleAutoMove ();
-                break;
-            case A_AlwaysRun:
-                toggleWalking ();
-                break;
-            case A_ToggleWeapon:
-                toggleWeapon ();
-                break;
-            case A_Rest:
-                rest();
-                break;
-            case A_ToggleSpell:
-                toggleSpell ();
-                break;
-            case A_QuickKey1:
-                quickKey(1);
-                break;
-            case A_QuickKey2:
-                quickKey(2);
-                break;
-            case A_QuickKey3:
-                quickKey(3);
-                break;
-            case A_QuickKey4:
-                quickKey(4);
-                break;
-            case A_QuickKey5:
-                quickKey(5);
-                break;
-            case A_QuickKey6:
-                quickKey(6);
-                break;
-            case A_QuickKey7:
-                quickKey(7);
-                break;
-            case A_QuickKey8:
-                quickKey(8);
-                break;
-            case A_QuickKey9:
-                quickKey(9);
-                break;
-            case A_QuickKey10:
-                quickKey(10);
-                break;
-            case A_QuickKeysMenu:
-                showQuickKeysMenu();
-                break;
-            case A_ToggleHUD:
-                MWBase::Environment::get().getWindowManager()->toggleHud();
-                break;
-            case A_ToggleDebug:
-                MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
-                break;
-            case A_ZoomIn:
-                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    MWBase::Environment::get().getWorld()->setCameraDistance(ZOOM_SCALE, true, true);
-                break;
-            case A_ZoomOut:
-                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                    MWBase::Environment::get().getWorld()->setCameraDistance(-ZOOM_SCALE, true, true);
-                break;
-            case A_QuickSave:
-                quickSave();
-                break;
-            case A_QuickLoad:
-                quickLoad();
-                break;
-            case A_CycleSpellLeft:
-                if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
-                    MWBase::Environment::get().getWindowManager()->cycleSpell(false);
-                break;
-            case A_CycleSpellRight:
-                if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
-                    MWBase::Environment::get().getWindowManager()->cycleSpell(true);
-                break;
-            case A_CycleWeaponLeft:
-                if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-                    MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
-                break;
-            case A_CycleWeaponRight:
-                if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
-                    MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
-                break;
-            case A_Sneak:
-                if (mSneakToggles)
-                {
-                    toggleSneaking();
-                }
-                break;
-            }
-        }
+            mActionManager->executeAction(action);
     }
 
     void InputManager::updateCursorMode()
@@ -519,18 +350,6 @@ namespace MWInput
         {
             mMouseManager->warpMouse();
         }
-    }
-
-    bool InputManager::checkAllowedToUseItems() const
-    {
-        MWWorld::Ptr player = MWMechanics::getPlayer();
-        if (player.getClass().getNpcStats(player).isWerewolf())
-        {
-            // Cannot use items or spells while in werewolf form
-            MWBase::Environment::get().getWindowManager()->messageBox("#{sWerewolfRefusal}");
-            return false;
-        }
-        return true;
     }
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
@@ -638,7 +457,8 @@ namespace MWInput
                     mPlayer->setForwardBackward (1);
                 }
 
-                if (!mSneakToggles)
+                static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
+                if (!isToggleSneak)
                 {
                     if(mJoystickLastUsed)
                     {
@@ -649,20 +469,20 @@ namespace MWInput
                                 if(mSneakToggleShortcutTimer <= 0.3f)
                                 {
                                     mSneakGamepadShortcut = true;
-                                    toggleSneaking();
+                                    mActionManager->toggleSneaking();
                                 }
                                 else
                                     mSneakGamepadShortcut = false;
                             }
 
-                            if(!mSneaking)
-                                toggleSneaking();
+                            if(!mActionManager->isSneaking())
+                                mActionManager->toggleSneaking();
                             mSneakToggleShortcutTimer = 0.f;
                         }
                         else
                         {
-                            if(!mSneakGamepadShortcut && mSneaking)
-                                toggleSneaking();
+                            if(!mSneakGamepadShortcut && mActionManager->isSneaking())
+                                mActionManager->toggleSneaking();
                             if(mSneakToggleShortcutTimer <= 0.3f)
                                 mSneakToggleShortcutTimer += dt;
                         }
@@ -678,7 +498,7 @@ namespace MWInput
                     mOverencumberedMessageDelay = 0.f;
                 }
 
-                if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
+                if ((mActionManager->isAlwaysRunActive() && alwaysRunAllowed) || isRunning)
                     mPlayer->setRunState(!actionIsActive(A_Run));
                 else
                     mPlayer->setRunState(actionIsActive(A_Run));
@@ -773,12 +593,6 @@ namespace MWInput
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
-            if (it->first == "Input" && it->second == "invert x axis")
-                mInvertX = Settings::Manager::getBool("invert x axis", "Input");
-
-            if (it->first == "Input" && it->second == "invert y axis")
-                mInvertY = Settings::Manager::getBool("invert y axis", "Input");
-
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
 
@@ -808,6 +622,7 @@ namespace MWInput
                                         Settings::Manager::getBool("window border", "Video"));
         }
 
+        mMouseManager->processChangedSettings(changed);
         mSensorManager->processChangedSettings(changed);
     }
 
@@ -1020,246 +835,6 @@ namespace MWInput
     void InputManager::windowClosed()
     {
         MWBase::Environment::get().getStateManager()->requestQuit();
-    }
-
-    void InputManager::toggleMainMenu()
-    {
-        if (MyGUI::InputManager::getInstance().isModalAny())
-        {
-            MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-            return;
-        }
-
-        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
-        {
-            MWBase::Environment::get().getWindowManager()->toggleConsole();
-            return;
-        }
-
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode()) //No open GUIs, open up the MainMenu
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
-        }
-        else //Close current GUI
-        {
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
-        }
-    }
-
-    void InputManager::quickLoad() {
-        if (!MyGUI::InputManager::getInstance().isModalAny())
-            MWBase::Environment::get().getStateManager()->quickLoad();
-    }
-
-    void InputManager::quickSave() {
-        if (!MyGUI::InputManager::getInstance().isModalAny())
-            MWBase::Environment::get().getStateManager()->quickSave();
-    }
-    void InputManager::toggleSpell()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
-
-        // Not allowed before the magic window is accessible
-        if (!mControlSwitch["playermagic"] || !mControlSwitch["playercontrols"])
-            return;
-
-        if (!checkAllowedToUseItems())
-            return;
-
-        // Not allowed if no spell selected
-        MWWorld::InventoryStore& inventory = mPlayer->getPlayer().getClass().getInventoryStore(mPlayer->getPlayer());
-        if (MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty() &&
-            inventory.getSelectedEnchantItem() == inventory.end())
-            return;
-
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
-            return;
-
-        MWMechanics::DrawState_ state = mPlayer->getDrawState();
-        if (state == MWMechanics::DrawState_Weapon || state == MWMechanics::DrawState_Nothing)
-            mPlayer->setDrawState(MWMechanics::DrawState_Spell);
-        else
-            mPlayer->setDrawState(MWMechanics::DrawState_Nothing);
-    }
-
-    void InputManager::toggleWeapon()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
-
-        // Not allowed before the inventory window is accessible
-        if (!mControlSwitch["playerfighting"] || !mControlSwitch["playercontrols"])
-            return;
-
-        // We want to interrupt animation only if attack is preparing, but still is not triggered
-        // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle Weapon" key twice
-        if (MWBase::Environment::get().getMechanicsManager()->isAttackPreparing(mPlayer->getPlayer()))
-            mPlayer->setAttackingOrSpell(false);
-        else if (MWBase::Environment::get().getMechanicsManager()->isAttackingOrSpell(mPlayer->getPlayer()))
-            return;
-
-        MWMechanics::DrawState_ state = mPlayer->getDrawState();
-        if (state == MWMechanics::DrawState_Spell || state == MWMechanics::DrawState_Nothing)
-            mPlayer->setDrawState(MWMechanics::DrawState_Weapon);
-        else
-            mPlayer->setDrawState(MWMechanics::DrawState_Nothing);
-    }
-
-    void InputManager::rest()
-    {
-        if (!mControlSwitch["playercontrols"])
-            return;
-
-        if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
-            return;
-
-        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
-
-    }
-
-    void InputManager::screenshot()
-    {
-        bool regularScreenshot = true;
-
-        std::string settingStr;
-
-        settingStr = Settings::Manager::getString("screenshot type","Video");
-        regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
-
-        if (regularScreenshot)
-        {
-            mScreenCaptureHandler->setFramesToCapture(1);
-            mScreenCaptureHandler->captureNextFrame(*mViewer);
-        }
-        else
-        {
-            osg::ref_ptr<osg::Image> screenshot (new osg::Image);
-
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(),settingStr))
-            {
-                (*mScreenCaptureOperation) (*(screenshot.get()),0);
-                // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
-            }
-        }
-    }
-
-    void InputManager::toggleInventory()
-    {
-        if (!mControlSwitch["playercontrols"])
-            return;
-
-        if (MyGUI::InputManager::getInstance ().isModalAny())
-            return;
-
-        if (MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            return;
-
-        // Toggle between game mode and inventory mode
-        if(!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Inventory);
-        else
-        {
-            MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
-            if(mode == MWGui::GM_Inventory || mode == MWGui::GM_Container)
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-        }
-
-        // .. but don't touch any other mode, except container.
-    }
-
-    void InputManager::toggleConsole()
-    {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
-            return;
-
-        MWBase::Environment::get().getWindowManager()->toggleConsole();
-    }
-
-    void InputManager::toggleJournal()
-    {
-        if (!mControlSwitch["playercontrols"])
-            return;
-        if (MyGUI::InputManager::getInstance ().isModalAny())
-            return;
-
-        if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
-                && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
-                && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
-        {
-            MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
-        }
-        else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
-        {
-            MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
-        }
-    }
-
-    void InputManager::quickKey (int index)
-    {
-        if (!mControlSwitch["playercontrols"] || !mControlSwitch["playerfighting"] || !mControlSwitch["playermagic"])
-            return;
-        if (!checkAllowedToUseItems())
-            return;
-
-        if (MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")!=-1)
-            return;
-
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
-            MWBase::Environment::get().getWindowManager()->activateQuickKey (index);
-    }
-
-    void InputManager::showQuickKeysMenu()
-    {
-        if (!MWBase::Environment::get().getWindowManager()->isGuiMode ()
-                && MWBase::Environment::get().getWorld()->getGlobalFloat ("chargenstate")==-1)
-        {
-            if (!checkAllowedToUseItems())
-                return;
-
-            MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_QuickKeysMenu);
-
-        }
-        else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu) {
-            while(MyGUI::InputManager::getInstance().isModalAny()) { //Handle any open Modal windows
-                MWBase::Environment::get().getWindowManager()->exitCurrentModal();
-            }
-            MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode(); //And handle the actual main window
-        }
-    }
-
-    void InputManager::activate()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode())
-        {
-            if (!SDL_IsTextInputActive() && !isLeftOrRightButton(A_Activate, mInputBinder, mFakeDeviceID, mJoystickLastUsed))
-                MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0, false);
-        }
-        else if (mControlSwitch["playercontrols"])
-            mPlayer->activate();
-    }
-
-    void InputManager::toggleAutoMove()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
-
-        if (mControlSwitch["playercontrols"])
-            mPlayer->setAutoMove (!mPlayer->getAutoMove());
-    }
-
-    void InputManager::toggleWalking()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode() || SDL_IsTextInputActive()) return;
-        mAlwaysRunActive = !mAlwaysRunActive;
-
-        Settings::Manager::setBool("always run", "Input", mAlwaysRunActive);
-    }
-
-    void InputManager::toggleSneaking()
-    {
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()) return;
-        if (!mControlSwitch["playercontrols"]) return;
-        mSneaking = !mSneaking;
-        mPlayer->setSneak(mSneaking);
     }
 
     void InputManager::resetIdleTime()
