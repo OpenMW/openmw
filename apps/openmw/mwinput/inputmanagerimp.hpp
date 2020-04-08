@@ -17,6 +17,11 @@
 
 #include "../mwbase/inputmanager.hpp"
 
+namespace MWInput
+{
+    class SensorManager;
+}
+
 namespace MWWorld
 {
     class Player;
@@ -67,7 +72,6 @@ namespace MWInput
             public MWBase::InputManager,
             public SDLUtil::KeyListener,
             public SDLUtil::MouseListener,
-            public SDLUtil::SensorListener,
             public SDLUtil::WindowListener,
             public SDLUtil::ControllerListener,
             public ICS::ChannelListener,
@@ -92,7 +96,7 @@ namespace MWInput
 
         virtual void update(float dt, bool disableControls=false, bool disableEvents=false);
 
-        void setPlayer (MWWorld::Player* player) { mPlayer = player; }
+        void setPlayer (MWWorld::Player* player);
 
         virtual void changeInputMode(bool guiMode);
 
@@ -115,7 +119,6 @@ namespace MWInput
 
         virtual bool joystickLastUsed() {return mJoystickLastUsed;}
 
-    public:
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
@@ -125,9 +128,6 @@ namespace MWInput
         virtual void mouseMoved( const SDLUtil::MouseMotionEvent &arg );
 
         virtual void mouseWheelMoved( const SDL_MouseWheelEvent &arg);
-
-        virtual void sensorUpdated(const SDL_SensorEvent &arg);
-        virtual void displayOrientationChanged();
 
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
@@ -168,17 +168,6 @@ namespace MWInput
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
-        enum GyroscopeAxis
-        {
-            Unknown = 0,
-            X = 1,
-            Y = 2,
-            Z = 3,
-            Minus_X = -1,
-            Minus_Y = -2,
-            Minus_Z = -3
-        };
-
         SDL_Window* mWindow;
         bool mWindowVisible;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -235,17 +224,8 @@ namespace MWInput
         float mInvUiScalingFactor;
         float mGamepadCursorSpeed;
 
-        float mGyroXSpeed;
-        float mGyroYSpeed;
-        float mGyroUpdateTimer;
+        SensorManager* mSensorManager;
 
-        float mGyroHSensitivity;
-        float mGyroVSensitivity;
-        GyroscopeAxis mGyroHAxis;
-        GyroscopeAxis mGyroVAxis;
-        float mGyroInputThreshold;
-
-    private:
         void convertMousePosForMyGUI(int& x, int& y);
 
         MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
@@ -263,15 +243,9 @@ namespace MWInput
         bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
-        void updateSensors();
-        void correctGyroscopeAxes();
-        GyroscopeAxis mapGyroscopeAxis(const std::string& axis);
 
         bool checkAllowedToUseItems() const;
 
-        float getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const;
-
-    private:
         void toggleMainMenu();
         void toggleSpell();
         void toggleWeapon();
@@ -296,9 +270,7 @@ namespace MWInput
         void loadControllerDefaults(bool force = false);
 
         int mFakeDeviceID; //As we only support one controller at a time, use a fake deviceID so we don't lose bindings when switching controllers
-        SDL_Sensor* mGyroscope;
 
-    private:
         enum Actions
         {
             // please add new actions at the bottom, in order to preserve the channel IDs in the key configuration files
