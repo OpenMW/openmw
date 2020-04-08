@@ -188,7 +188,7 @@ public:
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
-        const float fudge = 0.2;
+        const float fudge = 5;
         if (std::abs(cv->getEyeLocal().z()) < fudge)
         {
             float diff = fudge - cv->getEyeLocal().z();
