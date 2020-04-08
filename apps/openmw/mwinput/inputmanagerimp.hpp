@@ -86,8 +86,6 @@ namespace MWInput
 
         virtual void update(float dt, bool disableControls=false, bool disableEvents=false);
 
-        void setPlayer (MWWorld::Player* player);
-
         virtual void changeInputMode(bool guiMode);
 
         virtual void processChangedSettings(const Settings::CategorySettingVector& changed);

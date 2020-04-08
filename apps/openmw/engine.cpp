@@ -561,7 +561,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mFileCollections, mContentFiles, mEncoder, mActivationDistanceOverride, mCellName,
         mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
-    input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->setStore(mEnvironment.getWorld()->getStore());
     window->initUI();

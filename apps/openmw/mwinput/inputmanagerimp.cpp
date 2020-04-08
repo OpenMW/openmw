@@ -47,7 +47,6 @@ namespace MWInput
         : mWindow(window)
         , mWindowVisible(true)
         , mJoystickLastUsed(false)
-        , mPlayer(nullptr)
         , mInputManager(nullptr)
         , mVideoWrapper(nullptr)
         , mUserFile(userFile)
@@ -308,8 +307,9 @@ namespace MWInput
 
                 else
                 {
-                    MWMechanics::DrawState_ state = MWBase::Environment::get().getWorld()->getPlayer().getDrawState();
-                    mPlayer->setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
+                    MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+                    MWMechanics::DrawState_ state = player.getDrawState();
+                    player.setAttackingOrSpell(currentValue != 0 && state != MWMechanics::DrawState_Nothing);
                 }
             }
             else if (action == A_Jump)
@@ -408,6 +408,8 @@ namespace MWInput
             // be done in the physics system.
             if (mControlSwitch["playercontrols"])
             {
+                MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+
                 bool triedToMove = false;
                 bool isRunning = false;
                 bool alwaysRunAllowed = false;
@@ -418,14 +420,14 @@ namespace MWInput
                 if (xAxis != .5)
                 {
                     triedToMove = true;
-                    mPlayer->setLeftRight((xAxis - 0.5f) * 2);
+                    player.setLeftRight((xAxis - 0.5f) * 2);
                 }
 
                 if (yAxis != .5)
                 {
                     triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward((yAxis - 0.5f) * 2 * -1);
+                    player.setAutoMove (false);
+                    player.setForwardBackward((yAxis - 0.5f) * 2 * -1);
                 }
 
                 if (triedToMove)
@@ -439,22 +441,22 @@ namespace MWInput
                 {
                     alwaysRunAllowed = true;
                     triedToMove = true;
-                    mPlayer->setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
+                    player.setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
                 }
 
                 if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
                 {
                     alwaysRunAllowed = true;
                     triedToMove = true;
-                    mPlayer->setAutoMove (false);
-                    mPlayer->setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
+                    player.setAutoMove (false);
+                    player.setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
                 }
 
-                if (mPlayer->getAutoMove())
+                if (player.getAutoMove())
                 {
                     alwaysRunAllowed = true;
                     triedToMove = true;
-                    mPlayer->setForwardBackward (1);
+                    player.setForwardBackward (1);
                 }
 
                 static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
@@ -488,29 +490,29 @@ namespace MWInput
                         }
                     }
                     else
-                        mPlayer->setSneak(actionIsActive(A_Sneak));
+                        player.setSneak(actionIsActive(A_Sneak));
                 }
 
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
-                    mPlayer->setUpDown (1);
+                    player.setUpDown (1);
                     triedToMove = true;
                     mOverencumberedMessageDelay = 0.f;
                 }
 
                 if ((mActionManager->isAlwaysRunActive() && alwaysRunAllowed) || isRunning)
-                    mPlayer->setRunState(!actionIsActive(A_Run));
+                    player.setRunState(!actionIsActive(A_Run));
                 else
-                    mPlayer->setRunState(actionIsActive(A_Run));
+                    player.setRunState(actionIsActive(A_Run));
 
                 // if player tried to start moving, but can't (due to being overencumbered), display a notification.
                 if (triedToMove)
                 {
-                    MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                    MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     mOverencumberedMessageDelay -= dt;
-                    if (player.getClass().getEncumbrance(player) > player.getClass().getCapacity(player))
+                    if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
                     {
-                        mPlayer->setAutoMove (false);
+                        player.setAutoMove (false);
                         if (mOverencumberedMessageDelay <= 0)
                         {
                             MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
@@ -633,19 +635,28 @@ namespace MWInput
 
     void InputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
+        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+
         /// \note 7 switches at all, if-else is relevant
-        if (sw == "playercontrols" && !value) {
-            mPlayer->setLeftRight(0);
-            mPlayer->setForwardBackward(0);
-            mPlayer->setAutoMove(false);
-            mPlayer->setUpDown(0);
-        } else if (sw == "playerjumping" && !value) {
+        if (sw == "playercontrols" && !value)
+        {
+            player.setLeftRight(0);
+            player.setForwardBackward(0);
+            player.setAutoMove(false);
+            player.setUpDown(0);
+        }
+        else if (sw == "playerjumping" && !value)
+        {
             /// \fixme maybe crouching at this time
-            mPlayer->setUpDown(0);
-        } else if (sw == "vanitymode") {
+            player.setUpDown(0);
+        }
+        else if (sw == "vanitymode")
+        {
             MWBase::Environment::get().getWorld()->allowVanityMode(value);
-        } else if (sw == "playerlooking" && !value) {
-            MWBase::Environment::get().getWorld()->rotateObject(mPlayer->getPlayer(), 0.f, 0.f, 0.f);
+        }
+        else if (sw == "playerlooking" && !value)
+        {
+            MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), 0.f, 0.f, 0.f);
         }
         mControlSwitch[sw] = value;
     }
@@ -1386,10 +1397,5 @@ namespace MWInput
     void InputManager::resetToDefaultControllerBindings()
     {
         loadControllerDefaults(true);
-    }
-
-    void InputManager::setPlayer (MWWorld::Player* player)
-    {
-        mPlayer = player;
     }
 }
