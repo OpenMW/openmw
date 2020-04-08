@@ -25,7 +25,7 @@ add_openmw_dir (mwrender
     )
 
 add_openmw_dir (mwinput
-    inputmanagerimp sensormanager actions
+    actions inputmanagerimp sdlmappings sensormanager
     )
 
 add_openmw_dir (mwgui

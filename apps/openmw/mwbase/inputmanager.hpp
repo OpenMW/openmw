@@ -54,8 +54,6 @@ namespace MWBase
             virtual std::string getActionDescription (int action) = 0;
             virtual std::string getActionKeyBindingName (int action) = 0;
             virtual std::string getActionControllerBindingName (int action) = 0;
-            virtual std::string sdlControllerAxisToString(int axis) = 0;
-            virtual std::string sdlControllerButtonToString(int button) = 0;
             ///Actions available for binding to keyboard buttons
             virtual std::vector<int> getActionKeySorting() = 0;
             ///Actions available for binding to controller buttons

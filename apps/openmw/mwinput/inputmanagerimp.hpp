@@ -39,11 +39,6 @@ namespace ICS
     class InputControlSystem;
 }
 
-namespace MyGUI
-{
-    struct MouseButton;
-}
-
 namespace Files
 {
     struct ConfigurationManager;
@@ -229,11 +224,6 @@ namespace MWInput
         SensorManager* mSensorManager;
 
         void convertMousePosForMyGUI(int& x, int& y);
-
-        MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
-
-        virtual std::string sdlControllerAxisToString(int axis);
-        virtual std::string sdlControllerButtonToString(int button);
 
         void resetIdleTime();
         void updateIdleTime(float dt);
