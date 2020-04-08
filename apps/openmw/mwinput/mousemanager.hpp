@@ -1,8 +1,6 @@
 #ifndef MWINPUT_MWMOUSEMANAGER_H
 #define MWINPUT_MWMOUSEMANAGER_H
 
-#include <SDL_sensor.h>
-
 #include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
 

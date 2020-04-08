@@ -22,6 +22,7 @@
 namespace MWInput
 {
     class ActionManager;
+    class ControllerManager;
     class MouseManager;
     class SensorManager;
 }
@@ -63,7 +64,6 @@ namespace MWInput
             public MWBase::InputManager,
             public SDLUtil::KeyListener,
             public SDLUtil::WindowListener,
-            public SDLUtil::ControllerListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
@@ -106,18 +106,12 @@ namespace MWInput
         virtual void resetToDefaultKeyBindings();
         virtual void resetToDefaultControllerBindings();
 
-        virtual void setJoystickLastUsed(bool enabled) { mJoystickLastUsed = enabled; }
-        virtual bool joystickLastUsed() {return mJoystickLastUsed;}
+        virtual void setJoystickLastUsed(bool enabled);
+        virtual bool joystickLastUsed();
 
         virtual void keyPressed(const SDL_KeyboardEvent &arg );
         virtual void keyReleased( const SDL_KeyboardEvent &arg );
         virtual void textInput (const SDL_TextInputEvent &arg);
-
-        virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
-        virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
-        virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg);
-        virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg);
-        virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg);
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
@@ -159,9 +153,6 @@ namespace MWInput
         SDL_Window* mWindow;
         bool mWindowVisible;
 
-        bool mJoystickLastUsed;
-        MWWorld::Player* mPlayer;
-
         ICS::InputControlSystem* mInputBinder;
 
         SDLUtil::InputWrapper* mInputManager;
@@ -174,30 +165,22 @@ namespace MWInput
         bool mGrabCursor;
 
         bool mControlsDisabled;
-        bool mJoystickEnabled;
 
         float mPreviewPOVDelay;
         float mTimeIdle;
 
         bool mGuiCursorEnabled;
-        bool mGamepadGuiCursorEnabled;
 
         bool mDetectingKeyboard;
 
         float mOverencumberedMessageDelay;
 
-        float mGamepadZoom;
-        bool mSneakToggles;
-        float mSneakToggleShortcutTimer;
-        bool mSneakGamepadShortcut;
         bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
 
-        float mInvUiScalingFactor;
-        float mGamepadCursorSpeed;
-
         ActionManager* mActionManager;
+        ControllerManager* mControllerManager;
         MouseManager* mMouseManager;
         SensorManager* mSensorManager;
 
@@ -206,9 +189,6 @@ namespace MWInput
         void updateIdleTime(float dt);
 
         void handleGuiArrowKey(int action);
-        // Return true if GUI consumes input.
-        bool gamepadToGuiControl(const SDL_ControllerButtonEvent &arg);
-        bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
         void updateCursorMode();
 
