@@ -286,6 +286,7 @@ namespace SceneUtil {
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
         osg::ref_ptr<osg::Program>              _castingProgram;
+        osg::ref_ptr<osg::Uniform>              _shadowMapAlphaTestDisableUniform;
     };
 
 }

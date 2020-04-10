@@ -6,10 +6,17 @@ varying vec2 diffuseMapUV;
 varying float alphaPassthrough;
 
 uniform bool useDiffuseMapForShadowAlpha;
+uniform bool alphaTestShadows;
 
 void main()
 {
     gl_FragData[0].rgb = vec3(1.0);
+    if (!alphaTestShadows)
+    {
+        gl_FragData[0].a = 1.0;
+        return;
+    }
+
     if (useDiffuseMapForShadowAlpha)
         gl_FragData[0].a = texture2D(diffuseMap, diffuseMapUV).a * alphaPassthrough;
     else
