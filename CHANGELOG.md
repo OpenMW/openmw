@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #5364: Script fails/stops if trying to startscript an unknown script
 
 0.46.0
 ------
