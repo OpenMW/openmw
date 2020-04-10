@@ -1,8 +1,10 @@
 #include "shadervisitor.hpp"
 
-#include <osg/Texture>
-#include <osg/Material>
+#include <osg/AlphaFunc>
+#include <osg/BlendFunc>
 #include <osg/Geometry>
+#include <osg/Material>
+#include <osg/Texture>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -23,6 +25,8 @@ namespace Shader
         : mShaderRequired(false)
         , mColorMode(0)
         , mMaterialOverridden(false)
+        , mAlphaFuncOverridden(false)
+        , mBlendFuncOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mNode(nullptr)
@@ -229,15 +233,21 @@ namespace Shader
             {
                 if (!writableStateSet)
                     writableStateSet = getWritableStateSet(node);
+                // We probably shouldn't construct a new version of this each time as StateSets only use pointer comparison by default.
+                // Also it should probably belong to the shader manager
                 writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
             }
         }
+
+        bool alphaSettingsChanged = false;
+        bool alphaTestShadows = false;
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
         for (osg::StateSet::AttributeList::const_iterator it = attributes.begin(); it != attributes.end(); ++it)
         {
             if (it->first.first == osg::StateAttribute::MATERIAL)
             {
+                // This should probably be moved out of ShaderRequirements and be applied directly now it's a uniform instead of a define
                 if (!mRequirements.back().mMaterialOverridden || it->second.second & osg::StateAttribute::PROTECTED)
                 {
                     if (it->second.second & osg::StateAttribute::OVERRIDE)
@@ -269,6 +279,39 @@ namespace Shader
                     mRequirements.back().mColorMode = colorMode;
                 }
             }
+            else if (it->first.first == osg::StateAttribute::ALPHAFUNC)
+            {
+                if (!mRequirements.back().mAlphaFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
+                {
+                    if (it->second.second & osg::StateAttribute::OVERRIDE)
+                        mRequirements.back().mAlphaFuncOverridden = true;
+
+                    const osg::AlphaFunc* test = static_cast<const osg::AlphaFunc*>(it->second.first.get());
+                    if (test->getFunction() == osg::AlphaFunc::GREATER || test->getFunction() == osg::AlphaFunc::GEQUAL)
+                        alphaTestShadows = true;
+                    alphaSettingsChanged = true;
+                }
+            }
+            else if (it->first.first == osg::StateAttribute::BLENDFUNC)
+            {
+                if (!mRequirements.back().mBlendFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
+                {
+                    if (it->second.second & osg::StateAttribute::OVERRIDE)
+                        mRequirements.back().mBlendFuncOverridden = true;
+
+                    const osg::BlendFunc* blend = static_cast<const osg::BlendFunc*>(it->second.first.get());
+                    if (blend->getSource() == osg::BlendFunc::SRC_ALPHA || blend->getSource() == osg::BlendFunc::SRC_COLOR)
+                        alphaTestShadows = true;
+                    alphaSettingsChanged = true;
+                }
+            }
+        }
+        // we don't need to check for glEnable/glDisable of blending and testing as we always set it at the same time
+        if (alphaSettingsChanged)
+        {
+            if (!writableStateSet)
+                writableStateSet = getWritableStateSet(node);
+            writableStateSet->addUniform(alphaTestShadows ? mShaderManager.getShadowMapAlphaTestEnableUniform() : mShaderManager.getShadowMapAlphaTestDisableUniform());
         }
     }
 
