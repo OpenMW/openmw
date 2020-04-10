@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #5363: Enchantment autocalc not always 0/1
 
 0.46.0
 ------

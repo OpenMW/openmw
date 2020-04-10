@@ -66,7 +66,7 @@ namespace ESM
         mData.mType = 0;
         mData.mCost = 0;
         mData.mCharge = 0;
-        mData.mAutocalc = 0;
+        mData.mFlags = 0;
 
         mEffects.mList.clear();
     }
