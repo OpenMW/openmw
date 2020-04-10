@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0
 ------
