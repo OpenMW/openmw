@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
 
 0.46.0
 ------
