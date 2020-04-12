@@ -1,7 +1,7 @@
 #include "navmesh.hpp"
-#include "vismask.hpp"
 
 #include <components/sceneutil/navmesh.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -34,7 +34,7 @@ namespace MWRender
     void NavMesh::update(const dtNavMesh& navMesh, const std::size_t id,
         const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || (mGroup && mId == id && mGeneration >= generation && mRevision >= revision))
+        if (!mEnabled || (mGroup && mId == id && mGeneration == generation && mRevision == revision))
             return;
 
         mId = id;
@@ -45,7 +45,7 @@ namespace MWRender
         mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);
         if (mGroup)
         {
-            mGroup->setNodeMask(Mask_Debug);
+            mGroup->setNodeMask(SceneUtil::Mask_Debug);
             mRootNode->addChild(mGroup);
         }
     }

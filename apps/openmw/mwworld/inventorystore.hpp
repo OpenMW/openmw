@@ -34,6 +34,7 @@ namespace MWWorld
          */
         virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
 
+        virtual ~InventoryStoreListener() = default;
     };
 
     ///< \brief Variant of the ContainerStore for NPCs
@@ -124,16 +125,14 @@ namespace MWWorld
 
             virtual InventoryStore* clone() { return new InventoryStore(*this); }
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
-            /// Auto-equip items if specific conditions are fulfilled (see the implementation).
+            /// Auto-equip items if specific conditions are fulfilled and allowAutoEquip is true (see the implementation).
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
-            ///
-            /// @param setOwner Set the owner of the added item to \a actorPtr?
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -160,8 +159,6 @@ namespace MWWorld
             void autoEquip (const MWWorld::Ptr& actor);
             ///< Auto equip items according to stats and item value.
 
-            bool canActorAutoEquip(const MWWorld::Ptr& actor);
-
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
 
@@ -177,7 +174,7 @@ namespace MWWorld
             ///
             /// @return the number of items actually removed
 
-            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor);
+            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool fireEvent=true);
             ///< Unequip \a slot.
             ///
             /// @return an iterator to the item that was previously in the slot

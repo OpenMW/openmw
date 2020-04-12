@@ -30,6 +30,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 
+#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/translation/translation.hpp>
@@ -49,8 +50,6 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
-
-#include "../mwrender/vismask.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -241,7 +240,7 @@ namespace MWGui
         MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
         MyGUI::FactoryManager::getInstance().registerFactory<AutoSizedResourceSkin>("Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
-        loadUserFonts();
+        WindowManager::loadUserFonts();
 
         bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
         mKeyboardNavigation.reset(new KeyboardNavigation());
@@ -1163,11 +1162,7 @@ namespace MWGui
 
     void WindowManager::setCursorVisible(bool visible)
     {
-        if (visible == mCursorVisible)
-            return;
         mCursorVisible = visible;
-        if (!visible)
-            mCursorActive = false;
     }
 
     void WindowManager::setCursorActive(bool active)
@@ -1883,8 +1878,8 @@ namespace MWGui
         // Turn off all rendering except for the GUI
         int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
         int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
-        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
+        mViewer->getUpdateVisitor()->setTraversalMask(SceneUtil::Mask_GUI);
+        mViewer->getCamera()->setCullMask(SceneUtil::Mask_GUI);
 
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
@@ -1898,9 +1893,10 @@ namespace MWGui
         setCursorVisible(false);
 
         if (mVideoWidget->hasAudioStream())
-            MWBase::Environment::get().getSoundManager()->pauseSounds(
+            MWBase::Environment::get().getSoundManager()->pauseSounds(MWSound::VideoPlayback,
                 ~MWSound::Type::Movie & MWSound::Type::Mask
             );
+
         osg::Timer frameTimer;
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
@@ -1910,9 +1906,15 @@ namespace MWGui
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
             if (!MWBase::Environment::get().getInputManager()->isWindowVisible())
+            {
+                mVideoWidget->pause();
                 OpenThreads::Thread::microSleep(5000);
+            }
             else
             {
+                if (mVideoWidget->isPaused())
+                    mVideoWidget->resume();
+
                 mViewer->eventTraversal();
                 mViewer->updateTraversal();
                 mViewer->renderingTraversals();
@@ -1926,7 +1928,7 @@ namespace MWGui
         }
         mVideoWidget->stop();
 
-        MWBase::Environment::get().getSoundManager()->resumeSounds();
+        MWBase::Environment::get().getSoundManager()->resumeSounds(MWSound::VideoPlayback);
 
         setKeyFocusWidget(oldKeyFocus);
 

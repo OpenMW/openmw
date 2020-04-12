@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_H
 
 #include "tilebounds.hpp"
+#include "status.hpp"
 
 #include <osg/io_utils>
 
@@ -24,6 +25,25 @@ namespace DetourNavigator
     inline std::ostream& operator <<(std::ostream& stream, const TileBounds& value)
     {
         return stream << "TileBounds {" << value.mMin << ", " << value.mMax << "}";
+    }
+
+    inline std::ostream& operator <<(std::ostream& stream, Status value)
+    {
+#define OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(name) \
+    case Status::name: return stream << "DetourNavigator::Status::"#name;
+        switch (value)
+        {
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(Success)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(NavMeshNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(StartPolygonNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(EndPolygonNotFound)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(MoveAlongSurfaceFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(FindPathOverPolygonsFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(GetPolyHeightFailed)
+            OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE(InitNavMeshQueryFailed)
+        }
+#undef OPENMW_COMPONENTS_DETOURNAVIGATOR_DEBUG_STATUS_MESSAGE
+        return stream << "DetourNavigator::Error::" << static_cast<int>(value);
     }
 
     class RecastMesh;

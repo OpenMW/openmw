@@ -1,7 +1,6 @@
 #include "document.hpp"
 
 #include <cassert>
-#include <fstream>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -289,19 +288,22 @@ CSMDoc::Document::Document (const Files::ConfigurationManager& configuration,
 
     if (mNew || !boost::filesystem::exists (mProjectPath))
     {
-        boost::filesystem::path customFiltersPath (configuration.getUserDataPath());
-        customFiltersPath /= "defaultfilters";
+        boost::filesystem::path filtersPath (configuration.getUserDataPath() / "defaultfilters");
 
-        std::ofstream destination (mProjectPath.string().c_str(), std::ios::binary);
+        boost::filesystem::ofstream destination(mProjectPath, std::ios::out | std::ios::binary);
+        if (!destination.is_open())
+            throw std::runtime_error("Can not create project file: " + mProjectPath.string());
+        destination.exceptions(std::ios::failbit | std::ios::badbit);
 
-        if (boost::filesystem::exists (customFiltersPath))
-        {
-            destination << std::ifstream(customFiltersPath.string().c_str(), std::ios::binary).rdbuf();
-        }
-        else
-        {
-            destination << std::ifstream(std::string(mResDir.string() + "/defaultfilters").c_str(), std::ios::binary).rdbuf();
-        }
+        if (!boost::filesystem::exists (filtersPath))
+            filtersPath = mResDir / "defaultfilters";
+
+        boost::filesystem::ifstream source(filtersPath, std::ios::in | std::ios::binary);
+        if (!source.is_open())
+            throw std::runtime_error("Can not read filters file: " + filtersPath.string());
+        source.exceptions(std::ios::failbit | std::ios::badbit);
+
+        destination << source.rdbuf();
     }
 
     if (mNew)

@@ -52,5 +52,5 @@ void CSMTools::BodyPartCheckStage::perform (int stage, CSMDoc::Messages &message
     if ( bodyPart.mRace.empty() )
         messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);
     else if ( mRaces.searchId( bodyPart.mRace ) == -1 )
-        messages.add(id, "Race '" + bodyPart.mRace + " does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Race '" + bodyPart.mRace + "' does not exist", "", CSMDoc::Message::Severity_Error);
 }

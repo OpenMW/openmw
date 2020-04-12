@@ -155,8 +155,22 @@ public:
 
     Transformation getTrafo();
 
+    bool getBoolean();
+
+    std::string getString();
+
+    unsigned int getVersion() const;
+    unsigned int getUserVersion() const;
+    unsigned int getBethVersion() const;
+
+    // Convert human-readable version numbers into a number that can be compared.
+    static constexpr uint32_t generateVersion(uint8_t major, uint8_t minor, uint8_t patch, uint8_t rev)
+    {
+        return (major << 24) + (minor << 16) + (patch << 8) + rev;
+    }
+
     ///Read in a string of the given length
-    std::string getString(size_t length)
+    std::string getSizedString(size_t length)
     {
         std::vector<char> str(length + 1, 0);
 
@@ -165,11 +179,19 @@ public:
         return str.data();
     }
     ///Read in a string of the length specified in the file
-    std::string getString()
+    std::string getSizedString()
     {
         size_t size = readLittleEndianType<uint32_t,uint32_t>(inp);
-        return getString(size);
+        return getSizedString(size);
     }
+
+    ///Specific to Bethesda headers, uses a byte for length
+    std::string getExportString()
+    {
+        size_t size = static_cast<size_t>(readLittleEndianType<uint8_t,uint8_t>(inp));
+        return getSizedString(size);
+    }
+
     ///This is special since the version string doesn't start with a number, and ends with "\n"
     std::string getVersionString()
     {
@@ -188,6 +210,18 @@ public:
     {
         vec.resize(size);
         readLittleEndianDynamicBufferOfType<float,uint32_t>(inp, vec.data(), size);
+    }
+
+    void getInts(std::vector<int> &vec, size_t size)
+    {
+        vec.resize(size);
+        readLittleEndianDynamicBufferOfType<int,int>(inp, vec.data(), size);
+    }
+
+    void getUInts(std::vector<unsigned int> &vec, size_t size)
+    {
+        vec.resize(size);
+        readLittleEndianDynamicBufferOfType<unsigned int,unsigned int>(inp, vec.data(), size);
     }
 
     void getVector2s(std::vector<osg::Vec2f> &vec, size_t size)
@@ -216,6 +250,20 @@ public:
         quat.resize(size);
         for (size_t i = 0;i < quat.size();i++)
             quat[i] = getQuaternion();
+    }
+
+    void getStrings(std::vector<std::string> &vec, size_t size)
+    {
+        vec.resize(size);
+        for (size_t i = 0; i < vec.size(); i++)
+            vec[i] = getString();
+    }
+    /// We need to use this when the string table isn't actually initialized.
+    void getSizedStrings(std::vector<std::string> &vec, size_t size)
+    {
+        vec.resize(size);
+        for (size_t i = 0; i < vec.size(); i++)
+            vec[i] = getSizedString();
     }
 };
 

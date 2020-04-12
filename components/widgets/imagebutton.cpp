@@ -14,6 +14,8 @@ namespace Gui
         , mMouseFocus(false)
         , mMousePress(false)
         , mKeyFocus(false)
+        , mUseWholeTexture(true)
+        , mTextureRect(MyGUI::IntCoord(0, 0, 0, 0))
     {
         setNeedKeyFocus(sDefaultNeedKeyFocus);
     }
@@ -21,6 +23,13 @@ namespace Gui
     void ImageButton::setDefaultNeedKeyFocus(bool enabled)
     {
         sDefaultNeedKeyFocus = enabled;
+    }
+
+    void ImageButton::setTextureRect(MyGUI::IntCoord coord)
+    {
+        mTextureRect = coord;
+        mUseWholeTexture = (coord == MyGUI::IntCoord(0, 0, 0, 0));
+        updateImage();
     }
 
     void ImageButton::setPropertyOverride(const std::string &_key, const std::string &_value)
@@ -36,6 +45,11 @@ namespace Gui
                 setImageTexture(_value);
             }
             mImageNormal = _value;
+        }
+        else if (_key == "TextureRect")
+        {
+            mTextureRect = MyGUI::IntCoord::parse(_value);
+            mUseWholeTexture = (mTextureRect == MyGUI::IntCoord(0, 0, 0, 0));
         }
         else
             ImageBox::setPropertyOverride(_key, _value);
@@ -66,12 +80,25 @@ namespace Gui
 
     void ImageButton::updateImage()
     {
+        std::string textureName = mImageNormal;
         if (mMousePress)
-            setImageTexture(mImagePushed);
+            textureName = mImagePushed;
         else if (mMouseFocus || mKeyFocus)
-            setImageTexture(mImageHighlighted);
-        else
-            setImageTexture(mImageNormal);
+            textureName = mImageHighlighted;
+
+        if (!mUseWholeTexture)
+        {
+            int scale = 1.f;
+            MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture(textureName);
+            if (texture && getHeight() != 0)
+                scale = texture->getHeight() / getHeight();
+
+            setImageTile(MyGUI::IntSize(mTextureRect.width * scale, mTextureRect.height * scale));
+            MyGUI::IntCoord scaledSize(mTextureRect.left * scale, mTextureRect.top * scale, mTextureRect.width * scale, mTextureRect.height * scale);
+            setImageCoord(scaledSize);
+        }
+
+        setImageTexture(textureName);
     }
 
     MyGUI::IntSize ImageButton::getRequestedSize()
@@ -82,7 +109,11 @@ namespace Gui
             Log(Debug::Error) << "ImageButton: can't find image " << mImageNormal;
             return MyGUI::IntSize(0,0);
         }
-        return MyGUI::IntSize (texture->getWidth(), texture->getHeight());
+
+        if (mUseWholeTexture)
+            return MyGUI::IntSize(texture->getWidth(), texture->getHeight());
+
+        return MyGUI::IntSize(mTextureRect.width, mTextureRect.height);
     }
 
     void ImageButton::setImage(const std::string &image)
@@ -96,7 +127,7 @@ namespace Gui
         mImageHighlighted = imageNoExt + "_over" + ext;
         mImagePushed = imageNoExt + "_pressed" + ext;
 
-        setImageTexture(mImageNormal);
+        updateImage();
     }
 
     void ImageButton::onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id)

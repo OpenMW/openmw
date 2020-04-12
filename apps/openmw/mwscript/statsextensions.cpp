@@ -291,8 +291,15 @@ namespace MWScript
                     MWMechanics::DynamicStat<float> stat (ptr.getClass().getCreatureStats (ptr)
                         .getDynamic (mIndex));
 
-                    // for fatigue, a negative current value is allowed and means the actor will be knocked down
-                    bool allowDecreaseBelowZero = (mIndex == 2);
+                    bool allowDecreaseBelowZero = false;
+                    if (mIndex == 2) // Fatigue-specific logic
+                    {
+                        // For fatigue, a negative current value is allowed and means the actor will be knocked down
+                        allowDecreaseBelowZero = true;
+                        // Knock down the actor immediately if a non-positive new value is the case
+                        if (diff + current <= 0.f)
+                            ptr.getClass().getCreatureStats(ptr).setKnockedDown(true);
+                    }
                     stat.setCurrent (diff + current, allowDecreaseBelowZero);
 
                     ptr.getClass().getCreatureStats (ptr).setDynamic (mIndex, stat);
@@ -465,16 +472,6 @@ namespace MWScript
                     {
                         // Apply looping particles immediately for constant effects
                         MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
-
-                        // The spell may have an instant effect which must be handled immediately.
-                        for (const auto& effect : creatureStats.getSpells().getMagicEffects())
-                        {
-                            if (effect.second.getMagnitude() <= 0)
-                               continue;
-                            MWMechanics::CastSpell cast(ptr, ptr);
-                            if (cast.applyInstantEffect(ptr, ptr, effect.first, effect.second.getMagnitude()))
-                                creatureStats.getSpells().purgeEffect(effect.first.mId);
-                        }
                     }
                 }
         };
@@ -491,7 +488,18 @@ namespace MWScript
                     std::string id = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).getSpells().remove (id);
+                    MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
+                    // The spell may have an instant effect which must be handled before the spell's removal.
+                    for (const auto& effect : creatureStats.getSpells().getMagicEffects())
+                    {
+                        if (effect.second.getMagnitude() <= 0)
+                            continue;
+                        MWMechanics::CastSpell cast(ptr, ptr);
+                        if (cast.applyInstantEffect(ptr, ptr, effect.first, effect.second.getMagnitude()))
+                            creatureStats.getSpells().purgeEffect(effect.first.mId);
+                    }
+
+                    creatureStats.getSpells().remove (id);
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
 

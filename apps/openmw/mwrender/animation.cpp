@@ -31,6 +31,7 @@
 #include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -47,7 +48,6 @@
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
-#include "vismask.hpp"
 #include "util.hpp"
 #include "rotatecontroller.hpp"
 
@@ -518,13 +518,11 @@ namespace MWRender
     protected:
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-
             osg::BlendFunc* blendfunc (new osg::BlendFunc);
             stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
             // FIXME: overriding diffuse/ambient/emissive colors
-            material = new osg::Material;
+            osg::Material* material = new osg::Material;
             material->setColorMode(osg::Material::OFF);
             material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,mAlpha));
             material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
@@ -583,7 +581,7 @@ namespace MWRender
             else
             {
                 // Hide effect immediately
-                node->setNodeMask(0);
+                node->setNodeMask(SceneUtil::Mask_Disabled);
                 mFinished = true;
             }
         }
@@ -638,7 +636,7 @@ namespace MWRender
 
     Animation::~Animation()
     {
-        setLightEffect(0.f);
+        Animation::setLightEffect(0.f);
 
         if (mObjectRoot)
             mInsert->removeChild(mObjectRoot);
@@ -1602,7 +1600,7 @@ namespace MWRender
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
-        SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
+        SceneUtil::addLight(parent, esmLight, exterior);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
@@ -1654,7 +1652,7 @@ namespace MWRender
         // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         node->accept(disableFreezeOnCullVisitor);
-        node->setNodeMask(Mask_Effect);
+        node->setNodeMask(SceneUtil::Mask_Effect);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
         params.mLoop = loop;
@@ -1813,7 +1811,7 @@ namespace MWRender
                 SceneUtil::configureLight(light, radius, isExterior);
 
                 mGlowLight = new SceneUtil::LightSource;
-                mGlowLight->setNodeMask(Mask_Lighting);
+                mGlowLight->setNodeMask(SceneUtil::Mask_Lighting);
                 mInsert->addChild(mGlowLight);
                 mGlowLight->setLight(light);
             }

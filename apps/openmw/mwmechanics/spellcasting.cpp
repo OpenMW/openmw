@@ -90,7 +90,7 @@ namespace MWMechanics
             const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
                         it->mEffectID);
 
-            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage))
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
@@ -447,9 +447,9 @@ namespace MWMechanics
             if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
                 continue;
 
-            // caster needs to be an actor that's not the target for linked effects (e.g. Absorb)
+            // caster needs to be an actor for linked effects (e.g. Absorb)
             if (magicEffect->mData.mFlags & ESM::MagicEffect::CasterLinked
-                    && (caster.isEmpty() || !caster.getClass().isActor() || caster == target))
+                    && (caster.isEmpty() || !caster.getClass().isActor()))
                 continue;
 
             // If player is healing someone, show the target's HP bar
@@ -552,6 +552,15 @@ namespace MWMechanics
                     effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mMagnitude = magnitude;
 
+                    // Avoid applying absorb effects if the caster is the target
+                    // We still need the spell to be added
+                    if (caster == target
+                        && effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute
+                        && effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
+                    {
+                        effect.mMagnitude = 0;
+                    }
+
                     bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
                     if (hasDuration && effectIt->mDuration == 0)
                     {
@@ -600,21 +609,19 @@ namespace MWMechanics
                         // magnitude, since we're transferring stats from the target to the caster
                         if (!caster.isEmpty() && caster != target && caster.getClass().isActor())
                         {
-                            for (int i=0; i<5; ++i)
+                            if (effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute &&
+                                effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
                             {
-                                if (effectIt->mEffectID == ESM::MagicEffect::AbsorbAttribute+i)
-                                {
-                                    std::vector<ActiveSpells::ActiveEffect> absorbEffects;
-                                    ActiveSpells::ActiveEffect effect_ = effect;
-                                    effect_.mMagnitude *= -1;
-                                    absorbEffects.push_back(effect_);
-                                    if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
-                                        target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
-                                            absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
-                                    else
-                                        caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                            absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
-                                }
+                                std::vector<ActiveSpells::ActiveEffect> absorbEffects;
+                                ActiveSpells::ActiveEffect effect_ = effect;
+                                effect_.mMagnitude *= -1;
+                                absorbEffects.push_back(effect_);
+                                if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
+                                    target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
+                                        absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
+                                else
+                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
+                                        absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
                             }
                         }
                     }
@@ -830,7 +837,7 @@ namespace MWMechanics
         {
             int type = item.get<ESM::Weapon>()->mBase->mData.mType;
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(type)->mWeaponClass;
-            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ranged);
+            isProjectile = (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo);
         }
         int type = enchantment->mData.mType;
 
@@ -1192,10 +1199,10 @@ namespace MWMechanics
         return false;
     }
 
-    void adjustDynamicStat(CreatureStats& creatureStats, int index, float magnitude)
+    void adjustDynamicStat(CreatureStats& creatureStats, int index, float magnitude, bool allowDecreaseBelowZero = false)
     {
         DynamicStat<float> stat = creatureStats.getDynamic(index);
-        stat.setCurrent(stat.getCurrent() + magnitude, index == 2);
+        stat.setCurrent(stat.getCurrent() + magnitude, allowDecreaseBelowZero);
         creatureStats.setDynamic(index, stat);
     }
 
@@ -1234,9 +1241,12 @@ namespace MWMechanics
 
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
+        {
+            int index = effectKey.mId-ESM::MagicEffect::DamageHealth;
+            static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
+            adjustDynamicStat(creatureStats, index, -magnitude, index == 2 && uncappedDamageFatigue);
             break;
-
+        }
         case ESM::MagicEffect::AbsorbHealth:
             if (magnitude > 0.f)
                 receivedMagicDamage = true;

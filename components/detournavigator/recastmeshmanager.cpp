@@ -4,8 +4,8 @@
 
 namespace DetourNavigator
 {
-    RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds)
-        : mShouldRebuild(false)
+    RecastMeshManager::RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation)
+        : mGeneration(generation)
         , mMeshBuilder(settings, bounds)
     {
     }
@@ -19,8 +19,8 @@ namespace DetourNavigator
             mObjectsOrder.erase(iterator);
             return false;
         }
-        mShouldRebuild = true;
-        return mShouldRebuild;
+        ++mRevision;
+        return true;
     }
 
     bool RecastMeshManager::updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType)
@@ -30,8 +30,8 @@ namespace DetourNavigator
             return false;
         if (!object->second->update(transform, areaType))
             return false;
-        mShouldRebuild = true;
-        return mShouldRebuild;
+        ++mRevision;
+        return true;
     }
 
     boost::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(const ObjectId id)
@@ -42,7 +42,7 @@ namespace DetourNavigator
         const RemovedRecastMeshObject result {object->second->getShape(), object->second->getTransform()};
         mObjectsOrder.erase(object->second);
         mObjects.erase(object);
-        mShouldRebuild = true;
+        ++mRevision;
         return result;
     }
 
@@ -55,7 +55,7 @@ namespace DetourNavigator
             mWaterOrder.erase(iterator);
             return false;
         }
-        mShouldRebuild = true;
+        ++mRevision;
         return true;
     }
 
@@ -64,7 +64,7 @@ namespace DetourNavigator
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
             return boost::none;
-        mShouldRebuild = true;
+        ++mRevision;
         const auto result = *water->second;
         mWaterOrder.erase(water->second);
         mWater.erase(water);
@@ -74,7 +74,7 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> RecastMeshManager::getMesh()
     {
         rebuild();
-        return mMeshBuilder.create();
+        return mMeshBuilder.create(mGeneration, mLastBuildRevision);
     }
 
     bool RecastMeshManager::isEmpty() const
@@ -84,13 +84,13 @@ namespace DetourNavigator
 
     void RecastMeshManager::rebuild()
     {
-        if (!mShouldRebuild)
+        if (mLastBuildRevision == mRevision)
             return;
         mMeshBuilder.reset();
         for (const auto& v : mWaterOrder)
             mMeshBuilder.addWater(v.mCellSize, v.mTransform);
         for (const auto& v : mObjectsOrder)
             mMeshBuilder.addObject(v.getShape(), v.getTransform(), v.getAreaType());
-        mShouldRebuild = false;
+        mLastBuildRevision = mRevision;
     }
 }

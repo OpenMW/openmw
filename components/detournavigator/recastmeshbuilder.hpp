@@ -34,7 +34,7 @@ namespace DetourNavigator
 
         void addWater(const int mCellSize, const btTransform& transform);
 
-        std::shared_ptr<RecastMesh> create() const;
+        std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision) const;
 
         void reset();
 
@@ -47,6 +47,8 @@ namespace DetourNavigator
         std::vector<RecastMesh::Water> mWater;
 
         void addObject(const btConcaveShape& shape, const btTransform& transform, btTriangleCallback&& callback);
+
+        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, btTriangleCallback&& callback);
 
         void addTriangleVertex(const btVector3& worldPosition);
 

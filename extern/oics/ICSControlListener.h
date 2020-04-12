@@ -38,6 +38,8 @@ namespace ICS
     {
     public:
         virtual void controlChanged(Control* control, float currentValue, float previousValue) = 0;
+
+        virtual ~ControlListener() = default;
     };
 
 }

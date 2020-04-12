@@ -792,6 +792,14 @@ namespace MWWorld
     {
         return mSharedInt.size() + mSharedExt.size();
     }
+    size_t Store<ESM::Cell>::getExtSize() const
+    {
+        return mSharedExt.size();
+    }
+    size_t Store<ESM::Cell>::getIntSize() const
+    {
+        return mSharedInt.size();
+    }
     void Store<ESM::Cell>::listIdentifier(std::vector<std::string> &list) const
     {
         list.reserve(list.size() + mSharedInt.size());

@@ -127,8 +127,10 @@ namespace MWMechanics
             /// @param time value from [0,20]
             void setTimeToStartDrowning(float time);
 
+            void writeState (ESM::CreatureStats& state) const;
             void writeState (ESM::NpcStats& state) const;
 
+            void readState (const ESM::CreatureStats& state);
             void readState (const ESM::NpcStats& state);
     };
 }

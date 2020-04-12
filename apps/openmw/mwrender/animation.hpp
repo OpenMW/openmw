@@ -149,9 +149,13 @@ public:
     public:
         virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
                            const std::multimap<float, std::string>& map) = 0;
+
+        virtual ~TextKeyListener() = default;
     };
 
     void setTextKeyListener(TextKeyListener* listener);
+
+    virtual bool updateCarriedLeftVisible(const int weaptype) const { return false; };
 
 protected:
     class AnimationTime : public SceneUtil::ControllerSource
@@ -453,7 +457,9 @@ public:
     /// @note The matching is case-insensitive.
     const osg::Node* getNode(const std::string& name) const;
 
+    virtual bool useShieldAnimations() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
+    virtual bool getCarriedLeftShown() const { return false; }
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}
     virtual void setVampire(bool vampire) {}

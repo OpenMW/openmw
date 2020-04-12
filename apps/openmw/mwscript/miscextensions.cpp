@@ -1,9 +1,12 @@
 #include "miscextensions.hpp"
 
 #include <cstdlib>
+#include <iomanip>
 
 #include <components/compiler/opcodes.hpp>
 #include <components/compiler/locals.hpp>
+
+#include <components/debug/debuglog.hpp>
 
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -441,7 +444,7 @@ namespace MWScript
 
                     MWMechanics::MagicEffects effects = stats.getSpells().getMagicEffects();
                     effects += stats.getActiveSpells().getMagicEffects();
-                    if (ptr.getClass().hasInventoryStore(ptr))
+                    if (ptr.getClass().hasInventoryStore(ptr) && !stats.isDeathAnimationFinished())
                     {
                         MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
                         effects += store.getMagicEffects();
@@ -920,31 +923,27 @@ namespace MWScript
                 if (!ptr.isEmpty())
                 {
                     const std::string& script = ptr.getClass().getScript(ptr);
-                    if (script.empty())
-                    {
-                        output << ptr.getCellRef().getRefId() << " has no script " << std::endl;
-                    }
-                    else
+                    if (!script.empty())
                     {
                         const Compiler::Locals& locals =
                             MWBase::Environment::get().getScriptManager()->getLocals(script);
                         char type = locals.getType(var);
+                        std::string refId = ptr.getCellRef().getRefId();
+                        if (refId.find(' ') != std::string::npos)
+                            refId = '"' + refId + '"';
                         switch (type)
                         {
                         case 'l':
                         case 's':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getIntVar(script, var);
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getIntVar(script, var);
                             break;
                         case 'f':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getFloatVar(script, var);
-                            break;
-                        default:
-                            output << "unknown local '" << var << "' for '" << ptr.getCellRef().getRefId() << "'";
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getFloatVar(script, var);
                             break;
                         }
                     }
                 }
-                else
+                if (output.rdbuf()->in_avail() == 0)
                 {
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     char type = world->getGlobalVariableType (var);
@@ -952,16 +951,16 @@ namespace MWScript
                     switch (type)
                     {
                     case 's':
-                        output << runtime.getContext().getGlobalShort (var);
+                        output << var << " = " << runtime.getContext().getGlobalShort (var);
                         break;
                     case 'l':
-                        output << runtime.getContext().getGlobalLong (var);
+                        output << var << " = " << runtime.getContext().getGlobalLong (var);
                         break;
                     case 'f':
-                        output << runtime.getContext().getGlobalFloat (var);
+                        output << var << " = " << runtime.getContext().getGlobalFloat (var);
                         break;
                     default:
-                        output << "unknown global variable";
+                        output << "unknown variable";
                     }
                 }
                 runtime.getContext().report(output.str());
@@ -1106,18 +1105,9 @@ namespace MWScript
                     return;
                 }
 
-                if (spell->mData.mType != ESM::Spell::ST_Spell && spell->mData.mType != ESM::Spell::ST_Power)
-                {
-                    runtime.getContext().report("spellcasting failed: you can only cast spells and powers.");
-                    return;
-                }
-
                 if (ptr == MWMechanics::getPlayer())
                 {
-                    MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
-                    store.setSelectedEnchantItem(store.end());
-                    MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, int(MWMechanics::getSpellSuccessChance(spellId, ptr)));
-                    MWBase::Environment::get().getWindowManager()->updateSpellWindow();
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
                     return;
                 }
 
@@ -1125,11 +1115,12 @@ namespace MWScript
                 {
                     MWMechanics::AiCast castPackage(targetId, spellId, true);
                     ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
-
                     return;
                 }
 
-                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr (targetId, false);
+                MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetId, false, false);
+                if (target.isEmpty())
+                    return;
 
                 MWMechanics::CastSpell cast(ptr, target, false, true);
                 cast.playSpellCastingEffects(spell->mId, false);
@@ -1147,8 +1138,28 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string spell = runtime.getStringLiteral (runtime[0].mInteger);
+                std::string spellId = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
+
+                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                if (!spell)
+                {
+                    runtime.getContext().report("spellcasting failed: cannot find spell \""+spellId+"\"");
+                    return;
+                }
+
+                if (ptr == MWMechanics::getPlayer())
+                {
+                    MWBase::Environment::get().getWorld()->getPlayer().setSelectedSpell(spellId);
+                    return;
+                }
+
+                if (ptr.getClass().isActor())
+                {
+                    MWMechanics::AiCast castPackage(ptr.getCellRef().getRefId(), spellId, true);
+                    ptr.getClass().getCreatureStats (ptr).getAiSequence().stack(castPackage, ptr);
+                    return;
+                }
 
                 MWMechanics::CastSpell cast(ptr, ptr, false, true);
                 cast.mHitPosition = ptr.getRefData().getPosition().asVec3();
@@ -1220,6 +1231,11 @@ namespace MWScript
 
                 std::stringstream msg;
 
+                msg << "Report time: ";
+
+                std::time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+                msg << std::put_time(std::gmtime(&currentTime), "%Y.%m.%d %T UTC") << std::endl;
+
                 msg << "Content file: ";
 
                 if (!ptr.getCellRef().hasContentFile())
@@ -1238,6 +1254,7 @@ namespace MWScript
                     msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
+                msg << "Memory address: " << ptr.getBase() << std::endl;
 
                 if (ptr.isInCell())
                 {
@@ -1260,6 +1277,8 @@ namespace MWScript
                         msg << "Notes: " << notes << std::endl;
                     --arg0;
                 }
+
+                Log(Debug::Warning) << "\n" << msg.str();
 
                 runtime.getContext().report(msg.str());
             }
@@ -1421,6 +1440,20 @@ namespace MWScript
                 }
         };
 
+        class OpToggleRecastMesh : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_RecastMesh);
+
+                    runtime.getContext().report (enabled ?
+                        "Recast Mesh Rendering -> On" : "Recast Mesh Rendering -> Off");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1526,6 +1559,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeSetNavMeshNumberToRender, new OpSetNavMeshNumberToRender);
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMe, new OpRepairedOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMeExplicit, new OpRepairedOnMe<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleRecastMesh, new OpToggleRecastMesh);
         }
     }
 }

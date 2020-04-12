@@ -317,7 +317,6 @@ namespace MWClass
     {
         if (!state.mHasCustomState)
             return;
-        const ESM::ContainerState& state2 = dynamic_cast<const ESM::ContainerState&> (state);
 
         if (!ptr.getRefData().getCustomData())
         {
@@ -326,21 +325,21 @@ namespace MWClass
             ptr.getRefData().setCustomData (data.release());
         }
 
-        dynamic_cast<ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
-            readState (state2.mInventory);
+        ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
+        const ESM::ContainerState& containerState = state.asContainerState();
+        customData.mContainerStore.readState (containerState.mInventory);
     }
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
-        ESM::ContainerState& state2 = dynamic_cast<ESM::ContainerState&> (state);
-
         if (!ptr.getRefData().getCustomData())
         {
             state.mHasCustomState = false;
             return;
         }
 
-        dynamic_cast<const ContainerCustomData&> (*ptr.getRefData().getCustomData()).mContainerStore.
-            writeState (state2.mInventory);
+        const ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
+        ESM::ContainerState& containerState = state.asContainerState();
+        customData.mContainerStore.writeState (containerState.mInventory);
     }
 }

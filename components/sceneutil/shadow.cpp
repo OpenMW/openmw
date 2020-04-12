@@ -2,6 +2,7 @@
 
 #include <osgShadow/ShadowedScene>
 
+#include <components/sceneutil/vismask.hpp>
 #include <components/settings/settings.hpp>
 
 namespace SceneUtil
@@ -21,11 +22,21 @@ namespace SceneUtil
         mShadowTechnique->enableShadows();
 
         mShadowSettings->setLightNum(0);
-        mShadowSettings->setReceivesShadowTraversalMask(~0u);
+        mShadowSettings->setReceivesShadowTraversalMask(SceneUtil::Mask_Default);
 
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
+        numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
+
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
         mShadowSettings->setBaseShadowTextureUnit(8 - numberOfShadowMapsPerLight);
+
+        const float maximumShadowMapDistance = Settings::Manager::getFloat("maximum shadow map distance", "Shadows");
+        if (maximumShadowMapDistance > 0)
+        {
+            const float shadowFadeStart = std::min(std::max(0.f, Settings::Manager::getFloat("shadow fade start", "Shadows")), 1.f);
+            mShadowSettings->setMaximumShadowMapDistance(maximumShadowMapDistance);
+            mShadowTechnique->setShadowFadeStart(maximumShadowMapDistance * shadowFadeStart);
+        }
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
         if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
@@ -58,6 +69,8 @@ namespace SceneUtil
     void ShadowManager::disableShadowsForStateSet(osg::ref_ptr<osg::StateSet> stateset)
     {
         int numberOfShadowMapsPerLight = Settings::Manager::getInt("number of shadow maps", "Shadows");
+        numberOfShadowMapsPerLight = std::max(1, std::min(numberOfShadowMapsPerLight, 8));
+
         int baseShadowTextureUnit = 8 - numberOfShadowMapsPerLight;
         
         osg::ref_ptr<osg::Image> fakeShadowMapImage = new osg::Image();
@@ -117,6 +130,8 @@ namespace SceneUtil
 
         definesWithShadows["shadowNormalOffset"] = std::to_string(Settings::Manager::getFloat("normal offset distance", "Shadows"));
 
+        definesWithShadows["limitShadowMapDistance"] = Settings::Manager::getFloat("maximum shadow map distance", "Shadows") > 0 ? "1" : "0";
+
         return definesWithShadows;
     }
 
@@ -137,6 +152,8 @@ namespace SceneUtil
         definesWithoutShadows["disableNormalOffsetShadows"] = "0";
 
         definesWithoutShadows["shadowNormalOffset"] = "0.0";
+
+        definesWithoutShadows["limitShadowMapDistance"] = "0";
 
         return definesWithoutShadows;
     }

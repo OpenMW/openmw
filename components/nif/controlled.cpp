@@ -9,18 +9,19 @@ namespace Nif
     {
         Named::read(nif);
 
-        external = !!nif->getChar();
-        if(external)
+        external = nif->getChar() != 0;
+        bool internal = false;
+        if (external)
             filename = nif->getString();
         else
-        {
-            nif->getChar(); // always 1
-            data.read(nif);
-        }
+            internal = nif->getChar();
 
-        pixel = nif->getInt();
-        mipmap = nif->getInt();
-        alpha = nif->getInt();
+        if (!external && internal)
+            data.read(nif);
+
+        pixel = nif->getUInt();
+        mipmap = nif->getUInt();
+        alpha = nif->getUInt();
 
         nif->getChar(); // always 1
     }
@@ -112,9 +113,5 @@ namespace Nif
         mRadius = nif->getFloat();
         mCenter = nif->getVector3();
     }
-
-
-
-
 
 }

@@ -75,6 +75,7 @@ namespace ESM
         mContext = esm.getContext();
 
         mLandData = nullptr;
+        std::fill(std::begin(mWnam), std::end(mWnam), 0);
 
         // Skip the land data here. Load it when the cell is loaded.
         while (esm.hasMoreSubs())
@@ -127,7 +128,7 @@ namespace ESM
         if (mLandData)
         {
             if (mDataTypes & Land::DATA_VNML) {
-                esm.writeHNT("VNML", mLandData->mNormals, sizeof(mLandData->mNormals));
+                esm.writeHNT("VNML", mLandData->mNormals);
             }
             if (mDataTypes & Land::DATA_VHGT) {
                 VHGT offsets;
@@ -156,21 +157,32 @@ namespace ESM
                 }
                 esm.writeHNT("VHGT", offsets, sizeof(VHGT));
             }
-        }
-
-        if (mDataTypes & Land::DATA_WNAM) {
-            esm.writeHNT("WNAM", mWnam, 81);
-        }
-
-        if (mLandData)
-        {
+            if (mDataTypes & Land::DATA_WNAM)
+            {
+                // Generate WNAM record
+                signed char wnam[LAND_GLOBAL_MAP_LOD_SIZE];
+                float max = std::numeric_limits<signed char>::max();
+                float min = std::numeric_limits<signed char>::min();
+                float vertMult = static_cast<float>(ESM::Land::LAND_SIZE - 1) / LAND_GLOBAL_MAP_LOD_SIZE_SQRT;
+                for (int row = 0; row < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++row)
+                {
+                    for (int col = 0; col < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++col)
+                    {
+                        float height = mLandData->mHeights[int(row * vertMult) * ESM::Land::LAND_SIZE + int(col * vertMult)];
+                        height /= height > 0 ? 128.f : 16.f;
+                        height = std::min(max, std::max(min, height));
+                        wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
+                    }
+                }
+                esm.writeHNT("WNAM", wnam);
+            }
             if (mDataTypes & Land::DATA_VCLR) {
-                esm.writeHNT("VCLR", mLandData->mColours, 3*LAND_NUM_VERTS);
+                esm.writeHNT("VCLR", mLandData->mColours);
             }
             if (mDataTypes & Land::DATA_VTEX) {
                 uint16_t vtex[LAND_NUM_TEXTURES];
                 transposeTextureData(mLandData->mTextures, vtex);
-                esm.writeHNT("VTEX", vtex, sizeof(vtex));
+                esm.writeHNT("VTEX", vtex);
             }
         }
 
@@ -180,15 +192,13 @@ namespace ESM
     {
         mPlugin = 0;
 
-        for (int i = 0; i < LAND_GLOBAL_MAP_LOD_SIZE; ++i)
-            mWnam[0] = 0;
+        std::fill(std::begin(mWnam), std::end(mWnam), 0);
 
         if (!mLandData)
             mLandData = new LandData;
 
         mLandData->mHeightOffset = 0;
-        for (int i = 0; i < LAND_NUM_VERTS; ++i)
-            mLandData->mHeights[i] = 0;
+        std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
         mLandData->mMinHeight = 0;
         mLandData->mMaxHeight = 0;
         for (int i = 0; i < LAND_NUM_VERTS; ++i)
@@ -197,14 +207,8 @@ namespace ESM
             mLandData->mNormals[i*3+1] = 0;
             mLandData->mNormals[i*3+2] = 127;
         }
-        for (int i = 0; i < LAND_NUM_TEXTURES; ++i)
-            mLandData->mTextures[i] = 0;
-        for (int i = 0; i < LAND_NUM_VERTS; ++i)
-        {
-            mLandData->mColours[i*3+0] = 255;
-            mLandData->mColours[i*3+1] = 255;
-            mLandData->mColours[i*3+2] = 255;
-        }
+        std::fill(std::begin(mLandData->mTextures), std::end(mLandData->mTextures), 0);
+        std::fill(std::begin(mLandData->mColours), std::end(mLandData->mColours), 255);
         mLandData->mUnk1 = 0;
         mLandData->mUnk2 = 0;
         mLandData->mDataLoaded = Land::DATA_VNML | Land::DATA_VHGT | Land::DATA_WNAM |
@@ -322,7 +326,7 @@ namespace ESM
     Land::Land (const Land& land)
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
       mContext (land.mContext), mDataTypes (land.mDataTypes),
-      mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
+      mLandData (land.mLandData ? new LandData (*land.mLandData) : nullptr)
     {
         std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
     }
@@ -348,7 +352,7 @@ namespace ESM
     const Land::LandData *Land::getLandData (int flags) const
     {
         if (!(flags & mDataTypes))
-            return 0;
+            return nullptr;
 
         loadData (flags);
         return mLandData;
@@ -384,7 +388,7 @@ namespace ESM
             if (!mLandData->mDataLoaded)
             {
                 delete mLandData;
-                mLandData = 0;
+                mLandData = nullptr;
             }
         }
     }

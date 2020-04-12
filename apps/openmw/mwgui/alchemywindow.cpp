@@ -3,6 +3,7 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
+#include <MyGUI_ComboBox.h>
 #include <MyGUI_ControllerManager.h>
 #include <MyGUI_ControllerRepeatClick.h>
 
@@ -17,6 +18,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include <MyGUI_Macros.h>
 #include <components/esm/records.hpp>
 
 #include "inventoryitemmodel.hpp"
@@ -29,6 +31,8 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
+        , mCurrentFilter(FilterType::ByName)
+        , mModel(nullptr)
         , mSortModel(nullptr)
         , mAlchemy(new MWMechanics::Alchemy())
         , mApparatus (4)
@@ -50,6 +54,8 @@ namespace MWGui
         getWidget(mDecreaseButton, "DecreaseButton");
         getWidget(mNameEdit, "NameEdit");
         getWidget(mItemView, "ItemView");
+        getWidget(mFilterValue, "FilterValue");
+        getWidget(mFilterType, "FilterType");
 
         mBrewCountEdit->eventValueChanged += MyGUI::newDelegate(this, &AlchemyWindow::onCountValueChanged);
         mBrewCountEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &AlchemyWindow::onAccept);
@@ -72,6 +78,9 @@ namespace MWGui
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::onCancelButtonClicked);
 
         mNameEdit->eventEditSelectAccept += MyGUI::newDelegate(this, &AlchemyWindow::onAccept);
+        mFilterValue->eventComboChangePosition += MyGUI::newDelegate(this, &AlchemyWindow::onFilterChanged);
+        mFilterValue->eventEditTextChange += MyGUI::newDelegate(this, &AlchemyWindow::onFilterEdited);
+        mFilterType->eventMouseButtonClick += MyGUI::newDelegate(this, &AlchemyWindow::switchFilterType);
 
         center();
     }
@@ -136,7 +145,101 @@ namespace MWGui
                     removeIngredient(mIngredients[i]);
             }
 
+        updateFilters();
         update();
+    }
+
+    void AlchemyWindow::initFilter()
+    {
+        auto const& wm = MWBase::Environment::get().getWindowManager();
+        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
+        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+
+        if (mFilterType->getCaption() == ingredient)
+            mCurrentFilter = FilterType::ByName;
+        else
+            mCurrentFilter = FilterType::ByEffect;
+        updateFilters();
+        mFilterValue->clearIndexSelected();
+        updateFilters();
+    }
+
+    void AlchemyWindow::switchFilterType(MyGUI::Widget* _sender)
+    {
+        auto const& wm = MWBase::Environment::get().getWindowManager();
+        auto const ingredient  = wm->getGameSettingString("sIngredients", "Ingredients");
+        auto const effect = wm->getGameSettingString("sMagicEffects", "Magic Effects");
+        auto *button = _sender->castType<MyGUI::Button>();
+
+        if (button->getCaption() == ingredient)
+        {
+            button->setCaption(effect);
+            mCurrentFilter = FilterType::ByEffect;
+        }
+        else
+        {
+            button->setCaption(ingredient);
+            mCurrentFilter = FilterType::ByName;
+        }
+        mSortModel->setNameFilter({});
+        mSortModel->setEffectFilter({});
+        mFilterValue->clearIndexSelected();
+        updateFilters();
+        mItemView->update();
+    }
+
+    void AlchemyWindow::updateFilters()
+    {
+        std::set<std::string> itemNames, itemEffects;
+        for (size_t i = 0; i < mModel->getItemCount(); ++i)
+        {
+            MWWorld::Ptr item = mModel->getItem(i).mBase;
+            if (item.getTypeName() != typeid(ESM::Ingredient).name())
+                continue;
+
+            itemNames.insert(item.getClass().getName(item));
+
+            MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+            auto const alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
+
+            auto const effects = MWMechanics::Alchemy::effectsDescription(item, alchemySkill);
+            itemEffects.insert(effects.begin(), effects.end());
+        }
+
+        mFilterValue->removeAllItems();
+        auto const addItems = [&](auto const& container)
+        {
+            for (auto const& item : container)
+                mFilterValue->addItem(item);
+        };
+        switch (mCurrentFilter)
+        {
+            case FilterType::ByName: addItems(itemNames); break;
+            case FilterType::ByEffect: addItems(itemEffects); break;
+        }
+    }
+
+    void AlchemyWindow::applyFilter(const std::string& filter)
+    {
+        switch (mCurrentFilter)
+        {
+            case FilterType::ByName: mSortModel->setNameFilter(filter); break;
+            case FilterType::ByEffect: mSortModel->setEffectFilter(filter); break;
+        }
+        mItemView->update();
+    }
+
+    void AlchemyWindow::onFilterChanged(MyGUI::ComboBox* _sender, size_t _index)
+    {
+        // ignore spurious event fired when one edit the content after selection.
+        // onFilterEdited will handle it.
+        if (_index != MyGUI::ITEM_NONE)
+            applyFilter(_sender->getItemNameAt(_index));
+    }
+
+    void AlchemyWindow::onFilterEdited(MyGUI::EditBox* _sender)
+    {
+        applyFilter(_sender->getCaption());
     }
 
     void AlchemyWindow::onOpen()
@@ -144,8 +247,8 @@ namespace MWGui
         mAlchemy->clear();
         mAlchemy->setAlchemist (MWMechanics::getPlayer());
 
-        InventoryItemModel* model = new InventoryItemModel(MWMechanics::getPlayer());
-        mSortModel = new SortFilterItemModel(model);
+        mModel = new InventoryItemModel(MWMechanics::getPlayer());
+        mSortModel = new SortFilterItemModel(mModel);
         mSortModel->setFilter(SortFilterItemModel::Filter_OnlyIngredients);
         mItemView->setModel (mSortModel);
         mItemView->resetScrollBars();
@@ -167,6 +270,7 @@ namespace MWGui
         }
 
         update();
+        initFilter();
 
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mNameEdit);
     }

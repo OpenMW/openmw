@@ -135,6 +135,8 @@ namespace MWWorld
         void setPreviousItem(const std::string& boundItemId, const std::string& previousItemId);
         std::string getPreviousItem(const std::string& boundItemId);
         void erasePreviousItem(const std::string& boundItemId);
+
+        void setSelectedSpell(const std::string& spellId);
     };
 }
 #endif

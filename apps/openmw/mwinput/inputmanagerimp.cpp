@@ -79,10 +79,20 @@ namespace MWInput
         , mAttemptJump(false)
         , mInvUiScalingFactor(1.f)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
+        , mGyroXSpeed(0.f)
+        , mGyroYSpeed(0.f)
+        , mGyroUpdateTimer(0.f)
+        , mGyroHSensitivity (Settings::Manager::getFloat("gyro horizontal sensitivity", "Input"))
+        , mGyroVSensitivity (Settings::Manager::getFloat("gyro vertical sensitivity", "Input"))
+        , mGyroHAxis(GyroscopeAxis::Minus_X)
+        , mGyroVAxis(GyroscopeAxis::Y)
+        , mGyroInputThreshold(Settings::Manager::getFloat("gyro input threshold", "Input"))
         , mFakeDeviceID(1)
+        , mGyroscope(nullptr)
     {
         mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputManager->setMouseEventCallback (this);
+        mInputManager->setSensorEventCallback (this);
         mInputManager->setKeyboardEventCallback (this);
         mInputManager->setWindowEventCallback(this);
         mInputManager->setControllerEventCallback(this);
@@ -113,7 +123,6 @@ namespace MWInput
         /* Joystick Init */
 
         // Load controller mappings
-#if SDL_VERSION_ATLEAST(2,0,2)
         if(!controllerBindingsFile.empty())
         {
             SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
@@ -122,7 +131,6 @@ namespace MWInput
         {
             SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
         }
-#endif
 
         // Open all presently connected sticks
         int numSticks = SDL_NumJoysticks();
@@ -140,6 +148,9 @@ namespace MWInput
                 Log(Debug::Info) << "Detected unusable controller: " << SDL_JoystickNameForIndex(i);
             }
         }
+
+        correctGyroscopeAxes();
+        updateSensors();
 
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
@@ -163,11 +174,123 @@ namespace MWInput
     {
         mInputBinder->save (mUserFile);
 
+        if (mGyroscope != nullptr)
+        {
+            SDL_SensorClose(mGyroscope);
+            mGyroscope = nullptr;
+        }
+
         delete mInputBinder;
 
         delete mInputManager;
 
         delete mVideoWrapper;
+    }
+
+    InputManager::GyroscopeAxis InputManager::mapGyroscopeAxis(const std::string& axis)
+    {
+        if (axis == "x")
+            return GyroscopeAxis::X;
+        else if (axis == "y")
+            return GyroscopeAxis::Y;
+        else if (axis == "z")
+            return GyroscopeAxis::Z;
+        else if (axis == "-x")
+            return GyroscopeAxis::Minus_X;
+        else if (axis == "-y")
+            return GyroscopeAxis::Minus_Y;
+        else if (axis == "-z")
+            return GyroscopeAxis::Minus_Z;
+
+        return GyroscopeAxis::Unknown;
+    }
+
+    void InputManager::correctGyroscopeAxes()
+    {
+        if (!Settings::Manager::getBool("enable gyroscope", "Input"))
+            return;
+
+        // Treat setting from config as axes for landscape mode.
+        // If the device does not support orientation change, do nothing.
+        // Note: in is unclear how to correct axes for devices with non-standart Z axis direction.
+        mGyroHAxis = mapGyroscopeAxis(Settings::Manager::getString("gyro horizontal axis", "Input"));
+        mGyroVAxis = mapGyroscopeAxis(Settings::Manager::getString("gyro vertical axis", "Input"));
+
+        SDL_DisplayOrientation currentOrientation = SDL_GetDisplayOrientation(Settings::Manager::getInt("screen", "Video"));
+        switch (currentOrientation)
+        {
+            case SDL_ORIENTATION_UNKNOWN:
+                return;
+            case SDL_ORIENTATION_LANDSCAPE:
+                break;
+            case SDL_ORIENTATION_LANDSCAPE_FLIPPED:
+            {
+                mGyroHAxis = GyroscopeAxis(-mGyroHAxis);
+                mGyroVAxis = GyroscopeAxis(-mGyroVAxis);
+
+                break;
+            }
+            case SDL_ORIENTATION_PORTRAIT:
+            {
+                GyroscopeAxis oldVAxis = mGyroVAxis;
+                mGyroVAxis = mGyroHAxis;
+                mGyroHAxis = GyroscopeAxis(-oldVAxis);
+
+                break;
+            }
+            case SDL_ORIENTATION_PORTRAIT_FLIPPED:
+            {
+                GyroscopeAxis oldVAxis = mGyroVAxis;
+                mGyroVAxis = GyroscopeAxis(-mGyroHAxis);
+                mGyroHAxis = oldVAxis;
+
+                break;
+            }
+        }
+    }
+
+    void InputManager::updateSensors()
+    {
+        if (Settings::Manager::getBool("enable gyroscope", "Input"))
+        {
+            int numSensors = SDL_NumSensors();
+
+            for (int i = 0; i < numSensors; ++i)
+            {
+                if (SDL_SensorGetDeviceType(i) == SDL_SENSOR_GYRO)
+                {
+                    // It is unclear how to handle several enabled gyroscopes, so use the first one.
+                    // Note: Android registers some gyroscope as two separate sensors, for non-wake-up mode and for wake-up mode.
+                    if (mGyroscope != nullptr)
+                    {
+                        SDL_SensorClose(mGyroscope);
+                        mGyroscope = nullptr;
+                        mGyroXSpeed = mGyroYSpeed = 0.f;
+                        mGyroUpdateTimer = 0.f;
+                    }
+
+                    // FIXME: SDL2 does not provide a way to configure a sensor update frequency so far.
+                    SDL_Sensor *sensor = SDL_SensorOpen(i);
+                    if (sensor == nullptr)
+                        Log(Debug::Error) << "Couldn't open sensor " << SDL_SensorGetDeviceName(i) << ": " << SDL_GetError();
+                    else
+                    {
+                        mGyroscope = sensor;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            if (mGyroscope != nullptr)
+            {
+                SDL_SensorClose(mGyroscope);
+                mGyroscope = nullptr;
+                mGyroXSpeed = mGyroYSpeed = 0.f;
+                mGyroUpdateTimer = 0.f;
+            }
+        }
     }
 
     bool InputManager::isWindowVisible()
@@ -464,6 +587,14 @@ namespace MWInput
             case A_ToggleDebug:
                 MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
                 break;
+            case A_ZoomIn:
+                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    MWBase::Environment::get().getWorld()->setCameraDistance(ZOOM_SCALE, true, true);
+                break;
+            case A_ZoomOut:
+                if (mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"] && !MWBase::Environment::get().getWindowManager()->isGuiMode())
+                    MWBase::Environment::get().getWorld()->setCameraDistance(-ZOOM_SCALE, true, true);
+                break;
             case A_QuickSave:
                 quickSave();
                 break;
@@ -598,6 +729,37 @@ namespace MWInput
                     mPlayer->pitch(rot[0]);
                 }
             }
+        }
+
+        if (mGyroXSpeed != 0.f || mGyroYSpeed != 0.f)
+        {
+            if (mGyroUpdateTimer > 0.5f)
+            {
+                // More than half of second passed since the last gyroscope update.
+                // A device more likely was disconnected or switched to the sleep mode.
+                // Reset current rotation speed and wait for update.
+                mGyroXSpeed = mGyroYSpeed = 0.f;
+                mGyroUpdateTimer = 0.f;
+            }
+
+            if (!mGuiCursorEnabled)
+            {
+                resetIdleTime();
+
+                float rot[3];
+                rot[0] = mGyroYSpeed * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
+                rot[1] = 0.0f;
+                rot[2] = mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
+
+                // Only actually turn player when we're not in vanity mode
+                if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && mControlSwitch["playerlooking"])
+                {
+                    mPlayer->yaw(rot[2]);
+                    mPlayer->pitch(rot[0]);
+                }
+            }
+
+            mGyroUpdateTimer += dt;
         }
 
         // Disable movement in Gui mode
@@ -750,7 +912,9 @@ namespace MWInput
                 actionIsActive(A_MoveRight) ||
                 actionIsActive(A_Jump) ||
                 actionIsActive(A_Sneak) ||
-                actionIsActive(A_TogglePOV))
+                actionIsActive(A_TogglePOV) ||
+                actionIsActive(A_ZoomIn) ||
+                actionIsActive(A_ZoomOut) )
             {
                 resetIdleTime();
             } else {
@@ -792,6 +956,27 @@ namespace MWInput
 
             if (it->first == "Input" && it->second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "gyro horizontal sensitivity")
+                mGyroHSensitivity = Settings::Manager::getFloat("gyro horizontal sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "gyro vertical sensitivity")
+                mGyroVSensitivity = Settings::Manager::getFloat("gyro vertical sensitivity", "Input");
+
+            if (it->first == "Input" && it->second == "enable gyroscope")
+            {
+                correctGyroscopeAxes();
+                updateSensors();
+            }
+
+            if (it->first == "Input" && it->second == "gyro horizontal axis")
+                correctGyroscopeAxes();
+
+            if (it->first == "Input" && it->second == "gyro vertical axis")
+                correctGyroscopeAxes();
+
+            if (it->first == "Input" && it->second == "gyro input threshold")
+                mGyroInputThreshold = Settings::Manager::getFloat("gyro input threshold", "Input");
 
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
@@ -938,6 +1123,65 @@ namespace MWInput
         }
     }
 
+    void InputManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
+    {
+        if (mInputBinder->detectingBindingState() || !mControlsDisabled)
+            mInputBinder->mouseWheelMoved(arg);
+
+        mJoystickLastUsed = false;
+    }
+
+    float InputManager::getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const
+    {
+        switch (axis)
+        {
+            case GyroscopeAxis::X:
+            case GyroscopeAxis::Y:
+            case GyroscopeAxis::Z:
+                return std::abs(arg.data[0]) >= mGyroInputThreshold ? arg.data[axis-1] : 0.f;
+            case GyroscopeAxis::Minus_X:
+            case GyroscopeAxis::Minus_Y:
+            case GyroscopeAxis::Minus_Z:
+                return std::abs(arg.data[0]) >= mGyroInputThreshold ? -arg.data[std::abs(axis)-1] : 0.f;
+            default:
+                return 0.f;
+        }
+    }
+
+    void InputManager::displayOrientationChanged()
+    {
+        correctGyroscopeAxes();
+    }
+
+    void InputManager::sensorUpdated(const SDL_SensorEvent &arg)
+    {
+        if (!Settings::Manager::getBool("enable gyroscope", "Input"))
+            return;
+
+        SDL_Sensor *sensor = SDL_SensorFromInstanceID(arg.which);
+        if (!sensor)
+        {
+            Log(Debug::Info) << "Couldn't get sensor for sensor event";
+            return;
+        }
+
+        switch (SDL_SensorGetType(sensor))
+        {
+        case SDL_SENSOR_ACCEL:
+            break;
+        case SDL_SENSOR_GYRO:
+        {
+            mGyroXSpeed = getGyroAxisSpeed(mGyroHAxis, arg);
+            mGyroYSpeed = getGyroAxisSpeed(mGyroVAxis, arg);
+            mGyroUpdateTimer = 0.f;
+
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
     void InputManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg )
     {
         mInputBinder->mouseMoved (arg);
@@ -985,9 +1229,6 @@ namespace MWInput
             if (arg.zrel && mControlSwitch["playerviewswitch"] && mControlSwitch["playercontrols"]) //Check to make sure you are allowed to zoomout and there is a change
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(static_cast<float>(arg.zrel));
-
-                if (Settings::Manager::getBool("allow third person zoom", "Input"))
-                    MWBase::Environment::get().getWorld()->setCameraDistance(static_cast<float>(arg.zrel), true, true);
             }
         }
     }
@@ -1082,13 +1323,13 @@ namespace MWInput
             {
                 if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
-                    mGamepadZoom = static_cast<float>(arg.value / 10000 * 8.5f);
-                    return; // Do not propogate event.
+                    mGamepadZoom = arg.value * 0.85f / 1000.f;
+                    return; // Do not propagate event.
                 }
                 else if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
                 {
-                    mGamepadZoom = static_cast<float>(-(arg.value / 10000 * 8.5f));
-                    return; // Do not propogate event.
+                    mGamepadZoom = -arg.value * 0.85f / 1000.f;
+                    return; // Do not propagate event.
                 }
             }
         }
@@ -1447,6 +1688,10 @@ namespace MWInput
         defaultMouseButtonBindings[A_Inventory] = SDL_BUTTON_RIGHT;
         defaultMouseButtonBindings[A_Use] = SDL_BUTTON_LEFT;
 
+        std::map<int, ICS::InputControlSystem::MouseWheelClick> defaultMouseWheelBindings;
+        defaultMouseWheelBindings[A_ZoomIn] = ICS::InputControlSystem::MouseWheelClick::UP;
+        defaultMouseWheelBindings[A_ZoomOut] = ICS::InputControlSystem::MouseWheelClick::DOWN;
+
         for (int i = 0; i < A_Last; ++i)
         {
             ICS::Control* control;
@@ -1465,6 +1710,7 @@ namespace MWInput
             if (!controlExists || force ||
                     ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
                       && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                      && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED
                       ))
             {
                 clearAllKeyBindings(control);
@@ -1480,6 +1726,12 @@ namespace MWInput
                 {
                     control->setInitialValue(0.0f);
                     mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                }
+                else if (defaultMouseWheelBindings.find(i) != defaultMouseWheelBindings.end()
+                        && (force || !mInputBinder->isMouseWheelBound(defaultMouseWheelBindings[i])))
+                {
+                    control->setInitialValue(0.f);
+                    mInputBinder->addMouseWheelBinding(control, defaultMouseWheelBindings[i], ICS::Control::INCREASE);
                 }
 
                 if (i == A_LookLeftRight && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_4) && !mInputBinder->isKeyBound(SDL_SCANCODE_KP_6))
@@ -1571,6 +1823,12 @@ namespace MWInput
 
         if (action == A_Screenshot)
             return "Screenshot";
+        else if (action == A_ZoomIn)
+            return "Zoom In";
+        else if (action == A_ZoomOut)
+            return "Zoom Out";
+        else if (action == A_ToggleHUD)
+            return "Toggle HUD";
 
         descriptions[A_Use] = "sUse";
         descriptions[A_Activate] = "sActivate";
@@ -1623,10 +1881,25 @@ namespace MWInput
 
         SDL_Scancode key = mInputBinder->getKeyBinding (c, ICS::Control::INCREASE);
         unsigned int mouse = mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE);
+        ICS::InputControlSystem::MouseWheelClick wheel = mInputBinder->getMouseWheelBinding(c, ICS::Control::INCREASE);
         if (key != SDL_SCANCODE_UNKNOWN)
             return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + std::to_string(mouse);
+        else if (wheel != ICS::InputControlSystem::MouseWheelClick::UNASSIGNED)
+            switch (wheel)
+            {
+                case ICS::InputControlSystem::MouseWheelClick::UP:
+                    return "Mouse Wheel Up";
+                case ICS::InputControlSystem::MouseWheelClick::DOWN:
+                    return "Mouse Wheel Down";
+                case ICS::InputControlSystem::MouseWheelClick::RIGHT:
+                    return "Mouse Wheel Right";
+                case ICS::InputControlSystem::MouseWheelClick::LEFT:
+                    return "Mouse Wheel Left";
+                default:
+                    return "#{sNone}";
+            }
         else
             return "#{sNone}";
     }
@@ -1713,6 +1986,8 @@ namespace MWInput
         ret.push_back(A_MoveLeft);
         ret.push_back(A_MoveRight);
         ret.push_back(A_TogglePOV);
+        ret.push_back(A_ZoomIn);
+        ret.push_back(A_ZoomOut);
         ret.push_back(A_Run);
         ret.push_back(A_AlwaysRun);
         ret.push_back(A_Sneak);
@@ -1732,6 +2007,7 @@ namespace MWInput
         ret.push_back(A_Console);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
+        ret.push_back(A_ToggleHUD);
         ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
@@ -1751,6 +2027,8 @@ namespace MWInput
     {
         std::vector<int> ret;
         ret.push_back(A_TogglePOV);
+        ret.push_back(A_ZoomIn);
+        ret.push_back(A_ZoomOut);
         ret.push_back(A_Sneak);
         ret.push_back(A_Activate);
         ret.push_back(A_Use);
@@ -1763,6 +2041,7 @@ namespace MWInput
         ret.push_back(A_Rest);
         ret.push_back(A_QuickSave);
         ret.push_back(A_QuickLoad);
+        ret.push_back(A_ToggleHUD);
         ret.push_back(A_Screenshot);
         ret.push_back(A_QuickKeysMenu);
         ret.push_back(A_QuickKey1);
@@ -1790,13 +2069,6 @@ namespace MWInput
         mInputBinder->enableDetectingBindingState (c, ICS::Control::INCREASE);
     }
 
-    void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-        , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction)
-    {
-        // we don't want mouse movement bindings
-        return;
-    }
-
     void InputManager::keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , SDL_Scancode key, ICS::Control::ControlChangingDirection direction)
     {
@@ -1810,7 +2082,7 @@ namespace MWInput
         }
 
         // Disallow binding reserved keys
-        if (key == SDL_SCANCODE_F3 || key == SDL_SCANCODE_F4 || key == SDL_SCANCODE_F10 || key == SDL_SCANCODE_F11)
+        if (key == SDL_SCANCODE_F3 || key == SDL_SCANCODE_F4 || key == SDL_SCANCODE_F10)
             return;
 
         #ifndef __APPLE__
@@ -1828,6 +2100,13 @@ namespace MWInput
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
     }
 
+    void InputManager::mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction)
+    {
+        // we don't want mouse movement bindings
+        return;
+    }
+
     void InputManager::mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
         , unsigned int button, ICS::Control::ControlChangingDirection direction)
     {
@@ -1837,6 +2116,17 @@ namespace MWInput
         control->setInitialValue(0.0f);
         ICS::DetectingBindingListener::mouseButtonBindingDetected (ICS, control, button, direction);
         MWBase::Environment::get().getWindowManager ()->notifyInputActionBound ();
+    }
+
+    void InputManager::mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
+        , ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction)
+    {
+        if(!mDetectingKeyboard)
+            return;
+        clearAllKeyBindings(control);
+        control->setInitialValue(0.0f);
+        ICS::DetectingBindingListener::mouseWheelBindingDetected(ICS, control, click, direction);
+        MWBase::Environment::get().getWindowManager()->notifyInputActionBound();
     }
 
     void InputManager::joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
@@ -1873,6 +2163,8 @@ namespace MWInput
             mInputBinder->removeKeyBinding (mInputBinder->getKeyBinding (control, ICS::Control::INCREASE));
         if (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
             mInputBinder->removeMouseButtonBinding (mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE));
+        if (mInputBinder->getMouseWheelBinding (control, ICS::Control::INCREASE) != ICS::InputControlSystem::MouseWheelClick::UNASSIGNED)
+            mInputBinder->removeMouseWheelBinding (mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE));
     }
 
     void InputManager::clearAllControllerBindings (ICS::Control* control)

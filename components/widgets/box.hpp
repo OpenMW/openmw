@@ -33,6 +33,8 @@ namespace Gui
 
         virtual MyGUI::IntSize getRequestedSize() = 0;
 
+        virtual ~AutoSizedWidget() = default;
+
     protected:
         void notifySizeChange(MyGUI::Widget* w);
 
@@ -44,11 +46,11 @@ namespace Gui
         MYGUI_RTTI_DERIVED( AutoSizedTextBox )
 
     public:
-        virtual MyGUI::IntSize getRequestedSize();
-        virtual void setCaption(const MyGUI::UString& _value);
+        MyGUI::IntSize getRequestedSize() final;
+        void setCaption(const MyGUI::UString& _value) final;
 
     protected:
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
         std::string mFontSize;
     };
 
@@ -58,14 +60,14 @@ namespace Gui
 
     public:
 
-        virtual MyGUI::IntSize getRequestedSize();
-        virtual void setCaption(const MyGUI::UString& _value);
+        MyGUI::IntSize getRequestedSize() final;
+        void setCaption(const MyGUI::UString& _value) final;
 
-        virtual void initialiseOverride();
+        void initialiseOverride() final;
 
     protected:
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
-        virtual int getWidth();
+        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
+        int getWidth();
         std::string mFontSize;
         bool mShrink = false;
         bool mWasResized = false;
@@ -77,11 +79,11 @@ namespace Gui
         MYGUI_RTTI_DERIVED( AutoSizedButton )
 
     public:
-        virtual MyGUI::IntSize getRequestedSize();
-        virtual void setCaption(const MyGUI::UString& _value);
+        MyGUI::IntSize getRequestedSize() final;
+        void setCaption(const MyGUI::UString& _value) final;
 
     protected:
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
         std::string mFontSize;
     };
 
@@ -93,6 +95,8 @@ namespace Gui
     {
     public:
         Box();
+
+        virtual ~Box() = default;
 
         void notifyChildrenSizeChanged();
 
@@ -114,7 +118,7 @@ namespace Gui
     public:
         Spacer();
 
-        virtual MyGUI::IntSize getRequestedSize() { return MyGUI::IntSize(0,0); }
+        MyGUI::IntSize getRequestedSize() final { return MyGUI::IntSize(0,0); }
     };
 
     class HBox : public Box, public MyGUI::Widget
@@ -122,18 +126,18 @@ namespace Gui
         MYGUI_RTTI_DERIVED( HBox )
 
     public:
-        virtual void setSize (const MyGUI::IntSize &_value);
-        virtual void setCoord (const MyGUI::IntCoord &_value);
+        void setSize (const MyGUI::IntSize &_value) final;
+        void setCoord (const MyGUI::IntCoord &_value) final;
 
     protected:
-        virtual void initialiseOverride();
+        void initialiseOverride() final;
 
-        virtual void align();
-        virtual MyGUI::IntSize getRequestedSize();
+        void align() final;
+        MyGUI::IntSize getRequestedSize() final;
 
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
 
-        virtual void onWidgetCreated(MyGUI::Widget* _widget);
+        void onWidgetCreated(MyGUI::Widget* _widget) final;
     };
 
     class VBox : public Box, public MyGUI::Widget
@@ -141,18 +145,18 @@ namespace Gui
         MYGUI_RTTI_DERIVED( VBox)
 
     public:
-        virtual void setSize (const MyGUI::IntSize &_value);
-        virtual void setCoord (const MyGUI::IntCoord &_value);
+        void setSize (const MyGUI::IntSize &_value) final;
+        void setCoord (const MyGUI::IntCoord &_value) final;
 
     protected:
-        virtual void initialiseOverride();
+        void initialiseOverride() final;
 
-        virtual void align();
-        virtual MyGUI::IntSize getRequestedSize();
+        void align() final;
+        MyGUI::IntSize getRequestedSize() final;
 
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value);
+        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
 
-        virtual void onWidgetCreated(MyGUI::Widget* _widget);
+        void onWidgetCreated(MyGUI::Widget* _widget) final;
     };
 
 }

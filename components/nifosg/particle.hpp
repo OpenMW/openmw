@@ -78,6 +78,8 @@ namespace NifOsg
         ParticleShooter();
         ParticleShooter(const ParticleShooter& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
+        ParticleShooter& operator=(const ParticleShooter&) = delete;
+
         META_Object(NifOsg, ParticleShooter)
 
         virtual void shoot(osgParticle::Particle* particle) const;
@@ -135,6 +137,8 @@ namespace NifOsg
         GrowFadeAffector();
         GrowFadeAffector(const GrowFadeAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
+        GrowFadeAffector& operator=(const GrowFadeAffector&) = delete;
+
         META_Object(NifOsg, GrowFadeAffector)
 
         virtual void beginOperate(osgParticle::Program* program);
@@ -147,13 +151,14 @@ namespace NifOsg
         float mCachedDefaultSize;
     };
 
-    typedef ValueInterpolator<Nif::Vector4KeyMap, LerpFunc> Vec4Interpolator;
     class ParticleColorAffector : public osgParticle::Operator
     {
     public:
         ParticleColorAffector(const Nif::NiColorData* clrdata);
         ParticleColorAffector();
         ParticleColorAffector(const ParticleColorAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        ParticleColorAffector& operator=(const ParticleColorAffector&) = delete;
 
         META_Object(NifOsg, ParticleColorAffector)
 
@@ -169,6 +174,8 @@ namespace NifOsg
         GravityAffector(const Nif::NiGravity* gravity);
         GravityAffector();
         GravityAffector(const GravityAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        GravityAffector& operator=(const GravityAffector&) = delete;
 
         META_Object(NifOsg, GravityAffector)
 

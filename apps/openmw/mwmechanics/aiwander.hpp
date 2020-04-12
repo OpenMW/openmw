@@ -27,8 +27,6 @@ namespace MWMechanics
     {
         float mReaction; // update some actions infrequently
 
-        const MWWorld::CellStore* mCell; // for detecting cell change
-
         // AiWander states
         enum WanderState
         {
@@ -60,7 +58,6 @@ namespace MWMechanics
 
         AiWanderStorage():
             mReaction(0),
-            mCell(nullptr),
             mState(Wander_ChooseAction),
             mIsWanderingManually(false),
             mCanWanderAlongPathGrid(true),
@@ -100,6 +97,8 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            virtual bool useVariableSpeed() const { return true;}
+
             virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
 
             virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
@@ -107,6 +106,14 @@ namespace MWMechanics
             bool getRepeat() const;
 
             osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
+
+            virtual osg::Vec3f getDestination() const
+            {
+                if (!mHasDestination)
+                    return osg::Vec3f(0, 0, 0);
+
+                return mDestination;
+            }
 
         private:
             // NOTE: mDistance and mDuration must be set already
@@ -125,12 +132,10 @@ namespace MWMechanics
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-            bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-            const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos);
+            bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
             bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
-            bool destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
             int mDistance; // how far the actor can wander from the spawn point
@@ -141,7 +146,7 @@ namespace MWMechanics
             bool mRepeat;
 
             bool mStoredInitialActorPosition;
-            osg::Vec3f mInitialActorPosition;
+            osg::Vec3f mInitialActorPosition; // Note: an original engine does not reset coordinates even when actor changes a cell
 
             bool mHasDestination;
             osg::Vec3f mDestination;

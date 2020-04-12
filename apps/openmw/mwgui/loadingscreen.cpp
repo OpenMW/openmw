@@ -14,13 +14,12 @@
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
-
-#include "../mwrender/vismask.hpp"
 
 #include "backgroundimage.hpp"
 
@@ -335,8 +334,8 @@ namespace MWGui
         // Turn off rendering except the GUI
         int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
         int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI|MWRender::Mask_PreCompile);
-        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI|MWRender::Mask_PreCompile);
+        mViewer->getUpdateVisitor()->setTraversalMask(SceneUtil::Mask_GUI|SceneUtil::Mask_PreCompile);
+        mViewer->getCamera()->setCullMask(SceneUtil::Mask_GUI|SceneUtil::Mask_PreCompile);
 
         MWBase::Environment::get().getInputManager()->update(0, true, true);
 

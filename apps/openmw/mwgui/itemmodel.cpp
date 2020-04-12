@@ -116,9 +116,9 @@ namespace MWGui
         return mSourceModel->allowedToUseItems();
     }
 
-    MWWorld::Ptr ProxyItemModel::copyItem (const ItemStack& item, size_t count)
+    MWWorld::Ptr ProxyItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
     {
-        return mSourceModel->copyItem (item, count);
+        return mSourceModel->copyItem (item, count, allowAutoEquip);
     }
 
     void ProxyItemModel::removeItem (const ItemStack& item, size_t count)

@@ -370,7 +370,8 @@ int MWMechanics::NpcStats::getReputation() const
 
 void MWMechanics::NpcStats::setReputation(int reputation)
 {
-    mReputation = reputation;
+    // Reputation is capped in original engine
+    mReputation = std::min(255, std::max(0, reputation));
 }
 
 int MWMechanics::NpcStats::getCrimeId() const
@@ -454,6 +455,11 @@ void MWMechanics::NpcStats::setTimeToStartDrowning(float time)
     mTimeToStartDrowning=time;
 }
 
+void MWMechanics::NpcStats::writeState (ESM::CreatureStats& state) const
+{
+    CreatureStats::writeState(state);
+}
+
 void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
 {
     for (std::map<std::string, int>::const_iterator iter (mFactionRank.begin());
@@ -492,6 +498,10 @@ void MWMechanics::NpcStats::writeState (ESM::NpcStats& state) const
     std::copy (mUsedIds.begin(), mUsedIds.end(), std::back_inserter (state.mUsedIds));
 
     state.mTimeToStartDrowning = mTimeToStartDrowning;
+}
+void MWMechanics::NpcStats::readState (const ESM::CreatureStats& state)
+{
+    CreatureStats::readState(state);
 }
 
 void MWMechanics::NpcStats::readState (const ESM::NpcStats& state)

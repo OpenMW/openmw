@@ -9,9 +9,7 @@ namespace Nif
 
 /// Open a NIF stream. The name is used for error messages.
 NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
-    : ver(0)
-    , filename(name)
-    , mUseSkinning(false)
+    : filename(name)
 {
     parse(stream);
 }
@@ -50,6 +48,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiSwitchNode",               &construct <NiSwitchNode>                , RC_NiSwitchNode                  ));
     newFactory.insert(makeEntry("NiLODNode",                  &construct <NiLODNode>                   , RC_NiLODNode                     ));
     newFactory.insert(makeEntry("AvoidNode",                  &construct <NiNode>                      , RC_AvoidNode                     ));
+    newFactory.insert(makeEntry("NiCollisionSwitch",          &construct <NiNode>                      , RC_NiCollisionSwitch             ));
     newFactory.insert(makeEntry("NiBSParticleNode",           &construct <NiNode>                      , RC_NiBSParticleNode              ));
     newFactory.insert(makeEntry("NiBSAnimationNode",          &construct <NiNode>                      , RC_NiBSAnimationNode             ));
     newFactory.insert(makeEntry("NiBillboardNode",            &construct <NiNode>                      , RC_NiBillboardNode               ));
@@ -139,26 +138,17 @@ void NIFFile::parse(Files::IStreamPtr stream)
     // Check the header string
     std::string head = nif.getVersionString();
     if(head.compare(0, 22, "NetImmerse File Format") != 0)
-        fail("Invalid NIF header:  " + head);
+        fail("Invalid NIF header: " + head);
 
     // Get BCD version
     ver = nif.getUInt();
     // 4.0.0.0 is an older, practically identical version of the format.
     // It's not used by Morrowind assets but Morrowind supports it.
-    if(ver != 0x04000000 && ver != VER_MW)
+    if(ver != nif.generateVersion(4,0,0,0) && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
     // Number of records
     size_t recNum = nif.getInt();
     records.resize(recNum);
-
-    /* The format for 10.0.1.0 seems to be a bit different. After the
-     header, it contains the number of records, r (int), just like
-     4.0.0.2, but following that it contains a short x, followed by x
-     strings. Then again by r shorts, one for each record, giving
-     which of the above strings to use to identify the record. After
-     this follows two ints (zero?) and then the record data. However
-     we do not support or plan to support other versions yet.
-    */
 
     for(size_t i = 0;i < recNum;i++)
     {

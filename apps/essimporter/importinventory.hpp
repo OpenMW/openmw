@@ -5,6 +5,8 @@
 #include <string>
 
 #include <components/esm/cellref.hpp>
+#include <components/esm/esmcommon.hpp>
+
 #include "importscri.hpp"
 
 namespace ESM
@@ -14,6 +16,12 @@ namespace ESM
 
 namespace ESSImport
 {
+
+    struct ContItem
+    {
+        int mCount;
+        ESM::NAME32 mItem;
+    };
 
     struct Inventory
     {

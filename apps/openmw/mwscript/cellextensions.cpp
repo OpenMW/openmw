@@ -10,11 +10,13 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-#include "../mwworld/player.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/actionteleport.hpp"
+#include "../mwworld/cellstore.hpp"
+#include "../mwbase/environment.hpp"
+#include "../mwworld/player.hpp"
+#include "../mwbase/statemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
@@ -31,6 +33,52 @@ namespace MWScript
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
                     runtime.push (MWBase::Environment::get().getWorld()->hasCellChanged() ? 1 : 0);
+                }
+        };
+
+        class OpTestCells : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    if (MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+                    {
+                        runtime.getContext().report("Use TestCells from the main menu, when there is no active game session.");
+                        return;
+                    }
+
+                    bool wasConsole = MWBase::Environment::get().getWindowManager()->isConsoleMode();
+                    if (wasConsole)
+                        MWBase::Environment::get().getWindowManager()->toggleConsole();
+
+                    MWBase::Environment::get().getWorld()->testExteriorCells();
+
+                    if (wasConsole)
+                        MWBase::Environment::get().getWindowManager()->toggleConsole();
+                }
+        };
+
+        class OpTestInteriorCells : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    if (MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+                    {
+                        runtime.getContext().report("Use TestInteriorCells from the main menu, when there is no active game session.");
+                        return;
+                    }
+
+                    bool wasConsole = MWBase::Environment::get().getWindowManager()->isConsoleMode();
+                    if (wasConsole)
+                        MWBase::Environment::get().getWindowManager()->toggleConsole();
+
+                    MWBase::Environment::get().getWorld()->testInteriorCells();
+
+                    if (wasConsole)
+                        MWBase::Environment::get().getWindowManager()->toggleConsole();
                 }
         };
 
@@ -204,6 +252,8 @@ namespace MWScript
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Cell::opcodeCellChanged, new OpCellChanged);
+            interpreter.installSegment5 (Compiler::Cell::opcodeTestCells, new OpTestCells);
+            interpreter.installSegment5 (Compiler::Cell::opcodeTestInteriorCells, new OpTestInteriorCells);
             interpreter.installSegment5 (Compiler::Cell::opcodeCOC, new OpCOC);
             interpreter.installSegment5 (Compiler::Cell::opcodeCOE, new OpCOE);
             interpreter.installSegment5 (Compiler::Cell::opcodeGetInterior, new OpGetInterior);

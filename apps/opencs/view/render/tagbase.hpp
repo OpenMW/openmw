@@ -5,19 +5,19 @@
 
 #include <QString>
 
-#include "mask.hpp"
+#include <components/sceneutil/vismask.hpp>
 
 namespace CSVRender
 {
     class TagBase : public osg::Referenced
     {
-            Mask mMask;
+            SceneUtil::VisMask mMask;
 
         public:
 
-            TagBase (Mask mask);
+            TagBase (SceneUtil::VisMask mask);
 
-            Mask getMask() const;
+            SceneUtil::VisMask getMask() const;
 
             virtual QString getToolTip (bool hideBasics) const;
 

@@ -77,104 +77,97 @@ namespace MWMechanics
     }
 
     ObstacleCheck::ObstacleCheck()
-      : mWalkState(State_Norm)
-      , mStuckDuration(0)
-      , mEvadeDuration(0)
-      , mDistSameSpot(-1) // avoid calculating it each time
+      : mWalkState(WalkState::Initial)
+      , mStateDuration(0)
       , mEvadeDirectionIndex(0)
     {
     }
 
     void ObstacleCheck::clear()
     {
-        mWalkState = State_Norm;
-        mStuckDuration = 0;
-        mEvadeDuration = 0;
+        mWalkState = WalkState::Initial;
     }
 
     bool ObstacleCheck::isEvading() const
     {
-        return mWalkState == State_Evade;
+        return mWalkState == WalkState::Evade;
     }
 
     /*
      * input   - actor, duration (time since last check)
      * output  - true if evasive action needs to be taken
      *
-     *  Walking state transitions (player greeting check not shown):
+     * Walking state transitions (player greeting check not shown):
      *
-     *  MoveNow <------------------------------------+
-     *    |                                         d|
-     *    |                                          |
-     *    +-> State_Norm <---> State_CheckStuck --> State_Evade
-     *         ^  ^   |    f      ^   |         t    ^   |  |
-     *         |  |   |           |   |              |   |  |
-     *         |  +---+           +---+              +---+  | u
-     *         |   any             < t                < u   |
-     *         +--------------------------------------------+
+     * Initial ----> Norm  <--------> CheckStuck -------> Evade ---+
+     *               ^ ^ | f             ^   |       t    ^   |    |
+     *               | | |               |   |            |   |    |
+     *               | +-+               +---+            +---+    | u
+     *               | any                < t              < u     |
+     *               +---------------------------------------------+
      *
      * f = one reaction time
-     * d = proximity to a closed door
      * t = how long before considered stuck
      * u = how long to move sideways
      *
      */
-    void ObstacleCheck::update(const MWWorld::Ptr& actor, float duration)
+    void ObstacleCheck::update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration)
     {
-        const osg::Vec3f pos = actor.getRefData().getPosition().asVec3();
+        const auto position = actor.getRefData().getPosition().asVec3();
 
-        if (mDistSameSpot == -1)
-            mDistSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor);
-
-        const float distSameSpot = mDistSameSpot * duration;
-        const bool samePosition =  (pos - mPrev).length2() <  distSameSpot * distSameSpot;
-
-        mPrev = pos;
-
-        switch(mWalkState)
+        if (mWalkState == WalkState::Initial)
         {
-            case State_Norm:
+            mWalkState = WalkState::Norm;
+            mStateDuration = 0;
+            mPrev = position;
+            mInitialDistance = (destination - position).length();
+            return;
+        }
+
+        if (mWalkState != WalkState::Evade)
+        {
+            const float distSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor) * duration;
+            const float prevDistance = (destination - mPrev).length();
+            const float currentDistance = (destination - position).length();
+            const float movedDistance = prevDistance - currentDistance;
+            const float movedFromInitialDistance = mInitialDistance - currentDistance;
+
+            mPrev = position;
+
+            if (movedDistance >= distSameSpot && movedFromInitialDistance >= distSameSpot)
             {
-                if(!samePosition)
-                    break;
-                else
-                    mWalkState = State_CheckStuck;
+                mWalkState = WalkState::Norm;
+                mStateDuration = 0;
+                return;
             }
-                /* FALL THROUGH */
-            case State_CheckStuck:
+
+            if (mWalkState == WalkState::Norm)
             {
-                if(!samePosition)
-                {
-                    mWalkState = State_Norm;
-                    mStuckDuration = 0;
-                    break;
-                }
-                else
-                {
-                    mStuckDuration += duration;
-                    // consider stuck only if position unchanges for a period
-                    if(mStuckDuration < DURATION_SAME_SPOT)
-                        break; // still checking, note duration added to timer
-                    else
-                    {
-                        mStuckDuration = 0;
-                        mWalkState = State_Evade;
-                        chooseEvasionDirection();
-                    }
-                }
+                mWalkState = WalkState::CheckStuck;
+                mStateDuration = duration;
+                mInitialDistance = (destination - position).length();
+                return;
             }
-                /* FALL THROUGH */
-            case State_Evade:
+
+            mStateDuration += duration;
+            if (mStateDuration < DURATION_SAME_SPOT)
             {
-                mEvadeDuration += duration;
-                if(mEvadeDuration >= DURATION_TO_EVADE)
-                {
-                    // tried to evade, assume all is ok and start again
-                    mWalkState = State_Norm;
-                    mEvadeDuration = 0;
-                }
+                return;
             }
-            /* NO DEFAULT CASE */
+
+            mWalkState = WalkState::Evade;
+            mStateDuration = 0;
+            chooseEvasionDirection();
+            return;
+        }
+
+        mStateDuration += duration;
+        if(mStateDuration >= DURATION_TO_EVADE)
+        {
+            // tried to evade, assume all is ok and start again
+            mWalkState = WalkState::Norm;
+            mStateDuration = 0;
+            mPrev = position;
         }
     }
 

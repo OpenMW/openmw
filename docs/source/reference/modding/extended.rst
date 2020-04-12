@@ -197,10 +197,6 @@ The appearance and count of shown ammunition depends on type and count of equipp
 
 It is important to make sure the names of empty nodes start with ``"Bip01 "``, or the engine will optimize them out.
 
-4. Shields
-
-Shield holstering is not supported at the moment since it conflicts with any mods which use pseudo-shields as held items (such as Animated Morrowind and Hold It).
-
 An example of a mod which uses this feature is `Weapon Sheathing`_.
 
 

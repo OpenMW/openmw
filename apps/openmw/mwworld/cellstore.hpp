@@ -269,7 +269,7 @@ namespace MWWorld
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
             template<class Visitor>
-            bool forEach (Visitor& visitor)
+            bool forEach (Visitor&& visitor)
             {
                 if (mState != State_Loaded)
                     return false;
@@ -382,6 +382,7 @@ namespace MWWorld
             public:
                 ///@note must return nullptr if the cell is not found
                 virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+                virtual ~GetCellStoreCallback() = default;
             };
 
             /// @param callback to use for retrieving of additional CellStore objects by ID (required for resolving moved references)

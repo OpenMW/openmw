@@ -50,6 +50,8 @@ namespace DetourNavigator
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
 
+        RecastMeshTiles getRecastMeshTiles() override;
+
     private:
         Settings mSettings;
         NavMeshManager mNavMeshManager;

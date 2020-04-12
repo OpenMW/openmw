@@ -1,6 +1,8 @@
 #ifndef GAME_MWBASE_WORLD_H
 #define GAME_MWBASE_WORLD_H
 
+#include "rotationflags.hpp"
+
 #include <vector>
 #include <map>
 #include <set>
@@ -115,6 +117,9 @@ namespace MWBase
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
 
             virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
+
+            virtual void testExteriorCells() = 0;
+            virtual void testInteriorCells() = 0;
 
             virtual void useDeathCamera() = 0;
 
@@ -280,7 +285,8 @@ namespace MWBase
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr, float x, float y, float z,
+                RotationFlags flags = RotationFlag_inverseOrder) = 0;
 
             virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< Place an object. Makes a copy of the Ptr.
@@ -306,6 +312,8 @@ namespace MWBase
             ///< cast a Ray and return true if there is an object in the ray path.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+
+            virtual bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) = 0;
 
             virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
             virtual bool isActorCollisionEnabled(const MWWorld::Ptr& ptr) = 0;
@@ -615,6 +623,10 @@ namespace MWBase
 
             /// Return physical half extents of the given actor to be used in pathfinding
             virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
+
+            virtual bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
+
+            virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const = 0;
     };
 }
 

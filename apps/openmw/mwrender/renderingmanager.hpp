@@ -7,6 +7,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include "objects.hpp"
 
 #include "renderinginterface.hpp"
@@ -80,6 +82,7 @@ namespace MWRender
     class LandManager;
     class NavMesh;
     class ActorsPaths;
+    class RecastMesh;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -88,6 +91,8 @@ namespace MWRender
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                          const std::string& resourcePath, DetourNavigator::Navigator& navigator);
         ~RenderingManager();
+
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
 
         MWRender::Objects& getObjects();
 
@@ -242,6 +247,8 @@ namespace MWRender
 
         void updateNavMesh();
 
+        void updateRecastMesh();
+
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
@@ -260,6 +267,7 @@ namespace MWRender
         std::unique_ptr<NavMesh> mNavMesh;
         std::size_t mNavMeshNumber = 0;
         std::unique_ptr<ActorsPaths> mActorsPaths;
+        std::unique_ptr<RecastMesh> mRecastMesh;
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;

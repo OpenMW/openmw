@@ -44,9 +44,9 @@ namespace CSVRender
 
             std::vector<std::pair<int, int>> getTerrainSelection() const;
 
-        protected:
-
             void update();
+
+        protected:
 
             void drawShapeSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
             void drawTextureSelection(const osg::ref_ptr<osg::Vec3Array> vertices);
@@ -55,6 +55,14 @@ namespace CSVRender
 
         private:
 
+            bool noCell(const std::string& cellId);
+
+            bool noLand(const std::string& cellId);
+
+            bool noLandLoaded(const std::string& cellId);
+
+            bool isLandLoaded(const std::string& cellId);
+            
             osg::Group* mParentNode;
             WorldspaceWidget *mWorldspaceWidget;
             osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;

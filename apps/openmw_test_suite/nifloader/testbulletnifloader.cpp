@@ -266,9 +266,13 @@ namespace
         MOCK_CONST_METHOD0(numRecords, std::size_t ());
         MOCK_CONST_METHOD1(getRoot, Nif::Record* (std::size_t));
         MOCK_CONST_METHOD0(numRoots, std::size_t ());
+        MOCK_CONST_METHOD1(getString, std::string (uint32_t));
         MOCK_METHOD1(setUseSkinning, void (bool));
         MOCK_CONST_METHOD0(getUseSkinning, bool ());
         MOCK_CONST_METHOD0(getFilename, std::string ());
+        MOCK_CONST_METHOD0(getVersion, unsigned int ());
+        MOCK_CONST_METHOD0(getUserVersion, unsigned int ());
+        MOCK_CONST_METHOD0(getBethVersion, unsigned int ());
     };
 
     struct RecordMock : Nif::Record

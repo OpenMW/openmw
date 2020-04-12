@@ -15,6 +15,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -27,10 +28,9 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
-
-#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -62,6 +62,7 @@ ActorAnimation::~ActorAnimation()
     }
 
     mScabbard.reset();
+    mHolsteredShield.reset();
 }
 
 PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor)
@@ -81,6 +82,193 @@ PartHolderPtr ActorAnimation::attachMesh(const std::string& model, const std::st
         mGlowUpdater = SceneUtil::addEnchantedGlow(instance, mResourceSystem, *glowColor);
 
     return PartHolderPtr(new PartHolder(instance));
+}
+
+std::string ActorAnimation::getShieldMesh(MWWorld::ConstPtr shield) const
+{
+    std::string mesh = shield.getClass().getModel(shield);
+    const ESM::Armor *armor = shield.get<ESM::Armor>()->mBase;
+    const std::vector<ESM::PartReference>& bodyparts = armor->mParts.mParts;
+    if (!bodyparts.empty())
+    {
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::Store<ESM::BodyPart> &partStore = store.get<ESM::BodyPart>();
+
+        // Try to get shield model from bodyparts first, with ground model as fallback
+        for (const auto& part : bodyparts)
+        {
+            // Assume all creatures use the male mesh.
+            if (part.mPart != ESM::PRT_Shield || part.mMale.empty())
+                continue;
+            const ESM::BodyPart *bodypart = partStore.search(part.mMale);
+            if (bodypart && bodypart->mData.mType == ESM::BodyPart::MT_Armor && !bodypart->mModel.empty())
+            {
+                mesh = "meshes\\" + bodypart->mModel;
+                break;
+            }
+        }
+    }
+
+    if (mesh.empty())
+        return mesh;
+
+    std::string holsteredName = mesh;
+    holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");
+    if(mResourceSystem->getVFS()->exists(holsteredName))
+    {
+        osg::ref_ptr<osg::Node> shieldTemplate = mResourceSystem->getSceneManager()->getInstance(holsteredName);
+        SceneUtil::FindByNameVisitor findVisitor ("Bip01 Sheath");
+        shieldTemplate->accept(findVisitor);
+        osg::ref_ptr<osg::Node> sheathNode = findVisitor.mFoundNode;
+        if(!sheathNode)
+            return std::string();
+    }
+
+    return mesh;
+}
+
+bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
+{
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (shieldSheathing)
+    {
+        const MWWorld::Class &cls = mPtr.getClass();
+        MWMechanics::CreatureStats &stats = cls.getCreatureStats(mPtr);
+        if (cls.hasInventoryStore(mPtr) && weaptype != ESM::Weapon::Spell)
+        {
+            SceneUtil::FindByNameVisitor findVisitor ("Bip01 AttachShield");
+            mObjectRoot->accept(findVisitor);
+            if (findVisitor.mFoundNode || (mPtr == MWMechanics::getPlayer() && mPtr.isInCell() && MWBase::Environment::get().getWorld()->isFirstPerson()))
+            {
+                const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+                const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+                const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+                if (shield != inv.end() && shield->getTypeName() == typeid(ESM::Armor).name() && !getShieldMesh(*shield).empty())
+                {
+                    if(stats.getDrawState() != MWMechanics::DrawState_Weapon)
+                        return false;
+
+                    if (weapon != inv.end())
+                    {
+                        const std::string &type = weapon->getTypeName();
+                        if(type == typeid(ESM::Weapon).name())
+                        {
+                            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+                            ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
+                            return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
+                        }
+                        else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+                            return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return !(MWMechanics::getWeaponType(weaptype)->mFlags & ESM::WeaponType::TwoHanded);
+}
+
+void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
+{
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (!shieldSheathing)
+        return;
+
+    if (!mPtr.getClass().hasInventoryStore(mPtr))
+        return;
+
+    mHolsteredShield.reset();
+
+    if (showCarriedLeft)
+        return;
+
+    const MWWorld::InventoryStore& inv = mPtr.getClass().getInventoryStore(mPtr);
+    MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    if (shield == inv.end() || shield->getTypeName() != typeid(ESM::Armor).name())
+        return;
+
+    // Can not show holdstered shields with two-handed weapons at all
+    const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    if(weapon == inv.end())
+        return;
+
+    const std::string &type = weapon->getTypeName();
+    if(type == typeid(ESM::Weapon).name())
+    {
+        const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+        ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
+        if (MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded)
+            return;
+    }
+
+    std::string mesh = getShieldMesh(*shield);
+    if (mesh.empty())
+        return;
+
+    std::string boneName = "Bip01 AttachShield";
+    osg::Vec4f glowColor = shield->getClass().getEnchantmentColor(*shield);
+    std::string holsteredName = mesh;
+    holsteredName = holsteredName.replace(holsteredName.size()-4, 4, "_sh.nif");
+    bool isEnchanted = !shield->getClass().getEnchantment(*shield).empty();
+
+    // If we have no dedicated sheath model, use basic shield model as fallback.
+    if (!mResourceSystem->getVFS()->exists(holsteredName))
+        mHolsteredShield = attachMesh(mesh, boneName, isEnchanted, &glowColor);
+    else
+        mHolsteredShield = attachMesh(holsteredName, boneName, isEnchanted, &glowColor);
+
+    if (!mHolsteredShield)
+        return;
+
+    SceneUtil::FindByNameVisitor findVisitor ("Bip01 Sheath");
+    mHolsteredShield->getNode()->accept(findVisitor);
+    osg::Group* shieldNode = findVisitor.mFoundNode;
+
+    // If mesh author declared an empty sheath node, use transformation from this node, but use the common shield mesh.
+    // This approach allows to tweak shield position without need to store the whole shield mesh in the _sh file.
+    if (shieldNode && !shieldNode->getNumChildren())
+    {
+        osg::ref_ptr<osg::Node> fallbackNode = mResourceSystem->getSceneManager()->getInstance(mesh, shieldNode);
+        if (isEnchanted)
+            SceneUtil::addEnchantedGlow(shieldNode, mResourceSystem, glowColor);
+    }
+
+    if (mAlpha != 1.f)
+        mResourceSystem->getSceneManager()->recreateShaders(mHolsteredShield->getNode());
+}
+
+bool ActorAnimation::useShieldAnimations() const
+{
+    static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
+    if (!shieldSheathing)
+        return false;
+
+    const MWWorld::Class &cls = mPtr.getClass();
+    if (!cls.hasInventoryStore(mPtr))
+        return false;
+
+    if (getTextKeyTime("shield: equip attach") < 0 || getTextKeyTime("shield: unequip detach") < 0)
+        return false;
+
+    const MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
+    const MWWorld::ConstContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+    const MWWorld::ConstContainerStoreIterator shield = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
+    if (weapon != inv.end() && shield != inv.end() &&
+        shield->getTypeName() == typeid(ESM::Armor).name() &&
+        !getShieldMesh(*shield).empty())
+    {
+        const std::string &type = weapon->getTypeName();
+        if(type == typeid(ESM::Weapon).name())
+        {
+            const MWWorld::LiveCellRef<ESM::Weapon> *ref = weapon->get<ESM::Weapon>();
+            ESM::Weapon::Type weaponType = (ESM::Weapon::Type)ref->mBase->mData.mType;
+            return !(MWMechanics::getWeaponType(weaponType)->mFlags & ESM::WeaponType::TwoHanded);
+        }
+        else if (type == typeid(ESM::Lockpick).name() || type == typeid(ESM::Probe).name())
+            return true;
+    }
+
+    return false;
 }
 
 osg::Group* ActorAnimation::getBoneByName(const std::string& boneName)
@@ -178,7 +366,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     // Otherwise add the enchanted glow to it.
     if (!showHolsteredWeapons)
     {
-        weaponNode->setNodeMask(0);
+        weaponNode->setNodeMask(SceneUtil::Mask_Disabled);
     }
     else
     {
@@ -352,7 +540,7 @@ void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM
     bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
     osg::Vec4f ambient(1,1,1,1);
-    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, ambient);
+    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, exterior, ambient);
 
     mInsert->addChild(lightSource);
 

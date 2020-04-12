@@ -61,6 +61,7 @@ namespace Launcher
         void slotProfileRenamed(const QString &previous, const QString &current);
         void slotProfileDeleted(const QString &item);
         void slotAddonDataChanged ();
+        void slotRefreshButtonClicked ();
 
         void updateNewProfileOkButton(const QString &text);
         void updateCloneProfileOkButton(const QString &text);
@@ -100,6 +101,7 @@ namespace Launcher
         void checkForDefaultProfile();
         void populateFileViews(const QString& contentModelName);
         void reloadCells(QStringList selectedFiles);
+        void refreshDataFilesView ();
 
         class PathIterator
         {

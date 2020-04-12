@@ -98,6 +98,7 @@ private:
 protected:
     virtual void addControllers();
     virtual bool isArrowAttached() const;
+    virtual std::string getShieldMesh(MWWorld::ConstPtr shield) const;
 
 public:
     /**
@@ -128,6 +129,8 @@ public:
     virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
 
     virtual void showWeapons(bool showWeapon);
+
+    virtual bool getCarriedLeftShown() const { return mShowCarriedLeft; }
     virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();

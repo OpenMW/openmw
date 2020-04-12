@@ -1454,6 +1454,38 @@ void OpenAL_Output::pauseSounds(int types)
     }
 }
 
+void OpenAL_Output::pauseActiveDevice()
+{
+    if (mDevice == nullptr)
+        return;
+
+    if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
+    {
+        LPALCDEVICEPAUSESOFT alcDevicePauseSOFT = 0;
+        getALCFunc(alcDevicePauseSOFT, mDevice, "alcDevicePauseSOFT");
+        alcDevicePauseSOFT(mDevice);
+        getALCError(mDevice);
+    }
+
+    alListenerf(AL_GAIN, 0.0f);
+}
+
+void OpenAL_Output::resumeActiveDevice()
+{
+    if (mDevice == nullptr)
+        return;
+
+    if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
+    {
+        LPALCDEVICERESUMESOFT alcDeviceResumeSOFT = 0;
+        getALCFunc(alcDeviceResumeSOFT, mDevice, "alcDeviceResumeSOFT");
+        alcDeviceResumeSOFT(mDevice);
+        getALCError(mDevice);
+    }
+
+    alListenerf(AL_GAIN, 1.0f);
+}
+
 void OpenAL_Output::resumeSounds(int types)
 {
     std::vector<ALuint> sources;
@@ -1489,7 +1521,7 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
 
 OpenAL_Output::~OpenAL_Output()
 {
-    deinit();
+    OpenAL_Output::deinit();
 }
 
 }

@@ -7,12 +7,14 @@
 
 namespace Compiler
 {
+    class ContextOverride;
     /// \brief Error handler implementation: Write errors into logging stream
 
     class StreamErrorHandler : public ErrorHandler
     {
             std::string mContext;
 
+            friend class ContextOverride;
         // not implemented
 
             StreamErrorHandler (const StreamErrorHandler&);
@@ -32,6 +34,19 @@ namespace Compiler
 
             StreamErrorHandler ();
             ///< constructor
+    };
+
+    class ContextOverride
+    {
+            StreamErrorHandler& mHandler;
+            const std::string mContext;
+        public:
+            ContextOverride (StreamErrorHandler& handler, const std::string& context);
+
+            ContextOverride (const ContextOverride&) = delete;
+            ContextOverride& operator= (const ContextOverride&) = delete;
+
+            ~ContextOverride();
     };
 }
 
