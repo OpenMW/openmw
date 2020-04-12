@@ -215,7 +215,6 @@ private:
     float mMinSize;
 
     osg::ref_ptr<RootNode> mRootNode;
-    osg::ref_ptr<LodCallback> mLodCallback;
 };
 
 QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
