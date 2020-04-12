@@ -116,6 +116,13 @@ void KeyboardNavigation::onFrame()
     if (!mEnabled)
         return;
 
+    MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+    if (mode == GM_None)
+    {
+        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
+        return;
+    }
+
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
 
     if (focus == mCurrentFocus)
@@ -215,6 +222,10 @@ bool KeyboardNavigation::injectKeyPress(MyGUI::KeyCode key, unsigned int text, b
 
 bool KeyboardNavigation::switchFocus(int direction, bool wrap)
 {
+    MWGui::GuiMode mode = MWBase::Environment::get().getWindowManager()->getMode();
+    if (mode == GM_None)
+        return false;
+
     MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
 
     bool isCycle = (direction == D_Prev || direction == D_Next);
