@@ -4,6 +4,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadcont.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/loadench.hpp>
 #include <components/esm/loadlevlist.hpp>
 #include <components/esm/loadligh.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -723,6 +724,16 @@ std::string creatureFlags(int flags)
                    ESM::Creature::Essential));
     if (flags & unused) properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%02X)", flags);
+    return properties;
+}
+
+std::string enchantmentFlags(int flags)
+{
+    std::string properties;
+    if (flags == 0) properties += "[None] ";
+    if (flags & ESM::Enchantment::Autocalc) properties += "Autocalc ";
+    if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc)) properties += "Invalid ";
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 

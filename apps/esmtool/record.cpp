@@ -714,7 +714,7 @@ void Record<ESM::Enchantment>::print()
               << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Cost: " << mData.mData.mCost << std::endl;
     std::cout << "  Charge: " << mData.mData.mCharge << std::endl;
-    std::cout << "  AutoCalc: " << mData.mData.mAutocalc << std::endl;
+    std::cout << "  Flags: " << enchantmentFlags(mData.mData.mFlags) << std::endl;
     printEffectList(mData.mEffects);
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }

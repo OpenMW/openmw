@@ -2,6 +2,7 @@
 ------
 
     Bug #5358: ForceGreeting always resets the dialogue window completely
+    Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
     Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
