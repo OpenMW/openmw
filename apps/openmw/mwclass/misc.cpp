@@ -141,8 +141,6 @@ namespace MWClass
 
         MWGui::ToolTipInfo info;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         bool gold = isGold(ptr);
         if (gold)
             count *= getValue(ptr);
@@ -153,17 +151,8 @@ namespace MWClass
         else // gold displays its count also if it's 1.
             countString = " (" + std::to_string(count) + ")";
 
-        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + countString;
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + countString + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
-
-        if (ref->mRef.getSoul() != "")
-        {
-            const ESM::Creature *creature = store.get<ESM::Creature>().search(ref->mRef.getSoul());
-            if (creature && !creature->mName.empty())
-                info.caption += " (" + creature->mName + ")";
-            else if (creature)
-                info.caption += " (" + creature->mId + ")";
-        }
 
         std::string text;
 

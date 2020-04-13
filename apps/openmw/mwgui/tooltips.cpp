@@ -647,6 +647,20 @@ namespace MWGui
             return " (" + MyGUI::utility::toString(value) + ")";
     }
 
+    std::string ToolTips::getSoulString(const MWWorld::CellRef& cellref)
+    {
+        std::string soul = cellref.getSoul();
+        if (soul.empty())
+            return std::string();
+        const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+        const ESM::Creature *creature = store.get<ESM::Creature>().search(soul);
+        if (!creature)
+            return std::string();
+        if (creature->mName.empty())
+            return " (" + creature->mId + ")";
+        return " (" + creature->mName + ")";
+    }
+
     std::string ToolTips::getCellRefString(const MWWorld::CellRef& cellref)
     {
         std::string ret;
