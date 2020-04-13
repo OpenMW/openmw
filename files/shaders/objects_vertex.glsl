@@ -29,6 +29,10 @@ varying vec4 passTangent;
 varying vec2 envMapUV;
 #endif
 
+#if @bumpMap
+varying vec2 bumpMapUV;
+#endif
+
 #if @specularMap
 varying vec2 specularMapUV;
 #endif
@@ -38,7 +42,9 @@ uniform float axisScale;
 uniform float visibilityDistance;
 varying vec3 basic_prop; // _alive, _current_size, _current_alpha
 #endif
-varying float depth;
+
+varying float euclideanDepth;
+varying float linearDepth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -57,10 +63,9 @@ varying vec3 passNormal;
 
 void main(void)
 {
-
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_Position = gl_ProjectionMatrix * viewPos;
-    depth = gl_Position.z;
+
     gl_ClipVertex = viewPos;
 
 #if @pointsprite
@@ -79,6 +84,8 @@ void main(void)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
 
+    euclideanDepth = length(viewPos.xyz);
+    linearDepth = gl_Position.z;
 #if @envMap
     vec3 viewVec = normalize(viewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
@@ -109,6 +116,10 @@ void main(void)
 #if @normalMap
     normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
     passTangent = gl_MultiTexCoord7.xyzw;
+#endif
+
+#if @bumpMap
+    bumpMapUV = (gl_TextureMatrix[@bumpMapUV] * gl_MultiTexCoord@bumpMapUV).xy;
 #endif
 
 #if @specularMap

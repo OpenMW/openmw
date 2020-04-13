@@ -14,6 +14,7 @@
 #include "aicombataction.hpp"
 #include "spellpriority.hpp"
 #include "spellcasting.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
@@ -34,14 +35,15 @@ namespace MWMechanics
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::Store<ESM::GameSetting>& gmst = world->getStore().get<ESM::GameSetting>();
 
-        if (type == -1 && (weapon->mData.mType == ESM::Weapon::Arrow || weapon->mData.mType == ESM::Weapon::Bolt))
+        ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(weapon->mData.mType)->mWeaponClass;
+        if (type == -1 && weapclass == ESM::WeaponType::Ammo)
             return 0.f;
 
         float rating=0.f;
         static const float fAIMeleeWeaponMult = gmst.find("fAIMeleeWeaponMult")->mValue.getFloat();
         float ratingMult = fAIMeleeWeaponMult;
 
-        if (weapon->mData.mType >= ESM::Weapon::MarksmanBow && weapon->mData.mType <= ESM::Weapon::MarksmanThrown)
+        if (weapclass != ESM::WeaponType::Melee)
         {
             // Underwater ranged combat is impossible
             if (world->isUnderwater(MWWorld::ConstPtr(actor), 0.75f)
@@ -59,11 +61,11 @@ namespace MWMechanics
         const float chop = (weapon->mData.mChop[0] + weapon->mData.mChop[1]) / 2.f;
         // We need to account for the fact that thrown weapons have 2x real damage applied to the target
         // as they're both the weapon and the ammo of the hit
-        if (weapon->mData.mType == ESM::Weapon::MarksmanThrown)
+        if (weapclass == ESM::WeaponType::Thrown)
         {
             rating = chop * 2;
         }
-        else if (weapon->mData.mType >= ESM::Weapon::MarksmanBow)
+        else if (weapclass != ESM::WeaponType::Melee)
         {
             rating = chop;
         }
@@ -76,24 +78,28 @@ namespace MWMechanics
 
         adjustWeaponDamage(rating, item, actor);
 
-        if (weapon->mData.mType != ESM::Weapon::MarksmanBow && weapon->mData.mType != ESM::Weapon::MarksmanCrossbow)
+        if (weapclass != ESM::WeaponType::Ranged)
         {
             resistNormalWeapon(enemy, actor, item, rating);
             applyWerewolfDamageMult(enemy, item, rating);
         }
-        else if (weapon->mData.mType == ESM::Weapon::MarksmanBow)
+        else
         {
-            if (arrowRating <= 0.f)
-                rating = 0.f;
-            else
-                rating += arrowRating;
-        }
-        else if (weapon->mData.mType == ESM::Weapon::MarksmanCrossbow)
-        {
-            if (boltRating <= 0.f)
-                rating = 0.f;
-            else
-                rating += boltRating;
+            int ammotype = MWMechanics::getWeaponType(weapon->mData.mType)->mAmmoType;
+            if (ammotype == ESM::Weapon::Arrow)
+            {
+                if (arrowRating <= 0.f)
+                    rating = 0.f;
+                else
+                    rating += arrowRating;
+            }
+            else if (ammotype == ESM::Weapon::Bolt)
+            {
+                if (boltRating <= 0.f)
+                    rating = 0.f;
+                else
+                    rating += boltRating;
+            }
         }
 
         if (!weapon->mEnchant.empty())
@@ -102,8 +108,9 @@ namespace MWMechanics
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             {
                 int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+                float charge = item.getCellRef().getEnchantmentCharge();
 
-                if (item.getCellRef().getEnchantmentCharge() == -1 || item.getCellRef().getEnchantmentCharge() >= castCost)
+                if (charge == -1 || charge >= castCost || weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
                     rating += rateEffects(enchantment->mEffects, actor, enemy);
             }
         }
@@ -125,13 +132,13 @@ namespace MWMechanics
         float chance = getHitChance(actor, enemy, value) / 100.f;
         rating *= std::min(1.f, std::max(0.01f, chance));
 
-        if (weapon->mData.mType < ESM::Weapon::Arrow)
+        if (weapclass != ESM::WeaponType::Ammo)
             rating *= weapon->mData.mSpeed;
 
         return rating * ratingMult;
     }
 
-    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, ESM::Weapon::Type ammoType)
+    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, MWWorld::Ptr &bestAmmo, int ammoType)
     {
         float bestAmmoRating = 0.f;
         if (!actor.getClass().hasInventoryStore(actor))
@@ -152,7 +159,7 @@ namespace MWMechanics
         return bestAmmoRating;
     }
 
-    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, ESM::Weapon::Type ammoType)
+    float rateAmmo(const MWWorld::Ptr &actor, const MWWorld::Ptr &enemy, int ammoType)
     {
         MWWorld::Ptr emptyPtr;
         return rateAmmo(actor, enemy, emptyPtr, ammoType);
@@ -174,8 +181,8 @@ namespace MWMechanics
         float bonusDamage = 0.f;
 
         const ESM::Weapon* esmWeap = weapon.get<ESM::Weapon>()->mBase;
-
-        if (esmWeap->mData.mType >= ESM::Weapon::MarksmanBow)
+        int type = esmWeap->mData.mType;
+        if (getWeaponType(type)->mWeaponClass != ESM::WeaponType::Melee)
         {
             if (!ammo.isEmpty() && !MWBase::Environment::get().getWorld()->isSwimming(enemy))
             {

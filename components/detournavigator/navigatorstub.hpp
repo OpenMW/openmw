@@ -81,6 +81,11 @@ namespace DetourNavigator
 
         void reportStats(unsigned int /*frameNumber*/, osg::Stats& /*stats*/) const override {}
 
+        RecastMeshTiles getRecastMeshTiles() override
+        {
+            return {};
+        }
+
     private:
         Settings mDefaultSettings {};
         SharedNavMeshCacheItem mEmptyNavMeshCacheItem;

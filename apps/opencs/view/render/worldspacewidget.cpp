@@ -26,8 +26,9 @@
 #include "../widget/scenetooltoggle2.hpp"
 #include "../widget/scenetoolrun.hpp"
 
+#include <components/sceneutil/vismask.hpp>
+
 #include "object.hpp"
-#include "mask.hpp"
 #include "instancemode.hpp"
 #include "pathgridmode.hpp"
 #include "cameracontroller.hpp"
@@ -138,7 +139,7 @@ void CSVRender::WorldspaceWidget::settingChanged (const CSMPrefs::Setting *setti
     {
         float alpha = setting->toDouble();
         // getSelection is virtual, thus this can not be called from the constructor
-        auto selection = getSelection(Mask_Reference);
+        auto selection = getSelection(SceneUtil::Mask_EditorReference);
         for (osg::ref_ptr<TagBase> tag : selection)
         {
             if (auto objTag = dynamic_cast<ObjectTag*>(tag.get()))
@@ -345,7 +346,7 @@ unsigned int CSVRender::WorldspaceWidget::getVisibilityMask() const
 
 void CSVRender::WorldspaceWidget::setInteractionMask (unsigned int mask)
 {
-    mInteractionMask = mask | Mask_CellMarker | Mask_CellArrow;
+    mInteractionMask = mask | SceneUtil::Mask_EditorCellMarker | SceneUtil::Mask_EditorCellArrow;
 }
 
 unsigned int CSVRender::WorldspaceWidget::getInteractionMask() const
@@ -361,15 +362,15 @@ void CSVRender::WorldspaceWidget::setEditLock (bool locked)
 void CSVRender::WorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
-    tool->addButton (Button_Reference, Mask_Reference, "Instances");
-    tool->addButton (Button_Water, Mask_Water, "Water");
-    tool->addButton (Button_Pathgrid, Mask_Pathgrid, "Pathgrid");
+    tool->addButton (Button_Reference, SceneUtil::Mask_EditorReference, "Instances");
+    tool->addButton (Button_Water, SceneUtil::Mask_Water, "Water");
+    tool->addButton (Button_Pathgrid, SceneUtil::Mask_Pathgrid, "Pathgrid");
 }
 
 void CSVRender::WorldspaceWidget::addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool)
 {
     /// \todo replace EditMode with suitable subclasses
-    tool->addButton (new InstanceMode (this, tool), "object");
+    tool->addButton (new InstanceMode (this, mRootNode, tool), "object");
     tool->addButton (new PathgridMode (this, tool), "pathgrid");
 }
 

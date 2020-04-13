@@ -9,6 +9,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadland.hpp>
 #include <components/sceneutil/pathgridutil.hpp>
+#include <components/sceneutil/vismask.hpp>
 #include <components/terrain/terraingrid.hpp>
 
 #include "../../model/world/idtable.hpp"
@@ -21,7 +22,6 @@
 #include "cellborder.hpp"
 #include "cellarrow.hpp"
 #include "cellmarker.hpp"
-#include "mask.hpp"
 #include "pathgrid.hpp"
 #include "terrainstorage.hpp"
 #include "object.hpp"
@@ -92,7 +92,7 @@ bool CSVRender::Cell::addObjects (int start, int end)
 
             std::unique_ptr<Object> object (new Object (mData, mCellNode, id, false));
 
-            if (mSubModeElementMask & Mask_Reference)
+            if (mSubModeElementMask & SceneUtil::Mask_EditorReference)
                 object->setSubMode (mSubMode);
 
             mObjects.insert (std::make_pair (id, object.release()));
@@ -134,7 +134,7 @@ void CSVRender::Cell::updateLand()
             else
             {
                 mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
-                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+                    mData.getResourceSystem().get(), mTerrainStorage));
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
@@ -149,7 +149,6 @@ void CSVRender::Cell::updateLand()
     }
 
     // No land data
-    mLandDeleted = true;
     unloadLand();
 }
 
@@ -168,6 +167,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
   mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
+
+    mTerrainStorage = new TerrainStorage(mData);
 
     if (result.second)
         mCoordinates = result.first;
@@ -347,6 +348,28 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
     return addObjects (start, end);
 }
 
+void CSVRender::Cell::setAlteredHeight(int inCellX, int inCellY, float height)
+{
+    mTerrainStorage->setAlteredHeight(inCellX, inCellY, height);
+    mUpdateLand = true;
+}
+
+float CSVRender::Cell::getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY)
+{
+    return mTerrainStorage->getSumOfAlteredAndTrueHeight(cellX, cellY, inCellX, inCellY);
+}
+
+float* CSVRender::Cell::getAlteredHeight(int inCellX, int inCellY)
+{
+    return mTerrainStorage->getAlteredHeight(inCellX, inCellY);
+}
+
+void CSVRender::Cell::resetAlteredHeights()
+{
+    mTerrainStorage->resetHeights();
+    mUpdateLand = true;
+}
+
 void CSVRender::Cell::pathgridModified()
 {
     if (mPathgrid)
@@ -411,7 +434,7 @@ void CSVRender::Cell::reloadAssets()
 
 void CSVRender::Cell::setSelection (int elementMask, Selection mode)
 {
-    if (elementMask & Mask_Reference)
+    if (elementMask & SceneUtil::Mask_EditorReference)
     {
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
@@ -428,7 +451,7 @@ void CSVRender::Cell::setSelection (int elementMask, Selection mode)
             iter->second->setSelected (selected);
         }
     }
-    if (mPathgrid && elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & SceneUtil::Mask_Pathgrid)
     {
         // Only one pathgrid may be selected, so some operations will only have an effect
         // if the pathgrid is already focused
@@ -523,12 +546,12 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (un
 {
     std::vector<osg::ref_ptr<TagBase> > result;
 
-    if (elementMask & Mask_Reference)
+    if (elementMask & SceneUtil::Mask_EditorReference)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
             if (iter->second->getSelected())
                 result.push_back (iter->second->getTag());
-    if (mPathgrid && elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & SceneUtil::Mask_Pathgrid)
         if (mPathgrid->isSelected())
             result.push_back(mPathgrid->getTag());
 
@@ -539,7 +562,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getEdited (unsig
 {
     std::vector<osg::ref_ptr<TagBase> > result;
 
-    if (elementMask & Mask_Reference)
+    if (elementMask & SceneUtil::Mask_EditorReference)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
             if (iter->second->isEdited())
@@ -553,7 +576,7 @@ void CSVRender::Cell::setSubMode (int subMode, unsigned int elementMask)
     mSubMode = subMode;
     mSubModeElementMask = elementMask;
 
-    if (elementMask & Mask_Reference)
+    if (elementMask & SceneUtil::Mask_EditorReference)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
                 iter->second->setSubMode (subMode);
@@ -561,10 +584,10 @@ void CSVRender::Cell::setSubMode (int subMode, unsigned int elementMask)
 
 void CSVRender::Cell::reset (unsigned int elementMask)
 {
-    if (elementMask & Mask_Reference)
+    if (elementMask & SceneUtil::Mask_EditorReference)
         for (std::map<std::string, Object *>::const_iterator iter (mObjects.begin());
             iter!=mObjects.end(); ++iter)
             iter->second->reset();
-    if (mPathgrid && elementMask & Mask_Pathgrid)
+    if (mPathgrid && elementMask & SceneUtil::Mask_Pathgrid)
         mPathgrid->resetIndicators();
 }

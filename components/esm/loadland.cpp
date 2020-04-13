@@ -158,8 +158,24 @@ namespace ESM
             }
         }
 
-        if (mDataTypes & Land::DATA_WNAM) {
-            esm.writeHNT("WNAM", mWnam, 81);
+        if (mDataTypes & Land::DATA_WNAM)
+        {
+            // Generate WNAM record
+            signed char wnam[LAND_GLOBAL_MAP_LOD_SIZE];
+            float max = std::numeric_limits<signed char>::max();
+            float min = std::numeric_limits<signed char>::min();
+            float vertMult = static_cast<float>(ESM::Land::LAND_SIZE - 1) / LAND_GLOBAL_MAP_LOD_SIZE_SQRT;
+            for (int row = 0; row < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++row)
+            {
+                for (int col = 0; col < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++col)
+                {
+                    float height = mLandData->mHeights[int(row * vertMult) * ESM::Land::LAND_SIZE + int(col * vertMult)];
+                    height /= height > 0 ? 128.f : 16.f;
+                    height = std::min(max, std::max(min, height));
+                    wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
+                }
+            }
+            esm.writeHNT("WNAM", wnam, 81);
         }
 
         if (mLandData)
@@ -323,7 +339,9 @@ namespace ESM
     : mFlags (land.mFlags), mX (land.mX), mY (land.mY), mPlugin (land.mPlugin),
       mContext (land.mContext), mDataTypes (land.mDataTypes),
       mLandData (land.mLandData ? new LandData (*land.mLandData) : 0)
-    {}
+    {
+        std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
+    }
 
     Land& Land::operator= (Land land)
     {
@@ -340,6 +358,7 @@ namespace ESM
         std::swap (mContext, land.mContext);
         std::swap (mDataTypes, land.mDataTypes);
         std::swap (mLandData, land.mLandData);
+        std::swap (mWnam, land.mWnam);
     }
 
     const Land::LandData *Land::getLandData (int flags) const

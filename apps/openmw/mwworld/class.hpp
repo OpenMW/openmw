@@ -6,7 +6,10 @@
 #include <string>
 #include <vector>
 
+#include <osg/Vec4f>
+
 #include "ptr.hpp"
+#include "doorstate.hpp"
 
 namespace ESM
 {
@@ -80,8 +83,7 @@ namespace MWWorld
             ///< Add reference into a cell for rendering (default implementation: don't render anything).
 
             virtual std::string getName (const ConstPtr& ptr) const = 0;
-            ///< \return name (the one that is to be presented to the user; not the internal one);
-            /// can return an empty string.
+            ///< \return name or ID; can return an empty string.
 
             virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
             ///< Adjust position to stand on ground. Must be called post model load
@@ -92,7 +94,7 @@ namespace MWWorld
             /// (default implementation: throw an exception)
 
             virtual bool hasToolTip (const ConstPtr& ptr) const;
-            ///< @return true if this object has a tooltip when focused (default implementation: false)
+            ///< @return true if this object has a tooltip when focused (default implementation: true)
 
             virtual MWGui::ToolTipInfo getToolTipInfo (const ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
@@ -137,10 +139,6 @@ namespace MWWorld
             ///< Play the appropriate sound for a blocked attack, depending on the currently equipped shield
             /// (default implementation: throw an exception)
 
-            virtual bool canBeActivated(const Ptr& ptr) const;
-            ///< \return Can the player activate this object?
-            /// (default implementation: true if object's user-readable name is not empty, false otherwise)
-
             virtual std::shared_ptr<Action> activate (const Ptr& ptr, const Ptr& actor) const;
             ///< Generate action for activation (default implementation: return a null action).
 
@@ -159,12 +157,6 @@ namespace MWWorld
 
             virtual bool hasInventoryStore (const Ptr& ptr) const;
             ///< Does this object have an inventory store, i.e. equipment slots? (default implementation: false)
-
-            virtual void lock (const Ptr& ptr, int lockLevel) const;
-            ///< Lock object (default implementation: throw an exception)
-
-            virtual void unlock (const Ptr& ptr) const;
-            ///< Unlock object (default implementation: throw an exception)
 
             virtual bool canLock (const ConstPtr& ptr) const;
 
@@ -296,7 +288,7 @@ namespace MWWorld
 
             virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const { return true; }
             ///< Return whether this class of object can be activated with telekinesis
-            
+
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;
 
@@ -348,10 +340,9 @@ namespace MWWorld
 
             virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
 
-            /// 0 = nothing, 1 = opening, 2 = closing
-            virtual int getDoorState (const MWWorld::ConstPtr &ptr) const;
+            virtual DoorState getDoorState (const MWWorld::ConstPtr &ptr) const;
             /// This does not actually cause the door to move. Use World::activateDoor instead.
-            virtual void setDoorState (const MWWorld::Ptr &ptr, int state) const;
+            virtual void setDoorState (const MWWorld::Ptr &ptr, DoorState state) const;
 
             virtual void respawn (const MWWorld::Ptr& ptr) const {}
 
@@ -367,6 +358,8 @@ namespace MWWorld
 
             /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
             virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
+
+            virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
     };
 }
 

@@ -139,7 +139,8 @@ bool Wizard::ComponentSelectionPage::validatePage()
                     mWizard->mInstallations[path].hasBloodmoon = false;
                     QList<QListWidgetItem*> items = componentsList->findItems(QLatin1String("Bloodmoon"), Qt::MatchStartsWith);
 
-                    foreach (QListWidgetItem *item, items) {
+                    for (QListWidgetItem *item : items)
+                    {
                         item->setText(QLatin1String("Bloodmoon"));
                         item->setCheckState(Qt::Checked);
                     }

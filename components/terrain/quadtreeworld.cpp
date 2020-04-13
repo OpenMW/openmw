@@ -6,6 +6,7 @@
 
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -210,7 +211,6 @@ public:
 private:
     Terrain::Storage* mStorage;
 
-    float mLodFactor;
     float mMinX, mMaxX, mMinY, mMaxY;
     float mMinSize;
 
@@ -218,8 +218,8 @@ private:
     osg::ref_ptr<LodCallback> mLodCallback;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
@@ -354,7 +354,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
                 mRootNode->traverseTo(vd, 1, osg::Vec2f(x+0.5,y+0.5));
             }
             else
-                mRootNode->traverse(vd, cv->getViewPoint(), mLodCallback, mViewDistance);
+                mRootNode->traverseNodes(vd, cv->getViewPoint(), mLodCallback, mViewDistance);
         }
         else
         {
@@ -363,11 +363,17 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             if (!lineIntersector)
                 throw std::runtime_error("Cannot update QuadTreeWorld: node visitor is not LineSegmentIntersector");
 
-            osg::Matrix matrix = osg::Matrix::identity();
             if (lineIntersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
-                matrix = lineIntersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
-            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntersector, matrix));
-            mRootNode->intersect(vd, terrainIntersector);
+            {
+                TerrainLineIntersector terrainIntersector(lineIntersector);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
+            else
+            {
+                osg::Matrix matrix(lineIntersector->getTransformation(*iv, lineIntersector->getCoordinateFrame()));
+                TerrainLineIntersector terrainIntersector(lineIntersector, matrix);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
         }
     }
 
@@ -420,7 +426,7 @@ void QuadTreeWorld::enable(bool enabled)
     }
 
     if (mRootNode)
-        mRootNode->setNodeMask(enabled ? ~0 : 0);
+        mRootNode->setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
 }
 
 void QuadTreeWorld::cacheCell(View *view, int x, int y)
@@ -447,7 +453,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, std::atomic
 
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
-    mRootNode->traverse(vd, viewPoint, mLodCallback, mViewDistance);
+    mRootNode->traverseNodes(vd, viewPoint, mLodCallback, mViewDistance);
 
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {

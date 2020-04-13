@@ -38,23 +38,25 @@ class ActorAnimation : public Animation, public MWWorld::ContainerStoreListener
         virtual void itemAdded(const MWWorld::ConstPtr& item, int count);
         virtual void itemRemoved(const MWWorld::ConstPtr& item, int count);
         virtual bool isArrowAttached() const { return false; }
+        virtual bool useShieldAnimations() const;
+        bool updateCarriedLeftVisible(const int weaptype) const;
 
     protected:
-        bool mWeaponSheathing;
-        osg::Group* getBoneByName(std::string boneName);
+        osg::Group* getBoneByName(const std::string& boneName);
         virtual void updateHolsteredWeapon(bool showHolsteredWeapons);
-        virtual void injectWeaponBones();
+        virtual void updateHolsteredShield(bool showCarriedLeft);
         virtual void updateQuiver();
+        virtual std::string getShieldMesh(MWWorld::ConstPtr shield) const;
         virtual std::string getHolsteredWeaponBoneName(const MWWorld::ConstPtr& weapon);
-        virtual std::string getHolsteredWeaponBoneName(const unsigned int weaponType);
-        virtual PartHolderPtr getWeaponPart(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor);
-        virtual PartHolderPtr getWeaponPart(const std::string& model, const std::string& bonename)
+        virtual PartHolderPtr attachMesh(const std::string& model, const std::string& bonename, bool enchantedGlow, osg::Vec4f* glowColor);
+        virtual PartHolderPtr attachMesh(const std::string& model, const std::string& bonename)
         {
             osg::Vec4f stubColor = osg::Vec4f(0,0,0,0);
-            return getWeaponPart(model, bonename, false, &stubColor);
+            return attachMesh(model, bonename, false, &stubColor);
         };
 
         PartHolderPtr mScabbard;
+        PartHolderPtr mHolsteredShield;
 
     private:
         void addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM::Light* esmLight);

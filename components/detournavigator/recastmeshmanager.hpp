@@ -30,11 +30,11 @@ namespace DetourNavigator
     public:
         struct Water
         {
-            int mCellSize;
+            int mCellSize = 0;
             btTransform mTransform;
         };
 
-        RecastMeshManager(const Settings& settings, const TileBounds& bounds);
+        RecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
         bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
@@ -52,7 +52,9 @@ namespace DetourNavigator
         bool isEmpty() const;
 
     private:
-        bool mShouldRebuild;
+        std::size_t mRevision = 0;
+        std::size_t mLastBuildRevision = 0;
+        std::size_t mGeneration;
         RecastMeshBuilder mMeshBuilder;
         std::list<RecastMeshObject> mObjectsOrder;
         std::unordered_map<ObjectId, std::list<RecastMeshObject>::iterator> mObjects;

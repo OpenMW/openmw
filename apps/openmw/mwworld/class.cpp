@@ -109,11 +109,6 @@ namespace MWWorld
         throw std::runtime_error("class cannot block");
     }
 
-    bool Class::canBeActivated(const Ptr& ptr) const
-    {
-        return !getName(ptr).empty();
-    }
-
     void Class::onHit(const Ptr& ptr, float damage, bool ishealth, const Ptr& object, const Ptr& attacker, const osg::Vec3f& hitPosition, bool successful) const
     {
         throw std::runtime_error("class cannot be hit");
@@ -142,16 +137,6 @@ namespace MWWorld
     bool Class::hasInventoryStore(const Ptr &ptr) const
     {
         return false;
-    }
-
-    void Class::lock (const Ptr& ptr, int lockLevel) const
-    {
-        throw std::runtime_error ("class does not support locking");
-    }
-
-    void Class::unlock (const Ptr& ptr) const
-    {
-        throw std::runtime_error ("class does not support unlocking");
     }
 
     bool Class::canLock(const ConstPtr &ptr) const
@@ -298,7 +283,7 @@ namespace MWWorld
 
     bool Class::hasToolTip (const ConstPtr& ptr) const
     {
-        return false;
+        return true;
     }
 
     std::string Class::getEnchantment (const ConstPtr& ptr) const
@@ -460,12 +445,12 @@ namespace MWWorld
         return false;
     }
 
-    int Class::getDoorState (const MWWorld::ConstPtr &ptr) const
+    MWWorld::DoorState Class::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
         throw std::runtime_error("this is not a door");
     }
 
-    void Class::setDoorState (const MWWorld::Ptr &ptr, int state) const
+    void Class::setDoorState (const MWWorld::Ptr &ptr, MWWorld::DoorState state) const
     {
         throw std::runtime_error("this is not a door");
     }
@@ -506,5 +491,29 @@ namespace MWWorld
     float Class::getEffectiveArmorRating(const ConstPtr &armor, const Ptr &actor) const
     {
         throw std::runtime_error("class does not support armor ratings");
+    }
+
+    osg::Vec4f Class::getEnchantmentColor(const MWWorld::ConstPtr& item) const
+    {
+        osg::Vec4f result(1,1,1,1);
+        std::string enchantmentName = item.getClass().getEnchantment(item);
+        if (enchantmentName.empty())
+            return result;
+
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
+        if (!enchantment)
+            return result;
+
+        assert (enchantment->mEffects.mList.size());
+
+        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
+                enchantment->mEffects.mList.front().mEffectID);
+        if (!magicEffect)
+            return result;
+
+        result.x() = magicEffect->mData.mRed / 255.f;
+        result.y() = magicEffect->mData.mGreen / 255.f;
+        result.z() = magicEffect->mData.mBlue / 255.f;
+        return result;
     }
 }

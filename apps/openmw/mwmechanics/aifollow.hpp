@@ -7,6 +7,8 @@
 
 #include <components/esm/defs.hpp>
 
+#include "../mwworld/ptr.hpp"
+
 #include "pathfinding.hpp"
 
 namespace ESM
@@ -61,6 +63,8 @@ namespace MWMechanics
 
             virtual int getTypeId() const;
 
+            virtual bool useVariableSpeed() const { return true;}
+
             /// Returns the actor being followed
             std::string getFollowedActor();
 
@@ -71,6 +75,15 @@ namespace MWMechanics
             int getFollowIndex() const;
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state);
+
+            virtual osg::Vec3f getDestination() const
+            {
+                MWWorld::Ptr target = getTarget();
+                if (target.isEmpty())
+                    return osg::Vec3f(0, 0, 0);
+
+                return target.getRefData().getPosition().asVec3();
+            }
 
         private:
             /// This will make the actor always follow.

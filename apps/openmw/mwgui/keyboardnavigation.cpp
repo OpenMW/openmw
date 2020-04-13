@@ -16,9 +16,6 @@ namespace MWGui
 
 bool shouldAcceptKeyFocus(MyGUI::Widget* w)
 {
-    if (w && w->getUserString("IgnoreTabKey") == "y")
-        return false;
-
     return w && !w->castType<MyGUI::Window>(false) && w->getInheritedEnabled() && w->getInheritedVisible() && w->getVisible() && w->getEnabled();
 }
 

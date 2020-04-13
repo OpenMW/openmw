@@ -4,6 +4,7 @@
 #include <string>
 
 #include <components/esm/effectlist.hpp>
+#include <components/esm/loadench.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -23,6 +24,9 @@ namespace MWMechanics
 
             std::string mNewItemName;
             std::string mObjectType;
+            int mWeaponType;
+
+            const ESM::Enchantment* getRecord(const ESM::Enchantment& newEnchantment) const;
 
         public:
             Enchanting();
@@ -44,6 +48,8 @@ namespace MWMechanics
             int getMaxEnchantValue() const;
             int getGemCharge() const;
             int getEnchantChance() const;
+            int getEnchantItemsCount() const;
+            float getTypeMultiplier() const;
             bool soulEmpty() const; //Return true if empty
             bool itemEmpty() const; //Return true if empty
             void payForEnchantment() const;

@@ -121,7 +121,7 @@ namespace DetourNavigator
                         tileBounds.mMin -= osg::Vec2f(border, border);
                         tileBounds.mMax += osg::Vec2f(border, border);
                         tile = tiles->insert(std::make_pair(tilePosition,
-                                CachedRecastMeshManager(mSettings, tileBounds))).first;
+                                CachedRecastMeshManager(mSettings, tileBounds, mTilesGeneration))).first;
                     }
                     if (tile->second.addWater(cellPosition, cellSize, transform))
                     {
@@ -151,7 +151,10 @@ namespace DetourNavigator
                 continue;
             const auto tileResult = tile->second.removeWater(cellPosition);
             if (tile->second.isEmpty())
+            {
                 tiles->erase(tile);
+                ++mTilesGeneration;
+            }
             if (tileResult && !result)
                 result = tileResult;
         }
@@ -189,7 +192,8 @@ namespace DetourNavigator
             auto tileBounds = makeTileBounds(mSettings, tilePosition);
             tileBounds.mMin -= osg::Vec2f(border, border);
             tileBounds.mMax += osg::Vec2f(border, border);
-            tile = tiles.insert(std::make_pair(tilePosition, CachedRecastMeshManager(mSettings, tileBounds))).first;
+            tile = tiles.insert(std::make_pair(
+                tilePosition, CachedRecastMeshManager(mSettings, tileBounds, mTilesGeneration))).first;
         }
         return tile->second.addObject(id, shape, transform, areaType);
     }
@@ -209,7 +213,10 @@ namespace DetourNavigator
             return boost::optional<RemovedRecastMeshObject>();
         const auto tileResult = tile->second.removeObject(id);
         if (tile->second.isEmpty())
+        {
             tiles.erase(tile);
+            ++mTilesGeneration;
+        }
         return tileResult;
     }
 }

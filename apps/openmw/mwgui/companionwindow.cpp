@@ -46,9 +46,11 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
     getWidget(mCloseButton, "CloseButton");
     getWidget(mProfitLabel, "ProfitLabel");
     getWidget(mEncumbranceBar, "EncumbranceBar");
+    getWidget(mFilterEdit, "FilterEdit");
     getWidget(mItemView, "ItemView");
     mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &CompanionWindow::onBackgroundSelected);
     mItemView->eventItemClicked += MyGUI::newDelegate(this, &CompanionWindow::onItemSelected);
+    mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &CompanionWindow::onNameFilterChanged);
 
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
@@ -92,6 +94,12 @@ void CompanionWindow::onItemSelected(int index)
         dragItem (nullptr, count);
 }
 
+void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
+    }
+
 void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
 {
     mDragAndDrop->startDrag(mSelectedItem, mSortModel, mModel, mItemView, count);
@@ -113,6 +121,7 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
+    mFilterEdit->setCaption(std::string());
     mItemView->setModel(mSortModel);
     mItemView->resetScrollBars();
 

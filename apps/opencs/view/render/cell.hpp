@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 
 #include "../../model/world/cellcoordinates.hpp"
+#include "terrainstorage.hpp"
 
 class QModelIndex;
 
@@ -58,6 +59,7 @@ namespace CSVRender
             int mSubMode;
             unsigned int mSubModeElementMask;
             bool mUpdateLand, mLandDeleted;
+            TerrainStorage *mTerrainStorage;
 
             /// Ignored if cell does not have an object with the given ID.
             ///
@@ -117,6 +119,14 @@ namespace CSVRender
             /// \return Did this call result in a modification of the visual representation of
             /// this cell?
             bool referenceAdded (const QModelIndex& parent, int start, int end);
+
+            void setAlteredHeight(int inCellX, int inCellY, float height);
+
+            float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
+
+            float* getAlteredHeight(int inCellX, int inCellY);
+
+            void resetAlteredHeights();
 
             void pathgridModified();
 

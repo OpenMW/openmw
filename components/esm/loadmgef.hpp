@@ -30,15 +30,17 @@ struct MagicEffect
         CastSelf = 0x40, // Allows range - cast on self.
         CastTouch = 0x80, // Allows range - cast on touch.
         CastTarget = 0x100, // Allows range - cast on target.
-        UncappedDamage = 0x1000, // Negates multiple cap behaviours. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
+        AppliedOnce = 0x1000, // An effect that is applied once it lands, instead of continuously. Allows an effect to reduce an attribute below zero; removes the normal minimum effect duration of 1 second.
+        Stealth = 0x2000, // Unused
         NonRecastable = 0x4000, // Does not land if parent spell is already affecting target. Shows "you cannot re-cast" message for self target.
+        IllegalDaedra = 0x8000, // Unused
         Unreflectable = 0x10000, // Cannot be reflected, the effect always lands normally.
         CasterLinked = 0x20000, // Must quench if caster is dead, or not an NPC/creature. Not allowed in containter/door trap spells.
 
         // Originally modifiable flags
         AllowSpellmaking = 0x200, // Can be used for spellmaking
         AllowEnchanting = 0x400, // Can be used for enchanting
-        NegativeLight = 0x800 // Negative light source
+        NegativeLight = 0x800 // Unused
     };
 
     enum MagnitudeDisplayType

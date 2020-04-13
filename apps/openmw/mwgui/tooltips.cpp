@@ -249,6 +249,9 @@ namespace MWGui
                         int school = MWMechanics::getSpellSchool(spell, player);
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
+                    std::string cost = focus->getUserString("SpellCost");
+                    if (cost != "" && cost != "0")
+                        info.text += MWGui::ToolTips::getValueString(spell->mData.mCost, "#{sCastCost}");
                     info.effects = effects;
                     tooltipSize = createToolTip(info);
                 }
@@ -648,9 +651,25 @@ namespace MWGui
     {
         std::string ret;
         ret += getMiscString(cellref.getOwner(), "Owner");
-        ret += getMiscString(cellref.getFaction(), "Faction");
-        if (cellref.getFactionRank() > 0)
-            ret += getValueString(cellref.getFactionRank(), "Rank");
+        const std::string factionId = cellref.getFaction();
+        if (!factionId.empty())
+        {
+            const MWWorld::ESMStore &store = MWBase::Environment::get().getWorld()->getStore();
+            const ESM::Faction *fact = store.get<ESM::Faction>().search(factionId);
+            if (fact != nullptr)
+            {
+                ret += getMiscString(fact->mName.empty() ? factionId : fact->mName, "Owner Faction");
+                if (cellref.getFactionRank() >= 0)
+                {
+                    int rank = cellref.getFactionRank();
+                    const std::string rankName = fact->mRanks[rank];
+                    if (rankName.empty())
+                        ret += getValueString(cellref.getFactionRank(), "Rank");
+                    else
+                        ret += getMiscString(rankName, "Rank");
+                }
+            }
+        }
 
         std::vector<std::pair<std::string, int> > itemOwners =
                 MWBase::Environment::get().getMechanicsManager()->getStolenItemOwners(cellref.getRefId());
@@ -664,6 +683,60 @@ namespace MWGui
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");
+        return ret;
+    }
+
+    std::string ToolTips::getDurationString(float duration, const std::string& prefix)
+    {
+        std::string ret;
+        ret = prefix + ": ";
+
+        if (duration < 1.f)
+        {
+            ret += "0 s";
+            return ret;
+        }
+
+        constexpr int secondsPerMinute = 60; // 60 seconds
+        constexpr int secondsPerHour = secondsPerMinute * 60; // 60 minutes
+        constexpr int secondsPerDay = secondsPerHour * 24; // 24 hours
+        constexpr int secondsPerMonth = secondsPerDay * 30; // 30 days
+        constexpr int secondsPerYear = secondsPerDay * 365;
+        int fullDuration = static_cast<int>(duration);
+        int units = 0;
+        int years = fullDuration / secondsPerYear;
+        int months = fullDuration % secondsPerYear / secondsPerMonth;
+        int days = fullDuration % secondsPerYear % secondsPerMonth / secondsPerDay; // Because a year is not exactly 12 "months"
+        int hours = fullDuration % secondsPerDay / secondsPerHour;
+        int minutes = fullDuration % secondsPerHour / secondsPerMinute;
+        int seconds = fullDuration % secondsPerMinute;
+        if (years)
+        {
+            units++;
+            ret += toString(years) + " y ";
+        }
+        if (months)
+        {
+            units++;
+            ret += toString(months) + " mo ";
+        }
+        if (units < 2 && days)
+        {
+            units++;
+            ret += toString(days) + " d ";
+        }
+        if (units < 2 && hours)
+        {
+            units++;
+            ret += toString(hours) + " h ";
+        }
+        if (units >= 2)
+            return ret;
+        if (minutes)
+            ret += toString(minutes) + " min ";
+        if (seconds)
+            ret += toString(seconds) + " s ";
+
         return ret;
     }
 

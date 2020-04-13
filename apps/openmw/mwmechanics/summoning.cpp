@@ -99,25 +99,11 @@ namespace MWMechanics
             ++it;
         }
 
-        std::vector<int>& graveyard = creatureStats.getSummonedCreatureGraveyard();
-        for (std::vector<int>::iterator it = graveyard.begin(); it != graveyard.end(); )
-        {
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(*it);
-            if (!ptr.isEmpty())
-            {
-                it = graveyard.erase(it);
+        std::vector<int> graveyard = creatureStats.getSummonedCreatureGraveyard();
+        creatureStats.getSummonedCreatureGraveyard().clear();
 
-                const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>()
-                        .search("VFX_Summon_End");
-                if (fx)
-                    MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + fx->mModel,
-                        "", ptr.getRefData().getPosition().asVec3());
-
-                MWBase::Environment::get().getWorld()->deleteObject(ptr);
-            }
-            else
-                ++it;
-        }
+        for (const int creature : graveyard)
+            MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, creature);
 
         if (!cleanup)
             return;

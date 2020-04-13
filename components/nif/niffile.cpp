@@ -9,9 +9,7 @@ namespace Nif
 
 /// Open a NIF stream. The name is used for error messages.
 NIFFile::NIFFile(Files::IStreamPtr stream, const std::string &name)
-    : ver(0)
-    , filename(name)
-    , mUseSkinning(false)
+    : filename(name)
 {
     parse(stream);
 }
@@ -50,10 +48,12 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiSwitchNode",               &construct <NiSwitchNode>                , RC_NiSwitchNode                  ));
     newFactory.insert(makeEntry("NiLODNode",                  &construct <NiLODNode>                   , RC_NiLODNode                     ));
     newFactory.insert(makeEntry("AvoidNode",                  &construct <NiNode>                      , RC_AvoidNode                     ));
+    newFactory.insert(makeEntry("NiCollisionSwitch",          &construct <NiNode>                      , RC_NiCollisionSwitch             ));
     newFactory.insert(makeEntry("NiBSParticleNode",           &construct <NiNode>                      , RC_NiBSParticleNode              ));
     newFactory.insert(makeEntry("NiBSAnimationNode",          &construct <NiNode>                      , RC_NiBSAnimationNode             ));
     newFactory.insert(makeEntry("NiBillboardNode",            &construct <NiNode>                      , RC_NiBillboardNode               ));
     newFactory.insert(makeEntry("NiTriShape",                 &construct <NiTriShape>                  , RC_NiTriShape                    ));
+    newFactory.insert(makeEntry("NiTriStrips",                &construct <NiTriStrips>                 , RC_NiTriStrips                   ));
     newFactory.insert(makeEntry("NiRotatingParticles",        &construct <NiRotatingParticles>         , RC_NiRotatingParticles           ));
     newFactory.insert(makeEntry("NiAutoNormalParticles",      &construct <NiAutoNormalParticles>       , RC_NiAutoNormalParticles         ));
     newFactory.insert(makeEntry("NiCamera",                   &construct <NiCamera>                    , RC_NiCamera                      ));
@@ -96,6 +96,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiParticleRotation",         &construct <NiParticleRotation>          , RC_NiParticleRotation            ));
     newFactory.insert(makeEntry("NiFloatData",                &construct <NiFloatData>                 , RC_NiFloatData                   ));
     newFactory.insert(makeEntry("NiTriShapeData",             &construct <NiTriShapeData>              , RC_NiTriShapeData                ));
+    newFactory.insert(makeEntry("NiTriStripsData",            &construct <NiTriStripsData>             , RC_NiTriStripsData               ));
     newFactory.insert(makeEntry("NiVisData",                  &construct <NiVisData>                   , RC_NiVisData                     ));
     newFactory.insert(makeEntry("NiColorData",                &construct <NiColorData>                 , RC_NiColorData                   ));
     newFactory.insert(makeEntry("NiPixelData",                &construct <NiPixelData>                 , RC_NiPixelData                   ));
@@ -110,6 +111,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiSourceTexture",            &construct <NiSourceTexture>             , RC_NiSourceTexture               ));
     newFactory.insert(makeEntry("NiSkinInstance",             &construct <NiSkinInstance>              , RC_NiSkinInstance                ));
     newFactory.insert(makeEntry("NiLookAtController",         &construct <NiLookAtController>          , RC_NiLookAtController            ));
+    newFactory.insert(makeEntry("NiPalette",                  &construct <NiPalette>                   , RC_NiPalette                     ));
     return newFactory;
 }
 
@@ -136,26 +138,17 @@ void NIFFile::parse(Files::IStreamPtr stream)
     // Check the header string
     std::string head = nif.getVersionString();
     if(head.compare(0, 22, "NetImmerse File Format") != 0)
-        fail("Invalid NIF header:  " + head);
+        fail("Invalid NIF header: " + head);
 
     // Get BCD version
     ver = nif.getUInt();
     // 4.0.0.0 is an older, practically identical version of the format.
     // It's not used by Morrowind assets but Morrowind supports it.
-    if(ver != 0x04000000 && ver != VER_MW)
+    if(ver != nif.generateVersion(4,0,0,0) && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
     // Number of records
     size_t recNum = nif.getInt();
     records.resize(recNum);
-
-    /* The format for 10.0.1.0 seems to be a bit different. After the
-     header, it contains the number of records, r (int), just like
-     4.0.0.2, but following that it contains a short x, followed by x
-     strings. Then again by r shorts, one for each record, giving
-     which of the above strings to use to identify the record. After
-     this follows two ints (zero?) and then the record data. However
-     we do not support or plan to support other versions yet.
-    */
 
     for(size_t i = 0;i < recNum;i++)
     {

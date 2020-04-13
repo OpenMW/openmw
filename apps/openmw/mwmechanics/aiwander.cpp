@@ -3,6 +3,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
+#include <components/detournavigator/navigator.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,7 +18,6 @@
 
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
-#include "steering.hpp"
 #include "movement.hpp"
 #include "coordinateconverter.hpp"
 #include "actorutil.hpp"
@@ -26,8 +26,6 @@ namespace MWMechanics
 {
     static const int COUNT_BEFORE_RESET = 10;
     static const float DOOR_CHECK_INTERVAL = 1.5f;
-    static const int GREETING_SHOULD_START = 4; //how many reaction intervals should pass before NPC can greet player
-    static const int GREETING_SHOULD_END = 10;
 
     // to prevent overcrowding
     static const int DESTINATION_TOLERANCE = 64;
@@ -54,6 +52,42 @@ namespace MWMechanics
             if (actor.getClass().isPureWaterCreature(actor) || actor.getClass().isPureFlyingCreature(actor))
                 return 1;
             return COUNT_BEFORE_RESET;
+        }
+
+        osg::Vec3f getRandomPointAround(const osg::Vec3f& position, const float distance)
+        {
+            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * osg::PI;
+            osg::Matrixf rotation;
+            rotation.makeRotate(randomDirection, osg::Vec3f(0.0, 0.0, 1.0));
+            return position + osg::Vec3f(distance, 0.0, 0.0) * rotation;
+        }
+
+        bool isDestinationHidden(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
+        {
+            const auto position = actor.getRefData().getPosition().asVec3();
+            const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
+            const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            osg::Vec3f direction = destination - position;
+            direction.normalize();
+            const auto visibleDestination = (
+                    isWaterCreature || isFlyingCreature
+                    ? destination
+                    : destination + osg::Vec3f(0, 0, halfExtents.z())
+                ) + direction * std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+            const int mask = MWPhysics::CollisionType_World
+                | MWPhysics::CollisionType_HeightMap
+                | MWPhysics::CollisionType_Door
+                | MWPhysics::CollisionType_Actor;
+            return MWBase::Environment::get().getWorld()->castRay(position, visibleDestination, mask, actor);
+        }
+
+        bool isAreaOccupiedByOtherActor(const MWWorld::ConstPtr &actor, const osg::Vec3f& destination)
+        {
+            const auto world = MWBase::Environment::get().getWorld();
+            const osg::Vec3f halfExtents = world->getPathfindingHalfExtents(actor);
+            const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
+            return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
         }
     }
 
@@ -139,15 +173,6 @@ namespace MWMechanics
 
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        const MWWorld::CellStore*& currentCell = storage.mCell;
-        bool cellChange = currentCell && (actor.getCell() != currentCell);
-        if(!currentCell || cellChange)
-        {
-            stopWalking(actor, storage);
-            currentCell = actor.getCell();
-            storage.mPopulateAvailableNodes = true;
-            mStoredInitialActorPosition = false;
-        }
 
         mRemainingDuration -= ((duration*MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
 
@@ -176,6 +201,17 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_Walking);
         }
 
+        GreetingState greetingState = cStats.getGreetingState();
+        if (greetingState == Greet_InProgress)
+        {
+            if (storage.mState == AiWanderStorage::Wander_Walking)
+            {
+                stopWalking(actor, storage, false);
+                mObstacleCheck.clear();
+                storage.setState(AiWanderStorage::Wander_IdleNow);
+            }
+        }
+
         doPerFrameActionsForState(actor, duration, storage);
 
         float& lastReaction = storage.mReaction;
@@ -183,14 +219,13 @@ namespace MWMechanics
         if (AI_REACTION_TIME <= lastReaction)
         {
             lastReaction = 0;
-            return reactionTimeActions(actor, storage, currentCell, cellChange, pos);
+            return reactionTimeActions(actor, storage, pos);
         }
         else
             return false;
     }
 
-    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage,
-        const MWWorld::CellStore*& currentCell, bool cellChange, ESM::Position& pos)
+    bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
     {
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
@@ -212,7 +247,7 @@ namespace MWMechanics
         // Initialization to discover & store allowed node points for this actor.
         if (storage.mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, currentCell->getCell(), storage);
+            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
         }
 
         if (canActorMoveByZAxis(actor) && mDistance > 0) {
@@ -241,17 +276,7 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
-        // Don't try to move if you are in a new cell (ie: positioncell command called) but still play idles.
-        if(mDistance && cellChange)
-            mDistance = 0;
-
-        // Allow interrupting a walking actor to trigger a greeting
         AiWanderStorage::WanderState& wanderState = storage.mState;
-        if ((wanderState == AiWanderStorage::Wander_IdleNow) || (wanderState == AiWanderStorage::Wander_Walking))
-        {
-            playGreetingIfPlayerGetsTooClose(actor, storage);
-        }
-
         if ((wanderState == AiWanderStorage::Wander_MoveNow) && storage.mCanWanderAlongPathGrid)
         {
             // Construct a new path if there isn't one
@@ -267,6 +292,11 @@ namespace MWMechanics
         {
             completeManualWalking(actor, storage);
         }
+
+        if (wanderState == AiWanderStorage::Wander_Walking
+            && (isDestinationHidden(actor, mPathFinder.getPath().back())
+                || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
+            completeManualWalking(actor, storage);
 
         return false; // AiWander package not yet completed
     }
@@ -308,32 +338,39 @@ namespace MWMechanics
         std::size_t attempts = 10; // If a unit can't wander out of water, don't want to hang here
         const bool isWaterCreature = actor.getClass().isPureWaterCreature(actor);
         const bool isFlyingCreature = actor.getClass().isPureFlyingCreature(actor);
+        const auto world = MWBase::Environment::get().getWorld();
+        const auto halfExtents = world->getPathfindingHalfExtents(actor);
+        const auto navigator = world->getNavigator();
+        const auto navigatorFlags = getNavigatorFlags(actor);
+
         do {
             // Determine a random location within radius of original position
             const float wanderRadius = (0.2f + Misc::Rng::rollClosedProbability() * 0.8f) * wanderDistance;
-            const float randomDirection = Misc::Rng::rollClosedProbability() * 2.0f * osg::PI;
-            const float destinationX = mInitialActorPosition.x() + wanderRadius * std::cos(randomDirection);
-            const float destinationY = mInitialActorPosition.y() + wanderRadius * std::sin(randomDirection);
-            const float destinationZ = mInitialActorPosition.z();
-            mDestination = osg::Vec3f(destinationX, destinationY, destinationZ);
+            if (!isWaterCreature && !isFlyingCreature)
+            {
+                // findRandomPointAroundCircle uses wanderDistance as limit for random and not as exact distance
+                if (const auto destination = navigator->findRandomPointAroundCircle(halfExtents, mInitialActorPosition, wanderDistance, navigatorFlags))
+                    mDestination = *destination;
+                else
+                    mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
+            }
+            else
+                mDestination = getRandomPointAround(mInitialActorPosition, wanderRadius);
 
             // Check if land creature will walk onto water or if water creature will swim onto land
             if (!isWaterCreature && destinationIsAtWater(actor, mDestination))
                 continue;
 
-            if ((isWaterCreature || isFlyingCreature) && destinationThroughGround(currentPosition, mDestination))
+            if (isDestinationHidden(actor, mDestination))
+                continue;
+
+            if (isAreaOccupiedByOtherActor(actor, mDestination))
                 continue;
 
             if (isWaterCreature || isFlyingCreature)
-            {
                 mPathFinder.buildStraightPath(mDestination);
-            }
             else
-            {
-                const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
-                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents,
-                    getNavigatorFlags(actor));
-            }
+                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents, navigatorFlags);
 
             if (mPathFinder.isPathConstructed())
             {
@@ -354,16 +391,6 @@ namespace MWMechanics
         osg::Vec3f positionBelowSurface = destination;
         positionBelowSurface[2] = positionBelowSurface[2] - heightToGroundOrWater - 1.0f;
         return MWBase::Environment::get().getWorld()->isUnderwater(actor.getCell(), positionBelowSurface);
-    }
-
-    /*
-     * Returns true if the start to end point travels through a collision point (land).
-     */
-    bool AiWander::destinationThroughGround(const osg::Vec3f& startPoint, const osg::Vec3f& destination) {
-        const int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_HeightMap | MWPhysics::CollisionType_Door;
-        return MWBase::Environment::get().getWorld()->castRay(startPoint.x(), startPoint.y(), startPoint.z(),
-                                                              destination.x(), destination.y(), destination.z(),
-                                                              mask);
     }
 
     void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
@@ -416,19 +443,9 @@ namespace MWMechanics
             }
         }
 
-        bool& rotate = storage.mTurnActorGivingGreetingToFacePlayer;
-        if (rotate)
-        {
-            // Reduce the turning animation glitch by using a *HUGE* value of
-            // epsilon...  TODO: a proper fix might be in either the physics or the
-            // animation subsystem
-            if (zTurn(actor, storage.mTargetAngleRadians, osg::DegreesToRadians(5.f)))
-                rotate = false;
-        }
-
         // Check if idle animation finished
-        AiWanderStorage::GreetingState& greetingState = storage.mSaidGreeting;
-        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == AiWanderStorage::Greet_Done || greetingState == AiWanderStorage::Greet_None))
+        GreetingState greetingState = actor.getClass().getCreatureStats(actor).getGreetingState();
+        if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             if (mPathFinder.isPathConstructed())
                 storage.setState(AiWanderStorage::Wander_Walking);
@@ -448,7 +465,7 @@ namespace MWMechanics
         else
         {
             // have not yet reached the destination
-            evadeObstacles(actor, storage);
+            evadeObstacles(actor, duration, storage);
         }
     }
 
@@ -479,8 +496,17 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
+        if (mUsePathgrid)
+        {
+            const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
+                    + 1.2 * std::max(halfExtents.x(), halfExtents.y());
+            const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
+            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor), pointTolerance);
+        }
+
         if (mObstacleCheck.isEvading())
         {
             // first check if we're walking into a door
@@ -508,81 +534,14 @@ namespace MWMechanics
         }
     }
 
-    void AiWander::playGreetingIfPlayerGetsTooClose(const MWWorld::Ptr& actor, AiWanderStorage& storage)
-    {
-        // Play a random voice greeting if the player gets too close
-        int hello = actor.getClass().getCreatureStats(actor).getAiSetting(CreatureStats::AI_Hello).getModified();
-        float helloDistance = static_cast<float>(hello);
-        static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
-            .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        helloDistance *= iGreetDistanceMultiplier;
-
-        MWWorld::Ptr player = getPlayer();
-        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-
-        int& greetingTimer = storage.mGreetingTimer;
-        AiWanderStorage::GreetingState& greetingState = storage.mSaidGreeting;
-        if (greetingState == AiWanderStorage::Greet_None)
-        {
-            if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
-                !player.getClass().getCreatureStats(player).isDead() && !actor.getClass().getCreatureStats(actor).isParalyzed()
-                && MWBase::Environment::get().getWorld()->getLOS(player, actor)
-                && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(player, actor))
-                greetingTimer++;
-
-            if (greetingTimer >= GREETING_SHOULD_START)
-            {
-                greetingState = AiWanderStorage::Greet_InProgress;
-                MWBase::Environment::get().getDialogueManager()->say(actor, "hello");
-                greetingTimer = 0;
-            }
-        }
-
-        if (greetingState == AiWanderStorage::Greet_InProgress)
-        {
-            greetingTimer++;
-
-            if (storage.mState == AiWanderStorage::Wander_Walking)
-            {
-                stopWalking(actor, storage, false);
-                mObstacleCheck.clear();
-                storage.setState(AiWanderStorage::Wander_IdleNow);
-            }
-
-            turnActorToFacePlayer(actorPos, playerPos, storage);
-
-            if (greetingTimer >= GREETING_SHOULD_END)
-            {
-                greetingState = AiWanderStorage::Greet_Done;
-                greetingTimer = 0;
-            }
-        }
-
-        if (greetingState == AiWanderStorage::Greet_Done)
-        {
-            float resetDist = 2 * helloDistance;
-            if ((playerPos - actorPos).length2() >= resetDist*resetDist)
-                greetingState = AiWanderStorage::Greet_None;
-        }
-    }
-
-    void AiWander::turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage)
-    {
-        osg::Vec3f dir = playerPosition - actorPosition;
-
-        float faceAngleRadians = std::atan2(dir.x(), dir.y());
-        storage.mTargetAngleRadians = faceAngleRadians;
-        storage.mTurnActorGivingGreetingToFacePlayer = true;
-    }
 
     void AiWander::setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
         unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size());
         ESM::Pathgrid::Point dest(storage.mAllowedNodes[randNode]);
 
-        ToWorldCoordinates(dest, storage.mCell->getCell());
+        ToWorldCoordinates(dest, actor.getCell()->getCell());
 
         // actor position is already in world coordinates
         const osg::Vec3f start = actorPos.asVec3();

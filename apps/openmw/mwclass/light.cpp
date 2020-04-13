@@ -70,9 +70,10 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         if (ref->mBase->mModel.empty())
-            return "";
+            return std::string();
 
-        return ref->mBase->mName;
+        const std::string& name = ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Light::activate (const MWWorld::Ptr& ptr,
@@ -141,9 +142,7 @@ namespace MWClass
 
     bool Light::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
-        const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
-
-        return (ref->mBase->mName != "");
+        return showsInInventory(ptr);
     }
 
     MWGui::ToolTipInfo Light::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
@@ -151,18 +150,14 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Light> *ref = ptr.get<ESM::Light>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName + MWGui::ToolTips::getCountString(count);
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
         std::string text;
 
-        if (Settings::Manager::getBool("show effect duration","Game"))
-        {
-            // -1 is infinite light source, so duration makes no sense here. Other negative values are treated as 0.
-            float remainingTime = ptr.getClass().getRemainingUsageTime(ptr);
-            if (remainingTime != -1.0f)
-                text += "\n#{sDuration}: " + MWGui::ToolTips::toString(std::max(0.f, remainingTime));
-        }
+        // Don't show duration for infinite light sources.
+        if (Settings::Manager::getBool("show effect duration","Game") && ptr.getClass().getRemainingUsageTime(ptr) != -1)
+            text += MWGui::ToolTips::getDurationString(ptr.getClass().getRemainingUsageTime(ptr), "\n#{sDuration}");
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");
         text += MWGui::ToolTips::getValueString(ref->mBase->mData.mValue, "#{sValue}");

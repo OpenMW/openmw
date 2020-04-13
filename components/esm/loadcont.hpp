@@ -19,7 +19,7 @@ class ESMWriter;
 struct ContItem
 {
     int mCount;
-    NAME32 mItem;
+    std::string mItem;
 };
 
 /// InventoryList, NPCO subrecord

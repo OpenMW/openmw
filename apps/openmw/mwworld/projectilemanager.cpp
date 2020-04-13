@@ -16,6 +16,7 @@
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwworld/manualref.hpp"
@@ -32,9 +33,9 @@
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aipackage.hpp"
+#include "../mwmechanics/weapontype.hpp"
 
 #include "../mwrender/animation.hpp"
-#include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/util.hpp"
 
@@ -187,7 +188,7 @@ namespace MWWorld
                                         bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
-        state.mNode->setNodeMask(MWRender::Mask_Effect);
+        state.mNode->setNodeMask(SceneUtil::Mask_Effect);
         state.mNode->setPosition(pos);
         state.mNode->setAttitude(orient);
 
@@ -227,7 +228,7 @@ namespace MWWorld
             projectileLight->setPosition(osg::Vec4(pos, 1.0));
             
             SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
-            projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
+            projectileLightSource->setNodeMask(SceneUtil::Mask_Lighting);
             projectileLightSource->setRadius(66.f);
             
             state.mNode->addChild(projectileLightSource);
@@ -261,7 +262,7 @@ namespace MWWorld
         {
             // Spawn at 0.75 * ActorHeight
             // Note: we ignore the collision box offset, this is required to make some flying creatures work as intended.
-            pos.z() += mPhysics->getHalfExtents(caster).z() * 2 * 0.75;
+            pos.z() += mPhysics->getRenderingHalfExtents(caster).z() * 2 * 0.75;
         }
 
         if (MWBase::Environment::get().getWorld()->isUnderwater(caster.getCell(), pos)) // Underwater casting not possible
@@ -317,12 +318,16 @@ namespace MWWorld
         state.mIdArrow = projectile.getCellRef().getRefId();
         state.mCasterHandle = actor;
         state.mAttackStrength = attackStrength;
-        state.mThrown = projectile.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+
+        int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
+        state.mThrown = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
 
         createModel(state, ptr.getClass().getModel(ptr), pos, orient, false, false, osg::Vec4(0,0,0,0));
+        if (!ptr.getClass().getEnchantment(ptr).empty())
+            SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
         mProjectiles.push_back(state);
     }
@@ -602,7 +607,9 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), esm.mId);
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
-                state.mThrown = ptr.get<ESM::Weapon>()->mBase->mData.mType == ESM::Weapon::MarksmanThrown;
+
+                int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
+                state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
             }
             catch(...)
             {

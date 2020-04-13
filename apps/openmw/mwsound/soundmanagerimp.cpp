@@ -566,6 +566,27 @@ namespace MWSound
         return true;
     }
 
+    bool SoundManager::sayActive(const MWWorld::ConstPtr &ptr) const
+    {
+        SaySoundMap::const_iterator snditer = mSaySoundsQueue.find(ptr);
+        if(snditer != mSaySoundsQueue.end())
+        {
+            if(mOutput->isStreamPlaying(snditer->second))
+                return true;
+            return false;
+        }
+
+        snditer = mActiveSaySounds.find(ptr);
+        if(snditer != mActiveSaySounds.end())
+        {
+            if(mOutput->isStreamPlaying(snditer->second))
+                return true;
+            return false;
+        }
+
+        return false;
+    }
+
     void SoundManager::stopSay(const MWWorld::ConstPtr &ptr)
     {
         SaySoundMap::iterator snditer = mSaySoundsQueue.find(ptr);
@@ -903,7 +924,7 @@ namespace MWSound
         {
             if(r - pos < sndref.mChance)
             {
-                playSound(sndref.mSound.toString(), 1.0f, 1.0f);
+                playSound(sndref.mSound, 1.0f, 1.0f);
                 break;
             }
             pos += sndref.mChance;
@@ -1341,7 +1362,7 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        stopMusic();
+        SoundManager::stopMusic();
 
         for(SoundMap::value_type &snd : mActiveSounds)
         {

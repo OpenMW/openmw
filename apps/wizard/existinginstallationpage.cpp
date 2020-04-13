@@ -31,7 +31,7 @@ void Wizard::ExistingInstallationPage::initializePage()
     // Hide the default item if there are installations to choose from
     installationsList->item(0)->setHidden(!paths.isEmpty());
 
-    foreach (const QString &path, paths)
+    for (const QString &path : paths)
     {
         if (installationsList->findItems(path, Qt::MatchExactly).isEmpty())
         {

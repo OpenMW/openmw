@@ -10,6 +10,11 @@ namespace MWClass
         return "";
     }
 
+    bool ItemLevList::hasToolTip(const MWWorld::ConstPtr& ptr) const
+    {
+        return false;
+    }
+
     void ItemLevList::registerSelf()
     {
         std::shared_ptr<Class> instance (new ItemLevList);

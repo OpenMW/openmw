@@ -1,6 +1,8 @@
 #define SHADOWS @shadows_enabled
 
 #if SHADOWS
+    uniform float maximumShadowMapDistance;
+    uniform float shadowFadeStart;
     @foreach shadow_texture_unit_index @shadow_texture_unit_list
         uniform sampler2DShadow shadowTexture@shadow_texture_unit_index;
         varying vec4 shadowSpaceCoords@shadow_texture_unit_index;
@@ -11,10 +13,15 @@
     @endforeach
 #endif // SHADOWS
 
-float unshadowedLightRatio()
+float unshadowedLightRatio(float distance)
 {
     float shadowing = 1.0;
 #if SHADOWS
+#if @limitShadowMapDistance
+    float fade = clamp((distance - shadowFadeStart) / (maximumShadowMapDistance - shadowFadeStart), 0.0, 1.0);
+    if (fade == 1.0)
+        return shadowing;
+#endif
     #if @shadowMapsOverlap
         bool doneShadows = false;
         @foreach shadow_texture_unit_index @shadow_texture_unit_list
@@ -41,6 +48,9 @@ float unshadowedLightRatio()
             shadowing = min(shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r, shadowing);
         @endforeach
     #endif
+#if @limitShadowMapDistance
+    shadowing = mix(shadowing, 1.0, fade);
+#endif
 #endif // SHADOWS
     return shadowing;
 }

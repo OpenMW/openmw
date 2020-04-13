@@ -15,7 +15,8 @@ namespace Interpreter
 
     int Runtime::getIntegerLiteral (int index) const
     {
-        assert (index>=0 && index<static_cast<int> (mCode[1]));
+        if (index < 0 || index >= static_cast<int> (mCode[1]))
+            throw std::out_of_range("out of range");
 
         const Type_Code *literalBlock = mCode + 4 + mCode[0];
 
@@ -24,7 +25,8 @@ namespace Interpreter
 
     float Runtime::getFloatLiteral (int index) const
     {
-        assert (index>=0 && index<static_cast<int> (mCode[2]));
+        if (index < 0 || index >= static_cast<int> (mCode[2]))
+            throw std::out_of_range("out of range");
 
         const Type_Code *literalBlock = mCode + 4 + mCode[0] + mCode[1];
 
@@ -33,7 +35,8 @@ namespace Interpreter
 
     std::string Runtime::getStringLiteral (int index) const
     {
-        assert (index>=0 && static_cast<int> (mCode[3])>0);
+        if (index < 0 || static_cast<int> (mCode[3]) <= 0)
+            throw std::out_of_range("out of range");
 
         const char *literalBlock =
             reinterpret_cast<const char *> (mCode + 4 + mCode[0] + mCode[1] + mCode[2]);
@@ -43,7 +46,8 @@ namespace Interpreter
         for (; index; --index)
         {
             offset += std::strlen (literalBlock+offset) + 1;
-            assert (offset/4<static_cast<int> (mCode[3]));
+            if (offset / 4 >= static_cast<int> (mCode[3]))
+                throw std::out_of_range("out of range");
         }
 
         return literalBlock+offset;

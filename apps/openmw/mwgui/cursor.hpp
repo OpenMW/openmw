@@ -11,7 +11,7 @@ namespace MWGui
     ///        ResourceImageSetPointer that we need.
     /// \example MyGUI::FactoryManager::getInstance().registerFactory<ResourceImageSetPointerFix>("Resource", "ResourceImageSetPointer");
     ///          MyGUI::ResourceManager::getInstance().load("core.xml");
-    class ResourceImageSetPointerFix :
+    class ResourceImageSetPointerFix final :
         public MyGUI::IPointer
     {
         MYGUI_RTTI_DERIVED( ResourceImageSetPointerFix )
@@ -20,17 +20,17 @@ namespace MWGui
         ResourceImageSetPointerFix();
         virtual ~ResourceImageSetPointerFix();
 
-        virtual void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version);
+        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) final;
 
-        virtual void setImage(MyGUI::ImageBox* _image);
-        virtual void setPosition(MyGUI::ImageBox* _image, const MyGUI::IntPoint& _point);
+        void setImage(MyGUI::ImageBox* _image) final;
+        void setPosition(MyGUI::ImageBox* _image, const MyGUI::IntPoint& _point) final;
 
         //and now for the whole point of this class, allow us to get
         //the hot spot, the image and the size of the cursor.
-        virtual MyGUI::ResourceImageSetPtr getImageSet();
-        virtual MyGUI::IntPoint getHotSpot();
-        virtual MyGUI::IntSize getSize();
-        virtual int getRotation();
+        MyGUI::ResourceImageSetPtr getImageSet();
+        MyGUI::IntPoint getHotSpot();
+        MyGUI::IntSize getSize();
+        int getRotation();
 
     private:
         MyGUI::IntPoint mPoint;

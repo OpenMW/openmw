@@ -8,9 +8,9 @@
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
 
 namespace Shader
 {
@@ -60,7 +60,7 @@ namespace Shader
 
     bool parseIncludes(boost::filesystem::path shaderPath, std::string& source)
     {
-        boost::replace_all(source, "\r\n", "\n");
+        Misc::StringUtils::replaceAll(source, "\r\n", "\n");
 
         std::set<boost::filesystem::path> includedFiles;
         size_t foundPos = 0;
@@ -165,7 +165,7 @@ namespace Shader
             std::string list = source.substr(listStart, listEnd - listStart);
             std::vector<std::string> listElements;
             if (list != "")
-                boost::split(listElements, list, boost::is_any_of(","));
+                Misc::StringUtils::split (list, listElements, ",");
 
             size_t contentStart = source.find_first_not_of("\n\r", listEnd);
             size_t contentEnd = source.find("$endforeach", contentStart);

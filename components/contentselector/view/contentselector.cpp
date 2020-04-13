@@ -72,7 +72,7 @@ void ContentSelectorView::ContentSelector::setProfileContent(const QStringList &
 {
     clearCheckStates();
 
-    foreach (const QString &filepath, fileList)
+    for (const QString &filepath : fileList)
     {
         const ContentSelectorModel::EsmFile *file = mContentModel->item(filepath);
         if (file && file->isGameFile())
@@ -139,7 +139,7 @@ void ContentSelectorView::ContentSelector::addFiles(const QString &path)
     mContentModel->addFiles(path);
 
     // add any game files to the combo box
-    foreach(const QString gameFileName, mContentModel->gameFiles())
+    for (const QString& gameFileName : mContentModel->gameFiles())
     {
         if (ui.gameFileView->findText(gameFileName) == -1)
         {
@@ -225,7 +225,7 @@ void ContentSelectorView::ContentSelector::slotShowContextMenu(const QPoint& pos
 void ContentSelectorView::ContentSelector::setCheckStateForMultiSelectedItems(bool checked)
 {
     Qt::CheckState checkState = checked ? Qt::Checked : Qt::Unchecked;
-    foreach(const QModelIndex& index, ui.addonView->selectionModel()->selectedIndexes())
+    for (const QModelIndex& index : ui.addonView->selectionModel()->selectedIndexes())
     {
         QModelIndex sourceIndex = mAddonProxyModel->mapToSource(index);
         if (mContentModel->data(sourceIndex, Qt::CheckStateRole).toInt() != checkState)
@@ -249,7 +249,7 @@ void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
 {
     QClipboard *clipboard = QApplication::clipboard();
     QString filepaths;
-    foreach (const QModelIndex& index, ui.addonView->selectionModel()->selectedIndexes())
+    for (const QModelIndex& index : ui.addonView->selectionModel()->selectedIndexes())
     {
         int row = mAddonProxyModel->mapToSource(index).row();
         const ContentSelectorModel::EsmFile *file = mContentModel->item(row);

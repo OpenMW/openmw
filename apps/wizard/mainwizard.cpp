@@ -162,7 +162,8 @@ void Wizard::MainWizard::setupGameSettings()
     paths.append(QLatin1String("openmw.cfg"));
     paths.append(globalPath + QLatin1String("openmw.cfg"));
 
-    foreach (const QString &path2, paths) {
+    for (const QString &path2 : paths)
+    {
         qDebug() << "Loading config file:" << path2.toUtf8().constData();
 
         file.setFileName(path2);
@@ -222,7 +223,8 @@ void Wizard::MainWizard::setupLauncherSettings()
 void Wizard::MainWizard::setupInstallations()
 {
     // Check if the paths actually contain a Morrowind installation
-    foreach (const QString path, mGameSettings.getDataDirs()) {
+    for (const QString& path : mGameSettings.getDataDirs())
+    {
 
         if (findFiles(QLatin1String("Morrowind"), path))
             addInstallation(path);

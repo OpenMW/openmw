@@ -4,11 +4,13 @@
 
 #include <QComboBox>
 #include <QGridLayout>
+#include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
 
 #include "../../model/prefs/setting.hpp"
 #include "../../model/prefs/category.hpp"
+#include "../../model/prefs/state.hpp"
 
 namespace CSVPrefs
 {
@@ -29,8 +31,18 @@ namespace CSVPrefs
         mPageSelector = new QComboBox();
         connect(mPageSelector, SIGNAL(currentIndexChanged(int)), mStackedLayout, SLOT(setCurrentIndex(int)));
 
+        QFrame* lineSeparator = new QFrame(topWidget);
+        lineSeparator->setFrameShape(QFrame::HLine);
+        lineSeparator->setFrameShadow(QFrame::Sunken);
+
+        // Reset key bindings button
+        QPushButton* resetButton = new QPushButton ("Reset to Defaults", topWidget);
+        connect(resetButton, SIGNAL(clicked()), this, SLOT(resetKeyBindings()));
+
         topLayout->addWidget(mPageSelector);
         topLayout->addWidget(stackedWidget);
+        topLayout->addWidget(lineSeparator);
+        topLayout->addWidget(resetButton);
         topLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
         // Add each option
@@ -84,5 +96,10 @@ namespace CSVPrefs
                 mPageSelector->addItem(QString::fromUtf8(setting->getLabel().c_str()));
             }
         }
+    }
+
+    void KeyBindingPage::resetKeyBindings()
+    {
+        CSMPrefs::State::get().resetCategory("Key Bindings");
     }
 }

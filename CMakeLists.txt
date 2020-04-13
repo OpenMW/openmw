@@ -314,6 +314,8 @@ if (DEFINED ENV{TRAVIS_BRANCH} OR DEFINED ENV{APPVEYOR})
     set(REQUIRED_BULLET_VERSION 283) # but for build testing, 283 is fine
 endif()
 
+set(Boost_NO_BOOST_CMAKE ON)
+
 find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 REQUIRED)
@@ -604,9 +606,7 @@ if(WIN32)
 endif(WIN32)
 
 # Extern
-set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "Do not build RecastDemo")
 set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
-set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "Do not build recastnavigation tests")
 
 add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)

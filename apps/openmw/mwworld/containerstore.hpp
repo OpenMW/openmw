@@ -71,6 +71,12 @@ namespace MWWorld
         protected:
             ContainerStoreListener* mListener;
 
+            // (item, max charge)
+            typedef std::vector<std::pair<ContainerStoreIterator, float> > TRechargingItems;
+            TRechargingItems mRechargingItems;
+
+            bool mRechargingItemsUpToDate;
+
         private:
 
             MWWorld::CellRefList<ESM::Potion>            potions;
@@ -94,6 +100,7 @@ namespace MWWorld
             mutable bool mWeightUpToDate;
             ContainerStoreIterator addImp (const Ptr& ptr, int count);
             void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -107,6 +114,7 @@ namespace MWWorld
                 ESM::InventoryState& inventory, int& index,
                 bool equipable = false) const;
 
+            void updateRechargingItems();
 
             virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
 
@@ -130,15 +138,13 @@ namespace MWWorld
 
             bool hasVisibleItems() const;
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool setOwner=false);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
             ///
             /// \attention Do not add items to an existing stack by increasing the count instead of
             /// calling this function!
-            ///
-            /// @param setOwner Set the owner of the added item to \a actorPtr? If false, the owner is reset to "".
             ///
             /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to the newly inserted item.
 
@@ -154,6 +160,9 @@ namespace MWWorld
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed
+
+            void rechargeItems (float duration);
+            ///< Restore charge on enchanted items. Note this should only be done for the player.
 
             ContainerStoreIterator unstack (const Ptr& ptr, const Ptr& container, int count = 1);
             ///< Unstack an item in this container. The item's count will be set to count, then a new stack will be added with (origCount-count).
@@ -335,6 +344,7 @@ namespace MWWorld
             ContainerStoreIteratorBase& operator++ ();
             ContainerStoreIteratorBase operator++ (int);
             ContainerStoreIteratorBase& operator= (const ContainerStoreIteratorBase& rhs);
+            ContainerStoreIteratorBase (const ContainerStoreIteratorBase& rhs) = default;
 
             int getType() const;
             const ContainerStore *getContainerStore() const;

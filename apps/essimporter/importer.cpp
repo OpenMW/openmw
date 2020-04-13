@@ -2,6 +2,7 @@
 
 #include <iomanip>
 
+#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 #include <osgDB/ReadFile>
@@ -349,7 +350,7 @@ namespace ESSImport
 
         writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
-        std::ofstream stream(mOutFile.c_str(), std::ios::binary);
+        boost::filesystem::ofstream stream(boost::filesystem::path(mOutFile), std::ios::out | std::ios::binary);
         // all unused
         writer.setVersion(0);
         writer.setType(0);

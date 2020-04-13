@@ -98,6 +98,7 @@ private:
 protected:
     virtual void addControllers();
     virtual bool isArrowAttached() const;
+    virtual std::string getShieldMesh(MWWorld::ConstPtr shield) const;
 
 public:
     /**

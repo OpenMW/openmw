@@ -20,7 +20,7 @@ GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits)
     _traits = traits;
 
     init();
-    if(valid())
+    if(GraphicsWindowSDL2::valid())
     {
         setState(new osg::State);
         getState()->setGraphicsContext(this);

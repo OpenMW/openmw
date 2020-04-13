@@ -843,6 +843,11 @@ void SceneUtil::MWShadowTechnique::setPolygonOffset(float factor, float units)
     }
 }
 
+void SceneUtil::MWShadowTechnique::setShadowFadeStart(float shadowFadeStart)
+{
+    _shadowFadeStart = shadowFadeStart;
+}
+
 void SceneUtil::MWShadowTechnique::enableFrontFaceCulling()
 {
     _useFrontFaceCulling = true;
@@ -1492,6 +1497,9 @@ void MWShadowTechnique::createShaders()
 
     osg::ref_ptr<osg::Uniform> baseTextureUnit = new osg::Uniform("baseTextureUnit",(int)_baseTextureUnit);
     _uniforms.push_back(baseTextureUnit.get());
+
+    _uniforms.push_back(new osg::Uniform("maximumShadowMapDistance", (float)settings->getMaximumShadowMapDistance()));
+    _uniforms.push_back(new osg::Uniform("shadowFadeStart", (float)_shadowFadeStart));
 
     for(unsigned int sm_i=0; sm_i<settings->getNumShadowMapsPerLight(); ++sm_i)
     {

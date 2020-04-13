@@ -30,7 +30,7 @@ namespace MWMechanics
     {
         if (lock.getCellRef().getLockLevel() <= 0 ||
             lock.getCellRef().getLockLevel() == ESM::UnbreakableLock ||
-            !lock.getClass().canLock(lock)) //If it's unlocked or can not be unlocked back out immediately
+            !lock.getClass().hasToolTip(lock)) //If it's unlocked or can not be unlocked back out immediately
             return;
 
         int lockStrength = lock.getCellRef().getLockLevel();
@@ -48,10 +48,9 @@ namespace MWMechanics
             resultMessage = "#{sLockImpossible}";
         else
         {
-            MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, lock);
             if (Misc::Rng::roll0to99() <= x)
             {
-                lock.getClass().unlock(lock);
+                lock.getCellRef().unlock();
                 resultMessage = "#{sLockSuccess}";
                 resultSound = "Open Lock";
                 mActor.getClass().skillUsageSucceeded(mActor, ESM::Skill::Security, 1);
@@ -60,6 +59,7 @@ namespace MWMechanics
                 resultMessage = "#{sLockFail}";
         }
 
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, lock);
         int uses = lockpick.getClass().getItemHealth(lockpick);
         --uses;
         lockpick.getCellRef().setCharge(uses);
@@ -89,7 +89,6 @@ namespace MWMechanics
             resultMessage = "#{sTrapImpossible}";
         else
         {
-            MWBase::Environment::get().getMechanicsManager()->objectOpened(mActor, trap);
             if (Misc::Rng::roll0to99() <= x)
             {
                 trap.getCellRef().setTrap("");
@@ -102,6 +101,7 @@ namespace MWMechanics
                 resultMessage = "#{sTrapFail}";
         }
 
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, trap);
         int uses = probe.getClass().getItemHealth(probe);
         --uses;
         probe.getCellRef().setCharge(uses);
