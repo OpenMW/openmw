@@ -81,6 +81,9 @@ namespace MWGui
         static std::string getCountString(const int value);
         ///< @return blank string if count is 1, or else " (value)"
 
+        static std::string getSoulString(const MWWorld::CellRef& cellref);
+        ///< Returns a string containing the name of the creature that the ID in the cellref's soul field belongs to.
+
         static std::string getCellRefString(const MWWorld::CellRef& cellref);
         ///< Returns a string containing debug tooltip information about the given cellref.
 
