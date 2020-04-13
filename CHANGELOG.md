@@ -2,6 +2,9 @@
 ------
 
     Bug #5364: Script fails/stops if trying to startscript an unknown script
+    Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
+    Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
+    Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0
 ------

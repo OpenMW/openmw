@@ -43,6 +43,8 @@ namespace MWMechanics
         x *= pickQuality * mFatigueTerm;
         x += fPickLockMult * lockStrength;
 
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, lock);
+
         resultSound = "Open Lock Fail";
         if (x <= 0)
             resultMessage = "#{sLockImpossible}";
@@ -59,7 +61,6 @@ namespace MWMechanics
                 resultMessage = "#{sLockFail}";
         }
 
-        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, lock);
         int uses = lockpick.getClass().getItemHealth(lockpick);
         --uses;
         lockpick.getCellRef().setCharge(uses);
@@ -84,6 +85,8 @@ namespace MWMechanics
         x += fTrapCostMult * trapSpellPoints;
         x *= probeQuality * mFatigueTerm;
 
+        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, trap);
+
         resultSound = "Disarm Trap Fail";
         if (x <= 0)
             resultMessage = "#{sTrapImpossible}";
@@ -101,7 +104,6 @@ namespace MWMechanics
                 resultMessage = "#{sTrapFail}";
         }
 
-        MWBase::Environment::get().getMechanicsManager()->unlockAttempted(mActor, trap);
         int uses = probe.getClass().getItemHealth(probe);
         --uses;
         probe.getCellRef().setCharge(uses);
