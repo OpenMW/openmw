@@ -10,7 +10,7 @@ namespace DetourNavigator
     {
     public:
         template <class T>
-        explicit ObjectId(const T value) throw()
+        explicit ObjectId(T* value) throw()
             : mValue(reinterpret_cast<std::size_t>(value))
         {
         }
