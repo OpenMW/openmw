@@ -339,7 +339,8 @@ namespace Shader
             mAxisScaling->apply(state.get<osg::GLExtensions>(), state.getUniformLocation("axisScale"));
 #if OSG_MIN_VERSION_REQUIRED(3,6,0)
             drawable->drawImplementation(renderInfo);
-#else //OSG Scrawl specific
+#else
+           /// OSGOS Scrawl specific
            int numParticles;
 
            numParticles = partsys->numParticles();
@@ -404,15 +405,15 @@ namespace Shader
         osg::ref_ptr<osg::Vec3Array> mNormalArray;
         ParticleSystemFFPDrawCallback()
         {
-            mNormalArray=new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-            (*mNormalArray.get())[0] = osg::Vec3(0, 0, 1);
+            mNormalArray = new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+            (*mNormalArray.get())[0] = osg::Vec3(0, 0, -1);
         }
 
         ParticleSystemFFPDrawCallback(const ParticleSystemFFPDrawCallback& org,const osg::CopyOp& copyop):
             osg::Drawable::DrawCallback(org,copyop)
         {
-            mNormalArray=new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-            (*mNormalArray.get())[0] = osg::Vec3(0, 0, 1);
+            mNormalArray = new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+            (*mNormalArray.get())[0] = osg::Vec3(0, 0, -1);
         }
 
         virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
@@ -429,7 +430,7 @@ namespace Shader
                 state->getAttributeDispatchers().activateNormalArray(mNormalArray);
             }
 #else
-            state->Normal(0,0,1);
+            state->Normal(0, 0, -1);
 #endif
             drawable->drawImplementation(renderInfo);
         }
