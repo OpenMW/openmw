@@ -133,6 +133,8 @@ namespace MWGui
 
         void updateTopics();
 
+        void onClose();
+
     protected:
         void updateTopicsPane();
         bool isCompanion(const MWWorld::Ptr& actor);
@@ -156,7 +158,6 @@ namespace MWGui
         void updateDisposition();
         void restock();
         void deleteLater();
-        void resetHistory();
 
         bool mIsCompanion;
         std::list<std::string> mKeywords;

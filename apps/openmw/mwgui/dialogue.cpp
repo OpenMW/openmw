@@ -355,7 +355,6 @@ namespace MWGui
     {
         if (exit())
         {
-            resetHistory();
             MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
         }
     }
@@ -476,8 +475,9 @@ namespace MWGui
         mDeleteLater.clear();
     }
 
-    void DialogueWindow::resetHistory()
+    void DialogueWindow::onClose()
     {
+        // Reset history
         for (DialogueText* text : mHistoryContents)
             delete text;
         mHistoryContents.clear();
@@ -663,7 +663,6 @@ namespace MWGui
 
     void DialogueWindow::onGoodbyeActivated()
     {
-        resetHistory();
         MWBase::Environment::get().getDialogueManager()->goodbyeSelected();
         MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Dialogue);
         resetReference();
@@ -718,7 +717,6 @@ namespace MWGui
 
     void DialogueWindow::onReferenceUnavailable()
     {
-        resetHistory();
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Dialogue);
     }
 
