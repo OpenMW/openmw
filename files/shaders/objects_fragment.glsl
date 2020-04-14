@@ -63,23 +63,16 @@ centroid varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-#if @pointsprite
-varying vec3 basic_prop;
-#endif
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
 
 void main()
 {
-#if @pointsprite
-    if (basic_prop.x <= 0.0) discard;
-    vec2 adjustedDiffuseUV = gl_PointCoord.xy;
-#else
 #if @diffuseMap
     vec2 adjustedDiffuseUV = diffuseMapUV;
 #endif
-#endif
+
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 

@@ -37,12 +37,6 @@ varying vec2 bumpMapUV;
 varying vec2 specularMapUV;
 #endif
 
-#if @pointsprite
-uniform float axisScale;
-uniform float visibilityDistance;
-varying vec3 basic_prop; // _alive, _current_size, _current_alpha
-#endif
-
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -63,29 +57,15 @@ varying vec3 passNormal;
 
 void main(void)
 {
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
-    gl_Position = gl_ProjectionMatrix * viewPos;
-
     gl_ClipVertex = viewPos;
-
-#if @pointsprite
-    basic_prop = gl_MultiTexCoord0.xyz;
-
-    float ecDepth = -viewPos.z;
-    gl_PointSize = axisScale * basic_prop.y / ecDepth;
-
-    if (visibilityDistance > 0.0)
-    {
-        if (ecDepth <= 0.0 || ecDepth >= visibilityDistance)
-            basic_prop.x = -1.0;
-    }
-    vec3 viewNormal = normalize(gl_NormalMatrix * vec3(0.0, 0.0, 1.0));
-#else
-    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
-#endif
-
     euclideanDepth = length(viewPos.xyz);
     linearDepth = gl_Position.z;
+
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+
 #if @envMap
     vec3 viewVec = normalize(viewPos.xyz);
     vec3 r = reflect( viewVec, viewNormal );
@@ -126,21 +106,13 @@ void main(void)
     specularMapUV = (gl_TextureMatrix[@specularMapUV] * gl_MultiTexCoord@specularMapUV).xy;
 #endif
 
-    vec4 color = gl_Color;
-
-#if @pointsprite
-    color.a *= basic_prop.z;
-    passNormal = vec3(0.0, 0.0, 1.0);
-#else
-    passNormal = gl_Normal.xyz;
-#endif
 #if !PER_PIXEL_LIGHTING
-    lighting = doLighting(viewPos.xyz, viewNormal, color, shadowDiffuseLighting);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
 #else
-    passColor = color;
+    passColor = gl_Color;
 #endif
-
     passViewPos = viewPos.xyz;
+    passNormal = gl_Normal.xyz;
 
     setupShadowCoords(viewPos, viewNormal);
 }

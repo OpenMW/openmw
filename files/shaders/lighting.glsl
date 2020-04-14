@@ -13,12 +13,7 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 
     ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
-
-#if @pointsprite
-    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(normalize(gl_LightSource[lightIndex].position.xyz - viewPos.xyz), lightDir), 0.0) * illumination;
-#else
     diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
-#endif
 }
 
 #if PER_PIXEL_LIGHTING
@@ -47,9 +42,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
     vec3 diffuseLight, ambientLight;
-
     perLight(ambientLight, diffuseLight, 0, viewPos, viewNormal, diffuse, ambient);
-
 #if PER_PIXEL_LIGHTING
     lightResult.xyz += diffuseLight * shadowing - diffuseLight; // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
 #else

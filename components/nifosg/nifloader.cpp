@@ -7,7 +7,6 @@
 #include <osg/LOD>
 #include <osg/Switch>
 #include <osg/TexGen>
-#include <osg/PointSprite>
 #include <osg/ValueObject>
 
 // resource
@@ -1080,10 +1079,7 @@ namespace NifOsg
                 parentNode->addChild(trans);
             }
             // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
-            osg::StateSet *stateset = partsys->getOrCreateStateSet();
-            osg::ref_ptr<osg::PointSprite> sprite = new osg::PointSprite;
-            sprite = shareAttribute(sprite);
-            stateset->setTextureAttributeAndModes(0, sprite, osg::StateAttribute::ON);
+            partsys->getOrCreateStateSet();
         }
 
         void triCommonToGeometry(osg::Geometry *geometry, const std::vector<osg::Vec3f>& vertices, const std::vector<osg::Vec3f>& normals, const std::vector<std::vector<osg::Vec2f>>& uvlist, const std::vector<osg::Vec4f>& colors, const std::vector<unsigned int>& boundTextures, const std::string& name)
@@ -1781,7 +1777,7 @@ namespace NifOsg
                         osg::ref_ptr<osg::BlendFunc> blendFunc (new osg::BlendFunc(getBlendMode((alphaprop->flags>>1)&0xf),
                                                                                    getBlendMode((alphaprop->flags>>5)&0xf)));
                         blendFunc = shareAttribute(blendFunc);
-                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);                        
+                        stateset->setAttributeAndModes(blendFunc, osg::StateAttribute::ON);
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
