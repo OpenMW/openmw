@@ -1,3 +1,13 @@
+0.47.0
+------
+
+    Bug #5358: ForceGreeting always resets the dialogue window completely
+    Bug #5363: Enchantment autocalc not always 0/1
+    Bug #5364: Script fails/stops if trying to startscript an unknown script
+    Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
+    Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
+    Feature #5362: Show the soul gems' trapped soul in count dialog
+
 0.46.0
 ------
 
@@ -171,6 +181,7 @@
     Bug #5159: NiMaterialColorController can only control the diffuse color
     Bug #5161: Creature companions can't be activated when they are knocked down
     Bug #5164: Faction owned items handling is incorrect
+    Bug #5163: UserData is not copied during node cloning
     Bug #5166: Scripts still should be executed after player's death
     Bug #5167: Player can select and cast spells before magic menu is enabled
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
@@ -210,6 +221,8 @@
     Bug #5326: Formatting issues in the settings.cfg
     Bug #5328: Skills aren't properly reset for dead actors
     Bug #5345: Dopey Necromancy does not work due to a missing quote
+    Bug #5350: An attempt to launch magic bolt causes "AL error invalid value" error
+    Bug #5352: Light source items' duration is decremented while they aren't visible
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #4949: Incorrect particle lighting when force shaders = true
     Feature #1774: Handle AvoidNode
@@ -243,6 +256,7 @@
     Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
+    Feature #4944: Pause audio when OpenMW is minimized
     Feature #4958: Support eight blood types
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
@@ -269,10 +283,12 @@
     Feature #5170: Editor: Land shape editing, land selection
     Feature #5172: Editor: Delete instances/references with keypress in scene window
     Feature #5193: Weapon sheathing
+    Feature #5201: Editor: Show tool outline in scene view, when using editmodes
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape
     Feature #5274: Editor: Keyboard shortcut to drop objects to ground/obstacle in scene view
     Feature #5304: Morrowind-style bump-mapping
+    Feature #5311: Support for gyroscopic input (e.g. Android)
     Feature #5314: Ingredient filter in the alchemy window
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
@@ -3038,3 +3054,4 @@
 -----
 
 first release
+
