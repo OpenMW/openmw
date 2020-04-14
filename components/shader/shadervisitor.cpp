@@ -332,9 +332,9 @@ namespace Shader
             const osgParticle::ParticleSystem * partsys = static_cast<const osgParticle::ParticleSystem *>(drawable);
             osg::State& state = *renderInfo.getState();
             if(partsys->getParticleAlignment() == osgParticle::ParticleSystem::BILLBOARD)
-                mAxisScaling->set(osg::Matrix::transform3x3( state.getModelViewMatrix(), partsys->getAlignVectorX() * 0.5f * renderInfo.getCurrentCamera()->getViewport()->width()).length());
+                mAxisScaling->set(osg::Matrix::transform3x3( state.getModelViewMatrix(), partsys->getAlignVectorX() * renderInfo.getCurrentCamera()->getViewport()->width()).length());
             else
-                mAxisScaling->set(osg::Matrix::transform3x3( state.getModelViewMatrix(), partsys->getAlignVectorX() * 0.5f * renderInfo.getCurrentCamera()->getViewport()->width()).length2());
+                mAxisScaling->set(osg::Matrix::transform3x3( state.getModelViewMatrix(), partsys->getAlignVectorX() * renderInfo.getCurrentCamera()->getViewport()->width()).length2());
 
             mAxisScaling->apply(state.get<osg::GLExtensions>(), state.getUniformLocation("axisScale"));
 #if OSG_MIN_VERSION_REQUIRED(3,6,0)
