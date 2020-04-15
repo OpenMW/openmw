@@ -155,7 +155,7 @@ namespace MWInput
 
         ICS::InputControlSystem* mInputBinder;
 
-        SDLUtil::InputWrapper* mInputManager;
+        SDLUtil::InputWrapper* mInputWrapper;
         SDLUtil::VideoWrapper* mVideoWrapper;
 
         std::string mUserFile;

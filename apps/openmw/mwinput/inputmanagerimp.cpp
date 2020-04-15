@@ -47,7 +47,7 @@ namespace MWInput
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
-        , mInputManager(nullptr)
+        , mInputWrapper(nullptr)
         , mVideoWrapper(nullptr)
         , mUserFile(userFile)
         , mDragDrop(false)
@@ -61,9 +61,9 @@ namespace MWInput
         , mAttemptJump(false)
         , mFakeDeviceID(1)
     {
-        mInputManager = new SDLUtil::InputWrapper(window, viewer, grab);
-        mInputManager->setKeyboardEventCallback (this);
-        mInputManager->setWindowEventCallback(this);
+        mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
+        mInputWrapper->setKeyboardEventCallback (this);
+        mInputWrapper->setWindowEventCallback(this);
 
         mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
         mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
@@ -90,14 +90,14 @@ namespace MWInput
 
         mActionManager = new ActionManager(mInputBinder, screenCaptureOperation, viewer, screenCaptureHandler);
 
-        mMouseManager = new MouseManager(mInputBinder, mInputManager, window);
-        mInputManager->setMouseEventCallback (mMouseManager);
+        mMouseManager = new MouseManager(mInputBinder, mInputWrapper, window);
+        mInputWrapper->setMouseEventCallback (mMouseManager);
 
-        mControllerManager = new ControllerManager(mInputBinder, mInputManager, mActionManager, mMouseManager, userControllerBindingsFile, controllerBindingsFile);
-        mInputManager->setControllerEventCallback(mControllerManager);
+        mControllerManager = new ControllerManager(mInputBinder, mInputWrapper, mActionManager, mMouseManager, userControllerBindingsFile, controllerBindingsFile);
+        mInputWrapper->setControllerEventCallback(mControllerManager);
 
         mSensorManager = new SensorManager();
-        mInputManager->setSensorEventCallback (mSensorManager);
+        mInputWrapper->setSensorEventCallback (mSensorManager);
     }
 
     void InputManager::clear()
@@ -123,8 +123,7 @@ namespace MWInput
 
         delete mInputBinder;
 
-        delete mInputManager;
-
+        delete mInputWrapper;
         delete mVideoWrapper;
     }
 
@@ -217,15 +216,15 @@ namespace MWInput
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
 
-        bool was_relative = mInputManager->getMouseRelative();
+        bool was_relative = mInputWrapper->getMouseRelative();
         bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         // don't keep the pointer away from the window edge in gui mode
         // stop using raw mouse motions and switch to system cursor movements
-        mInputManager->setMouseRelative(is_relative);
+        mInputWrapper->setMouseRelative(is_relative);
 
         //we let the mouse escape in the main menu
-        mInputManager->setGrabPointer(grab && (mGrabCursor || is_relative));
+        mInputWrapper->setGrabPointer(grab && (mGrabCursor || is_relative));
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
@@ -239,9 +238,9 @@ namespace MWInput
     {
         mControlsDisabled = disableControls;
 
-        mInputManager->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
+        mInputWrapper->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
-        mInputManager->capture(disableEvents);
+        mInputWrapper->capture(disableEvents);
 
         if (mControlsDisabled)
         {
@@ -472,7 +471,7 @@ namespace MWInput
         // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
         // This assumes that SDL_TextInput events always come *after* the key event
         // (which is somewhat reasonable, and hopefully true for all SDL platforms)
-        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+        OIS::KeyCode kc = mInputWrapper->sdl2OISKeyCode(arg.keysym.sym);
         if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
                 == arg.keysym.scancode
                 && MWBase::Environment::get().getWindowManager()->isConsoleMode())
@@ -506,7 +505,7 @@ namespace MWInput
     void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
     {
         mControllerManager->setJoystickLastUsed(false);
-        OIS::KeyCode kc = mInputManager->sdl2OISKeyCode(arg.keysym.sym);
+        OIS::KeyCode kc = mInputWrapper->sdl2OISKeyCode(arg.keysym.sym);
 
         if (!mInputBinder->detectingBindingState())
             setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
