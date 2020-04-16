@@ -21,6 +21,7 @@
 
 namespace MWInput
 {
+    class ControlSwitch;
     class ActionManager;
     class ControllerManager;
     class KeyboardManager;
@@ -151,7 +152,7 @@ namespace MWInput
 
         bool mDetectingKeyboard;
 
-        std::map<std::string, bool> mControlSwitch;
+        ControlSwitch* mControlSwitch;
 
         ActionManager* mActionManager;
         ControllerManager* mControllerManager;

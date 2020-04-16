@@ -31,6 +31,7 @@
 
 #include "actionmanager.hpp"
 #include "controllermanager.hpp"
+#include "controlswitch.hpp"
 #include "keyboardmanager.hpp"
 #include "mousemanager.hpp"
 #include "sdlmappings.hpp"
@@ -66,13 +67,7 @@ namespace MWInput
             mInputBinder->getChannel (i)->addListener (this);
         }
 
-        mControlSwitch["playercontrols"]      = true;
-        mControlSwitch["playerfighting"]      = true;
-        mControlSwitch["playerjumping"]       = true;
-        mControlSwitch["playerlooking"]       = true;
-        mControlSwitch["playermagic"]         = true;
-        mControlSwitch["playerviewswitch"]    = true;
-        mControlSwitch["vanitymode"]          = true;
+        mControlSwitch = new ControlSwitch();
 
         mActionManager = new ActionManager(mInputBinder, screenCaptureOperation, viewer, screenCaptureHandler);
 
@@ -92,8 +87,7 @@ namespace MWInput
     void InputManager::clear()
     {
         // Enable all controls
-        for (std::map<std::string, bool>::iterator it = mControlSwitch.begin(); it != mControlSwitch.end(); ++it)
-            it->second = true;
+        mControlSwitch->clear();
 
         mActionManager->clear();
         mControllerManager->clear();
@@ -108,6 +102,8 @@ namespace MWInput
         delete mKeyboardManager;
         delete mMouseManager;
         delete mSensorManager;
+
+        delete mControlSwitch;
 
         mInputBinder->save(mUserFile);
         delete mInputBinder;
@@ -159,7 +155,7 @@ namespace MWInput
             return;
         }
 
-        if (mControlSwitch["playercontrols"])
+        if (mControlSwitch->get("playercontrols"))
         {
             bool joystickUsed = mControllerManager->joystickLastUsed();
             if (action == A_Use)
@@ -278,35 +274,12 @@ namespace MWInput
 
     bool InputManager::getControlSwitch (const std::string& sw)
     {
-        return mControlSwitch[sw];
+        return mControlSwitch->get(sw);
     }
 
     void InputManager::toggleControlSwitch (const std::string& sw, bool value)
     {
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-
-        /// \note 7 switches at all, if-else is relevant
-        if (sw == "playercontrols" && !value)
-        {
-            player.setLeftRight(0);
-            player.setForwardBackward(0);
-            player.setAutoMove(false);
-            player.setUpDown(0);
-        }
-        else if (sw == "playerjumping" && !value)
-        {
-            /// \fixme maybe crouching at this time
-            player.setUpDown(0);
-        }
-        else if (sw == "vanitymode")
-        {
-            MWBase::Environment::get().getWorld()->allowVanityMode(value);
-        }
-        else if (sw == "playerlooking" && !value)
-        {
-            MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), 0.f, 0.f, 0.f);
-        }
-        mControlSwitch[sw] = value;
+        mControlSwitch->set(sw, value);
     }
 
     void InputManager::resetIdleTime()
