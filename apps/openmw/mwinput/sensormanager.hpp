@@ -29,7 +29,7 @@ namespace MWInput
 
         void clear();
 
-        bool update(float dt, bool isCursorEnabled, bool isTurningEnabled);
+        void update(float dt, bool isCursorEnabled);
 
         virtual void sensorUpdated(const SDL_SensorEvent &arg);
         virtual void displayOrientationChanged();

@@ -46,17 +46,12 @@ namespace MWInput
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
-        : mWindow(window)
-        , mWindowVisible(true)
+        : mWindowVisible(true)
         , mUserFile(userFile)
         , mDragDrop(false)
-        , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
-        , mPreviewPOVDelay(0.f)
-        , mTimeIdle(0.f)
+        , mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
         , mGuiCursorEnabled(true)
         , mDetectingKeyboard(false)
-        , mOverencumberedMessageDelay(0.f)
-        , mAttemptJump(false)
         , mFakeDeviceID(1)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
@@ -204,7 +199,7 @@ namespace MWInput
                     action = A_CycleSpellLeft;
 
                 else
-                    mAttemptJump = (currentValue == 1.0 && previousValue == 0.0);
+                    mActionManager->setAttemptJump(currentValue == 1.0 && previousValue == 0.0);
             }
         }
 
@@ -252,82 +247,11 @@ namespace MWInput
 
         updateCursorMode();
 
-        bool controllerMove = mControllerManager->update(dt, disableControls, mPreviewPOVDelay == 1.f);
-        bool keyboardMove = mKeyboardManager->update(dt, disableControls);
-
-        if (mMouseManager->update(dt, disableControls))
-            resetIdleTime();
-
-        if (mSensorManager->update(dt, mGuiCursorEnabled, mControlSwitch["playerlooking"]))
-            resetIdleTime();
-
-        // Disable movement in Gui mode
-        if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running))
-        {
-            if (mControlSwitch["playercontrols"])
-            {
-                MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-
-                bool attemptToJump = false;
-                if (mAttemptJump && mControlSwitch["playerjumping"])
-                {
-                    player.setUpDown(1);
-                    attemptToJump = true;
-                    mOverencumberedMessageDelay = 0.f;
-                }
-
-                // if player tried to start moving, but can't (due to being overencumbered), display a notification.
-                if (controllerMove || keyboardMove || attemptToJump)
-                {
-                    MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-                    mOverencumberedMessageDelay -= dt;
-                    if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
-                    {
-                        player.setAutoMove (false);
-                        if (mOverencumberedMessageDelay <= 0)
-                        {
-                            MWBase::Environment::get().getWindowManager ()->messageBox("#{sNotifyMessage59}");
-                            mOverencumberedMessageDelay = 1.0;
-                        }
-                    }
-                }
-
-                if (mControlSwitch["playerviewswitch"]) {
-
-                    if (actionIsActive(A_TogglePOV)) {
-                        if (mPreviewPOVDelay <= 0.5 &&
-                            (mPreviewPOVDelay += dt) > 0.5)
-                        {
-                            mPreviewPOVDelay = 1.f;
-                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                        }
-                    } else {
-                        //disable preview mode
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                        if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5) {
-                            MWBase::Environment::get().getWorld()->togglePOV();
-                        }
-                        mPreviewPOVDelay = 0.f;
-                    }
-                }
-            }
-            if (actionIsActive(A_MoveForward) ||
-                actionIsActive(A_MoveBackward) ||
-                actionIsActive(A_MoveLeft) ||
-                actionIsActive(A_MoveRight) ||
-                actionIsActive(A_Jump) ||
-                actionIsActive(A_Sneak) ||
-                actionIsActive(A_TogglePOV) ||
-                actionIsActive(A_ZoomIn) ||
-                actionIsActive(A_ZoomOut) )
-            {
-                resetIdleTime();
-            } else {
-                updateIdleTime(dt);
-            }
-        }
-        mAttemptJump = false; // Can only jump on first frame input is on
+        bool controllerMove = mControllerManager->update(dt, disableControls);
+        mKeyboardManager->update(dt, disableControls);
+        mMouseManager->update(dt, disableControls);
+        mSensorManager->update(dt, mGuiCursorEnabled);
+        mActionManager->update(dt, controllerMove);
     }
 
     void InputManager::setDragDrop(bool dragDrop)
@@ -453,21 +377,7 @@ namespace MWInput
 
     void InputManager::resetIdleTime()
     {
-        if (mTimeIdle < 0)
-            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
-        mTimeIdle = 0.f;
-    }
-
-    void InputManager::updateIdleTime(float dt)
-    {
-        static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                .find("fVanityDelay")->mValue.getFloat();
-        if (mTimeIdle >= 0.f)
-            mTimeIdle += dt;
-        if (mTimeIdle > vanityDelay) {
-            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
-            mTimeIdle = -1.f;
-        }
+        mActionManager->resetIdleTime();
     }
 
     bool InputManager::actionIsActive (int id)

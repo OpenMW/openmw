@@ -30,7 +30,7 @@ namespace MWInput
 
         void clear();
 
-        bool update(float dt, bool disableControls);
+        void update(float dt, bool disableControls);
 
         virtual void mouseMoved(const SDLUtil::MouseMotionEvent &arg);
         virtual void mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id);

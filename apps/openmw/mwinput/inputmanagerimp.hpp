@@ -146,7 +146,6 @@ namespace MWInput
         virtual void resetIdleTime();
 
     private:
-        SDL_Window* mWindow;
         bool mWindowVisible;
 
         ICS::InputControlSystem* mInputBinder;
@@ -160,16 +159,9 @@ namespace MWInput
 
         bool mGrabCursor;
 
-        float mPreviewPOVDelay;
-        float mTimeIdle;
-
         bool mGuiCursorEnabled;
 
         bool mDetectingKeyboard;
-
-        float mOverencumberedMessageDelay;
-
-        bool mAttemptJump;
 
         std::map<std::string, bool> mControlSwitch;
 
@@ -180,8 +172,6 @@ namespace MWInput
         SensorManager* mSensorManager;
 
         void convertMousePosForMyGUI(int& x, int& y);
-
-        void updateIdleTime(float dt);
 
         void handleGuiArrowKey(int action);
 

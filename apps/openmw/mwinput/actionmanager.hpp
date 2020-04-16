@@ -28,6 +28,8 @@ namespace MWInput
 
         void clear();
 
+        void update(float dt, bool triedToMove);
+
         void executeAction(int action);
 
         bool checkAllowedToUseItems() const;
@@ -50,11 +52,21 @@ namespace MWInput
         void quickKey (int index);
         void showQuickKeysMenu();
 
+        void resetIdleTime();
+
         bool isAlwaysRunActive() const { return mAlwaysRunActive; };
         bool isSneaking() const { return mSneaking; };
 
+        void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
+
+        float getPreviewDelay() const { return mPreviewPOVDelay; };
+
     private:
         void handleGuiArrowKey(int action);
+
+        bool actionIsActive(int id);
+
+        void updateIdleTime(float dt);
 
         ICS::InputControlSystem* mInputBinder;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
@@ -63,6 +75,11 @@ namespace MWInput
 
         bool mAlwaysRunActive;
         bool mSneaking;
+        bool mAttemptJump;
+
+        float mOverencumberedMessageDelay;
+        float mPreviewPOVDelay;
+        float mTimeIdle;
     };
 }
 #endif

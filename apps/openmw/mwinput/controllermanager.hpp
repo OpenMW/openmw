@@ -31,7 +31,7 @@ namespace MWInput
 
         void clear();
 
-        bool update(float dt, bool disableControls, bool gamepadPreviewMode);
+        bool update(float dt, bool disableControls);
 
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
         virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);

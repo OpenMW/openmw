@@ -3,6 +3,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/inputmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
@@ -234,10 +235,10 @@ namespace MWInput
         }
     }
 
-    bool SensorManager::update(float dt, bool isCursorEnabled, bool isTurningEnabled)
+    void SensorManager::update(float dt, bool isCursorEnabled)
     {
         if (mGyroXSpeed == 0.f && mGyroYSpeed == 0.f)
-            return false;
+            return;
 
         if (mGyroUpdateTimer > 0.5f)
         {
@@ -246,7 +247,7 @@ namespace MWInput
             // Reset current rotation speed and wait for update.
             clear();
             mGyroUpdateTimer = 0.f;
-            return false;
+            return;
         }
 
         mGyroUpdateTimer += dt;
@@ -259,16 +260,14 @@ namespace MWInput
             rot[2] = mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
 
             // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && isTurningEnabled)
+            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking"))
             {
                 MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
                 player.yaw(rot[2]);
                 player.pitch(rot[0]);
             }
 
-            return true;
+            MWBase::Environment::get().getInputManager()->resetIdleTime();
         }
-
-        return false;
     }
 }

@@ -94,10 +94,10 @@ namespace MWInput
         return (mInputBinder->getChannel (id)->getValue ()==1.0);
     }
 
-    bool ControllerManager::update(float dt, bool disableControls, bool gamepadPreviewMode)
+    bool ControllerManager::update(float dt, bool disableControls)
     {
         mControlsDisabled = disableControls;
-        mGamepadPreviewMode = gamepadPreviewMode;
+        mGamepadPreviewMode = mActionManager->getPreviewDelay() == 1.f;
 
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
@@ -153,10 +153,10 @@ namespace MWInput
             }
 
             if (triedToMove)
+            {
                 mJoystickLastUsed = true;
-
-            if (triedToMove)
                 MWBase::Environment::get().getInputManager()->resetIdleTime();
+            }
 
             static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
             if (!isToggleSneak)
@@ -208,7 +208,7 @@ namespace MWInput
         return triedToMove;
     }
 
-    void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg )
+    void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg)
     {
         if (!mJoystickEnabled || mInputBinder->detectingBindingState())
             return;

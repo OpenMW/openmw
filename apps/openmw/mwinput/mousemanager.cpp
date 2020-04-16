@@ -173,17 +173,17 @@ namespace MWInput
             mInputBinder->mousePressed (arg, id);
     }
 
-    bool MouseManager::update(float dt, bool disableControls)
+    void MouseManager::update(float dt, bool disableControls)
     {
         mControlsDisabled = disableControls;
 
         if (!mMouseLookEnabled)
-            return false;
+            return;
 
         float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
         float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
         if (xAxis == 0 && yAxis == 0)
-            return false;
+            return;
 
         float rot[3];
         rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
@@ -198,7 +198,7 @@ namespace MWInput
             player.pitch(rot[0]);
         }
 
-        return true;
+        MWBase::Environment::get().getInputManager()->resetIdleTime();
     }
 
     bool MouseManager::injectMouseButtonPress(Uint8 button)

@@ -40,7 +40,161 @@ namespace MWInput
         , mScreenCaptureOperation(screenCaptureOperation)
         , mAlwaysRunActive(Settings::Manager::getBool("always run", "Input"))
         , mSneaking(false)
+        , mAttemptJump(false)
+        , mOverencumberedMessageDelay(0.f)
+        , mPreviewPOVDelay(0.f)
+        , mTimeIdle(0.f)
     {
+    }
+
+    void ActionManager::update(float dt, bool triedToMove)
+    {
+        // Disable movement in Gui mode
+        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
+            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
+        {
+            mAttemptJump = false;
+            return;
+        }
+
+        // Configure player movement according to keyboard input. Actual movement will
+        // be done in the physics system.
+        if (MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
+        {
+            bool alwaysRunAllowed = false;
+
+            MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+
+            if (actionIsActive(A_MoveLeft) != actionIsActive(A_MoveRight))
+            {
+                alwaysRunAllowed = true;
+                triedToMove = true;
+                player.setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
+            }
+
+            if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
+            {
+                alwaysRunAllowed = true;
+                triedToMove = true;
+                player.setAutoMove (false);
+                player.setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
+            }
+
+            if (player.getAutoMove())
+            {
+                alwaysRunAllowed = true;
+                triedToMove = true;
+                player.setForwardBackward (1);
+            }
+
+            if (mAttemptJump && MWBase::Environment::get().getInputManager()->getControlSwitch("playerjumping"))
+            {
+                player.setUpDown(1);
+                triedToMove = true;
+                mOverencumberedMessageDelay = 0.f;
+            }
+
+            // if player tried to start moving, but can't (due to being overencumbered), display a notification.
+            if (triedToMove)
+            {
+                MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                mOverencumberedMessageDelay -= dt;
+                if (playerPtr.getClass().getEncumbrance(playerPtr) > playerPtr.getClass().getCapacity(playerPtr))
+                {
+                    player.setAutoMove (false);
+                    if (mOverencumberedMessageDelay <= 0)
+                    {
+                        MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage59}");
+                        mOverencumberedMessageDelay = 1.0;
+                    }
+                }
+            }
+
+            if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
+            {
+                if (actionIsActive(A_TogglePOV))
+                {
+                    if (mPreviewPOVDelay <= 0.5 &&
+                        (mPreviewPOVDelay += dt) > 0.5)
+                    {
+                        mPreviewPOVDelay = 1.f;
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                    }
+                }
+                else
+                {
+                    //disable preview mode
+                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5)
+                    {
+                        MWBase::Environment::get().getWorld()->togglePOV();
+                    }
+                    mPreviewPOVDelay = 0.f;
+                }
+            }
+
+            if (triedToMove)
+                MWBase::Environment::get().getInputManager()->resetIdleTime();
+
+            static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
+            if (!isToggleSneak)
+            {
+                if(!MWBase::Environment::get().getInputManager()->joystickLastUsed())
+                    player.setSneak(actionIsActive(A_Sneak));
+            }
+
+            float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
+            float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
+            bool isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
+            if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
+                player.setRunState(!actionIsActive(A_Run));
+            else
+                player.setRunState(actionIsActive(A_Run));
+        }
+
+        if (actionIsActive(A_MoveForward) ||
+            actionIsActive(A_MoveBackward) ||
+            actionIsActive(A_MoveLeft) ||
+            actionIsActive(A_MoveRight) ||
+            actionIsActive(A_Jump) ||
+            actionIsActive(A_Sneak) ||
+            actionIsActive(A_TogglePOV) ||
+            actionIsActive(A_ZoomIn) ||
+            actionIsActive(A_ZoomOut))
+        {
+            resetIdleTime();
+        }
+        else
+        {
+            updateIdleTime(dt);
+        }
+
+        mAttemptJump = false;
+    }
+
+    void ActionManager::resetIdleTime()
+    {
+        if (mTimeIdle < 0)
+            MWBase::Environment::get().getWorld()->toggleVanityMode(false);
+        mTimeIdle = 0.f;
+    }
+
+    void ActionManager::updateIdleTime(float dt)
+    {
+        static const float vanityDelay = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
+                .find("fVanityDelay")->mValue.getFloat();
+        if (mTimeIdle >= 0.f)
+            mTimeIdle += dt;
+        if (mTimeIdle > vanityDelay)
+        {
+            MWBase::Environment::get().getWorld()->toggleVanityMode(true);
+            mTimeIdle = -1.f;
+        }
+    }
+
+    bool ActionManager::actionIsActive(int id)
+    {
+        return (mInputBinder->getChannel(id)->getValue ()==1.0);
     }
 
     void ActionManager::executeAction(int action)
