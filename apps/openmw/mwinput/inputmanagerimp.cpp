@@ -32,6 +32,7 @@
 
 #include "actionmanager.hpp"
 #include "controllermanager.hpp"
+#include "keyboardmanager.hpp"
 #include "mousemanager.hpp"
 #include "sdlmappings.hpp"
 #include "sensormanager.hpp"
@@ -47,12 +48,9 @@ namespace MWInput
             const std::string& controllerBindingsFile, bool grab)
         : mWindow(window)
         , mWindowVisible(true)
-        , mInputWrapper(nullptr)
-        , mVideoWrapper(nullptr)
         , mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor (Settings::Manager::getBool("grab cursor", "Input"))
-        , mControlsDisabled(false)
         , mPreviewPOVDelay(0.f)
         , mTimeIdle(0.f)
         , mGuiCursorEnabled(true)
@@ -62,7 +60,6 @@ namespace MWInput
         , mFakeDeviceID(1)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
-        mInputWrapper->setKeyboardEventCallback (this);
         mInputWrapper->setWindowEventCallback(this);
 
         mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
@@ -90,14 +87,17 @@ namespace MWInput
 
         mActionManager = new ActionManager(mInputBinder, screenCaptureOperation, viewer, screenCaptureHandler);
 
+        mKeyboardManager = new KeyboardManager(mInputBinder, mInputWrapper, mActionManager);
+        mInputWrapper->setKeyboardEventCallback(mKeyboardManager);
+
         mMouseManager = new MouseManager(mInputBinder, mInputWrapper, window);
-        mInputWrapper->setMouseEventCallback (mMouseManager);
+        mInputWrapper->setMouseEventCallback(mMouseManager);
 
         mControllerManager = new ControllerManager(mInputBinder, mInputWrapper, mActionManager, mMouseManager, userControllerBindingsFile, controllerBindingsFile);
         mInputWrapper->setControllerEventCallback(mControllerManager);
 
         mSensorManager = new SensorManager();
-        mInputWrapper->setSensorEventCallback (mSensorManager);
+        mInputWrapper->setSensorEventCallback(mSensorManager);
     }
 
     void InputManager::clear()
@@ -118,6 +118,7 @@ namespace MWInput
 
         delete mActionManager;
         delete mControllerManager;
+        delete mKeyboardManager;
         delete mMouseManager;
         delete mSensorManager;
 
@@ -236,13 +237,11 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
-        mControlsDisabled = disableControls;
-
         mInputWrapper->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
 
         mInputWrapper->capture(disableEvents);
 
-        if (mControlsDisabled)
+        if (disableControls)
         {
             updateCursorMode();
             return;
@@ -253,7 +252,8 @@ namespace MWInput
 
         updateCursorMode();
 
-        mControllerManager->update(dt, disableControls, mPreviewPOVDelay == 1.f);
+        bool controllerMove = mControllerManager->update(dt, disableControls, mPreviewPOVDelay == 1.f);
+        bool keyboardMove = mKeyboardManager->update(dt, disableControls);
 
         if (mMouseManager->update(dt, disableControls))
             resetIdleTime();
@@ -265,64 +265,20 @@ namespace MWInput
         if (!(MWBase::Environment::get().getWindowManager()->isGuiMode()
             || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running))
         {
-            // Configure player movement according to keyboard input. Actual movement will
-            // be done in the physics system.
             if (mControlSwitch["playercontrols"])
             {
                 MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
 
-                bool triedToMove = false;
-                bool isRunning = false;
-                bool alwaysRunAllowed = false;
-
-                // keyboard movement
-                float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
-                float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
-                isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
-
-                if (actionIsActive(A_MoveLeft) != actionIsActive(A_MoveRight))
-                {
-                    alwaysRunAllowed = true;
-                    triedToMove = true;
-                    player.setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
-                }
-
-                if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
-                {
-                    alwaysRunAllowed = true;
-                    triedToMove = true;
-                    player.setAutoMove (false);
-                    player.setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
-                }
-
-                if (player.getAutoMove())
-                {
-                    alwaysRunAllowed = true;
-                    triedToMove = true;
-                    player.setForwardBackward (1);
-                }
-
-                static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
-                if (!isToggleSneak)
-                {
-                    if(!mControllerManager->joystickLastUsed())
-                        player.setSneak(actionIsActive(A_Sneak));
-                }
-
+                bool attemptToJump = false;
                 if (mAttemptJump && mControlSwitch["playerjumping"])
                 {
-                    player.setUpDown (1);
-                    triedToMove = true;
+                    player.setUpDown(1);
+                    attemptToJump = true;
                     mOverencumberedMessageDelay = 0.f;
                 }
 
-                if ((mActionManager->isAlwaysRunActive() && alwaysRunAllowed) || isRunning)
-                    player.setRunState(!actionIsActive(A_Run));
-                else
-                    player.setRunState(actionIsActive(A_Run));
-
                 // if player tried to start moving, but can't (due to being overencumbered), display a notification.
-                if (triedToMove)
+                if (controllerMove || keyboardMove || attemptToJump)
                 {
                     MWWorld::Ptr playerPtr = MWBase::Environment::get().getWorld ()->getPlayerPtr();
                     mOverencumberedMessageDelay -= dt;
@@ -464,52 +420,6 @@ namespace MWInput
             MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), 0.f, 0.f, 0.f);
         }
         mControlSwitch[sw] = value;
-    }
-
-    void InputManager::keyPressed( const SDL_KeyboardEvent &arg )
-    {
-        // HACK: to make Morrowind's default keybinding for the console work without printing an extra "^" upon closing
-        // This assumes that SDL_TextInput events always come *after* the key event
-        // (which is somewhat reasonable, and hopefully true for all SDL platforms)
-        OIS::KeyCode kc = mInputWrapper->sdl2OISKeyCode(arg.keysym.sym);
-        if (mInputBinder->getKeyBinding(mInputBinder->getControl(A_Console), ICS::Control::INCREASE)
-                == arg.keysym.scancode
-                && MWBase::Environment::get().getWindowManager()->isConsoleMode())
-            SDL_StopTextInput();
-
-        bool consumed = false;
-        if (kc != OIS::KC_UNASSIGNED && !mInputBinder->detectingBindingState())
-        {
-            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Enum(kc), 0, arg.repeat);
-            if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
-                                    ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
-                consumed = true;
-            setPlayerControlsEnabled(!consumed);
-        }
-        if (arg.repeat)
-            return;
-
-        if (!mControlsDisabled && !consumed)
-            mInputBinder->keyPressed (arg);
-        mControllerManager->setJoystickLastUsed(false);
-    }
-
-    void InputManager::textInput(const SDL_TextInputEvent &arg)
-    {
-        MyGUI::UString ustring(&arg.text[0]);
-        MyGUI::UString::utf32string utf32string = ustring.asUTF32();
-        for (MyGUI::UString::utf32string::const_iterator it = utf32string.begin(); it != utf32string.end(); ++it)
-            MyGUI::InputManager::getInstance().injectKeyPress(MyGUI::KeyCode::None, *it);
-    }
-
-    void InputManager::keyReleased(const SDL_KeyboardEvent &arg )
-    {
-        mControllerManager->setJoystickLastUsed(false);
-        OIS::KeyCode kc = mInputWrapper->sdl2OISKeyCode(arg.keysym.sym);
-
-        if (!mInputBinder->detectingBindingState())
-            setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
-        mInputBinder->keyReleased (arg);
     }
 
     void InputManager::windowFocusChange(bool have_focus)

@@ -23,6 +23,7 @@ namespace MWInput
 {
     class ActionManager;
     class ControllerManager;
+    class KeyboardManager;
     class MouseManager;
     class SensorManager;
 }
@@ -62,7 +63,6 @@ namespace MWInput
     */
     class InputManager :
             public MWBase::InputManager,
-            public SDLUtil::KeyListener,
             public SDLUtil::WindowListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
@@ -108,10 +108,6 @@ namespace MWInput
 
         virtual void setJoystickLastUsed(bool enabled);
         virtual bool joystickLastUsed();
-
-        virtual void keyPressed(const SDL_KeyboardEvent &arg );
-        virtual void keyReleased( const SDL_KeyboardEvent &arg );
-        virtual void textInput (const SDL_TextInputEvent &arg);
 
         virtual void windowVisibilityChange( bool visible );
         virtual void windowFocusChange( bool have_focus );
@@ -164,8 +160,6 @@ namespace MWInput
 
         bool mGrabCursor;
 
-        bool mControlsDisabled;
-
         float mPreviewPOVDelay;
         float mTimeIdle;
 
@@ -181,6 +175,7 @@ namespace MWInput
 
         ActionManager* mActionManager;
         ControllerManager* mControllerManager;
+        KeyboardManager* mKeyboardManager;
         MouseManager* mMouseManager;
         SensorManager* mSensorManager;
 

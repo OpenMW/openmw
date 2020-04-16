@@ -31,7 +31,6 @@ namespace MWInput
 
         bool update(float dt, bool isCursorEnabled, bool isTurningEnabled);
 
-    public:
         virtual void sensorUpdated(const SDL_SensorEvent &arg);
         virtual void displayOrientationChanged();
         void processChangedSettings(const Settings::CategorySettingVector& changed);
@@ -48,6 +47,11 @@ namespace MWInput
             Minus_Z = -3
         };
 
+        void updateSensors();
+        void correctGyroscopeAxes();
+        GyroscopeAxis mapGyroscopeAxis(const std::string& axis);
+        float getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const;
+
         bool mInvertX;
         bool mInvertY;
 
@@ -61,12 +65,6 @@ namespace MWInput
         GyroscopeAxis mGyroVAxis;
         float mGyroInputThreshold;
 
-    private:
-
-        void updateSensors();
-        void correctGyroscopeAxes();
-        GyroscopeAxis mapGyroscopeAxis(const std::string& axis);
-        float getGyroAxisSpeed(GyroscopeAxis axis, const SDL_SensorEvent &arg) const;
         SDL_Sensor* mGyroscope;
     };
 }

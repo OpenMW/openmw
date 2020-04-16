@@ -94,7 +94,7 @@ namespace MWInput
         return (mInputBinder->getChannel (id)->getValue ()==1.0);
     }
 
-    void ControllerManager::update(float dt, bool disableControls, bool gamepadPreviewMode)
+    bool ControllerManager::update(float dt, bool disableControls, bool gamepadPreviewMode)
     {
         mControlsDisabled = disableControls;
         mGamepadPreviewMode = gamepadPreviewMode;
@@ -122,23 +122,21 @@ namespace MWInput
             }
         }
 
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-
         // Disable movement in Gui mode
         if (MWBase::Environment::get().getWindowManager()->isGuiMode()
             || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
         {
             mGamepadZoom = 0;
-            return;
+            return false;
         }
 
-        // Configure player movement according to keyboard input. Actual movement will
+        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+        bool triedToMove = false;
+
+        // Configure player movement according to controller input. Actual movement will
         // be done in the physics system.
         if (MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
         {
-            bool triedToMove = false;
-
-            // joystick movement
             float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
             float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
             if (xAxis != .5)
@@ -157,7 +155,8 @@ namespace MWInput
             if (triedToMove)
                 mJoystickLastUsed = true;
 
-            if(triedToMove) MWBase::Environment::get().getInputManager()->resetIdleTime();
+            if (triedToMove)
+                MWBase::Environment::get().getInputManager()->resetIdleTime();
 
             static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
             if (!isToggleSneak)
@@ -205,6 +204,8 @@ namespace MWInput
                 MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
             }
         }
+
+        return triedToMove;
     }
 
     void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg )
