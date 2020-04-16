@@ -51,7 +51,6 @@ namespace Files
 namespace SDLUtil
 {
     class InputWrapper;
-    class VideoWrapper;
 }
 
 struct SDL_Window;
@@ -63,7 +62,6 @@ namespace MWInput
     */
     class InputManager :
             public MWBase::InputManager,
-            public SDLUtil::WindowListener,
             public ICS::ChannelListener,
             public ICS::DetectingBindingListener
     {
@@ -78,8 +76,6 @@ namespace MWInput
             const std::string& controllerBindingsFile, bool grab);
 
         virtual ~InputManager();
-
-        virtual bool isWindowVisible();
 
         /// Clear all savegame-specific data
         virtual void clear();
@@ -108,11 +104,6 @@ namespace MWInput
 
         virtual void setJoystickLastUsed(bool enabled);
         virtual bool joystickLastUsed();
-
-        virtual void windowVisibilityChange( bool visible );
-        virtual void windowFocusChange( bool have_focus );
-        virtual void windowResized (int x, int y);
-        virtual void windowClosed ();
 
         virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
 
@@ -146,12 +137,9 @@ namespace MWInput
         virtual void resetIdleTime();
 
     private:
-        bool mWindowVisible;
-
         ICS::InputControlSystem* mInputBinder;
 
         SDLUtil::InputWrapper* mInputWrapper;
-        SDLUtil::VideoWrapper* mVideoWrapper;
 
         std::string mUserFile;
 

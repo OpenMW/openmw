@@ -231,15 +231,10 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
             case SDL_WINDOWEVENT_FOCUS_GAINED:
                 mWindowHasFocus = true;
                 updateMouseSettings();
-                if (mWindowListener)
-                    mWindowListener->windowFocusChange(true);
-
                 break;
             case SDL_WINDOWEVENT_FOCUS_LOST:
                 mWindowHasFocus = false;
                 updateMouseSettings();
-                if (mWindowListener)
-                    mWindowListener->windowFocusChange(false);
                 break;
             case SDL_WINDOWEVENT_CLOSE:
                 break;

@@ -11,7 +11,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
-#include <components/sdlutil/sdlvideowrapper.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/controlsstate.hpp>
@@ -46,8 +45,7 @@ namespace MWInput
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
-        : mWindowVisible(true)
-        , mUserFile(userFile)
+        : mUserFile(userFile)
         , mDragDrop(false)
         , mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
         , mGuiCursorEnabled(true)
@@ -55,11 +53,7 @@ namespace MWInput
         , mFakeDeviceID(1)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
-        mInputWrapper->setWindowEventCallback(this);
-
-        mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
-        mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
-                                        Settings::Manager::getFloat("contrast", "Video"));
+        mInputWrapper->setWindowEventCallback(MWBase::Environment::get().getWindowManager());
 
         std::string file = userFileExists ? userFile : "";
         mInputBinder = new ICS::InputControlSystem(file, true, this, nullptr, A_Last);
@@ -109,23 +103,16 @@ namespace MWInput
 
     InputManager::~InputManager()
     {
-        mInputBinder->save (mUserFile);
-
         delete mActionManager;
         delete mControllerManager;
         delete mKeyboardManager;
         delete mMouseManager;
         delete mSensorManager;
 
+        mInputBinder->save(mUserFile);
         delete mInputBinder;
 
         delete mInputWrapper;
-        delete mVideoWrapper;
-    }
-
-    bool InputManager::isWindowVisible()
-    {
-        return mWindowVisible;
     }
 
     void InputManager::setPlayerControlsEnabled(bool enabled)
@@ -278,35 +265,11 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        bool changeRes = false;
-
         for (Settings::CategorySettingVector::const_iterator it = changed.begin();
         it != changed.end(); ++it)
         {
             if (it->first == "Input" && it->second == "grab cursor")
                 mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
-
-            if (it->first == "Video" && (
-                    it->second == "resolution x"
-                    || it->second == "resolution y"
-                    || it->second == "fullscreen"
-                    || it->second == "window border"))
-                changeRes = true;
-
-            if (it->first == "Video" && it->second == "vsync")
-                mVideoWrapper->setSyncToVBlank(Settings::Manager::getBool("vsync", "Video"));
-
-            if (it->first == "Video" && (it->second == "gamma" || it->second == "contrast"))
-                mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
-                                                Settings::Manager::getFloat("contrast", "Video"));
-        }
-
-        if (changeRes)
-        {
-            mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
-                                        Settings::Manager::getInt("resolution y", "Video"),
-                                        Settings::Manager::getBool("fullscreen", "Video"),
-                                        Settings::Manager::getBool("window border", "Video"));
         }
 
         mMouseManager->processChangedSettings(changed);
@@ -344,35 +307,6 @@ namespace MWInput
             MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), 0.f, 0.f, 0.f);
         }
         mControlSwitch[sw] = value;
-    }
-
-    void InputManager::windowFocusChange(bool have_focus)
-    {
-    }
-
-    void InputManager::windowVisibilityChange(bool visible)
-    {
-        mWindowVisible = visible;
-    }
-
-    void InputManager::windowResized(int x, int y)
-    {
-        // Note: this is a side effect of resolution change or window resize.
-        // There is no need to track these changes.
-        Settings::Manager::setInt("resolution x", "Video", x);
-        Settings::Manager::setInt("resolution y", "Video", y);
-        Settings::Manager::resetPendingChange("resolution x", "Video");
-        Settings::Manager::resetPendingChange("resolution y", "Video");
-
-        MWBase::Environment::get().getWindowManager()->windowResized(x, y);
-
-        // We should reload TrueType fonts to fit new resolution
-        MWBase::Environment::get().getWindowManager()->loadUserFonts();
-    }
-
-    void InputManager::windowClosed()
-    {
-        MWBase::Environment::get().getStateManager()->requestQuit();
     }
 
     void InputManager::resetIdleTime()
