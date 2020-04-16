@@ -216,9 +216,9 @@ namespace MWInput
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mInputWrapper->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
-
         mInputWrapper->capture(disableEvents);
 
+        mKeyboardManager->setControlsDisabled(disableControls);
         if (disableControls)
         {
             updateCursorMode();
@@ -231,7 +231,6 @@ namespace MWInput
         updateCursorMode();
 
         bool controllerMove = mControllerManager->update(dt, disableControls);
-        mKeyboardManager->update(dt, disableControls);
         mMouseManager->update(dt, disableControls);
         mSensorManager->update(dt, mGuiCursorEnabled);
         mActionManager->update(dt, controllerMove);

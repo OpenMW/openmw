@@ -27,11 +27,6 @@ namespace MWInput
     {
     }
 
-    void KeyboardManager::update(float dt, bool disableControls)
-    {
-        mControlsDisabled = disableControls;
-    }
-
     bool KeyboardManager::actionIsActive (int id)
     {
         return (mInputBinder->getChannel(id)->getValue ()==1.0);

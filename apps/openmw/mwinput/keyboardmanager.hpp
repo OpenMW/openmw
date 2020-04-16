@@ -25,11 +25,11 @@ namespace MWInput
 
         virtual ~KeyboardManager() = default;
 
-        void update(float dt, bool disableControls);
-
         virtual void textInput(const SDL_TextInputEvent &arg);
         virtual void keyPressed(const SDL_KeyboardEvent &arg);
         virtual void keyReleased(const SDL_KeyboardEvent &arg);
+
+        void setControlsDisabled(bool disabled) { mControlsDisabled = disabled; }
 
     private:
         bool actionIsActive(int id);
