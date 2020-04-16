@@ -63,7 +63,7 @@ namespace MWInput
             if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
                                     ( !(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
                 consumed = true;
-            MWBase::Environment::get().getInputManager()->setJoystickLastUsed(!consumed);
+            MWBase::Environment::get().getInputManager()->setPlayerControlsEnabled(!consumed);
         }
         if (arg.repeat)
             return;
@@ -79,7 +79,7 @@ namespace MWInput
         OIS::KeyCode kc = mInputWrapper->sdl2OISKeyCode(arg.keysym.sym);
 
         if (!mInputBinder->detectingBindingState())
-            MWBase::Environment::get().getInputManager()->setJoystickLastUsed(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
+            MWBase::Environment::get().getInputManager()->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyRelease(MyGUI::KeyCode::Enum(kc)));
         mInputBinder->keyReleased(arg);
     }
 }
