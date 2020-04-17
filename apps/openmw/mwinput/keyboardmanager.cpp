@@ -1,5 +1,7 @@
 #include "keyboardmanager.hpp"
 
+#include <cctype>
+
 #include <MyGUI_InputManager.h>
 
 #include "../mwbase/environment.hpp"
