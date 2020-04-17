@@ -759,8 +759,8 @@ echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."
-add_cmake_opts -DBUILD_BSATOOL=no \
-	-DBUILD_ESMTOOL=no \
+add_cmake_opts -DBUILD_BSATOOL=yes \
+	-DBUILD_ESMTOOL=yes \
 	-DBUILD_MYGUI_PLUGIN=no \
 	-DOPENMW_MP_BUILD=on
 if [ ! -z $CI ]; then
