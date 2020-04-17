@@ -13,17 +13,6 @@
 
 #include "actions.hpp"
 
-namespace MWInput
-{
-    class ControlSwitch;
-    class ActionManager;
-    class BindingsManager;
-    class ControllerManager;
-    class KeyboardManager;
-    class MouseManager;
-    class SensorManager;
-}
-
 namespace MWWorld
 {
     class Player;
@@ -43,11 +32,18 @@ struct SDL_Window;
 
 namespace MWInput
 {
+    class ControlSwitch;
+    class ActionManager;
+    class BindingsManager;
+    class ControllerManager;
+    class KeyboardManager;
+    class MouseManager;
+    class SensorManager;
+
     /**
-    * @brief Class that handles all input and key bindings for OpenMW.
+    * @brief Class that provides a high-level API for game input
     */
-    class InputManager :
-            public MWBase::InputManager
+    class InputManager : public MWBase::InputManager
     {
     public:
         InputManager(
@@ -99,6 +95,18 @@ namespace MWInput
         virtual void executeAction(int action);
 
     private:
+        void convertMousePosForMyGUI(int& x, int& y);
+
+        void handleGuiArrowKey(int action);
+
+        void updateCursorMode();
+
+        void quickKey(int index);
+        void showQuickKeysMenu();
+
+        void loadKeyDefaults(bool force = false);
+        void loadControllerDefaults(bool force = false);
+
         SDLUtil::InputWrapper* mInputWrapper;
 
         bool mGrabCursor;
@@ -111,18 +119,6 @@ namespace MWInput
         KeyboardManager* mKeyboardManager;
         MouseManager* mMouseManager;
         SensorManager* mSensorManager;
-
-        void convertMousePosForMyGUI(int& x, int& y);
-
-        void handleGuiArrowKey(int action);
-
-        void updateCursorMode();
-
-        void quickKey(int index);
-        void showQuickKeysMenu();
-
-        void loadKeyDefaults(bool force = false);
-        void loadControllerDefaults(bool force = false);
     };
 }
 #endif

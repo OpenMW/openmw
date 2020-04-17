@@ -23,8 +23,6 @@ namespace MWInput
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
 
-        void clear();
-
         void update(float dt, bool triedToMove);
 
         void executeAction(int action);

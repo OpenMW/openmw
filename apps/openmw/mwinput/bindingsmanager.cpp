@@ -72,7 +72,7 @@ namespace MWInput
             , SDL_Scancode key, ICS::Control::ControlChangingDirection direction)
         {
             //Disallow binding escape key
-            if(key==SDL_SCANCODE_ESCAPE)
+            if (key==SDL_SCANCODE_ESCAPE)
             {
                 //Stop binding if esc pressed
                 mInputBinder->cancelDetectingBindingState();
@@ -90,7 +90,7 @@ namespace MWInput
                 return;
             #endif
 
-            if(!mDetectingKeyboard)
+            if (!mDetectingKeyboard)
                 return;
 
             clearAllKeyBindings(mInputBinder, control);
@@ -109,7 +109,7 @@ namespace MWInput
         virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction)
         {
-            if(!mDetectingKeyboard)
+            if (!mDetectingKeyboard)
                 return;
             clearAllKeyBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
@@ -120,7 +120,7 @@ namespace MWInput
         virtual void mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
             , ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction)
         {
-            if(!mDetectingKeyboard)
+            if (!mDetectingKeyboard)
                 return;
             clearAllKeyBindings(mInputBinder, control);
             control->setInitialValue(0.0f);
@@ -132,9 +132,9 @@ namespace MWInput
             , int axis, ICS::Control::ControlChangingDirection direction)
         {
             //only allow binding to the trigers
-            if(axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+            if (axis != SDL_CONTROLLER_AXIS_TRIGGERLEFT && axis != SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 return;
-            if(mDetectingKeyboard)
+            if (mDetectingKeyboard)
                 return;
 
             clearAllControllerBindings(mInputBinder, control);
@@ -147,7 +147,7 @@ namespace MWInput
         virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
             , unsigned int button, ICS::Control::ControlChangingDirection direction)
         {
-            if(mDetectingKeyboard)
+            if (mDetectingKeyboard)
                 return;
             clearAllControllerBindings(mInputBinder,control);
             control->setInitialValue(0.0f);
@@ -220,8 +220,8 @@ namespace MWInput
                                 A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
                                 A_Use, A_Journal};
 
-        for(size_t i = 0; i < sizeof(playerChannels)/sizeof(playerChannels[0]); i++) {
-            int pc = playerChannels[i];
+        for(int pc : playerChannels)
+        {
             mInputBinder->getChannel(pc)->setEnabled(enabled);
         }
     }
@@ -293,7 +293,7 @@ namespace MWInput
         for (int i = 0; i < A_Last; ++i)
         {
             ICS::Control* control;
-            bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
+            bool controlExists = mInputBinder->getChannel(i)->getControlsCount() != 0;
             if (!controlExists)
             {
                 control = new ICS::Control(std::to_string(i), false, true, 0, ICS::ICS_MAX, ICS::ICS_MAX);
@@ -302,14 +302,13 @@ namespace MWInput
             }
             else
             {
-                control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
+                control = mInputBinder->getChannel(i)->getAttachedControls().front().control;
             }
 
             if (!controlExists || force ||
-                    ( mInputBinder->getKeyBinding (control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
-                      && mInputBinder->getMouseButtonBinding (control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
-                      && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED
-                      ))
+                    (mInputBinder->getKeyBinding(control, ICS::Control::INCREASE) == SDL_SCANCODE_UNKNOWN
+                      && mInputBinder->getMouseButtonBinding(control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
+                      && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED))
             {
                 clearAllKeyBindings(mInputBinder, control);
 
@@ -323,7 +322,7 @@ namespace MWInput
                          && (force || !mInputBinder->isMouseButtonBound(defaultMouseButtonBindings[i])))
                 {
                     control->setInitialValue(0.0f);
-                    mInputBinder->addMouseButtonBinding (control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
+                    mInputBinder->addMouseButtonBinding(control, defaultMouseButtonBindings[i], ICS::Control::INCREASE);
                 }
                 else if (defaultMouseWheelBindings.find(i) != defaultMouseWheelBindings.end()
                         && (force || !mInputBinder->isMouseWheelBound(defaultMouseWheelBindings[i])))
@@ -379,7 +378,7 @@ namespace MWInput
         for (int i = 0; i < A_Last; i++)
         {
             ICS::Control* control;
-            bool controlExists = mInputBinder->getChannel(i)->getControlsCount () != 0;
+            bool controlExists = mInputBinder->getChannel(i)->getControlsCount() != 0;
             if (!controlExists)
             {
                 float initial;
@@ -392,10 +391,11 @@ namespace MWInput
             }
             else
             {
-                control = mInputBinder->getChannel(i)->getAttachedControls ().front().control;
+                control = mInputBinder->getChannel(i)->getAttachedControls().front().control;
             }
 
-            if (!controlExists || force || ( mInputBinder->getJoystickAxisBinding (control, sFakeDeviceId, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED && mInputBinder->getJoystickButtonBinding (control, sFakeDeviceId, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS ))
+            if (!controlExists || force || (mInputBinder->getJoystickAxisBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED &&
+                mInputBinder->getJoystickButtonBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS))
             {
                 clearAllControllerBindings(mInputBinder, control);
 
@@ -415,7 +415,7 @@ namespace MWInput
         }
     }
 
-    std::string BindingsManager::getActionDescription (int action)
+    std::string BindingsManager::getActionDescription(int action)
     {
         std::map<int, std::string> descriptions;
 
@@ -464,24 +464,24 @@ namespace MWInput
         descriptions[A_QuickSave] = "sQuickSaveCmd";
         descriptions[A_QuickLoad] = "sQuickLoadCmd";
 
-        if (descriptions[action] == "")
-            return ""; // not configurable
+        if (descriptions[action].empty())
+            return std::string(); // not configurable
 
         return "#{" + descriptions[action] + "}";
     }
 
-    std::string BindingsManager::getActionKeyBindingName (int action)
+    std::string BindingsManager::getActionKeyBindingName(int action)
     {
-        if (mInputBinder->getChannel (action)->getControlsCount () == 0)
+        if (mInputBinder->getChannel(action)->getControlsCount() == 0)
             return "#{sNone}";
 
-        ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
+        ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
-        SDL_Scancode key = mInputBinder->getKeyBinding (c, ICS::Control::INCREASE);
-        unsigned int mouse = mInputBinder->getMouseButtonBinding (c, ICS::Control::INCREASE);
+        SDL_Scancode key = mInputBinder->getKeyBinding(c, ICS::Control::INCREASE);
+        unsigned int mouse = mInputBinder->getMouseButtonBinding(c, ICS::Control::INCREASE);
         ICS::InputControlSystem::MouseWheelClick wheel = mInputBinder->getMouseWheelBinding(c, ICS::Control::INCREASE);
         if (key != SDL_SCANCODE_UNKNOWN)
-            return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString (key));
+            return MyGUI::TextIterator::toTagsString(mInputBinder->scancodeToString(key));
         else if (mouse != ICS_MAX_DEVICE_BUTTONS)
             return "#{sMouse} " + std::to_string(mouse);
         else if (wheel != ICS::InputControlSystem::MouseWheelClick::UNASSIGNED)
@@ -502,17 +502,17 @@ namespace MWInput
             return "#{sNone}";
     }
 
-    std::string BindingsManager::getActionControllerBindingName (int action)
+    std::string BindingsManager::getActionControllerBindingName(int action)
     {
-        if (mInputBinder->getChannel (action)->getControlsCount () == 0)
+        if (mInputBinder->getChannel(action)->getControlsCount() == 0)
             return "#{sNone}";
 
-        ICS::Control* c = mInputBinder->getChannel (action)->getAttachedControls ().front().control;
+        ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
-        if (mInputBinder->getJoystickAxisBinding (c, sFakeDeviceId, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
-            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding (c, sFakeDeviceId, ICS::Control::INCREASE));
-        else if (mInputBinder->getJoystickButtonBinding (c, sFakeDeviceId, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS )
-            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding (c, sFakeDeviceId, ICS::Control::INCREASE));
+        if (mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS::InputControlSystem::UNASSIGNED)
+            return sdlControllerAxisToString(mInputBinder->getJoystickAxisBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
+        else if (mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE) != ICS_MAX_DEVICE_BUTTONS)
+            return sdlControllerButtonToString(mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else
             return "#{sNone}";
     }
@@ -680,17 +680,17 @@ namespace MWInput
         if (mDragDrop && action != A_GameMenu && action != A_Inventory)
             return;
 
-        if((previousValue == 1 || previousValue == 0) && (currentValue==1 || currentValue==0))
+        if ((previousValue == 1 || previousValue == 0) && (currentValue==1 || currentValue==0))
         {
             //Is a normal button press, so don't change it at all
         }
         //Otherwise only trigger button presses as they go through specific points
-        else if(previousValue >= .8 && currentValue < .8)
+        else if (previousValue >= 0.8 && currentValue < 0.8)
         {
             currentValue = 0.0;
             previousValue = 1.0;
         }
-        else if(previousValue <= .6 && currentValue > .6)
+        else if (previousValue <= 0.6 && currentValue > 0.6)
         {
             currentValue = 1.0;
             previousValue = 0.0;
@@ -706,7 +706,7 @@ namespace MWInput
             bool joystickUsed = MWBase::Environment::get().getInputManager()->joystickLastUsed();
             if (action == A_Use)
             {
-                if(joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
                     action = A_CycleWeaponRight;
 
                 else if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))
@@ -721,7 +721,7 @@ namespace MWInput
             }
             else if (action == A_Jump)
             {
-                if(joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
+                if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleWeapon))
                     action = A_CycleWeaponLeft;
 
                 else if (joystickUsed && currentValue == 1.0 && actionIsActive(A_ToggleSpell))

@@ -206,14 +206,11 @@ namespace MWInput
     {
         static std::map<SDL_Keycode, MyGUI::KeyCode> keyMap;
         if (keyMap.empty())
-        {
             initKeyMap(keyMap);
-        }
 
         MyGUI::KeyCode kc = MyGUI::KeyCode::None;
-
         auto foundKey = keyMap.find(code);
-        if(foundKey != keyMap.end())
+        if (foundKey != keyMap.end())
             kc = foundKey->second;
 
         return kc;

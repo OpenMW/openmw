@@ -58,11 +58,6 @@ namespace MWInput
     {
         // Enable all controls
         mControlSwitch->clear();
-
-        mActionManager->clear();
-        mControllerManager->clear();
-        mSensorManager->clear();
-        mMouseManager->clear();
     }
 
     InputManager::~InputManager()
@@ -90,19 +85,19 @@ namespace MWInput
         bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
              && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
 
-        bool was_relative = mInputWrapper->getMouseRelative();
-        bool is_relative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
+        bool wasRelative = mInputWrapper->getMouseRelative();
+        bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
 
         // don't keep the pointer away from the window edge in gui mode
         // stop using raw mouse motions and switch to system cursor movements
-        mInputWrapper->setMouseRelative(is_relative);
+        mInputWrapper->setMouseRelative(isRelative);
 
         //we let the mouse escape in the main menu
-        mInputWrapper->setGrabPointer(grab && (mGrabCursor || is_relative));
+        mInputWrapper->setGrabPointer(grab && (mGrabCursor || isRelative));
 
         //we switched to non-relative mode, move our cursor to where the in-game
         //cursor is
-        if(!is_relative && was_relative != is_relative)
+        if (!isRelative && wasRelative != isRelative)
         {
             mMouseManager->warpMouse();
         }
@@ -148,7 +143,9 @@ namespace MWInput
         mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
-        MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (!mControllerManager->joystickLastUsed() || mControllerManager->gamepadGuiCursorEnabled()));
+
+        bool isCursorVisible = guiMode && (!mControllerManager->joystickLastUsed() || mControllerManager->gamepadGuiCursorEnabled());
+        MWBase::Environment::get().getWindowManager()->setCursorVisible(isCursorVisible);
         // if not in gui mode, the camera decides whether to show crosshair or not.
     }
 

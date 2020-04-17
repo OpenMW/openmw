@@ -20,8 +20,6 @@ namespace MWInput
 
         virtual ~MouseManager() = default;
 
-        void clear();
-
         void update(float dt, bool disableControls);
 
         virtual void mouseMoved(const SDLUtil::MouseMotionEvent &arg);

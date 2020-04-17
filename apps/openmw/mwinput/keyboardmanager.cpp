@@ -47,11 +47,13 @@ namespace MWInput
                 consumed = true;
             mBindingsManager->setPlayerControlsEnabled(!consumed);
         }
+
         if (arg.repeat)
             return;
 
         if (!mControlsDisabled && !consumed)
             mBindingsManager->keyPressed(arg);
+
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
     }
 

@@ -33,13 +33,6 @@ namespace MWInput
         updateSensors();
     }
 
-    void SensorManager::clear()
-    {
-        mGyroXSpeed = 0.f;
-        mGyroYSpeed = 0.f;
-        mGyroUpdateTimer = 0.f;
-    }
-
     SensorManager::~SensorManager()
     {
         if (mGyroscope != nullptr)
@@ -246,7 +239,8 @@ namespace MWInput
             // More than half of second passed since the last gyroscope update.
             // A device more likely was disconnected or switched to the sleep mode.
             // Reset current rotation speed and wait for update.
-            clear();
+            mGyroXSpeed = 0.f;
+            mGyroYSpeed = 0.f;
             mGyroUpdateTimer = 0.f;
             return;
         }

@@ -23,8 +23,6 @@ namespace MWInput
 
         virtual ~ControllerManager() = default;
 
-        void clear();
-
         bool update(float dt, bool disableControls);
 
         virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);

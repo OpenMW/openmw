@@ -47,10 +47,6 @@ namespace MWInput
         mGuiCursorY = mInvUiScalingFactor * h / 2.f;
     }
 
-    void MouseManager::clear()
-    {
-    }
-
     void MouseManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
         for (const auto& setting : changed)
@@ -103,7 +99,7 @@ namespace MWInput
             rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && input->getControlSwitch("playerlooking"))
+            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && input->getControlSwitch("playerlooking"))
             {
                 MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
                 player.yaw(x);
@@ -130,7 +126,8 @@ namespace MWInput
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
 
-            if(mBindingsManager->isDetectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
+            if (mBindingsManager->isDetectingBindingState())
+                return; // don't allow same mouseup to bind as initiated bind
 
             mBindingsManager->setPlayerControlsEnabled(!guiMode);
             mBindingsManager->mouseReleased(arg, id);
@@ -154,9 +151,9 @@ namespace MWInput
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
-            if (MyGUI::InputManager::getInstance ().getMouseFocusWidget () != 0)
+            if (MyGUI::InputManager::getInstance().getMouseFocusWidget () != 0)
             {
-                MyGUI::Button* b = MyGUI::InputManager::getInstance ().getMouseFocusWidget ()->castType<MyGUI::Button>(false);
+                MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                 if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
                     MWBase::Environment::get().getWindowManager()->playSound("Menu Click");

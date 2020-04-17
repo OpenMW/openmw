@@ -27,8 +27,6 @@ namespace MWInput
 
         void init();
 
-        void clear();
-
         void update(float dt);
 
         virtual void sensorUpdated(const SDL_SensorEvent &arg);

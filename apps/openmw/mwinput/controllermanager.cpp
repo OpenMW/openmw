@@ -41,20 +41,21 @@ namespace MWInput
         , mSneakGamepadShortcut(false)
         , mGamepadPreviewMode(false)
     {
-        if(!controllerBindingsFile.empty())
+        if (!controllerBindingsFile.empty())
         {
             SDL_GameControllerAddMappingsFromFile(controllerBindingsFile.c_str());
         }
-        if(!userControllerBindingsFile.empty())
+
+        if (!userControllerBindingsFile.empty())
         {
             SDL_GameControllerAddMappingsFromFile(userControllerBindingsFile.c_str());
         }
 
         // Open all presently connected sticks
         int numSticks = SDL_NumJoysticks();
-        for(int i = 0; i < numSticks; i++)
+        for (int i = 0; i < numSticks; i++)
         {
-            if(SDL_IsGameController(i))
+            if (SDL_IsGameController(i))
             {
                 SDL_ControllerDeviceEvent evt;
                 evt.which = i;
@@ -71,10 +72,6 @@ namespace MWInput
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
             mInvUiScalingFactor = 1.f / uiScale;
-    }
-
-    void ControllerManager::clear()
-    {
     }
 
     void ControllerManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -131,13 +128,13 @@ namespace MWInput
         {
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight);
             float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward);
-            if (xAxis != .5)
+            if (xAxis != 0.5)
             {
                 triedToMove = true;
                 player.setLeftRight((xAxis - 0.5f) * 2);
             }
 
-            if (yAxis != .5)
+            if (yAxis != 0.5)
             {
                 triedToMove = true;
                 player.setAutoMove (false);
@@ -153,13 +150,13 @@ namespace MWInput
             static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
             if (!isToggleSneak)
             {
-                if(mJoystickLastUsed)
+                if (mJoystickLastUsed)
                 {
-                    if(mBindingsManager->actionIsActive(A_Sneak))
+                    if (mBindingsManager->actionIsActive(A_Sneak))
                     {
-                        if(mSneakToggleShortcutTimer) // New Sneak Button Press
+                        if (mSneakToggleShortcutTimer) // New Sneak Button Press
                         {
-                            if(mSneakToggleShortcutTimer <= 0.3f)
+                            if (mSneakToggleShortcutTimer <= 0.3f)
                             {
                                 mSneakGamepadShortcut = true;
                                 mActionManager->toggleSneaking();
@@ -168,15 +165,15 @@ namespace MWInput
                                 mSneakGamepadShortcut = false;
                         }
 
-                        if(!mActionManager->isSneaking())
+                        if (!mActionManager->isSneaking())
                             mActionManager->toggleSneaking();
                         mSneakToggleShortcutTimer = 0.f;
                     }
                     else
                     {
-                        if(!mSneakGamepadShortcut && mActionManager->isSneaking())
+                        if (!mSneakGamepadShortcut && mActionManager->isSneaking())
                             mActionManager->toggleSneaking();
-                        if(mSneakToggleShortcutTimer <= 0.3f)
+                        if (mSneakToggleShortcutTimer <= 0.3f)
                             mSneakToggleShortcutTimer += dt;
                     }
                 }
@@ -190,7 +187,7 @@ namespace MWInput
             if (!mBindingsManager->actionIsActive(A_TogglePOV))
                 mGamepadZoom = 0;
 
-            if(mGamepadZoom)
+            if (mGamepadZoom)
             {
                 MWBase::Environment::get().getWorld()->changeVanityModeScale(mGamepadZoom);
                 MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
@@ -210,6 +207,7 @@ namespace MWInput
         {
             if (gamepadToGuiControl(arg))
                 return;
+
             if (mGamepadGuiCursorEnabled)
             {
                 // Temporary mouse binding until keyboard controls are available:
@@ -245,6 +243,7 @@ namespace MWInput
             mBindingsManager->controllerButtonReleased(deviceID, arg);
             return;
         }
+
         if (!mJoystickEnabled || mControlsDisabled)
             return;
 
@@ -276,7 +275,7 @@ namespace MWInput
 
     void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg)
     {
-        if(!mJoystickEnabled || mControlsDisabled)
+        if (!mJoystickEnabled || mControlsDisabled)
             return;
 
         mJoystickLastUsed = true;
@@ -286,14 +285,14 @@ namespace MWInput
         }
         else
         {
-            if(mGamepadPreviewMode && arg.value) // Preview Mode Gamepad Zooming
+            if (mGamepadPreviewMode && arg.value) // Preview Mode Gamepad Zooming
             {
-                if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+                if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
                     mGamepadZoom = arg.value * 0.85f / 1000.f;
                     return; // Do not propagate event.
                 }
-                else if(arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+                else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
                 {
                     mGamepadZoom = -arg.value * 0.85f / 1000.f;
                     return; // Do not propagate event.

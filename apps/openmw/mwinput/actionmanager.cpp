@@ -218,22 +218,22 @@ namespace MWInput
             handleGuiArrowKey(action);
             break;
         case A_Journal:
-            toggleJournal ();
+            toggleJournal();
             break;
         case A_AutoMove:
-            toggleAutoMove ();
+            toggleAutoMove();
             break;
         case A_AlwaysRun:
-            toggleWalking ();
+            toggleWalking();
             break;
         case A_ToggleWeapon:
-            toggleWeapon ();
+            toggleWeapon();
             break;
         case A_Rest:
             rest();
             break;
         case A_ToggleSpell:
-            toggleSpell ();
+            toggleSpell();
             break;
         case A_QuickKey1:
             quickKey(1);
@@ -344,9 +344,9 @@ namespace MWInput
         {
             osg::ref_ptr<osg::Image> screenshot (new osg::Image);
 
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(),settingStr))
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), settingStr))
             {
-                (*mScreenCaptureOperation) (*(screenshot.get()),0);
+                (*mScreenCaptureOperation) (*(screenshot.get()), 0);
                 // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
             }
         }
@@ -444,10 +444,10 @@ namespace MWInput
         if (!MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
             return;
 
-        if (!MWBase::Environment::get().getWindowManager()->getRestEnabled () || MWBase::Environment::get().getWindowManager()->isGuiMode ())
+        if (!MWBase::Environment::get().getWindowManager()->getRestEnabled() || MWBase::Environment::get().getWindowManager()->isGuiMode())
             return;
 
-        MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_Rest); //Open rest GUI
+        MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Rest); //Open rest GUI
     }
 
     void ActionManager::toggleInventory()
@@ -476,7 +476,7 @@ namespace MWInput
 
     void ActionManager::toggleConsole()
     {
-        if (MyGUI::InputManager::getInstance ().isModalAny())
+        if (MyGUI::InputManager::getInstance().isModalAny())
             return;
 
         MWBase::Environment::get().getWindowManager()->toggleConsole();
@@ -489,14 +489,14 @@ namespace MWInput
         if (MyGUI::InputManager::getInstance ().isModalAny())
             return;
 
-        if(MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
+        if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Journal
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_MainMenu
                 && MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings
                 && MWBase::Environment::get().getWindowManager ()->getJournalAllowed())
         {
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Journal);
         }
-        else if(MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
+        else if (MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_Journal))
         {
             MWBase::Environment::get().getWindowManager()->removeGuiMode(MWGui::GM_Journal);
         }
@@ -528,7 +528,7 @@ namespace MWInput
         }
         else if (MWBase::Environment::get().getWindowManager()->getMode () == MWGui::GM_QuickKeysMenu)
         {
-            while(MyGUI::InputManager::getInstance().isModalAny())
+            while (MyGUI::InputManager::getInstance().isModalAny())
             { //Handle any open Modal windows
                 MWBase::Environment::get().getWindowManager()->exitCurrentModal();
             }
@@ -577,10 +577,6 @@ namespace MWInput
         mSneaking = !mSneaking;
         MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
         player.setSneak(mSneaking);
-    }
-
-    void ActionManager::clear()
-    {
     }
 
     void ActionManager::handleGuiArrowKey(int action)
