@@ -90,9 +90,9 @@ namespace MWInput
 
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
-            float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight)*2.0f-1.0f;
-            float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward)*2.0f-1.0f;
-            float zAxis = mBindingsManager->getActionValue(A_LookUpDown)*2.0f-1.0f;
+            float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight) * 2.0f - 1.0f;
+            float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward) * 2.0f - 1.0f;
+            float zAxis = mBindingsManager->getActionValue(A_LookUpDown) * 2.0f - 1.0f;
 
             xAxis *= (1.5f - mBindingsManager->getActionValue(A_Use));
             yAxis *= (1.5f - mBindingsManager->getActionValue(A_Use));
@@ -138,7 +138,7 @@ namespace MWInput
             {
                 triedToMove = true;
                 player.setAutoMove (false);
-                player.setForwardBackward((yAxis - 0.5f) * 2 * -1);
+                player.setForwardBackward((0.5f - yAxis) * 2);
             }
 
             if (triedToMove)
@@ -316,7 +316,6 @@ namespace MWInput
     {
         // Presumption of GUI mode will be removed in the future.
         // MyGUI KeyCodes *may* change.
-
         MyGUI::KeyCode key = MyGUI::KeyCode::None;
         switch (arg.button)
         {

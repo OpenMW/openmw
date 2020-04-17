@@ -90,8 +90,8 @@ namespace MWInput
 
         if (mMouseLookEnabled && !mControlsDisabled)
         {
-            float x = arg.xrel * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
-            float y = arg.yrel * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+            float x = arg.xrel * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
+            float y = arg.yrel * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
 
             float rot[3];
             rot[0] = -y;
@@ -117,7 +117,7 @@ namespace MWInput
     {
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
 
-        if(mBindingsManager->isDetectingBindingState())
+        if (mBindingsManager->isDetectingBindingState())
         {
             mBindingsManager->mouseReleased(arg, id);
         }
@@ -176,18 +176,18 @@ namespace MWInput
         if (!mMouseLookEnabled)
             return;
 
-        float xAxis = mBindingsManager->getActionValue(A_LookLeftRight)*2.0f-1.0f;
-        float yAxis = mBindingsManager->getActionValue(A_LookUpDown)*2.0f-1.0f;
+        float xAxis = mBindingsManager->getActionValue(A_LookLeftRight) * 2.0f - 1.0f;
+        float yAxis = mBindingsManager->getActionValue(A_LookUpDown) * 2.0f - 1.0f;
         if (xAxis == 0 && yAxis == 0)
             return;
 
         float rot[3];
-        rot[0] = yAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertY ? -1 : 1) * mCameraYMultiplier;
+        rot[0] = yAxis * dt * 1000.0f * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
         rot[1] = 0.0f;
-        rot[2] = xAxis * (dt * 100.0f) * 10.0f * mCameraSensitivity * (1.0f/256.f) * (mInvertX ? -1 : 1);
+        rot[2] = xAxis * dt * 1000.0f * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
 
         // Only actually turn player when we're not in vanity mode
-        if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
+        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
             player.yaw(rot[2]);
@@ -214,14 +214,14 @@ namespace MWInput
         mMouseWheel += mouseWheelMove;
 
         const MyGUI::IntSize& viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width-1)));
-        mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height-1)));
+        mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width - 1)));
+        mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height - 1)));
 
         MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
     }
 
     void MouseManager::warpMouse()
     {
-        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX/mInvUiScalingFactor), static_cast<int>(mGuiCursorY/mInvUiScalingFactor));
+        mInputWrapper->warpMouse(static_cast<int>(mGuiCursorX / mInvUiScalingFactor), static_cast<int>(mGuiCursorY / mInvUiScalingFactor));
     }
 }

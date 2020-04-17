@@ -109,7 +109,6 @@ namespace MWInput
         if (Settings::Manager::getBool("enable gyroscope", "Input"))
         {
             int numSensors = SDL_NumSensors();
-
             for (int i = 0; i < numSensors; ++i)
             {
                 if (SDL_SensorGetDeviceType(i) == SDL_SENSOR_GYRO)
@@ -214,15 +213,15 @@ namespace MWInput
 
         switch (SDL_SensorGetType(sensor))
         {
-        case SDL_SENSOR_ACCEL:
-            break;
-        case SDL_SENSOR_GYRO:
-        {
-            mGyroXSpeed = getGyroAxisSpeed(mGyroHAxis, arg);
-            mGyroYSpeed = getGyroAxisSpeed(mGyroVAxis, arg);
-            mGyroUpdateTimer = 0.f;
+            case SDL_SENSOR_ACCEL:
+                break;
+            case SDL_SENSOR_GYRO:
+            {
+                mGyroXSpeed = getGyroAxisSpeed(mGyroHAxis, arg);
+                mGyroYSpeed = getGyroAxisSpeed(mGyroVAxis, arg);
+                mGyroUpdateTimer = 0.f;
 
-            break;
+                break;
         }
         default:
             break;
@@ -255,7 +254,7 @@ namespace MWInput
             rot[2] = mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
 
             // Only actually turn player when we're not in vanity mode
-            if(!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking"))
+            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking"))
             {
                 MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
                 player.yaw(rot[2]);
