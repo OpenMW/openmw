@@ -29,11 +29,13 @@ namespace MWInput
 
         void clear();
 
-        void update(float dt, bool isCursorEnabled);
+        void update(float dt);
 
         virtual void sensorUpdated(const SDL_SensorEvent &arg);
         virtual void displayOrientationChanged();
         void processChangedSettings(const Settings::CategorySettingVector& changed);
+
+        void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }
 
     private:
         enum GyroscopeAxis
@@ -66,6 +68,8 @@ namespace MWInput
         float mGyroInputThreshold;
 
         SDL_Sensor* mGyroscope;
+
+        bool mGuiCursorEnabled;
     };
 }
 #endif

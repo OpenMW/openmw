@@ -111,8 +111,6 @@ namespace MWInput
 
         bool mGrabCursor;
 
-        bool mGuiCursorEnabled;
-
         ControlSwitch* mControlSwitch;
 
         ActionManager* mActionManager;

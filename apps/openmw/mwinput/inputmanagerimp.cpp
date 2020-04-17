@@ -48,7 +48,6 @@ namespace MWInput
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
-        , mGuiCursorEnabled(true)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputWrapper->setWindowEventCallback(MWBase::Environment::get().getWindowManager());
@@ -144,7 +143,7 @@ namespace MWInput
 
         bool controllerMove = mControllerManager->update(dt, disableControls);
         mMouseManager->update(dt, disableControls);
-        mSensorManager->update(dt, mGuiCursorEnabled);
+        mSensorManager->update(dt);
         mActionManager->update(dt, controllerMove);
     }
 
@@ -160,10 +159,10 @@ namespace MWInput
 
     void InputManager::changeInputMode(bool guiMode)
     {
-        mGuiCursorEnabled = guiMode;
-        mControllerManager->setGuiCursorEnabled(mGuiCursorEnabled);
-        mMouseManager->setGuiCursorEnabled(mGuiCursorEnabled);
-        mMouseManager->setMouseLookEnabled(!mGuiCursorEnabled);
+        mControllerManager->setGuiCursorEnabled(guiMode);
+        mMouseManager->setGuiCursorEnabled(guiMode);
+        mSensorManager->setGuiCursorEnabled(guiMode);
+        mMouseManager->setMouseLookEnabled(!guiMode);
         if (guiMode)
             MWBase::Environment::get().getWindowManager()->showCrosshair(false);
         MWBase::Environment::get().getWindowManager()->setCursorVisible(guiMode && (!mControllerManager->joystickLastUsed() || mControllerManager->gamepadGuiCursorEnabled()));

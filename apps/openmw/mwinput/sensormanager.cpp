@@ -22,6 +22,7 @@ namespace MWInput
         , mGyroVAxis(GyroscopeAxis::Y)
         , mGyroInputThreshold(Settings::Manager::getFloat("gyro input threshold", "Input"))
         , mGyroscope(nullptr)
+        , mGuiCursorEnabled(true)
     {
         init();
     }
@@ -235,7 +236,7 @@ namespace MWInput
         }
     }
 
-    void SensorManager::update(float dt, bool isCursorEnabled)
+    void SensorManager::update(float dt)
     {
         if (mGyroXSpeed == 0.f && mGyroYSpeed == 0.f)
             return;
@@ -252,7 +253,7 @@ namespace MWInput
 
         mGyroUpdateTimer += dt;
 
-        if (!isCursorEnabled)
+        if (!mGuiCursorEnabled)
         {
             float rot[3];
             rot[0] = mGyroYSpeed * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
