@@ -8,9 +8,6 @@
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
-#include <extern/oics/ICSChannelListener.h>
-#include <extern/oics/ICSInputControlSystem.h>
-
 #include <components/settings/settings.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/sdlutil/events.hpp>
@@ -23,6 +20,7 @@ namespace MWInput
 {
     class ControlSwitch;
     class ActionManager;
+    class BindingsManager;
     class ControllerManager;
     class KeyboardManager;
     class MouseManager;
@@ -37,11 +35,6 @@ namespace MWWorld
 namespace MWBase
 {
     class WindowManager;
-}
-
-namespace ICS
-{
-    class InputControlSystem;
 }
 
 namespace Files
@@ -62,9 +55,7 @@ namespace MWInput
     * @brief Class that handles all input and key bindings for OpenMW.
     */
     class InputManager :
-            public MWBase::InputManager,
-            public ICS::ChannelListener,
-            public ICS::DetectingBindingListener
+            public MWBase::InputManager
     {
     public:
         InputManager(
@@ -89,6 +80,7 @@ namespace MWInput
 
         virtual void setDragDrop(bool dragDrop);
         virtual void setGamepadGuiCursorEnabled(bool enabled);
+        virtual void setAttemptJump(bool jumping);
 
         virtual void toggleControlSwitch (const std::string& sw, bool value);
         virtual bool getControlSwitch (const std::string& sw);
@@ -106,55 +98,25 @@ namespace MWInput
         virtual void setJoystickLastUsed(bool enabled);
         virtual bool joystickLastUsed();
 
-        virtual void channelChanged(ICS::Channel* channel, float currentValue, float previousValue);
-
-        virtual void keyBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , SDL_Scancode key, ICS::Control::ControlChangingDirection direction);
-
-        virtual void mouseAxisBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , ICS::InputControlSystem::NamedAxis axis, ICS::Control::ControlChangingDirection direction);
-
-        virtual void mouseButtonBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , unsigned int button, ICS::Control::ControlChangingDirection direction);
-
-        virtual void mouseWheelBindingDetected(ICS::InputControlSystem* ICS, ICS::Control* control
-            , ICS::InputControlSystem::MouseWheelClick click, ICS::Control::ControlChangingDirection direction);
-
-        virtual void joystickAxisBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
-            , int axis, ICS::Control::ControlChangingDirection direction);
-
-        virtual void joystickButtonBindingDetected(ICS::InputControlSystem* ICS, int deviceID, ICS::Control* control
-            , unsigned int button, ICS::Control::ControlChangingDirection direction);
-
-        void clearAllKeyBindings (ICS::Control* control);
-        void clearAllControllerBindings (ICS::Control* control);
-
         virtual int countSavedGameRecords() const;
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress);
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type);
 
-        virtual void setPlayerControlsEnabled(bool enabled);
-
         virtual void resetIdleTime();
 
+        virtual void executeAction(int action);
+
     private:
-        ICS::InputControlSystem* mInputBinder;
-
         SDLUtil::InputWrapper* mInputWrapper;
-
-        std::string mUserFile;
-
-        bool mDragDrop;
 
         bool mGrabCursor;
 
         bool mGuiCursorEnabled;
 
-        bool mDetectingKeyboard;
-
         ControlSwitch* mControlSwitch;
 
         ActionManager* mActionManager;
+        BindingsManager* mBindingsManager;
         ControllerManager* mControllerManager;
         KeyboardManager* mKeyboardManager;
         MouseManager* mMouseManager;
@@ -166,15 +128,11 @@ namespace MWInput
 
         void updateCursorMode();
 
-        void quickKey (int index);
+        void quickKey(int index);
         void showQuickKeysMenu();
-
-        bool actionIsActive (int id);
 
         void loadKeyDefaults(bool force = false);
         void loadControllerDefaults(bool force = false);
-
-        int mFakeDeviceID; //As we only support one controller at a time, use a fake deviceID so we don't lose bindings when switching controllers
     };
 }
 #endif

@@ -9,22 +9,14 @@ namespace SDLUtil
     class InputWrapper;
 }
 
-namespace MWWorld
-{
-    class Player;
-}
-
-namespace ICS
-{
-    class InputControlSystem;
-}
-
 namespace MWInput
 {
+    class BindingsManager;
+
     class MouseManager : public SDLUtil::MouseListener
     {
     public:
-        MouseManager(ICS::InputControlSystem* inputBinder, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window);
+        MouseManager(BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window);
 
         virtual ~MouseManager() = default;
 
@@ -53,7 +45,7 @@ namespace MWInput
         float mCameraSensitivity;
         float mCameraYMultiplier;
 
-        ICS::InputControlSystem* mInputBinder;
+        BindingsManager* mBindingsManager;
         SDLUtil::InputWrapper* mInputWrapper;
         float mInvUiScalingFactor;
 

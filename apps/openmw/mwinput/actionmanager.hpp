@@ -4,11 +4,6 @@
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
-namespace ICS
-{
-    class InputControlSystem;
-}
-
 namespace osgViewer
 {
     class Viewer;
@@ -17,11 +12,13 @@ namespace osgViewer
 
 namespace MWInput
 {
+    class BindingsManager;
+
     class ActionManager
     {
     public:
 
-        ActionManager(ICS::InputControlSystem* inputBinder,
+        ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler);
@@ -64,11 +61,9 @@ namespace MWInput
     private:
         void handleGuiArrowKey(int action);
 
-        bool actionIsActive(int id);
-
         void updateIdleTime(float dt);
 
-        ICS::InputControlSystem* mInputBinder;
+        BindingsManager* mBindingsManager;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
         osg::ref_ptr<osgViewer::ScreenCaptureHandler> mScreenCaptureHandler;
         osgViewer::ScreenCaptureHandler::CaptureOperation* mScreenCaptureOperation;

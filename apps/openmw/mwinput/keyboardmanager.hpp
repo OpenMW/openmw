@@ -9,19 +9,15 @@ namespace SDLUtil
     class InputWrapper;
 }
 
-namespace ICS
-{
-    class InputControlSystem;
-}
-
 namespace MWInput
 {
     class ActionManager;
+    class BindingsManager;
 
     class KeyboardManager : public SDLUtil::KeyListener
     {
     public:
-        KeyboardManager(ICS::InputControlSystem* inputBinder, SDLUtil::InputWrapper* inputWrapper, ActionManager* actionManager);
+        KeyboardManager(BindingsManager* bindingsManager, ActionManager* actionManager);
 
         virtual ~KeyboardManager() = default;
 
@@ -32,10 +28,7 @@ namespace MWInput
         void setControlsDisabled(bool disabled) { mControlsDisabled = disabled; }
 
     private:
-        bool actionIsActive(int id);
-
-        ICS::InputControlSystem* mInputBinder;
-        SDLUtil::InputWrapper* mInputWrapper;
+        BindingsManager* mBindingsManager;
 
         ActionManager* mActionManager;
 

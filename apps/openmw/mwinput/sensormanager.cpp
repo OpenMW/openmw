@@ -156,30 +156,30 @@ namespace MWInput
 
     void SensorManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
+        for (const auto& setting : changed)
         {
-            if (it->first == "Input" && it->second == "invert x axis")
+            if (setting.first == "Input" && setting.second == "invert x axis")
                 mInvertX = Settings::Manager::getBool("invert x axis", "Input");
 
-            if (it->first == "Input" && it->second == "invert y axis")
+            if (setting.first == "Input" && setting.second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
 
-            if (it->first == "Input" && it->second == "gyro horizontal sensitivity")
+            if (setting.first == "Input" && setting.second == "gyro horizontal sensitivity")
                 mGyroHSensitivity = Settings::Manager::getFloat("gyro horizontal sensitivity", "Input");
 
-            if (it->first == "Input" && it->second == "gyro vertical sensitivity")
+            if (setting.first == "Input" && setting.second == "gyro vertical sensitivity")
                 mGyroVSensitivity = Settings::Manager::getFloat("gyro vertical sensitivity", "Input");
 
-            if (it->first == "Input" && it->second == "enable gyroscope")
+            if (setting.first == "Input" && setting.second == "enable gyroscope")
                 init();
 
-            if (it->first == "Input" && it->second == "gyro horizontal axis")
+            if (setting.first == "Input" && setting.second == "gyro horizontal axis")
                 correctGyroscopeAxes();
 
-            if (it->first == "Input" && it->second == "gyro vertical axis")
+            if (setting.first == "Input" && setting.second == "gyro vertical axis")
                 correctGyroscopeAxes();
 
-            if (it->first == "Input" && it->second == "gyro input threshold")
+            if (setting.first == "Input" && setting.second == "gyro input threshold")
                 mGyroInputThreshold = Settings::Manager::getFloat("gyro input threshold", "Input");
         }
     }

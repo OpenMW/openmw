@@ -3,7 +3,9 @@
 
 #include <string>
 
-#include <SDL_types.h>
+#include <MyGUI_KeyCode.h>
+
+#include <SDL_keycode.h>
 
 namespace MyGUI
 {
@@ -17,5 +19,7 @@ namespace MWInput
     std::string sdlControllerAxisToString(int axis);
 
     MyGUI::MouseButton sdlButtonToMyGUI(Uint8 button);
+
+    MyGUI::KeyCode sdlKeyToMyGUI(SDL_Keycode code);
 }
 #endif

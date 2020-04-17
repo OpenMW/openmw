@@ -4,8 +4,6 @@
 
 #include <SDL_keyboard.h>
 
-#include <extern/oics/ICSInputControlSystem.h>
-
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/inputmanager.hpp"
@@ -24,17 +22,17 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "actions.hpp"
+#include "bindingsmanager.hpp"
 
 namespace MWInput
 {
     const float ZOOM_SCALE = 120.f; /// Used for scrolling camera in and out
-    const int fakeDeviceID = 1;
 
-    ActionManager::ActionManager(ICS::InputControlSystem* inputBinder,
+    ActionManager::ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
             osg::ref_ptr<osgViewer::Viewer> viewer,
             osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
-        : mInputBinder(inputBinder)
+        : mBindingsManager(bindingsManager)
         , mViewer(viewer)
         , mScreenCaptureHandler(screenCaptureHandler)
         , mScreenCaptureOperation(screenCaptureOperation)
@@ -65,19 +63,19 @@ namespace MWInput
 
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
 
-            if (actionIsActive(A_MoveLeft) != actionIsActive(A_MoveRight))
+            if (mBindingsManager->actionIsActive(A_MoveLeft) != mBindingsManager->actionIsActive(A_MoveRight))
             {
                 alwaysRunAllowed = true;
                 triedToMove = true;
-                player.setLeftRight (actionIsActive(A_MoveRight) ? 1 : -1);
+                player.setLeftRight(mBindingsManager->actionIsActive(A_MoveRight) ? 1 : -1);
             }
 
-            if (actionIsActive(A_MoveForward) != actionIsActive(A_MoveBackward))
+            if (mBindingsManager->actionIsActive(A_MoveForward) != mBindingsManager->actionIsActive(A_MoveBackward))
             {
                 alwaysRunAllowed = true;
                 triedToMove = true;
                 player.setAutoMove (false);
-                player.setForwardBackward (actionIsActive(A_MoveForward) ? 1 : -1);
+                player.setForwardBackward(mBindingsManager->actionIsActive(A_MoveForward) ? 1 : -1);
             }
 
             if (player.getAutoMove())
@@ -112,7 +110,7 @@ namespace MWInput
 
             if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
             {
-                if (actionIsActive(A_TogglePOV))
+                if (mBindingsManager->actionIsActive(A_TogglePOV))
                 {
                     if (mPreviewPOVDelay <= 0.5 &&
                         (mPreviewPOVDelay += dt) > 0.5)
@@ -140,27 +138,27 @@ namespace MWInput
             if (!isToggleSneak)
             {
                 if(!MWBase::Environment::get().getInputManager()->joystickLastUsed())
-                    player.setSneak(actionIsActive(A_Sneak));
+                    player.setSneak(mBindingsManager->actionIsActive(A_Sneak));
             }
 
-            float xAxis = mInputBinder->getChannel(A_MoveLeftRight)->getValue();
-            float yAxis = mInputBinder->getChannel(A_MoveForwardBackward)->getValue();
+            float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight);
+            float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward);
             bool isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
             if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
-                player.setRunState(!actionIsActive(A_Run));
+                player.setRunState(!mBindingsManager->actionIsActive(A_Run));
             else
-                player.setRunState(actionIsActive(A_Run));
+                player.setRunState(mBindingsManager->actionIsActive(A_Run));
         }
 
-        if (actionIsActive(A_MoveForward) ||
-            actionIsActive(A_MoveBackward) ||
-            actionIsActive(A_MoveLeft) ||
-            actionIsActive(A_MoveRight) ||
-            actionIsActive(A_Jump) ||
-            actionIsActive(A_Sneak) ||
-            actionIsActive(A_TogglePOV) ||
-            actionIsActive(A_ZoomIn) ||
-            actionIsActive(A_ZoomOut))
+        if (mBindingsManager->actionIsActive(A_MoveForward) ||
+            mBindingsManager->actionIsActive(A_MoveBackward) ||
+            mBindingsManager->actionIsActive(A_MoveLeft) ||
+            mBindingsManager->actionIsActive(A_MoveRight) ||
+            mBindingsManager->actionIsActive(A_Jump) ||
+            mBindingsManager->actionIsActive(A_Sneak) ||
+            mBindingsManager->actionIsActive(A_TogglePOV) ||
+            mBindingsManager->actionIsActive(A_ZoomIn) ||
+            mBindingsManager->actionIsActive(A_ZoomOut))
         {
             resetIdleTime();
         }
@@ -190,11 +188,6 @@ namespace MWInput
             MWBase::Environment::get().getWorld()->toggleVanityMode(true);
             mTimeIdle = -1.f;
         }
-    }
-
-    bool ActionManager::actionIsActive(int id)
-    {
-        return (mInputBinder->getChannel(id)->getValue ()==1.0);
     }
 
     void ActionManager::executeAction(int action)
@@ -319,17 +312,6 @@ namespace MWInput
             }
             break;
         }
-    }
-
-    bool isLeftOrRightButton(int action, ICS::InputControlSystem* ics, int deviceId, bool joystick)
-    {
-        int mouseBinding = ics->getMouseButtonBinding(ics->getControl(action), ICS::Control::INCREASE);
-        if (mouseBinding != ICS_MAX_DEVICE_BUTTONS)
-            return true;
-        int buttonBinding = ics->getJoystickButtonBinding(ics->getControl(action), deviceId, ICS::Control::INCREASE);
-        if (joystick && (buttonBinding == 0 || buttonBinding == 1))
-            return true;
-        return false;
     }
 
     bool ActionManager::checkAllowedToUseItems() const
@@ -559,7 +541,7 @@ namespace MWInput
         if (MWBase::Environment::get().getWindowManager()->isGuiMode())
         {
             bool joystickUsed = MWBase::Environment::get().getInputManager()->joystickLastUsed();
-            if (!SDL_IsTextInputActive() && !isLeftOrRightButton(A_Activate, mInputBinder, fakeDeviceID, joystickUsed))
+            if (!SDL_IsTextInputActive() && !mBindingsManager->isLeftOrRightButton(A_Activate, joystickUsed))
                 MWBase::Environment::get().getWindowManager()->injectKeyPress(MyGUI::KeyCode::Return, 0, false);
         }
         else if (MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
@@ -612,7 +594,7 @@ namespace MWInput
         if (SDL_IsTextInputActive())
             return;
 
-        if (isLeftOrRightButton(action, mInputBinder, fakeDeviceID, joystickUsed))
+        if (mBindingsManager->isLeftOrRightButton(action, joystickUsed))
             return;
 
         MyGUI::KeyCode key;

@@ -5,23 +5,17 @@
 
 #include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
-#include <components/sdlutil/sdlinputwrapper.hpp>
-
-namespace ICS
-{
-    class InputControlSystem;
-}
 
 namespace MWInput
 {
     class ActionManager;
+    class BindingsManager;
     class MouseManager;
 
     class ControllerManager : public SDLUtil::ControllerListener
     {
     public:
-        ControllerManager(ICS::InputControlSystem* inputBinder,
-            SDLUtil::InputWrapper* inputWrapper,
+        ControllerManager(BindingsManager* bindingsManager,
             ActionManager* actionManager,
             MouseManager* mouseManager,
             const std::string& userControllerBindingsFile,
@@ -54,10 +48,7 @@ namespace MWInput
         bool gamepadToGuiControl(const SDL_ControllerButtonEvent &arg);
         bool gamepadToGuiControl(const SDL_ControllerAxisEvent &arg);
 
-        bool actionIsActive(int id);
-
-        ICS::InputControlSystem* mInputBinder;
-        SDLUtil::InputWrapper* mInputWrapper;
+        BindingsManager* mBindingsManager;
         ActionManager* mActionManager;
         MouseManager* mMouseManager;
 

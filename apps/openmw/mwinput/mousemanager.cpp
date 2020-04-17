@@ -8,8 +8,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 
-#include <extern/oics/ICSInputControlSystem.h>
-
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -18,16 +16,17 @@
 #include "../mwworld/player.hpp"
 
 #include "actions.hpp"
+#include "bindingsmanager.hpp"
 #include "sdlmappings.hpp"
 
 namespace MWInput
 {
-    MouseManager::MouseManager(ICS::InputControlSystem* inputBinder, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
+    MouseManager::MouseManager(BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
         : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
         , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
         , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
-        , mInputBinder(inputBinder)
+        , mBindingsManager(bindingsManager)
         , mInputWrapper(inputWrapper)
         , mInvUiScalingFactor(1.f)
         , mGuiCursorX(0)
@@ -54,22 +53,22 @@ namespace MWInput
 
     void MouseManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        for (Settings::CategorySettingVector::const_iterator it = changed.begin(); it != changed.end(); ++it)
+        for (const auto& setting : changed)
         {
-            if (it->first == "Input" && it->second == "invert x axis")
+            if (setting.first == "Input" && setting.second == "invert x axis")
                 mInvertX = Settings::Manager::getBool("invert x axis", "Input");
 
-            if (it->first == "Input" && it->second == "invert y axis")
+            if (setting.first == "Input" && setting.second == "invert y axis")
                 mInvertY = Settings::Manager::getBool("invert y axis", "Input");
 
-            if (it->first == "Input" && it->second == "camera sensitivity")
+            if (setting.first == "Input" && setting.second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
         }
     }
 
     void MouseManager::mouseMoved(const SDLUtil::MouseMotionEvent &arg)
     {
-        mInputBinder->mouseMoved (arg);
+        mBindingsManager->mouseMoved(arg);
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         input->setJoystickLastUsed(false);
@@ -122,26 +121,26 @@ namespace MWInput
     {
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
 
-        if(mInputBinder->detectingBindingState())
+        if(mBindingsManager->isDetectingBindingState())
         {
-            mInputBinder->mouseReleased (arg, id);
+            mBindingsManager->mouseReleased(arg, id);
         }
         else
         {
             bool guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             guiMode = MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
 
-            if(mInputBinder->detectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
+            if(mBindingsManager->isDetectingBindingState()) return; // don't allow same mouseup to bind as initiated bind
 
-            MWBase::Environment::get().getInputManager()->setPlayerControlsEnabled(!guiMode);
-            mInputBinder->mouseReleased (arg, id);
+            mBindingsManager->setPlayerControlsEnabled(!guiMode);
+            mBindingsManager->mouseReleased(arg, id);
         }
     }
 
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
     {
-        if (mInputBinder->detectingBindingState() || !mControlsDisabled)
-            mInputBinder->mouseWheelMoved(arg);
+        if (mBindingsManager->isDetectingBindingState() || !mControlsDisabled)
+            mBindingsManager->mouseWheelMoved(arg);
 
         MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
     }
@@ -166,11 +165,11 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
-        MWBase::Environment::get().getInputManager()->setPlayerControlsEnabled(!guiMode);
+        mBindingsManager->setPlayerControlsEnabled(!guiMode);
 
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
-            mInputBinder->mousePressed (arg, id);
+            mBindingsManager->mousePressed(arg, id);
     }
 
     void MouseManager::update(float dt, bool disableControls)
@@ -180,8 +179,8 @@ namespace MWInput
         if (!mMouseLookEnabled)
             return;
 
-        float xAxis = mInputBinder->getChannel(A_LookLeftRight)->getValue()*2.0f-1.0f;
-        float yAxis = mInputBinder->getChannel(A_LookUpDown)->getValue()*2.0f-1.0f;
+        float xAxis = mBindingsManager->getActionValue(A_LookLeftRight)*2.0f-1.0f;
+        float yAxis = mBindingsManager->getActionValue(A_LookUpDown)*2.0f-1.0f;
         if (xAxis == 0 && yAxis == 0)
             return;
 
