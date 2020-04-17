@@ -2,32 +2,15 @@
 
 #include <osgViewer/ViewerEventHandlers>
 
-#include <MyGUI_InputManager.h>
-#include <MyGUI_Widget.h>
-#include <MyGUI_Button.h>
-#include <MyGUI_EditBox.h>
-
-#include <SDL_version.h>
-
-#include <components/debug/debuglog.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/controlsstate.hpp>
 
-#include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/statemanager.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 
-#include "../mwworld/player.hpp"
-#include "../mwworld/class.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/esmstore.hpp"
-
-#include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/actorutil.hpp"
 
 #include "actionmanager.hpp"
 #include "bindingsmanager.hpp"
@@ -58,7 +41,7 @@ namespace MWInput
 
         mActionManager = new ActionManager(mBindingsManager, screenCaptureOperation, viewer, screenCaptureHandler);
 
-        mKeyboardManager = new KeyboardManager(mBindingsManager, mActionManager);
+        mKeyboardManager = new KeyboardManager(mBindingsManager);
         mInputWrapper->setKeyboardEventCallback(mKeyboardManager);
 
         mMouseManager = new MouseManager(mBindingsManager, mInputWrapper, window);

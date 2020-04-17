@@ -1,18 +1,15 @@
 #ifndef MWINPUT_MWINPUTMANAGERIMP_H
 #define MWINPUT_MWINPUTMANAGERIMP_H
 
-#include "../mwgui/mode.hpp"
-
-#include <SDL_sensor.h>
-
 #include <osg/ref_ptr>
 #include <osgViewer/ViewerEventHandlers>
 
 #include <components/settings/settings.hpp>
-#include <components/files/configurationmanager.hpp>
 #include <components/sdlutil/events.hpp>
 
 #include "../mwbase/inputmanager.hpp"
+
+#include "../mwgui/mode.hpp"
 
 #include "actions.hpp"
 
@@ -35,11 +32,6 @@ namespace MWWorld
 namespace MWBase
 {
     class WindowManager;
-}
-
-namespace Files
-{
-    struct ConfigurationManager;
 }
 
 namespace SDLUtil

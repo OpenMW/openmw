@@ -4,20 +4,14 @@
 #include <components/settings/settings.hpp>
 #include <components/sdlutil/events.hpp>
 
-namespace SDLUtil
-{
-    class InputWrapper;
-}
-
 namespace MWInput
 {
-    class ActionManager;
     class BindingsManager;
 
     class KeyboardManager : public SDLUtil::KeyListener
     {
     public:
-        KeyboardManager(BindingsManager* bindingsManager, ActionManager* actionManager);
+        KeyboardManager(BindingsManager* bindingsManager);
 
         virtual ~KeyboardManager() = default;
 
@@ -29,8 +23,6 @@ namespace MWInput
 
     private:
         BindingsManager* mBindingsManager;
-
-        ActionManager* mActionManager;
 
         bool mControlsDisabled;
     };

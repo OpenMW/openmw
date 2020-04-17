@@ -4,22 +4,18 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
-#include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwworld/player.hpp"
 
-#include "actionmanager.hpp"
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
 #include "sdlmappings.hpp"
 
 namespace MWInput
 {
-    KeyboardManager::KeyboardManager(BindingsManager* bindingsManager, ActionManager* actionManager)
+    KeyboardManager::KeyboardManager(BindingsManager* bindingsManager)
         : mBindingsManager(bindingsManager)
-        , mActionManager(actionManager)
         , mControlsDisabled(false)
     {
     }
