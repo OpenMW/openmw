@@ -457,7 +457,7 @@ namespace NifOsg
             {
                 const Nif::NiLODNode* niLodNode = static_cast<const Nif::NiLODNode*>(nifNode);
                 node = handleLodNode(niLodNode);
-                dataVariance = osg::Object::STATIC;
+                dataVariance = osg::Object::DYNAMIC;
                 break;
             }
             case Nif::RC_NiSwitchNode:
@@ -476,8 +476,8 @@ namespace NifOsg
             {
                 bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
                 node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
-                dataVariance = osg::Object::STATIC;
-
+                // This matrix transform must not be combined with another matrix transform.
+                dataVariance = osg::Object::DYNAMIC;
                 break;
             }
             default:

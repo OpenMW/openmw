@@ -133,6 +133,8 @@ namespace MWGui
 
         void updateTopics();
 
+        void onClose();
+
     protected:
         void updateTopicsPane();
         bool isCompanion(const MWWorld::Ptr& actor);

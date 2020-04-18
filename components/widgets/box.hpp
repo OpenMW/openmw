@@ -33,6 +33,8 @@ namespace Gui
 
         virtual MyGUI::IntSize getRequestedSize() = 0;
 
+        virtual ~AutoSizedWidget() = default;
+
     protected:
         void notifySizeChange(MyGUI::Widget* w);
 
@@ -93,6 +95,8 @@ namespace Gui
     {
     public:
         Box();
+
+        virtual ~Box() = default;
 
         void notifyChildrenSizeChanged();
 

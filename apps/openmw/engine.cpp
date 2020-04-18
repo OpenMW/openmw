@@ -96,7 +96,12 @@ bool OMW::Engine::frame(float frametime)
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
         if (!mEnvironment.getInputManager()->isWindowVisible())
+        {
+            mEnvironment.getSoundManager()->pausePlayback();
             return false;
+        }
+        else
+            mEnvironment.getSoundManager()->resumePlayback();
 
         // sound
         if (mUseSound)
@@ -235,7 +240,9 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
 {
     MWClass::registerClasses();
 
-    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK;
+    SDL_SetHint(SDL_HINT_ACCELEROMETER_AS_JOYSTICK, "0"); // We use only gamepads
+
+    Uint32 flags = SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE|SDL_INIT_GAMECONTROLLER|SDL_INIT_JOYSTICK|SDL_INIT_SENSOR;
     if(SDL_WasInit(flags) == 0)
     {
         SDL_SetMainReady();
@@ -505,22 +512,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         Log(Debug::Info) << "Loading keybindings file: " << keybinderUser;
 
-    // find correct path to the game controller bindings
-    // File format for controller mappings is different for SDL <= 2.0.4, 2.0.5, and >= 2.0.6
-    SDL_version linkedSdlVersion;
-    SDL_GetVersion(&linkedSdlVersion);
-    std::string controllerFileName;
-    if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch <= 4) {
-        controllerFileName = "gamecontrollerdb_204.txt";
-    } else if (linkedSdlVersion.major == 2 && linkedSdlVersion.minor == 0 && linkedSdlVersion.patch == 5) {
-        controllerFileName = "gamecontrollerdb_205.txt";
-    } else {
-        controllerFileName = "gamecontrollerdb.txt";
-    }
-
-    const std::string userdefault = mCfgMgr.getUserConfigPath().string() + "/" + controllerFileName;
-    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/" + controllerFileName;
-    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/" + controllerFileName;
+    const std::string userdefault = mCfgMgr.getUserConfigPath().string() + "/gamecontrollerdb.txt";
+    const std::string localdefault = mCfgMgr.getLocalPath().string() + "/gamecontrollerdb.txt";
+    const std::string globaldefault = mCfgMgr.getGlobalPath().string() + "/gamecontrollerdb.txt";
 
     std::string userGameControllerdb;
     if (boost::filesystem::exists(userdefault)){

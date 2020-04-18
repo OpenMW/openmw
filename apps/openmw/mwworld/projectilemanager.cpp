@@ -291,6 +291,12 @@ namespace MWWorld
         if (state.mEffects.mList.empty())
             return;
 
+        if (!caster.getClass().isActor() && fallbackDirection.length2() <= 0)
+        {
+            Log(Debug::Warning) << "Unable to launch magic bolt (direction to target is empty)";
+            return;
+        }
+
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
         MWWorld::Ptr ptr = ref.getPtr();
 

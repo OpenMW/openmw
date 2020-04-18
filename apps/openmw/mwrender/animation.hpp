@@ -149,6 +149,8 @@ public:
     public:
         virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
                            const std::multimap<float, std::string>& map) = 0;
+
+        virtual ~TextKeyListener() = default;
     };
 
     void setTextKeyListener(TextKeyListener* listener);
@@ -457,6 +459,7 @@ public:
 
     virtual bool useShieldAnimations() const { return false; }
     virtual void showWeapons(bool showWeapon) {}
+    virtual bool getCarriedLeftShown() const { return false; }
     virtual void showCarriedLeft(bool show) {}
     virtual void setWeaponGroup(const std::string& group, bool relativeDuration) {}
     virtual void setVampire(bool vampire) {}

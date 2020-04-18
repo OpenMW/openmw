@@ -33,6 +33,14 @@ public:
     virtual void mouseWheelMoved( const SDL_MouseWheelEvent &arg) = 0;
 };
 
+class SensorListener
+{
+public:
+    virtual ~SensorListener() {}
+    virtual void sensorUpdated(const SDL_SensorEvent &arg) = 0;
+    virtual void displayOrientationChanged() = 0;
+};
+
 class KeyListener
 {
 public:

@@ -373,7 +373,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     mEnchantments.addColumn (new EnchantmentTypeColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new CostColumn<ESM::Enchantment>);
     mEnchantments.addColumn (new ChargesColumn2<ESM::Enchantment>);
-    mEnchantments.addColumn (new AutoCalcColumn<ESM::Enchantment>);
+    mEnchantments.addColumn (new FlagColumn<ESM::Enchantment> (Columns::ColumnId_AutoCalc, ESM::Enchantment::Autocalc));
     // Enchantment effects
     mEnchantments.addColumn (new NestedParentColumn<ESM::Enchantment> (Columns::ColumnId_EffectList));
     index = mEnchantments.getColumns()-1;
