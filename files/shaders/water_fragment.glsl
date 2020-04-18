@@ -203,17 +203,20 @@ void main(void)
     float ior = (cameraPos.z>0.0)?(1.333/1.0):(1.0/1.333); // air to water; water to air
     float fresnel = clamp(fresnel_dielectric(vVec, normal, ior), 0.0, 1.0);
 
+    float radialise = 1.0;
+
 #if @radialFog
     float radialDepth = distance(position.xyz, cameraPos);
-    float radialize = radialDepth / linearDepth;
-#else
-    float radialize = 1.0;
+    // TODO: Figure out how to properly radialise refraction depth and thus underwater fog
+    // while avoiding oddities when the water plane is close to the clipping plane
+    // radialise = radialDepth / linearDepth;
 #endif
+
     vec2 screenCoordsOffset = normal.xy * REFL_BUMP;
 #if REFRACTION
-    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * radialize;
-    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x) * radialize;
-    float surfaceDepth = linearizeDepth(gl_FragCoord.z) * radialize;
+    float depthSample = linearizeDepth(texture2D(refractionDepthMap,screenCoords).x) * radialise;
+    float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x) * radialise;
+    float surfaceDepth = linearizeDepth(gl_FragCoord.z) * radialise;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
     screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
 #endif
