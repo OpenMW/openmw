@@ -271,6 +271,8 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-file-newaddon", "New Addon", QKeySequence());
     declareShortcut ("document-file-open", "Open", QKeySequence(Qt::ControlModifier | Qt::Key_O));
     declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+    declareShortcut ("document-help-help", "Help", QKeySequence(Qt::Key_F1));
+    declareShortcut ("document-help-tutorial", "Tutorial", QKeySequence());
     declareShortcut ("document-file-verify", "Verify", QKeySequence());
     declareShortcut ("document-file-merge", "Merge", QKeySequence());
     declareShortcut ("document-file-errorlog", "Open Load Error Log", QKeySequence());
