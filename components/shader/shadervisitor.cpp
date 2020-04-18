@@ -287,46 +287,8 @@ namespace Shader
         mRequirements.pop_back();
     }
 
-    struct ParticleSystemDrawCallback : public osg::Drawable::DrawCallback
-    {
-        osg::ref_ptr<osg::Vec3Array> mNormalArray;
-        ParticleSystemDrawCallback()
-        {
-            mNormalArray = new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-            (*mNormalArray.get())[0] = osg::Vec3(0, 0, -1);
-        }
-
-        ParticleSystemDrawCallback(const ParticleSystemDrawCallback& org,const osg::CopyOp& copyop):
-            osg::Drawable::DrawCallback(org,copyop)
-        {
-            mNormalArray = new osg::Vec3Array(1); mNormalArray->setBinding(osg::Array::BIND_OVERALL);
-            (*mNormalArray.get())[0] = osg::Vec3(0, 0, -1);
-        }
-
-        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
-        {
-            osg::State * state = renderInfo.getState();
-#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
-            if(state->useVertexArrayObject(drawable->getUseVertexArrayObject()))
-            {
-                state->getCurrentVertexArrayState()->assignNormalArrayDispatcher();
-                state->getCurrentVertexArrayState()->setNormalArray(*state, mNormalArray);
-            }
-            else
-            {
-                state->getAttributeDispatchers().activateNormalArray(mNormalArray);
-            }
-#else
-            state->Normal(0, 0, -1);
-#endif
-            drawable->drawImplementation(renderInfo);
-        }
-    };
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
-        osgParticle::ParticleSystem * partsys = dynamic_cast<osgParticle::ParticleSystem *>(reqs.mNode);
-        if(partsys)
-            partsys->setDrawCallback(new ParticleSystemDrawCallback());
         if (!reqs.mShaderRequired && !mForceShaders)
             return;
 

@@ -36,8 +36,11 @@ namespace NifOsg
 
         void setQuota(int quota);
 
+        virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
+
     private:
         int mQuota;
+        osg::ref_ptr<osg::Vec3Array> mNormalArray;
     };
 
     // HACK: Particle doesn't allow setting the initial age, but we need this for loading the particle system state
