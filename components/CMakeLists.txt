@@ -86,7 +86,7 @@ add_component_dir (esmterrain
     )
 
 add_component_dir (misc
-    gcd constants utf8stream stringops resourcehelpers rng messageformatparser weakcache helpviewer
+    gcd constants utf8stream stringops resourcehelpers rng messageformatparser weakcache
     )
 
 add_component_dir (debug
@@ -194,6 +194,10 @@ if (USE_QT)
 
     add_component_qt_dir (process
         processinvoker
+        )
+
+    add_component_dir (misc
+        helpviewer
         )
 
     if (DESIRED_QT_VERSION MATCHES 4)
