@@ -45,7 +45,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
     const std::vector<ESM::Header::MasterData> &masters = esm.getGameFiles();
     std::vector<ESM::ESMReader> *allPlugins = esm.getGlobalReaderList();
     for (size_t j = 0; j < masters.size(); j++) {
-        ESM::Header::MasterData &mast = const_cast<ESM::Header::MasterData&>(masters[j]);
+        const ESM::Header::MasterData &mast = masters[j];
         std::string fname = mast.name;
         int index = ~0;
         for (int i = 0; i < esm.getIndex(); i++) {
@@ -63,7 +63,7 @@ void ESMStore::load(ESM::ESMReader &esm, Loading::Listener* listener)
                 + ", but it has not been loaded yet. Please check your load order.";
             esm.fail(fstring);
         }
-        mast.index = index;
+        esm.addParentFileIndex(index);
     }
 
     // Loop through all records

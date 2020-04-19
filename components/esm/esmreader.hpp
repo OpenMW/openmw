@@ -79,12 +79,14 @@ public:
   //  terrain palette, but ESMReader does not pass a reference to the correct plugin
   //  to the individual load() methods. This hack allows to pass this reference
   //  indirectly to the load() method.
-  int mIdx;
-  void setIndex(const int index) {mIdx = index; mCtx.index = index;}
-  int getIndex() {return mIdx;}
+  void setIndex(const int index) { mCtx.index = index;}
+  int getIndex() {return mCtx.index;}
 
   void setGlobalReaderList(std::vector<ESMReader> *list) {mGlobalReaderList = list;}
   std::vector<ESMReader> *getGlobalReaderList() {return mGlobalReaderList;}
+
+  void addParentFileIndex(int index) { mCtx.parentFileIndices.push_back(index); }
+  const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
 
   /*************************************************************************
    *
