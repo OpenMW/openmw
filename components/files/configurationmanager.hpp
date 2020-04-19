@@ -41,6 +41,7 @@ struct ConfigurationManager
     const boost::filesystem::path& getCachePath() const;
 
     const boost::filesystem::path& getLogPath() const;
+    const boost::filesystem::path  getScreenshotPath(std::string const& screenshotSetting) const;
 
     private:
         typedef Files::FixedPath<> FixedPathType;

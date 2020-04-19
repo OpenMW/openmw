@@ -657,7 +657,6 @@ private:
 };
 
 // Initialise and enter main loop.
-
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
@@ -686,7 +685,8 @@ void OMW::Engine::go()
     mViewer->setUseConfigureAffinity(false);
 #endif
 
-    mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
+    mScreenCaptureOperation = new WriteScreenshotToFileOperation(
+        mCfgMgr.getScreenshotPath(Settings::Manager::getString("screenshot path", "General")).string(),
         Settings::Manager::getString("screenshot format", "General"));
 
     mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);

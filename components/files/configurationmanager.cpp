@@ -196,4 +196,17 @@ const boost::filesystem::path& ConfigurationManager::getLogPath() const
     return mLogPath;
 }
 
+const boost::filesystem::path ConfigurationManager::getScreenshotPath(std::string const& screenshotSettings) const
+{
+    boost::filesystem::path ssPath = screenshotSettings;
+    if (ssPath.is_relative()) {
+        ssPath = mFixedPath.getUserDataPath() / ssPath;
+    }
+    boost::system::error_code dirErr;
+    if (!boost::filesystem::create_directories(ssPath, dirErr) && !boost::filesystem::is_directory(ssPath)) {
+        ssPath = mFixedPath.getUserDataPath();
+    }
+    return ssPath;
+}
+
 } /* namespace Cfg */
