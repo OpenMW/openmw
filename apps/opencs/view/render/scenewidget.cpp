@@ -5,13 +5,17 @@
 #include <QTimer>
 #include <QLayout>
 
-#include <extern/osgQt/GraphicsWindowQt>
 #include <osg/GraphicsContext>
 #include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osg/LightModel>
 #include <osg/Material>
 #include <osg/Version>
+#if OSG_VERSION_LESS_THAN(3,5,4)
+#include <extern/osgQt/GraphicsWindowQt>
+#else
+#include <extern/osgQt/osgQOpenGLWindow>
+#endif
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -59,13 +63,21 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView = new osgViewer::View;
     updateCameraParameters( traits->width / static_cast<double>(traits->height) );
 
+#if OSG_VERSION_LESS_THAN(3,5,4)
     osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
+#else
+    osgQt::osgQOpenGLWindow window(this);
+#endif
     QLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(window->getGLWidget());
+#if OSG_VERSION_LESS_THAN(3,5,4)
+    layout->addWidget(window.getGLWidget());
+#else
+    layout->addWidget(window.asWidget());
+#endif
     setLayout(layout);
 
-    mView->getCamera()->setGraphicsContext(window);
+    //mView->getCamera()->setGraphicsContext(window);
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
 
@@ -435,7 +447,7 @@ void RenderWidget::updateCameraParameters(double overrideAspect)
             -halfW, halfW, -halfH, halfH, nearDist, farDist);
     }
     else
-    { 
+    {
         mView->getCamera()->setProjectionMatrixAsPerspective(
             CSMPrefs::get()["Rendering"]["camera-fov"].toInt(),
             static_cast<double>(width())/static_cast<double>(height()),
