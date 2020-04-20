@@ -23,6 +23,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
@@ -46,7 +47,6 @@
 #include "../mwrender/npcanimation.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/camera.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -56,6 +56,7 @@
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/collisiontype.hpp"
 #include "../mwphysics/object.hpp"
+#include "../mwphysics/constants.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -1424,7 +1425,9 @@ namespace MWWorld
 
         pos.z() += 20; // place slightly above. will snap down to ground with code below
 
-        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !isSwimming(ptr) && isActorCollisionEnabled(ptr)))
+        // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
+        bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
+        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
@@ -1638,6 +1641,11 @@ namespace MWWorld
 
         MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
+    }
+
+    bool World::castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore)
+    {
+        return mPhysics->castRay(from, to, ignore, std::vector<MWWorld::Ptr>(), mask).mHit;
     }
 
     bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
@@ -2265,7 +2273,7 @@ namespace MWWorld
         {
             // Adjust position so the location we wanted ends up in the middle of the object bounding box
             osg::ComputeBoundsVisitor computeBounds;
-            computeBounds.setTraversalMask(~MWRender::Mask_ParticleSystem);
+            computeBounds.setTraversalMask(~SceneUtil::Mask_ParticleSystem);
             dropped.getRefData().getBaseNode()->accept(computeBounds);
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
             if (bounds.valid())
@@ -2745,28 +2753,15 @@ namespace MWWorld
         }
     }
 
-    struct ListObjectsVisitor
-    {
-        std::vector<MWWorld::Ptr> mObjects;
-
-        bool operator() (Ptr ptr)
-        {
-            if (ptr.getRefData().getBaseNode())
-                mObjects.push_back(ptr);
-            return true;
-        }
-    };
-
     void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            ListObjectsVisitor visitor;
-            cellstore->forEach(visitor);
-
-            for (const Ptr &object : visitor.mObjects)
-                if (Misc::StringUtils::ciEqual(object.getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(object);
+            cellstore->forEach([&] (const auto& ptr) {
+                if (ptr.getRefData().getBaseNode() && Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    out.push_back(ptr);
+                return true;
+            });
         }
     }
 
@@ -3908,5 +3903,10 @@ namespace MWWorld
         btScalar hitDistance = 1;
         btVector3 hitNormal;
         return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
+    }
+
+    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
     }
 }

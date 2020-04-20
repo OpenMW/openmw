@@ -29,12 +29,10 @@
 #include "../mwbase/environment.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwrender/bulletdebugdraw.hpp"
 
@@ -45,487 +43,15 @@
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
+#include "hasspherecollisioncallback.hpp"
+#include "deepestnotmecontacttestresultcallback.hpp"
+#include "closestnotmerayresultcallback.hpp"
+#include "contacttestresultcallback.hpp"
+#include "constants.hpp"
+#include "movementsolver.hpp"
 
 namespace MWPhysics
 {
-
-    static const float sStepSizeDown = 62.0f;
-    static const float sMinStep = 10.f;
-    static const float sGroundOffset = 1.0f;
-
-    // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
-    static const int sMaxIterations = 8;
-
-    static bool isActor(const btCollisionObject *obj)
-    {
-        assert(obj);
-        return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
-    }
-
-    template <class Vec3>
-    static bool isWalkableSlope(const Vec3 &normal)
-    {
-        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
-        return (normal.z() > sMaxSlopeCos);
-    }
-
-    static bool canStepDown(const ActorTracer &stepper)
-    {
-        return stepper.mHitObject && isWalkableSlope(stepper.mPlaneNormal) && !isActor(stepper.mHitObject);
-    }
-
-    class Stepper
-    {
-    private:
-        const btCollisionWorld *mColWorld;
-        const btCollisionObject *mColObj;
-
-        ActorTracer mTracer, mUpStepper, mDownStepper;
-        bool mHaveMoved;
-
-    public:
-        Stepper(const btCollisionWorld *colWorld, const btCollisionObject *colObj)
-            : mColWorld(colWorld)
-            , mColObj(colObj)
-            , mHaveMoved(true)
-        {}
-
-        bool step(osg::Vec3f &position, const osg::Vec3f &toMove, float &remainingTime)
-        {
-            /*
-             * Slide up an incline or set of stairs.  Should be called only after a
-             * collision detection otherwise unnecessary tracing will be performed.
-             *
-             * NOTE: with a small change this method can be used to step over an obstacle
-             * of height sStepSize.
-             *
-             * If successful return 'true' and update 'position' to the new possible
-             * location and adjust 'remainingTime'.
-             *
-             * If not successful return 'false'.  May fail for these reasons:
-             *    - can't move directly up from current position
-             *    - having moved up by between epsilon() and sStepSize, can't move forward
-             *    - having moved forward by between epsilon() and toMove,
-             *        = moved down between 0 and just under sStepSize but slope was too steep, or
-             *        = moved the full sStepSize down (FIXME: this could be a bug)
-             *
-             *
-             *
-             * Starting position.  Obstacle or stairs with height upto sStepSize in front.
-             *
-             *     +--+                          +--+       |XX
-             *     |  | -------> toMove          |  |    +--+XX
-             *     |  |                          |  |    |XXXXX
-             *     |  | +--+                     |  | +--+XXXXX
-             *     |  | |XX|                     |  | |XXXXXXXX
-             *     +--+ +--+                     +--+ +--------
-             *    ==============================================
-             */
-
-            /*
-             * Try moving up sStepSize using stepper.
-             * FIXME: does not work in case there is no front obstacle but there is one above
-             *
-             *     +--+                         +--+
-             *     |  |                         |  |
-             *     |  |                         |  |       |XX
-             *     |  |                         |  |    +--+XX
-             *     |  |                         |  |    |XXXXX
-             *     +--+ +--+                    +--+ +--+XXXXX
-             *          |XX|                         |XXXXXXXX
-             *          +--+                         +--------
-             *    ==============================================
-             */
-            if (mHaveMoved)
-            {
-                mHaveMoved = false;
-                mUpStepper.doTrace(mColObj, position, position+osg::Vec3f(0.0f,0.0f,sStepSizeUp), mColWorld);
-                if(mUpStepper.mFraction < std::numeric_limits<float>::epsilon())
-                    return false; // didn't even move the smallest representable amount
-                                  // (TODO: shouldn't this be larger? Why bother with such a small amount?)
-            }
-
-            /*
-             * Try moving from the elevated position using tracer.
-             *
-             *                          +--+  +--+
-             *                          |  |  |YY|   FIXME: collision with object YY
-             *                          |  |  +--+
-             *                          |  |
-             *     <------------------->|  |
-             *          +--+            +--+
-             *          |XX|      the moved amount is toMove*tracer.mFraction
-             *          +--+
-             *    ==============================================
-             */
-            osg::Vec3f tracerPos = mUpStepper.mEndPos;
-            mTracer.doTrace(mColObj, tracerPos, tracerPos + toMove, mColWorld);
-            if(mTracer.mFraction < std::numeric_limits<float>::epsilon())
-                return false; // didn't even move the smallest representable amount
-
-            /*
-             * Try moving back down sStepSizeDown using stepper.
-             * NOTE: if there is an obstacle below (e.g. stairs), we'll be "stepping up".
-             * Below diagram is the case where we "stepped over" an obstacle in front.
-             *
-             *                                +--+
-             *                                |YY|
-             *                          +--+  +--+
-             *                          |  |
-             *                          |  |
-             *          +--+            |  |
-             *          |XX|            |  |
-             *          +--+            +--+
-             *    ==============================================
-             */
-            mDownStepper.doTrace(mColObj, mTracer.mEndPos, mTracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), mColWorld);
-            if (!canStepDown(mDownStepper))
-            {
-                // Try again with increased step length
-                if (mTracer.mFraction < 1.0f || toMove.length2() > sMinStep*sMinStep)
-                    return false;
-
-                osg::Vec3f direction = toMove;
-                direction.normalize();
-                mTracer.doTrace(mColObj, tracerPos, tracerPos + direction*sMinStep, mColWorld);
-                if (mTracer.mFraction < 0.001f)
-                    return false;
-
-                mDownStepper.doTrace(mColObj, mTracer.mEndPos, mTracer.mEndPos-osg::Vec3f(0.0f,0.0f,sStepSizeDown), mColWorld);
-                if (!canStepDown(mDownStepper))
-                    return false;
-            }
-            if (mDownStepper.mFraction < 1.0f)
-            {
-                // only step down onto semi-horizontal surfaces. don't step down onto the side of a house or a wall.
-                // TODO: stepper.mPlaneNormal does not appear to be reliable - needs more testing
-                // NOTE: caller's variables 'position' & 'remainingTime' are modified here
-                position = mDownStepper.mEndPos;
-                remainingTime *= (1.0f-mTracer.mFraction); // remaining time is proportional to remaining distance
-                mHaveMoved = true;
-                return true;
-            }
-            return false;
-        }
-    };
-
-    class MovementSolver
-    {
-    private:
-        ///Project a vector u on another vector v
-        static inline osg::Vec3f project(const osg::Vec3f& u, const osg::Vec3f &v)
-        {
-            return v * (u * v);
-            //            ^ dot product
-        }
-
-        ///Helper for computing the character sliding
-        static inline osg::Vec3f slide(const osg::Vec3f& direction, const osg::Vec3f &planeNormal)
-        {
-            return direction - project(direction, planeNormal);
-        }
-
-    public:
-        static osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
-        {
-            osg::Vec3f offset = actor->getCollisionObjectPosition() - ptr.getRefData().getPosition().asVec3();
-
-            ActorTracer tracer;
-            tracer.findGround(actor, position + offset, position + offset - osg::Vec3f(0,0,maxHeight), collisionWorld);
-            if(tracer.mFraction >= 1.0f)
-            {
-                actor->setOnGround(false);
-                return position;
-            }
-            else
-            {
-                actor->setOnGround(true);
-
-                // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
-                // Required for some broken door destinations in Morrowind.esm, where the spawn point
-                // intersects with other geometry if the actor's base is taken into account
-                btVector3 from = Misc::Convert::toBullet(position);
-                btVector3 to = from - btVector3(0,0,maxHeight);
-
-                btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
-                resultCallback1.m_collisionFilterGroup = 0xff;
-                resultCallback1.m_collisionFilterMask = CollisionType_World|CollisionType_HeightMap;
-
-                collisionWorld->rayTest(from, to, resultCallback1);
-
-                if (resultCallback1.hasHit() &&
-                        ( (Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) - (tracer.mEndPos-offset)).length2() > 35*35
-                        || !isWalkableSlope(tracer.mPlaneNormal)))
-                {
-                    actor->setOnSlope(!isWalkableSlope(resultCallback1.m_hitNormalWorld));
-                    return Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, sGroundOffset);
-                }
-                else
-                {
-                    actor->setOnSlope(!isWalkableSlope(tracer.mPlaneNormal));
-                }
-
-                return tracer.mEndPos-offset + osg::Vec3f(0.f, 0.f, sGroundOffset);
-            }
-        }
-
-        static osg::Vec3f move(osg::Vec3f position, const MWWorld::Ptr &ptr, Actor* physicActor, const osg::Vec3f &movement, float time,
-                                  bool isFlying, float waterlevel, float slowFall, const btCollisionWorld* collisionWorld,
-                               std::map<MWWorld::Ptr, MWWorld::Ptr>& standingCollisionTracker)
-        {
-            const ESM::Position& refpos = ptr.getRefData().getPosition();
-            // Early-out for totally static creatures
-            // (Not sure if gravity should still apply?)
-            if (!ptr.getClass().isMobile(ptr))
-                return position;
-
-            // Reset per-frame data
-            physicActor->setWalkingOnWater(false);
-            // Anything to collide with?
-            if(!physicActor->getCollisionMode())
-            {
-                return position +  (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) *
-                                    osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))
-                                    ) * movement * time;
-            }
-
-            const btCollisionObject *colobj = physicActor->getCollisionObject();
-            osg::Vec3f halfExtents = physicActor->getHalfExtents();
-
-            // NOTE: here we don't account for the collision box translation (i.e. physicActor->getPosition() - refpos.pos).
-            // That means the collision shape used for moving this actor is in a different spot than the collision shape
-            // other actors are using to collide against this actor.
-            // While this is strictly speaking wrong, it's needed for MW compatibility.
-            position.z() += halfExtents.z();
-
-            static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                    .find("fSwimHeightScale")->mValue.getFloat();
-            float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
-
-            ActorTracer tracer;
-
-            osg::Vec3f inertia = physicActor->getInertialForce();
-            osg::Vec3f velocity;
-
-            if(position.z() < swimlevel || isFlying)
-            {
-                velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) *
-                            osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
-            }
-            else
-            {
-                velocity = (osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * movement;
-
-                if ((velocity.z() > 0.f && physicActor->getOnGround() && !physicActor->getOnSlope())
-                 || (velocity.z() > 0.f && velocity.z() + inertia.z() <= -velocity.z() && physicActor->getOnSlope()))
-                    inertia = velocity;
-                else if (!physicActor->getOnGround() || physicActor->getOnSlope())
-                    velocity = velocity + inertia;
-            }
-
-            // dead actors underwater will float to the surface, if the CharacterController tells us to do so
-            if (movement.z() > 0 && ptr.getClass().getCreatureStats(ptr).isDead() && position.z() < swimlevel)
-                velocity = osg::Vec3f(0,0,1) * 25;
-
-            if (ptr.getClass().getMovementSettings(ptr).mPosition[2])
-            {
-                const bool isPlayer = (ptr == MWMechanics::getPlayer());
-                // Advance acrobatics and set flag for GetPCJumping
-                if (isPlayer)
-                {
-                    ptr.getClass().skillUsageSucceeded(ptr, ESM::Skill::Acrobatics, 0);
-                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
-                }
-
-                // Decrease fatigue
-                if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-                    const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-                    const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-                    const float normalizedEncumbrance = std::min(1.f, ptr.getClass().getNormalizedEncumbrance(ptr));
-                    const float fatigueDecrease = fFatigueJumpBase + normalizedEncumbrance * fFatigueJumpMult;
-                    MWMechanics::DynamicStat<float> fatigue = ptr.getClass().getCreatureStats(ptr).getFatigue();
-                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                    ptr.getClass().getCreatureStats(ptr).setFatigue(fatigue);
-                }
-                ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
-            }
-
-            // Now that we have the effective movement vector, apply wind forces to it
-            if (MWBase::Environment::get().getWorld()->isInStorm())
-            {
-                osg::Vec3f stormDirection = MWBase::Environment::get().getWorld()->getStormDirection();
-                float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
-                static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fStromWalkMult")->mValue.getFloat();
-                velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
-            }
-
-            Stepper stepper(collisionWorld, colobj);
-            osg::Vec3f origVelocity = velocity;
-            osg::Vec3f newPosition = position;
-            /*
-             * A loop to find newPosition using tracer, if successful different from the starting position.
-             * nextpos is the local variable used to find potential newPosition, using velocity and remainingTime
-             * The initial velocity was set earlier (see above).
-             */
-            float remainingTime = time;
-            for(int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
-            {
-                osg::Vec3f nextpos = newPosition + velocity * remainingTime;
-
-                // If not able to fly, don't allow to swim up into the air
-                if(!isFlying &&                   // can't fly
-                   nextpos.z() > swimlevel &&     // but about to go above water
-                   newPosition.z() < swimlevel)
-                {
-                    const osg::Vec3f down(0,0,-1);
-                    velocity = slide(velocity, down);
-                    // NOTE: remainingTime is unchanged before the loop continues
-                    continue; // velocity updated, calculate nextpos again
-                }
-
-                if((newPosition - nextpos).length2() > 0.0001)
-                {
-                    // trace to where character would go if there were no obstructions
-                    tracer.doTrace(colobj, newPosition, nextpos, collisionWorld);
-
-                    // check for obstructions
-                    if(tracer.mFraction >= 1.0f)
-                    {
-                        newPosition = tracer.mEndPos; // ok to move, so set newPosition
-                        break;
-                    }
-                }
-                else
-                {
-                    // The current position and next position are nearly the same, so just exit.
-                    // Note: Bullet can trigger an assert in debug modes if the positions
-                    // are the same, since that causes it to attempt to normalize a zero
-                    // length vector (which can also happen with nearly identical vectors, since
-                    // precision can be lost due to any math Bullet does internally). Since we
-                    // aren't performing any collision detection, we want to reject the next
-                    // position, so that we don't slowly move inside another object.
-                    break;
-                }
-
-                // We are touching something.
-                if (tracer.mFraction < 1E-9f)
-                {
-                    // Try to separate by backing off slighly to unstuck the solver
-                    osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
-                    newPosition += backOff;
-                }
-
-                // We hit something. Check if we can step up.
-                float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
-                osg::Vec3f oldPosition = newPosition;
-                bool result = false;
-                if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
-                {
-                    // Try to step up onto it.
-                    // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
-                    result = stepper.step(newPosition, velocity*remainingTime, remainingTime);
-                }
-                if (result)
-                {
-                    // don't let pure water creatures move out of water after stepMove
-                    if (ptr.getClass().isPureWaterCreature(ptr)
-                            && newPosition.z() + halfExtents.z() > waterlevel)
-                        newPosition = oldPosition;
-                }
-                else
-                {
-                    // Can't move this way, try to find another spot along the plane
-                    osg::Vec3f newVelocity = slide(velocity, tracer.mPlaneNormal);
-
-                    // Do not allow sliding upward if there is gravity.
-                    // Stepping will have taken care of that.
-                    if(!(newPosition.z() < swimlevel || isFlying))
-                        newVelocity.z() = std::min(newVelocity.z(), 0.0f);
-
-                    if ((newVelocity-velocity).length2() < 0.01)
-                        break;
-                    if ((newVelocity * origVelocity) <= 0.f)
-                        break; // ^ dot product
-
-                    velocity = newVelocity;
-                }
-            }
-
-            bool isOnGround = false;
-            bool isOnSlope = false;
-            if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
-            {
-                osg::Vec3f from = newPosition;
-                osg::Vec3f to = newPosition - (physicActor->getOnGround() ?
-                             osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
-                tracer.doTrace(colobj, from, to, collisionWorld);
-                if(tracer.mFraction < 1.0f
-                        && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup != CollisionType_Actor)
-                {
-                    const btCollisionObject* standingOn = tracer.mHitObject;
-                    PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
-                    if (ptrHolder)
-                        standingCollisionTracker[ptr] = ptrHolder->getPtr();
-
-                    if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
-                        physicActor->setWalkingOnWater(true);
-                    if (!isFlying)
-                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
-
-                    isOnGround = true;
-
-                    isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                }
-                else
-                {
-                    // standing on actors is not allowed (see above).
-                    // in addition to that, apply a sliding effect away from the center of the actor,
-                    // so that we do not stay suspended in air indefinitely.
-                    if (tracer.mFraction < 1.0f && tracer.mHitObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
-                    {
-                        if (osg::Vec3f(velocity.x(), velocity.y(), 0).length2() < 100.f*100.f)
-                        {
-                            btVector3 aabbMin, aabbMax;
-                            tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
-                            btVector3 center = (aabbMin + aabbMax) / 2.f;
-                            inertia = osg::Vec3f(position.x() - center.x(), position.y() - center.y(), 0);
-                            inertia.normalize();
-                            inertia *= 100;
-                        }
-                    }
-
-                    isOnGround = false;
-                }
-            }
-
-            if((isOnGround && !isOnSlope) || newPosition.z() < swimlevel || isFlying)
-                physicActor->setInertialForce(osg::Vec3f(0.f, 0.f, 0.f));
-            else
-            {
-                inertia.z() -= time * Constants::GravityConst * Constants::UnitsPerMeter;
-                if (inertia.z() < 0)
-                    inertia.z() *= slowFall;
-                if (slowFall < 1.f) {
-                    inertia.x() *= slowFall;
-                    inertia.y() *= slowFall;
-                }
-                physicActor->setInertialForce(inertia);
-            }
-            physicActor->setOnGround(isOnGround);
-            physicActor->setOnSlope(isOnSlope);
-
-            newPosition.z() -= halfExtents.z(); // remove what was added at the beginning
-            return newPosition;
-        }
-    };
-
-
-    // ---------------------------------------------------------------
-
-
     PhysicsSystem::PhysicsSystem(Resource::ResourceSystem* resourceSystem, osg::ref_ptr<osg::Group> parentNode)
         : mShapeManager(new Resource::BulletShapeManager(resourceSystem->getVFS(), resourceSystem->getSceneManager(), resourceSystem->getNifFileManager()))
         , mResourceSystem(resourceSystem)
@@ -645,54 +171,6 @@ namespace MWPhysics
         return true;
     }
 
-    class DeepestNotMeContactTestResultCallback : public btCollisionWorld::ContactResultCallback
-    {
-        const btCollisionObject* mMe;
-        const std::vector<const btCollisionObject*> mTargets;
-
-        // Store the real origin, since the shape's origin is its center
-        btVector3 mOrigin;
-
-    public:
-        const btCollisionObject *mObject;
-        btVector3 mContactPoint;
-        btScalar mLeastDistSqr;
-
-        DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin)
-          : mMe(me), mTargets(targets), mOrigin(origin), mObject(nullptr), mContactPoint(0,0,0),
-            mLeastDistSqr(std::numeric_limits<float>::max())
-        { }
-
-        virtual btScalar addSingleResult(btManifoldPoint& cp,
-                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
-                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
-        {
-            const btCollisionObject* collisionObject = col1Wrap->m_collisionObject;
-            if (collisionObject != mMe)
-            {
-                if (!mTargets.empty())
-                {
-                    if ((std::find(mTargets.begin(), mTargets.end(), collisionObject) == mTargets.end()))
-                    {
-                        PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
-                        if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
-                            return 0.f;
-                    }
-                }
-
-                btScalar distsqr = mOrigin.distance2(cp.getPositionWorldOnA());
-                if(!mObject || distsqr < mLeastDistSqr)
-                {
-                    mObject = collisionObject;
-                    mLeastDistSqr = distsqr;
-                    mContactPoint = cp.getPositionWorldOnA();
-                }
-            }
-
-            return 0.f;
-        }
-    };
-
     std::pair<MWWorld::Ptr, osg::Vec3f> PhysicsSystem::getHitContact(const MWWorld::ConstPtr& actor,
                                                                      const osg::Vec3f &origin,
                                                                      const osg::Quat &orient,
@@ -782,35 +260,6 @@ namespace MWPhysics
         else
             return (point - Misc::Convert::toOsg(cb.m_hitPointWorld)).length();
     }
-
-    class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
-    {
-    public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to)
-            : btCollisionWorld::ClosestRayResultCallback(from, to)
-            , mMe(me), mTargets(targets)
-        {
-        }
-
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace)
-        {
-            if (rayResult.m_collisionObject == mMe)
-                return 1.f;
-            if (!mTargets.empty())
-            {
-                if ((std::find(mTargets.begin(), mTargets.end(), rayResult.m_collisionObject) == mTargets.end()))
-                {
-                    PtrHolder* holder = static_cast<PtrHolder*>(rayResult.m_collisionObject->getUserPointer());
-                    if (holder && !holder->getPtr().isEmpty() && holder->getPtr().getClass().isActor())
-                        return 1.f;
-                }
-            }
-            return btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
-        }
-    private:
-        const btCollisionObject* mMe;
-        const std::vector<const btCollisionObject*> mTargets;
-    };
 
     PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
@@ -955,32 +404,6 @@ namespace MWPhysics
         else
             return osg::Vec3f();
     }
-
-    class ContactTestResultCallback : public btCollisionWorld::ContactResultCallback
-    {
-    public:
-        ContactTestResultCallback(const btCollisionObject* testedAgainst)
-            : mTestedAgainst(testedAgainst)
-        {
-        }
-
-        const btCollisionObject* mTestedAgainst;
-
-        std::vector<MWWorld::Ptr> mResult;
-
-        virtual btScalar addSingleResult(btManifoldPoint& cp,
-                                         const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
-                                         const btCollisionObjectWrapper* col1Wrap,int partId1,int index1)
-        {
-            const btCollisionObject* collisionObject = col0Wrap->m_collisionObject;
-            if (collisionObject == mTestedAgainst)
-                collisionObject = col1Wrap->m_collisionObject;
-            PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
-            if (holder)
-                mResult.push_back(holder->getPtr());
-            return 0.f;
-        }
-    };
 
     std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
@@ -1443,5 +866,21 @@ namespace MWPhysics
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
         mCollisionWorld->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
                                                     CollisionType_Actor);
+    }
+
+    bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        btCollisionObject* object = nullptr;
+        const auto it = mActors.find(ignore);
+        if (it != mActors.end())
+            object = it->second->getCollisionObject();
+        const auto bulletPosition = Misc::Convert::toBullet(position);
+        const auto aabbMin = bulletPosition - btVector3(radius, radius, radius);
+        const auto aabbMax = bulletPosition + btVector3(radius, radius, radius);
+        const int mask = MWPhysics::CollisionType_Actor;
+        const int group = 0xff;
+        HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
+        mCollisionWorld->getBroadphase()->aabbTest(aabbMin, aabbMax, callback);
+        return callback.getResult();
     }
 }

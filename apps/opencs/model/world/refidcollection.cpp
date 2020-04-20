@@ -486,7 +486,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Head, ColumnBase::Display_BodyPart));
     npcColumns.mHead = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Gender, ColumnBase::Display_GenderNpc));
     npcColumns.mGender = &mColumns.back();
 
     npcColumns.mFlags.insert (std::make_pair (essential, ESM::NPC::Essential));

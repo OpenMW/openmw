@@ -5,8 +5,10 @@
 #include <sstream>
 
 #include <components/misc/constants.hpp>
+
 #include <components/sceneutil/mwshadowtechnique.hpp>
 #include <components/sceneutil/occlusionquerynode.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -218,10 +220,8 @@ private:
     osg::ref_ptr<LodCallback> mLodCallback;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage,
-                             unsigned int nodeMask, const SceneUtil::OcclusionQuerySettings& oqsettings,unsigned  int preCompileMask,unsigned  int borderMask,
-                             unsigned int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, oqsettings, preCompileMask, borderMask)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize, const SceneUtil::OcclusionQuerySettings& oqsettings)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage, oqsettings)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
@@ -311,7 +311,7 @@ void QuadTreeWorld::loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int 
     if (!entry.mRenderingNode){
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
 
-        entry.mRenderingNode->setNodeMask(mTerrainNodeMask);
+        entry.mRenderingNode->setNodeMask(SceneUtil::Mask_Terrain);
 
         if(mOQNSettings.enable&&entry.mRenderingNode.valid())
         {
@@ -387,11 +387,17 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
             if (!lineIntersector)
                 throw std::runtime_error("Cannot update QuadTreeWorld: node visitor is not LineSegmentIntersector");
 
-            osg::Matrix matrix = osg::Matrix::identity();
             if (lineIntersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
-                matrix = lineIntersector->getTransformation(*iv, osgUtil::Intersector::CoordinateFrame::MODEL);
-            osg::ref_ptr<TerrainLineIntersector> terrainIntersector (new TerrainLineIntersector(lineIntersector, matrix));
-            mRootNode->intersect(vd, terrainIntersector);
+            {
+                TerrainLineIntersector terrainIntersector(lineIntersector);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
+            else
+            {
+                osg::Matrix matrix(lineIntersector->getTransformation(*iv, lineIntersector->getCoordinateFrame()));
+                TerrainLineIntersector terrainIntersector(lineIntersector, matrix);
+                mRootNode->intersect(vd, terrainIntersector);
+            }
         }
     }
     osg::Node *chunknode;
@@ -454,7 +460,7 @@ void QuadTreeWorld::enable(bool enabled)
     }
 
     if (mRootNode)
-        mRootNode->setNodeMask(enabled ? ~0 : 0);
+        mRootNode->setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
 }
 
 void QuadTreeWorld::cacheCell(View *view, int x, int y)

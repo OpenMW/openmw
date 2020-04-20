@@ -13,7 +13,7 @@
 namespace CSVRender
 {
     PathgridSelectionMode::PathgridSelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget)
-        : SelectionMode(parent, worldspaceWidget, Mask_Pathgrid)
+        : SelectionMode(parent, worldspaceWidget, SceneUtil::Mask_Pathgrid)
     {
         mRemoveSelectedNodes = new QAction("Remove selected nodes", this);
         mRemoveSelectedEdges = new QAction("Remove edges between selected nodes", this);
@@ -37,7 +37,7 @@ namespace CSVRender
 
     void PathgridSelectionMode::removeSelectedNodes()
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_Pathgrid);
 
         for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
         {
@@ -54,7 +54,7 @@ namespace CSVRender
 
     void PathgridSelectionMode::removeSelectedEdges()
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (Mask_Pathgrid);
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection (SceneUtil::Mask_Pathgrid);
 
         for (std::vector<osg::ref_ptr<TagBase> >::iterator it = selection.begin(); it != selection.end(); ++it)
         {

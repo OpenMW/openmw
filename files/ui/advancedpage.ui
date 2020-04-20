@@ -226,6 +226,16 @@
             </layout>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="uncappedDamageFatigueCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make Damage Fatigue magic effect uncapped like Drain Fatigue effect.&lt;/p&gt;&lt;p&gt;This means that unlike Morrowind you will be able to knock down actors using this effect.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Uncapped Damage Fatigue</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>

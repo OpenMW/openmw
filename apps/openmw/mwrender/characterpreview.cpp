@@ -17,6 +17,7 @@
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -27,7 +28,6 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "npcanimation.hpp"
-#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -61,7 +61,7 @@ namespace MWRender
             }
             else
             {
-                node->setNodeMask(0);
+                node->setNodeMask(SceneUtil::Mask_Disabled);
             }
         }
 
@@ -138,9 +138,9 @@ namespace MWRender
         mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
         mCamera->setName("CharacterPreview");
         mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
-        mCamera->setCullMask(~(Mask_UpdateVisitor));
+        mCamera->setCullMask(~(SceneUtil::Mask_UpdateVisitor));
 
-        mCamera->setNodeMask(Mask_RenderToTexture);
+        mCamera->setNodeMask(SceneUtil::Mask_RenderToTexture);
 
         osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager;
         lightManager->setStartLight(1);
@@ -255,7 +255,7 @@ namespace MWRender
 
     void CharacterPreview::redraw()
     {
-        mCamera->setNodeMask(Mask_RenderToTexture);
+        mCamera->setNodeMask(SceneUtil::Mask_RenderToTexture);
         mDrawOnceCallback->redrawNextFrame();
     }
 
@@ -364,7 +364,7 @@ namespace MWRender
         visitor.setTraversalNumber(mDrawOnceCallback->getLastRenderedFrame());
 
         osg::Node::NodeMask nodeMask = mCamera->getNodeMask();
-        mCamera->setNodeMask(~0);
+        mCamera->setNodeMask(SceneUtil::Mask_Default);
         mCamera->accept(visitor);
         mCamera->setNodeMask(nodeMask);
 

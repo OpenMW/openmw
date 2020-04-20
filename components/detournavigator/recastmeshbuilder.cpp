@@ -112,9 +112,10 @@ namespace DetourNavigator
         mWater.push_back(RecastMesh::Water {cellSize, transform});
     }
 
-    std::shared_ptr<RecastMesh> RecastMeshBuilder::create() const
+    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) const
     {
-        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mWater, mSettings.get().mTrianglesPerChunk);
+        return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes,
+            mWater, mSettings.get().mTrianglesPerChunk);
     }
 
     void RecastMeshBuilder::reset()

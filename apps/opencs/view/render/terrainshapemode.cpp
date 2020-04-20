@@ -17,6 +17,7 @@
 
 #include <components/esm/loadland.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "../widget/brushshapes.hpp"
 #include "../widget/modebutton.hpp"
@@ -38,13 +39,12 @@
 
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
-#include "mask.hpp"
 #include "tagbase.hpp"
 #include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain | Mask_Reference, "Terrain land editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain land editing", parent),
     mParentNode(parentNode)
 {
 }
@@ -273,7 +273,6 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         *document.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
 
     int landshapeColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandHeightsIndex);
-    int landMapLodColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandMapLodIndex);
     int landnormalsColumn = landTable.findColumnIndex(CSMWorld::Columns::ColumnId_LandNormalsIndex);
 
     QUndoStack& undoStack = document.getUndoStack();
@@ -287,9 +286,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
         std::string cellId = CSMWorld::CellCoordinates::generateId(cellCoordinates.getX(), cellCoordinates.getY());
         undoStack.push (new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
         const CSMWorld::LandHeightsColumn::DataType landShapePointer = landTable.data(landTable.getModelIndex(cellId, landshapeColumn)).value<CSMWorld::LandHeightsColumn::DataType>();
-        const CSMWorld::LandMapLodColumn::DataType landMapLodPointer = landTable.data(landTable.getModelIndex(cellId, landMapLodColumn)).value<CSMWorld::LandMapLodColumn::DataType>();
         CSMWorld::LandHeightsColumn::DataType landShapeNew(landShapePointer);
-        CSMWorld::LandMapLodColumn::DataType mapLodShapeNew(landMapLodPointer);
         CSVRender::PagedWorldspaceWidget *paged = dynamic_cast<CSVRender::PagedWorldspaceWidget *> (&getWorldspaceWidget());
 
         // Generate land height record
@@ -304,26 +301,7 @@ void CSVRender::TerrainShapeMode::applyTerrainEditChanges()
             }
         }
 
-        // Generate WNAM record
-        int sqrtLandGlobalMapLodSize = sqrt(ESM::Land::LAND_GLOBAL_MAP_LOD_SIZE);
-        for(int i = 0; i < sqrtLandGlobalMapLodSize; ++i)
-        {
-            for(int j = 0; j < sqrtLandGlobalMapLodSize; ++j)
-            {
-                int col = (static_cast<float>(j) / sqrtLandGlobalMapLodSize) * (ESM::Land::LAND_SIZE - 1);
-                int row = (static_cast<float>(i) / sqrtLandGlobalMapLodSize) * (ESM::Land::LAND_SIZE - 1);
-                signed char lodHeight = 0;
-                float floatLodHeight = 0;
-                if (landShapeNew[col * ESM::Land::LAND_SIZE + row] > 0) floatLodHeight = landShapeNew[col * ESM::Land::LAND_SIZE + row] / 128;
-                if (landShapeNew[col * ESM::Land::LAND_SIZE + row] <= 0) floatLodHeight = landShapeNew[col * ESM::Land::LAND_SIZE + row] / 16;
-                if (floatLodHeight > std::numeric_limits<signed char>::max()) lodHeight = std::numeric_limits<signed char>::max();
-                else if (floatLodHeight < std::numeric_limits<signed char>::min()) lodHeight = std::numeric_limits<signed char>::min();
-                else lodHeight = static_cast<signed char>(floatLodHeight);
-                mapLodShapeNew[j * sqrtLandGlobalMapLodSize + i] = lodHeight;
-            }
-        }
         pushEditToCommand(landShapeNew, document, landTable, cellId);
-        pushLodToCommand(mapLodShapeNew, document, landTable, cellId);
     }
 
     for(CSMWorld::CellCoordinates cellCoordinates: mAlteredCells)
@@ -1134,18 +1112,6 @@ void CSVRender::TerrainShapeMode::pushNormalsEditToCommand(const CSMWorld::LandN
 
     QUndoStack& undoStack = document.getUndoStack();
     undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLand));
-}
-
-void CSVRender::TerrainShapeMode::pushLodToCommand(const CSMWorld::LandMapLodColumn::DataType& newLandMapLod, CSMDoc::Document& document,
-    CSMWorld::IdTable& landTable, const std::string& cellId)
-{
-    QVariant changedLod;
-    changedLod.setValue(newLandMapLod);
-
-    QModelIndex index(landTable.getModelIndex (cellId, landTable.findColumnIndex (CSMWorld::Columns::ColumnId_LandMapLodIndex)));
-
-    QUndoStack& undoStack = document.getUndoStack();
-    undoStack.push (new CSMWorld::ModifyCommand(landTable, index, changedLod));
 }
 
 bool CSVRender::TerrainShapeMode::noCell(const std::string& cellId)

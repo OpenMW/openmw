@@ -28,6 +28,10 @@ void AiSequence::copy (const AiSequence& sequence)
     for (std::list<AiPackage *>::const_iterator iter (sequence.mPackages.begin());
         iter!=sequence.mPackages.end(); ++iter)
         mPackages.push_back ((*iter)->clone());
+
+    // We need to keep an AiWander storage, if present - it has a state machine.
+    // Not sure about another temporary storages
+    sequence.mAiState.copy<AiWanderStorage>(mAiState);
 }
 
 AiSequence::AiSequence() : mDone (false), mRepeat(false), mLastAiPackage(-1) {}

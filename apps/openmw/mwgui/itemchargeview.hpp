@@ -21,7 +21,7 @@ namespace MWGui
     class ItemModel;
     class ItemWidget;
 
-    class ItemChargeView : public MyGUI::Widget
+    class ItemChargeView final : public MyGUI::Widget
     {
         MYGUI_RTTI_DERIVED(ItemChargeView)
         public:
@@ -36,7 +36,7 @@ namespace MWGui
             /// Register needed components with MyGUI's factory manager
             static void registerComponents();
 
-            virtual void initialiseOverride();
+            void initialiseOverride() final;
 
             /// Takes ownership of \a model
             void setModel(ItemModel* model);
@@ -47,8 +47,8 @@ namespace MWGui
             void layoutWidgets();
             void resetScrollbars();
 
-            virtual void setSize(const MyGUI::IntSize& value);
-            virtual void setCoord(const MyGUI::IntCoord& value);
+            void setSize(const MyGUI::IntSize& value) final;
+            void setCoord(const MyGUI::IntCoord& value) final;
 
             MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
 

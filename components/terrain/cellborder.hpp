@@ -16,7 +16,7 @@ namespace Terrain
     public:
         typedef std::map<std::pair<int, int>, osg::ref_ptr<osg::Node> > CellGrid; 
 
-        CellBorder(Terrain::World *world, osg::Group *root, int borderMask);
+        CellBorder(Terrain::World *world, osg::Group *root);
 
         void createCellBorderGeometry(int x, int y);
         void destroyCellBorderGeometry(int x, int y);

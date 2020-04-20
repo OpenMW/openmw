@@ -26,6 +26,7 @@
 
 #include <components/compiler/extensions0.hpp>
 
+#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
@@ -46,8 +47,6 @@
 #include "mwworld/class.hpp"
 #include "mwworld/player.hpp"
 #include "mwworld/worldimp.hpp"
-
-#include "mwrender/vismask.hpp"
 
 #include "mwclass/classes.hpp"
 
@@ -544,7 +543,7 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
-    guiRoot->setNodeMask(MWRender::Mask_GUI);
+    guiRoot->setNodeMask(SceneUtil::Mask_GUI);
     rootNode->addChild(guiRoot);
     MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,

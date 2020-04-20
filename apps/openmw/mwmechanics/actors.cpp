@@ -4,6 +4,7 @@
 #include <components/esm/esmwriter.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/sceneutil/vismask.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
@@ -23,8 +24,6 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/aibreathe.hpp"
-
-#include "../mwrender/vismask.hpp"
 
 #include "spellcasting.hpp"
 #include "steering.hpp"
@@ -452,28 +451,23 @@ namespace MWMechanics
             return;
 
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        int hello = stats.getAiSetting(CreatureStats::AI_Hello).getModified();
-        if (hello == 0)
-            return;
-
-        if (MWBase::Environment::get().getWorld()->isSwimming(actor))
-            return;
-
-        MWWorld::Ptr player = getPlayer();
-        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
-        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-        osg::Vec3f dir = playerPos - actorPos;
-
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
         int packageId = seq.getTypeId();
 
-        if (seq.isInCombat() || (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
+        if (seq.isInCombat() ||
+            MWBase::Environment::get().getWorld()->isSwimming(actor) ||
+            (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
         {
             stats.setTurningToPlayer(false);
             stats.setGreetingTimer(0);
             stats.setGreetingState(Greet_None);
             return;
         }
+
+        MWWorld::Ptr player = getPlayer();
+        osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());
+        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        osg::Vec3f dir = playerPos - actorPos;
 
         if (stats.isTurningToPlayer())
         {
@@ -492,11 +486,10 @@ namespace MWMechanics
             return;
 
         // Play a random voice greeting if the player gets too close
-        float helloDistance = static_cast<float>(hello);
         static int iGreetDistanceMultiplier = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("iGreetDistanceMultiplier")->mValue.getInteger();
 
-        helloDistance *= iGreetDistanceMultiplier;
+        float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
 
         int greetingTimer = stats.getGreetingTimer();
         GreetingState greetingState = stats.getGreetingState();
@@ -1241,6 +1234,11 @@ namespace MWMechanics
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
                             inventoryStore.unequipItem(*heldIter, ptr);
                     }
+                    else if (heldIter == inventoryStore.end() || heldIter->getTypeName() == typeid(ESM::Light).name())
+                    {
+                        // For hostile NPCs, see if they have anything better to equip first
+                        inventoryStore.autoEquip(ptr);
+                    }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
@@ -1420,11 +1418,11 @@ namespace MWMechanics
         const float dist = (player.getRefData().getPosition().asVec3() - ptr.getRefData().getPosition().asVec3()).length();
         if (dist > mActorsProcessingRange)
         {
-            ptr.getRefData().getBaseNode()->setNodeMask(0);
+            ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Disabled);
             return;
         }
         else
-            ptr.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
+            ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
 
         // Fade away actors on large distance (>90% of actor's processing distance)
         float visibilityRatio = 1.0;
@@ -1748,12 +1746,12 @@ namespace MWMechanics
 
                 if (!inRange)
                 {
-                    iter->first.getRefData().getBaseNode()->setNodeMask(0);
+                    iter->first.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Disabled);
                     world->setActorCollisionMode(iter->first, false, false);
                     continue;
                 }
                 else if (!isPlayer)
-                    iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
+                    iter->first.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
 
                 const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
                 if (!isDead && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
@@ -1852,6 +1850,8 @@ namespace MWMechanics
                     stats.getActiveSpells().visitEffectSources(soulTrap);
                 }
 
+                // Magic effects will be reset later, and the magic effect that could kill the actor
+                // needs to be determined now
                 calculateCreatureStatModifiers(iter->first, 0);
 
                 if (cls.isEssential(iter->first))
@@ -1869,7 +1869,10 @@ namespace MWMechanics
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
+                // Reset dynamic stats, attributes and skills
                 calculateCreatureStatModifiers(iter->first, 0);
+                if (iter->first.getClass().isNpc())
+                    calculateNpcStatModifiers(iter->first, 0);
 
                 if( iter->first == getPlayer())
                 {

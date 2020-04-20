@@ -867,6 +867,8 @@ namespace CSMWorld
         switch (subColIndex)
         {
             case 0: return isInterior;
+            // While the ambient information is not necessarily valid if the subrecord wasn't loaded,
+            // the user should still be allowed to edit it
             case 1: return (isInterior && !behaveLikeExterior) ?
                     cell.mAmbi.mAmbient : QVariant(QVariant::UserType);
             case 2: return (isInterior && !behaveLikeExterior) ?
@@ -912,7 +914,10 @@ namespace CSMWorld
             case 1:
             {
                 if (isInterior && !behaveLikeExterior)
+                {
                     cell.mAmbi.mAmbient = static_cast<int32_t>(value.toInt());
+                    cell.setHasAmbient(true);
+                }
                 else
                     return; // return without saving
                 break;
@@ -920,7 +925,10 @@ namespace CSMWorld
             case 2:
             {
                 if (isInterior && !behaveLikeExterior)
+                {
                     cell.mAmbi.mSunlight = static_cast<int32_t>(value.toInt());
+                    cell.setHasAmbient(true);
+                }
                 else
                     return; // return without saving
                 break;
@@ -928,7 +936,10 @@ namespace CSMWorld
             case 3:
             {
                 if (isInterior && !behaveLikeExterior)
+                {
                     cell.mAmbi.mFog = static_cast<int32_t>(value.toInt());
+                    cell.setHasAmbient(true);
+                }
                 else
                     return; // return without saving
                 break;
@@ -936,7 +947,10 @@ namespace CSMWorld
             case 4:
             {
                 if (isInterior && !behaveLikeExterior)
+                {
                     cell.mAmbi.mFogDensity = value.toFloat();
+                    cell.setHasAmbient(true);
+                }
                 else
                     return; // return without saving
                 break;

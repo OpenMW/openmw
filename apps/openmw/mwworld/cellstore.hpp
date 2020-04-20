@@ -269,7 +269,7 @@ namespace MWWorld
             /// \attention This function also lists deleted (count 0) objects!
             /// \return Iteration completed?
             template<class Visitor>
-            bool forEach (Visitor& visitor)
+            bool forEach (Visitor&& visitor)
             {
                 if (mState != State_Loaded)
                     return false;

@@ -42,7 +42,15 @@ uniform sampler2D specularMap;
 varying vec2 specularMapUV;
 #endif
 
-varying float depth;
+#if @bumpMap
+uniform sampler2D bumpMap;
+varying vec2 bumpMapUV;
+uniform vec2 envMapLumaBias;
+uniform mat2 bumpMapMatrix;
+#endif
+
+varying float euclideanDepth;
+varying float linearDepth;
 
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
@@ -114,7 +122,32 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, decalTex.xyz, decalTex.a);
 #endif
 
-    float shadowing = unshadowedLightRatio(depth);
+#if @envMap
+
+    vec2 envTexCoordGen = envMapUV;
+    float envLuma = 1.0;
+
+#if @normalMap
+    // if using normal map + env map, take advantage of per-pixel normals for envTexCoordGen
+    vec3 viewVec = normalize(passViewPos.xyz);
+    vec3 r = reflect( viewVec, viewNormal );
+    float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
+    envTexCoordGen = vec2(r.x/m + 0.5, r.y/m + 0.5);
+#endif
+
+#if @bumpMap
+    vec4 bumpTex = texture2D(bumpMap, bumpMapUV);
+    envTexCoordGen += bumpTex.rg * bumpMapMatrix;
+    envLuma = clamp(bumpTex.b * envMapLumaBias.x + envMapLumaBias.y, 0.0, 1.0);
+#endif
+
+#if @preLightEnv
+    gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
+#endif
+
+#endif
+
+    float shadowing = unshadowedLightRatio(linearDepth);
 
 #if !PER_PIXEL_LIGHTING
 
@@ -128,24 +161,12 @@ void main()
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
 #endif
 
+#if @envMap && !@preLightEnv
+    gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;
+#endif
+
 #if @emissiveMap
     gl_FragData[0].xyz += texture2D(emissiveMap, emissiveMapUV).xyz;
-#endif
-
-
-#if @envMap
-
-#if @normalMap
-    // if using normal map + env map, take advantage of per-pixel normals for texCoordGen
-    vec3 viewVec = normalize(passViewPos.xyz);
-    vec3 r = reflect( viewVec, viewNormal );
-    float m = 2.0 * sqrt( r.x*r.x + r.y*r.y + (r.z+1.0)*(r.z+1.0) );
-    vec2 texCoordGen = vec2(r.x/m + 0.5, r.y/m + 0.5);
-    gl_FragData[0].xyz += texture2D(envMap, texCoordGen).xyz * envMapColor.xyz;
-#else
-    gl_FragData[0].xyz += texture2D(envMap, envMapUV).xyz * envMapColor.xyz;
-#endif
-
 #endif
 
 #if @specularMap
@@ -158,8 +179,11 @@ void main()
 #endif
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
-
-    float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#if @radialFog
+    float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#else
+    float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+#endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
     applyShadowDebugOverlay();

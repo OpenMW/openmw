@@ -298,3 +298,20 @@ A value of 0 means that you can only enchant one projectile.
 If you want to have Morrowind Code Patch-like count of projectiles being enchanted at once, set this value to 0.25 (i.e. 25% of the charge).
 
 This setting can only be configured by editing the settings configuration file.
+
+uncapped damage fatigue
+-----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+There are four ways to decrease an actor's Fatigue stat in Morrowind gameplay mechanics:
+Drain, Absorb, Damage Fatigue magic effects and hand-to-hand combat.
+However, in Morrowind you can't knock down an actor with a Damage Fatigue spell or an Absorb Fatigue spell.
+Morrowind Code Patch adds an option to make it possible for Damage Fatigue spells. This is the equivalent of that option.
+
+Setting the value of this setting to true will remove the 0 lower cap from the value,
+allowing Damage Fatigue to reduce Fatigue to a value below zero.
+
+This setting can be controlled in Advanced tab of the launcher.

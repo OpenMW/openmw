@@ -8,6 +8,7 @@
 #include <components/settings/settings.hpp>
 
 #include <components/sceneutil/occlusionquerynode.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "storage.hpp"
 #include "texturemanager.hpp"
@@ -16,6 +17,7 @@
 
 namespace Terrain
 {
+
 void World::resetSettings()
 {
     mOQNSettings.enable = Settings::Manager::getBool("octree occlusion queries enable", "OcclusionQueries") && Settings::Manager::getBool("terrain OQN enable", "OcclusionQueries");
@@ -31,17 +33,17 @@ void World::resetSettings()
     SceneUtil::SettingsUpdatorVisitor updator(mOQNSettings);
     mTerrainRoot->accept(updator);
 }
-World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
-             unsigned int nodeMask,const SceneUtil::OcclusionQuerySettings& oqsettings, unsigned  int preCompileMask, unsigned  int borderMask)
+
+World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, const SceneUtil::OcclusionQuerySettings& oqsettings)
     : mStorage(storage)
     , mParent(parent)
     , mResourceSystem(resourceSystem)
     , mBorderVisible(false)
-    , mTerrainNodeMask(nodeMask)
     , mOQNSettings(oqsettings)
 {
     mTerrainRoot = new osg::Group;
     resetSettings();
+    //MY mTerrainRoot->setNodeMask(SceneUtil::Mask_Terrain);
     mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
     osg::ref_ptr<osg::Material> material (new osg::Material);
     material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
@@ -54,8 +56,8 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
     compositeCam->setProjectionMatrix(osg::Matrix::identity());
     compositeCam->setViewMatrix(osg::Matrix::identity());
     compositeCam->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-    compositeCam->setClearMask(0);
-    compositeCam->setNodeMask(preCompileMask);
+    compositeCam->setClearMask(SceneUtil::Mask_Disabled);
+    compositeCam->setNodeMask(SceneUtil::Mask_PreCompile);
     mCompositeMapCamera = compositeCam;
 
     compileRoot->addChild(compositeCam);
@@ -67,7 +69,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
-    mCellBorder.reset(new CellBorder(this,mTerrainRoot.get(),borderMask));
+    mCellBorder.reset(new CellBorder(this,mTerrainRoot.get()));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
     mResourceSystem->addResourceManager(mTextureManager.get());

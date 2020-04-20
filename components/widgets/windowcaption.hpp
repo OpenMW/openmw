@@ -8,17 +8,17 @@ namespace Gui
 
     /// Window caption that automatically adjusts "Left" and "Right" widgets in its skin
     /// based on the text size of the caption in the middle
-    class WindowCaption : public MyGUI::EditBox
+    class WindowCaption final : public MyGUI::EditBox
     {
         MYGUI_RTTI_DERIVED(WindowCaption)
     public:
         WindowCaption();
 
-        virtual void setCaption(const MyGUI::UString &_value);
-        virtual void initialiseOverride();
+        void setCaption(const MyGUI::UString &_value) final;
+        void initialiseOverride() final;
 
-        virtual void setSize(const MyGUI::IntSize& _value);
-        virtual void setCoord(const MyGUI::IntCoord& _value);
+        void setSize(const MyGUI::IntSize& _value) final;
+        void setCoord(const MyGUI::IntCoord& _value) final;
 
     private:
         MyGUI::Widget* mLeft;

@@ -16,8 +16,8 @@ namespace Terrain
     class TerrainGrid : public Terrain::World
     {
     public:
-        TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
-                    unsigned int nodeMask, const SceneUtil::OcclusionQuerySettings& oqsettings, unsigned int preCompileMask=~0,unsigned int borderMask=0);
+        TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, const SceneUtil::OcclusionQuerySettings& oqsettings);
+
         ~TerrainGrid();
 
         virtual void cacheCell(View* view, int x, int y);

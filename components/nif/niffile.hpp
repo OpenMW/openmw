@@ -26,7 +26,7 @@ struct File
 
     virtual size_t numRoots() const = 0;
 
-    virtual std::string getString(size_t index) const = 0;
+    virtual std::string getString(uint32_t index) const = 0;
 
     virtual void setUseSkinning(bool skinning) = 0;
 
@@ -75,26 +75,16 @@ class NIFFile final : public File
     void operator = (NIFFile const &);
 
 public:
+    // For generic versions NIFStream::generateVersion() is used instead
     enum NIFVersion
     {
-        // Feature-relevant
-        VER_4_1_0_0    = 0x04010000,    // 1-byte booleans (previously 4-byte)
-        VER_5_0_0_1    = 0x05000001,    // Optimized record type listings
-        VER_5_0_0_6    = 0x05000006,    // Record groups
-        VER_10_0_1_8   = 0x0A000108,    // The last version without user version
-        VER_20_1_0_1   = 0x14010001,    // String tables
-        VER_20_2_0_5   = 0x14020005,    // Record sizes
-        // Game-relevant
-        VER_4_0_0_0    = 0x04000000,    // Freedom Force NIFs, supported by Morrowind
-        VER_MW         = 0x04000002,    // 4.0.0.2. Morrowind and Freedom Force NIFs
-        VER_4_2_1_0    = 0x04020100,    // Used in Civ4 and Dark Age of Camelot
-        VER_CI         = 0x04020200,    // 4.2.2.0. Main Culpa Innata NIF version, also used in Civ4
-        VER_ZT2        = 0x0A000100,    // 10.0.1.0. Main Zoo Tycoon 2 NIF version, also used in Oblivion and Civ4
-        VER_OB_OLD     = 0x0A000102,    // 10.0.1.2. Main older Oblivion NIF version
+        VER_MW         = 0x04000002,    // 4.0.0.2. Main Morrowind NIF version.
+        VER_CI         = 0x04020200,    // 4.2.2.0. Main Culpa Innata NIF version, also used in Civ4.
+        VER_ZT2        = 0x0A000100,    // 10.0.1.0. Main Zoo Tycoon 2 NIF version, also used in Oblivion and Civ4.
+        VER_OB_OLD     = 0x0A000102,    // 10.0.1.2. Main older Oblivion NIF version.
         VER_GAMEBRYO   = 0x0A010000,    // 10.1.0.0. Lots of games use it. The first version that has Gamebryo File Format header.
-        VER_10_2_0_0   = 0x0A020000,    // Lots of games use this version as well.
         VER_CIV4       = 0x14000004,    // 20.0.0.4. Main Civilization IV NIF version.
-        VER_OB         = 0x14000005,    // 20.0.0.5. Main Oblivion NIF version
+        VER_OB         = 0x14000005,    // 20.0.0.5. Main Oblivion NIF version.
         VER_BGS        = 0x14020007     // 20.2.0.7. Main Fallout 3/4/76/New Vegas and Skyrim/SkyrimSE NIF version.
     };
     enum BethVersion
@@ -139,8 +129,10 @@ public:
     size_t numRoots() const override { return roots.size(); }
 
     /// Get a given string from the file's string table
-    std::string getString(size_t index) const override
+    std::string getString(uint32_t index) const override
     {
+        if (index == std::numeric_limits<uint32_t>::max())
+            return std::string();
         return strings.at(index);
     }
 

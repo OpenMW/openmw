@@ -46,13 +46,13 @@ public:
         3 - Compressed
         4 - Bumpmap
         5 - Default */
-    int pixel;
+    unsigned int pixel;
 
     /* Mipmap format
         0 - no
         1 - yes
         2 - default */
-    int mipmap;
+    unsigned int mipmap;
 
     /* Alpha
         0 - none
@@ -60,7 +60,7 @@ public:
         2 - smooth
         3 - default (use material alpha, or multiply material with texture if present)
     */
-    int alpha;
+    unsigned int alpha;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

@@ -197,7 +197,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     zTurn(actor, mPathFinder.getZAngleToNext(position.x(), position.y()));
     smoothTurn(actor, mPathFinder.getXAngleToNext(position.x(), position.y(), position.z()), 0);
 
-    mObstacleCheck.update(actor, duration);
+    const auto destination = mPathFinder.getPath().empty() ? dest : mPathFinder.getPath().front();
+    mObstacleCheck.update(actor, destination, duration);
 
     // handle obstacles on the way
     evadeObstacles(actor);

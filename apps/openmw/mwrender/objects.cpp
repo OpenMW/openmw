@@ -6,6 +6,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/occlusionquerynode.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -19,7 +20,7 @@
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
-#include "vismask.hpp"
+
 #include "renderbin.hpp"
 
 namespace MWRender
@@ -44,7 +45,7 @@ void Objects::resetSettings()
     mOQNSettings.querymargin = Settings::Manager::getFloat("queries margin", "OcclusionQueries");
     mOQNSettings.maxBVHOQLevelCount = Settings::Manager::getInt("max BVH OQ level count", "OcclusionQueries");
     mOQNSettings.securepopdistance = Settings::Manager::getFloat("min pop in distance", "OcclusionQueries");
-    mOQNSettings.OQMask = Mask_OcclusionQuery;
+    mOQNSettings.OQMask = SceneUtil::Mask_OcclusionQuery;
     mOQNSettings.OQRenderBin = RenderBin_OcclusionQuery;
 
     ///update current queries
@@ -131,7 +132,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
         bs.radius() = 0.5f * cellSize;
 
         osg::BoundingSphere bsi = objectNode->getBound();
-        if(objectNode->getNodeMask() == Mask_Actor)
+        if(objectNode->getNodeMask() == SceneUtil::Mask_Actor)
         {
             SceneUtil::StaticOcclusionQueryNode * qnode=new SceneUtil::StaticOcclusionQueryNode();
             qnode->setQueryMargin(mOQNSettings.querymargin);
@@ -146,7 +147,7 @@ void Objects::cellAddStaticObject(osg::Group* cellnode, const MWWorld::Ptr &ptr 
             for(unsigned int i=0; i<childc; ++i)
             {
                 cht=objectNode->getChild(i);
-                cht->setNodeMask(Mask_Object);//a bit hacky but required for actor to be OQN culled
+                cht->setNodeMask(SceneUtil::Mask_Object);//a bit hacky but required for actor to be OQN culled
                 qnode->addChild(cht);
             }
             qnode->resetStaticQueryGeometry();
@@ -206,7 +207,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
     osg::Group *cellroot = insertBegin(ptr);
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
 
-    basenode->setNodeMask(Mask_Object);
+    basenode->setNodeMask(SceneUtil::Mask_Object);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
@@ -221,7 +222,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
 
     basenode->setDataVariance(osg::Object::DYNAMIC);
-    basenode->setNodeMask(Mask_Actor);
+    basenode->setNodeMask(SceneUtil::Mask_Actor);
 
     // CreatureAnimation
     osg::ref_ptr<Animation> anim;
@@ -243,7 +244,7 @@ void Objects::insertNPC(const MWWorld::Ptr &ptr)
     SceneUtil::PositionAttitudeTransform* basenode = ptr.getRefData().getBaseNode();
 
     basenode->setDataVariance(osg::Object::DYNAMIC);
-    basenode->setNodeMask(Mask_Actor);
+    basenode->setNodeMask(SceneUtil::Mask_Actor);
 
     osg::ref_ptr<NpcAnimation> anim = new NpcAnimation(ptr, basenode, mResourceSystem);
 
@@ -279,7 +280,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
         }
         osg::Group *cellroot = mCellSceneNodes[ptr.getCell()];
 
-        if(basenode->getNodeMask() & (Mask_Object | Mask_Static) )
+        if(basenode->getNodeMask() & (SceneUtil::Mask_Object | SceneUtil::Mask_Static) )
             cellRemoveStaticObject(cellroot, ptr);
         else basenode->getParent(0)->removeChild(basenode);
 
@@ -338,7 +339,7 @@ void Objects::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &cur)
             if (dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
                 userDataContainer->setUserObject(i, new PtrHolder(cur));
         }
-    if(objectNode->getNodeMask() & (Mask_Object | Mask_Static) )
+    if(objectNode->getNodeMask() & (SceneUtil::Mask_Object | SceneUtil::Mask_Static) )
     {
         if (objectNode->getNumParents())
             cellRemoveStaticObject(getOrCreateCell(old), cur);

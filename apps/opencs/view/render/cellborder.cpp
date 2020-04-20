@@ -7,8 +7,7 @@
 #include <osg/PrimitiveSet>
 
 #include <components/esm/loadland.hpp>
-
-#include "mask.hpp"
+#include <components/sceneutil/vismask.hpp>
 
 #include "../../model/world/cellcoordinates.hpp"
 
@@ -20,7 +19,7 @@ CSVRender::CellBorder::CellBorder(osg::Group* cellNode, const CSMWorld::CellCoor
     : mParentNode(cellNode)
 {
     mBaseNode = new osg::PositionAttitudeTransform();
-    mBaseNode->setNodeMask(Mask_CellBorder);
+    mBaseNode->setNodeMask(SceneUtil::Mask_EditorCellBorder);
     mBaseNode->setPosition(osg::Vec3f(coords.getX() * CellSize, coords.getY() * CellSize, 10));
 
     mParentNode->addChild(mBaseNode);

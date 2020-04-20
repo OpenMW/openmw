@@ -421,16 +421,16 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		fi
 
 		download "Qt 5.7.0" \
-			"https://download.qt.io/archive/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
+			"https://download.qt.io/new_archive/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
 			"qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" \
 			"https://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
 			"qt-5-install.qs"
 	fi
 
 	# SDL2
-	download "SDL 2.0.7" \
-		"https://www.libsdl.org/release/SDL2-devel-2.0.7-VC.zip" \
-		"SDL2-2.0.7.zip"
+	download "SDL 2.0.12" \
+		"https://www.libsdl.org/release/SDL2-devel-2.0.12-VC.zip" \
+		"SDL2-2.0.12.zip"
 
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
@@ -697,16 +697,16 @@ fi
 cd $DEPS
 echo
 # SDL2
-printf "SDL 2.0.7... "
+printf "SDL 2.0.12... "
 {
-	if [ -d SDL2-2.0.7 ]; then
+	if [ -d SDL2-2.0.12 ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf SDL2-2.0.7
-		eval 7z x -y SDL2-2.0.7.zip $STRIP
+		rm -rf SDL2-2.0.12
+		eval 7z x -y SDL2-2.0.12.zip $STRIP
 	fi
-	export SDL2DIR="$(real_pwd)/SDL2-2.0.7"
-	add_runtime_dlls "$(pwd)/SDL2-2.0.7/lib/x${ARCHSUFFIX}/SDL2.dll"
+	export SDL2DIR="$(real_pwd)/SDL2-2.0.12"
+	add_runtime_dlls "$(pwd)/SDL2-2.0.12/lib/x${ARCHSUFFIX}/SDL2.dll"
 	echo Done.
 }
 cd $DEPS

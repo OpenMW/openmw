@@ -36,7 +36,7 @@ namespace MWMechanics
 
             virtual bool alwaysActive() const { return true; }
 
-            virtual osg::Vec3f getDestination() { return osg::Vec3f(mX, mY, mZ); }
+            virtual osg::Vec3f getDestination() const { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             float mX;

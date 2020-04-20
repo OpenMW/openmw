@@ -44,7 +44,7 @@ namespace MWMechanics
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state);
 
-            virtual osg::Vec3f getDestination() { return osg::Vec3f(mX, mY, mZ); }
+            virtual osg::Vec3f getDestination() const { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             std::string mCellId;

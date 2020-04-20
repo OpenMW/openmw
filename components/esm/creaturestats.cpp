@@ -144,7 +144,8 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mGoldPool)
         esm.writeHNT ("GOLD", mGoldPool);
 
-    esm.writeHNT ("TIME", mTradeTime);
+    if (mTradeTime.mDay != 0 || mTradeTime.mHour != 0)
+        esm.writeHNT ("TIME", mTradeTime);
 
     if (mDead)
         esm.writeHNT ("DEAD", mDead);

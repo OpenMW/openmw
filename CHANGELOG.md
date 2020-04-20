@@ -23,6 +23,7 @@
     Bug #3977: Non-ASCII characters in object ID's are not supported
     Bug #4009: Launcher does not show data files on the first run after installing
     Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
+    Bug #4141: PCSkipEquip isn't set to 1 when reading books/scrolls
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
     Bug #4262: Rain settings are hardcoded
@@ -36,10 +37,13 @@
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
     Bug #4449: Value returned by GetWindSpeed is incorrect
     Bug #4456: AiActivate should not be cancelled after target activation
+    Bug #4493: If the setup doesn't find what it is expecting, it fails silently and displays the requester again instead of letting the user know what wasn't found.
+    Bug #4523: "player->ModCurrentFatigue -0.001" in global script does not cause the running player to fall
     Bug #4540: Rain delay when exiting water
     Bug #4594: Actors without AI packages don't use Hello dialogue
     Bug #4598: Script parser does not support non-ASCII characters
     Bug #4600: Crash when no sound output is available or --no-sound is used.
+    Bug #4601: Filtering referenceables by gender is broken
     Bug #4639: Black screen after completing first mages guild mission + training
     Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog
     Bug #4680: Heap corruption on faulty esp
@@ -192,8 +196,20 @@
     Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
     Bug #5241: On-self absorb spells cannot be detected
     Bug #5242: ExplodeSpell behavior differs from Cast behavior
+    Bug #5246: Water ripples persist after cell change
     Bug #5249: Wandering NPCs start walking too soon after they hello
     Bug #5250: Creatures display shield ground mesh instead of shield body part
+    Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello
+    Bug #5261: Creatures can sometimes become stuck playing idles and never wander again
+    Bug #5264: "Damage Fatigue" Magic Effect Can Bring Fatigue below 0
+    Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
+    Bug #5278: Console command Show doesn't fall back to global variable after local var not found
+    Bug #5300: NPCs don't switch from torch to shield when starting combat
+    Bug #5308: World map copying makes save loading much slower
+    Bug #5313: Node properties of identical type are not applied in the correct order
+    Bug #5326: Formatting issues in the settings.cfg
+    Bug #5328: Skills aren't properly reset for dead actors
+    Bug #5345: Dopey Necromancy does not work due to a missing quote
     Feature #1774: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
@@ -214,9 +230,11 @@
     Feature #4544: Actors movement deceleration
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
+    Feature #4708: Radial fog support
     Feature #4730: Native animated containers support
     Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
+    Feature #4831: Item search in the player's inventory
     Feature #4836: Daytime node switch
     Feature #4840: Editor: Transient terrain change support
     Feature #4859: Make water reflections more configurable
@@ -239,6 +257,7 @@
     Feature #5091: Human-readable light source duration
     Feature #5094: Unix like console hotkeys
     Feature #5098: Allow user controller bindings
+    Feature #5114: Refresh launcher mod list
     Feature #5121: Handle NiTriStrips and NiTriStripsData
     Feature #5122: Use magic glow for enchanted arrows
     Feature #5131: Custom skeleton bones
@@ -246,9 +265,13 @@
     Feature #5146: Safe Dispose corpse
     Feature #5147: Show spell magicka cost in spell buying window
     Feature #5170: Editor: Land shape editing, land selection
+    Feature #5172: Editor: Delete instances/references with keypress in scene window
     Feature #5193: Weapon sheathing
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape
+    Feature #5274: Editor: Keyboard shortcut to drop objects to ground/obstacle in scene view
+    Feature #5304: Morrowind-style bump-mapping
+    Feature #5314: Ingredient filter in the alchemy window
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

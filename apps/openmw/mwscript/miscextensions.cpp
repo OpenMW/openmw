@@ -923,31 +923,27 @@ namespace MWScript
                 if (!ptr.isEmpty())
                 {
                     const std::string& script = ptr.getClass().getScript(ptr);
-                    if (script.empty())
-                    {
-                        output << ptr.getCellRef().getRefId() << " has no script " << std::endl;
-                    }
-                    else
+                    if (!script.empty())
                     {
                         const Compiler::Locals& locals =
                             MWBase::Environment::get().getScriptManager()->getLocals(script);
                         char type = locals.getType(var);
+                        std::string refId = ptr.getCellRef().getRefId();
+                        if (refId.find(' ') != std::string::npos)
+                            refId = '"' + refId + '"';
                         switch (type)
                         {
                         case 'l':
                         case 's':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getIntVar(script, var);
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getIntVar(script, var);
                             break;
                         case 'f':
-                            output << ptr.getCellRef().getRefId() << "." << var << ": " << ptr.getRefData().getLocals().getFloatVar(script, var);
-                            break;
-                        default:
-                            output << "unknown local '" << var << "' for '" << ptr.getCellRef().getRefId() << "'";
+                            output << refId << "." << var << " = " << ptr.getRefData().getLocals().getFloatVar(script, var);
                             break;
                         }
                     }
                 }
-                else
+                if (output.rdbuf()->in_avail() == 0)
                 {
                     MWBase::World *world = MWBase::Environment::get().getWorld();
                     char type = world->getGlobalVariableType (var);
@@ -955,16 +951,16 @@ namespace MWScript
                     switch (type)
                     {
                     case 's':
-                        output << runtime.getContext().getGlobalShort (var);
+                        output << var << " = " << runtime.getContext().getGlobalShort (var);
                         break;
                     case 'l':
-                        output << runtime.getContext().getGlobalLong (var);
+                        output << var << " = " << runtime.getContext().getGlobalLong (var);
                         break;
                     case 'f':
-                        output << runtime.getContext().getGlobalFloat (var);
+                        output << var << " = " << runtime.getContext().getGlobalFloat (var);
                         break;
                     default:
-                        output << "unknown global variable";
+                        output << "unknown variable";
                     }
                 }
                 runtime.getContext().report(output.str());
@@ -1258,6 +1254,7 @@ namespace MWScript
                     msg << "[Deleted]" << std::endl;
 
                 msg << "RefID: " << ptr.getCellRef().getRefId() << std::endl;
+                msg << "Memory address: " << ptr.getBase() << std::endl;
 
                 if (ptr.isInCell())
                 {
@@ -1443,6 +1440,20 @@ namespace MWScript
                 }
         };
 
+        class OpToggleRecastMesh : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    bool enabled =
+                        MWBase::Environment::get().getWorld()->toggleRenderMode (MWRender::Render_RecastMesh);
+
+                    runtime.getContext().report (enabled ?
+                        "Recast Mesh Rendering -> On" : "Recast Mesh Rendering -> Off");
+                }
+        };
+
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
@@ -1548,6 +1559,7 @@ namespace MWScript
             interpreter.installSegment5 (Compiler::Misc::opcodeSetNavMeshNumberToRender, new OpSetNavMeshNumberToRender);
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMe, new OpRepairedOnMe<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeRepairedOnMeExplicit, new OpRepairedOnMe<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeToggleRecastMesh, new OpToggleRecastMesh);
         }
     }
 }

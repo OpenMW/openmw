@@ -51,7 +51,11 @@ add_component_dir (shader
 add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue unrefqueue pathgridutil waterutil writescene serialize optimizer
+<<<<<<< HEAD
     actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique occlusionquerynode
+=======
+    actorutil detourdebugdraw navmesh agentpath shadow mwshadowtechnique vismask recastmesh
+>>>>>>> 2a31382e2014a79cf6f2e4a124239edf9e10e85e
     )
 
 add_component_dir (nif
@@ -172,6 +176,8 @@ add_component_dir(detournavigator
     recastmeshobject
     navmeshtilescache
     settings
+    navigator
+    findrandompointaroundcircle
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui

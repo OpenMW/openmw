@@ -62,10 +62,13 @@ void Launcher::DataFilesPage::buildView()
 {
     ui.verticalLayout->insertWidget (0, mSelector->uiWidget());
 
+    QToolButton * refreshButton = mSelector->refreshButton();    
+
     //tool buttons
     ui.newProfileButton->setToolTip ("Create a new Content List");
     ui.cloneProfileButton->setToolTip ("Clone the current Content List");
     ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
+    refreshButton->setToolTip("Refresh Data Files");
 
     //combo box
     ui.profilesComboBox->addItem(mDefaultContentListName);
@@ -76,6 +79,7 @@ void Launcher::DataFilesPage::buildView()
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
     ui.cloneProfileButton->setDefaultAction (ui.cloneProfileAction);
     ui.deleteProfileButton->setDefaultAction (ui.deleteProfileAction);
+    refreshButton->setDefaultAction(ui.refreshDataFilesAction);
 
     //establish connections
     connect (ui.profilesComboBox, SIGNAL (currentIndexChanged(int)),
@@ -86,6 +90,8 @@ void Launcher::DataFilesPage::buildView()
 
     connect (ui.profilesComboBox, SIGNAL (signalProfileChanged(QString, QString)),
              this, SLOT (slotProfileChangedByUser(QString, QString)));
+
+    connect(ui.refreshDataFilesAction, SIGNAL(triggered()),this, SLOT(slotRefreshButtonClicked()));
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -113,6 +119,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
     if (!mDataLocal.isEmpty())
         paths.insert(0, mDataLocal);
+
+    mSelector->clearFiles();
 
     for (const QString &path : paths)
         mSelector->addFiles(path);
@@ -167,7 +175,16 @@ QStringList Launcher::DataFilesPage::selectedFilePaths()
     QStringList filePaths;
     for (const ContentSelectorModel::EsmFile *item : items)
     {
-        filePaths.append(item->filePath());
+        QFile file(item->filePath());
+        
+        if(file.exists())
+        {
+            filePaths.append(item->filePath());
+        }
+        else
+        {
+            slotRefreshButtonClicked();
+        }
     }
     return filePaths;
 }
@@ -219,6 +236,18 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
 void Launcher::DataFilesPage::slotProfileDeleted (const QString &item)
 {
     removeProfile (item);
+}
+
+void Launcher::DataFilesPage:: refreshDataFilesView ()
+{
+    QString currentProfile = ui.profilesComboBox->currentText();
+    saveSettings(currentProfile);
+    populateFileViews(currentProfile);
+}
+
+void Launcher::DataFilesPage::slotRefreshButtonClicked ()
+{
+    refreshDataFilesView();
 }
 
 void Launcher::DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)

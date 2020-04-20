@@ -70,6 +70,8 @@ struct Land
 
     static const int LAND_GLOBAL_MAP_LOD_SIZE = 81;
 
+    static const int LAND_GLOBAL_MAP_LOD_SIZE_SQRT = 9;
+
 #pragma pack(push,1)
     struct VHGT
     {

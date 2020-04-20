@@ -153,13 +153,19 @@ void ESM::CellRef::save (ESMWriter &esm, bool wideRefNum, bool inInventory, bool
         esm.writeHNT("XSCL", scale);
     }
 
-    esm.writeHNOCString("ANAM", mOwner);
+    if (!inInventory)
+        esm.writeHNOCString("ANAM", mOwner);
+
     esm.writeHNOCString("BNAM", mGlobalVariable);
     esm.writeHNOCString("XSOL", mSoul);
 
-    esm.writeHNOCString("CNAM", mFaction);
-    if (mFactionRank != -2) {
-        esm.writeHNT("INDX", mFactionRank);
+    if (!inInventory)
+    {
+        esm.writeHNOCString("CNAM", mFaction);
+        if (mFactionRank != -2)
+        {
+            esm.writeHNT("INDX", mFactionRank);
+        }
     }
 
     if (mEnchantmentCharge != -1)

@@ -255,7 +255,7 @@ namespace
         }
     }
 
-    struct AdjustPositionVisitor
+    struct PositionVisitor
     {
         bool operator() (const MWWorld::Ptr& ptr)
         {
@@ -330,7 +330,7 @@ namespace MWWorld
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
 
-        (*iter)->forEach<ListAndResetObjectsVisitor>(visitor);
+        (*iter)->forEach(visitor);
         const auto world = MWBase::Environment::get().getWorld();
         for (const auto& ptr : visitor.mObjects)
         {
@@ -877,8 +877,8 @@ namespace MWWorld
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
-        AdjustPositionVisitor adjustPosVisitor;
-        cell.forEach (adjustPosVisitor);
+        PositionVisitor posVisitor;
+        cell.forEach (posVisitor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)

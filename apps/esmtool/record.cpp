@@ -534,10 +534,18 @@ void Record<ESM::Cell>::print()
     if (mData.mData.mFlags & ESM::Cell::Interior &&
         !(mData.mData.mFlags & ESM::Cell::QuasiEx))
     {
-        std::cout << "  Ambient Light Color: " << mData.mAmbi.mAmbient << std::endl;
-        std::cout << "  Sunlight Color: " << mData.mAmbi.mSunlight << std::endl;
-        std::cout << "  Fog Color: " << mData.mAmbi.mFog << std::endl;
-        std::cout << "  Fog Density: " << mData.mAmbi.mFogDensity << std::endl;
+        if (mData.hasAmbient())
+        {
+            // TODO: see if we can change the integer representation to something more sensible
+            std::cout << "  Ambient Light Color: " << mData.mAmbi.mAmbient << std::endl;
+            std::cout << "  Sunlight Color: " << mData.mAmbi.mSunlight << std::endl;
+            std::cout << "  Fog Color: " << mData.mAmbi.mFog << std::endl;
+            std::cout << "  Fog Density: " << mData.mAmbi.mFogDensity << std::endl;
+        }
+        else
+        {
+            std::cout << "  No Ambient Information" << std::endl;
+        }
         std::cout << "  Water Level: " << mData.mWater << std::endl;
     }
     else

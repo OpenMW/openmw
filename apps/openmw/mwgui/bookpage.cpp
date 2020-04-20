@@ -817,7 +817,7 @@ namespace
     };
 }
 
-class PageDisplay : public MyGUI::ISubWidgetText
+class PageDisplay final : public MyGUI::ISubWidgetText
 {
     MYGUI_RTTI_DERIVED(PageDisplay)
 protected:
@@ -1140,7 +1140,7 @@ public:
                 i->second->createDrawItem (mNode);
     }
 
-    void setVisible (bool newVisible)
+    void setVisible (bool newVisible) final
     {
         if (mVisible == newVisible)
             return;
@@ -1162,7 +1162,7 @@ public:
         }
     }
 
-    void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node)
+    void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node) final
     {
         mNode = node;
 
@@ -1230,9 +1230,9 @@ public:
 
     // ISubWidget should not necessarily be a drawitem
     // in this case, it is not...
-    void doRender() { }
+    void doRender() final { }
 
-    void _updateView ()
+    void _updateView () final
     {
         _checkMargin();
 
@@ -1241,7 +1241,7 @@ public:
                 mNode->outOfDate (i->second->mRenderItem);
     }
 
-    void _correctView()
+    void _correctView() final
     {
         _checkMargin ();
 
@@ -1251,7 +1251,7 @@ public:
 
     }
 
-    void destroyDrawItem()
+    void destroyDrawItem() final
     {
         for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
             i->second->destroyDrawItem (mNode);
@@ -1261,7 +1261,7 @@ public:
 };
 
 
-class BookPageImpl : public BookPage
+class BookPageImpl final : public BookPage
 {
 MYGUI_RTTI_DERIVED(BookPage)
 public:
@@ -1271,24 +1271,24 @@ public:
     {
     }
 
-    void showPage (TypesetBook::Ptr book, size_t page)
+    void showPage (TypesetBook::Ptr book, size_t page) final
     {
         mPageDisplay->showPage (book, page);
     }
 
-    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked)
+    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked) final
     {
         mPageDisplay->mLinkClicked = linkClicked;
     }
 
-    void unadviseLinkClicked ()
+    void unadviseLinkClicked () final
     {
         mPageDisplay->mLinkClicked = std::function <void (InteractiveId)> ();
     }
 
 protected:
 
-    virtual void initialiseOverride()
+    void initialiseOverride() final
     {
         Base::initialiseOverride();
 
@@ -1302,24 +1302,24 @@ protected:
         }
     }
 
-    void onMouseLostFocus(Widget* _new)
+    void onMouseLostFocus(Widget* _new) final
     {
         // NOTE: MyGUI also fires eventMouseLostFocus for widgets that are about to be destroyed (if they had focus).
         // Child widgets may already be destroyed! So be careful.
         mPageDisplay->onMouseLostFocus ();
     }
 
-    void onMouseMove(int left, int top)
+    void onMouseMove(int left, int top) final
     {
         mPageDisplay->onMouseMove (left, top);
     }
 
-    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id)
+    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id) final
     {
         mPageDisplay->onMouseButtonPressed (left, top, id);
     }
 
-    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
+    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id) final
     {
         mPageDisplay->onMouseButtonReleased (left, top, id);
     }

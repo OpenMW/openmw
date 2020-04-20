@@ -426,6 +426,8 @@ namespace MWWorld
 
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) override;
 
+            bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) override;
+
             void setActorCollisionMode(const Ptr& ptr, bool internal, bool external) override;
             bool isActorCollisionEnabled(const Ptr& ptr) override;
 
@@ -726,6 +728,8 @@ namespace MWWorld
             osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const override;
 
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
+
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
     };
 }
 

@@ -150,12 +150,12 @@ void QuadTreeNode::traverseTo(ViewData* vd, float size, const osg::Vec2f& center
     }
 }
 
-void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector* intersector)
+void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector& intersector)
 {
     if (!hasValidBounds())
         return;
 
-    if (!intersector->intersectAndClip(getBoundingBox()))
+    if (!intersector.intersectAndClip(getBoundingBox()))
         return;
 
     if (getNumChildren() == 0)

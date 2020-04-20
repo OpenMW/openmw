@@ -422,7 +422,8 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
 std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string extension) const
 {
     size_t len = stem.length();
-    if (len == 0) return 0;
+    if (len == 0)
+        return 0;
     std::uint64_t hash = 0;
     unsigned int hash2 = 0;
     Misc::StringUtils::lowerCaseInPlace(stem);
@@ -434,12 +435,19 @@ std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string exte
         for (const char &c : extension)
             hash = hash * 0x1003f + c;
     }
-    for (size_t i = 1; i < len-2 && len > 3; i++)
-        hash2 = hash2 * 0x1003f + stem[i];
+    if (len >= 4)
+    {
+        for (size_t i = 1; i < len-2; i++)
+            hash2 = hash2 * 0x1003f + stem[i];
+    }
     hash = (hash + hash2) << 32;
     hash2 = (stem[0] << 24) | (len << 16);
-    if (len >= 3) hash2 |= stem[len-2] << 8;
-    if (len >= 2) hash2 |= stem[len-1];
+    if (len >= 2)
+    {
+        if (len >= 3)
+            hash2 |= stem[len-2] << 8;
+        hash2 |= stem[len-1];
+    }
     if (!extension.empty())
     {
         if (extension == ".kf")       hash2 |= 0x80;

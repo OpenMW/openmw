@@ -5,6 +5,7 @@
 #include <osg/Group>
 
 #include <components/sceneutil/occlusionquerynode.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
@@ -20,9 +21,8 @@ public:
     virtual void reset() {}
 };
 
-TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
-                         unsigned int nodeMask, const SceneUtil::OcclusionQuerySettings& qsettings, unsigned int preCompileMask, unsigned int borderMask)
-    : Terrain::World(parent, compileRoot, resourceSystem, storage, nodeMask, qsettings, preCompileMask, borderMask)
+TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, const SceneUtil::OcclusionQuerySettings& oqsettings)
+    : Terrain::World(parent, compileRoot, resourceSystem, storage, oqsettings)
     , mNumSplits(4)
 {
     resetSettings();
@@ -81,7 +81,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
         if (!node)
             return nullptr;
 
-        node->setNodeMask(mTerrainNodeMask);
+        node->setNodeMask(SceneUtil::Mask_Terrain);
 
         if(mOQNSettings.enable)
         {
