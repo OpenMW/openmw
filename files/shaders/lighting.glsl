@@ -13,7 +13,11 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 
     ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
+#if @omnidirlighting
+    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * illumination;
+#else
     diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
+#endif
 }
 
 #if PER_PIXEL_LIGHTING

@@ -4,6 +4,8 @@
 #include <osg/Material>
 #include <osg/Geometry>
 
+#include <osgParticle/ParticleSystem>
+
 #include <osgUtil/TangentSpaceGenerator>
 
 #include <components/debug/debuglog.hpp>
@@ -287,7 +289,6 @@ namespace Shader
     {
         if (!reqs.mShaderRequired && !mForceShaders)
             return;
-
         osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = nullptr;
         if (mAllowedToModifyStateSets)
@@ -308,6 +309,8 @@ namespace Shader
         }
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
+        if(dynamic_cast<osgParticle::ParticleSystem *>(reqs.mNode))
+            defineMap["omnidirlighting"] = "1";
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
 
