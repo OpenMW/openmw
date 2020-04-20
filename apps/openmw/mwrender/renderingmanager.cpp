@@ -1012,11 +1012,9 @@ namespace MWRender
 
         mRttCamera->addChild(mSceneRoot);
 
-//MY
-        /*
         mRttCamera->addChild(mWater->getReflectionCamera());
         mRttCamera->addChild(mWater->getRefractionCamera());
-*/
+
         mRttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~SceneUtil::Mask_GUI));
 
         mRttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

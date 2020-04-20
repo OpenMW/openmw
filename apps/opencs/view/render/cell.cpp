@@ -137,11 +137,8 @@ void CSVRender::Cell::updateLand()
             else
             {
                 mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
-<<<<<<< HEAD
-                    mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain, OQsettings));
-=======
-                    mData.getResourceSystem().get(), mTerrainStorage));
->>>>>>> 2a31382e2014a79cf6f2e4a124239edf9e10e85e
+                    mData.getResourceSystem().get(), mTerrainStorage, OQsettings));
+
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
