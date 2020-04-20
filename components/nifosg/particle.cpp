@@ -2,6 +2,7 @@
 
 #include <limits>
 
+#include <osg/Version>
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
 
@@ -19,12 +20,19 @@ ParticleSystem::ParticleSystem()
     : osgParticle::ParticleSystem()
     , mQuota(std::numeric_limits<int>::max())
 {
+    mNormalArray = new osg::Vec3Array(1);
+    mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+    (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
 }
 
 ParticleSystem::ParticleSystem(const ParticleSystem &copy, const osg::CopyOp &copyop)
     : osgParticle::ParticleSystem(copy, copyop)
     , mQuota(copy.mQuota)
 {
+    mNormalArray = new osg::Vec3Array(1);
+    mNormalArray->setBinding(osg::Array::BIND_OVERALL);
+    (*mNormalArray.get())[0] = osg::Vec3(0.3, 0.3, 0.3);
+
     // For some reason the osgParticle constructor doesn't copy the particles
     for (int i=0;i<copy.numParticles()-copy.numDeadParticles();++i)
         ParticleSystem::createParticle(copy.getParticle(i));
@@ -40,6 +48,25 @@ osgParticle::Particle* ParticleSystem::createParticle(const osgParticle::Particl
     if (numParticles()-numDeadParticles() < mQuota)
         return osgParticle::ParticleSystem::createParticle(ptemplate);
     return nullptr;
+}
+
+void ParticleSystem::drawImplementation(osg::RenderInfo& renderInfo) const
+{
+    osg::State & state = *renderInfo.getState();
+#if OSG_MIN_VERSION_REQUIRED(3, 5, 6)
+    if(state.useVertexArrayObject(getUseVertexArrayObject()))
+    {
+        state.getCurrentVertexArrayState()->assignNormalArrayDispatcher();
+        state.getCurrentVertexArrayState()->setNormalArray(state, mNormalArray);
+    }
+    else
+    {
+        state.getAttributeDispatchers().activateNormalArray(mNormalArray);
+    }
+#else
+     state.Normal(0.3, 0.3, 0.3);
+#endif
+     osgParticle::ParticleSystem::drawImplementation(renderInfo);
 }
 
 void InverseWorldMatrix::operator()(osg::Node *node, osg::NodeVisitor *nv)
@@ -159,8 +186,11 @@ void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* d
 {
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
     osg::Vec4f color = mData.interpKey(time);
+    float alpha = color.a();
+    color.a() = 1.0f;
 
     particle->setColorRange(osgParticle::rangev4(color, color));
+    particle->setAlphaRange(osgParticle::rangef(alpha, alpha));
 }
 
 GravityAffector::GravityAffector(const Nif::NiGravity *gravity)
