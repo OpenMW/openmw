@@ -12,6 +12,7 @@
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 namespace DetourNavigator
 {
@@ -312,11 +313,11 @@ namespace
             AreaType_ground
         );
         const auto recastMesh = builder.create(mGeneration, mRevision);
-        EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
+        EXPECT_THAT(recastMesh->getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
             0, -0.70710659027099609375, -3.535533905029296875,
             0, 0.707107067108154296875, -3.535533905029296875,
             0, 2.384185791015625e-07, -4.24264049530029296875,
-        }));
+        })));
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
     }
@@ -337,11 +338,11 @@ namespace
             AreaType_ground
         );
         const auto recastMesh = builder.create(mGeneration, mRevision);
-        EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
+        EXPECT_THAT(recastMesh->getVertices(), Pointwise(FloatNear(1e-5), std::vector<float>({
             -3.535533905029296875, -0.70710659027099609375, 0,
             -3.535533905029296875, 0.707107067108154296875, 0,
             -4.24264049530029296875, 2.384185791015625e-07, 0,
-        }));
+        })));
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground}));
     }
