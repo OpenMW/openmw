@@ -730,7 +730,8 @@ namespace MWGui
             && (type != typeid(ESM::Potion).name()))
             return;
 
-        if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
+        // An object that can be picked up must have a tooltip.
+        if (!object.getClass().hasToolTip(object))
             return;
 
         int count = object.getRefData().getCount();
