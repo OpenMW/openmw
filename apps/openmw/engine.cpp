@@ -686,7 +686,7 @@ void OMW::Engine::go()
 #endif
 
     mScreenCaptureOperation = new WriteScreenshotToFileOperation(
-        mCfgMgr.getScreenshotPath(Settings::Manager::getString("screenshot path", "General")).string(),
+        mCfgMgr.getScreenshotPath().string(),
         Settings::Manager::getString("screenshot format", "General"));
 
     mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
