@@ -1,7 +1,7 @@
-#ifndef OPENMW_COMPONENTS_SCENEUTIL_VISMASK_H
-#define OPENMW_COMPONENTS_SCENEUTIL_VISMASK_H
+#ifndef OPENMW_MWRENDER_VISMASK_H
+#define OPENMW_MWRENDER_VISMASK_H
 
-namespace SceneUtil
+namespace MWRender
 {
 
     /// Node masks used for controlling visibility of game objects.
@@ -21,8 +21,6 @@ namespace SceneUtil
     /// compatibility if the enumeration values were to be changed. Feel free to change them when it makes sense.
     enum VisMask
     {
-        Mask_Disabled = 0, // For hidden nodes
-
         Mask_UpdateVisitor = 0x1, // reserved for separating UpdateVisitors from CullVisitors
 
         // child of Scene
@@ -55,19 +53,7 @@ namespace SceneUtil
         Mask_PreCompile = (1<<18),
 
         // Set on a camera's cull mask to enable the LightManager
-        Mask_Lighting = (1<<19),
-
-        // For pathgrid nodes debugging
-        Mask_Pathgrid = (1<<20),
-
-        // Editor control elements
-        Mask_EditorCellMarker = (1<<21),
-        Mask_EditorCellArrow = (1<<22),
-        Mask_EditorCellBorder = (1<<23),
-        Mask_EditorReference = (1<<24),
-
-        // Default mask for OSG nodes
-        Mask_Default = 0xffffffff
+        Mask_Lighting = (1<<19)
     };
 
 }

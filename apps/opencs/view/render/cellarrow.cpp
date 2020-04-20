@@ -11,10 +11,11 @@
 #include "../../model/prefs/shortcutmanager.hpp"
 
 #include <components/misc/constants.hpp>
-#include <components/sceneutil/vismask.hpp>
+
+#include "mask.hpp"
 
 CSVRender::CellArrowTag::CellArrowTag (CellArrow *arrow)
-: TagBase (SceneUtil::Mask_EditorCellArrow), mArrow (arrow)
+: TagBase (Mask_CellArrow), mArrow (arrow)
 {}
 
 CSVRender::CellArrow *CSVRender::CellArrowTag::getCellArrow() const
@@ -174,7 +175,7 @@ CSVRender::CellArrow::CellArrow (osg::Group *cellNode, Direction direction,
 
     mParentNode->addChild (mBaseNode);
 
-    mBaseNode->setNodeMask (SceneUtil::Mask_EditorCellArrow);
+    mBaseNode->setNodeMask (Mask_CellArrow);
 
     adjustTransform();
     buildShape();

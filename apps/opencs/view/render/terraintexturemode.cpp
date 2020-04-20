@@ -13,7 +13,6 @@
 #include <osg/Group>
 
 #include <components/esm/loadland.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
@@ -37,11 +36,12 @@
 #include "brushdraw.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
+#include "mask.hpp"
 #include "object.hpp" // Something small needed regarding pointers from here ()
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain texture editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
     mBrushTexture("L0#0"),
     mBrushSize(1),
     mBrushShape(CSVWidget::BrushShape_Point),

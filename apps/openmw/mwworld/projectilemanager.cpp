@@ -16,7 +16,6 @@
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwworld/manualref.hpp"
@@ -36,6 +35,7 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "../mwrender/animation.hpp"
+#include "../mwrender/vismask.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/util.hpp"
 
@@ -188,7 +188,7 @@ namespace MWWorld
                                         bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture)
     {
         state.mNode = new osg::PositionAttitudeTransform;
-        state.mNode->setNodeMask(SceneUtil::Mask_Effect);
+        state.mNode->setNodeMask(MWRender::Mask_Effect);
         state.mNode->setPosition(pos);
         state.mNode->setAttitude(orient);
 
@@ -228,7 +228,7 @@ namespace MWWorld
             projectileLight->setPosition(osg::Vec4(pos, 1.0));
             
             SceneUtil::LightSource* projectileLightSource = new SceneUtil::LightSource;
-            projectileLightSource->setNodeMask(SceneUtil::Mask_Lighting);
+            projectileLightSource->setNodeMask(MWRender::Mask_Lighting);
             projectileLightSource->setRadius(66.f);
             
             state.mNode->addChild(projectileLightSource);

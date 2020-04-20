@@ -28,7 +28,6 @@
 #include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -45,6 +44,7 @@
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
+#include "vismask.hpp"
 #include "util.hpp"
 #include "rotatecontroller.hpp"
 
@@ -578,7 +578,7 @@ namespace MWRender
             else
             {
                 // Hide effect immediately
-                node->setNodeMask(SceneUtil::Mask_Disabled);
+                node->setNodeMask(0);
                 mFinished = true;
             }
         }
@@ -1595,7 +1595,7 @@ namespace MWRender
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
-        SceneUtil::addLight(parent, esmLight, exterior);
+        SceneUtil::addLight(parent, esmLight, Mask_ParticleSystem, Mask_Lighting, exterior);
     }
 
     void Animation::addEffect (const std::string& model, int effectId, bool loop, const std::string& bonename, const std::string& texture)
@@ -1647,7 +1647,7 @@ namespace MWRender
         // FreezeOnCull doesn't work so well with effect particles, that tend to have moving emitters
         SceneUtil::DisableFreezeOnCullVisitor disableFreezeOnCullVisitor;
         node->accept(disableFreezeOnCullVisitor);
-        node->setNodeMask(SceneUtil::Mask_Effect);
+        node->setNodeMask(Mask_Effect);
 
         params.mMaxControllerLength = findMaxLengthVisitor.getMaxLength();
         params.mLoop = loop;
@@ -1806,7 +1806,7 @@ namespace MWRender
                 SceneUtil::configureLight(light, radius, isExterior);
 
                 mGlowLight = new SceneUtil::LightSource;
-                mGlowLight->setNodeMask(SceneUtil::Mask_Lighting);
+                mGlowLight->setNodeMask(Mask_Lighting);
                 mInsert->addChild(mGlowLight);
                 mGlowLight->setLight(light);
             }

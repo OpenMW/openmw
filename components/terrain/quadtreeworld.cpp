@@ -6,7 +6,6 @@
 
 #include <components/misc/constants.hpp>
 #include <components/sceneutil/mwshadowtechnique.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "quadtreenode.hpp"
 #include "storage.hpp"
@@ -217,8 +216,8 @@ private:
     osg::ref_ptr<RootNode> mRootNode;
 };
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
-    : TerrainGrid(parent, compileRoot, resourceSystem, storage)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resource::ResourceSystem *resourceSystem, Storage *storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float compMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize)
+    : TerrainGrid(parent, compileRoot, resourceSystem, storage, nodeMask, preCompileMask, borderMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
@@ -425,7 +424,7 @@ void QuadTreeWorld::enable(bool enabled)
     }
 
     if (mRootNode)
-        mRootNode->setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
+        mRootNode->setNodeMask(enabled ? ~0 : 0);
 }
 
 void QuadTreeWorld::cacheCell(View *view, int x, int y)

@@ -15,7 +15,6 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include <components/misc/stringops.hpp>
 
@@ -31,6 +30,8 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
+
+#include "vismask.hpp"
 
 namespace MWRender
 {
@@ -366,7 +367,7 @@ void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     // Otherwise add the enchanted glow to it.
     if (!showHolsteredWeapons)
     {
-        weaponNode->setNodeMask(SceneUtil::Mask_Disabled);
+        weaponNode->setNodeMask(0);
     }
     else
     {
@@ -540,7 +541,7 @@ void ActorAnimation::addHiddenItemLight(const MWWorld::ConstPtr& item, const ESM
     bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
     osg::Vec4f ambient(1,1,1,1);
-    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, exterior, ambient);
+    osg::ref_ptr<SceneUtil::LightSource> lightSource = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, ambient);
 
     mInsert->addChild(lightSource);
 

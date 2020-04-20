@@ -16,7 +16,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/util.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -178,7 +177,7 @@ namespace NifOsg
 
         void setEnabled(bool enabled)
         {
-            setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Effect);
+            setNodeMask(enabled ? ~0 : 0);
         }
     };
 
@@ -573,7 +572,7 @@ namespace NifOsg
             {
                 skipMeshes = true;
                 // Leave mask for UpdateVisitor enabled
-                node->setNodeMask(SceneUtil::Mask_UpdateVisitor);
+                node->setNodeMask(0x1);
             }
 
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
@@ -588,7 +587,7 @@ namespace NifOsg
                     skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
 
                 // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
-                node->setNodeMask(SceneUtil::Mask_UpdateVisitor);
+                node->setNodeMask(0x1);
             }
 
             if ((skipMeshes || hasMarkers) && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.

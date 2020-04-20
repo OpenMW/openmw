@@ -6,15 +6,13 @@
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/commands.hpp"
 
-#include <components/sceneutil/vismask.hpp>
-
 #include "worldspacewidget.hpp"
 #include "object.hpp"
 
 namespace CSVRender
 {
     InstanceSelectionMode::InstanceSelectionMode(CSVWidget::SceneToolbar* parent, WorldspaceWidget& worldspaceWidget)
-        : SelectionMode(parent, worldspaceWidget, SceneUtil::Mask_EditorReference)
+        : SelectionMode(parent, worldspaceWidget, Mask_Reference)
     {
         mSelectSame = new QAction("Extend selection to instances with same object ID", this);
         mDeleteSelection = new QAction("Delete selected instances", this);
@@ -38,12 +36,12 @@ namespace CSVRender
 
     void InstanceSelectionMode::selectSame()
     {
-        getWorldspaceWidget().selectAllWithSameParentId(SceneUtil::Mask_EditorReference);
+        getWorldspaceWidget().selectAllWithSameParentId(Mask_Reference);
     }
 
     void InstanceSelectionMode::deleteSelection()
     {
-        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection(SceneUtil::Mask_EditorReference);
+        std::vector<osg::ref_ptr<TagBase> > selection = getWorldspaceWidget().getSelection(Mask_Reference);
 
         CSMWorld::IdTable& referencesTable = dynamic_cast<CSMWorld::IdTable&>(
             *getWorldspaceWidget().getDocument().getData().getTableModel(CSMWorld::UniversalId::Type_References));

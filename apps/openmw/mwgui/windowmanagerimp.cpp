@@ -30,7 +30,6 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
 
-#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/translation/translation.hpp>
@@ -50,6 +49,8 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
+
+#include "../mwrender/vismask.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
@@ -1878,8 +1879,8 @@ namespace MWGui
         // Turn off all rendering except for the GUI
         int oldUpdateMask = mViewer->getUpdateVisitor()->getTraversalMask();
         int oldCullMask = mViewer->getCamera()->getCullMask();
-        mViewer->getUpdateVisitor()->setTraversalMask(SceneUtil::Mask_GUI);
-        mViewer->getCamera()->setCullMask(SceneUtil::Mask_GUI);
+        mViewer->getUpdateVisitor()->setTraversalMask(MWRender::Mask_GUI);
+        mViewer->getCamera()->setCullMask(MWRender::Mask_GUI);
 
         MyGUI::IntSize screenSize = MyGUI::RenderManager::getInstance().getViewSize();
         sizeVideo(screenSize.width, screenSize.height);
