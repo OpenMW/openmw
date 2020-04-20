@@ -1,8 +1,8 @@
 0.47.0
 ------
 
+    Bug #1952: Incorrect particle lighting
     Bug #3676: NiParticleColorModifier isn't applied properly
-    Bug #4949: Incorrect particle lighting when force shaders = true
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
