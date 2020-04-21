@@ -50,7 +50,7 @@ Windows:
     - Set-Variable -Name "time" -Value (date -Format "%H:%m")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - (New-Object System.Net.WebClient).DownloadFile(http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20190524.exe, $PSScriptRoot\msys2.exe)
+    - (New-Object System.Net.WebClient).DownloadFile('http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20190524.exe', '$PSScriptRoot\msys2.exe')
     - $result = Start-Process -Wait -FilePath '$PSScriptRoot\msys2.exe' -ArgumentList '/S' -PassThru
     - echo ${result}
     - bash
