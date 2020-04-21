@@ -42,10 +42,7 @@ MacOS:
 
 Windows:
   tags:
-    - win10
-    - msvc2017
-  except:
-    - branches # because our CI VMs are not public, MRs can't use them and timeout
+    - windows
   stage: build
   allow_failure: true
   script:
