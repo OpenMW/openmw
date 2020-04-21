@@ -11,18 +11,12 @@ uniform bool alphaTestShadows;
 void main()
 {
     gl_FragData[0].rgb = vec3(1.0);
-    if (!alphaTestShadows)
-    {
-        gl_FragData[0].a = 1.0;
-        return;
-    }
-
     if (useDiffuseMapForShadowAlpha)
         gl_FragData[0].a = texture2D(diffuseMap, diffuseMapUV).a * alphaPassthrough;
     else
         gl_FragData[0].a = alphaPassthrough;
 
-    // Prevent translucent things casting shadow (including the player using an invisibility effect)
-    if (gl_FragData[0].a <= 0.5)
+    // Prevent translucent things casting shadow (including the player using an invisibility effect). For now, rely on the deprecated FF test for non-blended stuff.
+    if (alphaTestShadows && gl_FragData[0].a <= 0.5)
         discard;
 }
