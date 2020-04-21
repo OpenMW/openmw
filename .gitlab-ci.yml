@@ -3,8 +3,9 @@ stages:
   
 Debian:
   tags:
-    - docker
-    - linux
+#    - docker
+#    - linux
+    - none_remove_me
   image: gcc
   cache:
     key: apt-cache
@@ -46,7 +47,14 @@ Windows:
   stage: build
   allow_failure: true
   script:
-    # - env  # turn on for debugging
+    - Set-Variable -Name "time" -Value (date -Format "%H:%m")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+    - (New-Object System.Net.WebClient).DownloadFile(http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20190524.exe, $PSScriptRoot\msys2.exe)
+    - $result = Start-Process -Wait -FilePath '$PSScriptRoot\msys2.exe' -ArgumentList '/S' -PassThru
+    - echo ${result}
+    - bash
+    - env  # turn on for debugging
     - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
     - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
     - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
