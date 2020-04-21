@@ -25,7 +25,6 @@ namespace Shader
         : mShaderRequired(false)
         , mColorMode(0)
         , mMaterialOverridden(false)
-        , mAlphaFuncOverridden(false)
         , mBlendFuncOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
@@ -279,19 +278,6 @@ namespace Shader
                     mRequirements.back().mColorMode = colorMode;
                 }
             }
-            else if (it->first.first == osg::StateAttribute::ALPHAFUNC)
-            {
-                if (!mRequirements.back().mAlphaFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
-                {
-                    if (it->second.second & osg::StateAttribute::OVERRIDE)
-                        mRequirements.back().mAlphaFuncOverridden = true;
-
-                    const osg::AlphaFunc* test = static_cast<const osg::AlphaFunc*>(it->second.first.get());
-                    if (test->getFunction() == osg::AlphaFunc::GREATER || test->getFunction() == osg::AlphaFunc::GEQUAL)
-                        alphaTestShadows = true;
-                    alphaSettingsChanged = true;
-                }
-            }
             else if (it->first.first == osg::StateAttribute::BLENDFUNC)
             {
                 if (!mRequirements.back().mBlendFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
@@ -305,8 +291,9 @@ namespace Shader
                     alphaSettingsChanged = true;
                 }
             }
+            // Eventually, move alpha testing to discard in shader adn remove deprecated state here
         }
-        // we don't need to check for glEnable/glDisable of blending and testing as we always set it at the same time
+        // we don't need to check for glEnable/glDisable of blending as we always set it at the same time
         if (alphaSettingsChanged)
         {
             if (!writableStateSet)

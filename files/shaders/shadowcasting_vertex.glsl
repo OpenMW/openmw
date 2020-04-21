@@ -5,8 +5,8 @@ varying vec2 diffuseMapUV;
 varying float alphaPassthrough;
 
 uniform int colorMode;
-uniform bool useDiffuseMapForShadowAlpha;
-uniform bool alphaTestShadows;
+uniform bool useDiffuseMapForShadowAlpha = true;
+uniform bool alphaTestShadows = true;
 
 void main(void)
 {
@@ -15,13 +15,11 @@ void main(void)
     vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
 
-    if (alphaTestShadows && useDiffuseMapForShadowAlpha)
+    if (useDiffuseMapForShadowAlpha)
         diffuseMapUV = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
     else
         diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
-    if (!alphaTestShadows)
-        alphaPassthrough = 1.0;
-    else if (colorMode == 2)
+    if (colorMode == 2)
         alphaPassthrough = gl_Color.a;
     else
         // This is uniform, so if it's too low, we might be able to put the position/clip vertex outside the view frustum and skip the fragment shader and rasteriser
