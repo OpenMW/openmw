@@ -467,7 +467,7 @@ namespace MWMechanics
         osg::Vec3f pos1 (actor1.getRefData().getPosition().asVec3());
         osg::Vec3f pos2 (actor2.getRefData().getPosition().asVec3());
 
-        float d = getAggroDistance(actor2, pos1, pos2);
+        float d = getAggroDistance(actor1, pos1, pos2);
 
         static const int iFightDistanceBase = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                     "iFightDistanceBase")->mValue.getInteger();
