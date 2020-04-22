@@ -1,7 +1,7 @@
 #include "actorspaths.hpp"
+#include "vismask.hpp"
 
 #include <components/sceneutil/agentpath.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -43,7 +43,7 @@ namespace MWRender
         const auto newGroup = SceneUtil::createAgentPathGroup(path, halfExtents, start, end, settings);
         if (newGroup)
         {
-            newGroup->setNodeMask(SceneUtil::Mask_Debug);
+            newGroup->setNodeMask(Mask_Debug);
             mRootNode->addChild(newGroup);
             mGroups[actor] = newGroup;
         }

@@ -40,6 +40,8 @@ namespace MWWorld
             return true;
         }
 
+        virtual ~ListModelsVisitor() = default;
+
         std::vector<std::string>& mOut;
     };
 

@@ -13,7 +13,6 @@
 #include <osg/Group>
 
 #include <components/esm/loadland.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../widget/modebutton.hpp"
 #include "../widget/scenetoolbar.hpp"
@@ -32,17 +31,20 @@
 #include "../../model/world/resourcetable.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
+#include "../widget/brushshapes.hpp"
 
+#include "brushdraw.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
+#include "mask.hpp"
 #include "object.hpp" // Something small needed regarding pointers from here ()
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainTextureMode::TerrainTextureMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain texture editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-texture"}, Mask_Terrain | Mask_Reference, "Terrain texture editing", parent),
     mBrushTexture("L0#0"),
     mBrushSize(1),
-    mBrushShape(0),
+    mBrushShape(CSVWidget::BrushShape_Point),
     mTextureBrushScenetool(nullptr),
     mDragMode(InteractionType_None),
     mParentNode(parentNode),
@@ -57,7 +59,7 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
         mTextureBrushScenetool = new CSVWidget::SceneToolTextureBrush (toolbar, "scenetooltexturebrush", getWorldspaceWidget().getDocument());
         connect(mTextureBrushScenetool, SIGNAL (clicked()), mTextureBrushScenetool, SLOT (activate()));
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushSize(int)), this, SLOT(setBrushSize(int)));
-        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setBrushShape(int)));
+        connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setBrushShape(CSVWidget::BrushShape)));
         connect(mTextureBrushScenetool->mTextureBrushWindow->mSizeSliders->mBrushSizeSlider, SIGNAL(valueChanged(int)), this, SLOT(setBrushSize(int)));
         connect(mTextureBrushScenetool, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
         connect(mTextureBrushScenetool->mTextureBrushWindow, SIGNAL(passTextureId(std::string)), this, SLOT(setBrushTexture(std::string)));
@@ -71,6 +73,9 @@ void CSVRender::TerrainTextureMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
         mTerrainTextureSelection.reset(new TerrainSelection(mParentNode, &getWorldspaceWidget(), TerrainSelectionType::Texture));
     }
+
+    if (!mBrushDraw)
+        mBrushDraw.reset(new BrushDraw(mParentNode, true));
 
     EditMode::activate(toolbar);
     toolbar->addTool (mTextureBrushScenetool);
@@ -89,6 +94,9 @@ void CSVRender::TerrainTextureMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     {
         mTerrainTextureSelection.reset();
     }
+
+    if (mBrushDraw)
+        mBrushDraw.reset();
 
     EditMode::deactivate(toolbar);
 }
@@ -328,11 +336,9 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
     std::string mBrushTextureInt = mBrushTexture.substr (hashlocation+1);
     int brushInt = stoi(mBrushTexture.substr (hashlocation+1))+1; // All indices are offset by +1
 
-    int rf = mBrushSize / 2;
-    int r = mBrushSize / 2 + 1;
-    int distance = 0;
+    int r = static_cast<float>(mBrushSize) / 2;
 
-    if (mBrushShape == 0)
+    if (mBrushShape == CSVWidget::BrushShape_Point)
     {
         CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
         CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
@@ -344,7 +350,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         }
     }
 
-    if (mBrushShape == 1)
+    if (mBrushShape == CSVWidget::BrushShape_Square)
     {
         int upperLeftCellX  = cellX - std::floor(r / landTextureSize);
         int upperLeftCellY  = cellY - std::floor(r / landTextureSize);
@@ -394,7 +400,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         }
     }
 
-    if (mBrushShape == 2)
+    if (mBrushShape == CSVWidget::BrushShape_Circle)
     {
         int upperLeftCellX  = cellX - std::floor(r / landTextureSize);
         int upperLeftCellY  = cellY - std::floor(r / landTextureSize);
@@ -419,7 +425,6 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                     {
                         for(int j = 0; j < landTextureSize; j++)
                         {
-
                             if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
                             {
                                 int distanceX(0);
@@ -430,7 +435,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float rf = static_cast<float>(mBrushSize) / 2;
                                 if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                             else
@@ -443,7 +449,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                                 if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
                                 if (i_cell == cellX) distanceX = abs(i-xHitInCell);
                                 if (j_cell == cellY) distanceY = abs(j-yHitInCell);
-                                distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
+                                float rf = static_cast<float>(mBrushSize) / 2;
                                 if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;
                             }
                         }
@@ -454,7 +461,7 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
         }
     }
 
-    if (mBrushShape == 3)
+    if (mBrushShape == CSVWidget::BrushShape_Custom)
     {
         CSMWorld::LandTexturesColumn::DataType newTerrainPointer = landTable.data(landTable.getModelIndex(mCellId, textureColumn)).value<CSMWorld::LandTexturesColumn::DataType>();
         CSMWorld::LandTexturesColumn::DataType newTerrain(newTerrainPointer);
@@ -506,12 +513,12 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
     int r = mBrushSize / 2;
     std::vector<std::pair<int, int>> selections;
 
-    if (mBrushShape == 0)
+    if (mBrushShape == CSVWidget::BrushShape_Point)
     {
         if (isInCellSelection(texCoords.first, texCoords.second)) selections.emplace_back(texCoords);
     }
 
-    if (mBrushShape == 1)
+    if (mBrushShape == CSVWidget::BrushShape_Square)
     {
         for (int i = -r; i <= r; i++)
         {
@@ -527,14 +534,15 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
         }
     }
 
-    if (mBrushShape == 2)
+    if (mBrushShape == CSVWidget::BrushShape_Circle)
     {
         for (int i = -r; i <= r; i++)
         {
             for (int j = -r; j <= r; j++)
             {
                 osg::Vec2f coords(i,j);
-                if (std::round(coords.length()) < r)
+                float rf = static_cast<float>(mBrushSize) / 2;
+                if (std::round(coords.length()) < rf)
                 {
                     int x = i + texCoords.first;
                     int y = j + texCoords.second;
@@ -547,7 +555,7 @@ void CSVRender::TerrainTextureMode::selectTerrainTextures(const std::pair<int, i
         }
     }
 
-    if (mBrushShape == 3)
+    if (mBrushShape == CSVWidget::BrushShape_Custom)
     {
         if(!mCustomBrushShape.empty())
         {
@@ -707,17 +715,27 @@ void CSVRender::TerrainTextureMode::dragMoveEvent (QDragMoveEvent *event)
 {
 }
 
+void CSVRender::TerrainTextureMode::mouseMoveEvent (QMouseEvent *event)
+{
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick(event->pos(), getInteractionMask());
+    if (hit.hit && mBrushDraw)
+        mBrushDraw->update(hit.worldPos, mBrushSize, mBrushShape);
+    if (!hit.hit && mBrushDraw)
+        mBrushDraw->hide();
+}
+
+
 void CSVRender::TerrainTextureMode::setBrushSize(int brushSize)
 {
     mBrushSize = brushSize;
 }
 
-void CSVRender::TerrainTextureMode::setBrushShape(int brushShape)
+void CSVRender::TerrainTextureMode::setBrushShape(CSVWidget::BrushShape brushShape)
 {
     mBrushShape = brushShape;
 
     //Set custom brush shape
-    if (mBrushShape == 3 && !mTerrainTextureSelection->getTerrainSelection().empty())
+    if (mBrushShape == CSVWidget::BrushShape_Custom && !mTerrainTextureSelection->getTerrainSelection().empty())
     {
         auto terrainSelection = mTerrainTextureSelection->getTerrainSelection();
         int selectionCenterX = 0;

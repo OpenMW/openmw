@@ -401,7 +401,8 @@ namespace MWGui
                     return;
                 }
 
-                MWBase::Environment::get().getWindowManager()->useItem(item);
+                if (!store.isEquipped(item))
+                    MWBase::Environment::get().getWindowManager()->useItem(item);
                 MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 // change draw state only if the item is in player's right hand
                 if (rightHand != store.end() && item == *rightHand)
@@ -411,8 +412,8 @@ namespace MWGui
             }
             else if (key->type == Type_MagicItem)
             {
-                // equip, if it can be equipped
-                if (!item.getClass().getEquipmentSlots(item).first.empty())
+                // equip, if it can be equipped and isn't yet equipped
+                if (!item.getClass().getEquipmentSlots(item).first.empty() && !store.isEquipped(item))
                 {
                     MWBase::Environment::get().getWindowManager()->useItem(item);
 

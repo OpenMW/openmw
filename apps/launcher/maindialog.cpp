@@ -1,6 +1,7 @@
 #include "maindialog.hpp"
 
 #include <components/version/version.hpp>
+#include <components/misc/helpviewer.hpp>
 
 #include <QDate>
 #include <QMessageBox>
@@ -54,12 +55,15 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setCurrentRow(0);
     iconWidget->setFlow(QListView::LeftToRight);
 
+    QPushButton *helpButton = new QPushButton(tr("Help"));
     QPushButton *playButton = new QPushButton(tr("Play"));
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
+    buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -613,4 +617,9 @@ void Launcher::MainDialog::play()
 
     if (mGameInvoker->startProcess(QLatin1String("openmw"), true))
         return qApp->quit();
+}
+
+void Launcher::MainDialog::help()
+{
+    Misc::HelpViewer::openHelp("reference/index.html");
 }

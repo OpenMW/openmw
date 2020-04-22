@@ -38,6 +38,7 @@
 #include "tradewindow.hpp"
 #include "draganddrop.hpp"
 #include "widgets.hpp"
+#include "tooltips.hpp"
 
 namespace
 {
@@ -298,7 +299,8 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
-            dialog->openCountDialog(object.getClass().getName(object), message, count);
+            std::string name = object.getClass().getName(object) + MWGui::ToolTips::getSoulString(object.getCellRef());
+            dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
             if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
@@ -730,7 +732,8 @@ namespace MWGui
             && (type != typeid(ESM::Potion).name()))
             return;
 
-        if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
+        // An object that can be picked up must have a tooltip.
+        if (!object.getClass().hasToolTip(object))
             return;
 
         int count = object.getRefData().getCount();

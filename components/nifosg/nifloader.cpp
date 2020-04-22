@@ -16,7 +16,6 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/imagemanager.hpp>
 #include <components/sceneutil/util.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 // particle
 #include <osgParticle/ParticleSystem>
@@ -178,7 +177,7 @@ namespace NifOsg
 
         void setEnabled(bool enabled)
         {
-            setNodeMask(enabled ? SceneUtil::Mask_Default : SceneUtil::Mask_Effect);
+            setNodeMask(enabled ? ~0 : 0);
         }
     };
 
@@ -192,6 +191,17 @@ namespace NifOsg
     bool Loader::getShowMarkers()
     {
         return sShowMarkers;
+    }
+
+    unsigned int Loader::sHiddenNodeMask = 0;
+
+    void Loader::setHiddenNodeMask(unsigned int mask)
+    {
+        sHiddenNodeMask = mask;
+    }
+    unsigned int Loader::getHiddenNodeMask()
+    {
+        return sHiddenNodeMask;
     }
 
     class LoaderImpl
@@ -457,7 +467,7 @@ namespace NifOsg
             {
                 const Nif::NiLODNode* niLodNode = static_cast<const Nif::NiLODNode*>(nifNode);
                 node = handleLodNode(niLodNode);
-                dataVariance = osg::Object::STATIC;
+                dataVariance = osg::Object::DYNAMIC;
                 break;
             }
             case Nif::RC_NiSwitchNode:
@@ -476,8 +486,8 @@ namespace NifOsg
             {
                 bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
                 node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
-                dataVariance = osg::Object::STATIC;
-
+                // This matrix transform must not be combined with another matrix transform.
+                dataVariance = osg::Object::DYNAMIC;
                 break;
             }
             default:
@@ -572,8 +582,7 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_RootCollisionNode)
             {
                 skipMeshes = true;
-                // Leave mask for UpdateVisitor enabled
-                node->setNodeMask(SceneUtil::Mask_UpdateVisitor);
+                node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
@@ -587,8 +596,7 @@ namespace NifOsg
                 if (!hasVisController)
                     skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
 
-                // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
-                node->setNodeMask(SceneUtil::Mask_UpdateVisitor);
+                node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
             if ((skipMeshes || hasMarkers) && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
@@ -754,7 +762,7 @@ namespace NifOsg
         {
             if (visctrl->data.empty())
                 return;
-            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
+            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr(), Loader::getHiddenNodeMask()));
             setupController(visctrl, callback, animflags);
             node->addUpdateCallback(callback);
         }
@@ -1078,6 +1086,8 @@ namespace NifOsg
                 trans->addChild(toAttach);
                 parentNode->addChild(trans);
             }
+            // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
+            partsys->getOrCreateStateSet();
         }
 
         void triCommonToGeometry(osg::Geometry *geometry, const std::vector<osg::Vec3f>& vertices, const std::vector<osg::Vec3f>& normals, const std::vector<std::vector<osg::Vec2f>>& uvlist, const std::vector<osg::Vec4f>& colors, const std::vector<unsigned int>& boundTextures, const std::string& name)
@@ -1705,7 +1715,8 @@ namespace NifOsg
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
-            int specFlags = 0; // Specular is disabled by default, even if there's a specular color in the NiMaterialProperty
+            // Specular lighting is enabled by default, but there's a quirk...
+            int specFlags = 1;
             osg::ref_ptr<osg::Material> mat (new osg::Material);
             mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
 
@@ -1723,6 +1734,7 @@ namespace NifOsg
                 {
                 case Nif::RC_NiSpecularProperty:
                 {
+                    // Specular property can turn specular lighting off.
                     specFlags = property->flags;
                     break;
                 }
@@ -1806,16 +1818,9 @@ namespace NifOsg
                 }
             }
 
-            if (specFlags == 0)
+            // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
+            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || specFlags == 0)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
-
-            // Particles don't have normals, so can't be diffuse lit.
-            if (particleMaterial)
-            {
-                // NB ignoring diffuse.a()
-                mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
-                mat->setColorMode(osg::Material::AMBIENT);
-            }
 
             if (lightmode == 0)
             {

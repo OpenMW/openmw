@@ -21,12 +21,12 @@ namespace
 
         // If we have an index value that does not make sense, assume that it was an addition
         // by the present plugin (but a faulty one)
-        if (local && local <= reader.getGameFiles().size())
+        if (local && local <= reader.getParentFileIndices().size())
         {
             // If the most significant 8 bits are used, then this reference already exists.
             // In this case, do not spawn a new reference, but overwrite the old one.
             refNum.mIndex &= 0x00ffffff; // delete old plugin ID
-            refNum.mContentFile = reader.getGameFiles()[local-1].index;
+            refNum.mContentFile = reader.getParentFileIndices()[local-1];
         }
         else
         {

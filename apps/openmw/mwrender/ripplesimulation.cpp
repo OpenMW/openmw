@@ -16,7 +16,8 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/fallback/fallback.hpp>
-#include <components/sceneutil/vismask.hpp>
+
+#include "vismask.hpp"
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -103,7 +104,7 @@ RippleSimulation::RippleSimulation(osg::Group *parent, Resource::ResourceSystem*
     mParticleNode->setName("Ripple Root");
     mParticleNode->addChild(updater);
     mParticleNode->addChild(mParticleSystem);
-    mParticleNode->setNodeMask(SceneUtil::Mask_Water);
+    mParticleNode->setNodeMask(Mask_Water);
 
     createWaterRippleStateSet(resourceSystem, mParticleNode);
 

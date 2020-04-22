@@ -54,8 +54,11 @@ namespace CSMWorld
             ///Converts worldspace coordinates to global vertex selection.
             static std::pair<int, int> toVertexCoords(const osg::Vec3d& worldPos);
 
-            ///Converts global texture coordinate to worldspace coordinate that is at the upper left corner of the selected texture.
-            static float textureGlobalToWorldCoords(int textureGlobal);
+            ///Converts global texture coordinate X to worldspace coordinate, offset by 0.25f.
+            static float textureGlobalXToWorldCoords(int textureGlobal);
+
+            ///Converts global texture coordinate Y to worldspace coordinate, offset by 0.25f.
+            static float textureGlobalYToWorldCoords(int textureGlobal);
 
             ///Converts global vertex coordinate to worldspace coordinate
             static float vertexGlobalToWorldCoords(int vertexGlobal);

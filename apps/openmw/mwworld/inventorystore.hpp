@@ -34,6 +34,7 @@ namespace MWWorld
          */
         virtual void permanentEffectAdded (const ESM::MagicEffect *magicEffect, bool isNew) {}
 
+        virtual ~InventoryStoreListener() = default;
     };
 
     ///< \brief Variant of the ContainerStore for NPCs

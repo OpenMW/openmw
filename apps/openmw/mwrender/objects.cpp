@@ -5,7 +5,6 @@
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/class.hpp"
@@ -13,6 +12,8 @@
 #include "animation.hpp"
 #include "npcanimation.hpp"
 #include "creatureanimation.hpp"
+#include "vismask.hpp"
+
 
 namespace MWRender
 {
@@ -70,7 +71,7 @@ void Objects::insertBegin(const MWWorld::Ptr& ptr)
 void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool animated, bool allowLight)
 {
     insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Object);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Object);
 
     osg::ref_ptr<ObjectAnimation> anim (new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
 
@@ -80,7 +81,7 @@ void Objects::insertModel(const MWWorld::Ptr &ptr, const std::string &mesh, bool
 void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, bool weaponsShields)
 {
     insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     // CreatureAnimation
     osg::ref_ptr<Animation> anim;
@@ -97,7 +98,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
 {
     insertBegin(ptr);
-    ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
+    ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
     osg::ref_ptr<NpcAnimation> anim (new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
 

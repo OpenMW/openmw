@@ -21,6 +21,7 @@
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "editmode.hpp"
+#include "mask.hpp"
 #include "cameracontroller.hpp"
 #include "cellarrow.hpp"
 #include "terraintexturemode.hpp"
@@ -126,8 +127,8 @@ void CSVRender::PagedWorldspaceWidget::addVisibilitySelectorButtons (
     CSVWidget::SceneToolToggle2 *tool)
 {
     WorldspaceWidget::addVisibilitySelectorButtons (tool);
-    tool->addButton (Button_Terrain, SceneUtil::Mask_Terrain, "Terrain");
-    //tool->addButton (Button_Fog, Mask_Fog, "Fog", "", true);
+    tool->addButton (Button_Terrain, Mask_Terrain, "Terrain");
+    tool->addButton (Button_Fog, Mask_Fog, "Fog", "", true);
 }
 
 void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
@@ -141,16 +142,16 @@ void CSVRender::PagedWorldspaceWidget::addEditModeSelectorButtons (
     tool->addButton (
         new TerrainTextureMode (this, mRootNode, tool), "terrain-texture");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), SceneUtil::Mask_EditorReference, "Terrain vertex paint editing"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain vertex paint editing"),
         "terrain-vertex");
     tool->addButton (
-        new EditMode (this, QIcon (":placeholder"), SceneUtil::Mask_EditorReference, "Terrain movement"),
+        new EditMode (this, QIcon (":placeholder"), Mask_Reference, "Terrain movement"),
         "terrain-move");
 }
 
 void CSVRender::PagedWorldspaceWidget::handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type)
 {
-    if (hit.tag && hit.tag->getMask()==SceneUtil::Mask_EditorCellArrow)
+    if (hit.tag && hit.tag->getMask()==Mask_CellArrow)
     {
         if (CellArrowTag *cellArrowTag = dynamic_cast<CSVRender::CellArrowTag *> (hit.tag.get()))
         {
@@ -873,9 +874,9 @@ CSVWidget::SceneToolToggle2 *CSVRender::PagedWorldspaceWidget::makeControlVisibi
     mControlElements = new CSVWidget::SceneToolToggle2 (parent,
         "Controls & Guides Visibility", ":scenetoolbar/scene-view-marker-c", ":scenetoolbar/scene-view-marker-");
 
-    mControlElements->addButton (1, SceneUtil::Mask_EditorCellMarker, "Cell Marker");
-    mControlElements->addButton (2, SceneUtil::Mask_EditorCellArrow, "Cell Arrows");
-    mControlElements->addButton (4, SceneUtil::Mask_EditorCellBorder, "Cell Border");
+    mControlElements->addButton (1, Mask_CellMarker, "Cell Marker");
+    mControlElements->addButton (2, Mask_CellArrow, "Cell Arrows");
+    mControlElements->addButton (4, Mask_CellBorder, "Cell Border");
 
     mControlElements->setSelectionMask (0xffffffff);
 

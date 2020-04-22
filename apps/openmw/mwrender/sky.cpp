@@ -43,12 +43,12 @@
 #include <components/sceneutil/statesetupdater.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/sceneutil/vismask.hpp>
 #include <components/sceneutil/shadow.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "vismask.hpp"
 #include "renderbin.hpp"
 
 namespace
@@ -454,7 +454,7 @@ public:
 
     void setVisible(bool visible)
     {
-        mTransform->setNodeMask(visible ? mVisibleMask : SceneUtil::Mask_Disabled);
+        mTransform->setNodeMask(visible ? mVisibleMask : 0);
     }
 
 protected:
@@ -470,7 +470,7 @@ class Sun : public CelestialBody
 {
 public:
     Sun(osg::Group* parentNode, Resource::ImageManager& imageManager)
-        : CelestialBody(parentNode, 1.0f, 1, SceneUtil::Mask_Sun)
+        : CelestialBody(parentNode, 1.0f, 1, Mask_Sun)
         , mUpdater(new Updater)
     {
         mTransform->addUpdateCallback(mUpdater);
@@ -655,7 +655,7 @@ private:
         camera->setProjectionMatrix(osg::Matrix::identity());
         camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF); // add to skyRoot instead?
         camera->setViewMatrix(osg::Matrix::identity());
-        camera->setClearMask(SceneUtil::Mask_Disabled);
+        camera->setClearMask(0);
         camera->setRenderOrder(osg::Camera::NESTED_RENDER);
         camera->setAllowEventFocus(false);
 
@@ -1145,7 +1145,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(), osg::StateAttribute::OVERRIDE|osg::StateAttribute::PROTECTED|osg::StateAttribute::ON);
     SceneUtil::ShadowManager::disableShadowsForStateSet(skyroot->getOrCreateStateSet());
 
-    skyroot->setNodeMask(SceneUtil::Mask_Sky);
+    skyroot->setNodeMask(Mask_Sky);
     parentNode->addChild(skyroot);
 
     mRootNode = skyroot;
@@ -1177,7 +1177,7 @@ void SkyManager::create()
     mAtmosphereDay->addUpdateCallback(mAtmosphereUpdater);
 
     mAtmosphereNightNode = new osg::PositionAttitudeTransform;
-    mAtmosphereNightNode->setNodeMask(SceneUtil::Mask_Disabled);
+    mAtmosphereNightNode->setNodeMask(0);
     mEarlyRenderBinRoot->addChild(mAtmosphereNightNode);
 
     osg::ref_ptr<osg::Node> atmosphereNight;
@@ -1210,7 +1210,7 @@ void SkyManager::create()
     mCloudUpdater2 = new CloudUpdater;
     mCloudUpdater2->setOpacity(0.f);
     mCloudMesh2->addUpdateCallback(mCloudUpdater2);
-    mCloudMesh2->setNodeMask(SceneUtil::Mask_Disabled);
+    mCloudMesh2->setNodeMask(0);
 
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(false);
@@ -1533,7 +1533,7 @@ void SkyManager::createRain()
     mRainFader = new RainFader(&mWeatherAlpha);
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
-    mRainNode->setNodeMask(SceneUtil::Mask_WeatherParticles);
+    mRainNode->setNodeMask(Mask_WeatherParticles);
 
     mRootNode->addChild(mRainNode);
 }
@@ -1636,7 +1636,7 @@ void SkyManager::setEnabled(bool enabled)
     if (enabled && !mCreated)
         create();
 
-    mRootNode->setNodeMask(enabled ? SceneUtil::Mask_Sky : SceneUtil::Mask_Disabled);
+    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
 }
@@ -1729,7 +1729,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
             {
                 mParticleNode = new osg::PositionAttitudeTransform;
                 mParticleNode->addCullCallback(mUnderwaterSwitch);
-                mParticleNode->setNodeMask(SceneUtil::Mask_WeatherParticles);
+                mParticleNode->setNodeMask(Mask_WeatherParticles);
                 mRootNode->addChild(mParticleNode);
             }
 
@@ -1799,7 +1799,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
         mCloudUpdater->setOpacity((1.f-mCloudBlendFactor));
         mCloudUpdater2->setOpacity(mCloudBlendFactor);
-        mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
+        mCloudMesh2->setNodeMask(mCloudBlendFactor > 0.f ? ~0 : 0);
     }
 
     if (mCloudColour != weather.mFogColor)
@@ -1844,7 +1844,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
         mAtmosphereNightUpdater->setFade(mStarsOpacity);
     }
 
-    mAtmosphereNightNode->setNodeMask(weather.mNight ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
+    mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);
 
     if (mRainFader)
         mRainFader->setAlpha(weather.mEffectFade * 0.6); // * Rain_Threshold?

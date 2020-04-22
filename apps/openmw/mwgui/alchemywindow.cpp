@@ -31,6 +31,7 @@ namespace MWGui
 {
     AlchemyWindow::AlchemyWindow()
         : WindowBase("openmw_alchemy_window.layout")
+        , mCurrentFilter(FilterType::ByName)
         , mModel(nullptr)
         , mSortModel(nullptr)
         , mAlchemy(new MWMechanics::Alchemy())
@@ -192,16 +193,16 @@ namespace MWGui
         std::set<std::string> itemNames, itemEffects;
         for (size_t i = 0; i < mModel->getItemCount(); ++i)
         {
-            auto const& base = mModel->getItem(i).mBase;
-            if (base.getTypeName() != typeid(ESM::Ingredient).name())
+            MWWorld::Ptr item = mModel->getItem(i).mBase;
+            if (item.getTypeName() != typeid(ESM::Ingredient).name())
                 continue;
 
-            itemNames.insert(base.getClass().getName(base));
+            itemNames.insert(item.getClass().getName(item));
 
             MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
             auto const alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
 
-            auto const effects = MWMechanics::Alchemy::effectsDescription(base, alchemySkill);
+            auto const effects = MWMechanics::Alchemy::effectsDescription(item, alchemySkill);
             itemEffects.insert(effects.begin(), effects.end());
         }
 

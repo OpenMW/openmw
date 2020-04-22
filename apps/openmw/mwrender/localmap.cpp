@@ -18,13 +18,14 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/sceneutil/vismask.hpp>
 #include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
+
+#include "vismask.hpp"
 
 namespace
 {
@@ -41,7 +42,7 @@ namespace
         virtual void operator()(osg::Node* node, osg::NodeVisitor*)
         {
             if (mRendered)
-                node->setNodeMask(SceneUtil::Mask_Disabled);
+                node->setNodeMask(0);
 
             if (!mRendered)
             {
@@ -177,8 +178,8 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera->setRenderOrder(osg::Camera::PRE_RENDER);
 
-    camera->setCullMask(SceneUtil::Mask_Scene | SceneUtil::Mask_SimpleWater | SceneUtil::Mask_Terrain | SceneUtil::Mask_Object | SceneUtil::Mask_Static);
-    camera->setNodeMask(SceneUtil::Mask_RenderToTexture);
+    camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
+    camera->setNodeMask(Mask_RenderToTexture);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
@@ -375,7 +376,7 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
 void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
 {
     osg::ComputeBoundsVisitor computeBoundsVisitor;
-    computeBoundsVisitor.setTraversalMask(SceneUtil::Mask_Scene | SceneUtil::Mask_Terrain | SceneUtil::Mask_Object | SceneUtil::Mask_Static);
+    computeBoundsVisitor.setTraversalMask(Mask_Scene | Mask_Terrain | Mask_Object | Mask_Static);
     mSceneRoot->accept(computeBoundsVisitor);
 
     osg::BoundingBox bounds = computeBoundsVisitor.getBoundingBox();

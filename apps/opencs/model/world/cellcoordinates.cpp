@@ -91,9 +91,14 @@ std::pair<int, int> CSMWorld::CellCoordinates::toVertexCoords(const osg::Vec3d& 
     return std::make_pair(x, y);
 }
 
-float CSMWorld::CellCoordinates::textureGlobalToWorldCoords(int textureGlobal)
+float CSMWorld::CellCoordinates::textureGlobalXToWorldCoords(int textureGlobal)
 {
-    return ESM::Land::REAL_SIZE * static_cast<float>(textureGlobal) / ESM::Land::LAND_TEXTURE_SIZE;
+    return ESM::Land::REAL_SIZE * (static_cast<float>(textureGlobal) + 0.25f) / ESM::Land::LAND_TEXTURE_SIZE;
+}
+
+float CSMWorld::CellCoordinates::textureGlobalYToWorldCoords(int textureGlobal)
+{
+    return ESM::Land::REAL_SIZE * (static_cast<float>(textureGlobal) - 0.25f) / ESM::Land::LAND_TEXTURE_SIZE;
 }
 
 float CSMWorld::CellCoordinates::vertexGlobalToWorldCoords(int vertexGlobal)

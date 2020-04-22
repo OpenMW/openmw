@@ -44,7 +44,7 @@ void Wizard::ConclusionPage::initializePage()
     } else {
         textLabel->setText(tr("<html><head/><body><p>The OpenMW Wizard failed to install Morrowind on your computer.</p> \
                               <p>Please report any bugs you might have encountered to our \
-                              <a href=\"https://bugs.openmw.org\">bug tracker</a>.<br/>Make sure to include the installation log.</p><br/></body></html>"));
+                              <a href=\"https://gitlab.com/OpenMW/openmw/issues\">bug tracker</a>.<br/>Make sure to include the installation log.</p><br/></body></html>"));
     }
 }
 

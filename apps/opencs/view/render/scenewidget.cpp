@@ -17,7 +17,6 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../widget/scenetoolmode.hpp"
 
@@ -26,6 +25,7 @@
 #include "../../model/prefs/shortcuteventhandler.hpp"
 
 #include "lighting.hpp"
+#include "mask.hpp"
 #include "cameracontroller.hpp"
 
 namespace CSVRender
@@ -71,7 +71,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
     lightMgr->setStartLight(1);
-    lightMgr->setLightingMask(SceneUtil::Mask_Lighting);
+    lightMgr->setLightingMask(Mask_Lighting);
     mRootNode = lightMgr;
 
     mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
@@ -87,8 +87,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     // Add ability to signal osg to show its statistics for debugging purposes
     mView->addEventHandler(new osgViewer::StatsHandler);
-
-    mView->getCamera()->setCullMask(~(SceneUtil::Mask_UpdateVisitor));
 
     viewer.addView(mView);
     viewer.setDone(false);
@@ -122,7 +120,7 @@ void RenderWidget::flagAsModified()
 
 void RenderWidget::setVisibilityMask(int mask)
 {
-    mView->getCamera()->setCullMask(mask | SceneUtil::Mask_ParticleSystem | SceneUtil::Mask_Lighting);
+    mView->getCamera()->setCullMask(mask | Mask_ParticleSystem | Mask_Lighting);
 }
 
 osg::Camera *RenderWidget::getCamera()
@@ -212,7 +210,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
     mOrbitCamControl = new OrbitCameraController(this);
     mCurrentCamControl = mFreeCamControl;
 
-    mOrbitCamControl->setPickingMask(SceneUtil::Mask_EditorReference | SceneUtil::Mask_Terrain);
+    mOrbitCamControl->setPickingMask(Mask_Reference | Mask_Terrain);
 
     mOrbitCamControl->setConstRoll( CSMPrefs::get()["3D Scene Input"]["navi-orbit-const-roll"].isTrue() );
 
@@ -221,7 +219,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
 
     setLighting(&mLightingDay);
 
-    mResourceSystem->getSceneManager()->setParticleSystemMask(SceneUtil::Mask_ParticleSystem);
+    mResourceSystem->getSceneManager()->setParticleSystemMask(Mask_ParticleSystem);
 
     // Recieve mouse move event even if mouse button is not pressed
     setMouseTracking(true);
@@ -350,7 +348,7 @@ void SceneWidget::update(double dt)
     }
     else
     {
-        mCurrentCamControl->setup(mRootNode, SceneUtil::Mask_EditorReference | SceneUtil::Mask_Terrain, CameraController::WorldUp);
+        mCurrentCamControl->setup(mRootNode, Mask_Reference | Mask_Terrain, CameraController::WorldUp);
         mCamPositionSet = true;
     }
 }

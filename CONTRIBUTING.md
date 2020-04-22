@@ -21,7 +21,7 @@ Pull Request Guidelines
 
 To facilitate the review process, your pull request description should include the following, if applicable:
 
-* A link back to the bug report or forum discussion that prompted the change. Note: when linking bugs, use the syntax ```[Bug #xyz](https://bugs.openmw.org/issues/#xyz)``` to create a clickable link. Writing only 'Bug #xyz' will unfortunately create a link to the Github pull request with that number instead.
+* A link back to the bug report or forum discussion that prompted the change. Note: when linking bugs, use the syntax ```[Bug #xyz](https://gitlab.com/OpenMW/openmw/issues/#xyz)``` to create a clickable link. Writing only 'Bug #xyz' will unfortunately create a link to the Github pull request with that number instead.
 * Summary of the changes made
 * Reasoning / motivation behind the change
 * What testing you have carried out to verify the change

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cstring>
+#include <vector>
 
 #include <stdint.h>
 #include <string.h>
@@ -126,6 +127,7 @@ struct ESM_Context
   //  actually contribute to a specific cell. Therefore, we need to store the index
   //  of the file belonging to this contest. See CellStore::(list/load)refs for details.
   int index;
+  std::vector<int> parentFileIndices;
 
   // True if subName has been read but not used.
   bool subCached;

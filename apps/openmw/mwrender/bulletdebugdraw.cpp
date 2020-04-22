@@ -7,7 +7,7 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/sceneutil/vismask.hpp>
+#include "vismask.hpp"
 
 namespace
 {
@@ -34,7 +34,7 @@ void DebugDrawer::createGeometry()
     if (!mGeometry)
     {
         mGeometry = new osg::Geometry;
-        mGeometry->setNodeMask(SceneUtil::Mask_Debug);
+        mGeometry->setNodeMask(Mask_Debug);
 
         mVertices = new osg::Vec3Array;
 

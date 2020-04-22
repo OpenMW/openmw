@@ -14,6 +14,14 @@ namespace MWWorld
 
 namespace MWSound
 {
+    // Each entry excepts of MaxCount should be used only in one place
+    enum BlockerType
+    {
+        VideoPlayback,
+
+        MaxCount
+    };
+
     class Sound;
     class Stream;
     struct Sound_Decoder;
@@ -168,11 +176,14 @@ namespace MWBase
             ///< Is the given sound currently playing on the given object?
             ///  If you want to check if sound played with playSound is playing, use empty Ptr
 
-            virtual void pauseSounds(int types=static_cast<int>(Type::Mask)) = 0;
+            virtual void pauseSounds(MWSound::BlockerType blocker, int types=int(Type::Mask)) = 0;
             ///< Pauses all currently playing sounds, including music.
 
-            virtual void resumeSounds(int types=static_cast<int>(Type::Mask)) = 0;
+            virtual void resumeSounds(MWSound::BlockerType blocker) = 0;
             ///< Resumes all previously paused sounds.
+
+            virtual void pausePlayback() = 0;
+            virtual void resumePlayback() = 0;
 
             virtual void update(float duration) = 0;
 

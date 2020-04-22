@@ -17,6 +17,8 @@
 #include "../../model/world/commands.hpp"
 #include "../../model/world/idtable.hpp"
 #include "../../model/world/landtexture.hpp"
+#include "../widget/brushshapes.hpp"
+#include "brushdraw.hpp"
 #endif
 
 #include "terrainselection.hpp"
@@ -81,6 +83,8 @@ namespace CSVRender
             void dragWheel (int diff, double speedFactor) final;
             void dragMoveEvent (QDragMoveEvent *event) final;
 
+            void mouseMoveEvent (QMouseEvent *event) final;
+
         private:
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.
             void editTerrainTextureGrid (const WorldspaceHitResult& hit);
@@ -104,7 +108,8 @@ namespace CSVRender
             std::string mCellId;
             std::string mBrushTexture;
             int mBrushSize;
-            int mBrushShape;
+            CSVWidget::BrushShape mBrushShape;
+            std::unique_ptr<BrushDraw> mBrushDraw;
             std::vector<std::pair<int, int>> mCustomBrushShape;
             CSVWidget::SceneToolTextureBrush *mTextureBrushScenetool;
             int mDragMode;
@@ -121,7 +126,7 @@ namespace CSVRender
         public slots:
             void handleDropEvent(QDropEvent *event);
             void setBrushSize(int brushSize);
-            void setBrushShape(int brushShape);
+            void setBrushShape(CSVWidget::BrushShape brushShape);
             void setBrushTexture(std::string brushShape);
     };
 }
