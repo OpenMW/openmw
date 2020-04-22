@@ -3,9 +3,8 @@ stages:
   
 Debian:
   tags:
-#    - docker
-#    - linux
-    - none_remove_me
+    - docker
+    - linux
   image: gcc
   cache:
     key: apt-cache
@@ -24,6 +23,7 @@ Debian:
   artifacts:
     paths:
       - build/artifacts/
+
 MacOS:
   tags:
     - macos
@@ -50,15 +50,14 @@ Windows:
     - Set-Variable -Name "time" -Value (date -Format "%H:%m")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-    - (New-Object System.Net.WebClient).DownloadFile('http://repo.msys2.org/distrib/x86_64/msys2-x86_64-20190524.exe', '$PSScriptRoot\msys2.exe')
-    - $result = Start-Process -Wait -FilePath '$PSScriptRoot\msys2.exe' -ArgumentList '/S' -PassThru
-    - echo ${result}
-    - bash
-    - env  # turn on for debugging
-    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
-    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
-    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
-    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
+#   TODO: to anyone wanting to do further work here, we need to figure out how to get the below working
+#   TODO: on gitlab's new shared windows runners. They currently don't have bash or anything else installed
+#   TODO: it is currently just a bare windows 10 with powershell.
+#    - env  # turn on for debugging
+#    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
+#    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
+#    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
+#    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
   cache:
     paths:
     - deps
