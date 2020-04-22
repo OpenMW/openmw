@@ -20,7 +20,7 @@
 
 #include <osgViewer/Viewer>
 
-#include <components/nifosg/nifloader.cpp>
+#include <components/nifosg/nifloader.hpp>
 
 #include <components/debug/debuglog.hpp>
 
