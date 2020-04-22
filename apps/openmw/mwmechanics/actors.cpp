@@ -4,7 +4,6 @@
 #include <components/esm/esmwriter.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/vismask.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
@@ -24,6 +23,8 @@
 #include "../mwbase/statemanager.hpp"
 
 #include "../mwmechanics/aibreathe.hpp"
+
+#include "../mwrender/vismask.hpp"
 
 #include "spellcasting.hpp"
 #include "steering.hpp"
@@ -1422,11 +1423,11 @@ namespace MWMechanics
         const float dist = (player.getRefData().getPosition().asVec3() - ptr.getRefData().getPosition().asVec3()).length();
         if (dist > mActorsProcessingRange)
         {
-            ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Disabled);
+            ptr.getRefData().getBaseNode()->setNodeMask(0);
             return;
         }
         else
-            ptr.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
+            ptr.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
 
         // Fade away actors on large distance (>90% of actor's processing distance)
         float visibilityRatio = 1.0;
@@ -1750,12 +1751,12 @@ namespace MWMechanics
 
                 if (!inRange)
                 {
-                    iter->first.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Disabled);
+                    iter->first.getRefData().getBaseNode()->setNodeMask(0);
                     world->setActorCollisionMode(iter->first, false, false);
                     continue;
                 }
                 else if (!isPlayer)
-                    iter->first.getRefData().getBaseNode()->setNodeMask(SceneUtil::Mask_Actor);
+                    iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
 
                 const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
                 if (!isDead && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())

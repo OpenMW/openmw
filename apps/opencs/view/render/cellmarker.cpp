@@ -8,7 +8,7 @@
 #include <components/misc/constants.hpp>
 
 CSVRender::CellMarkerTag::CellMarkerTag(CellMarker *marker)
-: TagBase(SceneUtil::Mask_EditorCellMarker), mMarker(marker)
+: TagBase(Mask_CellMarker), mMarker(marker)
 {}
 
 CSVRender::CellMarker *CSVRender::CellMarkerTag::getCellMarker() const
@@ -79,7 +79,7 @@ CSVRender::CellMarker::CellMarker(
     mMarkerNode->getOrCreateStateSet()->setAttribute(mat);
 
     mMarkerNode->setUserData(new CellMarkerTag(this));
-    mMarkerNode->setNodeMask(SceneUtil::Mask_EditorCellMarker);
+    mMarkerNode->setNodeMask(Mask_CellMarker);
 
     mCellNode->addChild(mMarkerNode);
 

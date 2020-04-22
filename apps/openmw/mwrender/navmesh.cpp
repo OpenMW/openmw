@@ -1,7 +1,7 @@
 #include "navmesh.hpp"
+#include "vismask.hpp"
 
 #include <components/sceneutil/navmesh.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include <osg/PositionAttitudeTransform>
 
@@ -45,7 +45,7 @@ namespace MWRender
         mGroup = SceneUtil::createNavMeshGroup(navMesh, settings);
         if (mGroup)
         {
-            mGroup->setNodeMask(SceneUtil::Mask_Debug);
+            mGroup->setNodeMask(Mask_Debug);
             mRootNode->addChild(mGroup);
         }
     }

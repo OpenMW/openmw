@@ -27,7 +27,6 @@
 
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -41,6 +40,7 @@
 
 #include "../mwworld/cellstore.hpp"
 
+#include "vismask.hpp"
 #include "ripplesimulation.hpp"
 #include "renderbin.hpp"
 #include "util.hpp"
@@ -243,8 +243,8 @@ public:
         setName("RefractionCamera");
         setCullCallback(new InheritViewPointCallback);
 
-        setCullMask(SceneUtil::Mask_Effect|SceneUtil::Mask_Scene|SceneUtil::Mask_Object|SceneUtil::Mask_Static|SceneUtil::Mask_Terrain|SceneUtil::Mask_Actor|SceneUtil::Mask_ParticleSystem|SceneUtil::Mask_Sky|SceneUtil::Mask_Sun|SceneUtil::Mask_Player|SceneUtil::Mask_Lighting);
-        setNodeMask(SceneUtil::Mask_RenderToTexture);
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 
         // No need for Update traversal since the scene is already updated as part of the main scene graph
@@ -337,7 +337,7 @@ public:
         setCullCallback(new InheritViewPointCallback);
 
         setInterior(isInterior);
-        setNodeMask(SceneUtil::Mask_RenderToTexture);
+        setNodeMask(Mask_RenderToTexture);
 
         unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
         setViewport(0, 0, rttSize, rttSize);
@@ -372,11 +372,11 @@ public:
         int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
         unsigned int extraMask = 0;
-        if(reflectionDetail >= 1) extraMask |= SceneUtil::Mask_Terrain;
-        if(reflectionDetail >= 2) extraMask |= SceneUtil::Mask_Static;
-        if(reflectionDetail >= 3) extraMask |= SceneUtil::Mask_Effect|SceneUtil::Mask_ParticleSystem|SceneUtil::Mask_Object;
-        if(reflectionDetail >= 4) extraMask |= SceneUtil::Mask_Player|SceneUtil::Mask_Actor;
-        setCullMask(SceneUtil::Mask_Scene|SceneUtil::Mask_Sky|SceneUtil::Mask_Lighting|extraMask);
+        if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
+        if(reflectionDetail >= 2) extraMask |= Mask_Static;
+        if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
+        if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
     }
 
     void setWaterLevel(float waterLevel)
@@ -441,7 +441,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
 
     mWaterGeom = SceneUtil::createWaterGeometry(Constants::CellSizeInUnits*150, 40, 900);
     mWaterGeom->setDrawCallback(new DepthClampCallback);
-    mWaterGeom->setNodeMask(SceneUtil::Mask_Water);
+    mWaterGeom->setNodeMask(Mask_Water);
 
     mWaterNode = new osg::PositionAttitudeTransform;
     mWaterNode->setName("Water Root");
@@ -451,7 +451,7 @@ Water::Water(osg::Group *parent, osg::Group* sceneRoot, Resource::ResourceSystem
     // simple water fallback for the local map
     osg::ref_ptr<osg::Geometry> geom2 (osg::clone(mWaterGeom.get(), osg::CopyOp::DEEP_COPY_NODES));
     createSimpleWaterStateSet(geom2, Fallback::Map::getFloat("Water_Map_Alpha"));
-    geom2->setNodeMask(SceneUtil::Mask_SimpleWater);
+    geom2->setNodeMask(Mask_SimpleWater);
     mWaterNode->addChild(geom2);
  
     mSceneRoot->addChild(mWaterNode);
@@ -706,11 +706,11 @@ void Water::update(float dt)
 void Water::updateVisible()
 {
     bool visible = mEnabled && mToggled;
-    mWaterNode->setNodeMask(visible ? SceneUtil::Mask_Default : SceneUtil::Mask_Disabled);
+    mWaterNode->setNodeMask(visible ? ~0 : 0);
     if (mRefraction)
-        mRefraction->setNodeMask(visible ? SceneUtil::Mask_RenderToTexture : SceneUtil::Mask_Disabled);
+        mRefraction->setNodeMask(visible ? Mask_RenderToTexture : 0);
     if (mReflection)
-        mReflection->setNodeMask(visible ? SceneUtil::Mask_RenderToTexture : SceneUtil::Mask_Disabled);
+        mReflection->setNodeMask(visible ? Mask_RenderToTexture : 0);
 }
 
 bool Water::toggle()

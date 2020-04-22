@@ -8,10 +8,9 @@
 
 #include <osgUtil/LineSegmentIntersector>
 
-#include <components/sceneutil/vismask.hpp>
-
 #include "../../model/world/cellcoordinates.hpp"
 #include "../widget/brushshapes.hpp"
+#include "mask.hpp"
 
 CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textureMode) :
     mParentNode(parentNode), mTextureMode(textureMode)
@@ -46,7 +45,7 @@ float CSVRender::BrushDraw::getIntersectionHeight (const osg::Vec3d& point)
     intersector->setIntersectionLimit(osgUtil::LineSegmentIntersector::NO_LIMIT);
     osgUtil::IntersectionVisitor visitor(intersector);
 
-    visitor.setTraversalMask(SceneUtil::Mask_Terrain);
+    visitor.setTraversalMask(Mask_Terrain);
 
     mParentNode->accept(visitor);
 
@@ -258,7 +257,6 @@ void CSVRender::BrushDraw::update(osg::Vec3d point, int brushSize, CSVWidget::Br
 {
     if (mBrushDrawNode->containsNode(mGeometry))
         mBrushDrawNode->removeChild(mGeometry);
-    mBrushDrawNode->setNodeMask (SceneUtil::Mask_GUI);
     float radius = (mLandSizeFactor * brushSize) / 2;
     osg::Vec3d snapToGridPoint = point;
     if (mTextureMode)

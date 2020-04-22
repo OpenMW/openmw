@@ -3,6 +3,8 @@
 
 #include "../widget/scenetoolmode.hpp"
 
+#include "mask.hpp"
+
 class QAction;
 
 namespace CSVRender

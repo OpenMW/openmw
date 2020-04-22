@@ -23,7 +23,6 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
@@ -47,6 +46,7 @@
 #include "../mwrender/npcanimation.hpp"
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/camera.hpp"
+#include "../mwrender/vismask.hpp"
 
 #include "../mwscript/globalscripts.hpp"
 
@@ -2273,7 +2273,7 @@ namespace MWWorld
         {
             // Adjust position so the location we wanted ends up in the middle of the object bounding box
             osg::ComputeBoundsVisitor computeBounds;
-            computeBounds.setTraversalMask(~SceneUtil::Mask_ParticleSystem);
+            computeBounds.setTraversalMask(~MWRender::Mask_ParticleSystem);
             dropped.getRefData().getBaseNode()->accept(computeBounds);
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
             if (bounds.valid())

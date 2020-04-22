@@ -11,12 +11,12 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/waterutil.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../../model/world/cell.hpp"
 #include "../../model/world/cellcoordinates.hpp"
 #include "../../model/world/data.hpp"
 
+#include "mask.hpp"
 
 namespace CSVRender
 {
@@ -38,7 +38,7 @@ namespace CSVRender
         mWaterTransform->setPosition(osg::Vec3f(cellCoords.getX() * CellSize + CellSize / 2.f,
             cellCoords.getY() * CellSize + CellSize / 2.f, 0));
 
-        mWaterTransform->setNodeMask(SceneUtil::Mask_Water);
+        mWaterTransform->setNodeMask(Mask_Water);
         mParentNode->addChild(mWaterTransform);
 
         mWaterNode = new osg::Geode();

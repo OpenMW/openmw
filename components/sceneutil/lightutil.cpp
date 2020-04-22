@@ -11,7 +11,6 @@
 #include "lightcontroller.hpp"
 #include "util.hpp"
 #include "visitor.hpp"
-#include "vismask.hpp"
 #include "positionattitudetransform.hpp"
 
 namespace SceneUtil
@@ -59,7 +58,7 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    void addLight (osg::Group* node, const ESM::Light* esmLight, bool isExterior)
+    void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -72,7 +71,7 @@ namespace SceneUtil
         else
         {
             osg::ComputeBoundsVisitor computeBound;
-            computeBound.setTraversalMask(~SceneUtil::Mask_ParticleSystem);
+            computeBound.setTraversalMask(~partsysMask);
             // We want the bounds of all children of the node, ignoring the node's local transformation
             // So do a traverse(), not accept()
             computeBound.traverse(*node);
@@ -86,15 +85,15 @@ namespace SceneUtil
             attachTo = trans;
         }
 
-        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, isExterior);
+        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior);
         attachTo->addChild(lightSource);
     }
 
-    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, bool isExterior, const osg::Vec4f& ambient)
+    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource (new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light (new osg::Light);
-        lightSource->setNodeMask(SceneUtil::Mask_Lighting);
+        lightSource->setNodeMask(lightMask);
 
         float radius = esmLight->mData.mRadius;
         lightSource->setRadius(radius);

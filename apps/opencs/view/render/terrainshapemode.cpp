@@ -17,7 +17,6 @@
 
 #include <components/esm/loadland.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/sceneutil/vismask.hpp>
 
 #include "../widget/brushshapes.hpp"
 #include "../widget/modebutton.hpp"
@@ -40,12 +39,13 @@
 #include "brushdraw.hpp"
 #include "editmode.hpp"
 #include "pagedworldspacewidget.hpp"
+#include "mask.hpp"
 #include "tagbase.hpp"
 #include "terrainselection.hpp"
 #include "worldspacewidget.hpp"
 
 CSVRender::TerrainShapeMode::TerrainShapeMode (WorldspaceWidget *worldspaceWidget, osg::Group* parentNode, QWidget *parent)
-: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, SceneUtil::Mask_Terrain | SceneUtil::Mask_EditorReference, "Terrain land editing", parent),
+: EditMode (worldspaceWidget, QIcon {":scenetoolbar/editing-terrain-shape"}, Mask_Terrain | Mask_Reference, "Terrain land editing", parent),
     mParentNode(parentNode)
 {
 }
