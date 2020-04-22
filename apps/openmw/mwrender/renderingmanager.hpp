@@ -279,6 +279,8 @@ namespace MWRender
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;
         osg::ref_ptr<SceneUtil::PositionAttitudeTransform> mPlayerNode;
         std::unique_ptr<Camera> mCamera;
+        osg::ref_ptr<osg::Camera> mRttCamera;
+        osg::ref_ptr<osg::Camera> mScreenshotCamera;
         osg::Vec3f mCurrentCameraPos;
 
         osg::ref_ptr<StateUpdater> mStateUpdater;

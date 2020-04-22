@@ -894,7 +894,8 @@ namespace MWRender
         for (int i = 0; i < 6; ++i)
             cubeTexture->setImage(i,images[i].get());
 
-        osg::ref_ptr<osg::Camera> screenshotCamera (new osg::Camera);
+        if(!mScreenshotCamera.valid())
+            mScreenshotCamera = new osg::Camera;
         osg::ref_ptr<osg::ShapeDrawable> quad (new osg::ShapeDrawable(new osg::Box(osg::Vec3(0,0,0),2.0)));
 
         std::map<std::string, std::string> defineMap;
@@ -916,9 +917,11 @@ namespace MWRender
         quad->setStateSet(stateset);
         quad->setUpdateCallback(nullptr);
 
-        screenshotCamera->addChild(quad);
+        mScreenshotCamera->addChild(quad);
 
-        renderCameraToImage(screenshotCamera,image,screenshotW,screenshotH);
+        renderCameraToImage(mScreenshotCamera,image,screenshotW,screenshotH);
+
+        mScreenshotCamera->removeChildren(0, mScreenshotCamera->getNumChildren());
 
         return true;
     }
@@ -968,21 +971,24 @@ namespace MWRender
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
     {
-        osg::ref_ptr<osg::Camera> rttCamera (new osg::Camera);
-        rttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
-        rttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
+        if(!mRttCamera.valid())
+                mRttCamera = new osg::Camera;
+        mRttCamera->setProjectionMatrixAsPerspective(mFieldOfView, w/float(h), mNearClip, mViewDistance);
+        mRttCamera->setViewMatrix(mViewer->getCamera()->getViewMatrix() * cameraTransform);
 
-        rttCamera->setUpdateCallback(new NoTraverseCallback);
-        rttCamera->addChild(mSceneRoot);
+        mRttCamera->setUpdateCallback(new NoTraverseCallback);
+        mRttCamera->addChild(mSceneRoot);
 
-        rttCamera->addChild(mWater->getReflectionCamera());
-        rttCamera->addChild(mWater->getRefractionCamera());
+        mRttCamera->addChild(mWater->getReflectionCamera());
+        mRttCamera->addChild(mWater->getRefractionCamera());
 
-        rttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~SceneUtil::Mask_GUI));
+        mRttCamera->setCullMask(mViewer->getCamera()->getCullMask() & (~SceneUtil::Mask_GUI));
 
-        rttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mRttCamera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderCameraToImage(rttCamera.get(),image,w,h);
+        renderCameraToImage(mRttCamera.get(),image,w,h);
+
+        mRttCamera->removeChildren(0, mRttCamera->getNumChildren());
     }
 
     osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
