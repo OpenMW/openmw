@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <osg/Texture2D>
+#include <osg/ClusterCullingCallback>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -197,6 +198,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     for (unsigned int i=0; i<numUvSets; ++i)
         geometry->setTexCoordArray(i, mBufferCache.getUVBuffer(numVerts));
+
+    geometry->createClusterCullingCallback();
 
     if (useCompositeMap)
     {
