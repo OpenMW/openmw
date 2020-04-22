@@ -193,6 +193,17 @@ namespace NifOsg
         return sShowMarkers;
     }
 
+    unsigned int Loader::sHiddenNodeMask = 0;
+
+    void Loader::setHiddenNodeMask(unsigned int mask)
+    {
+        sHiddenNodeMask = mask;
+    }
+    unsigned int Loader::getHiddenNodeMask()
+    {
+        return sHiddenNodeMask;
+    }
+
     class LoaderImpl
     {
     public:
@@ -571,8 +582,7 @@ namespace NifOsg
             if (nifNode->recType == Nif::RC_RootCollisionNode)
             {
                 skipMeshes = true;
-                // Leave mask for UpdateVisitor enabled
-                node->setNodeMask(0x1);
+                node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
             // We can skip creating meshes for hidden nodes if they don't have a VisController that
@@ -586,8 +596,7 @@ namespace NifOsg
                 if (!hasVisController)
                     skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
 
-                // now hide this node, but leave the mask for UpdateVisitor enabled so that KeyframeController works
-                node->setNodeMask(0x1);
+                node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
             if ((skipMeshes || hasMarkers) && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
@@ -753,7 +762,7 @@ namespace NifOsg
         {
             if (visctrl->data.empty())
                 return;
-            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr()));
+            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr(), Loader::getHiddenNodeMask()));
             setupController(visctrl, callback, animflags);
             node->addUpdateCallback(callback);
         }

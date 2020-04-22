@@ -74,8 +74,13 @@ namespace NifOsg
 
         static bool getShowMarkers();
 
-    private:
+        /// Set the mask to use for hidden nodes. The default is 0, i.e. updates to those nodes can no longer happen.
+        /// If you need to run animations or physics for hidden nodes, you may want to set this to a non-zero mask and remove exactly that mask from the camera's cull mask.
+        static void setHiddenNodeMask(unsigned int mask);
+        static unsigned int getHiddenNodeMask();
 
+    private:
+        static unsigned int sHiddenNodeMask;
         static bool sShowMarkers;
     };
 

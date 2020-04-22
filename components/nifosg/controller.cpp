@@ -269,12 +269,14 @@ void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     }
 }
 
-VisController::VisController(const Nif::NiVisData *data)
+VisController::VisController(const Nif::NiVisData *data, unsigned int mask)
     : mData(data->mVis)
+    , mMask(mask)
 {
 }
 
 VisController::VisController()
+    : mMask(0)
 {
 }
 
@@ -282,6 +284,7 @@ VisController::VisController(const VisController &copy, const osg::CopyOp &copyo
     : osg::NodeCallback(copy, copyop)
     , Controller(copy)
     , mData(copy.mData)
+    , mMask(copy.mMask)
 {
 }
 
@@ -303,8 +306,7 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     if (hasInput())
     {
         bool vis = calculate(getInputValue(nv));
-        // Leave 0x1 enabled for UpdateVisitor, so we can make ourselves visible again in the future from this update callback
-        node->setNodeMask(vis ? ~0 : 0x1);
+        node->setNodeMask(vis ? ~0 : mMask);
     }
     traverse(node, nv);
 }
