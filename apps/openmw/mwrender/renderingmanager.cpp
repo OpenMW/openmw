@@ -20,6 +20,8 @@
 
 #include <osgViewer/Viewer>
 
+#include <components/nifosg/nifloader.cpp>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/misc/stringops.hpp>
@@ -373,6 +375,7 @@ namespace MWRender
         mViewer->getCamera()->setCullingMode(cullingMode);
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");

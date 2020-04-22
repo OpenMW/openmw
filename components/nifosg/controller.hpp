@@ -234,11 +234,12 @@ namespace NifOsg
     {
     private:
         std::vector<Nif::NiVisData::VisData> mData;
+        unsigned int mMask;
 
         bool calculate(float time) const;
 
     public:
-        VisController(const Nif::NiVisData *data);
+        VisController(const Nif::NiVisData *data, unsigned int mask);
         VisController();
         VisController(const VisController& copy, const osg::CopyOp& copyop);
 

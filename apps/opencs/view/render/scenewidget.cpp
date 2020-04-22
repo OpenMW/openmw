@@ -88,8 +88,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     // Add ability to signal osg to show its statistics for debugging purposes
     mView->addEventHandler(new osgViewer::StatsHandler);
 
-    mView->getCamera()->setCullMask(~(Mask_UpdateVisitor));
-
     viewer.addView(mView);
     viewer.setDone(false);
     viewer.realize();
