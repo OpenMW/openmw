@@ -119,6 +119,13 @@ bool GLWidget::event( QEvent* event )
         enqueueDeferredEvent(QEvent::ParentChange);
         return true;
     }
+#if QT_VERSION >= QT_VERSION_CHECK(5, 5, 0)
+    else if (event->type() == QEvent::PlatformSurface && static_cast<QPlatformSurfaceEvent*>(event)->surfaceEventType() == QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed)
+    {
+        if (_gw)
+            _gw->close();
+    }
+#endif
 
     // perform regular event handling
     return QGLWidget::event( event );
