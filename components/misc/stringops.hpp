@@ -1,6 +1,7 @@
 #ifndef MISC_STRINGOPS_H
 #define MISC_STRINGOPS_H
 
+#include <cctype>
 #include <string>
 #include <algorithm>
 
@@ -245,6 +246,58 @@ public:
     {
         return format(fmt.c_str(), args ...);
     }
+
+    static inline void trim(std::string &s)
+    {
+        // left trim
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch)
+        {
+            return !std::isspace(ch);
+        }));
+
+        // right trim
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch)
+        {
+            return !std::isspace(ch);
+        }).base(), s.end());
+    }
+
+    template <class Container>
+    static inline void split(const std::string& str, Container& cont, const std::string& delims = " ")
+    {
+        std::size_t current, previous = 0;
+        current = str.find_first_of(delims);
+        while (current != std::string::npos)
+        {
+            cont.push_back(str.substr(previous, current - previous));
+            previous = current + 1;
+            current = str.find_first_of(delims, previous);
+        }
+        cont.push_back(str.substr(previous, current - previous));
+    }
+
+    // TODO: use the std::string_view once we will use the C++17.
+    // It should allow us to avoid data copying while we still will support both string and literal arguments.
+
+    static inline void replaceAll(std::string& data, std::string toSearch, std::string replaceStr)
+    {
+        size_t pos = data.find(toSearch);
+
+        while( pos != std::string::npos)
+        {
+            data.replace(pos, toSearch.size(), replaceStr);
+            pos = data.find(toSearch, pos + replaceStr.size());
+        }
+    }
+
+     static inline void replaceLast(std::string& str, std::string substr, std::string with)
+     {
+         size_t pos = str.rfind(substr);
+         if (pos == std::string::npos)
+             return;
+
+         str.replace(pos, substr.size(), with);
+     }
 };
 
 }

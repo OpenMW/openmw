@@ -29,13 +29,17 @@ struct Enchantment
         ConstantEffect = 3
     };
 
+    enum Flags
+    {
+        Autocalc = 0x01
+    };
+
     struct ENDTstruct
     {
         int mType;
         int mCost;
         int mCharge;
-        int mAutocalc; // Guessing this is 1 if we are supposed to auto
-        // calculate
+        int mFlags;
     };
 
     std::string mId;

@@ -396,4 +396,171 @@ namespace ICS
 		ICS->cancelDetectingBindingState();
 	}
 
+	/* ----------------------------------------------------------------------------------------
+	* OPENMW CODE STARTS HERE
+	* Mouse Wheel support added by Michael Stopa (Stomy) */
+
+	void InputControlSystem::loadMouseWheelBinders(TiXmlElement* xmlControlNode)
+	{
+		TiXmlElement* xmlMouseWheelBinder = xmlControlNode->FirstChildElement("MouseWheelBinder");
+		while (xmlMouseWheelBinder)
+		{
+			Control::ControlChangingDirection dir = Control::STOP;
+			if (std::string(xmlMouseWheelBinder->Attribute("direction")) == "INCREASE")
+			{
+				dir = Control::INCREASE;
+			}
+			else if (std::string(xmlMouseWheelBinder->Attribute("direction")) == "DECREASE")
+			{
+				dir = Control::DECREASE;
+			}
+
+			MouseWheelClick click = MouseWheelClick::UNASSIGNED;
+			if (std::string(xmlMouseWheelBinder->Attribute("button")) == "UP")
+			{
+				click = MouseWheelClick::UP;
+			}
+			else if (std::string(xmlMouseWheelBinder->Attribute("button")) == "DOWN")
+			{
+				click = MouseWheelClick::DOWN;
+			}
+			else if (std::string(xmlMouseWheelBinder->Attribute("button")) == "DOWN")
+			{
+				click = MouseWheelClick::RIGHT;
+			}
+			else if (std::string(xmlMouseWheelBinder->Attribute("button")) == "DOWN")
+			{
+				click = MouseWheelClick::LEFT;
+			}
+
+			addMouseWheelBinding(mControls.back(), click, dir);
+			xmlMouseWheelBinder = xmlMouseWheelBinder->NextSiblingElement("MouseWheelBinder");
+		}
+	}
+
+	void InputControlSystem::addMouseWheelBinding(
+			Control* control,
+			MouseWheelClick click,
+			Control::ControlChangingDirection direction)
+	{
+		ICS_LOG("\tAdding MouseWheelBinder [button="
+			+ ToString<int>(static_cast<int>(click)) + ", direction="
+			+ ToString<int>(direction) + "]");
+
+		ControlButtonBinderItem controlButtonBinderItem;
+		controlButtonBinderItem.control = control;
+		controlButtonBinderItem.direction = direction;
+		mControlsMouseWheelBinderMap[static_cast<int>(click)] = controlButtonBinderItem;
+	}
+
+	void InputControlSystem::removeMouseWheelBinding(MouseWheelClick click)
+	{
+		ControlsAxisBinderMapType::iterator it = mControlsMouseWheelBinderMap.find(static_cast<int>(click));
+		if (it != mControlsMouseWheelBinderMap.end())
+		{
+			mControlsMouseWheelBinderMap.erase(it);
+		}
+	}
+
+	InputControlSystem::MouseWheelClick InputControlSystem::getMouseWheelBinding(
+			Control* control,
+			ICS::Control::ControlChangingDirection direction)
+	{
+		ControlsAxisBinderMapType::iterator it = mControlsMouseWheelBinderMap.begin();
+		while (it != mControlsMouseWheelBinderMap.end())
+		{
+			if (it->first > 0 && it->second.control == control && it->second.direction == direction)
+			{
+				return (MouseWheelClick)(it->first);
+			}
+			++it;
+		}
+
+		return MouseWheelClick::UNASSIGNED;
+	}
+
+	bool InputControlSystem::isMouseWheelBound(MouseWheelClick button) const
+	{
+		return mControlsMouseWheelBinderMap.find(static_cast<int>(button)) != mControlsMouseWheelBinderMap.end();
+	}
+
+	void InputControlSystem::mouseWheelMoved(const SDL_MouseWheelEvent &evt)
+	{
+		if (mActive)
+		{
+			MouseWheelClick click = MouseWheelClick::UNASSIGNED;
+			int value;
+			if (evt.y != 0)
+			{
+				value = evt.y;
+				if (evt.direction == SDL_MOUSEWHEEL_FLIPPED)
+					value *= -1;
+				if (value > 0)
+					click = MouseWheelClick::UP;
+				else
+					click = MouseWheelClick::DOWN;
+			}
+			else if (evt.x != 0)
+			{
+				value = evt.x;
+				if (evt.direction == SDL_MOUSEWHEEL_FLIPPED)
+					value *= -1;
+				if (value > 0)
+					click = MouseWheelClick::RIGHT;
+				else
+					click = MouseWheelClick::LEFT;
+			}
+			else
+				return;
+
+			if(!mDetectingBindingControl)
+			{
+				// This assumes a single event is sent for every single mouse wheel direction, if they are
+				// buffered up then all bindings will have to be resolved on every invocation of this function
+
+				ControlButtonBinderItem wheelBinderItem = mControlsMouseWheelBinderMap[static_cast<int>(click)];
+				Control* control = wheelBinderItem.control;
+				if (control)
+				{
+					control->setIgnoreAutoReverse(false);
+					if (wheelBinderItem.direction == Control::INCREASE)
+					{
+						control->setValue(static_cast<float>(std::abs(value)));
+						control->setChangingDirection(Control::STOP);
+					}
+					else if (wheelBinderItem.direction == Control::DECREASE)
+					{
+						control->setValue(static_cast<float>(std::abs(value)));
+						control->setChangingDirection(Control::STOP);
+					}
+				}
+			}
+			else if(mDetectingBindingListener)
+			{
+				mDetectingBindingListener->mouseWheelBindingDetected(this,
+					mDetectingBindingControl, click, mDetectingBindingDirection);
+			}
+		}
+	}
+
+	void DetectingBindingListener::mouseWheelBindingDetected(
+			InputControlSystem* ICS,
+			Control* control,
+			InputControlSystem::MouseWheelClick click,
+			Control::ControlChangingDirection direction)
+	{
+		ICS->removeMouseWheelBinding(click);
+
+		InputControlSystem::MouseWheelClick oldClick = ICS->getMouseWheelBinding(control, direction);
+		if (oldClick != InputControlSystem::MouseWheelClick::UNASSIGNED)
+		{
+			ICS->removeMouseWheelBinding(oldClick);
+		}
+
+		ICS->addMouseWheelBinding(control, click, direction);
+		ICS->cancelDetectingBindingState();
+	}
+
+	/* OPENMW CODE ENDS HERE
+	* ------------------------------------------------------------------------------------- */
 }

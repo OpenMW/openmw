@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "loadskil.hpp"
+
 namespace ESM
 {
 
@@ -21,6 +23,10 @@ struct Weapon
 
     enum Type
     {
+        PickProbe = -4,
+        HandToHand = -3,
+        Spell = -2,
+        None = -1,
         ShortBladeOneHand = 0,
         LongBladeOneHand = 1,
         LongBladeTwoHand = 2,
@@ -75,5 +81,34 @@ struct Weapon
     void blank();
     ///< Set record to default state (does not touch the ID).
 };
+
+struct WeaponType
+{
+    enum Flags
+    {
+        TwoHanded = 0x01,
+        HasHealth = 0x02
+    };
+
+    enum Class
+    {
+        Melee = 0,
+        Ranged = 1,
+        Thrown = 2,
+        Ammo = 3
+    };
+
+    //std::string mDisplayName; // TODO: will be needed later for editor
+    std::string mShortGroup;
+    std::string mLongGroup;
+    std::string mSoundId;
+    std::string mAttachBone;
+    std::string mSheathingBone;
+    ESM::Skill::SkillEnum mSkill;
+    Class mWeaponClass;
+    int mAmmoType;
+    int mFlags;
+};
+
 }
 #endif

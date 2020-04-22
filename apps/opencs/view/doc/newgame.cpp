@@ -6,6 +6,10 @@
 #include <QDialogButtonBox>
 #include <QPushButton>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #include "filewidget.hpp"
 #include "adjusterwidget.hpp"
 
@@ -46,7 +50,11 @@ CSVDoc::NewGameDialogue::NewGameDialogue()
     connect (mFileWidget, SIGNAL (nameChanged (const QString&, bool)),
         mAdjusterWidget, SLOT (setName (const QString&, bool)));
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    QRect scr = QGuiApplication::primaryScreen()->geometry();
+#else
     QRect scr = QApplication::desktop()->screenGeometry();
+#endif
     QRect rect = geometry();
     move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }

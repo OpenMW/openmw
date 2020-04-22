@@ -15,6 +15,10 @@
 #include <QDesktopWidget>
 #include <QScrollBar>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #include "../../model/doc/document.hpp"
 #include "../../model/prefs/state.hpp"
 #include "../../model/prefs/shortcut.hpp"
@@ -27,6 +31,7 @@
 
 #include "../tools/subviews.hpp"
 
+#include <components/misc/helpviewer.hpp>
 #include <components/version/version.hpp>
 
 #include "viewmanager.hpp"
@@ -311,6 +316,12 @@ void CSVDoc::View::setupHelpMenu()
 {
     QMenu *help = menuBar()->addMenu (tr ("Help"));
 
+    QAction* helpInfo = createMenuEntry("Help", ":/info.png", help, "document-help-help");
+    connect (helpInfo, SIGNAL (triggered()), this, SLOT (openHelp()));
+
+    QAction* tutorial = createMenuEntry("Tutorial", ":/info.png", help, "document-help-tutorial");
+    connect (tutorial, SIGNAL (triggered()), this, SLOT (tutorial()));
+
     QAction* about = createMenuEntry("About OpenMW-CS", ":./info.png", help, "document-help-about");
     connect (about, SIGNAL (triggered()), this, SLOT (infoAbout()));
 
@@ -404,7 +415,7 @@ void CSVDoc::View::updateSubViewIndices(SubView *view)
 
     updateTitle();
 
-    foreach (SubView *subView, mSubViews)
+    for (SubView *subView : mSubViews)
     {
         if (!subView->isFloating())
         {
@@ -546,7 +557,7 @@ void CSVDoc::View::addSubView (const CSMWorld::UniversalId& id, const std::strin
     // User setting to reuse sub views (on a per top level view basis)
     if (windows["reuse"].isTrue())
     {
-        foreach(SubView *sb, mSubViews)
+        for (SubView *sb : mSubViews)
         {
             bool isSubViewReferenceable =
                 sb->getUniversalId().getType() == CSMWorld::UniversalId::Type_Referenceable;
@@ -702,6 +713,16 @@ void CSVDoc::View::newView()
 void CSVDoc::View::save()
 {
     mDocument->save();
+}
+
+void CSVDoc::View::openHelp()
+{
+    Misc::HelpViewer::openHelp("manuals/openmw-cs/index.html");
+}
+
+void CSVDoc::View::tutorial()
+{
+    Misc::HelpViewer::openHelp("manuals/openmw-cs/tour.html");
 }
 
 void CSVDoc::View::infoAbout()
@@ -975,7 +996,7 @@ void CSVDoc::View::resizeViewHeight (int height)
 
 void CSVDoc::View::toggleShowStatusBar (bool show)
 {
-    foreach (QObject *view, mSubViewWindow.children())
+    for (QObject *view : mSubViewWindow.children())
     {
         if (CSVDoc::SubView *subView = dynamic_cast<CSVDoc::SubView *> (view))
             subView->setStatusBar (show);
@@ -1050,7 +1071,11 @@ void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
     if (isGrowLimit)
         rect = dw->screenGeometry(this);
     else
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        rect = QGuiApplication::screens().at(dw->screenNumber(this))->geometry();
+#else
         rect = dw->screenGeometry(dw->screen(dw->screenNumber(this)));
+#endif
 
     if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
     {

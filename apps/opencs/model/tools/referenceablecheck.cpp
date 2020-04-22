@@ -910,7 +910,7 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
 {
     for (size_t i = 0; i < itemList.size(); ++i)
     {
-        std::string itemName = itemList[i].mItem.toString();
+        std::string itemName = itemList[i].mItem;
         CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
 
         if (localIndex.first == -1)

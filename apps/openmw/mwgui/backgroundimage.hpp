@@ -9,7 +9,7 @@ namespace MWGui
     /**
      * @brief A variant of MyGUI::ImageBox with aspect ratio correction using black bars
      */
-    class BackgroundImage : public MyGUI::ImageBox
+    class BackgroundImage final : public MyGUI::ImageBox
     {
     MYGUI_RTTI_DERIVED(BackgroundImage)
 
@@ -22,8 +22,8 @@ namespace MWGui
          */
         void setBackgroundImage (const std::string& image, bool fixedRatio=true, bool stretch=true);
 
-        virtual void setSize (const MyGUI::IntSize &_value);
-        virtual void setCoord (const MyGUI::IntCoord &_value);
+        void setSize (const MyGUI::IntSize &_value) final;
+        void setCoord (const MyGUI::IntCoord &_value) final;
 
     private:
         MyGUI::ImageBox* mChild;

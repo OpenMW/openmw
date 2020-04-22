@@ -6,8 +6,9 @@
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/Emitter>
 
-#include <components/sceneutil/morphgeometry.hpp>
+#include <components/nifosg/userdata.hpp>
 
+#include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 
 namespace SceneUtil
@@ -28,6 +29,15 @@ namespace SceneUtil
         if (stateset->getDataVariance() == osg::StateSet::DYNAMIC)
             return osg::clone(stateset, *this);
         return const_cast<osg::StateSet*>(stateset);
+    }
+
+    osg::Object* CopyOp::operator ()(const osg::Object* node) const
+    {
+        // We should copy node transformations when we copy node
+        if (const NifOsg::NodeUserData* data = dynamic_cast<const NifOsg::NodeUserData*>(node))
+            return osg::clone(data, *this);
+
+        return osg::CopyOp::operator()(node);
     }
 
     osg::Node* CopyOp::operator ()(const osg::Node* node) const

@@ -124,3 +124,25 @@ terrain specular map pattern
 :Default:	_diffusespec
 
 The filename pattern to probe for when detecting terrain specular maps (see 'auto use terrain specular maps')
+
+apply lighting to environment maps
+----------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
+Morrowind Code Patch includes an option to remedy that by doing environment-mapping before applying lighting, this is the equivalent of that option.
+Affected objects will use shaders.
+
+radial fog
+----------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
+This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
+Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.

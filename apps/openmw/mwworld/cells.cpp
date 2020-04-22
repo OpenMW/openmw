@@ -163,6 +163,19 @@ void MWWorld::Cells::rest (double hours)
     }
 }
 
+void MWWorld::Cells::recharge (float duration)
+{
+    for (auto &interior : mInteriors)
+    {
+        interior.second.recharge(duration);
+    }
+
+    for (auto &exterior : mExteriors)
+    {
+        exterior.second.recharge(duration);
+    }
+}
+
 MWWorld::CellStore *MWWorld::Cells::getCell (const ESM::CellId& id)
 {
     if (id.mPaged)

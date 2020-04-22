@@ -12,6 +12,11 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
+    struct ContainerState;
+    struct CreatureLevListState;
+    struct CreatureState;
+    struct DoorState;
+    struct NpcState;
 
     // format 0, saved games only
 
@@ -48,6 +53,21 @@ namespace ESM
         void blank();
 
         virtual ~ObjectState();
+
+        virtual const NpcState& asNpcState() const;
+        virtual NpcState& asNpcState();
+
+        virtual const CreatureState& asCreatureState() const;
+        virtual CreatureState& asCreatureState();
+
+        virtual const ContainerState& asContainerState() const;
+        virtual ContainerState& asContainerState();
+
+        virtual const DoorState& asDoorState() const;
+        virtual DoorState& asDoorState();
+
+        virtual const CreatureLevListState& asCreatureLevListState() const;
+        virtual CreatureLevListState& asCreatureLevListState();
     };
 }
 

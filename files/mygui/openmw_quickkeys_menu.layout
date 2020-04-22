@@ -17,16 +17,16 @@
 
         <Widget type="Widget" skin="" position="15 55 332 128" align="Left Bottom HCenter">
 
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 60 59" name="QuickKey1"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 0 60 59" name="QuickKey2"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 0 60 59" name="QuickKey3"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 0 60 59" name="QuickKey4"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 0 60 59" name="QuickKey5"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 67 60 59" name="QuickKey6"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 67 60 59" name="QuickKey7"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 67 60 59" name="QuickKey8"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 67 60 59" name="QuickKey9"/>
-            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 67 60 59" name="QuickKey10"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 0 60 60" name="QuickKey1"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 0 60 60" name="QuickKey2"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 0 60 60" name="QuickKey3"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 0 60 60" name="QuickKey4"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 0 60 60" name="QuickKey5"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="0 67 60 60" name="QuickKey6"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="68 67 60 60" name="QuickKey7"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="136 67 60 60" name="QuickKey8"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="204 67 60 60" name="QuickKey9"/>
+            <Widget type="ItemWidget" skin="MW_ItemIconBox" position="272 67 60 60" name="QuickKey10"/>
 
         </Widget>
 

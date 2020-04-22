@@ -38,6 +38,8 @@ namespace ICS
     {
     public:
         virtual void channelChanged(Channel* channel, float currentValue, float previousValue) = 0;
+
+        virtual ~ChannelListener() = default;
     };
 
 }

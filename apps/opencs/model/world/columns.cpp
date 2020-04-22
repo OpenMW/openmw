@@ -236,7 +236,6 @@ namespace CSMWorld
 
             { ColumnId_FactionReactions, "Reactions" },
             { ColumnId_FactionRanks, "Ranks" },
-            //{ ColumnId_FactionID, "Faction ID" },
             { ColumnId_FactionReaction, "Reaction" },
 
             { ColumnId_FactionAttrib1, "Attrib 1" },
@@ -248,7 +247,6 @@ namespace CSMWorld
 
             { ColumnId_EffectList, "Effects" },
             { ColumnId_EffectId, "Effect" },
-            //{ ColumnId_EffectAttribute, "Attrib" },
             { ColumnId_EffectRange, "Range" },
             { ColumnId_EffectArea, "Area" },
 
@@ -257,7 +255,6 @@ namespace CSMWorld
             { ColumnId_AiWanderDist, "Wander Dist" },
             { ColumnId_AiDuration, "Ai Duration" },
             { ColumnId_AiWanderToD, "Wander ToD" },
-            //{ ColumnId_AiWanderIdle, "Wander Idle" },
             { ColumnId_AiWanderRepeat, "Wander Repeat" },
             { ColumnId_AiActivateName, "Activate" },
             { ColumnId_AiTargetId, "Target ID" },
@@ -291,8 +288,6 @@ namespace CSMWorld
             { ColumnId_UChar, "Value [0..255]" },
             { ColumnId_NpcMisc, "NPC Misc" },
             { ColumnId_Level, "Level" },
-            { ColumnId_NpcFactionID, "Faction ID" },
-            { ColumnId_GenderNpc, "Gender"},
             { ColumnId_Mana, "Mana" },
             { ColumnId_Fatigue, "Fatigue" },
             { ColumnId_NpcDisposition, "NPC Disposition" },

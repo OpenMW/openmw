@@ -38,7 +38,7 @@ namespace MWGui
     public:
         WorldItemModel(float left, float top) : mLeft(left), mTop(top) {}
         virtual ~WorldItemModel() {}
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false)
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool /*allowAutoEquip*/)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
@@ -47,8 +47,7 @@ namespace MWGui
                 dropped = world->placeObject(item.mBase, mLeft, mTop, count);
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
-            if (setNewOwner)
-                dropped.getCellRef().setOwner("");
+            dropped.getCellRef().setOwner("");
 
             return dropped;
         }

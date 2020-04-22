@@ -538,7 +538,7 @@ namespace CSMWorld
         for (auto& item : npc.mInventory.mList)
         {
             if (item.mCount <= 0) continue;
-            std::string itemId = item.mItem.toString();
+            std::string itemId = item.mItem;
             addNpcItem(itemId, data);
         }
     }

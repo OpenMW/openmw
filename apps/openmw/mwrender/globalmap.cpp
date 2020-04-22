@@ -16,6 +16,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include <components/esm/globalmap.hpp>
 
@@ -23,8 +24,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-
-#include "vismask.hpp"
 
 namespace
 {
@@ -74,17 +73,17 @@ namespace
         {
             if (mRendered)
             {
-                node->setNodeMask(0);
+                if (mParent->copyResult(static_cast<osg::Camera*>(node), nv->getTraversalNumber()))
+                {
+                    node->setNodeMask(SceneUtil::Mask_Disabled);
+                    mParent->markForRemoval(static_cast<osg::Camera*>(node));
+                }
                 return;
             }
 
             traverse(node, nv);
 
-            if (!mRendered)
-            {
-                mRendered = true;
-                mParent->markForRemoval(static_cast<osg::Camera*>(node));
-            }
+            mRendered = true;
         }
 
     private:
@@ -288,7 +287,7 @@ namespace MWRender
                                                 float srcLeft, float srcTop, float srcRight, float srcBottom)
     {
         osg::ref_ptr<osg::Camera> camera (new osg::Camera);
-        camera->setNodeMask(Mask_RenderToTexture);
+        camera->setNodeMask(SceneUtil::Mask_RenderToTexture);
         camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         camera->setViewMatrix(osg::Matrix::identity());
         camera->setProjectionMatrix(osg::Matrix::identity());
@@ -325,7 +324,7 @@ namespace MWRender
             imageDest.mImage = image;
             imageDest.mX = x;
             imageDest.mY = y;
-            mPendingImageDest.push_back(imageDest);
+            mPendingImageDest[camera] = imageDest;
         }
 
         // Create a quad rendering the updated texture
@@ -458,7 +457,7 @@ namespace MWRender
         if (map.mImageData.empty())
             return;
 
-        Files::IMemStream istream(&map.mImageData[0], map.mImageData.size());
+        Files::IMemStream istream(map.mImageData.data(), map.mImageData.size());
 
         osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
         if (!readerwriter)
@@ -523,7 +522,7 @@ namespace MWRender
 
         if (srcBox == destBox && imageWidth == mWidth && imageHeight == mHeight)
         {
-            mOverlayImage->copySubImage(0, 0, 0, image);
+            mOverlayImage = image;
 
             requestOverlayTextureUpdate(0, 0, mWidth, mHeight, texture, true, false);
         }
@@ -567,6 +566,27 @@ namespace MWRender
         }
     }
 
+    bool GlobalMap::copyResult(osg::Camera *camera, unsigned int frame)
+    {
+        ImageDestMap::iterator it = mPendingImageDest.find(camera);
+        if (it == mPendingImageDest.end())
+            return true;
+        else
+        {
+            ImageDest& imageDest = it->second;
+            if (imageDest.mFrameDone == 0) imageDest.mFrameDone = frame+2; // wait an extra frame to ensure the draw thread has completed its frame.
+            if (imageDest.mFrameDone > frame)
+            {
+                ++it;
+                return false;
+            }
+
+            mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
+            it = mPendingImageDest.erase(it);
+            return true;
+        }
+    }
+
     void GlobalMap::markForRemoval(osg::Camera *camera)
     {
         CameraVector::iterator found = std::find(mActiveCameras.begin(), mActiveCameras.end(), camera);
@@ -585,21 +605,6 @@ namespace MWRender
             removeCamera(camera);
 
         mCamerasPendingRemoval.clear();
-
-        for (ImageDestVector::iterator it = mPendingImageDest.begin(); it != mPendingImageDest.end();)
-        {
-            ImageDest& imageDest = *it;
-            if (--imageDest.mFramesUntilDone > 0)
-            {
-                ++it;
-                continue;
-            }
-
-            ensureLoaded();
-            mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
-
-            it = mPendingImageDest.erase(it);
-        }
     }
 
     void GlobalMap::removeCamera(osg::Camera *cam)

@@ -58,7 +58,7 @@ void ESM::Player::save (ESMWriter &esm) const
 
     mCellId.save (esm);
 
-    esm.writeHNT ("LKEP", mLastKnownExteriorPosition, 12);
+    esm.writeHNT ("LKEP", mLastKnownExteriorPosition);
 
     if (mHasMark)
     {

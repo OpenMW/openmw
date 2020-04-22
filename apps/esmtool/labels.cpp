@@ -4,6 +4,7 @@
 #include <components/esm/loadcell.hpp>
 #include <components/esm/loadcont.hpp>
 #include <components/esm/loadcrea.hpp>
+#include <components/esm/loadench.hpp>
 #include <components/esm/loadlevlist.hpp>
 #include <components/esm/loadligh.hpp>
 #include <components/esm/loadmgef.hpp>
@@ -712,7 +713,7 @@ std::string creatureFlags(int flags)
     if (flags & ESM::Creature::Respawn) properties += "Respawn ";
     if (flags & ESM::Creature::Weapon) properties += "Weapon ";
     if (flags & ESM::Creature::Essential) properties += "Essential ";
-    int unused = (0xFF ^
+    int unused = (0xFFFFFFFF ^
                   (ESM::Creature::Base|
                    ESM::Creature::Walks|
                    ESM::Creature::Swims|
@@ -723,6 +724,16 @@ std::string creatureFlags(int flags)
                    ESM::Creature::Essential));
     if (flags & unused) properties += "Invalid ";
     properties += Misc::StringUtils::format("(0x%02X)", flags);
+    return properties;
+}
+
+std::string enchantmentFlags(int flags)
+{
+    std::string properties;
+    if (flags == 0) properties += "[None] ";
+    if (flags & ESM::Enchantment::Autocalc) properties += "Autocalc ";
+    if (flags & (0xFFFFFFFF ^ ESM::Enchantment::Autocalc)) properties += "Invalid ";
+    properties += Misc::StringUtils::format("(0x%08X)", flags);
     return properties;
 }
 
@@ -807,8 +818,10 @@ std::string magicEffectFlags(int flags)
     if (flags & ESM::MagicEffect::CastSelf) properties += "CastSelf ";
     if (flags & ESM::MagicEffect::CastTouch) properties += "CastTouch ";
     if (flags & ESM::MagicEffect::CastTarget) properties += "CastTarget ";
-    if (flags & ESM::MagicEffect::UncappedDamage) properties += "UncappedDamage ";
+    if (flags & ESM::MagicEffect::AppliedOnce) properties += "AppliedOnce ";
+    if (flags & ESM::MagicEffect::Stealth) properties += "Stealth ";
     if (flags & ESM::MagicEffect::NonRecastable) properties += "NonRecastable ";
+    if (flags & ESM::MagicEffect::IllegalDaedra) properties += "IllegalDaedra ";
     if (flags & ESM::MagicEffect::Unreflectable) properties += "Unreflectable ";
     if (flags & ESM::MagicEffect::CasterLinked) properties += "CasterLinked ";
     if (flags & ESM::MagicEffect::AllowSpellmaking) properties += "AllowSpellmaking ";

@@ -21,12 +21,12 @@ namespace
 
         // If we have an index value that does not make sense, assume that it was an addition
         // by the present plugin (but a faulty one)
-        if (local && local <= reader.getGameFiles().size())
+        if (local && local <= reader.getParentFileIndices().size())
         {
             // If the most significant 8 bits are used, then this reference already exists.
             // In this case, do not spawn a new reference, but overwrite the old one.
             refNum.mIndex &= 0x00ffffff; // delete old plugin ID
-            refNum.mContentFile = reader.getGameFiles()[local-1].index;
+            refNum.mContentFile = reader.getParentFileIndices()[local-1];
         }
         else
         {
@@ -110,6 +110,7 @@ namespace ESM
     void Cell::loadCell(ESMReader &esm, bool saveContext)
     {
         bool isLoaded = false;
+        mHasAmbi = false;
         while (!isLoaded && esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -127,6 +128,7 @@ namespace ESM
                     break;
                 case ESM::FourCC<'A','M','B','I'>::value:
                     esm.getHT(mAmbi);
+                    mHasAmbi = true;
                     break;
                 case ESM::FourCC<'R','G','N','N'>::value:
                     mRegion = esm.getHString();
@@ -160,7 +162,7 @@ namespace ESM
 
     void Cell::save(ESMWriter &esm, bool isDeleted) const
     {
-        esm.writeHNOCString("NAME", mName);
+        esm.writeHNCString("NAME", mName);
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
@@ -182,7 +184,12 @@ namespace ESM
             if (mData.mFlags & QuasiEx)
                 esm.writeHNOCString("RGNN", mRegion);
             else
-                esm.writeHNT("AMBI", mAmbi, 16);
+            {
+                // Try to avoid saving ambient lighting information when it's unnecessary.
+                // This is to fix black lighting in resaved cell records that lack this information.
+                if (mHasAmbi)
+                    esm.writeHNT("AMBI", mAmbi, 16);
+            }
         }
         else
         {
@@ -272,6 +279,7 @@ namespace ESM
         mData.mX = 0;
         mData.mY = 0;
 
+        mHasAmbi = true;
         mAmbi.mAmbient = 0;
         mAmbi.mSunlight = 0;
         mAmbi.mFog = 0;

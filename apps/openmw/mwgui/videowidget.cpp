@@ -76,6 +76,21 @@ void VideoWidget::stop()
     mPlayer->close();
 }
 
+void VideoWidget::pause()
+{
+    mPlayer->pause();
+}
+
+void VideoWidget::resume()
+{
+    mPlayer->play();
+}
+
+bool VideoWidget::isPaused() const
+{
+    return mPlayer->isPaused();
+}
+
 bool VideoWidget::hasAudioStream()
 {
     return mPlayer->hasAudioStream();

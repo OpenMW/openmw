@@ -14,7 +14,7 @@ namespace osgMyGUI
 {
 
     /// @brief A Layer rendering with additive blend mode.
-    class AdditiveLayer : public MyGUI::OverlappedLayer
+    class AdditiveLayer final : public MyGUI::OverlappedLayer
     {
     public:
         MYGUI_RTTI_DERIVED( AdditiveLayer )
@@ -22,7 +22,7 @@ namespace osgMyGUI
         AdditiveLayer();
         ~AdditiveLayer();
 
-        virtual void renderToTarget(MyGUI::IRenderTarget* _target, bool _update);
+        void renderToTarget(MyGUI::IRenderTarget* _target, bool _update) final;
 
     private:
         osg::ref_ptr<osg::StateSet> mStateSet;

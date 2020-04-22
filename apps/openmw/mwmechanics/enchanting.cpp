@@ -1,6 +1,7 @@
 #include "enchanting.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/class.hpp"
@@ -14,24 +15,26 @@
 #include "creaturestats.hpp"
 #include "spellcasting.hpp"
 #include "actorutil.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
     Enchanting::Enchanting()
         : mCastStyle(ESM::Enchantment::CastOnce)
         , mSelfEnchanting(false)
+        , mWeaponType(-1)
     {}
 
     void Enchanting::setOldItem(const MWWorld::Ptr& oldItem)
     {
         mOldItemPtr=oldItem;
+        mWeaponType = -1;
+        mObjectType.clear();
         if(!itemEmpty())
         {
             mObjectType = mOldItemPtr.getTypeName();
-        }
-        else
-        {
-            mObjectType="";
+            if (mObjectType == typeid(ESM::Weapon).name())
+                mWeaponType = mOldItemPtr.get<ESM::Weapon>()->mBase->mData.mType;
         }
     }
 
@@ -60,8 +63,7 @@ namespace MWMechanics
         const MWWorld::Ptr& player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
         ESM::Enchantment enchantment;
-        enchantment.mData.mCharge = getGemCharge();
-        enchantment.mData.mAutocalc = 0;
+        enchantment.mData.mFlags = 0;
         enchantment.mData.mType = mCastStyle;
         enchantment.mData.mCost = getBaseCastCost();
 
@@ -79,19 +81,26 @@ namespace MWMechanics
             mEnchanter.getClass().skillUsageSucceeded (mEnchanter, ESM::Skill::Enchant, 2);
         }
 
-        if(mCastStyle==ESM::Enchantment::ConstantEffect)
-        {
-            enchantment.mData.mCharge=0;
-        }
         enchantment.mEffects = mEffectList;
 
+        int count = getEnchantItemsCount();
+
+        if(mCastStyle==ESM::Enchantment::ConstantEffect)
+            enchantment.mData.mCharge = 0;
+        else
+            enchantment.mData.mCharge = getGemCharge() / count;
+
+        // Try to find a dynamic enchantment with the same stats, create a new one if not found.
+        const ESM::Enchantment* enchantmentPtr = getRecord(enchantment);
+        if (enchantmentPtr == nullptr)
+            enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
+
         // Apply the enchantment
-        const ESM::Enchantment *enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord (enchantment);
         std::string newItemId = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
-        store.remove(mOldItemPtr, 1, player);
-        store.add(newItemId, 1, player);
+        store.remove(mOldItemPtr, count, player);
+        store.add(newItemId, count, player);
 
         if(!mSelfEnchanting)
             payForEnchantment();
@@ -119,21 +128,25 @@ namespace MWMechanics
                     return;
             }
         }
-        else if(mObjectType == typeid(ESM::Weapon).name())
+        else if (mWeaponType != -1)
         { // Weapon
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             switch(mCastStyle)
             {
                 case ESM::Enchantment::WhenStrikes:
-                    mCastStyle = ESM::Enchantment::WhenUsed;
+                    if (weapclass == ESM::WeaponType::Melee || weapclass == ESM::WeaponType::Ranged)
+                        mCastStyle = ESM::Enchantment::WhenUsed;
                     return;
                 case ESM::Enchantment::WhenUsed:
-                    if (powerfulSoul)
+                    if (powerfulSoul && weapclass != ESM::WeaponType::Ammo && weapclass != ESM::WeaponType::Thrown)
                         mCastStyle = ESM::Enchantment::ConstantEffect;
-                    else
+                    else if (weapclass != ESM::WeaponType::Ranged)
                         mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
                 default: // takes care of Constant effect too
-                    mCastStyle = ESM::Enchantment::WhenStrikes;
+                    mCastStyle = ESM::Enchantment::WhenUsed;
+                    if (weapclass != ESM::WeaponType::Ranged)
+                        mCastStyle = ESM::Enchantment::WhenStrikes;
                     return;
             }
         }
@@ -196,6 +209,53 @@ namespace MWMechanics
         return enchantmentCost;
     }
 
+    const ESM::Enchantment* Enchanting::getRecord(const ESM::Enchantment& toFind) const
+    {
+        const MWWorld::Store<ESM::Enchantment>& enchantments = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>();
+        MWWorld::Store<ESM::Enchantment>::iterator iter (enchantments.begin());
+        iter += (enchantments.getSize() - enchantments.getDynamicSize());
+        for (; iter != enchantments.end(); ++iter)
+        {
+            if (iter->mEffects.mList.size() != toFind.mEffects.mList.size())
+                continue;
+
+            if (iter->mData.mFlags != toFind.mData.mFlags
+                    || iter->mData.mType != toFind.mData.mType
+                    || iter->mData.mCost != toFind.mData.mCost
+                    || iter->mData.mCharge != toFind.mData.mCharge)
+                continue;
+
+            // Don't choose an ID that came from the content files, would have unintended side effects
+            if (!enchantments.isDynamic(iter->mId))
+                continue;
+
+            bool mismatch = false;
+
+            for (int i=0; i<static_cast<int> (iter->mEffects.mList.size()); ++i)
+            {
+                const ESM::ENAMstruct& first = iter->mEffects.mList[i];
+                const ESM::ENAMstruct& second = toFind.mEffects.mList[i];
+
+                if (first.mEffectID!=second.mEffectID ||
+                    first.mArea!=second.mArea ||
+                    first.mRange!=second.mRange ||
+                    first.mSkill!=second.mSkill ||
+                    first.mAttribute!=second.mAttribute ||
+                    first.mMagnMin!=second.mMagnMin ||
+                    first.mMagnMax!=second.mMagnMax ||
+                    first.mDuration!=second.mDuration)
+                {
+                    mismatch = true;
+                    break;
+                }
+            }
+
+            if (!mismatch)
+                return &(*iter);
+        }
+
+        return nullptr;
+    }
 
     int Enchanting::getBaseCastCost() const
     {
@@ -220,6 +280,7 @@ namespace MWMechanics
 
         float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
+        price *= getEnchantItemsCount() * getTypeMultiplier();
         return price;
     }
 
@@ -278,11 +339,43 @@ namespace MWMechanics
         const float fEnchantmentChanceMult = gmst.find("fEnchantmentChanceMult")->mValue.getFloat();
         const float fEnchantmentConstantChanceMult = gmst.find("fEnchantmentConstantChanceMult")->mValue.getFloat();
 
-        float x = (a - getEnchantPoints()*fEnchantmentChanceMult + 0.2f * b + 0.1f * c) * stats.getFatigueTerm();
+        float x = (a - getEnchantPoints() * fEnchantmentChanceMult * getTypeMultiplier() * getEnchantItemsCount() + 0.2f * b + 0.1f * c) * stats.getFatigueTerm();
         if (mCastStyle == ESM::Enchantment::ConstantEffect)
             x *= fEnchantmentConstantChanceMult;
 
         return static_cast<int>(x);
+    }
+
+    int Enchanting::getEnchantItemsCount() const
+    {
+        int count = 1;
+        float enchantPoints = getEnchantPoints();
+        if (mWeaponType != -1 && enchantPoints > 0)
+        {
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
+            if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
+            {
+                static const float multiplier = std::max(0.f, std::min(1.0f, Settings::Manager::getFloat("projectiles enchant multiplier", "Game")));
+                MWWorld::Ptr player = getPlayer();
+                int itemsInInventoryCount = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
+                count = std::min(itemsInInventoryCount, std::max(1, int(getGemCharge() * multiplier / enchantPoints)));
+            }
+        }
+
+        return count;
+    }
+
+    float Enchanting::getTypeMultiplier() const
+    {
+        static const bool useMultiplier = Settings::Manager::getFloat("projectiles enchant multiplier", "Game") > 0;
+        if (useMultiplier && mWeaponType != -1 && getEnchantPoints() > 0)
+        {
+            ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
+            if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
+                return 0.125f;
+        }
+
+        return 1.f;
     }
 
     void Enchanting::payForEnchantment() const

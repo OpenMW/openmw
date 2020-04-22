@@ -29,6 +29,7 @@ namespace Launcher
     private slots:
         void on_skipMenuCheckBox_stateChanged(int state);
         void on_runScriptAfterStartupBrowseButton_clicked();
+        void slotAnimSourcesToggled(bool checked);
 
     private:
         Files::ConfigurationManager &mCfgMgr;

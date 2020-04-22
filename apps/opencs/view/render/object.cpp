@@ -29,9 +29,9 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/sceneutil/vismask.hpp>
 
 #include "actor.hpp"
-#include "mask.hpp"
 
 
 const float CSVRender::Object::MarkerShaftWidth = 30;
@@ -58,7 +58,7 @@ namespace
 
 
 CSVRender::ObjectTag::ObjectTag (Object* object)
-: TagBase (Mask_Reference), mObject (object)
+: TagBase (SceneUtil::Mask_EditorReference), mObject (object)
 {}
 
 QString CSVRender::ObjectTag::getToolTip (bool hideBasics) const
@@ -140,7 +140,7 @@ void CSVRender::Object::update()
     if (light)
     {
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_ParticleSystem, Mask_Lighting, isExterior);
+        SceneUtil::addLight(mBaseNode, light, isExterior);
     }
 }
 
@@ -429,7 +429,7 @@ CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
 
     parentNode->addChild (mRootNode);
 
-    mRootNode->setNodeMask(Mask_Reference);
+    mRootNode->setNodeMask(SceneUtil::Mask_EditorReference);
 
     if (referenceable)
     {
@@ -475,6 +475,16 @@ void CSVRender::Object::setSelected(bool selected)
 bool CSVRender::Object::getSelected() const
 {
     return mSelected;
+}
+
+osg::ref_ptr<osg::Group> CSVRender::Object::getRootNode()
+{
+    return mRootNode;
+}
+
+osg::ref_ptr<osg::Group> CSVRender::Object::getBaseNode()
+{
+    return mBaseNode;
 }
 
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
@@ -705,7 +715,7 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
                 CSMWorld::Columns::ColumnId_PositionXRot+i));
 
             commands.push (new CSMWorld::ModifyCommand (*model,
-                model->index (recordIndex, column), mPositionOverride.rot[i]));
+                model->index (recordIndex, column), osg::RadiansToDegrees(mPositionOverride.rot[i])));
         }
     }
 

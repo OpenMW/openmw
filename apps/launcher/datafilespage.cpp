@@ -62,10 +62,13 @@ void Launcher::DataFilesPage::buildView()
 {
     ui.verticalLayout->insertWidget (0, mSelector->uiWidget());
 
+    QToolButton * refreshButton = mSelector->refreshButton();    
+
     //tool buttons
     ui.newProfileButton->setToolTip ("Create a new Content List");
     ui.cloneProfileButton->setToolTip ("Clone the current Content List");
     ui.deleteProfileButton->setToolTip ("Delete an existing Content List");
+    refreshButton->setToolTip("Refresh Data Files");
 
     //combo box
     ui.profilesComboBox->addItem(mDefaultContentListName);
@@ -76,6 +79,7 @@ void Launcher::DataFilesPage::buildView()
     ui.newProfileButton->setDefaultAction (ui.newProfileAction);
     ui.cloneProfileButton->setDefaultAction (ui.cloneProfileAction);
     ui.deleteProfileButton->setDefaultAction (ui.deleteProfileAction);
+    refreshButton->setDefaultAction(ui.refreshDataFilesAction);
 
     //establish connections
     connect (ui.profilesComboBox, SIGNAL (currentIndexChanged(int)),
@@ -86,6 +90,8 @@ void Launcher::DataFilesPage::buildView()
 
     connect (ui.profilesComboBox, SIGNAL (signalProfileChanged(QString, QString)),
              this, SLOT (slotProfileChangedByUser(QString, QString)));
+
+    connect(ui.refreshDataFilesAction, SIGNAL(triggered()),this, SLOT(slotRefreshButtonClicked()));
 }
 
 bool Launcher::DataFilesPage::loadSettings()
@@ -95,7 +101,7 @@ bool Launcher::DataFilesPage::loadSettings()
 
     qDebug() << "The current profile is: " << currentProfile;
 
-    foreach (const QString &item, profiles)
+    for (const QString &item : profiles)
         addProfile (item, false);
 
     // Hack: also add the current profile
@@ -114,7 +120,9 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!mDataLocal.isEmpty())
         paths.insert(0, mDataLocal);
 
-    foreach(const QString &path, paths)
+    mSelector->clearFiles();
+
+    for (const QString &path : paths)
         mSelector->addFiles(path);
 
     PathIterator pathIterator(paths);
@@ -127,7 +135,7 @@ QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, 
     QStringList files = mLauncherSettings.getContentListFiles(profileName);
     QStringList filepaths;
 
-    foreach(const QString& file, files)
+    for (const QString& file : files)
     {
         QString filepath = pathIterator.findFirstPath(file);
 
@@ -152,7 +160,8 @@ void Launcher::DataFilesPage::saveSettings(const QString &profile)
     mLauncherSettings.setCurrentContentListName(ui.profilesComboBox->currentText());
 
     QStringList fileNames;
-    foreach(const ContentSelectorModel::EsmFile *item, items) {
+    for (const ContentSelectorModel::EsmFile *item : items)
+    {
         fileNames.append(item->fileName());
     }
     mLauncherSettings.setContentList(profileName, fileNames);
@@ -164,8 +173,18 @@ QStringList Launcher::DataFilesPage::selectedFilePaths()
     //retrieve the files selected for the profile
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList filePaths;
-    foreach(const ContentSelectorModel::EsmFile *item, items) {
-        filePaths.append(item->filePath());
+    for (const ContentSelectorModel::EsmFile *item : items)
+    {
+        QFile file(item->filePath());
+        
+        if(file.exists())
+        {
+            filePaths.append(item->filePath());
+        }
+        else
+        {
+            slotRefreshButtonClicked();
+        }
     }
     return filePaths;
 }
@@ -217,6 +236,18 @@ void Launcher::DataFilesPage::setProfile (const QString &previous, const QString
 void Launcher::DataFilesPage::slotProfileDeleted (const QString &item)
 {
     removeProfile (item);
+}
+
+void Launcher::DataFilesPage:: refreshDataFilesView ()
+{
+    QString currentProfile = ui.profilesComboBox->currentText();
+    saveSettings(currentProfile);
+    populateFileViews(currentProfile);
+}
+
+void Launcher::DataFilesPage::slotRefreshButtonClicked ()
+{
+    refreshDataFilesView();
 }
 
 void Launcher::DataFilesPage::slotProfileChangedByUser(const QString &previous, const QString &current)
@@ -373,7 +404,12 @@ void Launcher::DataFilesPage::reloadCells(QStringList selectedFiles)
 
     // The following code will run only if there is not another thread currently running it
     CellNameLoader cellNameLoader;
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+    QSet<QString> set = cellNameLoader.getCellNames(selectedFiles);
+    QStringList cellNamesList(set.begin(), set.end());
+#else
     QStringList cellNamesList = QStringList::fromSet(cellNameLoader.getCellNames(selectedFiles));
+#endif
     std::sort(cellNamesList.begin(), cellNamesList.end());
     emit signalLoadedCellsChanged(cellNamesList);
 }

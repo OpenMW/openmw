@@ -82,23 +82,19 @@ opencs_units_noqt (view/world
 
 opencs_units (view/widget
     scenetoolbar scenetool scenetoolmode pushbutton scenetooltoggle scenetoolrun modebutton
-    scenetooltoggle2 scenetooltexturebrush completerpopup coloreditor colorpickerpopup droplineedit
+    scenetooltoggle2 scenetooltexturebrush scenetoolshapebrush completerpopup coloreditor colorpickerpopup droplineedit
     )
 
 opencs_units (view/render
     scenewidget worldspacewidget pagedworldspacewidget unpagedworldspacewidget
     previewwidget editmode instancemode instanceselectionmode instancemovemode
     orbitcameramode pathgridmode selectionmode pathgridselectionmode cameracontroller
-    cellwater terraintexturemode actor
+    cellwater terraintexturemode actor terrainselection terrainshapemode brushdraw
     )
 
 opencs_units_noqt (view/render
     lighting lightingday lightingnight lightingbright object cell terrainstorage tagbase
     cellarrow cellmarker cellborder pathgrid
-    )
-
-opencs_hdrs_noqt (view/render
-    mask
     )
 
 
@@ -266,5 +262,5 @@ endif (MSVC)
 
 
 if(APPLE)
-    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT BUNDLE)
+    INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
 endif()

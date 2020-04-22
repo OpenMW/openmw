@@ -13,7 +13,7 @@ namespace Gui
     typedef std::vector<SharedStateButton*> ButtonGroup;
 
     /// @brief A button that applies its own state changes to other widgets, to do this you define it as part of a ButtonGroup.
-    class SharedStateButton : public FontWrapper<MyGUI::Button>
+    class SharedStateButton final : public FontWrapper<MyGUI::Button>
     {
     MYGUI_RTTI_DERIVED(SharedStateButton)
 
@@ -23,13 +23,13 @@ namespace Gui
     protected:
         void updateButtonState();
 
-        virtual void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id);
-        virtual void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id);
-        virtual void onMouseSetFocus(MyGUI::Widget* _old);
-        virtual void onMouseLostFocus(MyGUI::Widget* _new);
-        virtual void baseUpdateEnable();
+        void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) final;
+        void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) final;
+        void onMouseSetFocus(MyGUI::Widget* _old) final;
+        void onMouseLostFocus(MyGUI::Widget* _new) final;
+        void baseUpdateEnable() final;
 
-        virtual void shutdownOverride();
+        void shutdownOverride() final;
 
         bool _setState(const std::string &_value);
 

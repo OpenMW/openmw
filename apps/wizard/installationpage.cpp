@@ -154,6 +154,14 @@ void Wizard::InstallationPage::showFileDialog(Wizard::Component component)
         name = QLatin1String("Bloodmoon");
         break;
     }
+    logTextEdit->appendHtml(tr("<p>Attempting to install component %1.</p>").arg(name));
+    mWizard->addLogText(tr("Attempting to install component %1.").arg(name));
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("%1 Installation").arg(name));
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setText(QObject::tr("Select a valid %1 installation media.<br><b>Hint</b>: make sure that it contains at least one <b>.cab</b> file.").arg(name));
+    msgBox.exec();
 
     QString path = QFileDialog::getExistingDirectory(this,
                                                      tr("Select %1 installation media").arg(name),

@@ -792,6 +792,14 @@ namespace MWWorld
     {
         return mSharedInt.size() + mSharedExt.size();
     }
+    size_t Store<ESM::Cell>::getExtSize() const
+    {
+        return mSharedExt.size();
+    }
+    size_t Store<ESM::Cell>::getIntSize() const
+    {
+        return mSharedInt.size();
+    }
     void Store<ESM::Cell>::listIdentifier(std::vector<std::string> &list) const
     {
         list.reserve(list.size() + mSharedInt.size());
@@ -1089,6 +1097,18 @@ namespace MWWorld
         }
 
         return RecordId(dialogue.mId, isDeleted);
+    }
+
+    template<>
+    bool Store<ESM::Dialogue>::eraseStatic(const std::string &id)
+    {
+        auto it = mStatic.find(Misc::StringUtils::lowerCase(id));
+
+        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+            mStatic.erase(it);
+        }
+
+        return true;
     }
 
 }

@@ -65,7 +65,10 @@ void CSVWorld::ScriptHighlighter::parseEOF (Compiler::Scanner& scanner)
 
 void CSVWorld::ScriptHighlighter::highlight (const Compiler::TokenLoc& loc, Type type)
 {
-    int length = static_cast<int> (loc.mLiteral.size());
+    // We should take in account multibyte characters
+    int length = 0;
+    const char* token = loc.mLiteral.c_str();
+    while (*token) length += (*token++ & 0xc0) != 0x80;
 
     int index = loc.mColumn;
 

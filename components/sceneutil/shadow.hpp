@@ -19,15 +19,13 @@ namespace SceneUtil
 
         ShadowManager(osg::ref_ptr<osg::Group> sceneRoot, osg::ref_ptr<osg::Group> rootNode, unsigned int outdoorShadowCastingMask, unsigned int indoorShadowCastingMask, Shader::ShaderManager &shaderManager);
 
-        virtual ~ShadowManager() = default;
+        void setupShadowSettings();
 
-        virtual void setupShadowSettings();
+        Shader::ShaderManager::DefineMap getShadowDefines();
 
-        virtual Shader::ShaderManager::DefineMap getShadowDefines();
+        void enableIndoorMode();
 
-        virtual void enableIndoorMode();
-
-        virtual void enableOutdoorMode();
+        void enableOutdoorMode();
     protected:
         bool mEnableShadows;
 

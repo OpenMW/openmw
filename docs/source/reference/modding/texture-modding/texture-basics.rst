@@ -23,18 +23,6 @@ To plug in a normal map, you name the normal map as the diffuse texture but with
 OpenMW will then recognise the file and load it as a normal map, provided you have set up your settings file correctly. 
 See the section `Automatic use`_ further down below for detailed information.
 
-.. note::
-	While the original Morrowind engine does support the loading of a BumpTexture slot in the NIF, 
-	it will not display it as a normal map. Morrowind Code Patch (MCP) 
-	added a way to hack normal maps into the engine by first enabling the engine to load the BumpTexture slot as an 
-	environment map and then turn down the brightness of the environment map. 
-	This will imitate how a real normal map shader would display a normal map, but it will not look exactly the same.
-	OpenMW uses standard normal mapping, which achieves much better results.
-	Unfortunately, this difference can result in incompatibilities.
-	Some mods
-	(e.g. `Redoran Bump Mapped <http://www.nexusmods.com/morrowind/mods/42406/?>`_)
-	look much darker compared to the vanilla engine and will have to be recalibrated.
-
 Specular Mapping
 ################
 
@@ -43,14 +31,12 @@ The alpha channel specifies shininess in range [0, 255].
 If a specular map is used, it will override the shininess and specular color
 set in the NiMaterialProperty / osg::Material.
 
-NIF files do not support specular maps.
+Morrowind format NIF files do not support normal maps or specular maps.
 In order to use them anyway, see the next section.
 
 Automatic Use
 #############
 
-In addition to editing mesh files,
-there is another way of plugging in these texture maps.
 Simply create the textures with appropriate naming convention
 (e.g. when the base texture is called foo.dds,
 the normal map would have to be called foo_n.dds).

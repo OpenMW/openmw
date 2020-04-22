@@ -9,8 +9,10 @@ namespace ESM
 
     void InventoryList::add(ESMReader &esm)
     {
+        esm.getSubHeader();
         ContItem ci;
-        esm.getHT(ci, 36);
+        esm.getT(ci.mCount);
+        ci.mItem.assign(esm.getString(32));
         mList.push_back(ci);
     }
 
@@ -18,7 +20,10 @@ namespace ESM
     {
         for (std::vector<ContItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNT("NPCO", *it, 36);
+            esm.startSubRecord("NPCO");
+            esm.writeT(it->mCount);
+            esm.writeFixedSizeString(it->mItem, 32);
+            esm.endRecord("NPCO");
         }
     }
 

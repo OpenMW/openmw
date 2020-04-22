@@ -8,6 +8,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_Button.h>
+#include <MyGUI_EditBox.h>
 
 #include <osg/Texture2D>
 
@@ -21,12 +22,10 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-#include "../mwbase/scriptmanager.hpp"
 
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/actionequip.hpp"
-#include "../mwscript/interpretercontext.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -39,6 +38,7 @@
 #include "tradewindow.hpp"
 #include "draganddrop.hpp"
 #include "widgets.hpp"
+#include "tooltips.hpp"
 
 namespace
 {
@@ -90,6 +90,7 @@ namespace MWGui
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
         getWidget(mArmorRating, "ArmorRating");
+        getWidget(mFilterEdit, "FilterEdit");
 
         mAvatarImage->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onAvatarClicked);
         mAvatarImage->setRenderItemTexture(mPreviewTexture.get());
@@ -104,6 +105,7 @@ namespace MWGui
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMagic->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &InventoryWindow::onFilterChanged);
+        mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &InventoryWindow::onNameFilterChanged);
 
         mFilterAll->setStateSelected(true);
 
@@ -132,6 +134,8 @@ namespace MWGui
             mSortModel->setSourceModel(mTradeModel);
         else
             mSortModel = new SortFilterItemModel(mTradeModel);
+
+        mSortModel->setNameFilter(mFilterEdit->getCaption());
 
         mItemView->setModel(mSortModel);
 
@@ -295,7 +299,8 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = mTrading ? "#{sQuanityMenuMessage01}" : "#{sTake}";
-            dialog->openCountDialog(object.getClass().getName(object), message, count);
+            std::string name = object.getClass().getName(object) + MWGui::ToolTips::getSoulString(object.getCellRef());
+            dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
             if (mTrading)
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &InventoryWindow::sellItem);
@@ -388,6 +393,11 @@ namespace MWGui
 
     void InventoryWindow::onOpen()
     {
+        // Reset the filter focus when opening the window
+        MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+        if (focus == mFilterEdit)
+            MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(nullptr);
+
         if (!mPtr.isEmpty())
         {
             updateEncumbranceBar();
@@ -465,6 +475,12 @@ namespace MWGui
                                                                      width*mScaleFactor/float(mPreview->getTextureWidth()), height*mScaleFactor/float(mPreview->getTextureHeight())));
     }
 
+    void InventoryWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
+    }
+
     void InventoryWindow::onFilterChanged(MyGUI::Widget* _sender)
     {
         if (_sender == mFilterAll)
@@ -477,7 +493,6 @@ namespace MWGui
             mSortModel->setCategory(SortFilterItemModel::Category_Magic);
         else if (_sender == mFilterMisc)
             mSortModel->setCategory(SortFilterItemModel::Category_Misc);
-
         mFilterAll->setStateSelected(false);
         mFilterWeapon->setStateSelected(false);
         mFilterApparel->setStateSelected(false);
@@ -507,6 +522,16 @@ namespace MWGui
     void InventoryWindow::useItem(const MWWorld::Ptr &ptr, bool force)
     {
         const std::string& script = ptr.getClass().getScript(ptr);
+        if (!script.empty())
+        {
+            // Don't try to equip the item if PCSkipEquip is set to 1
+            if (ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1)
+            {
+                ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+                return;
+            }
+            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 0);
+        }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
 
@@ -533,32 +558,21 @@ namespace MWGui
             }
         }
 
-        // If the item has a script, set its OnPcEquip to 1
-        if (!script.empty()
-                // Another morrowind oddity: when an item has skipped equipping and pcskipequip is reset to 0 afterwards,
-                // the next time it is equipped will work normally, but will not set onpcequip
-                && (ptr != mSkippedToEquip || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 1))
-            ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
-
-        // Give the script a chance to run once before we do anything else
-        // this is important when setting pcskipequip as a reaction to onpcequip being set (bk_treasuryreport does this)
-        if (!force && !script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
+        // If the item has a script, set OnPCEquip or PCSkipEquip to 1
+        if (!script.empty())
         {
-            MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
-            MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
+            // Ingredients, books and repair hammers must not have OnPCEquip set to 1 here
+            const std::string& type = ptr.getTypeName();
+            bool isBook = type == typeid(ESM::Book).name();
+            if (!isBook && type != typeid(ESM::Ingredient).name() && type != typeid(ESM::Repair).name())
+                ptr.getRefData().getLocals().setVarByInt(script, "onpcequip", 1);
+            // Books must have PCSkipEquip set to 1 instead
+            else if (isBook)
+                ptr.getRefData().getLocals().setVarByInt(script, "pcskipequip", 1);
         }
 
-        mSkippedToEquip = MWWorld::Ptr();
-        if (ptr.getRefData().getCount()) // make sure the item is still there, the script might have removed it
-        {
-            if (script.empty() || ptr.getRefData().getLocals().getIntVar(script, "pcskipequip") == 0)
-            {
-                std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
-                action->execute(player);
-            }
-            else
-                mSkippedToEquip = ptr;
-        }
+        std::shared_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
+        action->execute(player);
 
         if (isVisible())
         {
@@ -718,7 +732,8 @@ namespace MWGui
             && (type != typeid(ESM::Potion).name()))
             return;
 
-        if (object.getClass().getName(object) == "") // objects without name presented to user can never be picked up
+        // An object that can be picked up must have a tooltip.
+        if (!object.getClass().hasToolTip(object))
             return;
 
         int count = object.getRefData().getCount();

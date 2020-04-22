@@ -11,6 +11,7 @@
 #include "lightcontroller.hpp"
 #include "util.hpp"
 #include "visitor.hpp"
+#include "vismask.hpp"
 #include "positionattitudetransform.hpp"
 
 namespace SceneUtil
@@ -22,29 +23,35 @@ namespace SceneUtil
         float linearAttenuation = 0.f;
         float constantAttenuation = 0.f;
 
-        const bool useConstant = Fallback::Map::getBool("LightAttenuation_UseConstant");
-        if (useConstant)
-        {
-            constantAttenuation = Fallback::Map::getFloat("LightAttenuation_ConstantValue");
-        }
+        static const bool useConstant = Fallback::Map::getBool("LightAttenuation_UseConstant");
+        static const bool useLinear = Fallback::Map::getBool("LightAttenuation_UseLinear");
+        static const bool useQuadratic = Fallback::Map::getBool("LightAttenuation_UseQuadratic");
+        static const float constantValue = Fallback::Map::getFloat("LightAttenuation_ConstantValue");
+        static const float linearValue = Fallback::Map::getFloat("LightAttenuation_LinearValue");
+        static const float quadraticValue = Fallback::Map::getFloat("LightAttenuation_QuadraticValue");
+        static const float linearRadiusMult = Fallback::Map::getFloat("LightAttenuation_LinearRadiusMult");
+        static const float quadraticRadiusMult = Fallback::Map::getFloat("LightAttenuation_QuadraticRadiusMult");
+        static const int linearMethod = Fallback::Map::getInt("LightAttenuation_LinearMethod");
+        static const int quadraticMethod = Fallback::Map::getInt("LightAttenuation_QuadraticMethod");
+        static const bool outQuadInLin = Fallback::Map::getBool("LightAttenuation_OutQuadInLin");
 
-        const bool useLinear = Fallback::Map::getBool("LightAttenuation_UseLinear");
+        if (useConstant)
+            constantAttenuation = constantValue;
+
         if (useLinear)
         {
-            const float linearValue = Fallback::Map::getFloat("LightAttenuation_LinearValue");
-            const float linearRadiusMult = Fallback::Map::getFloat("LightAttenuation_LinearRadiusMult");
+            linearAttenuation = linearMethod == 0 ? linearValue : 0.01f;
             float r = radius * linearRadiusMult;
-            if (r) linearAttenuation = linearValue / r;
+            if (r && (linearMethod == 1 || linearMethod == 2))
+                linearAttenuation = linearValue / std::pow(r, linearMethod);
         }
 
-        const bool useQuadratic = Fallback::Map::getBool("LightAttenuation_UseQuadratic");
-        const bool outQuadInLin = Fallback::Map::getBool("LightAttenuation_OutQuadInLin");
         if (useQuadratic && (!outQuadInLin || isExterior))
         {
-            const float quadraticValue = Fallback::Map::getFloat("LightAttenuation_QuadraticValue");
-            const float quadraticRadiusMult = Fallback::Map::getFloat("LightAttenuation_QuadraticRadiusMult");
+            quadraticAttenuation = quadraticMethod == 0 ? quadraticValue : 0.01f;
             float r = radius * quadraticRadiusMult;
-            if (r) quadraticAttenuation = quadraticValue / std::pow(r, 2);
+            if (r && (quadraticMethod == 1 || quadraticMethod == 2))
+                quadraticAttenuation = quadraticValue / std::pow(r, quadraticMethod);
         }
 
         light->setConstantAttenuation(constantAttenuation);
@@ -52,7 +59,7 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
+    void addLight (osg::Group* node, const ESM::Light* esmLight, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -65,7 +72,7 @@ namespace SceneUtil
         else
         {
             osg::ComputeBoundsVisitor computeBound;
-            computeBound.setTraversalMask(~partsysMask);
+            computeBound.setTraversalMask(~SceneUtil::Mask_ParticleSystem);
             // We want the bounds of all children of the node, ignoring the node's local transformation
             // So do a traverse(), not accept()
             computeBound.traverse(*node);
@@ -79,15 +86,15 @@ namespace SceneUtil
             attachTo = trans;
         }
 
-        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior);
+        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, isExterior);
         attachTo->addChild(lightSource);
     }
 
-    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
+    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource (new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light (new osg::Light);
-        lightSource->setNodeMask(lightMask);
+        lightSource->setNodeMask(SceneUtil::Mask_Lighting);
 
         float radius = esmLight->mData.mRadius;
         lightSource->setRadius(radius);

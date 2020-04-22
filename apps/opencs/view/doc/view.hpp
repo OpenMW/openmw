@@ -169,6 +169,10 @@ namespace CSVDoc
 
             void exit();
 
+            static void openHelp();
+
+            static void tutorial();
+
             void infoAbout();
 
             void infoAboutQt();

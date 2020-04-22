@@ -7,6 +7,7 @@
 #include <QString>
 #include <QtCore/qnamespace.h>
 
+#include <components/misc/helpviewer.hpp>
 #include <components/misc/stringops.hpp>
 
 #include "../../model/doc/document.hpp"
@@ -154,6 +155,9 @@ void CSVWorld::Table::contextMenuEvent (QContextMenuEvent *event)
                 menu.addAction (mPreviewAction);
         }
     }
+
+    if (mHelpAction)
+        menu.addAction (mHelpAction);
 
     menu.exec (event->globalPos());
 }
@@ -387,6 +391,13 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     connect (mEditIdAction, SIGNAL (triggered()), this, SLOT (editCell()));
     addAction (mEditIdAction);
 
+    mHelpAction = new QAction (tr ("Help"), this);
+    connect (mHelpAction, SIGNAL (triggered()), this, SLOT (openHelp()));
+    mHelpAction->setIcon(QIcon(":/info.png"));
+    addAction (mHelpAction);
+    CSMPrefs::Shortcut* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
+    openHelpShortcut->associateAction(mHelpAction);
+
     connect (mProxyModel, SIGNAL (rowsRemoved (const QModelIndex&, int, int)),
         this, SLOT (tableSizeUpdate()));
 
@@ -559,6 +570,11 @@ void CSVWorld::Table::moveDownRecord()
 void CSVWorld::Table::editCell()
 {
     emit editRequest(mEditIdAction->getCurrentId(), "");
+}
+
+void CSVWorld::Table::openHelp()
+{
+    Misc::HelpViewer::openHelp("manuals/openmw-cs/tables.html");
 }
 
 void CSVWorld::Table::viewRecord()

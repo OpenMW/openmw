@@ -143,6 +143,11 @@ namespace DetourNavigator
         mNavMeshManager.reportStats(frameNumber, stats);
     }
 
+    RecastMeshTiles NavigatorImpl::getRecastMeshTiles()
+    {
+        return mNavMeshManager.getRecastMeshTiles();
+    }
+
     void NavigatorImpl::updateAvoidShapeId(const ObjectId id, const ObjectId avoidId)
     {
         updateId(id, avoidId, mWaterIds);

@@ -32,6 +32,7 @@ namespace SceneUtil
         virtual osg::Drawable* operator() (const osg::Drawable* drawable) const;
 
         virtual osg::StateSet* operator() (const osg::StateSet* stateset) const;
+        virtual osg::Object* operator ()(const osg::Object* node) const;
 
     private:
         // maps new ParticleProcessor to their old ParticleSystem pointer

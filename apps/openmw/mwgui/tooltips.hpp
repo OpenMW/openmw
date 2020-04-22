@@ -81,8 +81,14 @@ namespace MWGui
         static std::string getCountString(const int value);
         ///< @return blank string if count is 1, or else " (value)"
 
+        static std::string getSoulString(const MWWorld::CellRef& cellref);
+        ///< Returns a string containing the name of the creature that the ID in the cellref's soul field belongs to.
+
         static std::string getCellRefString(const MWWorld::CellRef& cellref);
         ///< Returns a string containing debug tooltip information about the given cellref.
+
+        static std::string getDurationString (float duration, const std::string& prefix);
+        ///< Returns duration as two largest time units, rounded down. Note: not localized; no line break.
 
         // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
         // system knows what to show in case this widget is hovered

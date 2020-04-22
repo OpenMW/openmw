@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <osg/ref_ptr>
 
@@ -60,6 +61,8 @@ namespace MWRender
 
         void removeCamera(osg::Camera* cam);
 
+        bool copyResult(osg::Camera* cam, unsigned int frame);
+
         /**
          * Mark a camera for cleanup in the next update. For internal use only.
          */
@@ -95,18 +98,18 @@ namespace MWRender
         {
             ImageDest()
                 : mX(0), mY(0)
-                , mFramesUntilDone(3) // wait an extra frame to ensure the draw thread has completed its frame.
+                , mFrameDone(0)
             {
             }
 
             osg::ref_ptr<osg::Image> mImage;
             int mX, mY;
-            int mFramesUntilDone;
+            unsigned int mFrameDone;
         };
 
-        typedef std::vector<ImageDest> ImageDestVector;
+        typedef std::map<osg::ref_ptr<osg::Camera>, ImageDest> ImageDestMap;
 
-        ImageDestVector mPendingImageDest;
+        ImageDestMap mPendingImageDest;
 
         std::vector< std::pair<int,int> > mExploredCells;
 

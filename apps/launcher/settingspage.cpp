@@ -27,13 +27,13 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     setupUi(this);
 
     QStringList languages;
-    languages << QLatin1String("English")
-              << QLatin1String("French")
-              << QLatin1String("German")
-              << QLatin1String("Italian")
-              << QLatin1String("Polish")
-              << QLatin1String("Russian")
-              << QLatin1String("Spanish");
+    languages << tr("English")
+              << tr("French")
+              << tr("German")
+              << tr("Italian")
+              << tr("Polish")
+              << tr("Russian")
+              << tr("Spanish");
 
     languageComboBox->addItems(languages);
 
@@ -61,7 +61,8 @@ Launcher::SettingsPage::SettingsPage(Files::ConfigurationManager &cfg,
     // Detect Morrowind configuration files
     QStringList iniPaths;
 
-    foreach (const QString &path, mGameSettings.getDataDirs()) {
+    for (const QString &path : mGameSettings.getDataDirs())
+    {
         QDir dir(path);
         dir.setPath(dir.canonicalPath()); // Resolve symlinks
 

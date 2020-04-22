@@ -23,6 +23,8 @@
 #include "../mwworld/nullaction.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "../mwmechanics/alchemy.hpp"
+
 namespace
 {
     bool compareType(const std::string& type1, const std::string& type2)
@@ -151,6 +153,8 @@ namespace MWGui
         : mCategory(Category_All)
         , mFilter(0)
         , mSortByType(true)
+        , mNameFilter("")
+        , mEffectFilter("")
     {
         mSourceModel = sourceModel;
     }
@@ -199,8 +203,39 @@ namespace MWGui
         if (!(category & mCategory))
             return false;
 
-        if ((mFilter & Filter_OnlyIngredients) && base.getTypeName() != typeid(ESM::Ingredient).name())
-            return false;
+        if (mFilter & Filter_OnlyIngredients)
+        {
+            if (base.getTypeName() != typeid(ESM::Ingredient).name())
+                return false;
+
+            if (!mNameFilter.empty() && !mEffectFilter.empty())
+                throw std::logic_error("name and magic effect filter are mutually exclusive");
+
+            if (!mNameFilter.empty())
+            {
+                const auto itemName = Misc::StringUtils::lowerCase(base.getClass().getName(base));
+                return itemName.find(mNameFilter) != std::string::npos;
+            }
+
+            if (!mEffectFilter.empty())
+            {
+                MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
+                const auto alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
+
+                const auto effects = MWMechanics::Alchemy::effectsDescription(base, alchemySkill);
+
+                for (const auto& effect : effects)
+                {
+                    const auto ciEffect = Misc::StringUtils::lowerCase(effect);
+
+                    if (ciEffect.find(mEffectFilter) != std::string::npos)
+                        return true;
+                }
+                return false;
+            }
+            return true;
+        }
+
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones) && (base.getTypeName() != typeid(ESM::Miscellaneous).name()
@@ -250,6 +285,10 @@ namespace MWGui
                 return false;
         }
 
+        std::string compare = Misc::StringUtils::lowerCase(item.mBase.getClass().getName(item.mBase));
+        if(compare.find(mNameFilter) == std::string::npos)
+            return false;
+
         return true;
     }
 
@@ -275,6 +314,16 @@ namespace MWGui
     void SortFilterItemModel::setFilter (int filter)
     {
         mFilter = filter;
+    }
+
+    void SortFilterItemModel::setNameFilter (const std::string& filter)
+    {
+        mNameFilter = Misc::StringUtils::lowerCase(filter);
+    }
+
+    void SortFilterItemModel::setEffectFilter (const std::string& filter)
+    {
+        mEffectFilter = Misc::StringUtils::lowerCase(filter);
     }
 
     void SortFilterItemModel::update()

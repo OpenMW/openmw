@@ -38,6 +38,8 @@ namespace Debug
 
         virtual std::streamsize write(const char *str, std::streamsize size);
 
+        virtual ~DebugOutputBase() = default;
+
     protected:
         static Level getLevelMarker(const char *str);
 

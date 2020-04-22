@@ -33,19 +33,19 @@
 
 
 CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *parent)
-    : QGroupBox(title, parent)
+    : QGroupBox(title, parent),
+    mLayoutSliderSize(new QHBoxLayout),
+    mBrushSizeSlider(new QSlider(Qt::Horizontal)),
+    mBrushSizeSpinBox(new QSpinBox)
 {
-    mBrushSizeSlider = new QSlider(Qt::Horizontal);
     mBrushSizeSlider->setTickPosition(QSlider::TicksBothSides);
     mBrushSizeSlider->setTickInterval(10);
     mBrushSizeSlider->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSlider->setSingleStep(1);
 
-    mBrushSizeSpinBox = new QSpinBox;
     mBrushSizeSpinBox->setRange(1, CSMPrefs::get()["3D Scene Editing"]["texturebrush-maximumsize"].toInt());
     mBrushSizeSpinBox->setSingleStep(1);
 
-    mLayoutSliderSize = new QHBoxLayout;
     mLayoutSliderSize->addWidget(mBrushSizeSlider);
     mLayoutSliderSize->addWidget(mBrushSizeSpinBox);
 
@@ -57,9 +57,6 @@ CSVWidget::BrushSizeControls::BrushSizeControls(const QString &title, QWidget *p
 
 CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QWidget *parent)
     : QFrame(parent, Qt::Popup),
-    mBrushShape(0),
-    mBrushSize(0),
-    mBrushTexture("L0#0"),
     mDocument(document)
 {
     mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
@@ -142,60 +139,61 @@ void CSVWidget::TextureBrushWindow::configureButtonInitialSettings(QPushButton *
 
 void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
 {
-    mBrushTexture = brushTexture;
+    CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
+        *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
+    QUndoStack& undoStack = mDocument.getUndoStack();
 
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
-
     int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-    int columnModification = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Modification);
-    int index = landtexturesCollection.searchId(mBrushTexture);
 
-    // Check if texture exists in current plugin
-    if(landtexturesCollection.getData(index, columnModification).value<int>() == 0)
+    int index = 0;
+    int pluginInDragged = 0;
+    CSMWorld::LandTexture::parseUniqueRecordId(brushTexture, pluginInDragged, index);
+    std::string newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, index);
+    int rowInBase = landtexturesCollection.searchId(brushTexture);
+    int rowInNew = landtexturesCollection.searchId(newBrushTextureId);
+
+    // Check if texture exists in current plugin, and clone if id found in base, otherwise reindex the texture
+    // TO-DO: Handle case when texture is not found in neither base or plugin properly (finding new index is not enough)
+    // TO-DO: Handle conflicting plugins properly
+    if (rowInNew == -1)
     {
-        CSMWorld::IdTable& ltexTable = dynamic_cast<CSMWorld::IdTable&> (
-            *mDocument.getData().getTableModel (CSMWorld::UniversalId::Type_LandTextures));
-
-        QUndoStack& undoStack = mDocument.getUndoStack();
-
-        QVariant textureFileNameVariant;
-        textureFileNameVariant.setValue(landtexturesCollection.getData(index, landTextureFilename).value<QString>());
-
-        std::size_t hashlocation = mBrushTexture.find("#");
-        std::string mBrushTexturePlugin = "L0#" + mBrushTexture.substr (hashlocation+1);
-        int indexPlugin = landtexturesCollection.searchId(mBrushTexturePlugin);
-
-        // Reindex texture if needed
-        if (indexPlugin != -1 && !landtexturesCollection.getRecord(indexPlugin).isDeleted())
+        if (rowInBase == -1)
         {
             int counter=0;
             bool freeIndexFound = false;
+            const int maxCounter = std::numeric_limits<uint16_t>::max() - 1;
             do {
-                const size_t maxCounter = std::numeric_limits<uint16_t>::max() - 1;
-                mBrushTexturePlugin = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
-                if (landtexturesCollection.searchId(mBrushTexturePlugin) != -1 && landtexturesCollection.getRecord(mBrushTexturePlugin).isDeleted() == 0) counter = (counter + 1) % maxCounter;
+                newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
+                if (landtexturesCollection.searchId(brushTexture) != -1 &&
+                    landtexturesCollection.getRecord(brushTexture).isDeleted() == 0 &&
+                    landtexturesCollection.searchId(newBrushTextureId) != -1 &&
+                    landtexturesCollection.getRecord(newBrushTextureId).isDeleted() == 0)
+                        counter = (counter + 1) % maxCounter;
                 else freeIndexFound = true;
-            } while (freeIndexFound == false);
+            } while (freeIndexFound == false || counter < maxCounter);
         }
 
         undoStack.beginMacro ("Add land texture record");
-        undoStack.push (new CSMWorld::CloneCommand (ltexTable, mBrushTexture, mBrushTexturePlugin, CSMWorld::UniversalId::Type_LandTexture));
+        undoStack.push (new CSMWorld::CloneCommand (ltexTable, brushTexture, newBrushTextureId, CSMWorld::UniversalId::Type_LandTexture));
         undoStack.endMacro();
-        mBrushTexture = mBrushTexturePlugin;
-        emit passTextureId(mBrushTexture);
     }
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
-        mBrushTextureLabel = "Selected texture: " + mBrushTexture + " ";
+        mBrushTextureLabel = "Selected texture: " + newBrushTextureId + " ";
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel) + landtexturesCollection.getData(index, landTextureFilename).value<QString>());
     } else
     {
+        newBrushTextureId = "";
         mBrushTextureLabel = "No selected texture or invalid texture";
         mSelectedBrush->setText(QString::fromStdString(mBrushTextureLabel));
     }
 
-    emit passBrushShape(mBrushShape); // update icon
+    mBrushTexture = newBrushTextureId;
+
+    emit passTextureId(mBrushTexture);
+    emit passBrushShape(mBrushShape); // updates the icon tooltip
 }
 
 void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
@@ -206,10 +204,14 @@ void CSVWidget::TextureBrushWindow::setBrushSize(int brushSize)
 
 void CSVWidget::TextureBrushWindow::setBrushShape()
 {
-    if(mButtonPoint->isChecked()) mBrushShape = 0;
-    if(mButtonSquare->isChecked()) mBrushShape = 1;
-    if(mButtonCircle->isChecked()) mBrushShape = 2;
-    if(mButtonCustom->isChecked()) mBrushShape = 3;
+    if (mButtonPoint->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Point;
+    if (mButtonSquare->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Square;
+    if (mButtonCircle->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Circle;
+    if (mButtonCustom->isChecked())
+        mBrushShape = CSVWidget::BrushShape_Custom;
     emit passBrushShape(mBrushShape);
 }
 
@@ -227,7 +229,7 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
     mBrushHistory[0] = "L0#0";
 
     setAcceptDrops(true);
-    connect(mTextureBrushWindow, SIGNAL(passBrushShape(int)), this, SLOT(setButtonIcon(int)));
+    connect(mTextureBrushWindow, SIGNAL(passBrushShape(CSVWidget::BrushShape)), this, SLOT(setButtonIcon(CSVWidget::BrushShape)));
     setButtonIcon(mTextureBrushWindow->mBrushShape);
 
     mPanel = new QFrame (this, Qt::Popup);
@@ -257,31 +259,31 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
 
 }
 
-void CSVWidget::SceneToolTextureBrush::setButtonIcon (int brushShape)
+void CSVWidget::SceneToolTextureBrush::setButtonIcon (CSVWidget::BrushShape brushShape)
 {
     QString tooltip = "Change brush settings <p>Currently selected: ";
 
     switch (brushShape)
     {
-        case 0:
+        case BrushShape_Point:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-point")));
             tooltip += mTextureBrushWindow->toolTipPoint;
             break;
 
-        case 1:
+        case BrushShape_Square:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-square")));
             tooltip += mTextureBrushWindow->toolTipSquare;
             break;
 
-        case 2:
+        case BrushShape_Circle:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-circle")));
             tooltip += mTextureBrushWindow->toolTipCircle;
             break;
 
-        case 3:
+        case BrushShape_Custom:
 
             setIcon (QIcon (QPixmap (":scenetoolbar/brush-custom")));
             tooltip += mTextureBrushWindow->toolTipCustom;

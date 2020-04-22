@@ -7,6 +7,7 @@
 #include "settings.hpp"
 #include "settingsutils.hpp"
 #include "debug.hpp"
+#include "status.hpp"
 
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
@@ -97,11 +98,10 @@ namespace DetourNavigator
         std::reference_wrapper<const Settings> mSettings;
     };
 
-    inline void initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
+    inline bool initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
     {
         const auto status = value.init(&navMesh, maxNodes);
-        if (!dtStatusSucceed(status))
-            throw NavigatorException("Failed to init navmesh query");
+        return dtStatusSucceed(status);
     }
 
     struct MoveAlongSurfaceResult
@@ -110,8 +110,8 @@ namespace DetourNavigator
         std::vector<dtPolyRef> mVisited;
     };
 
-    inline MoveAlongSurfaceResult moveAlongSurface(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
-        const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& filter,
+    inline boost::optional<MoveAlongSurfaceResult> moveAlongSurface(const dtNavMeshQuery& navMeshQuery,
+        const dtPolyRef startRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& filter,
         const std::size_t maxVisitedSize)
     {
         MoveAlongSurfaceResult result;
@@ -120,18 +120,14 @@ namespace DetourNavigator
         const auto status = navMeshQuery.moveAlongSurface(startRef, startPos.ptr(), endPos.ptr(),
             &filter, result.mResultPos.ptr(), result.mVisited.data(), &visitedNumber, static_cast<int>(maxVisitedSize));
         if (!dtStatusSucceed(status))
-        {
-            std::ostringstream message;
-            message << "Failed to move along surface from " << startPos << " to " << endPos;
-            throw NavigatorException(message.str());
-        }
+            return {};
         assert(visitedNumber >= 0);
         assert(visitedNumber <= static_cast<int>(maxVisitedSize));
         result.mVisited.resize(static_cast<std::size_t>(visitedNumber));
-        return result;
+        return {std::move(result)};
     }
 
-    inline std::vector<dtPolyRef> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+    inline boost::optional<std::vector<dtPolyRef>> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
         const std::size_t maxSize)
     {
@@ -140,34 +136,26 @@ namespace DetourNavigator
         const auto status = navMeshQuery.findPath(startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter,
             result.data(), &pathLen, static_cast<int>(maxSize));
         if (!dtStatusSucceed(status))
-        {
-            std::ostringstream message;
-            message << "Failed to find path over polygons from " << startRef << " to " << endRef;
-            throw NavigatorException(message.str());
-        }
+            return {};
         assert(pathLen >= 0);
         assert(static_cast<std::size_t>(pathLen) <= maxSize);
         result.resize(static_cast<std::size_t>(pathLen));
-        return result;
+        return {std::move(result)};
     }
 
-    inline float getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
+    inline boost::optional<float> getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
     {
         float result = 0.0f;
         const auto status = navMeshQuery.getPolyHeight(ref, pos.ptr(), &result);
         if (!dtStatusSucceed(status))
-        {
-            std::ostringstream message;
-            message << "Failed to get polygon height ref=" << ref << " pos=" << pos;
-            throw NavigatorException(message.str());
-        }
+            return {};
         return result;
     }
 
     template <class OutputIterator>
-    OutputIterator makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery,
+    Status makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery,
             const dtQueryFilter& filter, const osg::Vec3f& start, const osg::Vec3f& end, const float stepSize,
-            std::vector<dtPolyRef> polygonPath, std::size_t maxSmoothPathSize, OutputIterator out)
+            std::vector<dtPolyRef> polygonPath, std::size_t maxSmoothPathSize, OutputIterator& out)
     {
         // Iterate over the path to find smooth path on the detail mesh surface.
         osg::Vec3f iterPos;
@@ -207,12 +195,15 @@ namespace DetourNavigator
             const osg::Vec3f moveTgt = iterPos + delta * len;
             const auto result = moveAlongSurface(navMeshQuery, polygonPath.front(), iterPos, moveTgt, filter, 16);
 
-            polygonPath = fixupCorridor(polygonPath, result.mVisited);
+            if (!result)
+                return Status::MoveAlongSurfaceFailed;
+
+            polygonPath = fixupCorridor(polygonPath, result->mVisited);
             polygonPath = fixupShortcuts(polygonPath, navMeshQuery);
 
             float h = 0;
-            navMeshQuery.getPolyHeight(polygonPath.front(), result.mResultPos.ptr(), &h);
-            iterPos = result.mResultPos;
+            navMeshQuery.getPolyHeight(polygonPath.front(), result->mResultPos.ptr(), &h);
+            iterPos = result->mResultPos;
             iterPos.y() = h;
 
             // Handle end of path and off-mesh links when close enough.
@@ -259,7 +250,12 @@ namespace DetourNavigator
 
                     // Move position at the other side of the off-mesh link.
                     iterPos = endPos;
-                    iterPos.y() = getPolyHeight(navMeshQuery, polygonPath.front(), iterPos);
+                    const auto height = getPolyHeight(navMeshQuery, polygonPath.front(), iterPos);
+
+                    if (!height)
+                        return Status::GetPolyHeightFailed;
+
+                    iterPos.y() = *height;
                 }
             }
 
@@ -268,16 +264,17 @@ namespace DetourNavigator
             ++smoothPathSize;
         }
 
-        return out;
+        return Status::Success;
     }
 
     template <class OutputIterator>
-    OutputIterator findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const float stepSize,
+    Status findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const float stepSize,
             const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
-            const Settings& settings, OutputIterator out)
+            const Settings& settings, OutputIterator& out)
     {
         dtNavMeshQuery navMeshQuery;
-        initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes);
+        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
+            return Status::InitNavMeshQueryFailed;
 
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -293,7 +290,7 @@ namespace DetourNavigator
         }
 
         if (startRef == 0)
-            throw NavigatorException("Navmesh polygon for start point is not found");
+            return Status::StartPolygonNotFound;
 
         dtPolyRef endRef = 0;
         osg::Vec3f endPolygonPosition;
@@ -306,18 +303,20 @@ namespace DetourNavigator
         }
 
         if (endRef == 0)
-            throw NavigatorException("Navmesh polygon for end polygon is not found");
+            return Status::EndPolygonNotFound;
 
         const auto polygonPath = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter,
                                           settings.mMaxPolygonPathSize);
 
-        if (polygonPath.empty() || polygonPath.back() != endRef)
-            return out;
+        if (!polygonPath)
+            return Status::FindPathOverPolygonsFailed;
 
-        makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize, std::move(polygonPath),
-            settings.mMaxSmoothPathSize, OutputTransformIterator<OutputIterator>(out, settings));
+        if (polygonPath->empty() || polygonPath->back() != endRef)
+            return Status::Success;
 
-        return out;
+        auto outTransform = OutputTransformIterator<OutputIterator>(out, settings);
+        return makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize, std::move(*polygonPath),
+            settings.mMaxSmoothPathSize, outTransform);
     }
 }
 

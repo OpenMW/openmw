@@ -106,7 +106,7 @@ bool Objects::onOpen(const MWWorld::Ptr& ptr)
     PtrControllerMap::iterator iter = mObjects.find(ptr);
     if(iter != mObjects.end())
         return iter->second->onOpen();
-    return false;
+    return true;
 }
 
 void Objects::onClose(const MWWorld::Ptr& ptr)

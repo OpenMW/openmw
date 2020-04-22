@@ -78,8 +78,6 @@ namespace MWMechanics
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
 
-            virtual void advanceTime (float duration) override;
-
             virtual void setPlayerName (const std::string& name) override;
             ///< Set player name.
 
@@ -130,7 +128,7 @@ namespace MWMechanics
              * @return was the crime seen?
              */
             virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0, bool victimAware=false) override;
+                                      OffenseType type, const std::string& factionId="", int arg=0, bool victimAware=false) override;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) override;
 
@@ -142,8 +140,8 @@ namespace MWMechanics
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
                                     int count, bool alarm = true) override;
-            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
-            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) override;
+            /// Utility to check if unlocking this object is illegal and calling commitCrime if so
+            virtual void unlockAttempted (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) override;
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it? Also returns fail when enemies are nearby
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) override;
@@ -197,7 +195,7 @@ namespace MWMechanics
 
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) override;
 
-            virtual void keepPlayerAlive() override;
+            virtual void resurrect(const MWWorld::Ptr& ptr) override;
 
             virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const override;
 
@@ -210,6 +208,8 @@ namespace MWMechanics
             void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
             virtual float getActorsProcessingRange() const override;
+
+            virtual void notifyDied(const MWWorld::Ptr& actor) override;
 
             /// Check if the target actor was detected by an observer
             /// If the observer is a non-NPC, check all actors in AI processing distance as observers
@@ -245,7 +245,7 @@ namespace MWMechanics
             bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);
 
             bool reportCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0);
+                                      OffenseType type, const std::string& factionId, int arg=0);
     };
 }
 

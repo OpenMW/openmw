@@ -1,4 +1,4 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
+﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_NAVIGATOR_H
 
 #include "findsmoothpath.hpp"
@@ -6,6 +6,8 @@
 #include "settings.hpp"
 #include "objectid.hpp"
 #include "navmeshcacheitem.hpp"
+#include "recastmesh.hpp"
+#include "recastmeshtiles.hpp"
 
 namespace DetourNavigator
 {
@@ -157,11 +159,10 @@ namespace DetourNavigator
          * @param out the beginning of the destination range.
          * @return Output iterator to the element in the destination range, one past the last element of found path.
          * Equal to out if no path is found.
-         * @throws InvalidArgument if there is no navmesh for given agentHalfExtents.
          */
         template <class OutputIterator>
-        OutputIterator findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
-            const osg::Vec3f& end, const Flags includeFlags, OutputIterator out) const
+        Status findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
+            const osg::Vec3f& end, const Flags includeFlags, OutputIterator& out) const
         {
             static_assert(
                 std::is_same<
@@ -172,7 +173,7 @@ namespace DetourNavigator
             );
             const auto navMesh = getNavMesh(agentHalfExtents);
             if (!navMesh)
-                return out;
+                return Status::NavMeshNotFound;
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
@@ -194,6 +195,19 @@ namespace DetourNavigator
         virtual const Settings& getSettings() const = 0;
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+
+        /**
+         * @brief findRandomPointAroundCircle returns random location on navmesh within the reach of specified location.
+         * @param agentHalfExtents allows to find navmesh for given actor.
+         * @param start path from given point.
+         * @param maxRadius limit maximum distance from start.
+         * @param includeFlags setup allowed surfaces for actor to walk.
+         * @return not empty optional with position if point is found and empty optional if point is not found.
+         */
+        boost::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
+            const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
+
+        virtual RecastMeshTiles getRecastMeshTiles() = 0;
     };
 }
 

@@ -17,7 +17,7 @@ namespace MWGui
 
         virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true);
         virtual void removeItem (const ItemStack& item, size_t count);
 
         /// Move items from this model to \a otherModel.

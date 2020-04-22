@@ -1,30 +1,64 @@
+0.47.0
+------
+
+    Bug #1952: Incorrect particle lighting
+    Bug #3676: NiParticleColorModifier isn't applied properly
+    Bug #5358: ForceGreeting always resets the dialogue window completely
+    Bug #5363: Enchantment autocalc not always 0/1
+    Bug #5364: Script fails/stops if trying to startscript an unknown script
+    Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
+    Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
+    Feature #5362: Show the soul gems' trapped soul in count dialog
+
 0.46.0
 ------
 
     Bug #1515: Opening console masks dialogue, inventory menu
+    Bug #1933: Actors can have few stocks of the same item
     Bug #2395: Duplicated plugins in the launcher when multiple data directories provide the same plugin
+    Bug #2679: Unable to map mouse wheel under control settings
     Bug #2969: Scripted items can stack
+    Bug #2976: Data lines in global openmw.cfg take priority over user openmw.cfg
     Bug #2987: Editor: some chance and AI data fields can overflow
     Bug #3006: 'else if' operator breaks script compilation
     Bug #3109: SetPos/Position handles actors differently
     Bug #3282: Unintended behaviour when assigning F3 and Windows keys
     Bug #3550: Companion from mod attacks the air after combat has ended
+    Bug #3609: Items from evidence chest are not considered to be stolen if player is allowed to use the chest
     Bug #3623: Display scaling breaks mouse recognition
     Bug #3725: Using script function in a non-conditional expression breaks script compilation
     Bug #3733: Normal maps are inverted on mirrored UVs
     Bug #3765: DisableTeleporting makes Mark/Recall/Intervention effects undetectable
     Bug #3778: [Mod] Improved Thrown Weapon Projectiles - weapons have wrong transformation during throw animation
     Bug #3812: Wrong multiline tooltips width when word-wrapping is enabled
+    Bug #3894: Hostile spell effects not detected/present on first frame of OnPCHitMe
+    Bug #3977: Non-ASCII characters in object ID's are not supported
+    Bug #4009: Launcher does not show data files on the first run after installing
+    Bug #4077: Enchanted items are not recharged if they are not in the player's inventory
+    Bug #4141: PCSkipEquip isn't set to 1 when reading books/scrolls
     Bug #4202: Open .omwaddon files without needing toopen openmw-cs first
     Bug #4240: Ash storm origin coordinates and hand shielding animation behavior are incorrect
+    Bug #4262: Rain settings are hardcoded
+    Bug #4270: Closing doors while they are obstructed desyncs closing sfx
+    Bug #4276: Resizing character window differs from vanilla
+    Bug #4284: ForceSneak behaviour is inconsistent if the target has AiWander package
     Bug #4329: Removed birthsign abilities are restored after reloading the save
     Bug #4341: Error message about missing GDB is too vague
     Bug #4383: Bow model obscures crosshair when arrow is drawn
     Bug #4384: Resist Normal Weapons only checks ammunition for ranged weapons
     Bug #4411: Reloading a saved game while falling prevents damage in some cases
+    Bug #4449: Value returned by GetWindSpeed is incorrect
+    Bug #4456: AiActivate should not be cancelled after target activation
+    Bug #4493: If the setup doesn't find what it is expecting, it fails silently and displays the requester again instead of letting the user know what wasn't found.
+    Bug #4523: "player->ModCurrentFatigue -0.001" in global script does not cause the running player to fall
     Bug #4540: Rain delay when exiting water
-    Bug #4600: Crash when no sound output is available or --no-sound is used. 
+    Bug #4594: Actors without AI packages don't use Hello dialogue
+    Bug #4598: Script parser does not support non-ASCII characters
+    Bug #4600: Crash when no sound output is available or --no-sound is used.
+    Bug #4601: Filtering referenceables by gender is broken
     Bug #4639: Black screen after completing first mages guild mission + training
+    Bug #4650: Focus is lost after pressing ESC in confirmation dialog inside savegame dialog
+    Bug #4680: Heap corruption on faulty esp
     Bug #4701: PrisonMarker record is not hardcoded like other markers
     Bug #4703: Editor: it's possible to preview levelled list records
     Bug #4705: Editor: unable to open exterior cell views from Instances table
@@ -43,9 +77,11 @@
     Bug #4768: Fallback numerical value recovery chokes on invalid arguments
     Bug #4775: Slowfall effect resets player jumping flag
     Bug #4778: Interiors of Illusion puzzle in Sotha Sil Expanded mod is broken
+    Bug #4783: Blizzard behavior is incorrect
     Bug #4787: Sneaking makes 1st person walking/bobbing animation super-slow
     Bug #4797: Player sneaking and running stances are not accounted for when in air
     Bug #4800: Standing collisions are not updated immediately when an object is teleported without a cell change
+    Bug #4802: You can rest before taking falling damage from landing from a jump
     Bug #4803: Stray special characters before begin statement break script compilation
     Bug #4804: Particle system with the "Has Sizes = false" causes an exception
     Bug #4805: NPC movement speed calculations do not take race Weight into account
@@ -70,6 +106,7 @@
     Bug #4888: Global variable stray explicit reference calls break script compilation
     Bug #4896: Title screen music doesn't loop
     Bug #4902: Using scrollbars in settings causes resolution to change
+    Bug #4904: Editor: Texture painting with duplicate of a base-version texture
     Bug #4911: Editor: QOpenGLContext::swapBuffers() warning with Qt5
     Bug #4916: Specular power (shininess) material parameter is ignored when shaders are used.
     Bug #4918: Abilities don't play looping VFX when they're initially applied
@@ -83,6 +120,7 @@
     Bug #4945: Poor random magic magnitude distribution
     Bug #4947: Player character doesn't use lip animation
     Bug #4948: Footstep sounds while levitating on ground level
+    Bug #4952: Torches held by NPCs flicker too quickly
     Bug #4961: Flying creature combat engagement takes z-axis into account
     Bug #4963: Enchant skill progress is incorrect
     Bug #4964: Multiple effect spell projectile sounds play louder than vanilla
@@ -95,44 +133,130 @@
     Bug #4984: "Friendly hits" feature should be used only for player's followers
     Bug #4989: Object dimension-dependent VFX scaling behavior is inconsistent
     Bug #4990: Dead bodies prevent you from hitting
+    Bug #4991: Jumping occasionally takes too much fatigue
     Bug #4999: Drop instruction behaves differently from vanilla
     Bug #5001: Possible data race in the Animation::setAlpha()
     Bug #5004: Werewolves shield their eyes during storm
+    Bug #5012: "Take all" on owned container generates a messagebox per item
     Bug #5018: Spell tooltips don't support purely negative magnitudes
     Bug #5025: Data race in the ICO::setMaximumNumOfObjectsToCompilePerFrame()
     Bug #5028: Offered price caps are not trading-specific
     Bug #5038: Enchanting success chance calculations are blatantly wrong
     Bug #5047: # in cell names sets color
     Bug #5050: Invalid spell effects are not handled gracefully
+    Bug #5055: Mark, Recall, Intervention magic effect abilities have no effect when added and removed in the same frame
     Bug #5056: Calling Cast function on player doesn't equip the spell but casts it
+    Bug #5059: Modded animation with combined attack keys always does max damage and can double damage
     Bug #5060: Magic effect visuals stop when death animation begins instead of when it ends
     Bug #5063: Shape named "Tri Shadow" in creature mesh is visible if it isn't hidden
+    Bug #5067: Ranged attacks on unaware opponents ("critical hits") differ from the vanilla engine
     Bug #5069: Blocking creatures' attacks doesn't degrade shields
+    Bug #5073: NPCs open doors in front of them even if they don't have to
     Bug #5074: Paralyzed actors greet the player
     Bug #5075: Enchanting cast style can be changed if there's no object
+    Bug #5078: DisablePlayerLooking is broken
+    Bug #5081: OpenMW-CS: Apparatus type "Alembic" is erroneously named "Albemic"
     Bug #5082: Scrolling with controller in GUI mode is broken
-    Feature #1774: Handle AvoidNode
+    Bug #5087: Some valid script names can't be used as string arguments
+    Bug #5089: Swimming/Underwater creatures only swim around ground level
+    Bug #5092: NPCs with enchanted weapons play sound when out of charges
+    Bug #5093: Hand to hand sound plays on knocked out enemies
+    Bug #5097: String arguments can't be parsed as number literals in scripts
+    Bug #5099: Non-swimming enemies will enter water if player is water walking
+    Bug #5103: Sneaking state behavior is still inconsistent
+    Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
+    Bug #5105: NPCs start combat with werewolves from any distance
+    Bug #5106: Still can jump even when encumbered
+    Bug #5110: ModRegion with a redundant numerical argument breaks script execution
+    Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
+    Bug #5113: Unknown alchemy question mark not centered
+    Bug #5123: Script won't run on respawn
+    Bug #5124: Arrow remains attached to actor if pulling animation was cancelled
+    Bug #5126: Swimming creatures without RunForward animations are motionless during combat
+    Bug #5134: Doors rotation by "Lock" console command is inconsistent
+    Bug #5136: LegionUniform script: can not access local variables
+    Bug #5137: Textures with Clamp Mode set to Clamp instead of Wrap are too dark outside the boundaries
+    Bug #5138: Actors stuck in half closed door
+    Bug #5149: Failing lock pick attempts isn't always a crime
+    Bug #5155: Lock/unlock behavior differs from vanilla
+    Bug #5158: Objects without a name don't fallback to their ID
+    Bug #5159: NiMaterialColorController can only control the diffuse color
+    Bug #5161: Creature companions can't be activated when they are knocked down
+    Bug #5164: Faction owned items handling is incorrect
+    Bug #5163: UserData is not copied during node cloning
+    Bug #5166: Scripts still should be executed after player's death
+    Bug #5167: Player can select and cast spells before magic menu is enabled
+    Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
+    Bug #5169: Nested levelled items/creatures have significantly higher chance not to spawn
+    Bug #5175: Random script function returns an integer value
+    Bug #5177: Editor: Unexplored map tiles get corrupted after a file with terrain is saved
+    Bug #5182: OnPCEquip doesn't trigger on skipped beast race attempts to equip something not equippable by beasts
+    Bug #5186: Equipped item enchantments don't affect creatures
+    Bug #5190: On-strike enchantments can be applied to and used with non-projectile ranged weapons
+    Bug #5196: Dwarven ghosts do not use idle animations
+    Bug #5206: A "class does not have NPC stats" error when player's follower kills an enemy with damage spell
+    Bug #5209: Spellcasting ignores race height
+    Bug #5210: AiActivate allows actors to open dialogue and inventory windows
+    Bug #5211: Screen fades in if the first loaded save is in interior cell
+    Bug #5212: AiTravel does not work for actors outside of AI processing range
+    Bug #5213: SameFaction script function is broken
+    Bug #5218: Crash when disabling ToggleBorders
+    Bug #5220: GetLOS crashes when actor isn't loaded
+    Bug #5222: Empty cell name subrecords are not saved
+    Bug #5223: Bow replacement during attack animation removes attached arrow
+    Bug #5226: Reputation should be capped
+    Bug #5229: Crash if mesh controller node has no data node
+    Bug #5239: OpenMW-CS does not support non-ASCII characters in path names
+    Bug #5241: On-self absorb spells cannot be detected
+    Bug #5242: ExplodeSpell behavior differs from Cast behavior
+    Bug #5246: Water ripples persist after cell change
+    Bug #5249: Wandering NPCs start walking too soon after they hello
+    Bug #5250: Creatures display shield ground mesh instead of shield body part
+    Bug #5255: "GetTarget, player" doesn't return 1 during NPC hello
+    Bug #5261: Creatures can sometimes become stuck playing idles and never wander again
+    Bug #5264: "Damage Fatigue" Magic Effect Can Bring Fatigue below 0
+    Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
+    Bug #5278: Console command Show doesn't fall back to global variable after local var not found
+    Bug #5300: NPCs don't switch from torch to shield when starting combat
+    Bug #5308: World map copying makes save loading much slower
+    Bug #5313: Node properties of identical type are not applied in the correct order
+    Bug #5326: Formatting issues in the settings.cfg
+    Bug #5328: Skills aren't properly reset for dead actors
+    Bug #5345: Dopey Necromancy does not work due to a missing quote
+    Bug #5350: An attempt to launch magic bolt causes "AL error invalid value" error
+    Bug #5352: Light source items' duration is decremented while they aren't visible
+    Feature #1724: Handle AvoidNode
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file
+    Feature #3517: Multiple projectiles enchantment
     Feature #3610: Option to invert X axis
+    Feature #3871: Editor: Terrain Selection
     Feature #3893: Implicit target for "set" function in console
     Feature #3980: In-game option to disable controller
     Feature #3999: Shift + Double Click should maximize/restore menu size
     Feature #4001: Toggle sneak controller shortcut
+    Feature #4068: OpenMW-CS: Add a button to reset key bindings to defaults
+    Feature #4129: Beta Comment to File
     Feature #4209: Editor: Faction rank sub-table
     Feature #4255: Handle broken RepairedOnMe script function
     Feature #4316: Implement RaiseRank/LowerRank functions properly
     Feature #4360: Improve default controller bindings
+    Feature #4544: Actors movement deceleration
     Feature #4673: Weapon sheathing
     Feature #4675: Support for NiRollController
+    Feature #4708: Radial fog support
     Feature #4730: Native animated containers support
     Feature #4784: Launcher: Duplicate Content Lists
     Feature #4812: Support NiSwitchNode
+    Feature #4831: Item search in the player's inventory
     Feature #4836: Daytime node switch
+    Feature #4840: Editor: Transient terrain change support
     Feature #4859: Make water reflections more configurable
+    Feature #4882: Support for NiPalette node
     Feature #4887: Add openmw command option to set initial random seed
     Feature #4890: Make Distant Terrain configurable
+    Feature #4944: Pause audio when OpenMW is minimized
     Feature #4958: Support eight blood types
     Feature #4962: Add casting animations for magic items
     Feature #4968: Scalable UI widget skins
@@ -146,6 +270,26 @@
     Feature #5036: Allow scripted faction leaving
     Feature #5046: Gamepad thumbstick cursor speed
     Feature #5051: Provide a separate textures for scrollbars
+    Feature #5091: Human-readable light source duration
+    Feature #5094: Unix like console hotkeys
+    Feature #5098: Allow user controller bindings
+    Feature #5114: Refresh launcher mod list
+    Feature #5121: Handle NiTriStrips and NiTriStripsData
+    Feature #5122: Use magic glow for enchanted arrows
+    Feature #5131: Custom skeleton bones
+    Feature #5132: Unique animations for different weapon types
+    Feature #5146: Safe Dispose corpse
+    Feature #5147: Show spell magicka cost in spell buying window
+    Feature #5170: Editor: Land shape editing, land selection
+    Feature #5172: Editor: Delete instances/references with keypress in scene window
+    Feature #5193: Weapon sheathing
+    Feature #5201: Editor: Show tool outline in scene view, when using editmodes
+    Feature #5219: Impelement TestCells console command
+    Feature #5224: Handle NiKeyframeController for NiTriShape
+    Feature #5274: Editor: Keyboard shortcut to drop objects to ground/obstacle in scene view
+    Feature #5304: Morrowind-style bump-mapping
+    Feature #5311: Support for gyroscopic input (e.g. Android)
+    Feature #5314: Ingredient filter in the alchemy window
     Task #4686: Upgrade media decoder to a more current FFmpeg API
     Task #4695: Optimize Distant Terrain memory consumption
     Task #4789: Optimize cell transitions

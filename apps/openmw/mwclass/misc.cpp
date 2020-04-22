@@ -56,8 +56,9 @@ namespace MWClass
     std::string Miscellaneous::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Miscellaneous::activate (const MWWorld::Ptr& ptr,
@@ -134,20 +135,11 @@ namespace MWClass
         return ref->mBase->mIcon;
     }
 
-    bool Miscellaneous::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Miscellaneous::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous> *ref = ptr.get<ESM::Miscellaneous>();
 
         MWGui::ToolTipInfo info;
-
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         bool gold = isGold(ptr);
         if (gold)
@@ -159,15 +151,8 @@ namespace MWClass
         else // gold displays its count also if it's 1.
             countString = " (" + std::to_string(count) + ")";
 
-        info.caption = ref->mBase->mName + countString;
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr)) + countString + MWGui::ToolTips::getSoulString(ptr.getCellRef());
         info.icon = ref->mBase->mIcon;
-
-        if (ref->mRef.getSoul() != "")
-        {
-            const ESM::Creature *creature = store.get<ESM::Creature>().search(ref->mRef.getSoul());
-            if (creature)
-                info.caption += " (" + creature->mName + ")";
-        }
 
         std::string text;
 
