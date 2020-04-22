@@ -995,7 +995,7 @@ namespace MWRender
         osg::ref_ptr<osg::Image> mImage;
     };
 
-    void RenderingManager::screenshotScreen(osg::Image* image, int w, int h)
+    void RenderingManager::screenshotFramebuffer(osg::Image* image, int w, int h)
     {
         osg::Camera* camera = mViewer->getCamera();
         osg::ref_ptr<osg::Drawable> tempDrw = new osg::Drawable;
@@ -1009,7 +1009,7 @@ namespace MWRender
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
         callback->waitTillDone();
-        // now that we've "used up" the current frame, get a fresh framenumber for the next frame() following after the screenshot is completed
+        // now that we've "used up" the current frame, get a fresh frame number for the next frame() following after the screenshot is completed
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
         camera->removeChild(tempDrw);
         camera->setFinalDrawCallback(nullptr);
