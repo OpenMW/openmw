@@ -227,6 +227,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     transform->addChild(geometry);
     transform->getBound();
 
+    geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
+
     if (mSceneManager->getIncrementalCompileOperation())
     {
         mSceneManager->getIncrementalCompileOperation()->add(geometry);

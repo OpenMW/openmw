@@ -1,6 +1,8 @@
 #include "quadtreeworld.hpp"
 
 #include <osgUtil/CullVisitor>
+#include <osg/ShapeDrawable>
+#include <osg/PolygonMode>
 
 #include <limits>
 #include <sstream>
@@ -13,6 +15,7 @@
 #include "viewdata.hpp"
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "terraindrawable.hpp"
 
 namespace
 {
@@ -323,9 +326,8 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
-        osg::BoundingBox bb = static_cast<osg::Drawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getBoundingBox();
-        float minZ = bb._min.z();
-        if (minZ > highZ)
+        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
+        if (!bb.valid())
             continue;
         osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);
         bb._min += ofs; bb._max += ofs;
@@ -333,8 +335,30 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
         bb._max.z() = highZ;
         if (cv->isCulled(bb))
             continue;
-        lowZ = minZ;
-        break;
+        lowZ = bb._min.z();
+
+        static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
+        if (!debug)
+            break;
+        osg::Box* b = new osg::Box;
+        b->set(bb.center(), bb._max - bb.center());
+        osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
+        static osg::ref_ptr<osg::StateSet> stateset = nullptr;
+        if (!stateset)
+        {
+            stateset = new osg::StateSet;
+            stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+            stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            stateset->setAttributeAndModes(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE), osg::StateAttribute::ON);
+            osg::Material* m = new osg::Material;
+            m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,1,1));
+            m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+            m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+            stateset->setAttributeAndModes(m, osg::StateAttribute::ON);
+            stateset->setRenderBinDetails(100,"RenderBin");
+        }
+        drw->setStateSet(stateset);
+        drw->accept(*cv);
     }
     callback->setLowZ(lowZ);
     cv->popCurrentMask();
