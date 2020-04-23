@@ -7,9 +7,9 @@
 #include <osg/NodeCallback>
 
 #include <atomic>
+#include <limits>
 #include <memory>
 #include <set>
-#include <atomic>
 
 #include "defs.hpp"
 #include "cellborder.hpp"
@@ -43,7 +43,7 @@ namespace Terrain
 class HeightCullCallback : public osg::NodeCallback
 {
 public:
-    HeightCullCallback() : mLowZ(-FLT_MAX), mHighZ(FLT_MAX), mMask(~0) {}
+    HeightCullCallback() : mLowZ(-std::numeric_limits<float>::max()), mHighZ(std::numeric_limits<float>::max()), mMask(~0) {}
 
     void setLowZ(float z)
     {

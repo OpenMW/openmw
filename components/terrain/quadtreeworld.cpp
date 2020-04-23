@@ -2,6 +2,7 @@
 
 #include <osgUtil/CullVisitor>
 
+#include <limits>
 #include <sstream>
 
 #include <components/misc/constants.hpp>
@@ -311,11 +312,11 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
 {
     if (!(cv->getTraversalMask() & callback->getCullMask()))
         return;
-    float lowZ = FLT_MAX;
+    float lowZ = std::numeric_limits<float>::max();
     float highZ = callback->getHighZ();
     if (cv->getEyePoint().z() <= highZ || outofworld)
     {
-        callback->setLowZ(-FLT_MAX);
+        callback->setLowZ(-std::numeric_limits<float>::max());
         return;
     }
     cv->pushCurrentMask();
