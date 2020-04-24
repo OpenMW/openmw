@@ -14,7 +14,7 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
 
     ambientOut = ambient * gl_LightSource[lightIndex].ambient.xyz * illumination;
 #if @omnidirlighting
-    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * illumination;
+    diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * 0.5196 * illumination;
 #else
     diffuseOut = diffuse.xyz * gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal.xyz, lightDir), 0.0) * illumination;
 #endif
