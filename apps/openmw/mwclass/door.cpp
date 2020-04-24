@@ -158,12 +158,11 @@ namespace MWClass
             }
         }
 
-        if ((isLocked || isTrapped) && hasKey)
+        if (isLocked && hasKey)
         {
             if(actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
-            if(isLocked)
-                ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
+            ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
             // using a key disarms the trap
             if(isTrapped)
             {
