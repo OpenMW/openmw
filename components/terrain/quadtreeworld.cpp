@@ -1,7 +1,10 @@
 #include "quadtreeworld.hpp"
 
 #include <osgUtil/CullVisitor>
+#include <osg/ShapeDrawable>
+#include <osg/PolygonMode>
 
+#include <limits>
 #include <sstream>
 
 #include <components/misc/constants.hpp>
@@ -12,6 +15,7 @@
 #include "viewdata.hpp"
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
+#include "terraindrawable.hpp"
 
 namespace
 {
@@ -307,6 +311,59 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, C
         entry.mRenderingNode = chunkManager->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags);
 }
 
+void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil::CullVisitor* cv, float cellworldsize, bool outofworld)
+{
+    if (!(cv->getTraversalMask() & callback->getCullMask()))
+        return;
+    float lowZ = std::numeric_limits<float>::max();
+    float highZ = callback->getHighZ();
+    if (cv->getEyePoint().z() <= highZ || outofworld)
+    {
+        callback->setLowZ(-std::numeric_limits<float>::max());
+        return;
+    }
+    cv->pushCurrentMask();
+    for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+    {
+        ViewData::Entry& entry = vd->getEntry(i);
+        osg::BoundingBox bb = static_cast<TerrainDrawable*>(entry.mRenderingNode->asGroup()->getChild(0))->getWaterBoundingBox();
+        if (!bb.valid())
+            continue;
+        osg::Vec3f ofs (entry.mNode->getCenter().x()*cellworldsize, entry.mNode->getCenter().y()*cellworldsize, 0.f);
+        bb._min += ofs; bb._max += ofs;
+        bb._min.z() = highZ;
+        bb._max.z() = highZ;
+        if (cv->isCulled(bb))
+            continue;
+        lowZ = bb._min.z();
+
+        static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
+        if (!debug)
+            break;
+        osg::Box* b = new osg::Box;
+        b->set(bb.center(), bb._max - bb.center());
+        osg::ShapeDrawable* drw = new osg::ShapeDrawable(b);
+        static osg::ref_ptr<osg::StateSet> stateset = nullptr;
+        if (!stateset)
+        {
+            stateset = new osg::StateSet;
+            stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+            stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+            stateset->setAttributeAndModes(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE), osg::StateAttribute::ON);
+            osg::Material* m = new osg::Material;
+            m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,1,1));
+            m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+            m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
+            stateset->setAttributeAndModes(m, osg::StateAttribute::ON);
+            stateset->setRenderBinDetails(100,"RenderBin");
+        }
+        drw->setStateSet(stateset);
+        drw->accept(*cv);
+    }
+    callback->setLowZ(lowZ);
+    cv->popCurrentMask();
+}
+
 void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 {
     bool isCullVisitor = nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
@@ -383,6 +440,9 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
         entry.mRenderingNode->accept(nv);
     }
+
+    if (isCullVisitor)
+        updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv), mStorage->getCellWorldSize(), !isGridEmpty());
 
     if (!isCullVisitor)
         vd->clear(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.

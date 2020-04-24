@@ -71,6 +71,8 @@ namespace MWRender
         float mTop;
         bool mInterior;
 
+        osg::Callback* mCullCallback;
+
         osg::Vec3f getSceneNodeCoordinates(int gridX, int gridY);
         void updateVisible();
 
@@ -87,6 +89,8 @@ namespace MWRender
               Resource::ResourceSystem* resourceSystem, osgUtil::IncrementalCompileOperation* ico,
               const std::string& resourcePath);
         ~Water();
+
+        void setCullCallback(osg::Callback* callback);
 
         void listAssetsToPreload(std::vector<std::string>& textures);
 
