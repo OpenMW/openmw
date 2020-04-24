@@ -1,5 +1,7 @@
 #include "loadingscreen.hpp"
 
+#include <array>
+
 #include <osgViewer/Viewer>
 
 #include <osg/Texture2D>
@@ -67,7 +69,7 @@ namespace MWGui
         mVFS->normalizeFilename(pattern);
 
         /* priority given to the left */
-        std::list<std::string> supported_extensions = {".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"};
+        const std::array<std::string, 7> supported_extensions {{".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"}};
 
         auto found = index.lower_bound(pattern);
         while (found != index.end())
