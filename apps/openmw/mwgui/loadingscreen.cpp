@@ -78,7 +78,7 @@ namespace MWGui
                 size_t pos = name.find_last_of('.');
                 if (pos != std::string::npos)
                 {
-                    for(auto const extension: supported_extensions)
+                    for(auto const& extension: supported_extensions)
                     {
                         if (name.compare(pos, name.size() - pos, extension) == 0)
                         {
