@@ -28,7 +28,7 @@ namespace Terrain
         View* createView();
 
     protected:
-        bool isGridEmpty() { return mGrid.empty(); }
+        bool isGridEmpty() const { return mGrid.empty(); }
 
     private:
         osg::ref_ptr<osg::Node> buildTerrain (osg::Group* parent, float chunkSize, const osg::Vec2f& chunkCenter);
