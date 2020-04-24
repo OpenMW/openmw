@@ -74,6 +74,9 @@ namespace SceneUtil
 
         stateset->setRenderBinDetails(renderBin, "RenderBin");
 
+        // Let the shader know we're dealing with simple water here.
+        stateset->addUniform(new osg::Uniform("simpleWater", true));
+
         return stateset;
     }
 }
