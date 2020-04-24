@@ -4,11 +4,12 @@
 #include <osg/ref_ptr>
 #include <osg/Referenced>
 #include <osg/Vec3f>
+#include <osg/NodeCallback>
 
 #include <atomic>
+#include <limits>
 #include <memory>
 #include <set>
-#include <atomic>
 
 #include "defs.hpp"
 #include "cellborder.hpp"
@@ -38,6 +39,37 @@ namespace Terrain
     class TextureManager;
     class ChunkManager;
     class CompositeMapRenderer;
+
+class HeightCullCallback : public osg::NodeCallback
+{
+public:
+    HeightCullCallback() : mLowZ(-std::numeric_limits<float>::max()), mHighZ(std::numeric_limits<float>::max()), mMask(~0) {}
+
+    void setLowZ(float z)
+    {
+        mLowZ = z;
+    }
+    float getLowZ() const { return mLowZ; }
+
+    void setHighZ(float highZ)
+    {
+        mHighZ = highZ;
+    }
+    float getHighZ() const { return mHighZ; }
+
+    void setCullMask(unsigned int mask) { mMask = mask; }
+    unsigned int getCullMask() const { return mMask; }
+
+    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    {
+        if (mLowZ <= mHighZ)
+            traverse(node, nv);
+    }
+private:
+    float mLowZ;
+    float mHighZ;
+    unsigned int mMask;
+};
 
     /**
      * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
@@ -116,6 +148,8 @@ namespace Terrain
 
         Storage* getStorage() { return mStorage; }
 
+        osg::Callback* getHeightCullCallback(float highz, unsigned int mask);
+
     protected:
         Storage* mStorage;
 
@@ -135,6 +169,7 @@ namespace Terrain
         bool mBorderVisible;
 
         std::set<std::pair<int,int>> mLoadedCells;
+        osg::ref_ptr<HeightCullCallback> mHeightCullCallback;
     };
 }
 

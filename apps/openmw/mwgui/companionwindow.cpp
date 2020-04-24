@@ -16,6 +16,7 @@
 #include "draganddrop.hpp"
 #include "countdialog.hpp"
 #include "widgets.hpp"
+#include "tooltips.hpp"
 
 namespace
 {
@@ -46,9 +47,11 @@ CompanionWindow::CompanionWindow(DragAndDrop *dragAndDrop, MessageBoxManager* ma
     getWidget(mCloseButton, "CloseButton");
     getWidget(mProfitLabel, "ProfitLabel");
     getWidget(mEncumbranceBar, "EncumbranceBar");
+    getWidget(mFilterEdit, "FilterEdit");
     getWidget(mItemView, "ItemView");
     mItemView->eventBackgroundClicked += MyGUI::newDelegate(this, &CompanionWindow::onBackgroundSelected);
     mItemView->eventItemClicked += MyGUI::newDelegate(this, &CompanionWindow::onItemSelected);
+    mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &CompanionWindow::onNameFilterChanged);
 
     mCloseButton->eventMouseButtonClick += MyGUI::newDelegate(this, &CompanionWindow::onCloseButtonClicked);
 
@@ -84,13 +87,20 @@ void CompanionWindow::onItemSelected(int index)
     if (count > 1 && !shift)
     {
         CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
-        dialog->openCountDialog(object.getClass().getName(object), "#{sTake}", count);
+        std::string name = object.getClass().getName(object) + MWGui::ToolTips::getSoulString(object.getCellRef());
+        dialog->openCountDialog(name, "#{sTake}", count);
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &CompanionWindow::dragItem);
     }
     else
         dragItem (nullptr, count);
 }
+
+void CompanionWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
+    }
 
 void CompanionWindow::dragItem(MyGUI::Widget* sender, int count)
 {
@@ -113,6 +123,7 @@ void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
 
     mModel = new CompanionItemModel(npc);
     mSortModel = new SortFilterItemModel(mModel);
+    mFilterEdit->setCaption(std::string());
     mItemView->setModel(mSortModel);
     mItemView->resetScrollBars();
 

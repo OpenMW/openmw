@@ -40,6 +40,9 @@ namespace CSVRender
             virtual void setEditLock (bool locked);
 
             /// Default-implementation: Ignored.
+            virtual void primaryOpenPressed (const WorldspaceHitResult& hit);
+
+            /// Default-implementation: Ignored.
             virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
             /// Default-implementation: Ignored.
@@ -94,6 +97,8 @@ namespace CSVRender
 
             /// Default-implementation: ignored
             virtual void dragMoveEvent (QDragMoveEvent *event);
+
+            virtual void mouseMoveEvent (QMouseEvent *event);
 
             /// Default: return -1
             virtual int getSubMode() const;

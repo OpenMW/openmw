@@ -13,10 +13,16 @@ namespace ESM
 namespace ESSImport
 {
 
+    struct SCHD
+    {
+        ESM::NAME32              mName;
+        ESM::Script::SCHDstruct  mData;
+    };
+
     // A running global script
     struct SCPT
     {
-        ESM::Script::SCHD mSCHD;
+        SCHD mSCHD;
 
         // values of local variables
         SCRI mSCRI;

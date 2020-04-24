@@ -331,7 +331,7 @@ namespace MWMechanics
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt = spell->mEffects.mList.begin(); effectIt != spell->mEffects.mList.end(); ++effectIt, ++i)
         {
             const ESM::MagicEffect * magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectIt->mEffectID);
-            if ((effectIt->mEffectID != ESM::MagicEffect::Corprus) && (magicEffect->mData.mFlags & ESM::MagicEffect::UncappedDamage)) // APPLIED_ONCE
+            if ((effectIt->mEffectID != ESM::MagicEffect::Corprus) && (magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
             {
                 float random = 1.f;
                 if (mSpells[spell].mEffectRands.find(i) != mSpells[spell].mEffectRands.end())

@@ -1,12 +1,18 @@
 #include "editwidget.hpp"
 
 #include <QAbstractItemModel>
+#include <QAction>
+#include <QContextMenuEvent>
+#include <QMenu>
 #include <QString>
 #include <QApplication>
+
+#include <components/misc/helpviewer.hpp>
 
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtablebase.hpp"
 #include "../../model/world/columns.hpp"
+#include "../../model/prefs/shortcut.hpp"
 
 CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
 : QLineEdit (parent), mParser (data), mIsEmpty(true)
@@ -29,6 +35,13 @@ CSVFilter::EditWidget::EditWidget (CSMWorld::Data& data, QWidget *parent)
 
     mStateColumnIndex   = model->findColumnIndex(CSMWorld::Columns::ColumnId_Modification);
     mDescColumnIndex    = model->findColumnIndex(CSMWorld::Columns::ColumnId_Description);
+
+    mHelpAction = new QAction (tr ("Help"), this);
+    connect (mHelpAction, SIGNAL (triggered()), this, SLOT (openHelp()));
+    mHelpAction->setIcon(QIcon(":/info.png"));
+    addAction (mHelpAction);
+    auto* openHelpShortcut = new CSMPrefs::Shortcut("help", this);
+    openHelpShortcut->associateAction(mHelpAction);
 }
 
 void CSVFilter::EditWidget::textChanged (const QString& text)
@@ -211,3 +224,17 @@ std::string CSVFilter::EditWidget::generateFilter (std::pair< std::string, std::
 
     return ss.str();
 }
+
+void CSVFilter::EditWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+    QMenu *menu = createStandardContextMenu();
+    menu->addAction(mHelpAction);
+    menu->exec(event->globalPos());
+    delete menu;
+}
+
+void CSVFilter::EditWidget::openHelp()
+{
+    Misc::HelpViewer::openHelp("manuals/openmw-cs/record-filters.html");
+}
+

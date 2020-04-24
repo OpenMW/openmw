@@ -6,158 +6,352 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>437</width>
-    <height>343</height>
+    <width>650</width>
+    <height>340</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="displayGroup">
-     <property name="title">
-      <string>Display</string>
+    <widget class="QTabWidget" name="DisplayTabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,1">
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="vSyncCheckBox">
-        <property name="text">
-         <string>Vertical Sync</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QCheckBox" name="fullScreenCheckBox">
-        <property name="text">
-         <string>Full Screen</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="windowBorderCheckBox">
-        <property name="text">
-         <string>Window border</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="antiAliasingLabel">
-        <property name="text">
-         <string>Anti-aliasing:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="screenLabel">
-        <property name="text">
-         <string>Screen:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="resolutionLabel">
-        <property name="text">
-         <string>Resolution:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="antiAliasingComboBox">
-        <item>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>2</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>4</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>8</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>16</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="screenComboBox"/>
-      </item>
-      <item row="5" column="1">
-       <layout class="QGridLayout" name="resolutionLayout">
-        <item row="1" column="2">
-         <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
-          <item>
-           <widget class="QSpinBox" name="customWidthSpinBox">
-            <property name="minimum">
-             <number>800</number>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="multiplyLabel">
+     <widget class="QWidget" name="DisplayWrapper">
+      <attribute name="title">
+       <string>Display</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QWidget" name="DisplayWidget">
+         <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,0">
+          <item row="3" column="0">
+           <widget class="QLabel" name="antiAliasingLabel">
             <property name="text">
-             <string> x </string>
+             <string>Anti-aliasing:</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QSpinBox" name="customHeightSpinBox">
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="framerateLimitCheckBox">
+            <property name="text">
+             <string>Framerate Limit:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <layout class="QGridLayout" name="resolutionLayout">
+            <item row="1" column="2">
+             <layout class="QHBoxLayout" name="customResolutionLayout" stretch="1,0,1">
+              <item>
+               <widget class="QSpinBox" name="customWidthSpinBox">
+                <property name="minimum">
+                 <number>800</number>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="multiplyLabel">
+                <property name="text">
+                 <string> x </string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="customHeightSpinBox">
+                <property name="minimum">
+                 <number>600</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="1">
+             <widget class="QRadioButton" name="customRadioButton">
+              <property name="text">
+               <string>Custom:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="standardRadioButton">
+              <property name="text">
+               <string>Standard:</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QComboBox" name="resolutionComboBox"/>
+            </item>
+           </layout>
+          </item>
+          <item row="6" column="1">
+           <widget class="QDoubleSpinBox" name="framerateLimitSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="suffix">
+             <string> FPS</string>
+            </property>
+            <property name="decimals">
+             <number>1</number>
+            </property>
             <property name="minimum">
-             <number>600</number>
+             <double>1</double>
+            </property>
+            <property name="maximum">
+             <double>1000</double>
+            </property>
+            <property name="singleStep">
+             <double>15</double>
+            </property>
+            <property name="value">
+             <double>300</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="windowBorderCheckBox">
+            <property name="text">
+             <string>Window Border</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="fullScreenCheckBox">
+            <property name="text">
+             <string>Full Screen</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="resolutionLabel">
+            <property name="text">
+             <string>Resolution:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QComboBox" name="screenComboBox"/>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="screenLabel">
+            <property name="text">
+             <string>Screen:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="antiAliasingComboBox">
+            <item>
+             <property name="text">
+              <string>0</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>8</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>16</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="vSyncCheckBox">
+            <property name="text">
+             <string>Vertical Sync</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-        <item row="1" column="1">
-         <widget class="QRadioButton" name="customRadioButton">
-          <property name="text">
-           <string>Custom:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QRadioButton" name="standardRadioButton">
-          <property name="text">
-           <string>Standard:</string>
-          </property>
-          <property name="checkable">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QComboBox" name="resolutionComboBox"/>
-        </item>
-       </layout>
-      </item>
-     </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="ShadowWrapper">
+      <attribute name="title">
+       <string>Shadows</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QWidget" name="ShadowWidget">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <layout class="QGridLayout" name="shadowsLayout" columnstretch="0,0">
+          <item row="6" column="0">
+           <widget class="QCheckBox" name="shadowDistanceCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Shadow Distance Limit:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QSpinBox" name="shadowDistanceSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 game units is 1 real life yard or about 0.9 m&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="suffix">
+             <string> unit(s)</string>
+            </property>
+            <property name="minimum">
+             <number>512</number>
+            </property>
+            <property name="maximum">
+             <number>81920</number>
+            </property>
+            <property name="value">
+             <number>8192</number>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="fadeStartLabel">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the limit above at which shadows begin to gradually fade away.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Fade Start Multiplier:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QComboBox" name="shadowResolutionComboBox">
+            <item>
+             <property name="text">
+              <string>512</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1024</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2048</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4096</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="actorShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Actor Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" alignment="Qt::AlignLeft">
+           <widget class="QCheckBox" name="terrainShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Terrain Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QDoubleSpinBox" name="fadeStartSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>2</number>
+            </property>
+            <property name="minimum">
+             <double>0</double>
+            </property>
+            <property name="maximum">
+             <double>1</double>
+            </property>
+            <property name="value">
+             <double>0.90</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="playerShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Player Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0" alignment="Qt::AlignLeft">
+           <widget class="QLabel" name="shadowResolutionLabel">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Shadow Map Resolution:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="objectShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for primarily inanimate objects. May have a significant performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Object Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="indoorShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Indoor Shadows</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>61</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

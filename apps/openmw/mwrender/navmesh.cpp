@@ -34,7 +34,7 @@ namespace MWRender
     void NavMesh::update(const dtNavMesh& navMesh, const std::size_t id,
         const std::size_t generation, const std::size_t revision, const DetourNavigator::Settings& settings)
     {
-        if (!mEnabled || (mGroup && mId == id && mGeneration >= generation && mRevision >= revision))
+        if (!mEnabled || (mGroup && mId == id && mGeneration == generation && mRevision == revision))
             return;
 
         mId = id;

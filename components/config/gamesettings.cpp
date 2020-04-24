@@ -44,7 +44,8 @@ void Config::GameSettings::validatePaths()
     QStringList paths = mSettings.values(QString("data"));
     Files::PathContainer dataDirs;
 
-    foreach (const QString &path, paths) {
+    for (const QString &path : paths)
+    {
         QByteArray bytes = path.toUtf8();
         dataDirs.push_back(Files::PathContainer::value_type(std::string(bytes.constData(), bytes.length())));
     }
@@ -511,7 +512,7 @@ bool Config::GameSettings::hasMaster()
 void Config::GameSettings::setContentList(const QStringList& fileNames)
 {
     remove(sContentKey);
-    foreach(const QString& fileName, fileNames)
+    for (const QString& fileName : fileNames)
     {
         setMultiValue(sContentKey, fileName);
     }

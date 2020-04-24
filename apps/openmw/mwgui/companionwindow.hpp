@@ -39,11 +39,13 @@ namespace MWGui
         DragAndDrop* mDragAndDrop;
 
         MyGUI::Button* mCloseButton;
+        MyGUI::EditBox* mFilterEdit;
         MyGUI::TextBox* mProfitLabel;
         Widgets::MWDynamicStat* mEncumbranceBar;
         MessageBoxManager* mMessageBoxManager;
 
         void onItemSelected(int index);
+        void onNameFilterChanged(MyGUI::EditBox* _sender);
         void onBackgroundSelected();
         void dragItem(MyGUI::Widget* sender, int count);
 

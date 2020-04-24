@@ -34,7 +34,7 @@ namespace MWClass
     class DoorCustomData : public MWWorld::CustomData
     {
     public:
-        int mDoorState; // 0 = nothing, 1 = opening, 2 = closing
+        MWWorld::DoorState mDoorState = MWWorld::DoorState::Idle;
 
         virtual MWWorld::CustomData *clone() const;
 
@@ -71,7 +71,7 @@ namespace MWClass
         if (ptr.getRefData().getCustomData())
         {
             const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
-            if (customData.mDoorState > 0)
+            if (customData.mDoorState != MWWorld::DoorState::Idle)
             {
                 MWBase::Environment::get().getWorld()->activateDoor(ptr, customData.mDoorState);
             }
@@ -102,8 +102,9 @@ namespace MWClass
     std::string Door::getName (const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
+        const std::string& name = ref->mBase->mName;
 
-        return ref->mBase->mName;
+        return !name.empty() ? name : ref->mBase->mId;
     }
 
     std::shared_ptr<MWWorld::Action> Door::activate (const MWWorld::Ptr& ptr,
@@ -157,12 +158,11 @@ namespace MWClass
             }
         }
 
-        if ((isLocked || isTrapped) && hasKey)
+        if (isLocked && hasKey)
         {
             if(actor == MWMechanics::getPlayer())
                 MWBase::Environment::get().getWindowManager()->messageBox(keyName + " #{sKeyUsed}");
-            if(isLocked)
-                unlock(ptr); //Call the function here. because that makes sense.
+            ptr.getCellRef().unlock(); //Call the function here. because that makes sense.
             // using a key disarms the trap
             if(isTrapped)
             {
@@ -201,12 +201,12 @@ namespace MWClass
             {
                 // animated door
                 std::shared_ptr<MWWorld::Action> action(new MWWorld::ActionDoor(ptr));
-                int doorstate = getDoorState(ptr);
+                const auto doorState = getDoorState(ptr);
                 bool opening = true;
                 float doorRot = ptr.getRefData().getPosition().rot[2] - ptr.getCellRef().getPosition().rot[2];
-                if (doorstate == 1)
+                if (doorState == MWWorld::DoorState::Opening)
                     opening = false;
-                if (doorstate == 0 && doorRot != 0)
+                if (doorState == MWWorld::DoorState::Idle && doorRot != 0)
                     opening = false;
 
                 if (opening)
@@ -240,20 +240,6 @@ namespace MWClass
         }
     }
 
-    void Door::lock (const MWWorld::Ptr& ptr, int lockLevel) const
-    {
-        if(lockLevel != 0)
-            ptr.getCellRef().setLockLevel(abs(lockLevel)); //Changes lock to locklevel, if positive
-        else
-            ptr.getCellRef().setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
-    }
-
-    void Door::unlock (const MWWorld::Ptr& ptr) const
-    {
-        int lockLevel = ptr.getCellRef().getLockLevel();
-        ptr.getCellRef().setLockLevel(-abs(lockLevel)); //Makes lockLevel negative
-    }
-
     bool Door::canLock(const MWWorld::ConstPtr &ptr) const
     {
         return true;
@@ -281,19 +267,12 @@ namespace MWClass
         registerClass (typeid (ESM::Door).name(), instance);
     }
 
-    bool Door::hasToolTip (const MWWorld::ConstPtr& ptr) const
-    {
-        const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
-
-        return (ref->mBase->mName != "");
-    }
-
     MWGui::ToolTipInfo Door::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
     {
         const MWWorld::LiveCellRef<ESM::Door> *ref = ptr.get<ESM::Door>();
 
         MWGui::ToolTipInfo info;
-        info.caption = ref->mBase->mName;
+        info.caption = MyGUI::TextIterator::toTagsString(getName(ptr));
 
         std::string text;
 
@@ -364,21 +343,19 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             std::unique_ptr<DoorCustomData> data(new DoorCustomData);
-
-            data->mDoorState = 0;
             ptr.getRefData().setCustomData(data.release());
         }
     }
 
-    int Door::getDoorState (const MWWorld::ConstPtr &ptr) const
+    MWWorld::DoorState Door::getDoorState (const MWWorld::ConstPtr &ptr) const
     {
         if (!ptr.getRefData().getCustomData())
-            return 0;
+            return MWWorld::DoorState::Idle;
         const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
         return customData.mDoorState;
     }
 
-    void Door::setDoorState (const MWWorld::Ptr &ptr, int state) const
+    void Door::setDoorState (const MWWorld::Ptr &ptr, MWWorld::DoorState state) const
     {
         if (ptr.getCellRef().getTeleport())
             throw std::runtime_error("load doors can't be moved");
@@ -392,11 +369,11 @@ namespace MWClass
     {
         if (!state.mHasCustomState)
             return;
+
         ensureCustomData(ptr);
         DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
-
-        const ESM::DoorState& state2 = dynamic_cast<const ESM::DoorState&>(state);
-        customData.mDoorState = state2.mDoorState;
+        const ESM::DoorState& doorState = state.asDoorState();
+        customData.mDoorState = MWWorld::DoorState(doorState.mDoorState);
     }
 
     void Door::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
@@ -406,10 +383,10 @@ namespace MWClass
             state.mHasCustomState = false;
             return;
         }
-        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
 
-        ESM::DoorState& state2 = dynamic_cast<ESM::DoorState&>(state);
-        state2.mDoorState = customData.mDoorState;
+        const DoorCustomData& customData = ptr.getRefData().getCustomData()->asDoorCustomData();
+        ESM::DoorState& doorState = state.asDoorState();
+        doorState.mDoorState = int(customData.mDoorState);
     }
 
 }

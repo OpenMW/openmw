@@ -3,6 +3,11 @@
 
 #include <osg/Geometry>
 
+namespace osg
+{
+    class ClusterCullingCallback;
+}
+
 namespace osgUtil
 {
     class CullVisitor;
@@ -31,8 +36,8 @@ namespace Terrain
         virtual const char* className() const { return "TerrainDrawable"; }
         virtual const char* libraryName() const { return "Terrain"; }
 
-        TerrainDrawable() = default;
-        ~TerrainDrawable() = default;
+        TerrainDrawable();
+        ~TerrainDrawable(); // has to be defined in the cpp file because we only forward declared some members.
         TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop);
 
         virtual void accept(osg::NodeVisitor &nv);
@@ -43,13 +48,21 @@ namespace Terrain
 
         void setLightListCallback(SceneUtil::LightListCallback* lightListCallback);
 
+        void createClusterCullingCallback();
+
         virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
+
+        void setupWaterBoundingBox(float waterheight, float margin);
+        const osg::BoundingBox& getWaterBoundingBox() const { return mWaterBoundingBox; }
 
         void setCompositeMap(CompositeMap* map) { mCompositeMap = map; }
         void setCompositeMapRenderer(CompositeMapRenderer* renderer) { mCompositeMapRenderer = renderer; }
 
     private:
+        osg::BoundingBox mWaterBoundingBox;
         PassVector mPasses;
+
+        osg::ref_ptr<osg::ClusterCullingCallback> mClusterCullingCallback;
 
         osg::ref_ptr<SceneUtil::LightListCallback> mLightListCallback;
         osg::ref_ptr<CompositeMap> mCompositeMap;

@@ -33,14 +33,14 @@ struct Region
         // the engine uses mA as "snow" and mB as "blizard"
                 mA, mB;
     }; // 10 bytes
+#pragma pack(pop)
 
     // Reference to a sound that is played randomly in this region
     struct SoundRef
     {
-        NAME32 mSound;
+        std::string   mSound;
         unsigned char mChance;
-    }; // 33 bytes
-#pragma pack(pop)
+    };
 
     WEATstruct mData;
     int mMapColor; // RGBA

@@ -97,6 +97,13 @@ namespace ICS
 	            xmlControl = xmlControl->NextSiblingElement("Control");
 	        }
 
+			static const size_t channelsCountLimit = 65536;
+			if (controlChannelCount > channelsCountLimit)
+			{
+				ICS_LOG("Warning: requested channels count (" + ToString<size_t>(controlChannelCount) + ") exceeds allowed maximum (" + ToString<size_t>(channelsCountLimit) + "), clamping it");
+				controlChannelCount = channelsCountLimit;
+			}
+
 			if(controlChannelCount > channelCount)
 			{
 				size_t dif = controlChannelCount - channelCount;
@@ -116,7 +123,13 @@ namespace ICS
 			TiXmlElement* xmlChannelFilter = xmlRoot->FirstChildElement("ChannelFilter");
 			while(xmlChannelFilter)
 			{
-				int ch = FromString<int>(xmlChannelFilter->Attribute("number"));
+				size_t ch = FromString<size_t>(xmlChannelFilter->Attribute("number"));
+				if(ch >= controlChannelCount)
+				{
+					ICS_LOG("ERROR: channel number (ch) is out of range");
+					xmlChannelFilter = xmlChannelFilter->NextSiblingElement("ChannelFilter");
+					continue;
+				}
 
 				TiXmlElement* xmlInterval = xmlChannelFilter->FirstChildElement("Interval");
 				while(xmlInterval)
@@ -135,7 +148,7 @@ namespace ICS
                         float step = FromString<float>(xmlInterval->Attribute("step"));
 
 						ICS_LOG("Applying Bezier filter to channel [number="
-							+ ToString<int>(ch) + ", startX="
+							+ ToString<size_t>(ch) + ", startX="
 							+ ToString<float>(startX) + ", startY="
 							+ ToString<float>(startY) + ", midX="
 							+ ToString<float>(midX) + ", midY="
@@ -149,7 +162,6 @@ namespace ICS
 
 					xmlInterval = xmlInterval->NextSiblingElement("Interval");
 				}
-
 
 				xmlChannelFilter = xmlChannelFilter->NextSiblingElement("ChannelFilter");
 			}
@@ -226,6 +238,15 @@ namespace ICS
 
 				loadJoystickButtonBinders(xmlControl);
 
+				/* ----------------------------------------------------------------------------------------
+				 * OPENMW CODE STARTS HERE
+				 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+				loadMouseWheelBinders(xmlControl);
+
+				/* OPENMW CODE ENDS HERE
+				 * ------------------------------------------------------------------------------------- */
+
 				// Attach controls to channels
 				TiXmlElement* xmlChannel = xmlControl->FirstChildElement("Channel");
 				while(xmlChannel)
@@ -255,14 +276,21 @@ namespace ICS
 						}
 					}
 
-					int chNumber = FromString<int>(xmlChannel->Attribute("number"));
-					if(std::string(xmlChannel->Attribute("direction")) == "DIRECT")
+					size_t chNumber = FromString<size_t>(xmlChannel->Attribute("number"));
+					if(chNumber >= controlChannelCount)
 					{
-						mControls.back()->attachChannel(mChannels[ chNumber ],Channel::DIRECT, percentage);
+						ICS_LOG("ERROR: channel number (chNumber) is out of range");
 					}
-					else if(std::string(xmlChannel->Attribute("direction")) == "INVERSE")
+					else
 					{
-						mControls.back()->attachChannel(mChannels[ chNumber ],Channel::INVERSE, percentage);
+						if(std::string(xmlChannel->Attribute("direction")) == "DIRECT")
+						{
+							mControls.back()->attachChannel(mChannels[ chNumber ],Channel::DIRECT, percentage);
+						}
+						else if(std::string(xmlChannel->Attribute("direction")) == "INVERSE")
+						{
+							mControls.back()->attachChannel(mChannels[ chNumber ],Channel::INVERSE, percentage);
+						}
 					}
 
 					xmlChannel = xmlChannel->NextSiblingElement("Channel");
@@ -306,6 +334,15 @@ namespace ICS
 		mControlsKeyBinderMap.clear();
 		mControlsMouseButtonBinderMap.clear();
 		mControlsJoystickButtonBinderMap.clear();
+
+		/* ----------------------------------------------------------------------------------------
+		 * OPENMW CODE STARTS HERE
+		 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+		mControlsMouseWheelBinderMap.clear();
+
+		/* OPENMW CODE ENDS HERE
+		 * ------------------------------------------------------------------------------------- */
 
 		ICS_LOG(" - InputControlSystem deleted - ");
 	}
@@ -490,6 +527,67 @@ namespace ICS
 				binder.SetAttribute( "direction", "DECREASE" );
 				control.InsertEndChild(binder);
 			}
+
+			/* ----------------------------------------------------------------------------------------
+			 * OPENMW CODE STARTS HERE
+			 * Mouse Wheel support added by Stomy */
+
+			if(getMouseWheelBinding(*o, Control::INCREASE) != MouseWheelClick::UNASSIGNED)
+			{
+				TiXmlElement binder( "MouseWheelBinder" );
+				MouseWheelClick click = getMouseWheelBinding(*o, Control::INCREASE);
+				bool skip = false;
+				switch (click) {
+					case MouseWheelClick::UP: {
+						binder.SetAttribute("button", "UP");
+					} break;
+					case MouseWheelClick::DOWN: {
+						binder.SetAttribute("button", "DOWN");
+					} break;
+					case MouseWheelClick::RIGHT: {
+						binder.SetAttribute("button", "RIGHT");
+					} break;
+					case MouseWheelClick::LEFT: {
+						binder.SetAttribute("button", "LEFT");
+					} break;
+					default: {
+						skip = true;
+					} break;
+				}
+				binder.SetAttribute( "direction", "INCREASE" );
+				if (!skip)
+					control.InsertEndChild(binder);
+			}
+
+			if(getMouseWheelBinding(*o, Control::DECREASE) != MouseWheelClick::UNASSIGNED)
+			{
+				TiXmlElement binder( "MouseWheelBinder" );
+				MouseWheelClick click = getMouseWheelBinding(*o, Control::INCREASE);
+				bool skip = false;
+				switch (click) {
+					case MouseWheelClick::UP: {
+						binder.SetAttribute("button", "UP");
+					} break;
+					case MouseWheelClick::DOWN: {
+						binder.SetAttribute("button", "DOWN");
+					} break;
+					case MouseWheelClick::RIGHT: {
+						binder.SetAttribute("button", "RIGHT");
+					} break;
+					case MouseWheelClick::LEFT: {
+						binder.SetAttribute("button", "LEFT");
+					} break;
+					default: {
+						skip = true;
+					} break;
+				}
+				binder.SetAttribute( "direction", "DECREASE" );
+				if (!skip)
+					control.InsertEndChild(binder);
+			}
+
+			/* OPENMW CODE ENDS HERE
+			 * ------------------------------------------------------------------------------------- */
 
 			if(getMouseButtonBinding(*o, Control/*::ControlChangingDirection*/::INCREASE)
 				!= ICS_MAX_DEVICE_BUTTONS)

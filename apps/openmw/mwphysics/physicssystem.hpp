@@ -50,9 +50,6 @@ namespace MWPhysics
     class Object;
     class Actor;
 
-    static const float sMaxSlope = 49.0f;
-    static const float sStepSizeUp = 34.0f;
-
     class PhysicsSystem
     {
         public:
@@ -186,6 +183,8 @@ namespace MWPhysics
             {
                 std::for_each(mAnimatedObjects.begin(), mAnimatedObjects.end(), function);
             }
+
+            bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const;
 
         private:
 

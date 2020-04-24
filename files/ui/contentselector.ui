@@ -20,7 +20,16 @@
    <enum>Qt::DefaultContextMenu</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -33,10 +42,41 @@
        <number>3</number>
       </property>
       <item>
-       <widget class="ContentSelectorView::ComboBox" name="gameFileView">
-        <property name="editable">
-         <bool>false</bool>
+       <widget class="QWidget" name="gameSelectorGroup" native="true">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
         </property>
+        <layout class="QHBoxLayout" name="horizLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="ContentSelectorView::ComboBox" name="gameFileView">
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="refreshButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
       </item>
       <item>

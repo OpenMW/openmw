@@ -8,7 +8,7 @@
 namespace MWGui
 {
 
-    class ItemView : public MyGUI::Widget
+    class ItemView final : public MyGUI::Widget
     {
     MYGUI_RTTI_DERIVED(ItemView)
     public:
@@ -33,12 +33,12 @@ namespace MWGui
         void resetScrollBars();
 
     private:
-        virtual void initialiseOverride();
+        void initialiseOverride() final;
 
         void layoutWidgets();
 
-        virtual void setSize(const MyGUI::IntSize& _value);
-        virtual void setCoord(const MyGUI::IntCoord& _value);
+        void setSize(const MyGUI::IntSize& _value) final;
+        void setCoord(const MyGUI::IntCoord& _value) final;
 
         void onSelectedItem (MyGUI::Widget* sender);
         void onSelectedBackground (MyGUI::Widget* sender);

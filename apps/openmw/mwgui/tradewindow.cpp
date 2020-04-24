@@ -27,6 +27,7 @@
 #include "tradeitemmodel.hpp"
 #include "countdialog.hpp"
 #include "controllers.hpp"
+#include "tooltips.hpp"
 
 namespace
 {
@@ -69,6 +70,7 @@ namespace MWGui
         getWidget(mTotalBalance, "TotalBalance");
         getWidget(mTotalBalanceLabel, "TotalBalanceLabel");
         getWidget(mBottomPane, "BottomPane");
+        getWidget(mFilterEdit, "FilterEdit");
 
         getWidget(mItemView, "ItemView");
         mItemView->eventItemClicked += MyGUI::newDelegate(this, &TradeWindow::onItemSelected);
@@ -80,6 +82,7 @@ namespace MWGui
         mFilterApparel->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
         mFilterMagic->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
         mFilterMisc->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onFilterChanged);
+        mFilterEdit->eventEditTextChange += MyGUI::newDelegate(this, &TradeWindow::onNameFilterChanged);
 
         mCancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onCancelButtonClicked);
         mOfferButton->eventMouseButtonClick += MyGUI::newDelegate(this, &TradeWindow::onOfferButtonClicked);
@@ -135,13 +138,18 @@ namespace MWGui
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
-
-        MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mTotalBalance);
+        mFilterEdit->setCaption("");
     }
 
     void TradeWindow::onFrame(float dt)
     {
         checkReferenceAvailable();
+    }
+
+    void TradeWindow::onNameFilterChanged(MyGUI::EditBox* _sender)
+    {
+        mSortModel->setNameFilter(_sender->getCaption());
+        mItemView->update();
     }
 
     void TradeWindow::onFilterChanged(MyGUI::Widget* _sender)
@@ -194,7 +202,8 @@ namespace MWGui
         {
             CountDialog* dialog = MWBase::Environment::get().getWindowManager()->getCountDialog();
             std::string message = "#{sQuanityMenuMessage02}";
-            dialog->openCountDialog(object.getClass().getName(object), message, count);
+            std::string name = object.getClass().getName(object) + MWGui::ToolTips::getSoulString(object.getCellRef());
+            dialog->openCountDialog(name, message, count);
             dialog->eventOkClicked.clear();
             dialog->eventOkClicked += MyGUI::newDelegate(this, &TradeWindow::sellItem);
             mItemToSell = mSortModel->mapToSource(index);

@@ -8,6 +8,10 @@
 #include <QStackedWidget>
 #include <QListWidgetItem>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #include <components/debug/debuglog.hpp>
 
 #include "../../model/prefs/state.hpp"
@@ -34,7 +38,12 @@ void CSVPrefs::Dialogue::buildCategorySelector (QSplitter *main)
         ++iter)
     {
         QString label = QString::fromUtf8 (iter->second.getKey().c_str());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
+        maxWidth = std::max (maxWidth, metrics.horizontalAdvance (label));
+#else
         maxWidth = std::max (maxWidth, metrics.width (label));
+#endif
 
         list->addItem (label);
     }
@@ -107,8 +116,15 @@ void CSVPrefs::Dialogue::show()
     }
     else
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+        QRect scr = QGuiApplication::primaryScreen()->geometry();
+#else
+        QRect scr = QApplication::desktop()->screenGeometry();
+#endif
+
         // otherwise place at the centre of the screen
-        QPoint screenCenter = QApplication::desktop()->screenGeometry().center();
+        QPoint screenCenter = scr.center();
+
         move (screenCenter - QPoint(frameGeometry().width()/2, frameGeometry().height()/2));
     }
 

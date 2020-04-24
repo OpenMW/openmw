@@ -3,6 +3,8 @@
 
 #include <osg/Math>
 
+#include <algorithm>
+
 namespace MWWorld
 {
 class Ptr;
@@ -12,7 +14,12 @@ namespace MWMechanics
 {
 
 // Max rotating speed, radian/sec
-const float MAX_VEL_ANGULAR_RADIANS(10);
+inline float getAngularVelocity(const float actorSpeed)
+{
+    const float baseAngluarVelocity = 10;
+    const float baseSpeed = 200;
+    return baseAngluarVelocity * std::max(actorSpeed / baseSpeed, 1.0f);
+}
 
 /// configure rotation settings for an actor to reach this target angle (eventually)
 /// @return have we reached the target angle?

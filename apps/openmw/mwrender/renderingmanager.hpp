@@ -7,6 +7,8 @@
 
 #include <components/settings/settings.hpp>
 
+#include <osgUtil/IncrementalCompileOperation>
+
 #include "objects.hpp"
 
 #include "renderinginterface.hpp"
@@ -80,6 +82,7 @@ namespace MWRender
     class LandManager;
     class NavMesh;
     class ActorsPaths;
+    class RecastMesh;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -88,6 +91,8 @@ namespace MWRender
                          Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                          const std::string& resourcePath, DetourNavigator::Navigator& navigator);
         ~RenderingManager();
+
+        osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
 
         MWRender::Objects& getObjects();
 
@@ -139,7 +144,8 @@ namespace MWRender
         void setWaterHeight(float level);
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd());
+        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd()); // make a new render at given size
+        void screenshotFramebuffer(osg::Image* image, int w, int h); // copy directly from framebuffer and scale to given size
         bool screenshot360(osg::Image* image, std::string settingStr);
 
         struct RayResult
@@ -204,11 +210,10 @@ namespace MWRender
         float getCameraDistance() const;
         Camera* getCamera();
         const osg::Vec3f& getCameraPosition() const;
-        void togglePOV();
+        void togglePOV(bool force = false);
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
-        void togglePlayerLooking(bool enable);
         void changeVanityModeScale(float factor);
 
         /// temporarily override the field of view with given value.
@@ -243,6 +248,8 @@ namespace MWRender
 
         void updateNavMesh();
 
+        void updateRecastMesh();
+
         osg::ref_ptr<osgUtil::IntersectionVisitor> getIntersectionVisitor(osgUtil::Intersector* intersector, bool ignorePlayer, bool ignoreActors);
 
         osg::ref_ptr<osgUtil::IntersectionVisitor> mIntersectionVisitor;
@@ -261,6 +268,7 @@ namespace MWRender
         std::unique_ptr<NavMesh> mNavMesh;
         std::size_t mNavMeshNumber = 0;
         std::unique_ptr<ActorsPaths> mActorsPaths;
+        std::unique_ptr<RecastMesh> mRecastMesh;
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;

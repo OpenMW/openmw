@@ -15,13 +15,16 @@
 #include <osg/TextureCubeMap>
 
 #include <osgUtil/LineSegmentIntersector>
-#include <osgUtil/IncrementalCompileOperation>
 
 #include <osg/ImageUtils>
 
 #include <osgViewer/Viewer>
 
+#include <components/nifosg/nifloader.hpp>
+
 #include <components/debug/debuglog.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -48,8 +51,6 @@
 
 #include <components/detournavigator/navigator.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
@@ -67,6 +68,7 @@
 #include "util.hpp"
 #include "navmesh.hpp"
 #include "actorspaths.hpp"
+#include "recastmesh.hpp"
 
 namespace
 {
@@ -218,7 +220,9 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
+        // Shadows and radial fog have problems with fixed-function mode
+        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows");
+        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
@@ -254,12 +258,15 @@ namespace MWRender
 
         globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
+        globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
+        globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
 
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
+        mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
@@ -274,8 +281,6 @@ namespace MWRender
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
-
-        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
         DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
@@ -314,6 +319,9 @@ namespace MWRender
 
         mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
         mTerrain->setWorkQueue(mWorkQueue.get());
+
+        // water goes after terrain for correct waterculling order
+        mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
 
@@ -368,6 +376,7 @@ namespace MWRender
         mViewer->getCamera()->setCullingMode(cullingMode);
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
+        NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
@@ -389,6 +398,11 @@ namespace MWRender
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
+    }
+
+    osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
+    {
+        return mViewer->getIncrementalCompileOperation();
     }
 
     MWRender::Objects& RenderingManager::getObjects()
@@ -528,6 +542,8 @@ namespace MWRender
 
     void RenderingManager::enableTerrain(bool enable)
     {
+        if (!enable)
+            mWater->setCullCallback(nullptr);
         mTerrain->enable(enable);
     }
 
@@ -580,6 +596,10 @@ namespace MWRender
         else if (mode == Render_ActorsPaths)
         {
             return mActorsPaths->toggle();
+        }
+        else if (mode == Render_RecastMesh)
+        {
+            return mRecastMesh->toggle();
         }
         return false;
     }
@@ -647,6 +667,7 @@ namespace MWRender
         }
 
         updateNavMesh();
+        updateRecastMesh();
 
         mCamera->update(dt, paused);
 
@@ -722,6 +743,7 @@ namespace MWRender
 
     void RenderingManager::setWaterHeight(float height)
     {
+        mWater->setCullCallback(mTerrain->getHeightCullCallback(height, Mask_Water));
         mWater->setHeight(height);
         mSky->setWaterHeight(height);
     }
@@ -729,17 +751,19 @@ namespace MWRender
     class NotifyDrawCompletedCallback : public osg::Camera::DrawCallback
     {
     public:
-        NotifyDrawCompletedCallback()
-            : mDone(false)
+        NotifyDrawCompletedCallback(unsigned int frame)
+            : mDone(false), mFrame(frame)
         {
         }
 
         virtual void operator () (osg::RenderInfo& renderInfo) const
         {
-            mMutex.lock();
-            mDone = true;
-            mMutex.unlock();
-            mCondition.signal();
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+            if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame)
+            {
+                mDone = true;
+                mCondition.signal();
+            }
         }
 
         void waitTillDone()
@@ -754,6 +778,7 @@ namespace MWRender
         mutable OpenThreads::Condition mCondition;
         mutable OpenThreads::Mutex mMutex;
         mutable bool mDone;
+        unsigned int mFrame;
     };
 
     bool RenderingManager::screenshot360(osg::Image* image, std::string settingStr)
@@ -763,7 +788,7 @@ namespace MWRender
         int screenshotMapping = 0;
 
         std::vector<std::string> settingArgs;
-        boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+        Misc::StringUtils::split(settingStr, settingArgs);
 
         if (settingArgs.size() > 0)
         {
@@ -933,7 +958,7 @@ namespace MWRender
         mRootNode->addChild(camera);
 
         // The draw needs to complete before we can copy back our image.
-        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback);
+        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback(0));
         camera->setFinalDrawCallback(callback);
 
         MWBase::Environment::get().getWindowManager()->getLoadingScreen()->loadingOn(false);
@@ -950,6 +975,51 @@ namespace MWRender
 
         camera->removeChildren(0, camera->getNumChildren());
         mRootNode->removeChild(camera);
+    }
+
+    class ReadImageFromFramebufferCallback : public osg::Drawable::DrawCallback
+    {
+    public:
+        ReadImageFromFramebufferCallback(osg::Image* image, int width, int height)
+            : mWidth(width), mHeight(height), mImage(image)
+        {
+        }
+        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const
+        {
+            int screenW = renderInfo.getCurrentCamera()->getViewport()->width();
+            int screenH = renderInfo.getCurrentCamera()->getViewport()->height();
+            double imageaspect = (double)mWidth/(double)mHeight;
+            int leftPadding = std::max(0, static_cast<int>(screenW - screenH * imageaspect) / 2);
+            int topPadding = std::max(0, static_cast<int>(screenH - screenW / imageaspect) / 2);
+            int width = screenW - leftPadding*2;
+            int height = screenH - topPadding*2;
+            mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+            mImage->scaleImage(mWidth, mHeight, 1);
+        }
+    private:
+        int mWidth;
+        int mHeight;
+        osg::ref_ptr<osg::Image> mImage;
+    };
+
+    void RenderingManager::screenshotFramebuffer(osg::Image* image, int w, int h)
+    {
+        osg::Camera* camera = mViewer->getCamera();
+        osg::ref_ptr<osg::Drawable> tempDrw = new osg::Drawable;
+        tempDrw->setDrawCallback(new ReadImageFromFramebufferCallback(image, w, h));
+        tempDrw->setCullingActive(false);
+        tempDrw->getOrCreateStateSet()->setRenderBinDetails(100, "RenderBin", osg::StateSet::USE_RENDERBIN_DETAILS); // so its after all scene bins but before POST_RENDER gui camera
+        camera->addChild(tempDrw);
+        osg::ref_ptr<NotifyDrawCompletedCallback> callback (new NotifyDrawCompletedCallback(mViewer->getFrameStamp()->getFrameNumber()));
+        camera->setFinalDrawCallback(callback);
+        mViewer->eventTraversal();
+        mViewer->updateTraversal();
+        mViewer->renderingTraversals();
+        callback->waitTillDone();
+        // now that we've "used up" the current frame, get a fresh frame number for the next frame() following after the screenshot is completed
+        mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+        camera->removeChild(tempDrw);
+        camera->setFinalDrawCallback(nullptr);
     }
 
     void RenderingManager::screenshot(osg::Image *image, int w, int h, osg::Matrixd cameraTransform)
@@ -1104,6 +1174,7 @@ namespace MWRender
     void RenderingManager::notifyWorldSpaceChanged()
     {
         mEffectManager->clear();
+        mWater->clearRipples();
     }
 
     void RenderingManager::clear()
@@ -1333,9 +1404,9 @@ namespace MWRender
         return mCurrentCameraPos;
     }
 
-    void RenderingManager::togglePOV()
+    void RenderingManager::togglePOV(bool force)
     {
-        mCamera->toggleViewMode();
+        mCamera->toggleViewMode(force);
     }
 
     void RenderingManager::togglePreviewMode(bool enable)
@@ -1351,11 +1422,6 @@ namespace MWRender
     void RenderingManager::allowVanityMode(bool allow)
     {
         mCamera->allowVanityMode(allow);
-    }
-
-    void RenderingManager::togglePlayerLooking(bool enable)
-    {
-        mCamera->togglePlayerLooking(enable);
     }
 
     void RenderingManager::changeVanityModeScale(float factor)
@@ -1463,5 +1529,13 @@ namespace MWRender
                 Log(Debug::Error) << "NavMesh render update exception: " << e.what();
             }
         }
+    }
+
+    void RenderingManager::updateRecastMesh()
+    {
+        if (!mRecastMesh->isEnabled())
+            return;
+
+        mRecastMesh->update(mNavigator.getRecastMeshTiles(), mNavigator.getSettings());
     }
 }

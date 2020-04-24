@@ -1770,7 +1770,7 @@ namespace CSMWorld
     struct GenderNpcColumn : public Column<ESXRecordT>
     {
         GenderNpcColumn()
-            : Column<ESXRecordT>(Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc)
+            : Column<ESXRecordT>(Columns::ColumnId_Gender, ColumnBase::Display_GenderNpc)
         {}
 
         virtual QVariant get(const Record<ESXRecordT>& record) const
@@ -2461,17 +2461,6 @@ namespace CSMWorld
         bool isEditable() const override;
     };
 
-    struct LandMapLodColumn : public Column<Land>
-    {
-        using DataType = QVector<signed char>;
-
-        LandMapLodColumn();
-
-        QVariant get(const Record<Land>& record) const override;
-        void set(Record<Land>& record, const QVariant& data) override;
-        bool isEditable() const override;
-    };
-
     struct LandNormalsColumn : public Column<Land>
     {
         using DataType = QVector<signed char>;
@@ -2529,8 +2518,7 @@ namespace CSMWorld
 }
 
 // This is required to access the type as a QVariant.
-Q_DECLARE_METATYPE(CSMWorld::LandMapLodColumn::DataType)
-//Q_DECLARE_METATYPE(CSMWorld::LandNormalsColumn::DataType) // Same as LandMapLodColumn::DataType
+Q_DECLARE_METATYPE(CSMWorld::LandNormalsColumn::DataType)
 Q_DECLARE_METATYPE(CSMWorld::LandHeightsColumn::DataType)
 Q_DECLARE_METATYPE(CSMWorld::LandColoursColumn::DataType)
 Q_DECLARE_METATYPE(CSMWorld::LandTexturesColumn::DataType)

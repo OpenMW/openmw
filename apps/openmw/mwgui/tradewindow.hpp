@@ -59,6 +59,8 @@ namespace MWGui
             MyGUI::Button* mFilterMagic;
             MyGUI::Button* mFilterMisc;
 
+            MyGUI::EditBox* mFilterEdit;
+
             MyGUI::Button* mIncreaseButton;
             MyGUI::Button* mDecreaseButton;
             MyGUI::TextBox* mTotalBalanceLabel;
@@ -86,6 +88,7 @@ namespace MWGui
             void sellItem (MyGUI::Widget* sender, int count);
 
             void onFilterChanged(MyGUI::Widget* _sender);
+            void onNameFilterChanged(MyGUI::EditBox* _sender);
             void onOfferButtonClicked(MyGUI::Widget* _sender);
             void onAccept(MyGUI::EditBox* sender);
             void onCancelButtonClicked(MyGUI::Widget* _sender);

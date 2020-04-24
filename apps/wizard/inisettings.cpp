@@ -21,7 +21,8 @@ QStringList Wizard::IniSettings::findKeys(const QString &text)
 {
     QStringList result;
 
-    foreach (const QString &key, mSettings.keys()) {
+    for (const QString &key : mSettings.keys())
+    {
 
         if (key.startsWith(text))
             result << key;

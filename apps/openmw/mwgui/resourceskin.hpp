@@ -5,12 +5,12 @@
 
 namespace MWGui
 {
-    class AutoSizedResourceSkin : public MyGUI::ResourceSkin
+    class AutoSizedResourceSkin final : public MyGUI::ResourceSkin
     {
         MYGUI_RTTI_DERIVED( AutoSizedResourceSkin )
 
     public:
-        virtual void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version);
+        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) final;
     };
 
 }

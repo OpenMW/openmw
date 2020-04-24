@@ -461,5 +461,8 @@ op 0x200030a: SetNavMeshNumber
 op 0x200030b: Journal, explicit
 op 0x200030c: RepairedOnMe
 op 0x200030d: RepairedOnMe, explicit
+op 0x200030e: TestCells
+op 0x200030f: TestInteriorCells
+op 0x2000310: ToggleRecastMesh
 
-opcodes 0x200030c-0x3ffffff unused
+opcodes 0x2000311-0x3ffffff unused

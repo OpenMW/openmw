@@ -107,10 +107,13 @@ namespace MWSound
         osg::Vec3f mListenerDir;
         osg::Vec3f mListenerUp;
 
-        int mPausedSoundTypes;
+        int mPausedSoundTypes[BlockerType::MaxCount] = {};
 
         Sound *mUnderwaterSound;
         Sound *mNearWaterSound;
+
+        std::string mNextMusic;
+        bool mPlaybackPaused;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
@@ -133,8 +136,6 @@ namespace MWSound
         void updateRegionSound(float duration);
         void updateWaterSound(float duration);
         void updateMusic(float duration);
-
-        std::string mNextMusic;
 
         float volumeFromType(Type type) const;
 
@@ -179,8 +180,11 @@ namespace MWSound
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        virtual bool sayActive(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
         ///< Is actor not speaking?
+
+        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        ///< For scripting backward compatibility
 
         virtual void stopSay(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr());
         ///< Stop an actor speaking
@@ -241,11 +245,14 @@ namespace MWSound
         virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const;
         ///< Is the given sound currently playing on the given object?
 
-        virtual void pauseSounds(int types);
+        virtual void pauseSounds(MWSound::BlockerType blocker, int types=int(Type::Mask));
         ///< Pauses all currently playing sounds, including music.
 
-        virtual void resumeSounds(int types);
+        virtual void resumeSounds(MWSound::BlockerType blocker);
         ///< Resumes all previously paused sounds.
+
+        virtual void pausePlayback();
+        virtual void resumePlayback();
 
         virtual void update(float duration);
 

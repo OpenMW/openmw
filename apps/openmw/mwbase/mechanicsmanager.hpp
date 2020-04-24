@@ -73,8 +73,6 @@ namespace MWBase
             /// \param paused In game type does not currently advance (this usually means some GUI
             /// component is up).
 
-            virtual void advanceTime (float duration) = 0;
-
             virtual void setPlayerName (const std::string& name) = 0;
             ///< Set player name.
 
@@ -130,8 +128,8 @@ namespace MWBase
              *                    If this parameter is false, it will be determined by a line-of-sight and awareness check.
              * @return was the crime seen?
              */
-            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim,
-                                      OffenseType type, int arg=0, bool victimAware=false) = 0;
+            virtual bool commitCrime (const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
+                                      const std::string& factionId="", int arg=0, bool victimAware=false) = 0;
             /// @return false if the attack was considered a "friendly hit" and forgiven
             virtual bool actorAttacked (const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) = 0;
 
@@ -143,8 +141,8 @@ namespace MWBase
             /// @param container The container the item is in; may be empty for an item in the world
             virtual void itemTaken (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item, const MWWorld::Ptr& container,
                                     int count, bool alarm = true) = 0;
-            /// Utility to check if opening (i.e. unlocking) this object is illegal and calling commitCrime if so
-            virtual void objectOpened (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) = 0;
+            /// Utility to check if unlocking this object is illegal and calling commitCrime if so
+            virtual void unlockAttempted (const MWWorld::Ptr& ptr, const MWWorld::Ptr& item) = 0;
             /// Attempt sleeping in a bed. If this is illegal, call commitCrime.
             /// @return was it illegal, and someone saw you doing it?
             virtual bool sleepInBed (const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed) = 0;
@@ -225,7 +223,7 @@ namespace MWBase
             virtual bool isAggressive (const MWWorld::Ptr& ptr, const MWWorld::Ptr& target) = 0;
 
             /// Resurrects the player if necessary
-            virtual void keepPlayerAlive() = 0;
+            virtual void resurrect(const MWWorld::Ptr& ptr) = 0;
 
             virtual bool isCastingSpell (const MWWorld::Ptr& ptr) const = 0;
             virtual bool isReadyToBlock (const MWWorld::Ptr& ptr) const = 0;
@@ -236,6 +234,8 @@ namespace MWBase
             virtual void processChangedSettings (const std::set< std::pair<std::string, std::string> >& settings) = 0;
 
             virtual float getActorsProcessingRange() const = 0;
+
+            virtual void notifyDied(const MWWorld::Ptr& actor) = 0;
 
             virtual bool onOpen(const MWWorld::Ptr& ptr) = 0;
             virtual void onClose(const MWWorld::Ptr& ptr) = 0;

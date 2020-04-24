@@ -4,6 +4,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_RenderManager.h>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/quickkeys.hpp>
@@ -257,7 +258,12 @@ namespace MWGui
         mSelected->id = item.getCellRef().getRefId();
         mSelected->name = item.getClass().getName(item);
 
-        mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
+        float scale = 1.f;
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture("textures\\menu_icon_select_magic_magic.dds");
+        if (texture)
+            scale = texture->getHeight() / 64.f;
+
+        mSelected->button->setFrame("textures\\menu_icon_select_magic_magic.dds", MyGUI::IntCoord(0, 0, 44*scale, 44*scale));
         mSelected->button->setIcon(item);
 
         mSelected->button->setUserString("ToolTipType", "ItemPtr");
@@ -292,7 +298,12 @@ namespace MWGui
         path.insert(slashPos+1, "b_");
         path = MWBase::Environment::get().getWindowManager()->correctIconPath(path);
 
-        mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(2, 2, 40, 40));
+        float scale = 1.f;
+        MyGUI::ITexture* texture = MyGUI::RenderManager::getInstance().getTexture("textures\\menu_icon_select_magic.dds");
+        if (texture)
+            scale = texture->getHeight() / 64.f;
+
+        mSelected->button->setFrame("textures\\menu_icon_select_magic.dds", MyGUI::IntCoord(0, 0, 44*scale, 44*scale));
         mSelected->button->setIcon(path);
 
         if (mMagicSelectionDialog)
@@ -390,7 +401,8 @@ namespace MWGui
                     return;
                 }
 
-                MWBase::Environment::get().getWindowManager()->useItem(item);
+                if (!store.isEquipped(item))
+                    MWBase::Environment::get().getWindowManager()->useItem(item);
                 MWWorld::ConstContainerStoreIterator rightHand = store.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
                 // change draw state only if the item is in player's right hand
                 if (rightHand != store.end() && item == *rightHand)
@@ -400,8 +412,8 @@ namespace MWGui
             }
             else if (key->type == Type_MagicItem)
             {
-                // equip, if it can be equipped
-                if (!item.getClass().getEquipmentSlots(item).first.empty())
+                // equip, if it can be equipped and isn't yet equipped
+                if (!item.getClass().getEquipmentSlots(item).first.empty() && !store.isEquipped(item))
                 {
                     MWBase::Environment::get().getWindowManager()->useItem(item);
 
@@ -493,7 +505,8 @@ namespace MWGui
 
         ESM::QuickKeys keys;
 
-        for (int i=0; i<10; ++i)
+        // NB: The quick key with index 9 always has Hand-to-Hand type and must not be saved
+        for (int i=0; i<9; ++i)
         {
             ItemWidget* button = mKey[i].button;
 
@@ -542,7 +555,8 @@ namespace MWGui
         int i=0;
         for (ESM::QuickKeys::QuickKey& quickKey : keys.mKeys)
         {
-            if (i >= 10)
+            // NB: The quick key with index 9 always has Hand-to-Hand type and must not be loaded
+            if (i >= 9)
                 return;
 
             mSelected = &mKey[i];

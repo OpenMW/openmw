@@ -10,17 +10,19 @@
 
 namespace Nif
 {
-/** A record that can have extra data. The extra data objects
-    themselves descend from the Extra class, and all the extra data
-    connected to an object form a linked list
-*/
+// An extra data record. All the extra data connected to an object form a linked list.
 class Extra : public Record
 {
 public:
-    ExtraPtr extra;
+    ExtraPtr next; // Next extra data record in the list
 
-    void read(NIFStream *nif) { extra.read(nif); }
-    void post(NIFFile *nif) { extra.post(nif); }
+    void read(NIFStream *nif)
+    {
+        next.read(nif);
+        nif->getUInt(); // Size of the record
+    }
+
+    void post(NIFFile *nif) { next.post(nif); }
 };
 
 class Controller : public Record
@@ -30,44 +32,34 @@ public:
     int flags;
     float frequency, phase;
     float timeStart, timeStop;
-    ControlledPtr target;
+    NamedPtr target;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };
 
-/// Anything that has a controller
-class Controlled : public Extra
+/// Has name, extra-data and controller
+class Named : public Record
 {
 public:
+    std::string name;
+    ExtraPtr extra;
     ControllerPtr controller;
 
     void read(NIFStream *nif)
     {
-        Extra::read(nif);
+        name = nif->getString();
+        extra.read(nif);
         controller.read(nif);
     }
 
     void post(NIFFile *nif)
     {
-        Extra::post(nif);
+        extra.post(nif);
         controller.post(nif);
     }
 };
-
-/// Has name, extra-data and controller
-class Named : public Controlled
-{
-public:
-    std::string name;
-
-    void read(NIFStream *nif)
-    {
-        name = nif->getString();
-        Controlled::read(nif);
-    }
-};
-typedef Named NiSequenceStreamHelper;
+using NiSequenceStreamHelper = Named;
 
 } // Namespace
 #endif

@@ -43,14 +43,20 @@ namespace MWMechanics
 
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
+        auto& stats = actor.getClass().getCreatureStats(actor);
+
+        if (stats.isTurningToPlayer() || stats.getGreetingState() == Greet_InProgress)
+            return false;
+
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         const osg::Vec3f targetPos(mX, mY, mZ);
 
-        actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, false);
-        actor.getClass().getCreatureStats(actor).setDrawState(DrawState_Nothing);
+        stats.setMovementFlag(CreatureStats::Flag_Run, false);
+        stats.setDrawState(DrawState_Nothing);
 
+        // Note: we should cancel internal "return after combat" package, if original location is too far away
         if (!isWithinMaxRange(targetPos, actorPos))
-            return false;
+            return mHidden;
 
         // Unfortunately, with vanilla assets destination is sometimes blocked by other actor.
         // If we got close to target, check for actors nearby. If they are, finish AI package.
@@ -88,6 +94,7 @@ namespace MWMechanics
         // that is the user's responsibility
         MWBase::Environment::get().getWorld()->moveObject(actor, mX, mY, mZ);
         actor.getClass().adjustPosition(actor, false);
+        reset();
     }
 
     void AiTravel::writeState(ESM::AiSequence::AiSequence &sequence) const

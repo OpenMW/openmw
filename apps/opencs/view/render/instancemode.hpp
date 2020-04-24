@@ -1,7 +1,10 @@
 #ifndef CSV_RENDER_INSTANCEMODE_H
 #define CSV_RENDER_INSTANCEMODE_H
 
+#include <QString>
+
 #include <osg/ref_ptr>
+#include <osg/Group>
 #include <osg/Quat>
 #include <osg/Vec3f>
 
@@ -16,6 +19,7 @@ namespace CSVRender
 {
     class TagBase;
     class InstanceSelectionMode;
+    class Object;
 
     class InstanceMode : public EditMode
     {
@@ -29,6 +33,14 @@ namespace CSVRender
                 DragMode_Scale
             };
 
+            enum DropMode
+            {
+                Collision,
+                Terrain,
+                CollisionSep,
+                TerrainSep
+            };
+
             CSVWidget::SceneToolMode *mSubMode;
             std::string mSubModeId;
             InstanceSelectionMode *mSelectionMode;
@@ -36,6 +48,7 @@ namespace CSVRender
             int mDragAxis;
             bool mLocked;
             float mUnitScaleDist;
+            osg::ref_ptr<osg::Group> mParentNode;
 
             int getSubModeFromId (const std::string& id) const;
 
@@ -44,16 +57,20 @@ namespace CSVRender
 
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
+            void dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+            float getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
         public:
 
-            InstanceMode (WorldspaceWidget *worldspaceWidget, QWidget *parent = 0);
+            InstanceMode (WorldspaceWidget *worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget *parent = 0);
 
             virtual void activate (CSVWidget::SceneToolbar *toolbar);
 
             virtual void deactivate (CSVWidget::SceneToolbar *toolbar);
 
             virtual void setEditLock (bool locked);
+
+            virtual void primaryOpenPressed (const WorldspaceHitResult& hit);
 
             virtual void primaryEditPressed (const WorldspaceHitResult& hit);
 
@@ -83,9 +100,32 @@ namespace CSVRender
 
             virtual int getSubMode() const;
 
+        signals:
+
+            void requestFocus (const std::string& id);
+
         private slots:
 
             void subModeChanged (const std::string& id);
+            void deleteSelectedInstances(bool active);
+            void dropSelectedInstancesToCollision();
+            void dropSelectedInstancesToTerrain();
+            void dropSelectedInstancesToCollisionSeparately();
+            void dropSelectedInstancesToTerrainSeparately();
+            void handleDropMethod(DropMode dropMode, QString commandMsg);
+    };
+
+    /// \brief Helper class to handle object mask data in safe way
+    class DropObjectDataHandler
+    {
+        public:
+            DropObjectDataHandler(WorldspaceWidget* worldspacewidget);
+            ~DropObjectDataHandler();
+            std::vector<float> mObjectHeights;
+
+        private:
+            WorldspaceWidget* mWorldspaceWidget;
+            std::vector<osg::Node::NodeMask> mOldMasks;
     };
 }
 

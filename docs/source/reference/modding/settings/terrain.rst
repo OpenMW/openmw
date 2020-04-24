@@ -68,7 +68,7 @@ composite map level
 
 :Type:		integer
 :Range:		>= -3
-:Default:	-2
+:Default:	0
 
 Controls at which minimum size (in 2^value cell units) terrain chunks will start to use a composite map instead of the high-detail textures.
 With value -3 composite maps are used everywhere.
@@ -76,7 +76,7 @@ With value -3 composite maps are used everywhere.
 A composite map is a pre-rendered texture that contains all the texture layers combined.
 Note that resolution of composite maps is currently always fixed at 'composite map resolution',
 regardless of the resolution of the underlying terrain textures.
-If high-detail texture replacers are used, probably it is worth to increase 'composite map resolution' setting value.
+If high resolution texture replacers are used, it is recommended to increase 'composite map resolution' setting value.
 
 composite map resolution
 ------------------------

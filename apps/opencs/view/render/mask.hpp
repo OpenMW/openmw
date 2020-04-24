@@ -10,9 +10,6 @@ namespace CSVRender
     /// @copydoc MWRender::VisMask
     enum Mask
     {
-        // internal use within NifLoader, do not change
-        Mask_UpdateVisitor = 0x1,
-
         // elements that are part of the actual scene
         Mask_Reference = 0x2,
         Mask_Pathgrid = 0x4,

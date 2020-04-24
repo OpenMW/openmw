@@ -47,7 +47,7 @@ QStringList CSVDoc::FileDialog::selectedFilePaths()
 {
     QStringList filePaths;
 
-    foreach (ContentSelectorModel::EsmFile *file, mSelector->selectedFiles() )
+    for (ContentSelectorModel::EsmFile *file : mSelector->selectedFiles() )
         filePaths.append(file->filePath());
 
     return filePaths;

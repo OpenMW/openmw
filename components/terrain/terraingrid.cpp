@@ -3,6 +3,7 @@
 #include <memory>
 
 #include <osg/Group>
+#include <osg/ComputeBoundsVisitor>
 
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
@@ -28,7 +29,7 @@ TerrainGrid::~TerrainGrid()
 {
     while (!mGrid.empty())
     {
-        unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
+        TerrainGrid::unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
     }
 }
 
@@ -80,6 +81,7 @@ void TerrainGrid::loadCell(int x, int y)
     mTerrainRoot->addChild(terrainNode);
 
     mGrid[std::make_pair(x,y)] = terrainNode;
+    updateWaterCulling();
 }
 
 void TerrainGrid::unloadCell(int x, int y)
@@ -94,6 +96,15 @@ void TerrainGrid::unloadCell(int x, int y)
     mTerrainRoot->removeChild(terrainNode);
 
     mGrid.erase(it);
+    updateWaterCulling();
+}
+
+void TerrainGrid::updateWaterCulling()
+{
+    osg::ComputeBoundsVisitor computeBoundsVisitor;
+    mTerrainRoot->accept(computeBoundsVisitor);
+    float lowZ = computeBoundsVisitor.getBoundingBox()._min.z();
+    mHeightCullCallback->setLowZ(lowZ);
 }
 
 View *TerrainGrid::createView()

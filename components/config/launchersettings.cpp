@@ -29,7 +29,8 @@ QStringList Config::LauncherSettings::subKeys(const QString &key)
 
     QStringList result;
 
-    foreach (const QString &currentKey, keys) {
+    for (const QString &currentKey : keys)
+    {
 
         if (keyRe.indexIn(currentKey) != -1)
         {
@@ -110,7 +111,7 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     }
 
     // if any existing profile in launcher matches the content list, make that profile the default
-    foreach(const QString &listName, getContentLists())
+    for (const QString &listName : getContentLists())
     {
         if (isEqual(files, getContentListFiles(listName)))
         {
@@ -140,7 +141,7 @@ void Config::LauncherSettings::setContentList(const QString& contentListName, co
 {
     removeContentList(contentListName);
     QString key = makeContentListKey(contentListName);
-    foreach(const QString& fileName, fileNames)
+    for (const QString& fileName : fileNames)
     {
         setMultiValue(key, fileName);
     }

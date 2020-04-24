@@ -29,6 +29,8 @@ void CSVRender::EditMode::setEditLock (bool locked)
 
 }
 
+void CSVRender::EditMode::primaryOpenPressed (const WorldspaceHitResult& hit) {}
+
 void CSVRender::EditMode::primaryEditPressed (const WorldspaceHitResult& hit) {}
 
 void CSVRender::EditMode::secondaryEditPressed (const WorldspaceHitResult& hit) {}
@@ -70,6 +72,8 @@ void CSVRender::EditMode::dragEnterEvent (QDragEnterEvent *event) {}
 void CSVRender::EditMode::dropEvent (QDropEvent *event) {}
 
 void CSVRender::EditMode::dragMoveEvent (QDragMoveEvent *event) {}
+
+void CSVRender::EditMode::mouseMoveEvent (QMouseEvent *event) {}
 
 int CSVRender::EditMode::getSubMode() const
 {

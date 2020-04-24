@@ -227,9 +227,9 @@ namespace MWGui
 
     void WaitDialog::onKeyButtonPressed(MyGUI::Widget *sender, MyGUI::KeyCode key, MyGUI::Char character)
     {
-        if (key == MyGUI::KeyCode::ArrowDown)
+        if (key == MyGUI::KeyCode::ArrowUp)
             mHourSlider->setScrollPosition(std::min(mHourSlider->getScrollPosition()+1, mHourSlider->getScrollRange()-1));
-        else if (key == MyGUI::KeyCode::ArrowUp)
+        else if (key == MyGUI::KeyCode::ArrowDown)
             mHourSlider->setScrollPosition(std::max(static_cast<int>(mHourSlider->getScrollPosition())-1, 0));
         else
             return;

@@ -10,6 +10,10 @@
 #include <QIcon>
 #include <QPushButton>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 QPushButton *CSVDoc::StartupDialogue::addButton (const QString& label, const QIcon& icon)
 {
     int column = mColumn--;
@@ -119,7 +123,12 @@ CSVDoc::StartupDialogue::StartupDialogue() : mWidth (0), mColumn (2)
 
     setLayout (layout);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    QRect scr = QGuiApplication::primaryScreen()->geometry();
+#else
     QRect scr = QApplication::desktop()->screenGeometry();
+#endif
+
     QRect rect = geometry();
     move (scr.center().x() - rect.center().x(), scr.center().y() - rect.center().y());
 }

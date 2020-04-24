@@ -1,6 +1,8 @@
 #ifndef GAME_MWBASE_WORLD_H
 #define GAME_MWBASE_WORLD_H
 
+#include "rotationflags.hpp"
+
 #include <vector>
 #include <map>
 #include <set>
@@ -9,6 +11,7 @@
 #include <components/esm/cellid.hpp>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/doorstate.hpp"
 
 #include "../mwrender/rendermode.hpp"
 
@@ -114,6 +117,9 @@ namespace MWBase
             virtual MWWorld::CellStore *getInterior (const std::string& name) = 0;
 
             virtual MWWorld::CellStore *getCell (const ESM::CellId& id) = 0;
+
+            virtual void testExteriorCells() = 0;
+            virtual void testInteriorCells() = 0;
 
             virtual void useDeathCamera() = 0;
 
@@ -279,7 +285,8 @@ namespace MWBase
 
             virtual void scaleObject (const MWWorld::Ptr& ptr, float scale) = 0;
 
-            virtual void rotateObject(const MWWorld::Ptr& ptr,float x,float y,float z, bool adjust = false) = 0;
+            virtual void rotateObject(const MWWorld::Ptr& ptr, float x, float y, float z,
+                RotationFlags flags = RotationFlag_inverseOrder) = 0;
 
             virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& ptr, MWWorld::CellStore* cell, ESM::Position pos) = 0;
             ///< Place an object. Makes a copy of the Ptr.
@@ -305,6 +312,8 @@ namespace MWBase
             ///< cast a Ray and return true if there is an object in the ray path.
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2) = 0;
+
+            virtual bool castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore) = 0;
 
             virtual void setActorCollisionMode(const MWWorld::Ptr& ptr, bool internal, bool external) = 0;
             virtual bool isActorCollisionEnabled(const MWWorld::Ptr& ptr) = 0;
@@ -402,12 +411,11 @@ namespace MWBase
 
             virtual osg::Matrixf getActorHeadTransform(const MWWorld::ConstPtr& actor) const = 0;
 
-            virtual void togglePOV() = 0;
+            virtual void togglePOV(bool force = false) = 0;
             virtual bool isFirstPerson() const = 0;
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;
-            virtual void togglePlayerLooking(bool enable) = 0;
             virtual void changeVanityModeScale(float factor) = 0;
             virtual bool vanityRotateCamera(float * rot) = 0;
             virtual void setCameraDistance(float dist, bool adjust = false, bool override = true)=0;
@@ -420,7 +428,7 @@ namespace MWBase
             /// update movement state of a non-teleport door as specified
             /// @param state see MWClass::setDoorState
             /// @note throws an exception when invoked on a teleport door
-            virtual void activateDoor(const MWWorld::Ptr& door, int state) = 0;
+            virtual void activateDoor(const MWWorld::Ptr& door, MWWorld::DoorState state) = 0;
 
             virtual void getActorsStandingOn (const MWWorld::ConstPtr& object, std::vector<MWWorld::Ptr> &actors) = 0; ///< get a list of actors standing on \a object
             virtual bool getPlayerStandingOn (const MWWorld::ConstPtr& object) = 0; ///< @return true if the player is standing on \a object
@@ -584,6 +592,7 @@ namespace MWBase
             virtual bool isPlayerInJail() const = 0;
 
             virtual void rest(double hours) = 0;
+            virtual void rechargeItems(double duration, bool activeOnly) = 0;
 
             virtual void setPlayerTraveling(bool traveling) = 0;
             virtual bool isPlayerTraveling() const = 0;
@@ -614,6 +623,10 @@ namespace MWBase
 
             /// Return physical half extents of the given actor to be used in pathfinding
             virtual osg::Vec3f getPathfindingHalfExtents(const MWWorld::ConstPtr& actor) const = 0;
+
+            virtual bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const = 0;
+
+            virtual bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const = 0;
     };
 }
 

@@ -57,8 +57,7 @@
 
         <!-- Available Ingredients -->
 
-        <Widget type="ItemView" skin="MW_ItemView" position="10 206 552 158" name="ItemView" align="Left Top Stretch"/>
-
+        <Widget type="ItemView" skin="MW_ItemView" position="10 206 552 132" name="ItemView" align="Left Top Stretch"/>
 
         <!-- Created Effects -->
 
@@ -69,6 +68,21 @@
 
         <Widget type="Widget" skin="MW_Box" position="250 66 312 130" align="Top Left HStretch">
             <Widget type="Widget" skin="" position="4 4 316 122" name="CreatedEffects" align="HStretch"/>
+        </Widget>
+
+        <!-- Filters -->
+
+        <Widget type="HBox" skin="MW_Box" position="10 333 552 39" align="Bottom HStretch">
+            <Property key="Padding" value="5"/>
+            <Property key="Spacing" value="10"/>
+
+            <Widget type="AutoSizedButton" skin="MW_Button" position="10 2 1 1" name="FilterType">
+                <Property key="Caption" value="#{sIngredients}"/> <!-- default value, can be either sIngredients of sMagicEffects -->
+            </Widget>
+            <Widget type="ComboBox" skin="MW_ComboBox" position="0 2 0 24" name="FilterValue">
+                <UserString key="HStretch" value="true"/>
+                <Property key="ModeDrop" value="false"/>
+            </Widget>
         </Widget>
 
 

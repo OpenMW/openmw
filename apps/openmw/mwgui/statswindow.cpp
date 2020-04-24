@@ -40,8 +40,8 @@ namespace MWGui
       , mBounty(0)
       , mSkillWidgets()
       , mChanged(true)
+      , mMinFullWidth(mMainWidget->getSize().width)
     {
-        setCoord(0,0,498, 342);
 
         const char *names[][2] =
         {
@@ -88,8 +88,41 @@ namespace MWGui
 
     void StatsWindow::onWindowResize(MyGUI::Window* window)
     {
-        mLeftPane->setCoord( MyGUI::IntCoord(0, 0, static_cast<int>(0.44*window->getSize().width), window->getSize().height) );
-        mRightPane->setCoord( MyGUI::IntCoord(static_cast<int>(0.44*window->getSize().width), 0, static_cast<int>(0.56*window->getSize().width), window->getSize().height) );
+        int windowWidth = window->getSize().width;
+        int windowHeight = window->getSize().height;
+
+        //initial values defined in openmw_stats_window.layout, if custom options are not present in .layout, a default is loaded
+        float leftPaneRatio = 0.44;
+        if (mLeftPane->isUserString("LeftPaneRatio"))
+            leftPaneRatio = MyGUI::utility::parseFloat(mLeftPane->getUserString("LeftPaneRatio"));
+
+        int leftOffsetWidth = 24;
+        if (mLeftPane->isUserString("LeftOffsetWidth"))
+            leftOffsetWidth = MyGUI::utility::parseInt(mLeftPane->getUserString("LeftOffsetWidth"));
+
+        float rightPaneRatio = 1.f - leftPaneRatio;
+        int minLeftWidth = static_cast<int>(mMinFullWidth * leftPaneRatio);
+        int minLeftOffsetWidth = minLeftWidth + leftOffsetWidth;
+
+        //if there's no space for right pane
+        mRightPane->setVisible(windowWidth >= minLeftOffsetWidth);
+        if (!mRightPane->getVisible())
+        {
+            mLeftPane->setCoord(MyGUI::IntCoord(0, 0, windowWidth - leftOffsetWidth, windowHeight));
+        }
+        //if there's some space for right pane
+        else if (windowWidth < mMinFullWidth)
+        {
+            mLeftPane->setCoord(MyGUI::IntCoord(0, 0, minLeftWidth, windowHeight));
+            mRightPane->setCoord(MyGUI::IntCoord(minLeftWidth, 0, windowWidth - minLeftWidth, windowHeight));
+        }
+        //if there's enough space for both panes
+        else
+        {
+            mLeftPane->setCoord(MyGUI::IntCoord(0, 0, static_cast<int>(leftPaneRatio*windowWidth), windowHeight));
+            mRightPane->setCoord(MyGUI::IntCoord(static_cast<int>(leftPaneRatio*windowWidth), 0, static_cast<int>(rightPaneRatio*windowWidth), windowHeight));
+        }
+
         // Canvas size must be expressed with VScroll disabled, otherwise MyGUI would expand the scroll area when the scrollbar is hidden
         mSkillView->setVisibleVScroll(false);
         mSkillView->setCanvasSize (mSkillView->getWidth(), mSkillView->getCanvasSize().height);

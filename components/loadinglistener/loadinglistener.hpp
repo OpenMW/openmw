@@ -29,6 +29,8 @@ namespace Loading
         virtual void setProgress (size_t value) {}
         /// Increase current progress, default by 1.
         virtual void increaseProgress (size_t increase = 1) {}
+
+        virtual ~Listener() = default;
     };
 
     /// @brief Used for stopping a loading sequence when the object goes out of scope

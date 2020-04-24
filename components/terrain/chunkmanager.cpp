@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <osg/Texture2D>
+#include <osg/ClusterCullingCallback>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -198,6 +199,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     for (unsigned int i=0; i<numUvSets; ++i)
         geometry->setTexCoordArray(i, mBufferCache.getUVBuffer(numVerts));
 
+    geometry->createClusterCullingCallback();
+
     if (useCompositeMap)
     {
         osg::ref_ptr<CompositeMap> compositeMap = new CompositeMap;
@@ -223,6 +226,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     transform->addChild(geometry);
     transform->getBound();
+
+    geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
 
     if (mSceneManager->getIncrementalCompileOperation())
     {

@@ -39,6 +39,8 @@ namespace MWGui
             /// and end of the span relative to the body, and a valid topic ID if
             /// the span represents a keyword, or zero if not.
             virtual void visitSpans (std::function <void (TopicId, size_t, size_t)> visitor) const = 0;
+
+            virtual ~Entry() = default;
         };
 
         /// An interface to topic data.
@@ -47,6 +49,8 @@ namespace MWGui
             /// Returns a pre-formatted span of UTF8 encoded text representing
             /// the name of the NPC this portion of dialog was heard from.
             virtual Utf8Span source () const = 0;
+
+            virtual ~TopicEntry() = default;
         };
 
         /// An interface to journal data.
@@ -55,8 +59,9 @@ namespace MWGui
             /// Returns a pre-formatted span of UTF8 encoded text representing
             /// the in-game date this entry was added to the journal.
             virtual Utf8Span timestamp () const = 0;
-        };
 
+            virtual ~JournalEntry() = default;
+        };
 
         /// called prior to journal opening
         virtual void load () = 0;
@@ -85,6 +90,8 @@ namespace MWGui
 
         // create an instance of the default journal view model implementation
         static Ptr create ();
+
+        virtual ~JournalViewModel() = default;
     };
 }
 

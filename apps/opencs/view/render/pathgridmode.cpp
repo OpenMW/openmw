@@ -63,6 +63,10 @@ namespace CSVRender
         }
     }
 
+    void PathgridMode::primaryOpenPressed(const WorldspaceHitResult& hitResult)
+    {
+    }
+
     void PathgridMode::primaryEditPressed(const WorldspaceHitResult& hitResult)
     {
         if (CSMPrefs::get()["3D Scene Input"]["context-select"].isTrue() &&

@@ -36,8 +36,14 @@ namespace MWMechanics
         private:
             float mDuration;
             MWWorld::ConstPtr mDoorPtr;
-            ESM::Position mLastPos;
-            float mAdjAngle;
+            osg::Vec3f mLastPos;
+            int mDirection;
+
+            bool isStuck(const osg::Vec3f& actorPos) const;
+
+            void adjustDirection();
+
+            float getAdjustedAngle() const;
     };
 }
 #endif
