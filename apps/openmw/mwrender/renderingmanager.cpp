@@ -15,13 +15,14 @@
 #include <osg/TextureCubeMap>
 
 #include <osgUtil/LineSegmentIntersector>
-#include <osgUtil/IncrementalCompileOperation>
 
 #include <osg/ImageUtils>
 
 #include <osgViewer/Viewer>
 
 #include <components/debug/debuglog.hpp>
+
+#include <components/misc/stringops.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/imagemanager.hpp>
@@ -48,8 +49,6 @@
 
 #include <components/detournavigator/navigator.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwgui/loadingscreen.hpp"
@@ -67,6 +66,7 @@
 #include "util.hpp"
 #include "navmesh.hpp"
 #include "actorspaths.hpp"
+#include "recastmesh.hpp"
 
 namespace
 {
@@ -310,7 +310,9 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        resourceSystem->getSceneManager()->setForceShaders(Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows")); // Shadows have problems with fixed-function mode
+        // Shadows and radial fog have problems with fixed-function mode
+        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows");
+        resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
         resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::Manager::getBool("auto use object normal maps", "Shaders"));
@@ -346,12 +348,15 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
 
         globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
+        globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
+        globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
 
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
         mNavMesh.reset(new NavMesh(mRootNode, Settings::Manager::getBool("enable nav mesh render", "Navigator")));
         mActorsPaths.reset(new ActorsPaths(mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator")));
+        mRecastMesh.reset(new RecastMesh(mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator")));
         mPathgrid.reset(new Pathgrid(mRootNode));
 
         mObjects.reset(new Objects(mResourceSystem, sceneRoot, mUnrefQueue.get()));
@@ -482,6 +487,11 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
+    }
+
+    osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
+    {
+        return mViewer->getIncrementalCompileOperation();
     }
 
     MWRender::Objects& RenderingManager::getObjects()
@@ -674,6 +684,10 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
         {
             return mActorsPaths->toggle();
         }
+        else if (mode == Render_RecastMesh)
+        {
+            return mRecastMesh->toggle();
+        }
         return false;
     }
 
@@ -740,6 +754,7 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
         }
 
         updateNavMesh();
+        updateRecastMesh();
 
         mCamera->update(dt, paused);
 
@@ -856,7 +871,7 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
         int screenshotMapping = 0;
 
         std::vector<std::string> settingArgs;
-        boost::algorithm::split(settingArgs,settingStr,boost::is_any_of(" "));
+        Misc::StringUtils::split(settingStr, settingArgs);
 
         if (settingArgs.size() > 0)
         {
@@ -1197,6 +1212,7 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
     void RenderingManager::notifyWorldSpaceChanged()
     {
         mEffectManager->clear();
+        mWater->clearRipples();
     }
 
     void RenderingManager::clear()
@@ -1426,9 +1442,9 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
         return mCurrentCameraPos;
     }
 
-    void RenderingManager::togglePOV()
+    void RenderingManager::togglePOV(bool force)
     {
-        mCamera->toggleViewMode();
+        mCamera->toggleViewMode(force);
     }
 
     void RenderingManager::togglePreviewMode(bool enable)
@@ -1444,11 +1460,6 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
     void RenderingManager::allowVanityMode(bool allow)
     {
         mCamera->allowVanityMode(allow);
-    }
-
-    void RenderingManager::togglePlayerLooking(bool enable)
-    {
-        mCamera->togglePlayerLooking(enable);
     }
 
     void RenderingManager::changeVanityModeScale(float factor)
@@ -1556,5 +1567,13 @@ class NearClamperCallback : public osg::CullSettings::ClampProjectionMatrixCallb
                 Log(Debug::Error) << "NavMesh render update exception: " << e.what();
             }
         }
+    }
+
+    void RenderingManager::updateRecastMesh()
+    {
+        if (!mRecastMesh->isEnabled())
+            return;
+
+        mRecastMesh->update(mNavigator.getRecastMeshTiles(), mNavigator.getSettings());
     }
 }

@@ -150,6 +150,11 @@ CSVRender::Cell* CSVRender::UnpagedWorldspaceWidget::getCell(const osg::Vec3d& p
     return mCell.get();
 }
 
+CSVRender::Cell* CSVRender::UnpagedWorldspaceWidget::getCell(const CSMWorld::CellCoordinates& coords) const
+{
+    return mCell.get();
+}
+
 std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::UnpagedWorldspaceWidget::getSelection (
     unsigned int elementMask) const
 {

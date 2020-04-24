@@ -140,6 +140,8 @@ namespace CSVDoc
 
             void mergeDocument (CSMDoc::Document *document);
 
+            void requestFocus (const std::string& id);
+
         public slots:
 
             void addSubView (const CSMWorld::UniversalId& id, const std::string& hint = "");
@@ -166,6 +168,10 @@ namespace CSVDoc
             void save();
 
             void exit();
+
+            static void openHelp();
+
+            static void tutorial();
 
             void infoAbout();
 
@@ -262,6 +268,8 @@ namespace CSVDoc
             void moveScrollBarToEnd(int min, int max);
 
             void merge();
+
+            void onRequestFocus (const std::string& id);
     };
 }
 

@@ -21,6 +21,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/recharge.hpp"
 
 #include "ptr.hpp"
 #include "esmstore.hpp"
@@ -136,7 +137,7 @@ namespace
         {
             for (typename MWWorld::CellRefList<T>::List::iterator iter (collection.mList.begin());
                 iter!=collection.mList.end(); ++iter)
-                if (iter->mRef.getRefNum()==state.mRef.mRefNum && iter->mRef.getRefId() == state.mRef.mRefID)
+                if (iter->mRef.getRefNum()==state.mRef.mRefNum && *iter->mRef.getRefIdPtr() == state.mRef.mRefID)
                 {
                     // overwrite existing reference
                     iter->load (state);
@@ -328,6 +329,7 @@ namespace MWWorld
     void CellStore::updateMergedRefs()
     {
         mMergedRefs.clear();
+        mRechargingItemsUpToDate = false;
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
         forEachInternal(visitor);
         visitor.merge();
@@ -345,7 +347,7 @@ namespace MWWorld
     }
 
     CellStore::CellStore (const ESM::Cell *cell, const MWWorld::ESMStore& esmStore, std::vector<ESM::ESMReader>& readerList)
-        : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0)
+        : mStore(esmStore), mReader(readerList), mCell (cell), mState (State_Unloaded), mHasState (false), mLastRespawn(0,0), mRechargingItemsUpToDate(false)
     {
         mWaterLevel = cell->mWater;
     }
@@ -388,7 +390,7 @@ namespace MWWorld
         const std::string *mIdToFind;
         bool operator()(const PtrType& ptr)
         {
-            if (ptr.getCellRef().getRefId() == *mIdToFind)
+            if (*ptr.getCellRef().getRefIdPtr() == *mIdToFind)
             {
                 mFound = ptr;
                 return false;
@@ -992,6 +994,42 @@ namespace MWWorld
         }
     }
 
+    void CellStore::recharge(float duration)
+    {
+        if (duration <= 0)
+            return;
+
+        if (mState == State_Loaded)
+        {
+            for (CellRefList<ESM::Creature>::List::iterator it (mCreatures.mList.begin()); it!=mCreatures.mList.end(); ++it)
+            {
+                Ptr ptr = getCurrentPtr(&*it);
+                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                {
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                }
+            }
+            for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
+            {
+                Ptr ptr = getCurrentPtr(&*it);
+                if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+                {
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                }
+            }
+            for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
+            {
+                Ptr ptr = getCurrentPtr(&*it);
+                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0)
+                {
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                }
+            }
+
+            rechargeItems(duration);
+        }
+    }
+
     void CellStore::respawn()
     {
         if (mState == State_Loaded)
@@ -1026,5 +1064,74 @@ namespace MWWorld
                 ptr.getClass().respawn(ptr);
             }
         }
+    }
+
+    void MWWorld::CellStore::rechargeItems(float duration)
+    {
+        if (!mRechargingItemsUpToDate)
+        {
+            updateRechargingItems();
+            mRechargingItemsUpToDate = true;
+        }
+        for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
+        {
+            MWMechanics::rechargeItem(it->first, it->second, duration);
+        }
+    }
+
+    void MWWorld::CellStore::updateRechargingItems()
+    {
+        mRechargingItems.clear();
+
+        for (CellRefList<ESM::Weapon>::List::iterator it (mWeapons.mList.begin()); it!=mWeapons.mList.end(); ++it)
+        {
+            Ptr ptr = getCurrentPtr(&*it);
+            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            {
+                checkItem(ptr);
+            }
+        }
+        for (CellRefList<ESM::Armor>::List::iterator it (mArmors.mList.begin()); it!=mArmors.mList.end(); ++it)
+        {
+            Ptr ptr = getCurrentPtr(&*it);
+            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            {
+                checkItem(ptr);
+            }
+        }
+        for (CellRefList<ESM::Clothing>::List::iterator it (mClothes.mList.begin()); it!=mClothes.mList.end(); ++it)
+        {
+            Ptr ptr = getCurrentPtr(&*it);
+            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            {
+                checkItem(ptr);
+            }
+        }
+        for (CellRefList<ESM::Book>::List::iterator it (mBooks.mList.begin()); it!=mBooks.mList.end(); ++it)
+        {
+            Ptr ptr = getCurrentPtr(&*it);
+            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            {
+                checkItem(ptr);
+            }
+        }
+    }
+
+    void MWWorld::CellStore::checkItem(Ptr ptr)
+    {
+        if (ptr.getClass().getEnchantment(ptr).empty())
+            return;
+
+        std::string enchantmentId = ptr.getClass().getEnchantment(ptr);
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);
+        if (!enchantment)
+        {
+            Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item " << ptr.getCellRef().getRefId();
+            return;
+        }
+
+        if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
+                || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
+            mRechargingItems.emplace_back(ptr.getBase(), static_cast<float>(enchantment->mData.mCharge));
     }
 }

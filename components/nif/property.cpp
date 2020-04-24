@@ -14,18 +14,17 @@ void Property::read(NIFStream *nif)
 
 void NiTexturingProperty::Texture::read(NIFStream *nif)
 {
-    inUse = !!nif->getInt();
+    inUse = nif->getBoolean();
     if(!inUse) return;
 
     texture.read(nif);
-    clamp = nif->getInt();
-    filter = nif->getInt();
-    uvSet = nif->getInt();
+    clamp = nif->getUInt();
+    nif->skip(4); // Filter mode. Ignoring because global filtering settings are more sensible
+    uvSet = nif->getUInt();
 
-    // I have no idea, but I think these are actually two
-    // PS2-specific shorts (ps2L and ps2K), followed by an unknown
-    // short.
-    nif->skip(6);
+    // Two PS2-specific shorts.
+    nif->skip(4);
+    nif->skip(2); // Unknown short
 }
 
 void NiTexturingProperty::Texture::post(NIFFile *nif)
@@ -36,26 +35,23 @@ void NiTexturingProperty::Texture::post(NIFFile *nif)
 void NiTexturingProperty::read(NIFStream *nif)
 {
     Property::read(nif);
-    apply = nif->getInt();
+    apply = nif->getUInt();
 
-    // Unknown, always 7. Probably the number of textures to read
-    // below
-    nif->getInt();
+    unsigned int numTextures = nif->getUInt();
 
-    textures[0].read(nif); // Base
-    textures[1].read(nif); // Dark
-    textures[2].read(nif); // Detail
-    textures[3].read(nif); // Gloss (never present)
-    textures[4].read(nif); // Glow
-    textures[5].read(nif); // Bump map
-    if(textures[5].inUse)
+    if (!numTextures)
+        return;
+
+    textures.resize(numTextures);
+    for (unsigned int i = 0; i < numTextures; i++)
     {
-        // Ignore these at the moment
-        /*float lumaScale =*/ nif->getFloat();
-        /*float lumaOffset =*/ nif->getFloat();
-        /*const Vector4 *lumaMatrix =*/ nif->getVector4();
+        textures[i].read(nif);
+        if (i == 5 && textures[5].inUse) // Bump map settings
+        {
+            envMapLumaBias = nif->getVector2();
+            bumpMapMatrix = nif->getVector4();
+        }
     }
-    textures[6].read(nif); // Decal
 }
 
 void NiTexturingProperty::post(NIFFile *nif)

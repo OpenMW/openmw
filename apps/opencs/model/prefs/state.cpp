@@ -3,6 +3,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <sstream>
 
 #include "intsetting.hpp"
 #include "doublesetting.hpp"
@@ -169,7 +170,7 @@ void CSMPrefs::State::declare()
         "list go to the first/last item");
 
     declareCategory ("3D Scene Input");
-    
+
     declareDouble ("navi-wheel-factor", "Camera Zoom Sensitivity", 8).setRange(-100.0, 100.0);
     declareDouble ("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
     declareSeparator();
@@ -177,7 +178,7 @@ void CSMPrefs::State::declare()
     declareDouble ("p-navi-free-sensitivity", "Free Camera Sensitivity", 1/650.).setPrecision(5).setRange(0.0, 1.0);
     declareBool ("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
     declareDouble ("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
-    declareDouble ("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);    
+    declareDouble ("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
     declareDouble ("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
     declareSeparator();
 
@@ -241,12 +242,27 @@ void CSMPrefs::State::declare()
         addValues (insertOutsideCell);
     declareEnum ("outside-visible-drop", "Handling drops outside of visible cells", showAndInsert).
         addValues (insertOutsideVisibleCell);
-    declareEnum ("outside-landedit", "Handling land edit outside of cells", createAndLandEdit).
+    declareEnum ("outside-landedit", "Handling terrain edit outside of cells", createAndLandEdit).
+        setTooltip("Behavior of terrain editing, if land editing brush reaches an area without cell record.").
         addValues (landeditOutsideCell);
-    declareEnum ("outside-visible-landedit", "Handling land edit outside of visible cells", showAndLandEdit).
+    declareEnum ("outside-visible-landedit", "Handling terrain edit outside of visible cells", showAndLandEdit).
+        setTooltip("Behavior of terrain editing, if land editing brush reaches an area that is not currently visible.").
         addValues (landeditOutsideVisibleCell);
     declareInt ("texturebrush-maximumsize", "Maximum texture brush size", 50).
         setMin (1);
+    declareInt ("shapebrush-maximumsize", "Maximum height edit brush size", 100).
+        setTooltip("Setting for the slider range of brush size in terrain height editing.").
+        setMin (1);
+    declareBool ("landedit-post-smoothpainting", "Smooth land after painting height", false).
+        setTooltip("Raise and lower tools will leave bumpy finish without this option");
+    declareDouble ("landedit-post-smoothstrength", "Smoothing strength (post-edit)", 0.25).
+        setTooltip("If smoothing land after painting height is used, this is the percentage of smooth applied afterwards. "
+        "Negative values may be used to roughen instead of smooth.").
+        setMin (-1).
+        setMax (1);
+    declareBool ("open-list-view", "Open displays list view", false).
+        setTooltip ("When opening a reference from the scene view, it will open the"
+        " instance list view instead of the individual instance record view.");
 
     declareCategory ("Key Bindings");
 
@@ -255,6 +271,8 @@ void CSMPrefs::State::declare()
     declareShortcut ("document-file-newaddon", "New Addon", QKeySequence());
     declareShortcut ("document-file-open", "Open", QKeySequence(Qt::ControlModifier | Qt::Key_O));
     declareShortcut ("document-file-save", "Save", QKeySequence(Qt::ControlModifier | Qt::Key_S));
+    declareShortcut ("document-help-help", "Help", QKeySequence(Qt::Key_F1));
+    declareShortcut ("document-help-tutorial", "Tutorial", QKeySequence());
     declareShortcut ("document-file-verify", "Verify", QKeySequence());
     declareShortcut ("document-file-merge", "Merge", QKeySequence());
     declareShortcut ("document-file-errorlog", "Open Load Error Log", QKeySequence());
@@ -331,6 +349,7 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-navi-primary", "Camera Rotation From Mouse Movement", QKeySequence(Qt::LeftButton));
     declareShortcut ("scene-navi-secondary", "Camera Translation From Mouse Movement",
         QKeySequence(Qt::ControlModifier | (int)Qt::LeftButton));
+    declareShortcut ("scene-open-primary", "Primary Open", QKeySequence(Qt::ShiftModifier | (int)Qt::LeftButton));
     declareShortcut ("scene-edit-primary", "Primary Edit", QKeySequence(Qt::RightButton));
     declareShortcut ("scene-edit-secondary", "Secondary Edit",
         QKeySequence(Qt::ControlModifier | (int)Qt::RightButton));
@@ -338,6 +357,11 @@ void CSMPrefs::State::declare()
     declareShortcut ("scene-select-secondary", "Secondary Select",
         QKeySequence(Qt::ControlModifier | (int)Qt::MiddleButton));
     declareModifier ("scene-speed-modifier", "Speed Modifier", Qt::Key_Shift);
+    declareShortcut ("scene-delete", "Delete Instance", QKeySequence(Qt::Key_Delete));
+    declareShortcut ("scene-instance-drop-terrain", "Drop to terrain level", QKeySequence(Qt::Key_G));
+    declareShortcut ("scene-instance-drop-collision", "Drop to collision", QKeySequence(Qt::Key_H));
+    declareShortcut ("scene-instance-drop-terrain-separately", "Drop to terrain level separately", QKeySequence());
+    declareShortcut ("scene-instance-drop-collision-separately", "Drop to collision separately", QKeySequence());
     declareShortcut ("scene-load-cam-cell", "Load Camera Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_5));
     declareShortcut ("scene-load-cam-eastcell", "Load East Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_6));
     declareShortcut ("scene-load-cam-northcell", "Load North Cell", QKeySequence(Qt::KeypadModifier | Qt::Key_8));
@@ -411,7 +435,9 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble (const std::string& key,
     if (mCurrentCategory==mCategories.end())
         throw std::logic_error ("no category for setting");
 
-    setDefault(key, std::to_string(default_));
+    std::ostringstream stream;
+    stream << default_;
+    setDefault(key, stream.str());
 
     default_ = mSettings.getFloat (key, mCurrentCategory->second.getKey());
 

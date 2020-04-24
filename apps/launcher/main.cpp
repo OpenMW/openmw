@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <QApplication>
+#include <QTranslator>
 #include <QTextCodec>
 #include <QDir>
 #include <QDebug>
@@ -25,6 +26,13 @@ int main(int argc, char *argv[])
 #endif
 
         QApplication app(argc, argv);
+
+        // Internationalization 
+        QString locale = QLocale::system().name().section('_', 0, 0);
+
+        QTranslator appTranslator;
+        appTranslator.load(":/translations/" + locale + ".qm");
+        app.installTranslator(&appTranslator);
 
         // Now we make sure the current dir is set to application path
         QDir dir(QCoreApplication::applicationDirPath());

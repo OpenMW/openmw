@@ -477,6 +477,16 @@ bool CSVRender::Object::getSelected() const
     return mSelected;
 }
 
+osg::ref_ptr<osg::Group> CSVRender::Object::getRootNode()
+{
+    return mRootNode;
+}
+
+osg::ref_ptr<osg::Group> CSVRender::Object::getBaseNode()
+{
+    return mBaseNode;
+}
+
 bool CSVRender::Object::referenceableDataChanged (const QModelIndex& topLeft,
     const QModelIndex& bottomRight)
 {
@@ -705,7 +715,7 @@ void CSVRender::Object::apply (CSMWorld::CommandMacro& commands)
                 CSMWorld::Columns::ColumnId_PositionXRot+i));
 
             commands.push (new CSMWorld::ModifyCommand (*model,
-                model->index (recordIndex, column), mPositionOverride.rot[i]));
+                model->index (recordIndex, column), osg::RadiansToDegrees(mPositionOverride.rot[i])));
         }
     }
 

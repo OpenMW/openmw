@@ -19,16 +19,14 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, unsigned char failChance=0)
+    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature)
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
         const MWWorld::Ptr& player = getPlayer();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
-        failChance += levItem->mChanceNone;
-
-        if (Misc::Rng::roll0to99() < failChance)
+        if (Misc::Rng::roll0to99() < levItem->mChanceNone)
             return std::string();
 
         std::vector<std::string> candidates;
@@ -76,9 +74,9 @@ namespace MWMechanics
         else
         {
             if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
-                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, failChance);
+                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
             else
-                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, failChance);
+                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true);
         }
     }
 

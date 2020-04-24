@@ -46,13 +46,13 @@ public:
         3 - Compressed
         4 - Bumpmap
         5 - Default */
-    int pixel;
+    unsigned int pixel;
 
     /* Mipmap format
         0 - no
         1 - yes
         2 - default */
-    int mipmap;
+    unsigned int mipmap;
 
     /* Alpha
         0 - none
@@ -60,13 +60,22 @@ public:
         2 - smooth
         3 - default (use material alpha, or multiply material with texture if present)
     */
-    int alpha;
+    unsigned int alpha;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };
 
-class NiParticleGrowFade : public Controlled
+struct NiParticleModifier : public Record
+{
+    NiParticleModifierPtr next;
+    ControllerPtr controller;
+
+    void read(NIFStream *nif);
+    void post(NIFFile *nif);
+};
+
+class NiParticleGrowFade : public NiParticleModifier
 {
 public:
     float growTime;
@@ -75,7 +84,7 @@ public:
     void read(NIFStream *nif);
 };
 
-class NiParticleColorModifier : public Controlled
+class NiParticleColorModifier : public NiParticleModifier
 {
 public:
     NiColorDataPtr data;
@@ -84,7 +93,7 @@ public:
     void post(NIFFile *nif);
 };
 
-class NiGravity : public Controlled
+class NiGravity : public NiParticleModifier
 {
 public:
     float mForce;
@@ -99,29 +108,32 @@ public:
     void read(NIFStream *nif);
 };
 
+struct NiParticleCollider : public NiParticleModifier
+{
+    float mBounceFactor;
+    void read(NIFStream *nif);
+};
+
 // NiPinaColada
-class NiPlanarCollider : public Controlled
+class NiPlanarCollider : public NiParticleCollider
 {
 public:
     void read(NIFStream *nif);
-
-    float mBounceFactor;
 
     osg::Vec3f mPlaneNormal;
     float mPlaneDistance;
 };
 
-class NiSphericalCollider : public Controlled
+class NiSphericalCollider : public NiParticleCollider
 {
 public:
-    float mBounceFactor;
     float mRadius;
     osg::Vec3f mCenter;
 
     void read(NIFStream *nif);
 };
 
-class NiParticleRotation : public Controlled
+class NiParticleRotation : public NiParticleModifier
 {
 public:
     void read(NIFStream *nif);

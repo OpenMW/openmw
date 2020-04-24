@@ -798,7 +798,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
                 if(alGetError() == AL_NO_ERROR)
                     Log(Debug::Info) << "Standard Reverb supported";
             }
-            EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_GENERIC;
+            EFXEAXREVERBPROPERTIES props = EFX_REVERB_PRESET_LIVINGROOM;
             props.flGain = 0.0f;
             LoadEffect(mDefaultEffect, props);
         }
@@ -1454,6 +1454,38 @@ void OpenAL_Output::pauseSounds(int types)
     }
 }
 
+void OpenAL_Output::pauseActiveDevice()
+{
+    if (mDevice == nullptr)
+        return;
+
+    if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
+    {
+        LPALCDEVICEPAUSESOFT alcDevicePauseSOFT = 0;
+        getALCFunc(alcDevicePauseSOFT, mDevice, "alcDevicePauseSOFT");
+        alcDevicePauseSOFT(mDevice);
+        getALCError(mDevice);
+    }
+
+    alListenerf(AL_GAIN, 0.0f);
+}
+
+void OpenAL_Output::resumeActiveDevice()
+{
+    if (mDevice == nullptr)
+        return;
+
+    if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
+    {
+        LPALCDEVICERESUMESOFT alcDeviceResumeSOFT = 0;
+        getALCFunc(alcDeviceResumeSOFT, mDevice, "alcDeviceResumeSOFT");
+        alcDeviceResumeSOFT(mDevice);
+        getALCError(mDevice);
+    }
+
+    alListenerf(AL_GAIN, 1.0f);
+}
+
 void OpenAL_Output::resumeSounds(int types)
 {
     std::vector<ALuint> sources;
@@ -1489,7 +1521,7 @@ OpenAL_Output::OpenAL_Output(SoundManager &mgr)
 
 OpenAL_Output::~OpenAL_Output()
 {
-    deinit();
+    OpenAL_Output::deinit();
 }
 
 }

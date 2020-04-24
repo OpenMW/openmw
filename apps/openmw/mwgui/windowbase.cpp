@@ -149,7 +149,7 @@ float BookWindowBase::adjustButton (char const * name)
     Gui::ImageButton* button;
     WindowBase::getWidget (button, name);
     MyGUI::IntSize requested = button->getRequestedSize();
-    float scale = requested.height / button->getSize().height;
+    float scale = float(requested.height) / button->getSize().height;
     MyGUI::IntSize newSize = requested;
     newSize.width /= scale;
     newSize.height /= scale;

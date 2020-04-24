@@ -83,6 +83,9 @@ void CSVWorld::SceneSubView::makeConnections (CSVRender::UnpagedWorldspaceWidget
 
     connect(widget, SIGNAL(cellChanged(const CSMWorld::UniversalId&)),
             this, SLOT(cellSelectionChanged(const CSMWorld::UniversalId&)));
+
+    connect(widget, SIGNAL(requestFocus (const std::string&)),
+            this, SIGNAL(requestFocus (const std::string&)));
 }
 
 void CSVWorld::SceneSubView::makeConnections (CSVRender::PagedWorldspaceWidget* widget)
@@ -94,6 +97,9 @@ void CSVWorld::SceneSubView::makeConnections (CSVRender::PagedWorldspaceWidget* 
 
     connect (widget, SIGNAL (cellSelectionChanged (const CSMWorld::CellSelection&)),
              this, SLOT (cellSelectionChanged (const CSMWorld::CellSelection&)));
+
+    connect(widget, SIGNAL(requestFocus (const std::string&)),
+            this, SIGNAL(requestFocus (const std::string&)));
 }
 
 CSVWidget::SceneToolbar* CSVWorld::SceneSubView::makeToolbar (CSVRender::WorldspaceWidget* widget, widgetType type)

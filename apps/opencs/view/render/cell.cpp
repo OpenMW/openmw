@@ -134,7 +134,7 @@ void CSVRender::Cell::updateLand()
             else
             {
                 mTerrain.reset(new Terrain::TerrainGrid(mCellNode, mCellNode,
-                    mData.getResourceSystem().get(), new TerrainStorage(mData), Mask_Terrain));
+                    mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain));
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);
@@ -149,7 +149,6 @@ void CSVRender::Cell::updateLand()
     }
 
     // No land data
-    mLandDeleted = true;
     unloadLand();
 }
 
@@ -168,6 +167,8 @@ CSVRender::Cell::Cell (CSMWorld::Data& data, osg::Group* rootNode, const std::st
   mSubModeElementMask (0), mUpdateLand(true), mLandDeleted(false)
 {
     std::pair<CSMWorld::CellCoordinates, bool> result = CSMWorld::CellCoordinates::fromId (id);
+
+    mTerrainStorage = new TerrainStorage(mData);
 
     if (result.second)
         mCoordinates = result.first;
@@ -345,6 +346,28 @@ bool CSVRender::Cell::referenceAdded (const QModelIndex& parent, int start, int 
         return false;
 
     return addObjects (start, end);
+}
+
+void CSVRender::Cell::setAlteredHeight(int inCellX, int inCellY, float height)
+{
+    mTerrainStorage->setAlteredHeight(inCellX, inCellY, height);
+    mUpdateLand = true;
+}
+
+float CSVRender::Cell::getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY)
+{
+    return mTerrainStorage->getSumOfAlteredAndTrueHeight(cellX, cellY, inCellX, inCellY);
+}
+
+float* CSVRender::Cell::getAlteredHeight(int inCellX, int inCellY)
+{
+    return mTerrainStorage->getAlteredHeight(inCellX, inCellY);
+}
+
+void CSVRender::Cell::resetAlteredHeights()
+{
+    mTerrainStorage->resetHeights();
+    mUpdateLand = true;
 }
 
 void CSVRender::Cell::pathgridModified()

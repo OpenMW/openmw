@@ -65,6 +65,7 @@ namespace CSVWorld
             QAction *mPreviewAction;
             QAction *mExtendedDeleteAction;
             QAction *mExtendedRevertAction;
+            QAction *mHelpAction;
             TableEditIdAction *mEditIdAction;
             CSMWorld::IdTableProxyModel *mProxyModel;
             CSMWorld::IdTableBase *mModel;
@@ -127,6 +128,8 @@ namespace CSVWorld
         private slots:
 
             void editCell();
+
+            static void openHelp();
 
             void editRecord();
 

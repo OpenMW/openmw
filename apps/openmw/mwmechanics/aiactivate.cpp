@@ -9,6 +9,7 @@
 
 #include "creaturestats.hpp"
 #include "movement.hpp"
+#include "steering.hpp"
 
 namespace MWMechanics
 {
@@ -33,16 +34,18 @@ namespace MWMechanics
         if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
             return true;
 
-        //Set the target destination for the actor
-        const osg::Vec3f dest = target.getRefData().getPosition().asVec3();
+        // Turn to target and move to it directly, without pathfinding.
+        const osg::Vec3f targetDir = target.getRefData().getPosition().asVec3() - actor.getRefData().getPosition().asVec3();
 
-        if (pathTo(actor, dest, duration, MWBase::Environment::get().getWorld()->getMaxActivationDistance())) //Stop when you get in activation range
+        zTurn(actor, std::atan2(targetDir.x(), targetDir.y()), 0.f);
+        actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
+        actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
+
+        if (MWBase::Environment::get().getWorld()->getMaxActivationDistance() >= targetDir.length())
         {
-            // activate when reached
+            // Note: we intentionally do not cancel package after activation here for backward compatibility with original engine.
             MWBase::Environment::get().getWorld()->activate(target, actor);
-            return true;
         }
-
         return false;
     }
 

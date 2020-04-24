@@ -2,7 +2,7 @@
     
 varying vec3  screenCoordsPassthrough;
 varying vec4  position;
-varying float  depthPassthrough;
+varying float linearDepth;
 
 #include "shadows_vertex.glsl"
 
@@ -16,11 +16,11 @@ void main(void)
                          0.5, 0.5, 0.5, 1.0);
 
     vec4 texcoordProj = ((scalemat) * ( gl_Position));
-    screenCoordsPassthrough = vec3(texcoordProj.x, texcoordProj.y, texcoordProj.w);
+    screenCoordsPassthrough = texcoordProj.xyw;
 
     position = gl_Vertex;
 
-    depthPassthrough = gl_Position.z;
+    linearDepth = gl_Position.z;
 
     setupShadowCoords(gl_ModelViewMatrix * gl_Vertex, normalize((gl_NormalMatrix * gl_Normal).xyz));
 }

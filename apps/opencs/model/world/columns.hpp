@@ -225,12 +225,10 @@ namespace CSMWorld
             ColumnId_SoundChance = 210,
 
             ColumnId_FactionReactions = 211,
-            //ColumnId_FactionID = 212,
             ColumnId_FactionReaction = 213,
 
             ColumnId_EffectList = 214,
             ColumnId_EffectId = 215,
-            //ColumnId_EffectAttribute = 216,
             ColumnId_EffectRange = 217,
             ColumnId_EffectArea = 218,
 
@@ -275,8 +273,7 @@ namespace CSMWorld
             ColumnId_UChar = 250,
             ColumnId_NpcMisc = 251,
             ColumnId_Level = 252,
-            ColumnId_NpcFactionID = 253,
-            ColumnId_GenderNpc = 254,
+            // unused
             ColumnId_Mana = 255,
             ColumnId_Fatigue = 256,
             ColumnId_NpcDisposition = 257,

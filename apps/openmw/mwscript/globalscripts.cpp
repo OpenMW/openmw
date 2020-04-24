@@ -28,7 +28,7 @@ namespace MWScript
 
         if (iter==mScripts.end())
         {
-            if (const ESM::Script *script = mStore.get<ESM::Script>().find (name))
+            if (const ESM::Script *script = mStore.get<ESM::Script>().search(name))
             {
                 GlobalScriptDesc desc;
                 desc.mRunning = true;
@@ -36,6 +36,10 @@ namespace MWScript
                 desc.mId = targetId;
 
                 mScripts.insert (std::make_pair (name, desc));
+            }
+            else
+            {
+                Log(Debug::Error) << "Failed to add global script " << name << ": script record not found";
             }
         }
         else if (!iter->second.mRunning)

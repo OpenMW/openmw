@@ -17,6 +17,7 @@ namespace CSMPrefs
 
 namespace CSMWorld
 {
+    class CellCoordinates;
     class UniversalId;
 }
 
@@ -91,6 +92,7 @@ namespace CSVRender
                 InteractionType_PrimarySelect,
                 InteractionType_SecondaryEdit,
                 InteractionType_SecondarySelect,
+                InteractionType_PrimaryOpen,
                 InteractionType_None
             };
 
@@ -168,6 +170,8 @@ namespace CSVRender
 
             /// \note Returns the cell if it exists, otherwise a null pointer
             virtual Cell* getCell(const osg::Vec3d& point) const = 0;
+
+            virtual Cell* getCell(const CSMWorld::CellCoordinates& coords) const = 0;
 
             virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
                 const = 0;
@@ -263,6 +267,8 @@ namespace CSVRender
 
             void showToolTip();
 
+            void primaryOpen(bool activate);
+
             void primaryEdit(bool activate);
 
             void secondaryEdit(bool activate);
@@ -282,6 +288,8 @@ namespace CSVRender
             void closeRequest();
 
             void dataDropped(const std::vector<CSMWorld::UniversalId>& data);
+
+            void requestFocus (const std::string& id);
 
         friend class MouseState;
     };

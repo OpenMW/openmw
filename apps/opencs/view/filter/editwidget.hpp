@@ -26,6 +26,7 @@ namespace CSVFilter
             bool mIsEmpty;
             int mStateColumnIndex;
             int mDescColumnIndex;
+            QAction *mHelpAction;
 
         public:
 
@@ -40,6 +41,7 @@ namespace CSVFilter
 
     private:
             std::string generateFilter(std::pair<std::string, std::vector<std::string> >& seekedString) const;
+            void contextMenuEvent (QContextMenuEvent *event) override;
 
         private slots:
 
@@ -50,6 +52,8 @@ namespace CSVFilter
             void filterRowsRemoved (const QModelIndex& parent, int start, int end);
 
             void filterRowsInserted (const QModelIndex& parent, int start, int end);
+
+            static void openHelp();
 
 
     };

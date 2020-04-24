@@ -90,6 +90,7 @@ struct Cell
 
   Cell() : mName(""),
            mRegion(""),
+           mHasAmbi(true),
            mWater(0),
            mWaterInt(false),
            mMapColor(0),
@@ -108,6 +109,7 @@ struct Cell
   CellId mCellId;
 
   AMBIstruct mAmbi;
+  bool mHasAmbi;
 
   float mWater; // Water level
   bool mWaterInt;
@@ -150,6 +152,16 @@ struct Cell
   bool hasWater() const
   {
       return ((mData.mFlags&HasWater) != 0) || isExterior();
+  }
+
+  bool hasAmbient() const
+  {
+      return mHasAmbi;
+  }
+
+  void setHasAmbient(bool hasAmbi)
+  {
+      mHasAmbi = hasAmbi;
   }
 
   // Restore the given reader to the stored position. Will try to open

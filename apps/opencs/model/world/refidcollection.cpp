@@ -486,7 +486,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mColumns.push_back (RefIdColumn (Columns::ColumnId_Head, ColumnBase::Display_BodyPart));
     npcColumns.mHead = &mColumns.back();
 
-    mColumns.push_back (RefIdColumn (Columns::ColumnId_GenderNpc, ColumnBase::Display_GenderNpc));
+    mColumns.push_back (RefIdColumn (Columns::ColumnId_Gender, ColumnBase::Display_GenderNpc));
     npcColumns.mGender = &mColumns.back();
 
     npcColumns.mFlags.insert (std::make_pair (essential, ESM::NPC::Essential));
@@ -535,8 +535,6 @@ CSMWorld::RefIdCollection::RefIdCollection()
     mNestedAdapters.push_back (std::make_pair(&mColumns.back(), miscMap));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Level, CSMWorld::ColumnBase::Display_SignedInteger16));
-    mColumns.back().addColumn(
-            new RefIdColumn (Columns::ColumnId_NpcFactionID, CSMWorld::ColumnBase::Display_SignedInteger8));
     mColumns.back().addColumn(
             new RefIdColumn (Columns::ColumnId_Health, CSMWorld::ColumnBase::Display_UnsignedInteger16));
     mColumns.back().addColumn(

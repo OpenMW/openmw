@@ -62,6 +62,9 @@ namespace MWSound
         virtual void pauseSounds(int types) = 0;
         virtual void resumeSounds(int types) = 0;
 
+        virtual void pauseActiveDevice() = 0;
+        virtual void resumeActiveDevice() = 0;
+
         Sound_Output& operator=(const Sound_Output &rhs);
         Sound_Output(const Sound_Output &rhs);
 

@@ -1,6 +1,7 @@
 #include "maindialog.hpp"
 
 #include <components/version/version.hpp>
+#include <components/misc/helpviewer.hpp>
 
 #include <QDate>
 #include <QMessageBox>
@@ -54,11 +55,15 @@ Launcher::MainDialog::MainDialog(QWidget *parent)
     iconWidget->setCurrentRow(0);
     iconWidget->setFlow(QListView::LeftToRight);
 
+    QPushButton *helpButton = new QPushButton(tr("Help"));
     QPushButton *playButton = new QPushButton(tr("Play"));
+    buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
+    buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
     buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
 
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(close()));
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(play()));
+    connect(buttonBox, SIGNAL(helpRequested()), this, SLOT(help()));
 
     // Remove what's this? button
     setWindowFlags(this->windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -115,6 +120,10 @@ void Launcher::MainDialog::createIcons()
 
 void Launcher::MainDialog::createPages()
 {
+    // Avoid creating the widgets twice
+    if (pagesWidget->count() != 0)
+        return;
+
     mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(mCfgMgr, mEngineSettings, this);
@@ -165,18 +174,20 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         QAbstractButton *skipButton =
                 msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
 
-        Q_UNUSED(skipButton); // Surpress compiler unused warning
-
         msgBox.exec();
 
         if (msgBox.clickedButton() == wizardButton)
         {
-            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
-                return FirstRunDialogResultFailure;
-            } else {
+            if (mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
                 return FirstRunDialogResultWizard;
-            }
         }
+        else if (msgBox.clickedButton() == skipButton)
+        {
+            // Don't bother setting up absent game data.
+            if (setup())
+                return FirstRunDialogResultContinue;
+        }
+        return FirstRunDialogResultFailure;
     }
 
     if (!setup() || !setupGameData()) {
@@ -280,7 +291,8 @@ bool Launcher::MainDialog::setupLauncherSettings()
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
     paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
 
-    foreach (const QString &path, paths) {
+    for (const QString &path : paths)
+    {
         qDebug() << "Loading config file:" << path.toUtf8().constData();
         QFile file(path);
         if (file.exists()) {
@@ -329,6 +341,7 @@ bool Launcher::MainDialog::setupGameSettings()
         stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
         mGameSettings.readUserFile(stream);
+        file.close();
     }
 
     // Now the rest - priority: user > local > global
@@ -337,7 +350,8 @@ bool Launcher::MainDialog::setupGameSettings()
     paths.append(localPath + QString("openmw.cfg"));
     paths.append(userPath + QString("openmw.cfg"));
 
-    foreach (const QString &path2, paths) {
+    for (const QString &path2 : paths)
+    {
         qDebug() << "Loading config file:" << path2.toUtf8().constData();
 
         file.setFileName(path2);
@@ -353,8 +367,8 @@ bool Launcher::MainDialog::setupGameSettings()
             stream.setCodec(QTextCodec::codecForName("UTF-8"));
 
             mGameSettings.readFile(stream);
+            file.close();
         }
-        file.close();
     }
 
     return true;
@@ -365,7 +379,8 @@ bool Launcher::MainDialog::setupGameData()
     QStringList dataDirs;
 
     // Check if the paths actually contain data files
-    foreach (const QString path3, mGameSettings.getDataDirs()) {
+    for (const QString& path3 : mGameSettings.getDataDirs())
+    {
         QDir dir(path3);
         QStringList filters;
         filters << "*.esp" << "*.esm" << "*.omwgame" << "*.omwaddon";
@@ -379,22 +394,23 @@ bool Launcher::MainDialog::setupGameData()
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error detecting Morrowind installation"));
         msgBox.setIcon(QMessageBox::Warning);
-        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setStandardButtons(QMessageBox::NoButton);
         msgBox.setText(tr("<br><b>Could not find the Data Files location</b><br><br> \
                                    The directory containing the data files was not found."));
 
         QAbstractButton *wizardButton =
                 msgBox.addButton(tr("Run &Installation Wizard..."), QMessageBox::ActionRole);
+        QAbstractButton *skipButton =
+                msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
+
+        Q_UNUSED(skipButton); // Supress compiler unused warning
 
         msgBox.exec();
 
         if (msgBox.clickedButton() == wizardButton)
         {
-            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false)) {
+            if (!mWizardInvoker->startProcess(QLatin1String("openmw-wizard"), false))
                 return false;
-            } else {
-                return true;
-            }
         }
     }
 
@@ -577,7 +593,7 @@ void Launcher::MainDialog::wizardFinished(int exitCode, QProcess::ExitStatus exi
     // HACK: Ensure the pages are created, else segfault
     setup();
 
-    if (reloadSettings())
+    if (setupGameData() && reloadSettings())
         show();
 }
 
@@ -601,4 +617,9 @@ void Launcher::MainDialog::play()
 
     if (mGameInvoker->startProcess(QLatin1String("openmw"), true))
         return qApp->quit();
+}
+
+void Launcher::MainDialog::help()
+{
+    Misc::HelpViewer::openHelp("reference/index.html");
 }

@@ -131,6 +131,8 @@ namespace MWMechanics
             ///< Try to create potions from the ingredients, place them in the inventory of the alchemist and
             /// adjust the skills of the alchemist accordingly.
             /// \param name must not be an empty string, or Result_NoName is returned
+
+            static std::vector<std::string> effectsDescription (const MWWorld::ConstPtr &ptr, const int alchemySKill);
     };
 }
 

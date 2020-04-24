@@ -14,6 +14,15 @@ namespace ESM
 
         virtual void load (ESMReader &esm);
         virtual void save (ESMWriter &esm, bool inInventory = false) const;
+
+        virtual ContainerState& asContainerState()
+        {
+            return *this;
+        }
+        virtual const ContainerState& asContainerState() const
+        {
+            return *this;
+        }
     };
 }
 

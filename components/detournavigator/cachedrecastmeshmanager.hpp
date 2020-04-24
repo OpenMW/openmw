@@ -10,7 +10,7 @@ namespace DetourNavigator
     class CachedRecastMeshManager
     {
     public:
-        CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds);
+        CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
         bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);

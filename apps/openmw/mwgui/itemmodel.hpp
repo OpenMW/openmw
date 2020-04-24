@@ -65,9 +65,7 @@ namespace MWGui
         /// @note Derived implementations may return an empty Ptr if the move was unsuccessful.
         virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
 
-        /// @param setNewOwner If true, set the copied item's owner to the actor we are copying to,
-        ///                    otherwise reset owner to ""
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false) = 0;
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) = 0;
         virtual void removeItem (const ItemStack& item, size_t count) = 0;
 
         /// Is the player allowed to use items from this item model? (default true)
@@ -97,7 +95,7 @@ namespace MWGui
         virtual bool onDropItem(const MWWorld::Ptr &item, int count);
         virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool setNewOwner=false);
+        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true);
         virtual void removeItem (const ItemStack& item, size_t count);
         virtual ModelIndex getIndex (ItemStack item);
 

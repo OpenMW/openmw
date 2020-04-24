@@ -24,7 +24,7 @@ class Node : public Named
 {
 public:
     // Node flags. Interpretation depends somewhat on the type of node.
-    int flags;
+    unsigned int flags;
     Transformation trafo;
     osg::Vec3f velocity; // Unused? Might be a run-time game state
     PropertyList props;
@@ -44,7 +44,7 @@ public:
         velocity = nif->getVector3();
         props.read(nif);
 
-        hasBounds = !!nif->getInt();
+        hasBounds = nif->getBoolean();
         if(hasBounds)
         {
             nif->getInt(); // always 1
@@ -84,7 +84,8 @@ struct NiNode : Node
     enum Flags {
         Flag_Hidden = 0x0001,
         Flag_MeshCollision = 0x0002,
-        Flag_BBoxCollision = 0x0004
+        Flag_BBoxCollision = 0x0004,
+        Flag_ActiveCollision = 0x0020
     };
     enum BSAnimFlags {
         AnimFlag_AutoPlay = 0x0020
@@ -155,6 +156,29 @@ struct NiTriShape : Node
             nif->setUseSkinning(true);
     }
 };
+
+struct NiTriStrips : Node
+{
+    NiTriStripsDataPtr data;
+    NiSkinInstancePtr skin;
+
+    void read(NIFStream *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        skin.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+        skin.post(nif);
+        if (!skin.empty())
+            nif->setUseSkinning(true);
+    }
+};
+
 
 struct NiCamera : Node
 {
@@ -261,7 +285,8 @@ struct NiLODNode : public NiSwitchNode
     void read(NIFStream *nif)
     {
         NiSwitchNode::read(nif);
-        lodCenter = nif->getVector3();
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_ZT2)
+            lodCenter = nif->getVector3();
         unsigned int numLodLevels = nif->getUInt();
         for (unsigned int i=0; i<numLodLevels; ++i)
         {

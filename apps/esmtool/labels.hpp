@@ -49,6 +49,7 @@ std::string bodyPartFlags(int flags);
 std::string cellFlags(int flags);
 std::string containerFlags(int flags);
 std::string creatureFlags(int flags);
+std::string enchantmentFlags(int flags);
 std::string landFlags(int flags);
 std::string creatureListFlags(int flags);
 std::string itemListFlags(int flags);

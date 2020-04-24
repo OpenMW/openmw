@@ -48,6 +48,7 @@ namespace DetourNavigator
         std::unordered_map<ObjectId, std::set<TilePosition>> mObjectsTilesPositions;
         std::map<osg::Vec2i, std::vector<TilePosition>> mWaterTilesPositions;
         std::size_t mRevision = 0;
+        std::size_t mTilesGeneration = 0;
 
         bool addTile(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                      const AreaType areaType, const TilePosition& tilePosition, float border,

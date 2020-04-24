@@ -7,9 +7,7 @@ GOOGLETEST_DIR="$(pwd)/googletest/build"
 
 mkdir build
 cd build
-export CODE_COVERAGE=1
 
-if [[ "${CC}" =~ "clang" ]]; then export CODE_COVERAGE=0; fi
 if [[ -z "${BUILD_OPENMW}" ]]; then export BUILD_OPENMW=ON; fi
 if [[ -z "${BUILD_OPENMW_CS}" ]]; then export BUILD_OPENMW_CS=ON; fi
 
@@ -28,7 +26,6 @@ ${ANALYZE} cmake \
     -DBUILD_WIZARD=${BUILD_OPENMW_CS} \
     -DBUILD_NIFTEST=${BUILD_OPENMW_CS} \
     -DBUILD_MYGUI_PLUGIN=${BUILD_OPENMW_CS} \
-    -DBUILD_WITH_CODE_COVERAGE=${CODE_COVERAGE} \
     -DBUILD_UNITTESTS=1 \
     -DUSE_SYSTEM_TINYXML=1 \
     -DDESIRED_QT_VERSION=5 \

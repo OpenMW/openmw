@@ -45,6 +45,8 @@ namespace ICS
 	{
 	public:
 		virtual void logMessage(const char* text) = 0;
+
+		virtual ~InputControlSystemLog() = default;
 	};
 
     class DllExport InputControlSystem
@@ -214,6 +216,26 @@ namespace ICS
 
 		Uint16 mClientWidth;
 		Uint16 mClientHeight;
+
+		/* ----------------------------------------------------------------------------------------
+		 * OPENMW CODE STARTS HERE
+		 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+	public:
+		enum class MouseWheelClick : int { UNASSIGNED = 0, UP = 1, DOWN = 2, LEFT = 3, RIGHT = 4};
+
+		void mouseWheelMoved(const SDL_MouseWheelEvent &evt);
+		void addMouseWheelBinding(Control* control, MouseWheelClick click, Control::ControlChangingDirection direction);
+		void removeMouseWheelBinding(MouseWheelClick click);
+		MouseWheelClick getMouseWheelBinding(Control* control, ICS::Control::ControlChangingDirection direction);
+		bool isMouseWheelBound(MouseWheelClick button) const;
+
+	protected:
+		void loadMouseWheelBinders(TiXmlElement* xmlControlNode);
+		ControlsButtonBinderMapType mControlsMouseWheelBinderMap;
+
+		/* OPENMW CODE ENDS HERE
+		 * ------------------------------------------------------------------------------------- */
 	};
 
 	class DllExport DetectingBindingListener
@@ -234,6 +256,18 @@ namespace ICS
 		virtual void joystickButtonBindingDetected(InputControlSystem* ICS, int deviceID, Control* control
 			, unsigned int button, Control::ControlChangingDirection direction);
 
+		/* ----------------------------------------------------------------------------------------
+		 * OPENMW CODE STARTS HERE
+		 * Mouse Wheel support added by Michael Stopa (Stomy) */
+
+		virtual void mouseWheelBindingDetected(InputControlSystem* ICS, Control* control,
+		                                       InputControlSystem::MouseWheelClick click,
+		                                       Control::ControlChangingDirection direction);
+
+        virtual ~DetectingBindingListener() = default;
+
+		/* OPENMW CODE ENDS HERE
+		 * ------------------------------------------------------------------------------------- */
 	};
 
 	extern const float ICS_MAX;

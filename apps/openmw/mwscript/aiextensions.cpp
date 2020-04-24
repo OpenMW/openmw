@@ -25,6 +25,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -382,9 +383,11 @@ namespace MWScript
                     std::string actorID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->getPtr(actorID, true);
+                    MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
 
-                    Interpreter::Type_Integer value = MWBase::Environment::get().getMechanicsManager()->isActorDetected(actor, observer);
+                    Interpreter::Type_Integer value = 0;
+                    if (!actor.isEmpty())
+                        value = MWBase::Environment::get().getMechanicsManager()->isActorDetected(actor, observer);
 
                     runtime.push (value);
                 }
@@ -404,9 +407,9 @@ namespace MWScript
                     runtime.pop();
 
 
-                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->getPtr(actorID,true);
+                    MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
                     bool value = false;
-                    if(dest != MWWorld::Ptr() && source.getClass().isActor() && dest.getClass().isActor())
+                    if (!dest.isEmpty() && source.getClass().isActor() && dest.getClass().isActor())
                     {
                         value = MWBase::Environment::get().getWorld()->getLOS(source,dest);
                     }
@@ -433,6 +436,14 @@ namespace MWScript
                         if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
+                    else
+                    {
+                        bool turningToPlayer = creatureStats.isTurningToPlayer();
+                        bool greeting = creatureStats.getGreetingState() == MWMechanics::Greet_InProgress;
+                        bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
+                        if (turningToPlayer || (greeting && sayActive))
+                            targetsAreEqual = (testedTargetId == "player"); // Currently the player ID is hardcoded
+                    }
                     runtime.push(int(targetsAreEqual));
                 }
         };
@@ -447,8 +458,9 @@ namespace MWScript
                     std::string targetID = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Ptr target = MWBase::Environment::get().getWorld()->getPtr(targetID, true);
-                    MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
+                    MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetID, true, false);
+                    if (!target.isEmpty())
+                        MWBase::Environment::get().getMechanicsManager()->startCombat(actor, target);
                 }
         };
 

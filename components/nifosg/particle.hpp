@@ -36,8 +36,11 @@ namespace NifOsg
 
         void setQuota(int quota);
 
+        virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
+
     private:
         int mQuota;
+        osg::ref_ptr<osg::Vec3Array> mNormalArray;
     };
 
     // HACK: Particle doesn't allow setting the initial age, but we need this for loading the particle system state
@@ -77,6 +80,8 @@ namespace NifOsg
                         float lifetime, float lifetimeRandom);
         ParticleShooter();
         ParticleShooter(const ParticleShooter& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        ParticleShooter& operator=(const ParticleShooter&) = delete;
 
         META_Object(NifOsg, ParticleShooter)
 
@@ -135,6 +140,8 @@ namespace NifOsg
         GrowFadeAffector();
         GrowFadeAffector(const GrowFadeAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
+        GrowFadeAffector& operator=(const GrowFadeAffector&) = delete;
+
         META_Object(NifOsg, GrowFadeAffector)
 
         virtual void beginOperate(osgParticle::Program* program);
@@ -147,13 +154,14 @@ namespace NifOsg
         float mCachedDefaultSize;
     };
 
-    typedef ValueInterpolator<Nif::Vector4KeyMap, LerpFunc> Vec4Interpolator;
     class ParticleColorAffector : public osgParticle::Operator
     {
     public:
         ParticleColorAffector(const Nif::NiColorData* clrdata);
         ParticleColorAffector();
         ParticleColorAffector(const ParticleColorAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        ParticleColorAffector& operator=(const ParticleColorAffector&) = delete;
 
         META_Object(NifOsg, ParticleColorAffector)
 
@@ -169,6 +177,8 @@ namespace NifOsg
         GravityAffector(const Nif::NiGravity* gravity);
         GravityAffector();
         GravityAffector(const GravityAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        GravityAffector& operator=(const GravityAffector&) = delete;
 
         META_Object(NifOsg, GravityAffector)
 

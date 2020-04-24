@@ -28,7 +28,7 @@ TerrainGrid::~TerrainGrid()
 {
     while (!mGrid.empty())
     {
-        unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
+        TerrainGrid::unloadCell(mGrid.begin()->first.first, mGrid.begin()->first.second);
     }
 }
 

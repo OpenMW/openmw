@@ -356,7 +356,7 @@ void CSMDoc::WriteCellCollectionStage::perform (int stage, Messages& messages)
                         istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
 
                         refRecord.mRefNum.save (writer, false, "MVRF");
-                        writer.writeHNT ("CNDT", moved.mTarget, 8);
+                        writer.writeHNT ("CNDT", moved.mTarget);
                     }
 
                     refRecord.save (writer, false, false, ref.mState == CSMWorld::RecordBase::State_Deleted);

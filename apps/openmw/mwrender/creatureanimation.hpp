@@ -31,6 +31,8 @@ namespace MWRender
         virtual void equipmentChanged() { updateParts(); }
 
         virtual void showWeapons(bool showWeapon);
+
+        virtual bool getCarriedLeftShown() const { return mShowCarriedLeft; }
         virtual void showCarriedLeft(bool show);
 
         void updateParts();

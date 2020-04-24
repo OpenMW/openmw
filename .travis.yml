@@ -9,19 +9,15 @@ env:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
    - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
-cache:
-  ccache: true
-  directories:
-  - ${HOME}/.ccache
+cache: ccache
 addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-xenial-7
     packages: [
       # Dev
-      cmake, clang-7, clang-tools-7, gcc-8, g++-8, ccache,
+      cmake, clang-tools, gcc-9, g++-9, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -29,7 +25,7 @@ addons:
       # Audio, Video and Misc. deps
       libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev,
       # The other ones from OpenMW ppa
-      libbullet-dev, libopenscenegraph-3.4-dev, libmygui-dev
+      libbullet-dev, libopenscenegraph-dev, libmygui-dev
     ]
   coverity_scan:  # TODO: currently takes too long, disabled openmw/openmw-cs for now.
     project:
@@ -45,50 +41,51 @@ matrix:
       os: osx
       osx_image: xcode10.2
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-5
+    - name: OpenMW (all) on Ubuntu Bionic GCC-7
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Xenial GCC-8
+    - name: OpenMW (all) on Ubuntu Bionic GCC-9
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
       if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
+    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+        - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Xenial Clang-7 with Static Analysis
+    - name: OpenMW (openmw-cs) on Ubuntu Bionic Clang-6 with Static Analysis
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
-        - ANALYZE="scan-build-7 --force-analyze-debug-code --use-cc clang-7 --use-c++ clang++-7"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
+        - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
         - BUILD_OPENMW="OFF"
       if: branch != coverity_scan
       compiler: clang
     - name: OpenMW Components Coverity Scan
       os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Xenial Clang-7 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
     - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_install.${TRAVIS_OS_NAME}.sh; fi
 before_script:
+    - ccache -z
     - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_script.${TRAVIS_OS_NAME}.sh; fi
 script:
  - cd ./build
@@ -98,6 +95,7 @@ script:
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
  - cd "${TRAVIS_BUILD_DIR}"
+ - ccache -s
 deploy:
  provider: script
  script: ./CI/deploy.osx.sh

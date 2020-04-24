@@ -5,6 +5,7 @@
 #include "settingsutils.hpp"
 #include "exceptions.hpp"
 
+#include <components/bullethelpers/transformboundingbox.hpp>
 #include <components/bullethelpers/processtrianglecallback.hpp>
 #include <components/misc/convert.hpp>
 
@@ -13,6 +14,7 @@
 #include <BulletCollision/CollisionShapes/btConcaveShape.h>
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <LinearMath/btTransform.h>
+#include <LinearMath/btAabbUtil2.h>
 
 #include <algorithm>
 
@@ -57,7 +59,7 @@ namespace DetourNavigator
         return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
         {
             for (std::size_t i = 3; i > 0; --i)
-                addTriangleVertex(transform(triangle[i - 1]));
+                addTriangleVertex(triangle[i - 1]);
             mAreaTypes.push_back(areaType);
         }));
     }
@@ -68,7 +70,7 @@ namespace DetourNavigator
         return addObject(shape, transform, makeProcessTriangleCallback([&] (btVector3* triangle, int, int)
         {
             for (std::size_t i = 0; i < 3; ++i)
-                addTriangleVertex(transform(triangle[i]));
+                addTriangleVertex(triangle[i]);
             mAreaTypes.push_back(areaType);
         }));
     }
@@ -110,9 +112,10 @@ namespace DetourNavigator
         mWater.push_back(RecastMesh::Water {cellSize, transform});
     }
 
-    std::shared_ptr<RecastMesh> RecastMeshBuilder::create() const
+    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) const
     {
-        return std::make_shared<RecastMesh>(mIndices, mVertices, mAreaTypes, mWater, mSettings.get().mTrianglesPerChunk);
+        return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes,
+            mWater, mSettings.get().mTrianglesPerChunk);
     }
 
     void RecastMeshBuilder::reset()
@@ -131,8 +134,34 @@ namespace DetourNavigator
 
         shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
-        aabbMin = transform(aabbMin);
-        aabbMax = transform(aabbMax);
+        const btVector3 boundsMin(mBounds.mMin.x(), mBounds.mMin.y(),
+            -std::numeric_limits<btScalar>::max() * std::numeric_limits<btScalar>::epsilon());
+        const btVector3 boundsMax(mBounds.mMax.x(), mBounds.mMax.y(),
+            std::numeric_limits<btScalar>::max() * std::numeric_limits<btScalar>::epsilon());
+
+        auto wrapper = makeProcessTriangleCallback([&] (btVector3* triangle, int partId, int triangleIndex)
+        {
+            std::array<btVector3, 3> transformed;
+            for (std::size_t i = 0; i < 3; ++i)
+                transformed[i] = transform(triangle[i]);
+            if (TestTriangleAgainstAabb2(transformed.data(), boundsMin, boundsMax))
+                callback.processTriangle(transformed.data(), partId, triangleIndex);
+        });
+
+        shape.processAllTriangles(&wrapper, aabbMin, aabbMax);
+    }
+
+    void RecastMeshBuilder::addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform,
+                                      btTriangleCallback&& callback)
+    {
+        using BulletHelpers::transformBoundingBox;
+
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+
+        shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+        transformBoundingBox(transform, aabbMin, aabbMax);
 
         aabbMin.setX(std::max(mBounds.mMin.x(), aabbMin.x()));
         aabbMin.setX(std::min(mBounds.mMax.x(), aabbMin.x()));
@@ -144,20 +173,17 @@ namespace DetourNavigator
         aabbMax.setY(std::max(mBounds.mMin.y(), aabbMax.y()));
         aabbMax.setY(std::min(mBounds.mMax.y(), aabbMax.y()));
 
-        const auto inversedTransform = transform.inverse();
+        transformBoundingBox(transform.inverse(), aabbMin, aabbMax);
 
-        aabbMin = inversedTransform(aabbMin);
-        aabbMax = inversedTransform(aabbMax);
+        auto wrapper = makeProcessTriangleCallback([&] (btVector3* triangle, int partId, int triangleIndex)
+        {
+            std::array<btVector3, 3> transformed;
+            for (std::size_t i = 0; i < 3; ++i)
+                transformed[i] = transform(triangle[i]);
+            callback.processTriangle(transformed.data(), partId, triangleIndex);
+        });
 
-        aabbMin.setX(std::min(aabbMin.x(), aabbMax.x()));
-        aabbMin.setY(std::min(aabbMin.y(), aabbMax.y()));
-        aabbMin.setZ(std::min(aabbMin.z(), aabbMax.z()));
-
-        aabbMax.setX(std::max(aabbMin.x(), aabbMax.x()));
-        aabbMax.setY(std::max(aabbMin.y(), aabbMax.y()));
-        aabbMax.setZ(std::max(aabbMin.z(), aabbMax.z()));
-
-        shape.processAllTriangles(&callback, aabbMin, aabbMax);
+        shape.processAllTriangles(&wrapper, aabbMin, aabbMax);
     }
 
     void RecastMeshBuilder::addTriangleVertex(const btVector3& worldPosition)

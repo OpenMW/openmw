@@ -38,6 +38,14 @@ namespace MWMechanics
             //return a reference to the (new allocated) object 
             return *result;
         }
+
+        template< class Derived >
+        void copy(DerivedClassStorage& destination) const
+        {
+            Derived* result = dynamic_cast<Derived*>(mStorage);
+            if (result != nullptr)
+                destination.store<Derived>(*result);
+        }
         
         template< class Derived >
         void store( const Derived& payload )

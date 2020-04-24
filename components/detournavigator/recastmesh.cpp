@@ -5,9 +5,11 @@
 
 namespace DetourNavigator
 {
-    RecastMesh::RecastMesh(std::vector<int> indices, std::vector<float> vertices, std::vector<AreaType> areaTypes,
-            std::vector<Water> water, const std::size_t trianglesPerChunk)
-        : mIndices(std::move(indices))
+    RecastMesh::RecastMesh(std::size_t generation, std::size_t revision, std::vector<int> indices, std::vector<float> vertices,
+            std::vector<AreaType> areaTypes, std::vector<Water> water, const std::size_t trianglesPerChunk)
+        : mGeneration(generation)
+        , mRevision(revision)
+        , mIndices(std::move(indices))
         , mVertices(std::move(vertices))
         , mAreaTypes(std::move(areaTypes))
         , mWater(std::move(water))

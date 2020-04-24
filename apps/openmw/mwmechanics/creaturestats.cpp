@@ -23,10 +23,51 @@ namespace MWMechanics
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1), mHitAttemptActorId(-1),
-          mDeathAnimation(-1), mTimeOfDeath(), mLevel (0)
+          mDeathAnimation(-1), mTimeOfDeath(), mGreetingState(Greet_None),
+          mGreetingTimer(0), mTargetAngleRadians(0), mIsTurningToPlayer(false), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
+    }
+
+    int MWMechanics::CreatureStats::getGreetingTimer() const
+    {
+        return mGreetingTimer;
+    }
+
+    void MWMechanics::CreatureStats::setGreetingTimer(int timer)
+    {
+        mGreetingTimer = timer;
+    }
+
+    float MWMechanics::CreatureStats::getAngleToPlayer() const
+    {
+        return mTargetAngleRadians;
+    }
+
+    void MWMechanics::CreatureStats::setAngleToPlayer(float angle)
+    {
+        mTargetAngleRadians = angle;
+    }
+
+    GreetingState MWMechanics::CreatureStats::getGreetingState() const
+    {
+        return mGreetingState;
+    }
+
+    void MWMechanics::CreatureStats::setGreetingState(GreetingState state)
+    {
+        mGreetingState = state;
+    }
+
+    bool MWMechanics::CreatureStats::isTurningToPlayer() const
+    {
+        return mIsTurningToPlayer;
+    }
+
+    void MWMechanics::CreatureStats::setTurningToPlayer(bool turning)
+    {
+        mIsTurningToPlayer = turning;
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
@@ -198,9 +239,6 @@ namespace MWMechanics
             mDynamic[index].setModifier(0);
             mDynamic[index].setCurrentModifier(0);
             mDynamic[index].setCurrent(0);
-
-            if (MWBase::Environment::get().getWorld()->getGodModeState())
-                MWBase::Environment::get().getMechanicsManager()->keepPlayerAlive();
         }
     }
 
@@ -386,6 +424,11 @@ namespace MWMechanics
     void CreatureStats::addToFallHeight(float height)
     {
         mFallHeight += height;
+    }
+
+    float CreatureStats::getFallHeight() const
+    {
+        return mFallHeight;
     }
 
     float CreatureStats::land(bool isPlayer)

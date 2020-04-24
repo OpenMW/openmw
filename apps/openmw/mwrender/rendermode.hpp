@@ -13,6 +13,7 @@ namespace MWRender
         Render_Scene,
         Render_NavMesh,
         Render_ActorsPaths,
+        Render_RecastMesh,
     };
 
 }

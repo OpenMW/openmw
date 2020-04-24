@@ -31,6 +31,8 @@ namespace Launcher
     private slots:
         void slotFullScreenChanged(int state);
         void slotStandardToggled(bool checked);
+        void slotFramerateLimitToggled(bool checked);
+        void slotShadowDistLimitToggled(bool checked);
 
     private:
         Files::ConfigurationManager &mCfgMgr;

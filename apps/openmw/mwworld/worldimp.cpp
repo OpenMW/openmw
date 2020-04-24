@@ -15,6 +15,7 @@
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/convert.hpp>
 
 #include <components/files/collections.hpp>
 
@@ -55,6 +56,7 @@
 #include "../mwphysics/actor.hpp"
 #include "../mwphysics/collisiontype.hpp"
 #include "../mwphysics/object.hpp"
+#include "../mwphysics/constants.hpp"
 
 #include "player.hpp"
 #include "manualref.hpp"
@@ -585,6 +587,16 @@ namespace MWWorld
             return getInterior (id.mWorldspace);
     }
 
+    void World::testExteriorCells()
+    {
+        mWorldScene->testExteriorCells();
+    }
+
+    void World::testInteriorCells()
+    {
+        mWorldScene->testInteriorCells();
+    }
+
     void World::useDeathCamera()
     {
         if(mRendering->getCamera()->isVanityOrPreviewModeEnabled() )
@@ -857,7 +869,17 @@ namespace MWWorld
 
     void World::advanceTime (double hours, bool incremental)
     {
-        MWBase::Environment::get().getMechanicsManager()->advanceTime(static_cast<float>(hours * 3600));
+        if (!incremental)
+        {
+            // When we fast-forward time, we should recharge magic items
+            // in all loaded cells, using game world time
+            float duration = hours * 3600;
+            const float timeScaleFactor = getTimeScaleFactor();
+            if (timeScaleFactor != 0.0f)
+                duration /= timeScaleFactor;
+
+            rechargeItems(duration, false);
+        }
 
         mWeatherManager->advanceTime (hours, incremental);
 
@@ -1337,13 +1359,13 @@ namespace MWWorld
             mShouldUpdateNavigator = updateNavigatorObject(object) || mShouldUpdateNavigator;
     }
 
-    void World::rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, bool adjust)
+    void World::rotateObjectImp(const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags)
     {
         const float pi = static_cast<float>(osg::PI);
 
         ESM::Position pos = ptr.getRefData().getPosition();
         float *objRot = pos.rot;
-        if(adjust)
+        if (flags & MWBase::RotationFlag_adjust)
         {
             objRot[0] += rot.x();
             objRot[1] += rot.y();
@@ -1375,7 +1397,9 @@ namespace MWWorld
 
         if(ptr.getRefData().getBaseNode() != 0)
         {
-            mWorldScene->updateObjectRotation(ptr, true);
+            const auto order = flags & MWBase::RotationFlag_inverseOrder
+                ? RotationOrder::inverse : RotationOrder::direct;
+            mWorldScene->updateObjectRotation(ptr, order);
 
             if (const auto object = mPhysics->getObject(ptr))
                 updateNavigatorObject(object);
@@ -1401,7 +1425,9 @@ namespace MWWorld
 
         pos.z() += 20; // place slightly above. will snap down to ground with code below
 
-        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && isActorCollisionEnabled(ptr)))
+        // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
+        bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
+        if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
             if (traced.z() < pos.z())
@@ -1447,9 +1473,9 @@ namespace MWWorld
         }
     }
 
-    void World::rotateObject (const Ptr& ptr,float x,float y,float z, bool adjust)
+    void World::rotateObject (const Ptr& ptr, float x, float y, float z, MWBase::RotationFlags flags)
     {
-        rotateObjectImp(ptr, osg::Vec3f(x, y, z), adjust);
+        rotateObjectImp(ptr, osg::Vec3f(x, y, z), flags);
     }
 
     void World::rotateWorldObject (const Ptr& ptr, osg::Quat rotate)
@@ -1458,6 +1484,9 @@ namespace MWWorld
         {
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
+
+            if (const auto object = mPhysics->getObject(ptr))
+                updateNavigatorObject(object);
         }
     }
 
@@ -1614,9 +1643,74 @@ namespace MWWorld
         return result.mHit;
     }
 
+    bool World::castRay(const osg::Vec3f& from, const osg::Vec3f& to, int mask, const MWWorld::ConstPtr& ignore)
+    {
+        return mPhysics->castRay(from, to, ignore, std::vector<MWWorld::Ptr>(), mask).mHit;
+    }
+
+    bool World::rotateDoor(const Ptr door, MWWorld::DoorState state, float duration)
+    {
+        const ESM::Position& objPos = door.getRefData().getPosition();
+        float oldRot = objPos.rot[2];
+
+        float minRot = door.getCellRef().getPosition().rot[2];
+        float maxRot = minRot + osg::DegreesToRadians(90.f);
+
+        float diff = duration * osg::DegreesToRadians(90.f);
+        float targetRot = std::min(std::max(minRot, oldRot + diff * (state == MWWorld::DoorState::Opening ? 1 : -1)), maxRot);
+        rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
+
+        bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
+
+        /// \todo should use convexSweepTest here
+        bool collisionWithActor = false;
+        std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(door, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
+        for (MWWorld::Ptr& ptr : collisions)
+        {
+            if (ptr.getClass().isActor())
+            {
+                collisionWithActor = true;
+                
+                // Collided with actor, ask actor to try to avoid door
+                if(ptr != getPlayerPtr() )
+                {
+                    MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+                    if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                        seq.stack(MWMechanics::AiAvoidDoor(door),ptr);
+                }
+
+                // we need to undo the rotation
+                reached = false;
+            }
+        }
+
+        // Cancel door closing sound if collision with actor is detected
+        if (collisionWithActor)
+        {
+            const ESM::Door* ref = door.get<ESM::Door>()->mBase;
+
+            if (state == MWWorld::DoorState::Opening)
+            {
+                const std::string& openSound = ref->mOpenSound;
+                if (!openSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, openSound))
+                    MWBase::Environment::get().getSoundManager()->stopSound3D(door, openSound);
+            }
+            else if (state == MWWorld::DoorState::Closing)
+            {
+                const std::string& closeSound = ref->mCloseSound;
+                if (!closeSound.empty() && MWBase::Environment::get().getSoundManager()->getSoundPlaying(door, closeSound))
+                    MWBase::Environment::get().getSoundManager()->stopSound3D(door, closeSound);
+            }
+
+            rotateObject(door, objPos.rot[0], objPos.rot[1], oldRot, MWBase::RotationFlag_none);
+        }
+
+        return reached;
+    }
+
     void World::processDoors(float duration)
     {
-        std::map<MWWorld::Ptr, int>::iterator it = mDoorStates.begin();
+        auto it = mDoorStates.begin();
         while (it != mDoorStates.end())
         {
             if (!mWorldScene->isCellActive(*it->first.getCell()) || !it->first.getRefData().getBaseNode())
@@ -1628,45 +1722,12 @@ namespace MWWorld
             }
             else
             {
-                const ESM::Position& objPos = it->first.getRefData().getPosition();
-                float oldRot = objPos.rot[2];
-
-                float minRot = it->first.getCellRef().getPosition().rot[2];
-                float maxRot = minRot + osg::DegreesToRadians(90.f);
-
-                float diff = duration * osg::DegreesToRadians(90.f);
-                float targetRot = std::min(std::max(minRot, oldRot + diff * (it->second == 1 ? 1 : -1)), maxRot);
-                rotateObject(it->first, objPos.rot[0], objPos.rot[1], targetRot);
-
-                bool reached = (targetRot == maxRot && it->second) || targetRot == minRot;
-
-                /// \todo should use convexSweepTest here
-                std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(it->first, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
-                for (MWWorld::Ptr& ptr : collisions)
-                {
-                    if (ptr.getClass().isActor())
-                    {
-                        // Collided with actor, ask actor to try to avoid door
-                        if(ptr != getPlayerPtr() )
-                        {
-                            MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-                            if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
-                                seq.stack(MWMechanics::AiAvoidDoor(it->first),ptr);
-                        }
-
-                        // we need to undo the rotation
-                        rotateObject(it->first, objPos.rot[0], objPos.rot[1], oldRot);
-                        reached = false;
-                    }
-                }
-
-                // the rotation order we want to use
-                mWorldScene->updateObjectRotation(it->first, false);
+                bool reached = rotateDoor(it->first, it->second, duration);
 
                 if (reached)
                 {
                     // Mark as non-moving
-                    it->first.getClass().setDoorState(it->first, 0);
+                    it->first.getClass().setDoorState(it->first, MWWorld::DoorState::Idle);
                     mDoorStates.erase(it++);
                 }
                 else
@@ -2364,9 +2425,9 @@ namespace MWWorld
         return mPhysics->isOnGround(ptr);
     }
 
-    void World::togglePOV()
+    void World::togglePOV(bool force)
     {
-        mRendering->togglePOV();
+        mRendering->togglePOV(force);
     }
 
     bool World::isFirstPerson() const
@@ -2387,11 +2448,6 @@ namespace MWWorld
     void World::allowVanityMode(bool allow)
     {
         mRendering->allowVanityMode(allow);
-    }
-
-    void World::togglePlayerLooking(bool enable)
-    {
-        mRendering->togglePlayerLooking(enable);
     }
 
     void World::changeVanityModeScale(float factor)
@@ -2441,7 +2497,7 @@ namespace MWWorld
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale()); // apply race height
-        rotateObject(player, 0.f, 0.f, 0.f, true);
+        rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
@@ -2475,7 +2531,9 @@ namespace MWWorld
         if (isUnderwater(currentCell, playerPos) || isWalkingOnWater(player))
             return Rest_PlayerIsUnderwater;
 
-        if ((actor->getCollisionMode() && !mPhysics->isOnSolidGround(player)) || isFlying(player))
+        float fallHeight = player.getClass().getCreatureStats(player).getFallHeight();
+        float epsilon = 1e-4;
+        if ((actor->getCollisionMode() && (!mPhysics->isOnSolidGround(player) || fallHeight >= epsilon)) || isFlying(player))
             return Rest_PlayerIsInAir;
 
         if((currentCell->getCell()->mData.mFlags&ESM::Cell::NoSleep) || player.getClass().getNpcStats(player).isWerewolf())
@@ -2506,33 +2564,36 @@ namespace MWWorld
 
     void World::activateDoor(const MWWorld::Ptr& door)
     {
-        int state = door.getClass().getDoorState(door);
+        auto state = door.getClass().getDoorState(door);
         switch (state)
         {
-        case 0:
+        case MWWorld::DoorState::Idle:
             if (door.getRefData().getPosition().rot[2] == door.getCellRef().getPosition().rot[2])
-                state = 1; // if closed, then open
+                state = MWWorld::DoorState::Opening; // if closed, then open
             else
-                state = 2; // if open, then close
+                state = MWWorld::DoorState::Closing; // if open, then close
             break;
-        case 2:
-            state = 1; // if closing, then open
+        case MWWorld::DoorState::Closing:
+            state = MWWorld::DoorState::Opening; // if closing, then open
             break;
-        case 1:
+        case MWWorld::DoorState::Opening:
         default:
-            state = 2; // if opening, then close
+            state = MWWorld::DoorState::Closing; // if opening, then close
             break;
         }
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
     }
 
-    void World::activateDoor(const Ptr &door, int state)
+    void World::activateDoor(const Ptr &door, MWWorld::DoorState state)
     {
         door.getClass().setDoorState(door, state);
         mDoorStates[door] = state;
-        if (state == 0)
+        if (state == MWWorld::DoorState::Idle)
+        {
             mDoorStates.erase(door);
+            rotateDoor(door, state, 1);
+        }
     }
 
     bool World::getPlayerStandingOn (const MWWorld::ConstPtr& object)
@@ -2692,28 +2753,15 @@ namespace MWWorld
         }
     }
 
-    struct ListObjectsVisitor
-    {
-        std::vector<MWWorld::Ptr> mObjects;
-
-        bool operator() (Ptr ptr)
-        {
-            if (ptr.getRefData().getBaseNode())
-                mObjects.push_back(ptr);
-            return true;
-        }
-    };
-
     void World::getItemsOwnedBy (const MWWorld::ConstPtr& npc, std::vector<MWWorld::Ptr>& out)
     {
         for (CellStore* cellstore : mWorldScene->getActiveCells())
         {
-            ListObjectsVisitor visitor;
-            cellstore->forEach(visitor);
-
-            for (const Ptr &object : visitor.mObjects)
-                if (Misc::StringUtils::ciEqual(object.getCellRef().getOwner(), npc.getCellRef().getRefId()))
-                    out.push_back(object);
+            cellstore->forEach([&] (const auto& ptr) {
+                if (ptr.getRefData().getBaseNode() && Misc::StringUtils::ciEqual(ptr.getCellRef().getOwner(), npc.getCellRef().getRefId()))
+                    out.push_back(ptr);
+                return true;
+            });
         }
     }
 
@@ -2808,6 +2856,7 @@ namespace MWWorld
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
                         pos = destDoor.mRef.getDoorDest();
+                        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
                         return true;
                     }
                 }
@@ -2818,6 +2867,7 @@ namespace MWWorld
         if (!statics.empty())
         {
             pos = statics.begin()->mRef.getPosition();
+            pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
             return true;
         }
 
@@ -2992,7 +3042,7 @@ namespace MWWorld
             target = getFacedObject();
 
         // if the faced object can not be activated, do not use it
-        if (!target.isEmpty() && !target.getClass().canBeActivated(target))
+        if (!target.isEmpty() && !target.getClass().hasToolTip(target))
             target = nullptr;
 
         if (target.isEmpty())
@@ -3051,7 +3101,7 @@ namespace MWWorld
                 {
                     target = result2.mHitObject;
                     hitPosition = result2.mHitPointWorld;
-                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().canBeActivated(target))
+                    if (dist2 > getMaxActivationDistance() && !target.isEmpty() && !target.getClass().hasToolTip(target))
                         target = nullptr;
                 }
             }
@@ -3273,7 +3323,6 @@ namespace MWWorld
                 closestDistance = distance;
                 closestMarker = marker;
             }
-
         }
 
         return closestMarker;
@@ -3282,6 +3331,22 @@ namespace MWWorld
     void World::rest(double hours)
     {
         mCells.rest(hours);
+    }
+
+    void World::rechargeItems(double duration, bool activeOnly)
+    {
+        MWWorld::Ptr player = getPlayerPtr();
+        player.getClass().getInventoryStore(player).rechargeItems(duration);
+
+        if (activeOnly)
+        {
+            for (auto &cell : mWorldScene->getActiveCells())
+            {
+                cell->recharge(duration);
+            }
+        }
+        else
+            mCells.recharge(duration);
     }
 
     void World::teleportToClosestMarker (const MWWorld::Ptr& ptr,
@@ -3619,7 +3684,7 @@ namespace MWWorld
             if (fromProjectile && effectInfo.mArea <= 0)
                 continue; // Don't play explosion for projectiles with 0-area effects
 
-            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && (!ignore.isEmpty()) && (!ignore.getClass().isActor() && !ignore.getClass().canBeActivated(ignore)))
+            if (!fromProjectile && effectInfo.mRange == ESM::RT_Touch && !ignore.isEmpty() && !ignore.getClass().isActor() && !ignore.getClass().hasToolTip(ignore))
                 continue; // Don't play explosion for touch spells on non-activatable objects except when spell is from the projectile enchantment
 
             // Spawn the explosion orb effect
@@ -3820,4 +3885,28 @@ namespace MWWorld
             return getHalfExtents(actor);
     }
 
+    bool World::hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const
+    {
+        const auto object = mPhysics->getObject(door);
+
+        if (!object)
+            return false;
+
+        btVector3 aabbMin;
+        btVector3 aabbMax;
+        object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
+
+        const auto toLocal = object->getCollisionObject()->getWorldTransform().inverse();
+        const auto localFrom = toLocal(Misc::Convert::toBullet(position));
+        const auto localTo = toLocal(Misc::Convert::toBullet(destination));
+
+        btScalar hitDistance = 1;
+        btVector3 hitNormal;
+        return btRayAabb(localFrom, localTo, aabbMin, aabbMax, hitDistance, hitNormal);
+    }
+
+    bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
+    {
+        return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
+    }
 }

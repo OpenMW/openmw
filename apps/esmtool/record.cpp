@@ -534,10 +534,18 @@ void Record<ESM::Cell>::print()
     if (mData.mData.mFlags & ESM::Cell::Interior &&
         !(mData.mData.mFlags & ESM::Cell::QuasiEx))
     {
-        std::cout << "  Ambient Light Color: " << mData.mAmbi.mAmbient << std::endl;
-        std::cout << "  Sunlight Color: " << mData.mAmbi.mSunlight << std::endl;
-        std::cout << "  Fog Color: " << mData.mAmbi.mFog << std::endl;
-        std::cout << "  Fog Density: " << mData.mAmbi.mFogDensity << std::endl;
+        if (mData.hasAmbient())
+        {
+            // TODO: see if we can change the integer representation to something more sensible
+            std::cout << "  Ambient Light Color: " << mData.mAmbi.mAmbient << std::endl;
+            std::cout << "  Sunlight Color: " << mData.mAmbi.mSunlight << std::endl;
+            std::cout << "  Fog Color: " << mData.mAmbi.mFog << std::endl;
+            std::cout << "  Fog Density: " << mData.mAmbi.mFogDensity << std::endl;
+        }
+        else
+        {
+            std::cout << "  No Ambient Information" << std::endl;
+        }
         std::cout << "  Water Level: " << mData.mWater << std::endl;
     }
     else
@@ -607,7 +615,7 @@ void Record<ESM::Container>::print()
     std::cout << "  Weight: " << mData.mWeight << std::endl;
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
 
@@ -653,7 +661,7 @@ void Record<ESM::Creature>::print()
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
         std::cout << "  Spell: " << spell << std::endl;
@@ -706,7 +714,7 @@ void Record<ESM::Enchantment>::print()
               << " (" << mData.mData.mType << ")" << std::endl;
     std::cout << "  Cost: " << mData.mData.mCost << std::endl;
     std::cout << "  Charge: " << mData.mData.mCharge << std::endl;
-    std::cout << "  AutoCalc: " << mData.mData.mAutocalc << std::endl;
+    std::cout << "  Flags: " << enchantmentFlags(mData.mData.mFlags) << std::endl;
     printEffectList(mData.mEffects);
     std::cout << "  Deleted: " << mIsDeleted << std::endl;
 }
@@ -1032,14 +1040,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
-        //Why do we want to print these fields? They are padding in the struct and contain
-        // nothing of real value. Now we don't deal with NPDTstruct12 in runtime either...
-        //std::cout << "  Unknown1: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown1) << std::endl;
-        //std::cout << "  Unknown2: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown2) << std::endl;
-        //std::cout << "  Unknown3: "
-        //          << (unsigned int)((unsigned char)mData.mNpdt12.mUnknown3) << std::endl;
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
     else {
@@ -1047,7 +1047,6 @@ void Record<ESM::NPC>::print()
         std::cout << "  Reputation: " << (int)mData.mNpdt.mReputation << std::endl;
         std::cout << "  Disposition: " << (int)mData.mNpdt.mDisposition << std::endl;
         std::cout << "  Rank: " << (int)mData.mNpdt.mRank << std::endl;
-        std::cout << "  FactionID: " << (int)mData.mNpdt.mFactionID << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
         std::cout << "    Strength: " << (int)mData.mNpdt.mStrength << std::endl;
@@ -1067,13 +1066,12 @@ void Record<ESM::NPC>::print()
         std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;
         std::cout << "  Fatigue: " << mData.mNpdt.mFatigue << std::endl;
-        std::cout << "  Unknown: " << (int)mData.mNpdt.mUnknown << std::endl;
         std::cout << "  Gold: " << mData.mNpdt.mGold << std::endl;
     }
 
     for (const ESM::ContItem &item : mData.mInventory.mList)
         std::cout << "  Inventory: Count: " << Misc::StringUtils::format("%4d", item.mCount)
-                  << " Item: " << item.mItem.toString() << std::endl;
+                  << " Item: " << item.mItem << std::endl;
 
     for (const std::string &spell : mData.mSpells.mList)
         std::cout << "  Spell: " << spell << std::endl;
@@ -1192,7 +1190,7 @@ void Record<ESM::Region>::print()
     if (!mData.mSleepList.empty())
         std::cout << "  Sleep List: " << mData.mSleepList << std::endl;
     for (const ESM::Region::SoundRef &soundref : mData.mSoundList)
-        std::cout << "  Sound: " << (int)soundref.mChance << " = " << soundref.mSound.toString() << std::endl;
+        std::cout << "  Sound: " << (int)soundref.mChance << " = " << soundref.mSound << std::endl;
 }
 
 template<>

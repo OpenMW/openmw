@@ -50,9 +50,9 @@ namespace MWSound
         , mListenerPos(0,0,0)
         , mListenerDir(1,0,0)
         , mListenerUp(0,0,1)
-        , mPausedSoundTypes(0)
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
+        , mPlaybackPaused(false)
     {
         mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
         mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
@@ -566,6 +566,27 @@ namespace MWSound
         return true;
     }
 
+    bool SoundManager::sayActive(const MWWorld::ConstPtr &ptr) const
+    {
+        SaySoundMap::const_iterator snditer = mSaySoundsQueue.find(ptr);
+        if(snditer != mSaySoundsQueue.end())
+        {
+            if(mOutput->isStreamPlaying(snditer->second))
+                return true;
+            return false;
+        }
+
+        snditer = mActiveSaySounds.find(ptr);
+        if(snditer != mActiveSaySounds.end())
+        {
+            if(mOutput->isStreamPlaying(snditer->second))
+                return true;
+            return false;
+        }
+
+        return false;
+    }
+
     void SoundManager::stopSay(const MWWorld::ConstPtr &ptr)
     {
         SaySoundMap::iterator snditer = mSaySoundsQueue.find(ptr);
@@ -747,6 +768,9 @@ namespace MWSound
 
     void SoundManager::stopSound(const std::string& soundId)
     {
+        if(!mOutput->isInitialized())
+            return;
+
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if (!sfx) return;
 
@@ -755,6 +779,9 @@ namespace MWSound
 
     void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
     {
+        if(!mOutput->isInitialized())
+            return;
+
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if (!sfx) return;
 
@@ -830,27 +857,52 @@ namespace MWSound
         return false;
     }
 
-
-    void SoundManager::pauseSounds(int types)
+    void SoundManager::pauseSounds(BlockerType blocker, int types)
     {
         if(mOutput->isInitialized())
         {
+            if (mPausedSoundTypes[blocker] != 0)
+                resumeSounds(blocker);
+
             types = types & Type::Mask;
             mOutput->pauseSounds(types);
-            mPausedSoundTypes |= types;
+            mPausedSoundTypes[blocker] = types;
         }
     }
 
-    void SoundManager::resumeSounds(int types)
+    void SoundManager::resumeSounds(BlockerType blocker)
     {
         if(mOutput->isInitialized())
         {
-            types = types & Type::Mask & mPausedSoundTypes;
+            mPausedSoundTypes[blocker] = 0;
+            int types = int(Type::Mask);
+            for (int currentBlocker = 0; currentBlocker < BlockerType::MaxCount; currentBlocker++)
+            {
+                if (currentBlocker != blocker)
+                    types &= ~mPausedSoundTypes[currentBlocker];
+            }
+
             mOutput->resumeSounds(types);
-            mPausedSoundTypes &= ~types;
         }
     }
 
+    void SoundManager::pausePlayback()
+    {
+        if (mPlaybackPaused)
+            return;
+
+        mPlaybackPaused = true;
+        mOutput->pauseActiveDevice();
+    }
+
+    void SoundManager::resumePlayback()
+    {
+        if (!mPlaybackPaused)
+            return;
+
+        mPlaybackPaused = false;
+        mOutput->resumeActiveDevice();
+    }
 
     void SoundManager::updateRegionSound(float duration)
     {
@@ -897,7 +949,7 @@ namespace MWSound
         {
             if(r - pos < sndref.mChance)
             {
-                playSound(sndref.mSound.toString(), 1.0f, 1.0f);
+                playSound(sndref.mSound, 1.0f, 1.0f);
                 break;
             }
             pos += sndref.mChance;
@@ -1174,7 +1226,7 @@ namespace MWSound
 
     void SoundManager::update(float duration)
     {
-        if(!mOutput->isInitialized())
+        if(!mOutput->isInitialized() || mPlaybackPaused)
             return;
 
         updateSounds(duration);
@@ -1335,7 +1387,7 @@ namespace MWSound
 
     void SoundManager::clear()
     {
-        stopMusic();
+        SoundManager::stopMusic();
 
         for(SoundMap::value_type &snd : mActiveSounds)
         {
@@ -1372,5 +1424,7 @@ namespace MWSound
             mUnusedStreams.push_back(sound);
         }
         mActiveTracks.clear();
+        mPlaybackPaused = false;
+        std::fill(std::begin(mPausedSoundTypes), std::end(mPausedSoundTypes), 0);
     }
 }

@@ -13,14 +13,7 @@ Debian:
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
-    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev
-  # - apt-get install -y libmygui-dev libbullet-dev  # to be updated to latest below because stretch is too old
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet-dev_2.87+dfsg-2_amd64.deb -o libbullet-dev_2.87+dfsg-2_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/b/bullet/libbullet2.87_2.87+dfsg-2_amd64.deb -o libbullet2.87_2.87+dfsg-2_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb -o libmygui.openglplatform0debian1v5_3.2.2+dfsg-1_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb -o libmyguiengine3debian1v5_3.2.2+dfsg-1_amd64.deb
-    - curl -L http://archive.ubuntu.com/ubuntu/pool/universe/m/mygui/libmygui-dev_3.2.2+dfsg-1_amd64.deb -o libmygui-dev_3.2.2+dfsg-1_amd64.deb
-    - dpkg --ignore-depends=libmygui.ogreplatform0debian1v5 -i *.deb 
+    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt4-dev libopenal-dev libopenscenegraph-3.4-dev libunshield-dev libtinyxml-dev libmygui-dev libbullet-dev
   stage: build
   script: 
     - cores_to_use=$((`nproc`-2)); if (( $cores_to_use < 1 )); then cores_to_use=1; fi
@@ -30,6 +23,7 @@ Debian:
   artifacts:
     paths:
       - build/artifacts/
+
 MacOS:
   tags:
     - macos
@@ -49,18 +43,21 @@ MacOS:
 
 Windows:
   tags:
-    - win10
-    - msvc2017
-  except:
-    - branches # because our CI VMs are not public, MRs can't use them and timeout
+    - windows
   stage: build
   allow_failure: true
   script:
-    # - env  # turn on for debugging
-    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
-    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
-    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
-    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
+    - Set-Variable -Name "time" -Value (date -Format "%H:%m")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+#   TODO: to anyone wanting to do further work here, we need to figure out how to get the below working
+#   TODO: on gitlab's new shared windows runners. They currently don't have bash or anything else installed
+#   TODO: it is currently just a bare windows 10 with powershell.
+#    - env  # turn on for debugging
+#    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
+#    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
+#    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
+#    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
   cache:
     paths:
     - deps

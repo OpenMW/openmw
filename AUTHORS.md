@@ -22,6 +22,7 @@ Programmers
     alexanderkjall
     Alexander Nadeau (wareya)
     Alexander Olofsson (Ace)
+    Alex Rice
     Alex S (docwest)
     Allofich
     Andrei Kortunov (akortunov)
@@ -29,6 +30,7 @@ Programmers
     Ardekantur
     Armin Preiml
     Artem Kotsynyak (greye)
+    Artem Nykolenko (anikm21)
     artemutin
     Arthur Moore (EmperorArthur)
     Assumeru
@@ -72,6 +74,8 @@ Programmers
     Fil Krynicki (filkry)
     Finbar Crago (finbar-crago)
     Florian Weber (Florianjw)
+    Frédéric Chardon (fr3dz10)
+    Gaëtan Dezeiraud (Brouilles)
     Gašper Sedej
     Gijsbert ter Horst (Ghostbird)
     Gohan1989
@@ -84,6 +88,8 @@ Programmers
     Jacob Essex (Yacoby)
     Jake Westrip (16bitint)
     James Carty (MrTopCat)
+    James Moore (moore.work)
+    James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)
     Jan Borsodi (am0s)
     Jason Hooks (jhooks)

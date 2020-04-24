@@ -31,9 +31,9 @@ public:
     };
     struct SCHD
     {
-        NAME32              mName;
+        std::string         mName;
         Script::SCHDstruct  mData;
-    }; // 52 bytes
+    };
 
     std::string mId;
 

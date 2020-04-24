@@ -5,6 +5,10 @@
 #include <QMessageBox>
 #include <QDir>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+#include <QScreen>
+#endif
+
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 // We need to do this because of Qt: https://bugreports.qt-project.org/browse/QTBUG-22154
@@ -44,6 +48,8 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
     connect(fullScreenCheckBox, SIGNAL(stateChanged(int)), this, SLOT(slotFullScreenChanged(int)));
     connect(standardRadioButton, SIGNAL(toggled(bool)), this, SLOT(slotStandardToggled(bool)));
     connect(screenComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(screenChanged(int)));
+    connect(framerateLimitCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotFramerateLimitToggled(bool)));
+    connect(shadowDistanceCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotShadowDistLimitToggled(bool)));
 
 }
 
@@ -121,6 +127,40 @@ bool Launcher::GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height);
     }
 
+    float fpsLimit = mEngineSettings.getFloat("framerate limit", "Video");
+    if (fpsLimit != 0)
+    {
+        framerateLimitCheckBox->setCheckState(Qt::Checked);
+        framerateLimitSpinBox->setValue(fpsLimit);
+    }
+
+    if (mEngineSettings.getBool("actor shadows", "Shadows"))
+        actorShadowsCheckBox->setCheckState(Qt::Checked);
+    if (mEngineSettings.getBool("player shadows", "Shadows"))
+        playerShadowsCheckBox->setCheckState(Qt::Checked);
+    if (mEngineSettings.getBool("terrain shadows", "Shadows"))
+        terrainShadowsCheckBox->setCheckState(Qt::Checked);
+    if (mEngineSettings.getBool("object shadows", "Shadows"))
+        objectShadowsCheckBox->setCheckState(Qt::Checked);
+    if (mEngineSettings.getBool("enable indoor shadows", "Shadows"))
+        indoorShadowsCheckBox->setCheckState(Qt::Checked);
+
+    int shadowDistLimit = mEngineSettings.getInt("maximum shadow map distance", "Shadows");
+    if (shadowDistLimit > 0)
+    {
+        shadowDistanceCheckBox->setCheckState(Qt::Checked);
+        shadowDistanceSpinBox->setValue(shadowDistLimit);
+    }
+
+    float shadowFadeStart = mEngineSettings.getFloat("shadow fade start", "Shadows");
+    if (shadowFadeStart != 0)
+        fadeStartSpinBox->setValue(shadowFadeStart);
+
+    int shadowRes = mEngineSettings.getInt("shadow map resolution", "Shadows");
+    int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
+    if (shadowResIndex != -1)
+        shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
+
     return true;
 }
 
@@ -166,6 +206,63 @@ void Launcher::GraphicsPage::saveSettings()
     int cScreen = screenComboBox->currentIndex();
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
+
+    if (framerateLimitCheckBox->checkState())
+    {
+        float cFpsLimit = framerateLimitSpinBox->value();
+        if (cFpsLimit != mEngineSettings.getFloat("framerate limit", "Video"))
+            mEngineSettings.setFloat("framerate limit", "Video", cFpsLimit);
+    }
+    else if (mEngineSettings.getFloat("framerate limit", "Video") != 0)
+    {
+        mEngineSettings.setFloat("framerate limit", "Video", 0);
+    }
+
+    int cShadowDist = shadowDistanceCheckBox->checkState() ? shadowDistanceSpinBox->value() : 0;
+    if (mEngineSettings.getInt("maximum shadow map distance", "Shadows") != cShadowDist)
+        mEngineSettings.setInt("maximum shadow map distance", "Shadows", cShadowDist);
+    float cFadeStart = fadeStartSpinBox->value();
+    if (cShadowDist > 0 && mEngineSettings.getFloat("shadow fade start", "Shadows") != cFadeStart)
+        mEngineSettings.setFloat("shadow fade start", "Shadows", cFadeStart);
+
+    bool cActorShadows = actorShadowsCheckBox->checkState();
+    bool cObjectShadows = objectShadowsCheckBox->checkState();
+    bool cTerrainShadows = terrainShadowsCheckBox->checkState();
+    bool cPlayerShadows = playerShadowsCheckBox->checkState();
+    if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
+    {
+        if (mEngineSettings.getBool("enable shadows", "Shadows") != true)
+            mEngineSettings.setBool("enable shadows", "Shadows", true);
+        if (mEngineSettings.getBool("actor shadows", "Shadows") != cActorShadows)
+            mEngineSettings.setBool("actor shadows", "Shadows", cActorShadows);
+        if (mEngineSettings.getBool("player shadows", "Shadows") != cPlayerShadows)
+            mEngineSettings.setBool("player shadows", "Shadows", cPlayerShadows);
+        if (mEngineSettings.getBool("object shadows", "Shadows") != cObjectShadows)
+            mEngineSettings.setBool("object shadows", "Shadows", cObjectShadows);
+        if (mEngineSettings.getBool("terrain shadows", "Shadows") != cTerrainShadows)
+            mEngineSettings.setBool("terrain shadows", "Shadows", cTerrainShadows);
+    }
+    else
+    {
+        if (mEngineSettings.getBool("enable shadows", "Shadows"))
+            mEngineSettings.setBool("enable shadows", "Shadows", false);
+        if (mEngineSettings.getBool("actor shadows", "Shadows"))
+            mEngineSettings.setBool("actor shadows", "Shadows", false);
+        if (mEngineSettings.getBool("player shadows", "Shadows"))
+            mEngineSettings.setBool("player shadows", "Shadows", false);
+        if (mEngineSettings.getBool("object shadows", "Shadows"))
+            mEngineSettings.setBool("object shadows", "Shadows", false);
+        if (mEngineSettings.getBool("terrain shadows", "Shadows"))
+            mEngineSettings.setBool("terrain shadows", "Shadows", false);
+    }
+
+    bool cIndoorShadows = indoorShadowsCheckBox->checkState();
+    if (mEngineSettings.getBool("enable indoor shadows", "Shadows") != cIndoorShadows)
+        mEngineSettings.setBool("enable indoor shadows", "Shadows", cIndoorShadows);
+
+    int cShadowRes = shadowResolutionComboBox->currentText().toInt();
+    if (cShadowRes != mEngineSettings.getInt("shadow map resolution", "Shadows"))
+        mEngineSettings.setInt("shadow map resolution", "Shadows", cShadowRes);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
@@ -218,6 +315,17 @@ QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
 QRect Launcher::GraphicsPage::getMaximumResolution()
 {
     QRect max;
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
+    for (QScreen* screen : QGuiApplication::screens())
+    {
+        QRect res = screen->geometry();
+        if (res.width() > max.width())
+            max.setWidth(res.width());
+        if (res.height() > max.height())
+            max.setHeight(res.height());
+    }
+#else
     int screens = QApplication::desktop()->screenCount();
     for (int i = 0; i < screens; ++i)
     {
@@ -227,6 +335,7 @@ QRect Launcher::GraphicsPage::getMaximumResolution()
         if (res.height() > max.height())
             max.setHeight(res.height());
     }
+#endif
     return max;
 }
 
@@ -265,4 +374,15 @@ void Launcher::GraphicsPage::slotStandardToggled(bool checked)
         customWidthSpinBox->setEnabled(true);
         customHeightSpinBox->setEnabled(true);
     }
+}
+
+void Launcher::GraphicsPage::slotFramerateLimitToggled(bool checked)
+{
+    framerateLimitSpinBox->setEnabled(checked);
+}
+
+void Launcher::GraphicsPage::slotShadowDistLimitToggled(bool checked)
+{
+    shadowDistanceSpinBox->setEnabled(checked);
+    fadeStartSpinBox->setEnabled(checked);
 }

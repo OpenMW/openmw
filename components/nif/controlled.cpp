@@ -9,18 +9,19 @@ namespace Nif
     {
         Named::read(nif);
 
-        external = !!nif->getChar();
-        if(external)
+        external = nif->getChar() != 0;
+        bool internal = false;
+        if (external)
             filename = nif->getString();
         else
-        {
-            nif->getChar(); // always 1
-            data.read(nif);
-        }
+            internal = nif->getChar();
 
-        pixel = nif->getInt();
-        mipmap = nif->getInt();
-        alpha = nif->getInt();
+        if (!external && internal)
+            data.read(nif);
+
+        pixel = nif->getUInt();
+        mipmap = nif->getUInt();
+        alpha = nif->getUInt();
 
         nif->getChar(); // always 1
     }
@@ -31,28 +32,40 @@ namespace Nif
         data.post(nif);
     }
 
+    void NiParticleModifier::read(NIFStream *nif)
+    {
+        next.read(nif);
+        controller.read(nif);
+    }
+
+    void NiParticleModifier::post(NIFFile *nif)
+    {
+        next.post(nif);
+        controller.post(nif);
+    }
+
     void NiParticleGrowFade::read(NIFStream *nif)
     {
-        Controlled::read(nif);
+        NiParticleModifier::read(nif);
         growTime = nif->getFloat();
         fadeTime = nif->getFloat();
     }
 
     void NiParticleColorModifier::read(NIFStream *nif)
     {
-        Controlled::read(nif);
+        NiParticleModifier::read(nif);
         data.read(nif);
     }
 
     void NiParticleColorModifier::post(NIFFile *nif)
     {
-        Controlled::post(nif);
+        NiParticleModifier::post(nif);
         data.post(nif);
     }
 
     void NiGravity::read(NIFStream *nif)
     {
-        Controlled::read(nif);
+        NiParticleModifier::read(nif);
 
         mDecay = nif->getFloat();
         mForce = nif->getFloat();
@@ -61,11 +74,17 @@ namespace Nif
         mDirection = nif->getVector3();
     }
 
-    void NiPlanarCollider::read(NIFStream *nif)
+    void NiParticleCollider::read(NIFStream *nif)
     {
-        Controlled::read(nif);
+        NiParticleModifier::read(nif);
 
         mBounceFactor = nif->getFloat();
+    }
+
+    void NiPlanarCollider::read(NIFStream *nif)
+    {
+        NiParticleCollider::read(nif);
+
         /*unknown*/nif->getFloat();
 
         for (int i=0;i<10;++i)
@@ -77,7 +96,7 @@ namespace Nif
 
     void NiParticleRotation::read(NIFStream *nif)
     {
-        Controlled::read(nif);
+        NiParticleModifier::read(nif);
 
         /*
            byte (0 or 1)
@@ -89,15 +108,10 @@ namespace Nif
 
     void NiSphericalCollider::read(NIFStream* nif)
     {
-        Controlled::read(nif);
+        NiParticleCollider::read(nif);
 
-        mBounceFactor = nif->getFloat();
         mRadius = nif->getFloat();
         mCenter = nif->getVector3();
     }
-
-
-
-
 
 }

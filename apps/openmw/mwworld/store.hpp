@@ -92,6 +92,8 @@ namespace MWWorld
           : mIter(iter)
         {}
 
+        SharedIterator& operator=(const SharedIterator&) = default;
+
         SharedIterator &operator++() {
             ++mIter;
             return *this;
@@ -102,6 +104,11 @@ namespace MWWorld
             ++mIter;
 
             return iter;
+        }
+
+        SharedIterator &operator+=(int advance) {
+            mIter += advance;
+            return *this;
         }
 
         SharedIterator &operator--() {
@@ -312,6 +319,8 @@ namespace MWWorld
         const ESM::Cell *searchExtByRegion(const std::string &id) const;
 
         size_t getSize() const;
+        size_t getExtSize() const;
+        size_t getIntSize() const;
 
         void listIdentifier(std::vector<std::string> &list) const;
 
@@ -380,6 +389,30 @@ namespace MWWorld
 
         const ESM::Attribute *search(size_t index) const;
         const ESM::Attribute *find(size_t index) const;
+
+        void setUp();
+
+        size_t getSize() const;
+        iterator begin() const;
+        iterator end() const;
+    };
+
+    template <>
+    class Store<ESM::WeaponType> : public StoreBase
+    {
+        std::map<int, ESM::WeaponType> mStatic;
+
+    public:
+        typedef std::map<int, ESM::WeaponType>::const_iterator iterator;
+
+        Store();
+
+        const ESM::WeaponType *search(const int id) const;
+        const ESM::WeaponType *find(const int id) const;
+
+        RecordId load(ESM::ESMReader &esm) { return RecordId(0, false); }
+
+        ESM::WeaponType* insert(const ESM::WeaponType &weaponType);
 
         void setUp();
 
