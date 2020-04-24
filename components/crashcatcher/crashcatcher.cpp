@@ -555,6 +555,9 @@ static bool is_debugger_present()
 
 void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
 {
+    if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"))
+        if (std::atol(env) != 0)
+            return;
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
         int s[5] = { SIGSEGV, SIGILL, SIGFPE, SIGBUS, SIGABRT };
