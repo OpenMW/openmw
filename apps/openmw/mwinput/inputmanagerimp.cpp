@@ -208,39 +208,19 @@ namespace MWInput
 
     int InputManager::countSavedGameRecords() const
     {
-        return 1;
+        return mControlSwitch->countSavedGameRecords();
     }
 
-    void InputManager::write(ESM::ESMWriter& writer, Loading::Listener& /*progress*/)
+    void InputManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
     {
-        ESM::ControlsState controls;
-        controls.mViewSwitchDisabled = !getControlSwitch("playerviewswitch");
-        controls.mControlsDisabled = !getControlSwitch("playercontrols");
-        controls.mJumpingDisabled = !getControlSwitch("playerjumping");
-        controls.mLookingDisabled = !getControlSwitch("playerlooking");
-        controls.mVanityModeDisabled = !getControlSwitch("vanitymode");
-        controls.mWeaponDrawingDisabled = !getControlSwitch("playerfighting");
-        controls.mSpellDrawingDisabled = !getControlSwitch("playermagic");
-
-        writer.startRecord (ESM::REC_INPU);
-        controls.save(writer);
-        writer.endRecord (ESM::REC_INPU);
+        mControlSwitch->write(writer, progress);
     }
 
     void InputManager::readRecord(ESM::ESMReader& reader, uint32_t type)
     {
         if (type == ESM::REC_INPU)
         {
-            ESM::ControlsState controls;
-            controls.load(reader);
-
-            toggleControlSwitch("playerviewswitch", !controls.mViewSwitchDisabled);
-            toggleControlSwitch("playercontrols", !controls.mControlsDisabled);
-            toggleControlSwitch("playerjumping", !controls.mJumpingDisabled);
-            toggleControlSwitch("playerlooking", !controls.mLookingDisabled);
-            toggleControlSwitch("vanitymode", !controls.mVanityModeDisabled);
-            toggleControlSwitch("playerfighting", !controls.mWeaponDrawingDisabled);
-            toggleControlSwitch("playermagic", !controls.mSpellDrawingDisabled);
+            mControlSwitch->readRecord(reader, type);
         }
     }
 

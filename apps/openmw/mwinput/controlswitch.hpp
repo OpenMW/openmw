@@ -3,6 +3,18 @@
 
 #include <map>
 
+namespace ESM
+{
+    struct ControlsState;
+    class ESMReader;
+    class ESMWriter;
+}
+
+namespace Loading
+{
+    class Listener;
+}
+
 namespace MWInput
 {
     class ControlSwitch
@@ -13,6 +25,10 @@ namespace MWInput
         bool get(const std::string& key);
         void set(const std::string& key, bool value);
         void clear();
+
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress);
+        void readRecord(ESM::ESMReader& reader, uint32_t type);
+        int countSavedGameRecords() const;
 
     private:
         std::map<std::string, bool> mSwitches;
