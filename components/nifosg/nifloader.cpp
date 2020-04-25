@@ -1078,7 +1078,11 @@ namespace NifOsg
                 parentNode->addChild(trans);
             }
             // create partsys stateset in order to pass in ShaderVisitor like all other Drawables
-            partsys->getOrCreateStateSet()->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            osg::StateSet * stateset =partsys->getOrCreateStateSet();
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            osg::ref_ptr<osg::Depth> depth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0, false);
+            depth = shareAttribute(depth);
+            stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
 
         void triCommonToGeometry(osg::Geometry *geometry, const std::vector<osg::Vec3f>& vertices, const std::vector<osg::Vec3f>& normals, const std::vector<std::vector<osg::Vec2f>>& uvlist, const std::vector<osg::Vec4f>& colors, const std::vector<unsigned int>& boundTextures, const std::string& name)
@@ -1782,7 +1786,13 @@ namespace NifOsg
 
                         bool noSort = (alphaprop->flags>>13)&1;
                         if (!noSort)
+                        {
                             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+                            osg::ref_ptr<osg::Depth> depth = new osg::Depth(osg::Depth::LESS, 0.0, 1.0, false);
+                            depth = shareAttribute(depth);
+                            stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                        }
+
                         else
                             stateset->setRenderBinToInherit();
                     }
