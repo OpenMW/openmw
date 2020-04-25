@@ -25,8 +25,7 @@ namespace MWMechanics
 
     ESM::Skill::SkillEnum spellSchoolToSkill(int school);
 
-    float calcEffectCost(const ESM::ENAMstruct& effect);
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect);
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr);
 
     bool isSummoningEffect(int effectId);
 
@@ -87,11 +86,11 @@ namespace MWMechanics
         void playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects);
 
     public:
-        bool mStack;
+        bool mStack{false};
         std::string mId; // ID of spell, potion, item etc
         std::string mSourceName; // Display name for spell, potion, etc
-        osg::Vec3f mHitPosition; // Used for spawning area orb
-        bool mAlwaysSucceed; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
+        osg::Vec3f mHitPosition{0,0,0}; // Used for spawning area orb
+        bool mAlwaysSucceed{false}; // Always succeed spells casted by NPCs/creatures regardless of their chance (default: false)
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
         bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance, etc.)
 
