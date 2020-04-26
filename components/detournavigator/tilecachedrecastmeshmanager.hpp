@@ -3,6 +3,8 @@
 
 #include "cachedrecastmeshmanager.hpp"
 #include "tileposition.hpp"
+#include "settingsutils.hpp"
+#include "gettilespositions.hpp"
 
 #include <components/misc/guarded.hpp>
 
@@ -20,8 +22,52 @@ namespace DetourNavigator
         bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
                        const AreaType areaType);
 
-        std::vector<TilePosition> updateObject(const ObjectId id, const btCollisionShape& shape,
-                                               const btTransform& transform, const AreaType areaType);
+        template <class OnChangedTile>
+        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+            const AreaType areaType, OnChangedTile&& onChangedTile)
+        {
+            const auto object = mObjectsTilesPositions.find(id);
+            if (object == mObjectsTilesPositions.end())
+                return false;
+            auto& currentTiles = object->second;
+            const auto border = getBorderSize(mSettings);
+            bool changed = false;
+            std::set<TilePosition> newTiles;
+            {
+                auto tiles = mTiles.lock();
+                const auto onTilePosition = [&] (const TilePosition& tilePosition)
+                {
+                    if (currentTiles.count(tilePosition))
+                    {
+                        newTiles.insert(tilePosition);
+                        if (updateTile(id, transform, areaType, tilePosition, tiles.get()))
+                        {
+                            onChangedTile(tilePosition);
+                            changed = true;
+                        }
+                    }
+                    else if (addTile(id, shape, transform, areaType, tilePosition, border, tiles.get()))
+                    {
+                        newTiles.insert(tilePosition);
+                        onChangedTile(tilePosition);
+                        changed = true;
+                    }
+                };
+                getTilesPositions(shape, transform, mSettings, onTilePosition);
+                for (const auto& tile : currentTiles)
+                {
+                    if (!newTiles.count(tile) && removeTile(id, tile, tiles.get()))
+                    {
+                        onChangedTile(tile);
+                        changed = true;
+                    }
+                }
+            }
+            std::swap(currentTiles, newTiles);
+            if (changed)
+                ++mRevision;
+            return changed;
+        }
 
         boost::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
