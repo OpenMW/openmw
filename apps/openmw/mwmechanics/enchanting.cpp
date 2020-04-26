@@ -13,7 +13,7 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
+#include "spellutil.hpp"
 #include "actorutil.hpp"
 #include "weapontype.hpp"
 

@@ -15,10 +15,10 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
-#include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/spells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "tooltips.hpp"
 #include "class.hpp"

@@ -17,7 +17,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
 #include "mapwindow.hpp"

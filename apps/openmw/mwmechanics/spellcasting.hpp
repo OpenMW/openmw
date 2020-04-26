@@ -2,12 +2,9 @@
 #define MWMECHANICS_SPELLCASTING_H
 
 #include <components/esm/effectlist.hpp>
-#include <components/esm/loadskil.hpp>
 #include <components/esm/loadmgef.hpp>
 
 #include "../mwworld/ptr.hpp"
-
-#include "magiceffects.hpp"
 
 namespace ESM
 {
@@ -22,38 +19,6 @@ namespace MWMechanics
     struct EffectKey;
     class MagicEffects;
     class CreatureStats;
-
-    ESM::Skill::SkillEnum spellSchoolToSkill(int school);
-
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr);
-
-    /**
-     * @param spell spell to cast
-     * @param actor calculate spell success chance for this actor (depends on actor's skills)
-     * @param effectiveSchool the spell's effective school (relevant for skill progress) will be written here
-     * @param cap cap the result to 100%?
-     * @param checkMagicka check magicka?
-     * @note actor can be an NPC or a creature
-     * @return success chance from 0 to 100 (in percent), if cap=false then chance above 100 may be returned.
-     */
-    float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=true);
-    float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool = nullptr, bool cap=true, bool checkMagicka=true);
-
-    int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor);
-    int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor);
-
-    /// Get whether or not the given spell contributes to skill progress.
-    bool spellIncreasesSkill(const ESM::Spell* spell);
-    bool spellIncreasesSkill(const std::string& spellId);
-
-    bool checkEffectTarget (int effectId, const MWWorld::Ptr& target, const MWWorld::Ptr& caster, bool castByPlayer);
-
-    int getEffectiveEnchantmentCastCost (float castCost, const MWWorld::Ptr& actor);
-    float calcSpellBaseSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool);
-
-    /// Apply a magic effect that is applied in tick intervals until its remaining time ends or it is removed
-    /// @return Was the effect a tickable effect with a magnitude?
-    bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const MWMechanics::EffectKey& effectKey, float magnitude);
 
     class CastSpell
     {
@@ -104,22 +69,6 @@ namespace MWMechanics
         /// @note \a caster can be any type of object, or even an empty object.
         /// @return was the target suitable for the effect?
         bool applyInstantEffect (const MWWorld::Ptr& target, const MWWorld::Ptr& caster, const MWMechanics::EffectKey& effect, float magnitude);
-    };
-
-    class ApplyLoopingParticlesVisitor : public EffectSourceVisitor
-    {
-    private:
-        MWWorld::Ptr mActor;
-
-    public:
-        ApplyLoopingParticlesVisitor(const MWWorld::Ptr& actor)
-            : mActor(actor)
-        {
-        }
-
-        virtual void visit (MWMechanics::EffectKey key,
-                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1);
     };
 }
 

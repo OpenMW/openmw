@@ -9,7 +9,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
+#include "spellutil.hpp"
 
 namespace MWMechanics
 {

@@ -19,7 +19,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
