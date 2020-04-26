@@ -7,9 +7,15 @@
 
 #include <QDebug>
 
+#include <boost/filesystem/operations.hpp>
+
+#include <components/files/configurationmanager.hpp>
+
 const char Config::LauncherSettings::sCurrentContentListKey[] = "Profiles/currentprofile";
 const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
 const char Config::LauncherSettings::sContentListsSectionPrefix[] = "Profiles/";
+const char Config::LauncherSettings::sDirectoryListSuffix[] = "/data";
+const char Config::LauncherSettings::sArchiveListSuffix[] = "/fallback-archive";
 const char Config::LauncherSettings::sContentListSuffix[] = "/content";
 
 QStringList Config::LauncherSettings::subKeys(const QString &key)
@@ -86,6 +92,16 @@ QStringList Config::LauncherSettings::getContentLists()
     return subKeys(QString(sContentListsSectionPrefix));
 }
 
+QString Config::LauncherSettings::makeDirectoryListKey(const QString& contentListName)
+{
+    return QString(sContentListsSectionPrefix) + contentListName + QString(sDirectoryListSuffix);
+}
+
+QString Config::LauncherSettings::makeArchiveListKey(const QString& contentListName)
+{
+    return QString(sContentListsSectionPrefix) + contentListName + QString(sArchiveListSuffix);
+}
+
 QString Config::LauncherSettings::makeContentListKey(const QString& contentListName)
 {
     return QString(sContentListsSectionPrefix) + contentListName + QString(sContentListSuffix);
@@ -94,18 +110,28 @@ QString Config::LauncherSettings::makeContentListKey(const QString& contentListN
 void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
 {
     // obtain content list from game settings (if present)
+    QStringList dirs(gameSettings.getDataDirs());
+    const QStringList archives(gameSettings.getArchiveList());
     const QStringList files(gameSettings.getContentList());
 
     // if openmw.cfg has no content, exit so we don't create an empty content list.
-    if (files.isEmpty())
+    if (dirs.isEmpty() || files.isEmpty())
     {
         return;
     }
 
+    // global and local data directories are not part of any profile
+    const auto globalDataDir = QString(gameSettings.getGlobalDataDir().c_str());
+    const auto dataLocal = gameSettings.getDataLocal();
+    dirs.removeAll(globalDataDir);
+    dirs.removeAll(dataLocal);
+
     // if any existing profile in launcher matches the content list, make that profile the default
     for (const QString &listName : getContentLists())
     {
-        if (isEqual(files, getContentListFiles(listName)))
+        if (isEqual(files, getContentListFiles(listName)) &&
+            isEqual(archives, getArchiveList(listName)) &&
+            isEqual(dirs, getDataDirectoryList(listName)))
         {
             setCurrentContentListName(listName);
             return;
@@ -115,11 +141,13 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     // otherwise, add content list
     QString newContentListName(makeNewContentListName());
     setCurrentContentListName(newContentListName);
-    setContentList(newContentListName, files);
+    setContentList(newContentListName, dirs, archives, files);
 }
 
 void Config::LauncherSettings::removeContentList(const QString &contentListName)
 {
+    remove(makeDirectoryListKey(contentListName));
+    remove(makeArchiveListKey(contentListName));
     remove(makeContentListKey(contentListName));
 }
 
@@ -129,14 +157,18 @@ void Config::LauncherSettings::setCurrentContentListName(const QString &contentL
     setValue(QString(sCurrentContentListKey), contentListName);
 }
 
-void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& fileNames)
+void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames)
 {
-    removeContentList(contentListName);
-    QString key = makeContentListKey(contentListName);
-    for (const QString& fileName : fileNames)
+    auto const assign = [this](const QString key, const QStringList& list)
     {
-        setMultiValue(key, fileName);
-    }
+        for (auto const& item : list)
+            setMultiValue(key, item);
+    };
+
+    removeContentList(contentListName);
+    assign(makeDirectoryListKey(contentListName), dirNames);
+    assign(makeArchiveListKey(contentListName), archiveNames);
+    assign(makeContentListKey(contentListName), fileNames);
 }
 
 QString Config::LauncherSettings::getCurrentContentListName() const
@@ -144,6 +176,17 @@ QString Config::LauncherSettings::getCurrentContentListName() const
     return value(QString(sCurrentContentListKey));
 }
 
+QStringList Config::LauncherSettings::getDataDirectoryList(const QString& contentListName) const
+{
+    // QMap returns multiple rows in LIFO order, so need to reverse
+    return reverse(getSettings().values(makeDirectoryListKey(contentListName)));
+}
+
+QStringList Config::LauncherSettings::getArchiveList(const QString& contentListName) const
+{
+    // QMap returns multiple rows in LIFO order, so need to reverse
+    return reverse(getSettings().values(makeArchiveListKey(contentListName)));
+}
 QStringList Config::LauncherSettings::getContentListFiles(const QString& contentListName) const
 {
     // QMap returns multiple rows in LIFO order, so need to reverse

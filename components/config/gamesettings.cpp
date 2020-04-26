@@ -7,7 +7,9 @@
 
 #include <components/files/configurationmanager.hpp>
 
+const char Config::GameSettings::sArchiveKey[] = "fallback-archive";
 const char Config::GameSettings::sContentKey[] = "content";
+const char Config::GameSettings::sDirectoryKey[] = "data";
 
 Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
     : mCfgMgr(cfg)
@@ -61,6 +63,14 @@ void Config::GameSettings::validatePaths()
         if (dir.exists())
             mDataLocal = path;
     }
+}
+
+std::string Config::GameSettings::getGlobalDataDir() const
+{
+    // global data dir may not exists if OpenMW is not installed (ie if run from build directory)
+    if (boost::filesystem::exists(mCfgMgr.getGlobalDataPath()))
+        return boost::filesystem::canonical(mCfgMgr.getGlobalDataPath()).string();
+    return {};
 }
 
 QStringList Config::GameSettings::values(const QString &key, const QStringList &defaultValues) const
@@ -475,13 +485,29 @@ bool Config::GameSettings::hasMaster()
     return result;
 }
 
-void Config::GameSettings::setContentList(const QStringList& fileNames)
+void Config::GameSettings::setContentList(const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames)
 {
-    remove(sContentKey);
-    for (const QString& fileName : fileNames)
+    auto const reset = [this](const char* key, const QStringList& list)
     {
-        setMultiValue(sContentKey, fileName);
-    }
+        remove(key);
+        for (auto const& item : list)
+            setMultiValue(key, item);
+    };
+
+    reset(sDirectoryKey, dirNames);
+    reset(sArchiveKey, archiveNames);
+    reset(sContentKey, fileNames);
+}
+
+QStringList Config::GameSettings::getDataDirs() const
+{
+    return Config::LauncherSettings::reverse(mDataDirs);
+}
+
+QStringList Config::GameSettings::getArchiveList() const
+{
+    // QMap returns multiple rows in LIFO order, so need to reverse
+    return Config::LauncherSettings::reverse(values(sArchiveKey));
 }
 
 QStringList Config::GameSettings::getContentList() const

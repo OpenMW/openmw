@@ -53,7 +53,8 @@ namespace Config
             mUserSettings.remove(key);
         }
 
-        inline QStringList getDataDirs() const { return mDataDirs; }
+        QStringList getDataDirs() const;
+        std::string getGlobalDataDir() const;
 
         inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
@@ -70,7 +71,8 @@ namespace Config
         bool writeFile(QTextStream &stream);
         bool writeFileWithComments(QFile &file);
 
-        void setContentList(const QStringList& fileNames);
+        QStringList getArchiveList() const;
+        void setContentList(const QStringList& dirNames, const QStringList& archiveNames, const QStringList& fileNames);
         QStringList getContentList() const;
 
         void clear();
@@ -85,7 +87,9 @@ namespace Config
         QStringList mDataDirs;
         QString mDataLocal;
 
+        static const char sArchiveKey[];
         static const char sContentKey[];
+        static const char sDirectoryKey[];
 
         static bool isOrderedLine(const QString& line) ;
     };

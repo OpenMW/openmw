@@ -44,6 +44,7 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
     ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/advancedpage.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/directorypicker.ui
 )
 
 source_group(launcher FILES ${LAUNCHER} ${LAUNCHER_HEADER})
