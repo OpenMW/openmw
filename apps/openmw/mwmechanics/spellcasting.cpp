@@ -20,7 +20,7 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "npcstats.hpp"
+#include "creaturestats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
 #include "weapontype.hpp"
@@ -515,16 +515,14 @@ namespace MWMechanics
 
     bool CastSpell::cast(const std::string &id)
     {
-        if (const ESM::Spell *spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (id))
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        if (const auto spell = store.get<ESM::Spell>().search(id))
             return cast(spell);
 
-        if (const ESM::Potion *potion =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>().search (id))
+        if (const auto potion = store.get<ESM::Potion>().search(id))
             return cast(potion);
 
-        if (const ESM::Ingredient *ingredient =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Ingredient>().search (id))
+        if (const auto ingredient = store.get<ESM::Ingredient>().search(id))
             return cast(ingredient);
 
         throw std::runtime_error("ID type cannot be casted");
@@ -687,10 +685,9 @@ namespace MWMechanics
                 stats.getSpells().usePower(spell);
         }
 
-        if (mCaster == getPlayer() && spellIncreasesSkill())
-            mCaster.getClass().skillUsageSucceeded(mCaster,
-                spellSchoolToSkill(school), 0);
-    
+        if (!mManualSpell && mCaster == getPlayer() && spellIncreasesSkill(spell))
+            mCaster.getClass().skillUsageSucceeded(mCaster, spellSchoolToSkill(school), 0);
+
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
             playSpellCastingEffects(spell->mEffects.mList);
@@ -718,10 +715,8 @@ namespace MWMechanics
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 
-        const ESM::MagicEffect *magicEffect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find (
-            effect.mEffectID);
-
+        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
         const MWMechanics::CreatureStats& creatureStats = mCaster.getClass().getCreatureStats(mCaster);
 
         float x = (mCaster.getClass().getSkill(mCaster, ESM::Skill::Alchemy) +
@@ -733,7 +728,7 @@ namespace MWMechanics
         if (roll > x)
         {
             // "X has no effect on you"
-            std::string message = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
+            std::string message = store.get<ESM::GameSetting>().find("sNotifyMessage50")->mValue.getString();
             message = Misc::StringUtils::format(message, ingredient->mName);
             MWBase::Environment::get().getWindowManager()->messageBox(message);
             return false;
@@ -833,10 +828,5 @@ namespace MWMechanics
             else
                 sndMgr->playSound3D(mCaster, schools[effect->mData.mSchool]+" cast", 1.0f, 1.0f);
         }
-    }
-
-    bool CastSpell::spellIncreasesSkill()
-    {
-        return !mManualSpell && MWMechanics::spellIncreasesSkill(mId);
     }
 }

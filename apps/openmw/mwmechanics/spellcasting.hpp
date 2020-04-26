@@ -17,8 +17,6 @@ namespace ESM
 namespace MWMechanics
 {
     struct EffectKey;
-    class MagicEffects;
-    class CreatureStats;
 
     class CastSpell
     {
@@ -55,8 +53,6 @@ namespace MWMechanics
         bool cast (const std::string& id);
 
         void playSpellCastingEffects(const std::string &spellid, bool enchantment);
-
-        bool spellIncreasesSkill();
 
         /// Launch a bolt with the given effects.
         void launchMagicBolt ();
