@@ -32,41 +32,23 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        static std::map<int, ESM::Skill::SkillEnum> schoolSkillMap; // maps spell school to skill id
-        if (schoolSkillMap.empty())
+        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray
         {
-            schoolSkillMap[0] = ESM::Skill::Alteration;
-            schoolSkillMap[1] = ESM::Skill::Conjuration;
-            schoolSkillMap[3] = ESM::Skill::Illusion;
-            schoolSkillMap[2] = ESM::Skill::Destruction;
-            schoolSkillMap[4] = ESM::Skill::Mysticism;
-            schoolSkillMap[5] = ESM::Skill::Restoration;
-        }
-
-        assert(schoolSkillMap.find(school) != schoolSkillMap.end());
-        return schoolSkillMap[school];
-    }
-
-    float calcEffectCost(const ESM::ENAMstruct& effect)
-    {
-        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
-        return calcEffectCost(effect, magicEffect);
+            ESM::Skill::Alteration, ESM::Skill::Conjuration, ESM::Skill::Destruction,
+            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration
+        };
+        return schoolSkillArray.at(school);
     }
 
     float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
     {
-        int minMagn = 1;
-        int maxMagn = 1;
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude))
-        {
-            minMagn = effect.mMagnMin;
-            maxMagn = effect.mMagnMax;
-        }
-
-        int duration = 1;
-        if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
-            duration = effect.mDuration;
-
+        if (!magicEffect)
+            magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+        bool hasMagnitude = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude);
+        bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+        int minMagn = hasMagnitude ? effect.mMagnMin : 1;
+        int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
+        int duration = hasDuration ? effect.mDuration : 1;
         static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore()
             .get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
@@ -84,19 +66,18 @@ namespace MWMechanics
         float y = std::numeric_limits<float>::max();
         float lowestSkill = 0;
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = spell->mEffects.mList.begin(); it != spell->mEffects.mList.end(); ++it)
+        for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
         {
-            float x = static_cast<float>(it->mDuration);
-            const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
-                        it->mEffectID);
+            float x = static_cast<float>(effect.mDuration);
+            const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
 
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
 
             x *= 0.1f * magicEffect->mData.mBaseCost;
-            x *= 0.5f * (it->mMagnMin + it->mMagnMax);
-            x *= it->mArea * 0.05f * magicEffect->mData.mBaseCost;
-            if (it->mRange == ESM::RT_Target)
+            x *= 0.5f * (effect.mMagnMin + effect.mMagnMax);
+            x += effect.mArea * 0.05f * magicEffect->mData.mBaseCost;
+            if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
                         "fEffectCostMult")->mValue.getFloat();
@@ -149,23 +130,17 @@ namespace MWMechanics
             return 100;
 
         if (godmode)
-        {
             return 100;
-        }
 
-        if (!cap)
-            return std::max(0.f, castChance);
-        else
-            return std::max(0.f, std::min(100.f, castChance));
+        return std::max(0.f, cap ? std::min(100.f, castChance) : castChance);
     }
 
     float getSpellSuccessChance (const std::string& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
+        if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId))
+            return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
+        return 0.f;
     }
-
 
     int getSpellSchool(const std::string& spellId, const MWWorld::Ptr& actor)
     {
@@ -183,16 +158,13 @@ namespace MWMechanics
 
     bool spellIncreasesSkill(const ESM::Spell *spell)
     {
-        if (spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always))
-            return true;
-        return false;
+        return spell->mData.mType == ESM::Spell::ST_Spell && !(spell->mData.mFlags & ESM::Spell::F_Always);
     }
 
     bool spellIncreasesSkill(const std::string &spellId)
     {
-        const ESM::Spell* spell =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
-        return spellIncreasesSkill(spell);
+        const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+        return spell && spellIncreasesSkill(spell);
     }
 
     float getEffectResistanceAttribute (short effectId, const MagicEffects* actorEffects)
@@ -314,10 +286,9 @@ namespace MWMechanics
     class GetAbsorptionProbability : public MWMechanics::EffectSourceVisitor
     {
     public:
-        float mProbability;
+        float mProbability{0.f};
 
-        GetAbsorptionProbability(const MWWorld::Ptr& actor)
-            : mProbability(0.f){}
+        GetAbsorptionProbability() = default;
 
         virtual void visit (MWMechanics::EffectKey key,
                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
@@ -342,9 +313,6 @@ namespace MWMechanics
     CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile, const bool manualSpell)
         : mCaster(caster)
         , mTarget(target)
-        , mStack(false)
-        , mHitPosition(0,0,0)
-        , mAlwaysSucceed(false)
         , mFromProjectile(fromProjectile)
         , mManualSpell(manualSpell)
     {
@@ -375,10 +343,9 @@ namespace MWMechanics
 
         // If none of the effects need to apply, we can early-out
         bool found = false;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter (effects.mList.begin());
-            iter!=effects.mList.end(); ++iter)
+        for (const ESM::ENAMstruct& effect : effects.mList)
         {
-            if (iter->mRange == range)
+            if (effect.mRange == range)
             {
                 found = true;
                 break;
@@ -441,8 +408,7 @@ namespace MWMechanics
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCannotRecast}");
                 continue;
             }
-            else
-                canCastAnEffect = true;
+            canCastAnEffect = true;
 
             if (!checkEffectTarget(effectIt->mEffectID, target, caster, castByPlayer))
                 continue;
@@ -466,7 +432,7 @@ namespace MWMechanics
                 CreatureStats& stats = target.getClass().getCreatureStats(target);
                 if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f)
                 {
-                    GetAbsorptionProbability check(target);
+                    GetAbsorptionProbability check;
                     stats.getActiveSpells().visitEffectSources(check);
                     stats.getSpells().visitEffectSources(check);
                     if (target.getClass().hasInventoryStore(target))
@@ -578,11 +544,7 @@ namespace MWMechanics
                     }
                     else
                     {
-
-                        if (!hasDuration)
-                            effect.mDuration = 1.0f;
-                        else
-                            effect.mDuration = static_cast<float>(effectIt->mDuration);
+                        effect.mDuration = hasDuration ? static_cast<float>(effectIt->mDuration) : 1.f;
 
                         targetEffects.add(MWMechanics::EffectKey(*effectIt), MWMechanics::EffectParam(effect.mMagnitude));
 
@@ -658,13 +620,11 @@ namespace MWMechanics
                     else
                         castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
 
-                    std::string texture = magicEffect->mParticle;
-
                     bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
                     // Note: in case of non actor, a free effect should be fine as well
                     MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);
-                    if (anim)
-                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", texture);
+                    if (anim && !castStatic->mModel.empty())
+                        anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", magicEffect->mParticle);
                 }
             }
         }
@@ -985,7 +945,7 @@ namespace MWMechanics
     
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
-            playSpellCastingEffects(mId, false);
+            playSpellCastingEffects(spell->mEffects.mList);
 
         inflict(mCaster, mCaster, spell->mEffects, ESM::RT_Self);
 
@@ -1065,14 +1025,13 @@ namespace MWMechanics
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (enchantment)
         {
-            const ESM::Enchantment *spell = store.get<ESM::Enchantment>().find(spellid);
-            playSpellCastingEffects(spell->mEffects.mList);
-
+            if (const auto spell = store.get<ESM::Enchantment>().search(spellid))
+                playSpellCastingEffects(spell->mEffects.mList);
         }
         else
         {
-            const ESM::Spell *spell = store.get<ESM::Spell>().find(spellid);
-            playSpellCastingEffects(spell->mEffects.mList);
+            if (const auto spell = store.get<ESM::Spell>().search(spellid))
+                playSpellCastingEffects(spell->mEffects.mList);
         }
     }
 
@@ -1080,12 +1039,9 @@ namespace MWMechanics
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         std::vector<std::string> addedEffects;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter = effects.begin(); iter != effects.end(); ++iter)
+        for (const ESM::ENAMstruct& effectData : effects)
         {
-            const ESM::MagicEffect *effect;
-            effect = store.get<ESM::MagicEffect>().find(iter->mEffectID);
-
-            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
+            const auto effect = store.get<ESM::MagicEffect>().find(effectData.mEffectID);
 
             const ESM::Static* castStatic;
 
@@ -1098,13 +1054,10 @@ namespace MWMechanics
             if (std::find(addedEffects.begin(), addedEffects.end(), "meshes\\" + castStatic->mModel) != addedEffects.end())
                 continue;
 
-            std::string texture = effect->mParticle;
-
-            osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
-
+            MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
             if (animation)
             {
-                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", texture);
+                animation->addEffect("meshes\\" + castStatic->mModel, effect->mIndex, false, "", effect->mParticle);
             }
             else
             {
@@ -1113,6 +1066,7 @@ namespace MWMechanics
                 osg::Vec3f bounds (MWBase::Environment::get().getWorld()->getHalfExtents(mCaster) * 2.f / Constants::UnitsPerFoot);
                 float scale = std::max({ bounds.x()/3.f, bounds.y()/3.f, bounds.z()/6.f });
                 float meshScale = !mCaster.getClass().isActor() ? mCaster.getCellRef().getScale() : 1.0f;
+                osg::Vec3f pos (mCaster.getRefData().getPosition().asVec3());
                 MWBase::Environment::get().getWorld()->spawnEffect("meshes\\" + castStatic->mModel, effect->mParticle, pos, scale * meshScale);
             }
 
@@ -1135,10 +1089,7 @@ namespace MWMechanics
 
     bool CastSpell::spellIncreasesSkill()
     {
-        if (mManualSpell)
-            return false;
-
-        return MWMechanics::spellIncreasesSkill(mId);
+        return !mManualSpell && MWMechanics::spellIncreasesSkill(mId);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
@@ -1167,8 +1118,7 @@ namespace MWMechanics
         if (ptr.getClass().hasInventoryStore(ptr))
         {
             MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
-            MWWorld::ContainerStoreIterator item =
-                    inv.getSlot(slot);
+            MWWorld::ContainerStoreIterator item = inv.getSlot(slot);
 
             if (item != inv.end() && (item.getType() == MWWorld::ContainerStore::Type_Armor || item.getType() == MWWorld::ContainerStore::Type_Weapon))
             {
@@ -1183,9 +1133,7 @@ namespace MWMechanics
                 item->getCellRef().applyChargeRemainderToBeSubtracted(disintegrate - std::floor(disintegrate));
 
                 charge = item->getClass().getItemHealth(*item);
-                charge -=
-                        std::min(static_cast<int>(disintegrate),
-                                 charge);
+                charge -= std::min(static_cast<int>(disintegrate), charge);
                 item->getCellRef().setCharge(charge);
 
                 if (charge == 0)
@@ -1366,58 +1314,52 @@ namespace MWMechanics
 
     std::string getSummonedCreature(int effectId)
     {
-        static std::map<int, std::string> summonMap;
-        if (summonMap.empty())
+        static const std::map<int, std::string> summonMap
         {
-            summonMap[ESM::MagicEffect::SummonAncestralGhost] = "sMagicAncestralGhostID";
-            summonMap[ESM::MagicEffect::SummonBonelord] = "sMagicBonelordID";
-            summonMap[ESM::MagicEffect::SummonBonewalker] = "sMagicLeastBonewalkerID";
-            summonMap[ESM::MagicEffect::SummonCenturionSphere] = "sMagicCenturionSphereID";
-            summonMap[ESM::MagicEffect::SummonClannfear] = "sMagicClannfearID";
-            summonMap[ESM::MagicEffect::SummonDaedroth] = "sMagicDaedrothID";
-            summonMap[ESM::MagicEffect::SummonDremora] = "sMagicDremoraID";
-            summonMap[ESM::MagicEffect::SummonFabricant] = "sMagicFabricantID";
-            summonMap[ESM::MagicEffect::SummonFlameAtronach] = "sMagicFlameAtronachID";
-            summonMap[ESM::MagicEffect::SummonFrostAtronach] = "sMagicFrostAtronachID";
-            summonMap[ESM::MagicEffect::SummonGoldenSaint] = "sMagicGoldenSaintID";
-            summonMap[ESM::MagicEffect::SummonGreaterBonewalker] = "sMagicGreaterBonewalkerID";
-            summonMap[ESM::MagicEffect::SummonHunger] = "sMagicHungerID";
-            summonMap[ESM::MagicEffect::SummonScamp] = "sMagicScampID";
-            summonMap[ESM::MagicEffect::SummonSkeletalMinion] = "sMagicSkeletalMinionID";
-            summonMap[ESM::MagicEffect::SummonStormAtronach] = "sMagicStormAtronachID";
-            summonMap[ESM::MagicEffect::SummonWingedTwilight] = "sMagicWingedTwilightID";
-            summonMap[ESM::MagicEffect::SummonWolf] = "sMagicCreature01ID";
-            summonMap[ESM::MagicEffect::SummonBear] = "sMagicCreature02ID";
-            summonMap[ESM::MagicEffect::SummonBonewolf] = "sMagicCreature03ID";
-            summonMap[ESM::MagicEffect::SummonCreature04] = "sMagicCreature04ID";
-            summonMap[ESM::MagicEffect::SummonCreature05] = "sMagicCreature05ID";
-        }
+            {ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID"},
+            {ESM::MagicEffect::SummonBonelord, "sMagicBonelordID"},
+            {ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID"},
+            {ESM::MagicEffect::SummonCenturionSphere, "sMagicCenturionSphereID"},
+            {ESM::MagicEffect::SummonClannfear, "sMagicClannfearID"},
+            {ESM::MagicEffect::SummonDaedroth, "sMagicDaedrothID"},
+            {ESM::MagicEffect::SummonDremora, "sMagicDremoraID"},
+            {ESM::MagicEffect::SummonFabricant, "sMagicFabricantID"},
+            {ESM::MagicEffect::SummonFlameAtronach, "sMagicFlameAtronachID"},
+            {ESM::MagicEffect::SummonFrostAtronach, "sMagicFrostAtronachID"},
+            {ESM::MagicEffect::SummonGoldenSaint, "sMagicGoldenSaintID"},
+            {ESM::MagicEffect::SummonGreaterBonewalker, "sMagicGreaterBonewalkerID"},
+            {ESM::MagicEffect::SummonHunger, "sMagicHungerID"},
+            {ESM::MagicEffect::SummonScamp, "sMagicScampID"},
+            {ESM::MagicEffect::SummonSkeletalMinion, "sMagicSkeletalMinionID"},
+            {ESM::MagicEffect::SummonStormAtronach, "sMagicStormAtronachID"},
+            {ESM::MagicEffect::SummonWingedTwilight, "sMagicWingedTwilightID"},
+            {ESM::MagicEffect::SummonWolf, "sMagicCreature01ID"},
+            {ESM::MagicEffect::SummonBear, "sMagicCreature02ID"},
+            {ESM::MagicEffect::SummonBonewolf, "sMagicCreature03ID"},
+            {ESM::MagicEffect::SummonCreature04, "sMagicCreature04ID"},
+            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"}
+        };
 
-        std::map<int, std::string>::const_iterator it = summonMap.find(effectId);
-        if (it == summonMap.end())
-            return std::string();
-        else
+        auto it = summonMap.find(effectId);
+        if (it != summonMap.end())
             return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->mValue.getString();
+        return std::string();
     }
 
     void ApplyLoopingParticlesVisitor::visit (MWMechanics::EffectKey key,
                         const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
                         float /*magnitude*/, float /*remainingTime*/, float /*totalTime*/)
     {
-        const ESM::MagicEffect *magicEffect =
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(key.mId);
-
+        const auto magicEffect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(key.mId);
+        if ((magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) == 0)
+            return;
         const ESM::Static* castStatic;
         if (!magicEffect->mHit.empty())
             castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find (magicEffect->mHit);
         else
             castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_DefaultHit");
-
-        std::string texture = magicEffect->mParticle;
-
-        bool loop = (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
-        if (anim && loop)
-            anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, loop, "", texture);
+        if (anim && !castStatic->mModel.empty())
+            anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, /*loop*/true, "", magicEffect->mParticle);
     }
 }
