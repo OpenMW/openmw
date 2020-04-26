@@ -591,7 +591,13 @@ namespace NifOsg
             {
                 bool hasVisController = false;
                 for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
-                    hasVisController = (ctrl->recType == Nif::RC_NiVisController);
+                {
+                    if (ctrl->recType == Nif::RC_NiVisController)
+                    {
+                        hasVisController = true;
+                        break;
+                    }
+                }
 
                 if (!hasVisController)
                     skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating collision shapes
