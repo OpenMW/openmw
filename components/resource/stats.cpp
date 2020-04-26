@@ -8,6 +8,8 @@
 
 #include <osgText/Text>
 
+#include <osgDB/Registry>
+
 #include <osgViewer/Viewer>
 #include <osgViewer/Renderer>
 
@@ -32,12 +34,14 @@ StatsHandler::StatsHandler():
 
     _resourceStatsChildNum = 0;
 
-    _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
+        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
 }
 
 Profiler::Profiler()
 {
-    _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
+        _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
 
     setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
 }
