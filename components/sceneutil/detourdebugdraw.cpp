@@ -7,9 +7,6 @@
 #include <osg/Group>
 #include <osg/LineWidth>
 
-#define OPENMW_TO_STRING(X) #X
-#define OPENMW_LINE_STRING OPENMW_TO_STRING(__LINE__)
-
 namespace
 {
     using DetourNavigator::operator<<;
@@ -121,6 +118,3 @@ namespace SceneUtil
         mColors->push_back(value);
     }
 }
-
-#undef OPENMW_TO_STRING
-#undef OPENMW_LINE_STRING
