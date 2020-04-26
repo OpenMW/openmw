@@ -32,12 +32,12 @@ namespace MWMechanics
 {
     ESM::Skill::SkillEnum spellSchoolToSkill(int school)
     {
-        static const std::map<int, ESM::Skill::SkillEnum> schoolSkillMap
+        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray
         {
-            {0, ESM::Skill::Alteration}, {1, ESM::Skill::Conjuration}, {2, ESM::Skill::Destruction},
-            {3, ESM::Skill::Illusion}, {4, ESM::Skill::Mysticism}, {5, ESM::Skill::Restoration}
+            ESM::Skill::Alteration, ESM::Skill::Conjuration, ESM::Skill::Destruction,
+            ESM::Skill::Illusion, ESM::Skill::Mysticism, ESM::Skill::Restoration
         };
-        return schoolSkillMap.at(school);
+        return schoolSkillArray.at(school);
     }
 
     float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
