@@ -2,7 +2,6 @@
 
 #include <components/misc/constants.hpp>
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -20,44 +19,19 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "creaturestats.hpp"
 #include "actorutil.hpp"
 #include "aifollow.hpp"
-#include "weapontype.hpp"
-#include "summoning.hpp"
+#include "creaturestats.hpp"
+#include "linkedeffects.hpp"
+#include "spellabsorption.hpp"
 #include "spellresistance.hpp"
 #include "spellutil.hpp"
+#include "summoning.hpp"
 #include "tickableeffects.hpp"
+#include "weapontype.hpp"
 
 namespace MWMechanics
 {
-    class GetAbsorptionProbability : public MWMechanics::EffectSourceVisitor
-    {
-    public:
-        float mProbability{0.f};
-
-        GetAbsorptionProbability() = default;
-
-        virtual void visit (MWMechanics::EffectKey key,
-                                const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1)
-        {
-            if (key.mId == ESM::MagicEffect::SpellAbsorption)
-            {
-                if (mProbability == 0.f)
-                    mProbability = magnitude / 100;
-                else
-                {
-                    // If there are different sources of SpellAbsorption effect, multiply failing probability for all effects.
-                    // Real absorption probability will be the (1 - total fail chance) in this case.
-                    float failProbability = 1.f - mProbability;
-                    failProbability *= 1.f - magnitude / 100;
-                    mProbability = 1.f - failProbability;
-                }
-            }
-        }
-    };
-
     CastSpell::CastSpell(const MWWorld::Ptr &caster, const MWWorld::Ptr &target, const bool fromProjectile, const bool manualSpell)
         : mCaster(caster)
         , mTarget(target)
@@ -172,57 +146,27 @@ namespace MWMechanics
                     && target.getClass().isActor())
                 MWBase::Environment::get().getWindowManager()->setEnemy(target);
 
-            // Try absorbing if it's a spell
-            // Unlike Reflect, this is done once per spell absorption effect source
+            // Try absorbing the spell
+            // FIXME: this should be done only once for the spell
             bool absorbed = false;
-            if (spell && caster != target && target.getClass().isActor())
+            if (absorbSpell(spell, caster, target))
             {
-                CreatureStats& stats = target.getClass().getCreatureStats(target);
-                if (stats.getMagicEffects().get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f)
-                {
-                    GetAbsorptionProbability check;
-                    stats.getActiveSpells().visitEffectSources(check);
-                    stats.getSpells().visitEffectSources(check);
-                    if (target.getClass().hasInventoryStore(target))
-                        target.getClass().getInventoryStore(target).visitEffectSources(check);
+                absorbed = true;
+                continue;
+            }
 
-                    int absorb = check.mProbability * 100;
-                    absorbed = (Misc::Rng::roll0to99() < absorb);
-                    if (absorbed)
-                    {
-                        const ESM::Static* absorbStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Absorb");
-                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                                    "meshes\\" + absorbStatic->mModel, ESM::MagicEffect::SpellAbsorption, false, "");
-                        // Magicka is increased by cost of spell
-                        DynamicStat<float> magicka = stats.getMagicka();
-                        magicka.setCurrent(magicka.getCurrent() + spell->mData.mCost);
-                        stats.setMagicka(magicka);
-                    }
-                }
+            // Reflect harmful effects
+            if (!reflected && reflectEffect(*effectIt, magicEffect, caster, target, reflectedEffects))
+            {
+                reflected = true;
+                continue;
             }
 
             float magnitudeMult = 1;
 
             if (target.getClass().isActor())
             {
-                if (absorbed)
-                    continue;
-
                 bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
-                // Reflect harmful effects
-                if (isHarmful && !reflected && !caster.isEmpty() && caster != target && !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable))
-                {
-                    float reflect = target.getClass().getCreatureStats(target).getMagicEffects().get(ESM::MagicEffect::Reflect).getMagnitude();
-                    bool isReflected = (Misc::Rng::roll0to99() < reflect);
-                    if (isReflected)
-                    {
-                        const ESM::Static* reflectStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find ("VFX_Reflect");
-                        MWBase::Environment::get().getWorld()->getAnimation(target)->addEffect(
-                                    "meshes\\" + reflectStatic->mModel, ESM::MagicEffect::Reflect, false, "");
-                        reflectedEffects.mList.push_back(*effectIt);
-                        continue;
-                    }
-                }
 
                 // Try resisting
                 magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
@@ -317,23 +261,8 @@ namespace MWMechanics
 
                         // For absorb effects, also apply the effect to the caster - but with a negative
                         // magnitude, since we're transferring stats from the target to the caster
-                        if (!caster.isEmpty() && caster != target && caster.getClass().isActor())
-                        {
-                            if (effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute &&
-                                effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
-                            {
-                                std::vector<ActiveSpells::ActiveEffect> absorbEffects;
-                                ActiveSpells::ActiveEffect effect_ = effect;
-                                effect_.mMagnitude *= -1;
-                                absorbEffects.push_back(effect_);
-                                if (reflected && Settings::Manager::getBool("classic reflected absorb spells behavior", "Game"))
-                                    target.getClass().getCreatureStats(target).getActiveSpells().addSpell("", true,
-                                        absorbEffects, mSourceName, caster.getClass().getCreatureStats(caster).getActorId());
-                                else
-                                    caster.getClass().getCreatureStats(caster).getActiveSpells().addSpell("", true,
-                                        absorbEffects, mSourceName, target.getClass().getCreatureStats(target).getActorId());
-                            }
-                        }
+                        if (effectIt->mEffectID >= ESM::MagicEffect::AbsorbAttribute && effectIt->mEffectID <= ESM::MagicEffect::AbsorbSkill)
+                            absorbStat(*effectIt, effect, caster, target, reflected, mSourceName);
                     }
                 }
 

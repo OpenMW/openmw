@@ -117,8 +117,8 @@ namespace MWMechanics
 
         case ESM::MagicEffect::DisintegrateArmor:
         {
-            // According to UESP
-            int priorities[] = {
+            static const std::array<int, 9>  priorities
+            {
                 MWWorld::InventoryStore::Slot_CarriedLeft,
                 MWWorld::InventoryStore::Slot_Cuirass,
                 MWWorld::InventoryStore::Slot_LeftPauldron,
@@ -129,10 +129,9 @@ namespace MWMechanics
                 MWWorld::InventoryStore::Slot_Greaves,
                 MWWorld::InventoryStore::Slot_Boots
             };
-
-            for (unsigned int i=0; i<sizeof(priorities)/sizeof(int); ++i)
+            for (const int priority : priorities)
             {
-                if (disintegrateSlot(actor, priorities[i], magnitude))
+                if (disintegrateSlot(actor, priority, magnitude))
                     break;
             }
 
