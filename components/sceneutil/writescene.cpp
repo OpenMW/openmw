@@ -21,6 +21,7 @@ void SceneUtil::writeScene(osg::Node *node, const std::string& filename, const s
 
     osg::ref_ptr<osgDB::Options> options = new osgDB::Options;
     options->setPluginStringData("fileType", format);
+    options->setPluginStringData("WriteImageHint", "UseExternal");
 
     rw->writeNode(*node, stream, options);
 }
