@@ -52,6 +52,9 @@ namespace MWMechanics
         if (effect.mEffectID < ESM::MagicEffect::AbsorbAttribute || effect.mEffectID > ESM::MagicEffect::AbsorbSkill)
             throw std::runtime_error("invalid absorb stat effect");
 
+        if (appliedEffect.mMagnitude == 0)
+            return;
+
         std::vector<ActiveSpells::ActiveEffect> absorbEffects;
         ActiveSpells::ActiveEffect absorbEffect = appliedEffect;
         absorbEffect.mMagnitude *= -1;

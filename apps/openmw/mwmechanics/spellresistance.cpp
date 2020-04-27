@@ -17,6 +17,9 @@ namespace MWMechanics
     float getEffectMultiplier(short effectId, const MWWorld::Ptr& actor, const MWWorld::Ptr& caster,
                               const ESM::Spell* spell, const MagicEffects* effects)
     {
+        if (!actor.getClass().isActor())
+            return 1;
+
         float resistance = getEffectResistance(effectId, actor, caster, spell, effects);
         return 1 - resistance / 100.f;
     }

@@ -113,6 +113,9 @@ namespace MWMechanics
                                          // throughout the iteration of this spell's 
                                          // effects, we display a "can't re-cast" message
 
+        // Try absorbing the spell. Some handling must still happen for absorbed effects.
+        bool absorbed = absorbSpell(spell, caster, target);
+
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
              !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt)
         {
@@ -140,20 +143,14 @@ namespace MWMechanics
                     && (caster.isEmpty() || !caster.getClass().isActor()))
                 continue;
 
-            // If player is healing someone, show the target's HP bar
-            if (castByPlayer && target != caster
-                    && effectIt->mEffectID == ESM::MagicEffect::RestoreHealth
-                    && target.getClass().isActor())
-                MWBase::Environment::get().getWindowManager()->setEnemy(target);
+            // Notify the target actor they've been hit
+            bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
+            if (target.getClass().isActor() && target != caster && !caster.isEmpty() && isHarmful)
+                target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
 
-            // Try absorbing the spell
-            // FIXME: this should be done only once for the spell
-            bool absorbed = false;
-            if (absorbSpell(spell, caster, target))
-            {
-                absorbed = true;
+            // Avoid proceeding further for absorbed spells.
+            if (absorbed)
                 continue;
-            }
 
             // Reflect harmful effects
             if (!reflected && reflectEffect(*effectIt, magicEffect, caster, target, reflectedEffects))
@@ -162,37 +159,17 @@ namespace MWMechanics
                 continue;
             }
 
-            float magnitudeMult = 1;
-
-            if (target.getClass().isActor())
+            // Try resisting.
+            float magnitudeMult = getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
+            if (magnitudeMult == 0)
             {
-                bool isHarmful = magicEffect->mData.mFlags & ESM::MagicEffect::Harmful;
-
-                // Try resisting
-                magnitudeMult = MWMechanics::getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
-                if (magnitudeMult == 0)
-                {
-                    // Fully resisted, show message
-                    if (target == getPlayer())
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
-                    else if (castByPlayer)
-                        MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
-                }
-                else if (isHarmful && castByPlayer && target != caster)
-                {
-                    // If player is attempting to cast a harmful spell and it wasn't fully resisted, show the target's HP bar
-                    MWBase::Environment::get().getWindowManager()->setEnemy(target);
-                }
-
-                if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState() && isHarmful)
-                    magnitudeMult = 0;
-
-                // Notify the target actor they've been hit
-                if (target != caster && !caster.isEmpty() && isHarmful)
-                    target.getClass().onHit(target, 0.0f, true, MWWorld::Ptr(), caster, osg::Vec3f(), true);
+                // Fully resisted, show message
+                if (target == getPlayer())
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicPCResisted}");
+                else if (castByPlayer)
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResisted}");
             }
-
-            if (magnitudeMult > 0 && !absorbed)
+            else
             {
                 float magnitude = effectIt->mMagnMin + Misc::Rng::rollDice(effectIt->mMagnMax - effectIt->mMagnMin + 1);
                 magnitude *= magnitudeMult;
@@ -219,6 +196,19 @@ namespace MWMechanics
                         effect.mMagnitude = 0;
                     }
 
+                    // Avoid applying harmful effects to the player in god mode
+                    if (target == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState() && isHarmful)
+                    {
+                        effect.mMagnitude = 0;
+                    }
+
+                    bool effectAffectsHealth = isHarmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
+                    if (castByPlayer && target != caster && effectAffectsHealth)
+                    {
+                        // If player is attempting to cast a harmful spell or is healing someone, show the target's HP bar.
+                        MWBase::Environment::get().getWindowManager()->setEnemy(target);
+                    }
+
                     bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
                     if (hasDuration && effectIt->mDuration == 0)
                     {
@@ -228,7 +218,7 @@ namespace MWMechanics
 
                         // duration 0 means apply full magnitude instantly
                         bool wasDead = target.getClass().getCreatureStats(target).isDead();
-                        effectTick(target.getClass().getCreatureStats(target), target, EffectKey(*effectIt), magnitude);
+                        effectTick(target.getClass().getCreatureStats(target), target, EffectKey(*effectIt), effect.mMagnitude);
                         bool isDead = target.getClass().getCreatureStats(target).isDead();
 
                         if (!wasDead && isDead)
@@ -253,7 +243,7 @@ namespace MWMechanics
                         // Command spells should have their effect, including taking the target out of combat, each time the spell successfully affects the target
                         if (((effectIt->mEffectID == ESM::MagicEffect::CommandHumanoid && target.getClass().isNpc())
                         || (effectIt->mEffectID == ESM::MagicEffect::CommandCreature && target.getTypeName() == typeid(ESM::Creature).name()))
-                        && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && magnitude >= target.getClass().getCreatureStats(target).getLevel())
+                        && !caster.isEmpty() && caster.getClass().isActor() && target != getPlayer() && effect.mMagnitude >= target.getClass().getCreatureStats(target).getLevel())
                         {
                             MWMechanics::AiFollow package(caster, true);
                             target.getClass().getCreatureStats(target).getAiSequence().stack(package, target);
