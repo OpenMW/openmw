@@ -154,10 +154,7 @@ namespace MWMechanics
 
             // Reflect harmful effects
             if (!reflected && reflectEffect(*effectIt, magicEffect, caster, target, reflectedEffects))
-            {
-                reflected = true;
                 continue;
-            }
 
             // Try resisting.
             float magnitudeMult = getEffectMultiplier(effectIt->mEffectID, target, caster, spell, &targetEffects);
