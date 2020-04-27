@@ -115,6 +115,8 @@ void registerSerializers()
             "SceneUtil::UpdateRigGeometry",
             "SceneUtil::LightSource",
             "SceneUtil::StateSetUpdater",
+            "SceneUtil::DisableLight",
+            "SceneUtil::MWShadowTechnique",
             "NifOsg::NodeUserData",
             "NifOsg::FlipController",
             "NifOsg::KeyframeController",
