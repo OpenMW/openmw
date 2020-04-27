@@ -42,6 +42,8 @@ Profiler::Profiler()
 {
     if (osgDB::Registry::instance()->getReaderWriterForExtension("ttf"))
         _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
+    else
+	_font = "";
 
     setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
 }
