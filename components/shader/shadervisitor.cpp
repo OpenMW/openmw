@@ -232,7 +232,7 @@ namespace Shader
             {
                 if (!writableStateSet)
                     writableStateSet = getWritableStateSet(node);
-                // We probably shouldn't construct a new version of this each time as StateSets only use pointer comparison by default.
+                // We probably shouldn't construct a new version of this each time as Uniforms use pointer comparison for early-out.
                 // Also it should probably belong to the shader manager
                 writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
             }
