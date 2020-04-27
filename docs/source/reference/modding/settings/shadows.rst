@@ -85,7 +85,7 @@ compute tight scene bounds
 
 :Type:		boolean
 :Range:		True/False
-:Default:	False
+:Default:	True
 
 With this setting enabled, attempt to better use the shadow map(s) by making them cover a smaller area.
 May have a minor to major performance impact.
