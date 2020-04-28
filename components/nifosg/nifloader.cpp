@@ -583,11 +583,8 @@ namespace NifOsg
                 bool hasVisController = false;
                 for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
                 {
-                    if (ctrl->recType == Nif::RC_NiVisController)
-                    {
-                        hasVisController = true;
+                    if (hasVisController |= (ctrl->recType == Nif::RC_NiVisController))
                         break;
-                    }
                 }
 
                 if (!hasVisController)
