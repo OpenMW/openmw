@@ -2,6 +2,7 @@
 
 #include <osgShadow/ShadowedScene>
 
+#include <components/misc/stringops.hpp>
 #include <components/settings/settings.hpp>
 
 namespace SceneUtil
@@ -38,10 +39,13 @@ namespace SceneUtil
         }
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
-        if (Settings::Manager::getBool("compute tight scene bounds", "Shadows"))
+
+        std::string computeNearFarMode = Settings::Manager::getString("near far computation", "Shadows");
+        if (Misc::StringUtils::lowerCase(computeNearFarMode) == "primitives")
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
-        else
+        else if (Misc::StringUtils::lowerCase(computeNearFarMode) == "bounding volumes")
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
+
 
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
         mShadowSettings->setTextureSize(osg::Vec2s(mapres, mapres));
