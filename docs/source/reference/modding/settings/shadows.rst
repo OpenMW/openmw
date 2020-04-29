@@ -88,7 +88,6 @@ compute tight scene bounds
 :Default:	True
 
 With this setting enabled, attempt to better use the shadow map(s) by making them cover a smaller area.
-This can be especially helpful when looking downwards with a high viewing distance but will be less useful with the default value.
 May have a minor to major performance impact.
 
 shadow map resolution
