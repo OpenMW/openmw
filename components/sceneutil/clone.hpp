@@ -37,9 +37,9 @@ namespace SceneUtil
     private:
         // maps new pointers to their old pointers
         // a little messy, but I think this should be the most efficient way
-        mutable std::map<osgParticle::ParticleProcessor*, const osgParticle::ParticleSystem*> mMap;
-        mutable std::map<osgParticle::ParticleSystemUpdater*, const osgParticle::ParticleSystem*> mMap2;
-        mutable std::map<const osgParticle::ParticleSystem*, osgParticle::ParticleSystem*> mMap3;
+        mutable std::map<osgParticle::ParticleProcessor*, const osgParticle::ParticleSystem*> mProcessorToOldPs;
+        mutable std::map<osgParticle::ParticleSystemUpdater*, const osgParticle::ParticleSystem*> mUpdaterToOldPs;
+        mutable std::map<const osgParticle::ParticleSystem*, osgParticle::ParticleSystem*> mOldPsToNewPs;
     };
 
 }
