@@ -28,22 +28,6 @@ namespace Interpreter
                 return;
             }
 
-            case 1:
-            {
-                int opcode = (code>>24) & 0x3f;
-                unsigned int arg0 = (code>>16) & 0xfff;
-                unsigned int arg1 = code & 0xfff;
-
-                std::map<int, Opcode2 *>::iterator iter = mSegment1.find (opcode);
-
-                if (iter==mSegment1.end())
-                    abortUnknownCode (1, opcode);
-
-                iter->second->execute (mRuntime, arg0, arg1);
-
-                return;
-            }
-
             case 2:
             {
                 int opcode = (code>>20) & 0x3ff;
@@ -75,22 +59,6 @@ namespace Interpreter
                     abortUnknownCode (3, opcode);
 
                 iter->second->execute (mRuntime, arg0);
-
-                return;
-            }
-
-            case 0x31:
-            {
-                int opcode = (code>>16) & 0x3ff;
-                unsigned int arg0 = (code>>8) & 0xff;
-                unsigned int arg1 = code & 0xff;
-
-                std::map<int, Opcode2 *>::iterator iter = mSegment4.find (opcode);
-
-                if (iter==mSegment4.end())
-                    abortUnknownCode (4, opcode);
-
-                iter->second->execute (mRuntime, arg0, arg1);
 
                 return;
             }
@@ -161,20 +129,12 @@ namespace Interpreter
             iter!=mSegment0.end(); ++iter)
             delete iter->second;
 
-        for (std::map<int, Opcode2 *>::iterator iter (mSegment1.begin());
-            iter!=mSegment1.end(); ++iter)
-            delete iter->second;
-
         for (std::map<int, Opcode1 *>::iterator iter (mSegment2.begin());
             iter!=mSegment2.end(); ++iter)
             delete iter->second;
 
         for (std::map<int, Opcode1 *>::iterator iter (mSegment3.begin());
             iter!=mSegment3.end(); ++iter)
-            delete iter->second;
-
-        for (std::map<int, Opcode2 *>::iterator iter (mSegment4.begin());
-            iter!=mSegment4.end(); ++iter)
             delete iter->second;
 
         for (std::map<int, Opcode0 *>::iterator iter (mSegment5.begin());
@@ -188,12 +148,6 @@ namespace Interpreter
         mSegment0.insert (std::make_pair (code, opcode));
     }
 
-    void Interpreter::installSegment1 (int code, Opcode2 *opcode)
-    {
-        assert(mSegment1.find(code) == mSegment1.end());
-        mSegment1.insert (std::make_pair (code, opcode));
-    }
-
     void Interpreter::installSegment2 (int code, Opcode1 *opcode)
     {
         assert(mSegment2.find(code) == mSegment2.end());
@@ -204,12 +158,6 @@ namespace Interpreter
     {
         assert(mSegment3.find(code) == mSegment3.end());
         mSegment3.insert (std::make_pair (code, opcode));
-    }
-
-    void Interpreter::installSegment4 (int code, Opcode2 *opcode)
-    {
-        assert(mSegment4.find(code) == mSegment4.end());
-        mSegment4.insert (std::make_pair (code, opcode));
     }
 
     void Interpreter::installSegment5 (int code, Opcode0 *opcode)
