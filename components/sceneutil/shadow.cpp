@@ -46,7 +46,6 @@ namespace SceneUtil
         else if (Misc::StringUtils::lowerCase(computeNearFarMode) == "bounding volumes")
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
-
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
         mShadowSettings->setTextureSize(osg::Vec2s(mapres, mapres));
 
