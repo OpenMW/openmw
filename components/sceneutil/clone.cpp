@@ -69,6 +69,15 @@ namespace SceneUtil
     osgParticle::ParticleProcessor* CopyOp::operator() (const osgParticle::ParticleProcessor* processor) const
     {
         osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::DEEP_COPY_CALLBACKS);
+        for (std::map<const osgParticle::ParticleSystem*, osgParticle::ParticleSystem*>::const_iterator it = mMap3.begin(); it != mMap3.end(); ++it)
+        {
+            if (processor->getParticleSystem() == it->first)
+            {
+                cloned->setParticleSystem(it->second);
+                return cloned;
+            }
+        }
+
         mMap[cloned] = processor->getParticleSystem();
         return cloned;
     }
@@ -93,6 +102,9 @@ namespace SceneUtil
                 updater->addParticleSystem(cloned);
             }
         }
+        // In rare situations a particle processor may be placed after the particle system in the scene graph.
+        mMap3[partsys] = cloned;
+
         return cloned;
     }
 

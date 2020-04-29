@@ -1056,6 +1056,8 @@ namespace NifOsg
                 emitter->setReferenceFrame(osgParticle::ParticleProcessor::RELATIVE_RF);
 
                 // The emitter node may not actually be handled yet, so let's delay attaching the emitter to a later moment.
+                // If the emitter node is placed later than the particle node, it'll have a single frame delay in particle processing.
+                // But that shouldn't be a game-breaking issue.
                 mEmitterQueue.emplace_back(partctrl->emitter->recIndex, emitter);
 
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
@@ -1073,7 +1075,7 @@ namespace NifOsg
                 partsys->update(0.0, nv);
             }
 
-            // affectors must be attached *after* the emitter in the scene graph for correct update order
+            // affectors should be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
