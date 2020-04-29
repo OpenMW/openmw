@@ -57,7 +57,7 @@ namespace DetourNavigator
                                       const AreaType areaType)
     {
         return mRecastMeshManager.updateObject(id, shape, transform, areaType,
-            [&] (const auto& tile) { addChangedTile(tile, ChangeType::update); });
+            [&] (const TilePosition& tile) { addChangedTile(tile, ChangeType::update); });
     }
 
     bool NavMeshManager::removeObject(const ObjectId id)
