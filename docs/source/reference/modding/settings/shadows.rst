@@ -71,7 +71,7 @@ Enable or disable the debug hud to see what the shadow map(s) contain.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
 enable debug overlay
-----------------
+--------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -84,11 +84,11 @@ near far computation
 --------------------
 
 :Type:		string
-:Range:		bounding volumes|primitives
+:Range:		primitives|bounds
 :Default:	bounding volumes
 
 Two different ways to make better use of shadow map(s) by making them cover a smaller area.
-While primitives give better results at expense of more CPU, bounding volumes gives better performance overall but with lower quality shadows.
+While primitives give better shadows at expense of more CPU, bounds gives better performance overall but with lower quality shadows.
 
 shadow map resolution
 ---------------------

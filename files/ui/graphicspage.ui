@@ -266,7 +266,7 @@
            <widget class="QComboBox" name="shadowNearFarComputationComboBox">
             <item>
              <property name="text">
-              <string>bounding volumes</string>
+              <string>bounds</string>
              </property>
             </item>
             <item>
