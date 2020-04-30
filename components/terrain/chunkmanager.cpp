@@ -34,7 +34,7 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
 
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint)
+osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile)
 {
     ChunkId id = std::make_tuple(center, lod, lodFlags);
     osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
@@ -42,7 +42,7 @@ osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &cen
         return obj->asNode();
     else
     {
-        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags);
+        osg::ref_ptr<osg::Node> node = createChunk(size, center, lod, lodFlags, compile);
         mCache->addEntryToObjectCache(id, node.get());
         return node;
     }
@@ -160,7 +160,7 @@ std::vector<osg::ref_ptr<osg::StateSet> > ChunkManager::createPasses(float chunk
     return ::Terrain::createPasses(useShaders, &mSceneManager->getShaderManager(), layers, blendmapTextures, blendmapScale, blendmapScale);
 }
 
-osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags)
+osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Vec2f &chunkCenter, unsigned char lod, unsigned int lodFlags, bool compile)
 {
     osg::ref_ptr<osg::Vec3Array> positions (new osg::Vec3Array);
     osg::ref_ptr<osg::Vec3Array> normals (new osg::Vec3Array);
@@ -221,7 +221,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
 
     geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
 
-    if (mSceneManager->getIncrementalCompileOperation())
+    if (compile && mSceneManager->getIncrementalCompileOperation())
     {
         mSceneManager->getIncrementalCompileOperation()->add(geometry);
     }

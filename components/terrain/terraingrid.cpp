@@ -58,7 +58,7 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     }
     else
     {
-        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f());
+        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
         if (!node)
             return nullptr;
 

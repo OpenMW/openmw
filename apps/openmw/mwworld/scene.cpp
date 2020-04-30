@@ -477,7 +477,7 @@ namespace MWWorld
         {
             float centerX, centerY;
             MWBase::Environment::get().getWorld()->indexToPosition(currentGridCenter->x(), currentGridCenter->y(), centerX, centerY, true);
-            float distance = std::max(std::abs(centerY-pos.x()), std::abs(centerY-pos.y()));
+            float distance = std::max(std::abs(centerX-pos.x()), std::abs(centerY-pos.y()));
             const float maxDistance = Constants::CellSizeInUnits / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
                 return *currentGridCenter;

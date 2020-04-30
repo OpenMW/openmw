@@ -47,7 +47,7 @@ namespace Terrain
         {
         public:
             virtual ~ChunkManager(){}
-            virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint) = 0;
+            virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile) = 0;
             virtual unsigned int getNodeMask() { return 0; }
         };
         void addChunkManager(ChunkManager*);
@@ -58,7 +58,6 @@ namespace Terrain
         osg::ref_ptr<RootNode> mRootNode;
 
         osg::ref_ptr<ViewDataMap> mViewDataMap;
-        osg::ref_ptr<LodCallback> mLodCallback;
 
         std::vector<ChunkManager*> mChunkManagers;
 
