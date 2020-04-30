@@ -80,15 +80,15 @@ enable debug overlay
 Enable or disable the debug overlay to see the area covered by each shadow map.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
-near far computation
+compute scene bounds
 --------------------
 
 :Type:		string
-:Range:		primitives|bounds
+:Range:		primitives|bounds|none
 :Default:	bounding volumes
 
 Two different ways to make better use of shadow map(s) by making them cover a smaller area.
-While primitives give better shadows at expense of more CPU, bounds gives better performance overall but with lower quality shadows.
+While primitives give better shadows at expense of more CPU, bounds gives better performance overall but with lower quality shadows. There is also the ability to disable this computation with none.
 
 shadow map resolution
 ---------------------

@@ -144,9 +144,9 @@ bool Launcher::GraphicsPage::loadSettings()
     if (mEngineSettings.getBool("enable indoor shadows", "Shadows"))
         indoorShadowsCheckBox->setCheckState(Qt::Checked);
 
-    shadowNearFarComputationComboBox->setCurrentIndex(
-        shadowNearFarComputationComboBox->findText(
-            QString(tr(mEngineSettings.getString("near far computation", "Shadows").c_str()))));
+    shadowComputeSceneBoundsComboBox->setCurrentIndex(
+        shadowComputeSceneBoundsComboBox->findText(
+            QString(tr(mEngineSettings.getString("compute scene bounds", "Shadows").c_str()))));
 
     int shadowDistLimit = mEngineSettings.getInt("maximum shadow map distance", "Shadows");
     if (shadowDistLimit > 0)
@@ -267,9 +267,9 @@ void Launcher::GraphicsPage::saveSettings()
     if (cShadowRes != mEngineSettings.getInt("shadow map resolution", "Shadows"))
         mEngineSettings.setInt("shadow map resolution", "Shadows", cShadowRes);
 
-    auto cShadowNearFarMode = shadowNearFarComputationComboBox->currentText().toStdString();
-    if (cShadowNearFarMode != mEngineSettings.getString("near far computation", "Shadows"))
-        mEngineSettings.setString("near far computation", "Shadows", cShadowNearFarMode);
+    auto cComputeSceneBounds = shadowComputeSceneBoundsComboBox->currentText().toStdString();
+    if (cComputeSceneBounds != mEngineSettings.getString("compute scene bounds", "Shadows"))
+        mEngineSettings.setString("compute scene bounds", "Shadows", cComputeSceneBounds);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)

@@ -40,10 +40,10 @@ namespace SceneUtil
 
         mShadowSettings->setMinimumShadowMapNearFarRatio(Settings::Manager::getFloat("minimum lispsm near far ratio", "Shadows"));
 
-        std::string computeNearFarMode = Settings::Manager::getString("near far computation", "Shadows");
-        if (Misc::StringUtils::lowerCase(computeNearFarMode) == "primitives")
+        std::string computeSceneBounds = Settings::Manager::getString("compute scene bounds", "Shadows");
+        if (Misc::StringUtils::lowerCase(computeSceneBounds) == "primitives")
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES);
-        else
+        else if (Misc::StringUtils::lowerCase(computeSceneBounds) == "bounds")
             mShadowSettings->setComputeNearFarModeOverride(osg::CullSettings::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
 
         int mapres = Settings::Manager::getInt("shadow map resolution", "Shadows");
