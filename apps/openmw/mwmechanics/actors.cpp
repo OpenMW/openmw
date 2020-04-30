@@ -1235,11 +1235,6 @@ namespace MWMechanics
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
                             inventoryStore.unequipItem(*heldIter, ptr);
                     }
-                    else if (heldIter == inventoryStore.end() || heldIter->getTypeName() == typeid(ESM::Light).name())
-                    {
-                        // For hostile NPCs, see if they have anything better to equip first
-                        inventoryStore.autoEquip(ptr);
-                    }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
 
