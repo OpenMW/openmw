@@ -699,4 +699,71 @@ namespace
 
         EXPECT_FLOAT_EQ(distance, 85.260780334472656);
     }
+
+    TEST_F(DetourNavigatorNavigatorTest, multiple_threads_should_lock_tiles)
+    {
+        mSettings.mAsyncNavMeshUpdaterThreads = 2;
+        mNavigator.reset(new NavigatorImpl(mSettings));
+
+        const std::array<btScalar, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape heightfieldShape(5, 5, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        heightfieldShape.setLocalScaling(btVector3(128, 128, 1));
+
+        const std::vector<btBoxShape> boxShapes(100, btVector3(20, 20, 100));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+
+        mNavigator->addObject(ObjectId(&heightfieldShape), heightfieldShape, btTransform::getIdentity());
+
+        for (std::size_t i = 0; i < boxShapes.size(); ++i)
+        {
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 10, i * 10, i * 10));
+            mNavigator->addObject(ObjectId(&boxShapes[i]), boxShapes[i], transform);
+        }
+
+        std::this_thread::sleep_for(std::chrono::microseconds(1));
+
+        for (std::size_t i = 0; i < boxShapes.size(); ++i)
+        {
+            const btTransform transform(btMatrix3x3::getIdentity(), btVector3(i * 10 + 1, i * 10 + 1, i * 10 + 1));
+            mNavigator->updateObject(ObjectId(&boxShapes[i]), boxShapes[i], transform);
+        }
+
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+
+        EXPECT_THAT(mPath, ElementsAre(
+            Vec3fEq(-215, 215, 1.8782780170440673828125),
+            Vec3fEq(-199.7968292236328125, 191.09100341796875, -3.54875946044921875),
+            Vec3fEq(-184.5936431884765625, 167.1819915771484375, -8.97846889495849609375),
+            Vec3fEq(-169.3904571533203125, 143.2729949951171875, -14.40818119049072265625),
+            Vec3fEq(-154.1872711181640625, 119.363983154296875, -19.837886810302734375),
+            Vec3fEq(-138.9840850830078125, 95.4549713134765625, -25.2675952911376953125),
+            Vec3fEq(-123.78090667724609375, 71.54595947265625, -30.6973056793212890625),
+            Vec3fEq(-108.57772064208984375, 47.63695526123046875, -36.12701416015625),
+            Vec3fEq(-93.3745269775390625, 23.72794342041015625, -40.754695892333984375),
+            Vec3fEq(-78.17134857177734375, -0.18106450140476226806640625, -37.128795623779296875),
+            Vec3fEq(-62.968158721923828125, -24.0900726318359375, -33.50289154052734375),
+            Vec3fEq(-47.764972686767578125, -47.99908447265625, -30.797946929931640625),
+            Vec3fEq(-23.8524494171142578125, -63.196746826171875, -33.97112274169921875),
+            Vec3fEq(0.0600722394883632659912109375, -78.3944091796875, -37.14543914794921875),
+            Vec3fEq(23.97259521484375, -93.592071533203125, -40.774089813232421875),
+            Vec3fEq(47.885120391845703125, -108.78974151611328125, -36.051296234130859375),
+            Vec3fEq(71.797637939453125, -123.98740386962890625, -30.62355804443359375),
+            Vec3fEq(95.71016693115234375, -139.18505859375, -25.195819854736328125),
+            Vec3fEq(119.6226806640625, -154.382720947265625, -19.768085479736328125),
+            Vec3fEq(143.5352020263671875, -169.5803680419921875, -14.34035015106201171875),
+            Vec3fEq(167.447723388671875, -184.7780303955078125, -8.912616729736328125),
+            Vec3fEq(191.3602294921875, -199.9756927490234375, -3.48488140106201171875),
+            Vec3fEq(215, -215, 1.8782813549041748046875)
+        )) << mPath;
+    }
 }

@@ -86,6 +86,7 @@ namespace DetourNavigator
         mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::condition_variable mDone;
+        std::condition_variable mProcessed;
         Jobs mJobs;
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
