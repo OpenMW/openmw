@@ -13,6 +13,7 @@
 
 #include <boost/optional.hpp>
 
+#include <algorithm>
 #include <map>
 #include <mutex>
 #include <unordered_map>
