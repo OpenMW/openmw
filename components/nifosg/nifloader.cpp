@@ -177,7 +177,7 @@ namespace NifOsg
 
         void setEnabled(bool enabled)
         {
-            setNodeMask(enabled ? ~0 : 0);
+            setNodeMask(enabled ? ~0 : Loader::getIntersectionDisabledNodeMask());
         }
     };
 
@@ -202,6 +202,18 @@ namespace NifOsg
     unsigned int Loader::getHiddenNodeMask()
     {
         return sHiddenNodeMask;
+    }
+
+    unsigned int Loader::sIntersectionDisabledNodeMask = ~0;
+
+    void Loader::setIntersectionDisabledNodeMask(unsigned int mask)
+    {
+        sIntersectionDisabledNodeMask = mask;
+    }
+
+    unsigned int Loader::getIntersectionDisabledNodeMask()
+    {
+        return sIntersectionDisabledNodeMask;
     }
 
     class LoaderImpl

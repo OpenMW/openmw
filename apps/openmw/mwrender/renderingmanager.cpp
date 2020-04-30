@@ -376,6 +376,7 @@ namespace MWRender
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
+        NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
