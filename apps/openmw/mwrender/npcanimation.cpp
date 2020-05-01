@@ -1127,7 +1127,7 @@ void NpcAnimation::equipmentChanged()
     static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
     if (shieldSheathing)
     {
-        int weaptype;
+        int weaptype = ESM::Weapon::None;
         MWMechanics::getActiveWeapon(mPtr, &weaptype);
         showCarriedLeft(updateCarriedLeftVisible(weaptype));
     }
