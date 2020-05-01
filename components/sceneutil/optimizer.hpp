@@ -321,8 +321,6 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES) {}
 
                 virtual void apply(osg::Group& group);
-                virtual void apply(osg::LOD& lod);
-                virtual void apply(osg::Switch& switchNode);
 
                 void removeEmptyNodes();
 
