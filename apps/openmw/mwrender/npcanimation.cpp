@@ -266,16 +266,22 @@ void HeadAnimationTime::setBlinkStop(float value)
 
 // ----------------------------------------------------
 
-NpcAnimation::NpcType NpcAnimation::getNpcType()
+NpcAnimation::NpcType NpcAnimation::getNpcType() const
 {
     const MWWorld::Class &cls = mPtr.getClass();
     // Dead vampires should typically stay vampires.
     if (mNpcType == Type_Vampire && cls.getNpcStats(mPtr).isDead() && !cls.getNpcStats(mPtr).isWerewolf())
         return mNpcType;
+    return getNpcType(mPtr);
+}
+
+NpcAnimation::NpcType NpcAnimation::getNpcType(const MWWorld::Ptr& ptr)
+{
+    const MWWorld::Class &cls = ptr.getClass();
     NpcAnimation::NpcType curType = Type_Normal;
-    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
+    if (cls.getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
         curType = Type_Vampire;
-    if (cls.getNpcStats(mPtr).isWerewolf())
+    if (cls.getNpcStats(ptr).isWerewolf())
         curType = Type_Werewolf;
 
     return curType;
@@ -326,7 +332,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
-    mNpcType(getNpcType()),
+    mNpcType(getNpcType(ptr)),
     mFirstPersonFieldOfView(firstPersonFieldOfView),
     mSoundsDisabled(disableSounds),
     mAccurateAiming(false),
