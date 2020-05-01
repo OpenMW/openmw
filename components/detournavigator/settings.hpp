@@ -4,6 +4,7 @@
 #include <boost/optional.hpp>
 
 #include <string>
+#include <chrono>
 
 namespace DetourNavigator
 {
@@ -38,6 +39,7 @@ namespace DetourNavigator
         std::size_t mTrianglesPerChunk = 0;
         std::string mRecastMeshPathPrefix;
         std::string mNavMeshPathPrefix;
+        std::chrono::milliseconds mMinUpdateInterval;
     };
 
     boost::optional<Settings> makeSettingsFromSettingsManager();
