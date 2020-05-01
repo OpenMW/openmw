@@ -63,6 +63,10 @@ namespace Shader
         OpenThreads::Mutex mMutex;
     };
 
+    bool parseFors(std::string& source, const std::string& templateName);
+
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines,
+        const ShaderManager::DefineMap& globalDefines, const std::string& templateName);
 }
 
 #endif
