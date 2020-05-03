@@ -50,8 +50,6 @@ namespace Terrain
 
         void releaseGLObjects(osg::State* state) override;
 
-        virtual void setExpiryDelay(double expiryDelay) override { mExpiryDelay = 0.5f; }
-
     private:
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool compile);
 

@@ -45,7 +45,7 @@ namespace MWRender
         }
     }
 
-    const std::string& getModel(int type, const std::string& id, const MWWorld::ESMStore& store)
+    std::string getModel(int type, const std::string& id, const MWWorld::ESMStore& store)
     {
         switch (type)
         {
@@ -57,7 +57,8 @@ namespace MWRender
             return store.get<ESM::Door>().searchStatic(id)->mModel;
           case ESM::REC_CONT:
             return store.get<ESM::Container>().searchStatic(id)->mModel;
-          default: throw std::exception();
+          default:
+            return std::string();
         }
     }
 
@@ -340,7 +341,7 @@ namespace MWRender
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
             {
-                const_cast<osg::Node*>(cnode.get())->accept(analyzeVisitor);
+                const_cast<osg::Node*>(cnode.get())->accept(analyzeVisitor); // const-trickery required because there is no const version of NodeVisitor
                 emplaced.first->second.mAnalyzeResult = analyzeVisitor.retrieveResult();
             }
             emplaced.first->second.mInstances.push_back(&ref);
@@ -410,8 +411,9 @@ namespace MWRender
 
         group->getBound();
         group->setNodeMask(Mask_Static);
-
-        group->getOrCreateUserDataContainer()->addUserObject(templateRefs);
+        osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
+        udc->addUserObject(templateRefs);
+        udc->addUserObject(mergeGroup); // for ICO ref counting
 
         return group;
     }

@@ -717,8 +717,14 @@ namespace Resource
         if (mIncrementalCompileOperation)
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
-            while (mIncrementalCompileOperation->getToCompile().size() > 1000)
-                mIncrementalCompileOperation->getToCompile().pop_front();
+            osgUtil::IncrementalCompileOperation::CompileSets& sets = mIncrementalCompileOperation->getToCompile();
+            for(osgUtil::IncrementalCompileOperation::CompileSets::iterator it = sets.begin(); it != sets.end();)
+            {
+                if ((*it)->_subgraphToCompile->referenceCount() <= 2)
+                    it = sets.erase(it);
+                else
+                    ++it;
+            }
         }
     }
 

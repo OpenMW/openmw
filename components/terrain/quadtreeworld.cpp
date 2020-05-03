@@ -325,7 +325,7 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
 
     if (!entry.mRenderingNode)
     {
-        auto pat = new SceneUtil::PositionAttitudeTransform;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
         pat->setPosition(osg::Vec3f(entry.mNode->getCenter().x()*cellWorldSize, entry.mNode->getCenter().y()*cellWorldSize, 0.f));
 
         const osg::Vec2f& center = entry.mNode->getCenter();
