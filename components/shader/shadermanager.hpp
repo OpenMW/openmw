@@ -30,7 +30,7 @@ namespace Shader
         /// @param shaderType The type of shader (usually vertex or fragment shader).
         /// @note May return nullptr on failure.
         /// @note Thread safe.
-        osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType);
+        osg::ref_ptr<osg::Shader> getShader(const std::string& templateName, const DefineMap& defines, osg::Shader::Type shaderType);
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
 
@@ -63,6 +63,10 @@ namespace Shader
         OpenThreads::Mutex mMutex;
     };
 
+    bool parseFors(std::string& source, const std::string& templateName);
+
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines,
+        const ShaderManager::DefineMap& globalDefines, const std::string& templateName);
 }
 
 #endif
