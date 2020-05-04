@@ -94,14 +94,16 @@ namespace MWRender
     class CopyOp : public osg::CopyOp
     {
     public:
-        CopyOp(bool deep) : mDistance(0.f) {
+        CopyOp(bool deep) : mSqrDistance(0.f) {
             unsigned int flags = osg::CopyOp::DEEP_COPY_NODES;
             if (deep)
                 flags |= osg::CopyOp::DEEP_COPY_DRAWABLES;
             setCopyFlags(flags);
         }
 
-        float mDistance;
+        float mSqrDistance;
+        osg::Vec3f mViewVector;
+        mutable std::vector<const osg::Node*> mNodePath;
 
         virtual osg::Node* operator() (const osg::Node* node) const
         {
@@ -123,7 +125,7 @@ namespace MWRender
             {
                 osg::Group* n = new osg::Group;
                 for (unsigned int i=0; i<lod->getNumChildren(); ++i)
-                    if (lod->getMinRange(i) <= mDistance && mDistance < lod->getMaxRange(i))
+                    if (lod->getMinRange(i) * lod->getMinRange(i) <= mSqrDistance && mSqrDistance < lod->getMaxRange(i) * lod->getMaxRange(i))
                         n->addChild(operator()(lod->getChild(i)));
                 n->setDataVariance(osg::Object::STATIC);
                 return n;
@@ -132,11 +134,64 @@ namespace MWRender
             if (const osg::Drawable* d = node->asDrawable())
                 return operator()(d);
 
-            osg::Node* n = osg::clone(node, *this);
-            n->setDataVariance(osg::Object::STATIC);
-            n->setUserDataContainer(nullptr);
-            n->setName("");
-            return n;
+            mNodePath.push_back(node);
+
+            osg::Node* cloned = osg::clone(node, *this);
+            cloned->setDataVariance(osg::Object::STATIC);
+            cloned->setUserDataContainer(nullptr);
+            cloned->setName("");
+
+            mNodePath.pop_back();
+
+            handleCallbacks(node, cloned);
+
+            return cloned;
+        }
+        void handleCallbacks(const osg::Node* node, osg::Node *cloned) const
+        {
+            const osg::Callback* callback = node->getCullCallback();
+            while (callback)
+            {
+                if (callback->className() == std::string("BillboardCallback"))
+                    handleBillboard(cloned);
+                callback = callback->getNestedCallback();
+            }
+        }
+        void handleBillboard(osg::Node* node) const
+        {
+            osg::Transform* transform = node->asTransform();
+            if (!transform) return;
+            osg::MatrixTransform* matrixTransform = transform->asMatrixTransform();
+            if (!matrixTransform) return;
+
+            osg::Matrix worldToLocal = osg::Matrix::identity();
+            for (auto node : mNodePath)
+                if (const osg::Transform* t = node->asTransform())
+                    t->computeWorldToLocalMatrix(worldToLocal, nullptr);
+            worldToLocal = osg::Matrix::orthoNormal(worldToLocal);
+
+            osg::Matrix billboardMatrix;
+            osg::Vec3f viewVector = -(mViewVector + worldToLocal.getTrans());
+            viewVector.normalize();
+            osg::Vec3f right = viewVector ^ osg::Vec3f(0,0,1);
+            right.normalize();
+            osg::Vec3f up = right ^ viewVector;
+            up.normalize();
+            billboardMatrix.makeLookAt(osg::Vec3f(0,0,0), viewVector, up);
+            billboardMatrix.invert(billboardMatrix);
+
+            const osg::Matrix& oldMatrix = matrixTransform->getMatrix();
+            float mag[3]; // attempt to preserve scale
+            for (int i=0;i<3;++i)
+                mag[i] = std::sqrt(oldMatrix(0,i) * oldMatrix(0,i) + oldMatrix(1,i) * oldMatrix(1,i) + oldMatrix(2,i) * oldMatrix(2,i));
+            osg::Matrix newMatrix;
+            worldToLocal.setTrans(0,0,0);
+            newMatrix *= worldToLocal;
+            newMatrix.preMult(billboardMatrix);
+            newMatrix.preMultScale(osg::Vec3f(mag[0], mag[1], mag[2]));
+            newMatrix.setTrans(oldMatrix.getTrans());
+
+            matrixTransform->setMatrix(newMatrix);
         }
         virtual osg::Drawable* operator() (const osg::Drawable* drawable) const
         {
@@ -367,12 +422,6 @@ namespace MWRender
             {
                 const ESM::CellRef& ref = *cref;
                 osg::Vec3f pos = ref.mPos.asVec3();
-                float d = (viewPoint - pos).length();
-
-                CopyOp co = CopyOp(merge);
-                co.mDistance = d;
-                osg::ref_ptr<osg::Node> node = osg::clone(cnode, co);
-                node->setUserDataContainer(nullptr);
 
                 osg::Matrixf matrix;
                 matrix.preMultTranslate(pos - worldCenter);
@@ -381,8 +430,16 @@ namespace MWRender
                                         osg::Quat(ref.mPos.rot[0], osg::Vec3f(-1,0,0)) );
                 matrix.preMultScale(osg::Vec3f(ref.mScale, ref.mScale, ref.mScale));
                 osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(matrix);
-                trans->addChild(node);
                 trans->setDataVariance(osg::Object::STATIC);
+
+                CopyOp co = CopyOp(merge);
+                co.mNodePath.push_back(trans);
+                co.mSqrDistance = (viewPoint - pos).length2();
+                co.mViewVector = (viewPoint - worldCenter);
+                osg::ref_ptr<osg::Node> node = osg::clone(cnode, co);
+                node->setUserDataContainer(nullptr);
+
+                trans->addChild(node);
 
                 if (merge)
                     mergeGroup->addChild(trans);
