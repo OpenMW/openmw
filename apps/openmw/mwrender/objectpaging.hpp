@@ -45,6 +45,10 @@ namespace MWRender
 
         OpenThreads::Mutex mDisabledMutex;
         std::set<ESM::RefNum> mDisabled;
+
+        OpenThreads::Mutex mSizeCacheMutex;
+        typedef std::map<ESM::RefNum, float> SizeCache;
+        SizeCache mSizeCache;
     };
 
 }

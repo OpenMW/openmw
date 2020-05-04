@@ -374,6 +374,17 @@ namespace MWRender
                     continue;
             }
 
+            float d = (viewPoint - pos).length();
+            {
+                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
+                SizeCache::iterator found = mSizeCache.find(pair.first);
+                if (found != mSizeCache.end())
+                {
+                    if (found->second < d*mMinSize)
+                        continue;
+                }
+            }
+
             std::string id = Misc::StringUtils::lowerCase(ref.mRefID);
             if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
                 continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
@@ -389,9 +400,15 @@ namespace MWRender
 */
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, compile);
 
-            float d = (viewPoint - pos).length();
-            if (cnode->getBound().radius() * ref.mScale < d*mMinSize)
+            float radius = cnode->getBound().radius() * ref.mScale;
+            if (radius < d*mMinSize)
+            {
+                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
+                {
+                    mSizeCache[pair.first] = radius;
+                }
                 continue;
+            }
 
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
