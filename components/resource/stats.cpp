@@ -292,6 +292,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Nif",
             "Keyframe",
             "",
+            "Object Chunk",
             "Terrain Chunk",
             "Terrain Texture",
             "Land",

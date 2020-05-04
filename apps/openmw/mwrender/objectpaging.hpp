@@ -36,6 +36,8 @@ namespace MWRender
         void enableObject(const ESM::RefNum & refnum, bool enabled);
         void clear();
 
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
+
     private:
         Resource::SceneManager* mSceneManager;
         float mMergeFactor;

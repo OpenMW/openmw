@@ -463,14 +463,17 @@ namespace MWRender
             group->addChild(mergeGroup);
 
             auto ico = mSceneManager->getIncrementalCompileOperation();
-            if (compile && ico) ico->add(mergeGroup);
+            if (compile && ico)
+            {
+                auto compileSet = new osgUtil::IncrementalCompileOperation::CompileSet(mergeGroup);
+                ico->add(compileSet);
+                compileSet->_subgraphToCompile = group; // for ref counting in SceneManager::updateCache
+            }
         }
 
         group->getBound();
         group->setNodeMask(Mask_Static);
-        osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
-        udc->addUserObject(templateRefs);
-        udc->addUserObject(mergeGroup); // for ICO ref counting
+        group->getOrCreateUserDataContainer()->addUserObject(templateRefs);
 
         return group;
     }
@@ -492,4 +495,10 @@ namespace MWRender
         OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
         mDisabled.clear();
     }
+
+    void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats *stats) const
+    {
+        stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+    }
+
 }

@@ -720,8 +720,13 @@ namespace Resource
             osgUtil::IncrementalCompileOperation::CompileSets& sets = mIncrementalCompileOperation->getToCompile();
             for(osgUtil::IncrementalCompileOperation::CompileSets::iterator it = sets.begin(); it != sets.end();)
             {
-                if ((*it)->_subgraphToCompile->referenceCount() <= 2)
+                int refcount = (*it)->_subgraphToCompile->referenceCount();
+                if ((*it)->_subgraphToCompile->asDrawable()) refcount -= 1; // ref by CompileList.
+                if (refcount <= 2) // ref by ObjectCache + ref by _subgraphToCompile.
+                {
+                    // no other ref = not needed anymore.
                     it = sets.erase(it);
+                }
                 else
                     ++it;
             }
