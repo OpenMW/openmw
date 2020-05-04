@@ -32,6 +32,14 @@ ConfigurationManager::ConfigurationManager(bool silent)
     boost::filesystem::create_directories(mFixedPath.getUserDataPath());
 
     mLogPath = mFixedPath.getUserConfigPath();
+
+    mScreenshotPath = mFixedPath.getUserDataPath() / "screenshots";
+
+    // probably not necessary but validate the creation of the screenshots directory and fallback to the original behavior if it fails
+    boost::system::error_code dirErr;
+    if (!boost::filesystem::create_directories(mScreenshotPath, dirErr) && !boost::filesystem::is_directory(mScreenshotPath)) {
+        mScreenshotPath = mFixedPath.getUserDataPath();
+    }
 }
 
 ConfigurationManager::~ConfigurationManager()
@@ -194,6 +202,11 @@ const boost::filesystem::path& ConfigurationManager::getInstallPath() const
 const boost::filesystem::path& ConfigurationManager::getLogPath() const
 {
     return mLogPath;
+}
+
+const boost::filesystem::path& ConfigurationManager::getScreenshotPath() const
+{
+    return mScreenshotPath;
 }
 
 } /* namespace Cfg */
