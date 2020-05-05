@@ -285,6 +285,8 @@ namespace MWRender
     {
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
+        mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
+        mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
     }
 
     osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, const osg::Vec3f& viewPoint, bool compile)
@@ -358,7 +360,9 @@ namespace MWRender
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
         AnalyzeVisitor analyzeVisitor;
-
+        float minSize = mMinSize;
+        if (mMinSizeMergeFactor)
+            minSize *= mMinSizeMergeFactor;
         for (const auto& pair : refs)
         {
             const ESM::CellRef& ref = pair.second;
@@ -381,7 +385,7 @@ namespace MWRender
                 SizeCache::iterator found = mSizeCache.find(pair.first);
                 if (found != mSizeCache.end())
                 {
-                    if (found->second < d*mMinSize)
+                    if (found->second < d*minSize)
                         continue;
                 }
             }
@@ -402,7 +406,7 @@ namespace MWRender
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
             float radius = cnode->getBound().radius() * ref.mScale;
-            if (radius < d*mMinSize)
+            if (radius < d*minSize)
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
                 {
@@ -435,22 +439,25 @@ namespace MWRender
             float mergeBenefit = analyzeVisitor.getMergeBenefit(analyzeResult) * mMergeFactor;
             bool merge = mergeBenefit > mergeCost;
 
-            // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-            templateRefs->mObjects.push_back(cnode);
+            float minSizeMerged = mMinSize;
+            float factor2 = mergeBenefit > 0 ? std::min(1.f, mergeCost * mMinSizeCostMultiplier / mergeBenefit) : 1;
+            float minSizeMergeFactor2 = (1-factor2) * mMinSizeMergeFactor + factor2;
+            if (minSizeMergeFactor2 > 0)
+                minSizeMerged *= minSizeMergeFactor2;
 
-            if (pair.second.mNeedCompile)
-            {
-                int mode = osgUtil::GLObjectsVisitor::COMPILE_STATE_ATTRIBUTES;
-                if (!merge)
-                    mode |= osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
-                stateToCompile._mode = mode;
-                const_cast<osg::Node*>(cnode)->accept(stateToCompile);
-            }
-
+            unsigned int numinstances = 0;
             for (auto cref : pair.second.mInstances)
             {
                 const ESM::CellRef& ref = *cref;
                 osg::Vec3f pos = ref.mPos.asVec3();
+
+                if (minSizeMerged != minSize)
+                {
+                    float d = (viewPoint - pos).length();
+                    float radius = cnode->getBound().radius() * cref->mScale;
+                    if (radius < d*minSizeMerged)
+                        continue;
+                }
 
                 osg::Matrixf matrix;
                 matrix.preMultTranslate(pos - worldCenter);
@@ -474,6 +481,21 @@ namespace MWRender
                     mergeGroup->addChild(trans);
                 else
                     group->addChild(trans);
+                ++numinstances;
+            }
+            if (numinstances > 0)
+            {
+                // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+                templateRefs->mObjects.push_back(cnode);
+
+                if (pair.second.mNeedCompile)
+                {
+                    int mode = osgUtil::GLObjectsVisitor::COMPILE_STATE_ATTRIBUTES;
+                    if (!merge)
+                        mode |= osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
+                    stateToCompile._mode = mode;
+                    const_cast<osg::Node*>(cnode)->accept(stateToCompile);
+                }
             }
         }
 
