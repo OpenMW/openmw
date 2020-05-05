@@ -230,7 +230,7 @@ namespace MWGui
         mKeyboardNavigation->setEnabled(keyboardNav);
         Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
 
-        mLoadingScreen = new LoadingScreen(mResourceSystem->getVFS(), mViewer);
+        mLoadingScreen = new LoadingScreen(mResourceSystem, mViewer);
         mWindows.push_back(mLoadingScreen);
 
         //set up the hardware cursor manager

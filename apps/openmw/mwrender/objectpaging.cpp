@@ -353,6 +353,7 @@ namespace MWRender
         {
             std::vector<const ESM::CellRef*> mInstances;
             AnalyzeVisitor::Result mAnalyzeResult;
+            bool mNeedCompile = false;
         };
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
@@ -398,7 +399,7 @@ namespace MWRender
             if (useAnim)
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
 */
-            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, compile);
+            osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
             float radius = cnode->getBound().radius() * ref.mScale;
             if (radius < d*mMinSize)
@@ -415,6 +416,7 @@ namespace MWRender
             {
                 const_cast<osg::Node*>(cnode.get())->accept(analyzeVisitor); // const-trickery required because there is no const version of NodeVisitor
                 emplaced.first->second.mAnalyzeResult = analyzeVisitor.retrieveResult();
+                emplaced.first->second.mNeedCompile = compile && cnode->referenceCount() <= 3;
             }
             emplaced.first->second.mInstances.push_back(&ref);
         }
@@ -422,18 +424,28 @@ namespace MWRender
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
+        osgUtil::StateToCompile stateToCompile(0, nullptr);
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
-
-            // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-            templateRefs->mObjects.push_back(cnode);
 
             const AnalyzeVisitor::Result& analyzeResult = pair.second.mAnalyzeResult;
 
             float mergeCost = analyzeResult.mNumVerts * size;
             float mergeBenefit = analyzeVisitor.getMergeBenefit(analyzeResult) * mMergeFactor;
             bool merge = mergeBenefit > mergeCost;
+
+            // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
+            templateRefs->mObjects.push_back(cnode);
+
+            if (pair.second.mNeedCompile)
+            {
+                int mode = osgUtil::GLObjectsVisitor::COMPILE_STATE_ATTRIBUTES;
+                if (!merge)
+                    mode |= osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
+                stateToCompile._mode = mode;
+                const_cast<osg::Node*>(cnode)->accept(stateToCompile);
+            }
 
             for (auto cref : pair.second.mInstances)
             {
@@ -479,13 +491,19 @@ namespace MWRender
 
             group->addChild(mergeGroup);
 
-            auto ico = mSceneManager->getIncrementalCompileOperation();
-            if (compile && ico)
+            if (compile)
             {
-                auto compileSet = new osgUtil::IncrementalCompileOperation::CompileSet(mergeGroup);
-                ico->add(compileSet);
-                compileSet->_subgraphToCompile = group; // for ref counting in SceneManager::updateCache
+                stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
+                mergeGroup->accept(stateToCompile);
             }
+        }
+
+        auto ico = mSceneManager->getIncrementalCompileOperation();
+        if (!stateToCompile.empty() && ico)
+        {
+            auto compileSet = new osgUtil::IncrementalCompileOperation::CompileSet(group);
+            compileSet->buildCompileMap(ico->getContextSet(), stateToCompile);
+            ico->add(compileSet, false);
         }
 
         group->getBound();
