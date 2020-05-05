@@ -40,6 +40,7 @@
 #include "summoning.hpp"
 #include "combat.hpp"
 #include "actorutil.hpp"
+#include "tickableeffects.hpp"
 
 namespace
 {

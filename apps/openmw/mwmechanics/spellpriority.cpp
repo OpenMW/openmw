@@ -15,9 +15,11 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "creaturestats.hpp"
-#include "spellcasting.hpp"
+#include "spellresistance.hpp"
 #include "weapontype.hpp"
 #include "combat.hpp"
+#include "summoning.hpp"
+#include "spellutil.hpp"
 
 namespace
 {

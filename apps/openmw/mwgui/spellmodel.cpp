@@ -7,7 +7,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"

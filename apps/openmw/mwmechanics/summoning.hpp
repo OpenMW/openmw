@@ -9,13 +9,16 @@
 
 namespace MWMechanics
 {
-
     class CreatureStats;
+
+    bool isSummoningEffect(int effectId);
+
+    std::string getSummonedCreature(int effectId);
 
     struct UpdateSummonedCreatures : public EffectSourceVisitor
     {
         UpdateSummonedCreatures(const MWWorld::Ptr& actor);
-        virtual ~UpdateSummonedCreatures();
+        virtual ~UpdateSummonedCreatures() = default;
 
         virtual void visit (MWMechanics::EffectKey key,
                                  const std::string& sourceName, const std::string& sourceId, int casterActorId,

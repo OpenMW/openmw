@@ -13,7 +13,7 @@
 #include "combat.hpp"
 #include "aicombataction.hpp"
 #include "spellpriority.hpp"
-#include "spellcasting.hpp"
+#include "spellutil.hpp"
 #include "weapontype.hpp"
 
 namespace MWMechanics

@@ -13,7 +13,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellresistance.hpp"
+#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
 

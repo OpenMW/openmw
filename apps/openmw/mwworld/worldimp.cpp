@@ -41,6 +41,7 @@
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
+#include "../mwmechanics/summoning.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/npcanimation.hpp"
@@ -3160,12 +3161,42 @@ namespace MWWorld
         mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);
     }
 
+    class ApplyLoopingParticlesVisitor : public MWMechanics::EffectSourceVisitor
+    {
+    private:
+        MWWorld::Ptr mActor;
+
+    public:
+        ApplyLoopingParticlesVisitor(const MWWorld::Ptr& actor)
+            : mActor(actor)
+        {
+        }
+
+        virtual void visit (MWMechanics::EffectKey key,
+                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
+                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1)
+        {
+            const ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const auto magicEffect = store.get<ESM::MagicEffect>().find(key.mId);
+            if ((magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) == 0)
+                return;
+            const ESM::Static* castStatic;
+            if (!magicEffect->mHit.empty())
+                castStatic = store.get<ESM::Static>().find (magicEffect->mHit);
+            else
+                castStatic = store.get<ESM::Static>().find ("VFX_DefaultHit");
+            MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
+            if (anim && !castStatic->mModel.empty())
+                anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, /*loop*/true, "", magicEffect->mParticle);
+        }
+    };
+
     void World::applyLoopingParticles(const MWWorld::Ptr& ptr)
     {
         const MWWorld::Class &cls = ptr.getClass();
         if (cls.isActor())
         {
-            MWMechanics::ApplyLoopingParticlesVisitor visitor(ptr);
+            ApplyLoopingParticlesVisitor visitor(ptr);
             cls.getCreatureStats(ptr).getActiveSpells().visitEffectSources(visitor);
             cls.getCreatureStats(ptr).getSpells().visitEffectSources(visitor);
             if (cls.hasInventoryStore(ptr))
