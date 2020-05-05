@@ -6,6 +6,7 @@
 #include <osg/LOD>
 #include <osg/Switch>
 #include <osg/MatrixTransform>
+#include <osg/Material>
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/esm/esmreader.hpp>
@@ -20,6 +21,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/settings/settings.hpp>
+#include <components/misc/rng.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
 #include "apps/openmw/mwbase/environment.hpp"
@@ -279,10 +281,31 @@ namespace MWRender
         StateSetCounter mGlobalStateSetCounter;
     };
 
+    class DebugVisitor : public osg::NodeVisitor
+    {
+    public:
+        DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
+        virtual void apply(osg::Drawable& node)
+        {
+            osg::ref_ptr<osg::Material> m (new osg::Material);
+            osg::Vec4f color(Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), 0.f);
+            color.normalize();
+            m->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f,0.1f,0.1f,1.f));
+            m->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.1f,0.1f,0.1f,1.f));
+            m->setColorMode(osg::Material::OFF);
+            m->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(color));
+            osg::ref_ptr<osg::StateSet> stateset = node.getStateSet() ? osg::clone(node.getStateSet(), osg::CopyOp::SHALLOW_COPY) : new osg::StateSet;
+            stateset->setAttribute(m);
+            stateset->addUniform(new osg::Uniform("colorMode", 0));
+            node.setStateSet(stateset);
+        }
+    };
+
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
             : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
     {
+        mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
         mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
@@ -517,6 +540,12 @@ namespace MWRender
             {
                 stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
                 mergeGroup->accept(stateToCompile);
+            }
+
+            if (mDebugBatches)
+            {
+                DebugVisitor dv;
+                mergeGroup->accept(dv);
             }
         }
 
