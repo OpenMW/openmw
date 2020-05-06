@@ -1278,8 +1278,8 @@ class AlphaFader : public SceneUtil::StateSetUpdater
 {
 public:
     /// @param alphaUpdate variable which to update with alpha value
-    AlphaFader(float *alphaUpdate)
-        : mAlpha(1.f)
+    AlphaFader(float *alphaUpdate, osgParticle::ParticleSystem *partsys)
+        : mAlpha(1.f), _partsys(partsys)
     {
         mAlphaUpdate = alphaUpdate;
     }
@@ -1288,21 +1288,34 @@ public:
     {
         mAlpha = alpha;
     }
+    class FindParticleSystemVisitor : public osg::NodeVisitor
+    {
+    public:
+        osg::ref_ptr<osgParticle::ParticleSystem> _found;
+        FindParticleSystemVisitor()
+            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        {
+        }
+
+        virtual void apply(osg::Drawable &node)
+        {
+           osgParticle::ParticleSystem* test;
+           if((test = dynamic_cast<osgParticle::ParticleSystem*>(&node)))
+               _found = test;
+        }
+    };
 
     virtual void setDefaults(osg::StateSet* stateset)
     {
         // need to create a deep copy of StateAttributes we will modify
-        osg::ref_ptr<osg::Material> mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat = static_cast<osg::Material*>(osg::clone(mat.get(), osg::CopyOp::DEEP_COPY_ALL));
-        mat->setColorMode(osg::Material::AMBIENT); // set Ambient lighting to control alpha fading with color
-        stateset->setAttribute(mat, osg::StateAttribute::ON);
+        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
     }
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
-
+        for(int i=0; i<_partsys->numParticles(); ++i)
+            _partsys->getParticle(i)->setAlphaRange(osgParticle::rangef(mAlpha, mAlpha));
         if (mAlphaUpdate)
             *mAlphaUpdate = mAlpha;
     }
@@ -1334,7 +1347,9 @@ public:
                         callback = callback->getNestedCallback();
                     }
 
-                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate));
+                    FindParticleSystemVisitor fpart;
+                    node.accept(fpart);
+                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, fpart._found));
 
                     if (composite)
                         composite->addController(alphaFader);
@@ -1361,12 +1376,13 @@ public:
 protected:
     float mAlpha;
     float *mAlphaUpdate;
+    osg::ref_ptr<osgParticle::ParticleSystem> _partsys;
 };
 
 class RainFader : public AlphaFader
 {
 public:
-    RainFader(float *alphaUpdate): AlphaFader(alphaUpdate)
+    RainFader(float *alphaUpdate, osgParticle::ParticleSystem *partsys): AlphaFader(alphaUpdate, partsys)
     {
     }
 
@@ -1532,7 +1548,7 @@ void SkyManager::createRain()
     mRainNode->addChild(mRainParticleSystem);
     mRainNode->addChild(updater);
 
-    mRainFader = new RainFader(&mWeatherAlpha);
+    mRainFader = new RainFader(&mWeatherAlpha, mRainParticleSystem);
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
