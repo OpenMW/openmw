@@ -1389,9 +1389,9 @@ public:
     virtual void setDefaults(osg::StateSet* stateset)
     {
         osg::ref_ptr<osg::Material> mat (new osg::Material);
-        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,1));
-        mat->setColorMode(osg::Material::OFF);
+        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
 
