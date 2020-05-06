@@ -396,7 +396,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItemCell : public Interpreter::Opcode0
         {
             public:
@@ -450,7 +449,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItem : public Interpreter::Opcode0
         {
             public:
@@ -750,8 +748,8 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);
