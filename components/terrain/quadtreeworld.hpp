@@ -31,7 +31,7 @@ namespace Terrain
 
         virtual void setViewDistance(float distance) { mViewDistance = distance; }
 
-        void cacheCell(View *view, int x, int y);
+        void cacheCell(View *view, int x, int y) {}
         /// @note Not thread safe.
         virtual void loadCell(int x, int y);
         /// @note Not thread safe.

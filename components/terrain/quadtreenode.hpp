@@ -100,9 +100,6 @@ namespace Terrain
         /// Traverse nodes according to LOD selection.
         void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
 
-        /// Traverse to a specific node and add only that node.
-        void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
-
         /// Adds all leaf nodes which intersect the line from start to end
         void intersect(ViewData* vd, TerrainLineIntersector& intersector);
 
