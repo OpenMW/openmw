@@ -1279,7 +1279,7 @@ class AlphaFader : public SceneUtil::StateSetUpdater
 public:
     /// @param alphaUpdate variable which to update with alpha value
     AlphaFader(float *alphaUpdate, osgParticle::ParticleSystem *partsys)
-        : mAlpha(1.f), _partsys(partsys)
+        : mAlpha(1.f), mPartSys(partsys)
     {
         mAlphaUpdate = alphaUpdate;
     }
@@ -1291,7 +1291,7 @@ public:
     class FindParticleSystemVisitor : public osg::NodeVisitor
     {
     public:
-        osg::ref_ptr<osgParticle::ParticleSystem> _found;
+        osg::ref_ptr<osgParticle::ParticleSystem> mFound;
         FindParticleSystemVisitor()
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         {
@@ -1301,7 +1301,7 @@ public:
         {
            osgParticle::ParticleSystem* test;
            if((test = dynamic_cast<osgParticle::ParticleSystem*>(&node)))
-               _found = test;
+               mFound = test;
         }
     };
 
@@ -1314,8 +1314,8 @@ public:
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-        for(int i=0; i<_partsys->numParticles(); ++i)
-            _partsys->getParticle(i)->setAlphaRange(osgParticle::rangef(mAlpha, mAlpha));
+        for(int i=0; i<mPartSys->numParticles(); ++i)
+            mPartSys->getParticle(i)->setAlphaRange(osgParticle::rangef(mAlpha, mAlpha));
         if (mAlphaUpdate)
             *mAlphaUpdate = mAlpha;
     }
@@ -1349,7 +1349,7 @@ public:
 
                     FindParticleSystemVisitor fpart;
                     node.accept(fpart);
-                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, fpart._found));
+                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, fpart.mFound));
 
                     if (composite)
                         composite->addController(alphaFader);
@@ -1376,7 +1376,7 @@ public:
 protected:
     float mAlpha;
     float *mAlphaUpdate;
-    osg::ref_ptr<osgParticle::ParticleSystem> _partsys;
+    osg::ref_ptr<osgParticle::ParticleSystem> mPartSys;
 };
 
 class RainFader : public AlphaFader
