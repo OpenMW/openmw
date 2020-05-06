@@ -264,6 +264,11 @@ namespace MWRender
             mCurrentStateSet = nullptr;
             return result;
         }
+        void addInstance(const Result& result)
+        {
+            for (auto pair : result.mStateSetCounter)
+                mGlobalStateSetCounter[pair.first] += pair.second;
+        }
         float getMergeBenefit(const Result& result)
         {
             if (result.mStateSetCounter.empty()) return 1;
@@ -445,6 +450,8 @@ namespace MWRender
                 emplaced.first->second.mAnalyzeResult = analyzeVisitor.retrieveResult();
                 emplaced.first->second.mNeedCompile = compile && cnode->referenceCount() <= 3;
             }
+            else
+                analyzeVisitor.addInstance(emplaced.first->second.mAnalyzeResult);
             emplaced.first->second.mInstances.push_back(&ref);
         }
 
