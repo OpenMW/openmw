@@ -1292,9 +1292,10 @@ public:
     virtual void setDefaults(osg::StateSet* stateset)
     {
         // need to create a deep copy of StateAttributes we will modify
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        mat->setColorMode(osg::Material::AMBIENT); // set Ambient lighting to control alpha fading with color
-        stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+        osg::ref_ptr<osg::Material> mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+        mat = static_cast<osg::Material*>(osg::clone(mat.get(), osg::CopyOp::DEEP_COPY_ALL));
+        mat->setColorMode(osg::Material::AMBIENT);
+        stateset->setAttribute(mat, osg::StateAttribute::ON);
     }
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
