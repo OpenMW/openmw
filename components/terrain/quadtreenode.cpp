@@ -171,18 +171,11 @@ void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)
 {
     mBoundingBox = boundingBox;
     mValidBounds = boundingBox.valid();
-    dirtyBound();
-    getBound();
 }
 
 const osg::BoundingBox &QuadTreeNode::getBoundingBox() const
 {
     return mBoundingBox;
-}
-
-osg::BoundingSphere QuadTreeNode::computeBound() const
-{
-    return osg::BoundingSphere(mBoundingBox);
 }
 
 float QuadTreeNode::getSize() const

@@ -91,8 +91,6 @@ namespace Terrain
         const osg::BoundingBox& getBoundingBox() const;
         bool hasValidBounds() const { return mValidBounds; }
 
-        virtual osg::BoundingSphere computeBound() const;
-
         /// size in cell coordinates
         float getSize() const;
 

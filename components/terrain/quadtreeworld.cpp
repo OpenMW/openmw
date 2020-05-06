@@ -140,6 +140,8 @@ public:
         addChildren(mRootNode);
 
         mRootNode->initNeighbours();
+        float cellWorldSize = mStorage->getCellWorldSize();
+        mRootNode->setInitialBound(osg::BoundingSphere(osg::BoundingBox(osg::Vec3(mMinX*cellWorldSize, mMinY*cellWorldSize, 0), osg::Vec3(mMaxX*cellWorldSize, mMaxY*cellWorldSize, 0))));
     }
 
     void addChildren(QuadTreeNode* parent)
