@@ -849,13 +849,40 @@ namespace MWWorld
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
+        preloadTerrain(position.asVec3());
+
         changeCellGrid(x, y, changeEvent);
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
 
+        checkTerrainLoaded();
+
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
+    }
+
+    void Scene::checkTerrainLoaded()
+    {
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        Loading::ScopedLoad load(loadingListener);
+        int progress = 0, initialProgress = -1, progressRange = 0;
+        while (mPreloader->getTerrainPreloadInProgress(progress, progressRange, mRendering.getReferenceTime()))
+        {
+            if (initialProgress == -1)
+            {
+                loadingListener->setLabel("#{sLoadingMessage4}");
+                initialProgress = progress;
+            }
+            if (progress)
+            {
+                loadingListener->setProgressRange(std::max(0, progressRange-initialProgress));
+                loadingListener->setProgress(progress-initialProgress);
+            }
+            else
+                loadingListener->setProgress(0);
+            OpenThreads::Thread::microSleep(5000);
+        }
     }
 
     CellStore* Scene::getCurrentCell ()
@@ -1102,6 +1129,7 @@ namespace MWWorld
 
     void Scene::preloadTerrain(const osg::Vec3f &pos)
     {
+        mPreloader->abortTerrainPreloadExcept(pos);
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
         mPreloader->setTerrainPreloadPositions(vec);

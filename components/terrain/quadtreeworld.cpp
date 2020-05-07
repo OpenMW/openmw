@@ -509,7 +509,7 @@ View* QuadTreeWorld::createView()
     return new ViewData;
 }
 
-void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::Vec4i &grid, std::atomic<bool> &abort)
+void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::Vec4i &grid, std::atomic<bool> &abort, std::atomic<int> &progress, int& progressTotal)
 {
     ensureQuadTreeBuilt();
 
@@ -519,12 +519,16 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, grid);
     mRootNode->traverseNodes(vd, viewPoint, &lodCallback, mViewDistance);
 
-    const float cellWorldSize = mStorage->getCellWorldSize();
+    if (!progressTotal)
+        for (unsigned int i=0; i<vd->getNumEntries(); ++i)
+            progressTotal += vd->getEntry(i).mNode->getSize();
 
+    const float cellWorldSize = mStorage->getCellWorldSize();
     for (unsigned int i=0; i<vd->getNumEntries() && !abort; ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
         loadRenderingNode(entry, vd, mVertexLodMod, cellWorldSize, grid, mChunkManagers, true);
+        progress += entry.mNode->getSize();
     }
     vd->markUnchanged();
 }

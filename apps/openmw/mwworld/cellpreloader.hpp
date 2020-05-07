@@ -72,6 +72,9 @@ namespace MWWorld
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
+        bool getTerrainPreloadInProgress(int& progress, int& progressRange, double timestamp);
+        void abortTerrainPreloadExcept(const osg::Vec3f& exceptPos);
+
     private:
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
