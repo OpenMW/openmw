@@ -1305,16 +1305,9 @@ public:
         }
     };
 
-    virtual void setDefaults(osg::StateSet* stateset)
-    {
-        // need to create a deep copy of StateAttributes we will modify
-        osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-        stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
-    }
-
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
-        for(int i=0; i<mPartSys->numParticles(); ++i)
+        for(int i = 0; i<mPartSys->numParticles(); ++i)
             mPartSys->getParticle(i)->setAlphaRange(osgParticle::rangef(mAlpha, mAlpha));
         if (mAlphaUpdate)
             *mAlphaUpdate = mAlpha;
@@ -1384,15 +1377,6 @@ class RainFader : public AlphaFader
 public:
     RainFader(float *alphaUpdate, osgParticle::ParticleSystem *partsys): AlphaFader(alphaUpdate, partsys)
     {
-    }
-
-    virtual void setDefaults(osg::StateSet* stateset)
-    {
-        osg::ref_ptr<osg::Material> mat (new osg::Material);
-        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-        stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
 
     virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -1508,7 +1492,11 @@ void SkyManager::createRain()
     stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
     stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
     stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-
+    osg::ref_ptr<osg::Material> mat (new osg::Material);
+    mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+    mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     osgParticle::Particle& particleTemplate = mRainParticleSystem->getDefaultParticleTemplate();
     particleTemplate.setSizeRange(osgParticle::rangef(5.f, 15.f));
     particleTemplate.setAlphaRange(osgParticle::rangef(1.f, 1.f));
