@@ -183,17 +183,20 @@ namespace Terrain
 
             osg::ref_ptr<osg::StateSet> stateset (new osg::StateSet);
 
-            stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-
-            if (!firstLayer)
+            if (!blendmaps.empty())
             {
-                stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
-                stateset->setAttributeAndModes(EqualDepth::value(), osg::StateAttribute::ON);
-            }
-            else
-            {
-                stateset->setAttributeAndModes(BlendFuncFirst::value(), osg::StateAttribute::ON);
-                stateset->setAttributeAndModes(LequalDepth::value(), osg::StateAttribute::ON);
+                stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+                stateset->setRenderBinDetails(passIndex++, "RenderBin");
+                if (!firstLayer)
+                {
+                    stateset->setAttributeAndModes(BlendFunc::value(), osg::StateAttribute::ON);
+                    stateset->setAttributeAndModes(EqualDepth::value(), osg::StateAttribute::ON);
+                }
+                else
+                {
+                    stateset->setAttributeAndModes(BlendFuncFirst::value(), osg::StateAttribute::ON);
+                    stateset->setAttributeAndModes(LequalDepth::value(), osg::StateAttribute::ON);
+                }
             }
 
             int texunit = 0;
@@ -267,8 +270,6 @@ namespace Terrain
                 }
 
             }
-
-            stateset->setRenderBinDetails(passIndex++, "RenderBin");
 
             passes.push_back(stateset);
         }

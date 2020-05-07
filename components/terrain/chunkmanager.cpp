@@ -4,6 +4,7 @@
 
 #include <osg/Texture2D>
 #include <osg/ClusterCullingCallback>
+#include <osg/Material>
 
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -31,7 +32,11 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mCompositeMapLevel(1.f)
     , mMaxCompGeometrySize(1.f)
 {
-
+    mMultiPassRoot = new osg::StateSet;
+    mMultiPassRoot->setRenderingHint(osg::StateSet::OPAQUE_BIN);
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    mMultiPassRoot->setAttributeAndModes(material, osg::StateAttribute::ON);
 }
 
 osg::ref_ptr<osg::Node> ChunkManager::getChunk(float size, const osg::Vec2f &center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile)
@@ -195,6 +200,8 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
         geometry->setTexCoordArray(i, mBufferCache.getUVBuffer(numVerts));
 
     geometry->createClusterCullingCallback();
+
+    geometry->setStateSet(mMultiPassRoot);
 
     if (useCompositeMap)
     {

@@ -65,6 +65,8 @@ namespace Terrain
         CompositeMapRenderer* mCompositeMapRenderer;
         BufferCache mBufferCache;
 
+        osg::ref_ptr<osg::StateSet> mMultiPassRoot;
+
         unsigned int mNodeMask;
 
         unsigned int mCompositeMapSize;
