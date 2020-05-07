@@ -45,6 +45,8 @@
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
 
+#include <components/nifosg/particle.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -1474,7 +1476,7 @@ void SkyManager::createRain()
 
     mRainNode = new osg::Group;
 
-    mRainParticleSystem = new osgParticle::ParticleSystem;
+    mRainParticleSystem = new NifOsg::ParticleSystem;
     osg::Vec3 rainRange = osg::Vec3(mRainDiameter, mRainDiameter, (mRainMinHeight+mRainMaxHeight)/2.f);
 
     mRainParticleSystem->setParticleAlignment(osgParticle::ParticleSystem::FIXED);
