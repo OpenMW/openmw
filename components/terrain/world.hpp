@@ -40,36 +40,46 @@ namespace Terrain
     class ChunkManager;
     class CompositeMapRenderer;
 
-class HeightCullCallback : public osg::NodeCallback
-{
-public:
-    HeightCullCallback() : mLowZ(-std::numeric_limits<float>::max()), mHighZ(std::numeric_limits<float>::max()), mMask(~0) {}
-
-    void setLowZ(float z)
+    class HeightCullCallback : public osg::NodeCallback
     {
-        mLowZ = z;
-    }
-    float getLowZ() const { return mLowZ; }
+    public:
+        void setLowZ(float z)
+        {
+            mLowZ = z;
+        }
+        float getLowZ() const
+        {
+            return mLowZ;
+        }
 
-    void setHighZ(float highZ)
-    {
-        mHighZ = highZ;
-    }
-    float getHighZ() const { return mHighZ; }
+        void setHighZ(float highZ)
+        {
+            mHighZ = highZ;
+        }
+        float getHighZ() const
+        {
+            return mHighZ;
+        }
 
-    void setCullMask(unsigned int mask) { mMask = mask; }
-    unsigned int getCullMask() const { return mMask; }
+        void setCullMask(unsigned int mask)
+        {
+            mMask = mask;
+        }
+        unsigned int getCullMask() const
+        {
+            return mMask;
+        }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        if (mLowZ <= mHighZ)
-            traverse(node, nv);
-    }
-private:
-    float mLowZ;
-    float mHighZ;
-    unsigned int mMask;
-};
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            if (mLowZ <= mHighZ)
+                traverse(node, nv);
+        }
+    private:
+        float mLowZ{-std::numeric_limits<float>::max()};
+        float mHighZ{std::numeric_limits<float>::max()};
+        unsigned int mMask{~0u};
+    };
 
     /**
      * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
