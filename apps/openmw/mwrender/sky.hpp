@@ -196,6 +196,8 @@ namespace MWRender
         osg::Uniform *mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mRootNode;
+        osg::ref_ptr<osg::Group> mSceneRootNode;
+
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
