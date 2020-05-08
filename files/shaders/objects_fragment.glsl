@@ -49,6 +49,8 @@ uniform vec2 envMapLumaBias;
 uniform mat2 bumpMapMatrix;
 #endif
 
+uniform bool simpleWater = false;
+
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -180,7 +182,11 @@ void main()
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
 #if @radialFog
-    float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
+    float depth = euclideanDepth;
+    // For the less detailed mesh of simple water we need to recalculate depth on per-pixel basis
+    if (simpleWater)
+        depth = length(passViewPos);
+    float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #else
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
