@@ -82,7 +82,7 @@ void main()
 #endif
 
 #if @specularMap
-    float shininess = 128; // TODO: make configurable
+    float shininess = 128.0; // TODO: make configurable
     vec3 matSpec = vec3(diffuseTex.a, diffuseTex.a, diffuseTex.a);
 #else
     float shininess = gl_FrontMaterial.shininess;
