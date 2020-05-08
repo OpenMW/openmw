@@ -1481,9 +1481,9 @@ namespace MWRender
     {
         mTerrain->setActiveGrid(grid);
     }
-    void RenderingManager::pagingEnableObject(const ESM::RefNum & refnum, bool enabled)
+    void RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
     {
-        if (mObjectPaging)
-            mObjectPaging->enableObject(refnum, enabled);
+        if (mObjectPaging && mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getRefData().getPosition().asVec3(), enabled))
+            mTerrain->clearCachedViews(ptr.getRefData().getPosition().asVec3());
     }
 }

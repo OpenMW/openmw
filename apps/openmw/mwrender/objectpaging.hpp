@@ -33,7 +33,9 @@ namespace MWRender
 
         virtual unsigned int getNodeMask() override;
 
-        void enableObject(const ESM::RefNum & refnum, bool enabled);
+        /// @return true if something changed
+        bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled);
+
         void clear();
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;

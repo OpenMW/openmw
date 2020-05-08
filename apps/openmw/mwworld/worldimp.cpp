@@ -815,7 +815,10 @@ namespace MWWorld
                 mWorldScene->addObjectToScene (reference);
 
             if (reference.getCellRef().getRefNum().hasContentFile())
-                mRendering->pagingEnableObject(reference.getCellRef().getRefNum(), true);
+            {
+                int type = mStore.find(Misc::StringUtils::lowerCase(reference.getCellRef().getRefId()));
+                mRendering->pagingEnableObject(type, reference, true);
+            }
         }
     }
 
@@ -853,7 +856,10 @@ namespace MWWorld
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())
-            mRendering->pagingEnableObject(reference.getCellRef().getRefNum(), false);
+        {
+            int type = mStore.find(Misc::StringUtils::lowerCase(reference.getCellRef().getRefId()));
+            mRendering->pagingEnableObject(type, reference, false);
+        }
 
         if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
             mWorldScene->removeObjectFromScene (reference);

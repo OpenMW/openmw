@@ -24,6 +24,7 @@ namespace Terrain
         void reset();
 
         void clear();
+        void clearCache(const osg::Vec3f &cellPos);
 
         bool contains(QuadTreeNode* node);
 
@@ -84,6 +85,7 @@ namespace Terrain
         ViewData* createOrReuseView();
 
         void clearUnusedViews(double referenceTime);
+        void clearCachedViews(const osg::Vec3f &cellPos);
 
         void clear();
 

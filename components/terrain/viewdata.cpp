@@ -1,5 +1,7 @@
 #include "viewdata.hpp"
 
+#include "quadtreenode.hpp"
+
 namespace Terrain
 {
 
@@ -99,6 +101,18 @@ bool ViewData::contains(QuadTreeNode *node)
     return false;
 }
 
+bool intersects(const osg::Vec2f& center, float halfSize, osg::Vec3f pos)
+{
+    return (pos.x() >= center.x()-halfSize && pos.y() >= center.y()-halfSize && pos.x() <= center.x()+halfSize && pos.y() <= center.y()+halfSize);
+}
+
+void ViewData::clearCache(const osg::Vec3f &cellPos)
+{
+    for (Entry& entry : mEntries)
+        if (entry.mNode && intersects(entry.mNode->getCenter(), entry.mNode->getSize()/2.f, cellPos))
+            entry.mRenderingNode = nullptr;
+}
+
 ViewData::Entry::Entry()
     : mNode(nullptr)
     , mLodFlags(0)
@@ -186,6 +200,12 @@ void ViewDataMap::clearUnusedViews(double referenceTime)
         else
             ++it;
     }
+}
+
+void ViewDataMap::clearCachedViews(const osg::Vec3f &cellPos)
+{
+    for (auto pair : mViews)
+        pair.second->clearCache(cellPos);
 }
 
 void ViewDataMap::clear()

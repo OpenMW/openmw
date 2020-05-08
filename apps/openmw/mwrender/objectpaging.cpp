@@ -576,17 +576,52 @@ namespace MWRender
         return Mask_Static;
     }
 
-    void ObjectPaging::enableObject(const ESM::RefNum & refnum, bool enabled)
+    struct ClearCacheFunctor
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-        if (enabled) mDisabled.erase(refnum);
-        else mDisabled.insert(refnum);
+        void operator()(MWRender::ChunkId id, osg::Object* obj)
+        {
+            if (intersects(id, mPosition))
+                mToClear.insert(id);
+        }
+        bool intersects(ChunkId id, osg::Vec3f pos)
+        {
+            pos /= ESM::Land::REAL_SIZE;
+            osg::Vec2f center = std::get<0>(id);
+            float halfSize = std::get<1>(id)/2;
+            return pos.x() >= center.x()-halfSize && pos.y() >= center.y()-halfSize && pos.x() <= center.x()+halfSize && pos.y() <= center.y()+halfSize;
+        }
+        osg::Vec3f mPosition;
+        std::set<MWRender::ChunkId> mToClear;
+    };
+
+    bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled)
+    {
+        if (!typeFilter(type, false))
+            return false;
+
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+            if (enabled && !mDisabled.erase(refnum)) return false;
+            if (!enabled && !mDisabled.insert(refnum).second) return false;
+        }
+
+        ClearCacheFunctor ccf;
+        ccf.mPosition = pos;
+        mCache->call(ccf);
+        for (auto chunk : ccf.mToClear)
+            mCache->removeFromObjectCache(chunk);
+        return true;
     }
 
     void ObjectPaging::clear()
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-        mDisabled.clear();
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+            if (mDisabled.empty())
+                return;
+            mDisabled.clear();
+        }
+        mCache->clear();
     }
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats *stats) const

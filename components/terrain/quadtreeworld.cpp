@@ -574,4 +574,11 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
     mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask()|m->getNodeMask());
 }
 
+void QuadTreeWorld::clearCachedViews(const osg::Vec3f &pos)
+{
+//mViewDataMap->clear();
+    osg::Vec3 pos_ = pos / mStorage->getCellWorldSize();
+    mViewDataMap->clearCachedViews(pos_);
+}
+
 }

@@ -40,6 +40,7 @@ namespace Terrain
         View* createView();
         void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange);
         void storeView(const View* view, double referenceTime);
+        void clearCachedViews(const osg::Vec3f& pos) override;
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats);
 

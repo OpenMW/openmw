@@ -153,6 +153,8 @@ namespace Terrain
         /// @note Not thread safe.
         virtual void storeView(const View* view, double referenceTime) {}
 
+        virtual void clearCachedViews(const osg::Vec3f& pos) {}
+
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
         virtual void setViewDistance(float distance) {}
