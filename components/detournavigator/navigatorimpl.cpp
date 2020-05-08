@@ -12,6 +12,7 @@ namespace DetourNavigator
     NavigatorImpl::NavigatorImpl(const Settings& settings)
         : mSettings(settings)
         , mNavMeshManager(mSettings)
+        , mUpdatesEnabled(true)
     {
     }
 
@@ -138,9 +139,16 @@ namespace DetourNavigator
 
     void NavigatorImpl::update(const osg::Vec3f& playerPosition)
     {
+        if (!mUpdatesEnabled)
+            return;
         removeUnusedNavMeshes();
         for (const auto& v : mAgents)
             mNavMeshManager.update(playerPosition, v.first);
+    }
+
+    void NavigatorImpl::setUpdatesEnabled(bool enabled)
+    {
+        mUpdatesEnabled = enabled;
     }
 
     void NavigatorImpl::wait()
