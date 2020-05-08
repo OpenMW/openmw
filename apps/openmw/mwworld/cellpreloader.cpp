@@ -182,10 +182,12 @@ namespace MWWorld
         {
         }
 
-        void storeViews(double referenceTime)
+        bool storeViews(double referenceTime)
         {
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size(); ++i)
-                mWorld->storeView(mTerrainViews[i], referenceTime);
+                if (!mWorld->storeView(mTerrainViews[i], referenceTime))
+                    return false;
+            return true;
         }
 
         virtual void doWork()
@@ -244,6 +246,7 @@ namespace MWWorld
         , mMaxCacheSize(0)
         , mPreloadInstances(true)
         , mLastResourceCacheUpdate(0.0)
+        , mStoreViewsFailCount(0)
     {
     }
 
@@ -379,7 +382,17 @@ namespace MWWorld
 
         if (mTerrainPreloadItem && mTerrainPreloadItem->isDone())
         {
-            mTerrainPreloadItem->storeViews(timestamp);
+            if (!mTerrainPreloadItem->storeViews(timestamp))
+            {
+                if (++mStoreViewsFailCount > 100)
+                {
+                    OSG_ALWAYS << "paging views are rebuilt every frame, please check for faulty enable/disable scripts." << std::endl;
+                    mStoreViewsFailCount = 0;
+                }
+                setTerrainPreloadPositions(std::vector<PositionCellGrid>());
+            }
+            else
+                mStoreViewsFailCount = 0;
             mTerrainPreloadItem = nullptr;
         }
     }
@@ -451,11 +464,31 @@ namespace MWWorld
         }
     }
 
+    bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained)
+    {
+        for (auto pos : contained)
+        {
+            bool found = false;
+            for (auto pos2 : container)
+            {
+                if ((pos.first-pos2.first).length2() < 1 && pos.second == pos2.second)
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) return false;
+        }
+        return true;
+    }
+
     void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid> &positions)
     {
-        if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
+        if (positions.empty())
+            mTerrainPreloadPositions.clear();
+        else if (contains(mTerrainPreloadPositions, positions))
             return;
-        else if (positions == mTerrainPreloadPositions)
+        if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
             return;
         else
         {
@@ -472,7 +505,6 @@ namespace MWWorld
             }
 
             mTerrainPreloadPositions = positions;
-
             if (!positions.empty())
             {
                 mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);

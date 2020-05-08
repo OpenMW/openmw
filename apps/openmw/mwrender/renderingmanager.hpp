@@ -241,7 +241,7 @@ namespace MWRender
 
         void setActiveGrid(const osg::Vec4i &grid);
 
-        void pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
+        bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
 
     private:
         void updateProjectionMatrix();

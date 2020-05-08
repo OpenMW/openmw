@@ -253,7 +253,6 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
 
 QuadTreeWorld::~QuadTreeWorld()
 {
-    mViewDataMap->clear();
 }
 
 /// get the level of vertex detail to render this node at, expressed relative to the native resolution of the data set.
@@ -279,7 +278,7 @@ unsigned int getVertexLod(QuadTreeNode* node, int vertexLodMod)
 }
 
 /// get the flags to use for stitching in the index buffer so that chunks of different LOD connect seamlessly
-unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, ViewData* vd)
+unsigned int getLodFlags(QuadTreeNode* node, int ourLod, int vertexLodMod, const ViewData* vd)
 {
     unsigned int lodFlags = 0;
     for (unsigned int i=0; i<4; ++i)
@@ -506,7 +505,7 @@ void QuadTreeWorld::enable(bool enabled)
 
 View* QuadTreeWorld::createView()
 {
-    return new ViewData;
+    return mViewDataMap->createIndependentView();
 }
 
 void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::Vec4i &grid, std::atomic<bool> &abort, std::atomic<int> &progress, int& progressTotal)
@@ -533,14 +532,9 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     vd->markUnchanged();
 }
 
-void QuadTreeWorld::storeView(const View* view, double referenceTime)
+bool QuadTreeWorld::storeView(const View* view, double referenceTime)
 {
-    osg::ref_ptr<osg::Object> dummy = new osg::DummyObject;
-    const ViewData* vd = static_cast<const ViewData*>(view);
-    bool needsUpdate = false;
-    ViewData* stored = mViewDataMap->getViewData(dummy, vd->getViewPoint(), vd->getActiveGrid(), needsUpdate);
-    stored->copyFrom(*vd);
-    stored->setLastUsageTimeStamp(referenceTime);
+    return mViewDataMap->storeView(static_cast<const ViewData*>(view), referenceTime);
 }
 
 void QuadTreeWorld::reportStats(unsigned int frameNumber, osg::Stats *stats)
@@ -574,11 +568,9 @@ void QuadTreeWorld::addChunkManager(QuadTreeWorld::ChunkManager* m)
     mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask()|m->getNodeMask());
 }
 
-void QuadTreeWorld::clearCachedViews(const osg::Vec3f &pos)
+void QuadTreeWorld::rebuildViews()
 {
-//mViewDataMap->clear();
-    osg::Vec3 pos_ = pos / mStorage->getCellWorldSize();
-    mViewDataMap->clearCachedViews(pos_);
+    mViewDataMap->rebuildViews();
 }
 
 }

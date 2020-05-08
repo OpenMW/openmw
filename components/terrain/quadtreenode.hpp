@@ -53,7 +53,6 @@ namespace Terrain
         virtual bool isSufficientDetail(QuadTreeNode *node, float dist) = 0;
     };
 
-    class ViewDataMap;
     class ViewData;
 
     class QuadTreeNode : public osg::Group

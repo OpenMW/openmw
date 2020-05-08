@@ -1481,9 +1481,15 @@ namespace MWRender
     {
         mTerrain->setActiveGrid(grid);
     }
-    void RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
+    bool RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
     {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior())
+            return false;
         if (mObjectPaging && mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getRefData().getPosition().asVec3(), enabled))
-            mTerrain->clearCachedViews(ptr.getRefData().getPosition().asVec3());
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
     }
 }
