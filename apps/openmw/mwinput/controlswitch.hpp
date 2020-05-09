@@ -2,6 +2,7 @@
 #define MWINPUT_CONTROLSWITCH_H
 
 #include <map>
+#include <string>
 
 namespace ESM
 {
