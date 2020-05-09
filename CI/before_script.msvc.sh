@@ -759,8 +759,7 @@ echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."
-add_cmake_opts -DBUILD_MYGUI_PLUGIN=no \
-	-DOPENMW_MP_BUILD=on
+add_cmake_opts -DOPENMW_MP_BUILD=on
 if [ ! -z $CI ]; then
 	case $STEP in
 		components )
