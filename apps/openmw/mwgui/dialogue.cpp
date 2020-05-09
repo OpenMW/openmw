@@ -477,6 +477,8 @@ namespace MWGui
 
     void DialogueWindow::onClose()
     {
+        if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Dialogue))
+            return;
         // Reset history
         for (DialogueText* text : mHistoryContents)
             delete text;
