@@ -263,15 +263,21 @@ namespace Shader
                     case osg::Material::OFF:
                         colorMode = 0;
                         break;
-                    case GL_AMBIENT:
-                        colorMode = 3;
+                    case osg::Material::EMISSION:
+                        colorMode = 1;
                         break;
                     default:
-                    case GL_AMBIENT_AND_DIFFUSE:
+                    case osg::Material::AMBIENT_AND_DIFFUSE:
                         colorMode = 2;
                         break;
-                    case GL_EMISSION:
-                        colorMode = 1;
+                    case osg::Material::AMBIENT:
+                        colorMode = 3;
+                        break;
+                    case osg::Material::DIFFUSE:
+                        colorMode = 4;
+                        break;
+                    case osg::Material::SPECULAR:
+                        colorMode = 5;
                         break;
                     }
 
