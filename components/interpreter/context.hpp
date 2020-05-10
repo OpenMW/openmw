@@ -108,8 +108,6 @@ namespace Interpreter
 
             virtual void setMemberFloat (const std::string& id, const std::string& name, float value, bool global)
                 = 0;
-
-            virtual std::string getTargetId() const = 0;
     };
 }
 
