@@ -417,57 +417,89 @@ namespace MWInput
 
     std::string BindingsManager::getActionDescription(int action)
     {
-        std::map<int, std::string> descriptions;
-
-        if (action == A_Screenshot)
-            return "Screenshot";
-        else if (action == A_ZoomIn)
-            return "Zoom In";
-        else if (action == A_ZoomOut)
-            return "Zoom Out";
-        else if (action == A_ToggleHUD)
-            return "Toggle HUD";
-
-        descriptions[A_Use] = "sUse";
-        descriptions[A_Activate] = "sActivate";
-        descriptions[A_MoveBackward] = "sBack";
-        descriptions[A_MoveForward] = "sForward";
-        descriptions[A_MoveLeft] = "sLeft";
-        descriptions[A_MoveRight] = "sRight";
-        descriptions[A_ToggleWeapon] = "sReady_Weapon";
-        descriptions[A_ToggleSpell] = "sReady_Magic";
-        descriptions[A_CycleSpellLeft] = "sPrevSpell";
-        descriptions[A_CycleSpellRight] = "sNextSpell";
-        descriptions[A_CycleWeaponLeft] = "sPrevWeapon";
-        descriptions[A_CycleWeaponRight] = "sNextWeapon";
-        descriptions[A_Console] = "sConsoleTitle";
-        descriptions[A_Run] = "sRun";
-        descriptions[A_Sneak] = "sCrouch_Sneak";
-        descriptions[A_AutoMove] = "sAuto_Run";
-        descriptions[A_Jump] = "sJump";
-        descriptions[A_Journal] = "sJournal";
-        descriptions[A_Rest] = "sRestKey";
-        descriptions[A_Inventory] = "sInventory";
-        descriptions[A_TogglePOV] = "sTogglePOVCmd";
-        descriptions[A_QuickKeysMenu] = "sQuickMenu";
-        descriptions[A_QuickKey1] = "sQuick1Cmd";
-        descriptions[A_QuickKey2] = "sQuick2Cmd";
-        descriptions[A_QuickKey3] = "sQuick3Cmd";
-        descriptions[A_QuickKey4] = "sQuick4Cmd";
-        descriptions[A_QuickKey5] = "sQuick5Cmd";
-        descriptions[A_QuickKey6] = "sQuick6Cmd";
-        descriptions[A_QuickKey7] = "sQuick7Cmd";
-        descriptions[A_QuickKey8] = "sQuick8Cmd";
-        descriptions[A_QuickKey9] = "sQuick9Cmd";
-        descriptions[A_QuickKey10] = "sQuick10Cmd";
-        descriptions[A_AlwaysRun] = "sAlways_Run";
-        descriptions[A_QuickSave] = "sQuickSaveCmd";
-        descriptions[A_QuickLoad] = "sQuickLoadCmd";
-
-        if (descriptions[action].empty())
-            return std::string(); // not configurable
-
-        return "#{" + descriptions[action] + "}";
+        switch (action)
+        {
+            case A_Screenshot:
+                return "Screenshot";
+            case A_ZoomIn:
+                return "Zoom In";
+            case A_ZoomOut:
+                return "Zoom Out";
+            case A_ToggleHUD:
+                return "Toggle HUD";
+            case A_Use:
+                return "#{sUse}";
+            case A_Activate:
+                return "#{sActivate}";
+            case A_MoveBackward:
+                return "#{sBack}";
+            case A_MoveForward:
+                return "#{sForward}";
+            case A_MoveLeft:
+                return "#{sLeft}";
+            case A_MoveRight:
+                return "#{sRight}";
+            case A_ToggleWeapon:
+                return "#{sReady_Weapon}";
+            case A_ToggleSpell:
+                return "#{sReady_Magic}";
+            case A_CycleSpellLeft:
+                return "#{sPrevSpell}";
+            case A_CycleSpellRight:
+                return "#{sNextSpell}";
+            case A_CycleWeaponLeft:
+                return "#{sPrevWeapon}";
+            case A_CycleWeaponRight:
+                return "#{sNextWeapon}";
+            case A_Console:
+                return "#{sConsoleTitle}";
+            case A_Run:
+                return "#{sRun}";
+            case A_Sneak:
+                return "#{sCrouch_Sneak}";
+            case A_AutoMove:
+                return "#{sAuto_Run}";
+            case A_Jump:
+                return "#{sJump}";
+            case A_Journal:
+                return "#{sJournal}";
+            case A_Rest:
+                return "#{sRestKey}";
+            case A_Inventory:
+                return "#{sInventory}";
+            case A_TogglePOV:
+                return "#{sTogglePOVCmd}";
+            case A_QuickKeysMenu:
+                return "#{sQuickMenu}";
+            case A_QuickKey1:
+                return "#{sQuick1Cmd}";
+            case A_QuickKey2:
+                return "#{sQuick2Cmd}";
+            case A_QuickKey3:
+                return "#{sQuick3Cmd}";
+            case A_QuickKey4:
+                return "#{sQuick4Cmd}";
+            case A_QuickKey5:
+                return "#{sQuick5Cmd}";
+            case A_QuickKey6:
+                return "#{sQuick6Cmd}";
+            case A_QuickKey7:
+                return "#{sQuick7Cmd}";
+            case A_QuickKey8:
+                return "#{sQuick8Cmd}";
+            case A_QuickKey9:
+                return "#{sQuick9Cmd}";
+            case A_QuickKey10:
+                return "#{sQuick10Cmd}";
+            case A_AlwaysRun:
+                return "#{sAlways_Run}";
+            case A_QuickSave:
+                return "#{sQuickSaveCmd}";
+            case A_QuickLoad:
+                return "#{sQuickLoadCmd}";
+            default:
+                return std::string(); // not configurable
+        }
     }
 
     std::string BindingsManager::getActionKeyBindingName(int action)
@@ -519,86 +551,30 @@ namespace MWInput
 
     std::vector<int> BindingsManager::getActionKeySorting()
     {
-        std::vector<int> ret;
-        ret.push_back(A_MoveForward);
-        ret.push_back(A_MoveBackward);
-        ret.push_back(A_MoveLeft);
-        ret.push_back(A_MoveRight);
-        ret.push_back(A_TogglePOV);
-        ret.push_back(A_ZoomIn);
-        ret.push_back(A_ZoomOut);
-        ret.push_back(A_Run);
-        ret.push_back(A_AlwaysRun);
-        ret.push_back(A_Sneak);
-        ret.push_back(A_Activate);
-        ret.push_back(A_Use);
-        ret.push_back(A_ToggleWeapon);
-        ret.push_back(A_ToggleSpell);
-        ret.push_back(A_CycleSpellLeft);
-        ret.push_back(A_CycleSpellRight);
-        ret.push_back(A_CycleWeaponLeft);
-        ret.push_back(A_CycleWeaponRight);
-        ret.push_back(A_AutoMove);
-        ret.push_back(A_Jump);
-        ret.push_back(A_Inventory);
-        ret.push_back(A_Journal);
-        ret.push_back(A_Rest);
-        ret.push_back(A_Console);
-        ret.push_back(A_QuickSave);
-        ret.push_back(A_QuickLoad);
-        ret.push_back(A_ToggleHUD);
-        ret.push_back(A_Screenshot);
-        ret.push_back(A_QuickKeysMenu);
-        ret.push_back(A_QuickKey1);
-        ret.push_back(A_QuickKey2);
-        ret.push_back(A_QuickKey3);
-        ret.push_back(A_QuickKey4);
-        ret.push_back(A_QuickKey5);
-        ret.push_back(A_QuickKey6);
-        ret.push_back(A_QuickKey7);
-        ret.push_back(A_QuickKey8);
-        ret.push_back(A_QuickKey9);
-        ret.push_back(A_QuickKey10);
+        static const std::vector<int> actions
+        {
+            A_MoveForward, A_MoveBackward, A_MoveLeft, A_MoveRight, A_TogglePOV, A_ZoomIn, A_ZoomOut,
+            A_Run, A_AlwaysRun, A_Sneak, A_Activate, A_Use, A_ToggleWeapon, A_ToggleSpell,
+            A_CycleSpellLeft, A_CycleSpellRight, A_CycleWeaponLeft, A_CycleWeaponRight, A_AutoMove,
+            A_Jump, A_Inventory, A_Journal, A_Rest, A_Console, A_QuickSave, A_QuickLoad,
+            A_ToggleHUD, A_Screenshot, A_QuickKeysMenu, A_QuickKey1, A_QuickKey2, A_QuickKey3,
+            A_QuickKey4, A_QuickKey5, A_QuickKey6, A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10
+        };
 
-        return ret;
+        return actions;
     }
     std::vector<int> BindingsManager::getActionControllerSorting()
     {
-        std::vector<int> ret;
-        ret.push_back(A_TogglePOV);
-        ret.push_back(A_ZoomIn);
-        ret.push_back(A_ZoomOut);
-        ret.push_back(A_Sneak);
-        ret.push_back(A_Activate);
-        ret.push_back(A_Use);
-        ret.push_back(A_ToggleWeapon);
-        ret.push_back(A_ToggleSpell);
-        ret.push_back(A_AutoMove);
-        ret.push_back(A_Jump);
-        ret.push_back(A_Inventory);
-        ret.push_back(A_Journal);
-        ret.push_back(A_Rest);
-        ret.push_back(A_QuickSave);
-        ret.push_back(A_QuickLoad);
-        ret.push_back(A_ToggleHUD);
-        ret.push_back(A_Screenshot);
-        ret.push_back(A_QuickKeysMenu);
-        ret.push_back(A_QuickKey1);
-        ret.push_back(A_QuickKey2);
-        ret.push_back(A_QuickKey3);
-        ret.push_back(A_QuickKey4);
-        ret.push_back(A_QuickKey5);
-        ret.push_back(A_QuickKey6);
-        ret.push_back(A_QuickKey7);
-        ret.push_back(A_QuickKey8);
-        ret.push_back(A_QuickKey9);
-        ret.push_back(A_QuickKey10);
-        ret.push_back(A_CycleSpellLeft);
-        ret.push_back(A_CycleSpellRight);
-        ret.push_back(A_CycleWeaponLeft);
-        ret.push_back(A_CycleWeaponRight);
+        static const std::vector<int> actions
+        {
+            A_TogglePOV, A_ZoomIn, A_ZoomOut, A_Sneak, A_Activate, A_Use, A_ToggleWeapon, A_ToggleSpell,
+            A_AutoMove, A_Jump, A_Inventory, A_Journal, A_Rest, A_QuickSave, A_QuickLoad, A_ToggleHUD,
+            A_Screenshot, A_QuickKeysMenu, A_QuickKey1, A_QuickKey2, A_QuickKey3, A_QuickKey4,
+            A_QuickKey5, A_QuickKey6, A_QuickKey7, A_QuickKey8, A_QuickKey9, A_QuickKey10,
+            A_CycleSpellLeft, A_CycleSpellRight, A_CycleWeaponLeft, A_CycleWeaponRight
+        };
 
-        return ret;
+        return actions;
     }
 
     void BindingsManager::enableDetectingBindingMode(int action, bool keyboard)
