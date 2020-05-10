@@ -1548,6 +1548,7 @@ void SkyManager::createRain()
     mRainNode->addUpdateCallback(mRainFader);
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
+    mSceneManager->recreateShaders(mRainNode);
 
     mSceneRootNode->addChild(mRainNode);
 }
