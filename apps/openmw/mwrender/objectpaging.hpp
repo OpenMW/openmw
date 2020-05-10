@@ -19,7 +19,7 @@ namespace MWWorld
 namespace MWRender
 {
 
-    typedef std::tuple<osg::Vec2f, float> ChunkId; // Center, Size
+    typedef std::tuple<osg::Vec2f, float, bool> ChunkId; // Center, Size, ActiveGrid
 
     class ObjectPaging : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
@@ -27,9 +27,9 @@ namespace MWRender
         ObjectPaging(Resource::SceneManager* sceneManager);
         ~ObjectPaging() = default;
 
-        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile) override;
+        osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
-        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, const osg::Vec3f& viewPoint, bool compile);
+        osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile);
 
         virtual unsigned int getNodeMask() override;
 
@@ -40,8 +40,11 @@ namespace MWRender
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
+        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
+
     private:
         Resource::SceneManager* mSceneManager;
+        bool mActiveGrid;
         bool mDebugBatches;
         float mMergeFactor;
         float mMinSize;

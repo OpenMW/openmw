@@ -13,6 +13,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/bulletshape.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/debug.hpp>
 #include <components/misc/convert.hpp>
@@ -87,7 +88,7 @@ namespace
     }
 
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                   MWRender::RenderingManager& rendering)
+                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs)
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
@@ -104,7 +105,11 @@ namespace
         if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
             model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
 
-        ptr.getClass().insertObjectRendering(ptr, model, rendering);
+        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
+            ptr.getClass().insertObjectRendering(ptr, model, rendering);
+        else
+            ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
         setNodeRotation(ptr, rendering, RotationOrder::direct);
 
         ptr.getClass().insertObject (ptr, model, physics);
@@ -498,18 +503,14 @@ namespace MWWorld
 
         osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
         if (newCell != mCurrentGridCenter)
+        {
+            preloadTerrain(pos);
             changeCellGrid(newCell.x(), newCell.y());
+        }
     }
 
     void Scene::changeCellGrid (int playerCellX, int playerCellY, bool changeEvent)
     {
-        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        Loading::ScopedLoad load(loadingListener);
-
-        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
-        std::string loadingExteriorText = "#{sLoadingMessage3}";
-        loadingListener->setLabel(loadingExteriorText, false, messagesCount > 0);
-
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
         {
@@ -525,6 +526,14 @@ namespace MWWorld
             }
             unloadCell (active++);
         }
+
+        mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
+        osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
+        mRendering.setActiveGrid(newGrid);
+
+        mPagedRefs.clear();
+        checkTerrainLoaded();
+        mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
         std::size_t refsToLoad = 0;
         std::vector<std::pair<int, int>> cellsPositionsToLoad;
@@ -554,6 +563,11 @@ namespace MWWorld
             }
         }
 
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        Loading::ScopedLoad load(loadingListener);
+        int messagesCount = MWBase::Environment::get().getWindowManager()->getMessagesCount();
+        std::string loadingExteriorText = "#{sLoadingMessage3}";
+        loadingListener->setLabel(loadingExteriorText, false, messagesCount > 0);
         loadingListener->setProgressRange(refsToLoad);
 
         const auto getDistanceToPlayerCell = [&] (const std::pair<int, int>& cellPosition)
@@ -600,9 +614,6 @@ namespace MWWorld
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(playerCellX, playerCellY);
         MWBase::Environment::get().getWindowManager()->changeCell(current);
-
-        mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
-        mRendering.setActiveGrid(gridCenterToBounds(mCurrentGridCenter));
 
         if (changeEvent)
             mCellChanged = true;
@@ -820,6 +831,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         // Load cell.
+        mPagedRefs.clear();
         loadCell (cell, loadingListener, changeEvent);
 
         changePlayerCell(cell, position, adjustPlayerPos);
@@ -850,13 +862,11 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         preloadTerrain(position.asVec3());
-
+        checkTerrainLoaded();
         changeCellGrid(x, y, changeEvent);
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
-
-        checkTerrainLoaded();
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
@@ -899,7 +909,7 @@ namespace MWWorld
     {
         InsertVisitor insertVisitor (cell, *loadingListener, test);
         cell.forEach (insertVisitor);
-        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs); });
         insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
 
         // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
@@ -911,7 +921,7 @@ namespace MWWorld
     {
         try
         {
-            addObject(ptr, *mPhysics, mRendering);
+            addObject(ptr, *mPhysics, mRendering, mPagedRefs);
             addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
@@ -943,6 +953,8 @@ namespace MWWorld
         mRendering.removeObject (ptr);
         if (ptr.getClass().isActor())
             mRendering.removeWaterRippleEmitter(ptr);
+        ptr.getRefData().setBaseNode(nullptr);
+        mPagedRefs.erase(ptr.getCellRef().getRefNum());
     }
 
     bool Scene::isCellActive(const CellStore &cell)
@@ -1129,9 +1141,9 @@ namespace MWWorld
 
     void Scene::preloadTerrain(const osg::Vec3f &pos)
     {
-        mPreloader->abortTerrainPreloadExcept(pos);
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
+        mPreloader->abortTerrainPreloadExcept(vec[0]);
         mPreloader->setTerrainPreloadPositions(vec);
     }
 

@@ -108,24 +108,20 @@ void QuadTreeNode::initNeighbours()
         getChild(i)->initNeighbours();
 }
 
-void QuadTreeNode::traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist)
+void QuadTreeNode::traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback)
 {
     if (!hasValidBounds())
         return;
-
-    float dist = distance(viewPoint);
-    if (dist > maxDist)
+    LodCallback::ReturnValue lodResult = lodCallback->isSufficientDetail(this, distance(viewPoint));
+    if (lodResult == LodCallback::StopTraversal)
         return;
-
-    bool stopTraversal = (lodCallback->isSufficientDetail(this, dist)) || !getNumChildren();
-
-    if (stopTraversal)
-        vd->add(this);
-    else
+    else if (lodResult == LodCallback::Deeper && getNumChildren())
     {
         for (unsigned int i=0; i<getNumChildren(); ++i)
-            getChild(i)->traverseNodes(vd, viewPoint, lodCallback, maxDist);
+            getChild(i)->traverseNodes(vd, viewPoint, lodCallback);
     }
+    else
+        vd->add(this);
 }
 
 void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector& intersector)

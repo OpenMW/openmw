@@ -53,34 +53,40 @@ namespace Terrain
 class DefaultLodCallback : public LodCallback
 {
 public:
-    DefaultLodCallback(float factor, float minSize, const osg::Vec4i& grid)
+    DefaultLodCallback(float factor, float minSize, float viewDistance, const osg::Vec4i& grid)
         : mFactor(factor)
         , mMinSize(minSize)
+        , mViewDistance(viewDistance)
         , mActiveGrid(grid)
     {
     }
 
-    virtual bool isSufficientDetail(QuadTreeNode* node, float dist)
+    virtual ReturnValue isSufficientDetail(QuadTreeNode* node, float dist)
     {
-        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
-        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
-
+        const osg::Vec2f& center = node->getCenter();
+        bool activeGrid = (center.x() > mActiveGrid.x() && center.y() > mActiveGrid.y() && center.x() < mActiveGrid.z() && center.y() < mActiveGrid.w());
+        if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
+            return StopTraversal;
         if (node->getSize()>1)
         {
             float halfSize = node->getSize()/2;
-            const osg::Vec2f& center = node->getCenter();
             osg::Vec4i nodeBounds (static_cast<int>(center.x() - halfSize), static_cast<int>(center.y() - halfSize), static_cast<int>(center.x() + halfSize), static_cast<int>(center.y() + halfSize));
             bool intersects = (std::max(nodeBounds.x(), mActiveGrid.x()) < std::min(nodeBounds.z(), mActiveGrid.z()) && std::max(nodeBounds.y(), mActiveGrid.y()) < std::min(nodeBounds.w(), mActiveGrid.w()));
             // to prevent making chunks who will cross the activegrid border
             if (intersects)
-                return false;
+                return Deeper;
         }
-        return nativeLodLevel <= lodLevel;
+
+        int nativeLodLevel = Log2(static_cast<unsigned int>(node->getSize()/mMinSize));
+        int lodLevel = Log2(static_cast<unsigned int>(dist/(Constants::CellSizeInUnits*mMinSize*mFactor)));
+
+        return nativeLodLevel <= lodLevel ? StopTraversalAndUse : Deeper;
     }
 
 private:
     float mFactor;
     float mMinSize;
+    float mViewDistance;
     osg::Vec4i mActiveGrid;
 };
 
@@ -330,11 +336,11 @@ void loadRenderingNode(ViewData::Entry& entry, ViewData* vd, int vertexLodMod, f
         pat->setPosition(osg::Vec3f(entry.mNode->getCenter().x()*cellWorldSize, entry.mNode->getCenter().y()*cellWorldSize, 0.f));
 
         const osg::Vec2f& center = entry.mNode->getCenter();
-        bool far = (center.x() <= gridbounds.x() || center.y() <= gridbounds.y() || center.x() >= gridbounds.z() || center.y() >= gridbounds.w());
+        bool activeGrid = (center.x() > gridbounds.x() && center.y() > gridbounds.y() && center.x() < gridbounds.z() && center.y() < gridbounds.w());
 
         for (QuadTreeWorld::ChunkManager* m : chunkManagers)
         {
-            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, far, vd->getViewPoint(), compile);
+            osg::ref_ptr<osg::Node> n = m->getChunk(entry.mNode->getSize(), entry.mNode->getCenter(), ourLod, entry.mLodFlags, activeGrid, vd->getViewPoint(), compile);
             if (n) pat->addChild(n);
         }
         entry.mRenderingNode = pat;
@@ -428,9 +434,8 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         vd->reset();
         if (isCullVisitor)
         {
-            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
-            DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mActiveGrid);
-            mRootNode->traverseNodes(vd, cv->getViewPoint(), &lodCallback, mViewDistance);
+            DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, mActiveGrid);
+            mRootNode->traverseNodes(vd, nv.getViewPoint(), &lodCallback);
         }
         else
         {
@@ -515,8 +520,8 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
     vd->setActiveGrid(grid);
-    DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, grid);
-    mRootNode->traverseNodes(vd, viewPoint, &lodCallback, mViewDistance);
+    DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, grid);
+    mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
     if (!progressTotal)
         for (unsigned int i=0; i<vd->getNumEntries(); ++i)

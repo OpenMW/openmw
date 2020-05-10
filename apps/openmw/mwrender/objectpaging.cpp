@@ -18,6 +18,7 @@
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
 
+#include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/settings/settings.hpp>
@@ -32,16 +33,19 @@
 namespace MWRender
 {
 
-    bool typeFilter(int type, bool far)
+    bool typeFilter(int type, bool far, bool activeGrid)
     {
         switch (type)
         {
           case ESM::REC_STAT:
-           case ESM::REC_ACTI:
-            case ESM::REC_DOOR:
-          return true;
+            return true;
+
+          case ESM::REC_ACTI: // TODO enable when intersectionvisitor supported
+          case ESM::REC_DOOR:
+            return !activeGrid;
           case ESM::REC_CONT:
-          return far ? false : true;
+            return far ? false : !activeGrid;
+
         default:
             return false;
         }
@@ -64,17 +68,19 @@ namespace MWRender
         }
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool far, const osg::Vec3f& viewPoint, bool compile)
+    osg::ref_ptr<osg::Node> ObjectPaging::getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
-        if (!far)return nullptr;
-        ChunkId id = std::make_tuple(center, size);
+        if (activeGrid && !mActiveGrid)
+            return nullptr;
+
+        ChunkId id = std::make_tuple(center, size, activeGrid);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(id);
         if (obj)
             return obj->asNode();
         else
         {
-            osg::ref_ptr<osg::Node> node = createChunk(size, center, viewPoint, compile);
+            osg::ref_ptr<osg::Node> node = createChunk(size, center, activeGrid, viewPoint, compile);
             mCache->addEntryToObjectCache(id, node.get());
             return node;
         }
@@ -231,6 +237,15 @@ namespace MWRender
         std::vector<osg::ref_ptr<const Object>> mObjects;
     };
 
+    class RefnumSet : public osg::Object
+    {
+    public:
+        RefnumSet(){}
+        RefnumSet(const RefnumSet& copy, const osg::CopyOp&) : mRefnums(copy.mRefnums) {}
+        META_Object(MWRender, RefnumSet)
+        std::set<ESM::RefNum> mRefnums;
+    };
+
     class AnalyzeVisitor : public osg::NodeVisitor
     {
     public:
@@ -310,6 +325,7 @@ namespace MWRender
             : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
     {
+        mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
         mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
         mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
@@ -317,7 +333,7 @@ namespace MWRender
         mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, const osg::Vec3f& viewPoint, bool compile)
+    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
     {
         osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size/2.f), std::floor(center.y() - size/2.f));
 
@@ -349,7 +365,7 @@ namespace MWRender
                         {
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
-                            if (!typeFilter(type,size>=2)) continue;
+                            if (!typeFilter(type,size>=2,activeGrid)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
                             refs[ref.mRefNum] = ref;
                         }
@@ -365,7 +381,7 @@ namespace MWRender
                     bool deleted = it->second;
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
                     int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
-                    if (!typeFilter(type,size>=2)) continue;
+                    if (!typeFilter(type,size>=2,activeGrid)) continue;
                     refs[ref.mRefNum] = ref;
                 }
             }
@@ -387,6 +403,7 @@ namespace MWRender
         };
         typedef std::map<osg::ref_ptr<const osg::Node>, InstanceList> NodeMap;
         NodeMap nodes;
+        osg::ref_ptr<RefnumSet> refnumSet = activeGrid ? new RefnumSet : nullptr;
         AnalyzeVisitor analyzeVisitor;
         float minSize = mMinSize;
         if (mMinSizeMergeFactor)
@@ -443,6 +460,9 @@ namespace MWRender
                 continue;
             }
 
+            if (activeGrid && cnode->getNumChildrenRequiringUpdateTraversal() > 0)
+                continue;
+
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
             {
@@ -453,6 +473,9 @@ namespace MWRender
             else
                 analyzeVisitor.addInstance(emplaced.first->second.mAnalyzeResult);
             emplaced.first->second.mInstances.push_back(&ref);
+
+            if (activeGrid)
+                refnumSet->mRefnums.insert(pair.first);
         }
 
         osg::ref_ptr<osg::Group> group = new osg::Group;
@@ -566,7 +589,13 @@ namespace MWRender
 
         group->getBound();
         group->setNodeMask(Mask_Static);
-        group->getOrCreateUserDataContainer()->addUserObject(templateRefs);
+        osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
+        if (activeGrid)
+        {
+            udc->addUserObject(refnumSet);
+            group->addCullCallback(new SceneUtil::LightListCallback);
+        }
+        udc->addUserObject(templateRefs);
 
         return group;
     }
@@ -596,7 +625,7 @@ namespace MWRender
 
     bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled)
     {
-        if (!typeFilter(type, false))
+        if (!typeFilter(type, false, false))
             return false;
 
         {
@@ -622,6 +651,35 @@ namespace MWRender
             mDisabled.clear();
         }
         mCache->clear();
+    }
+
+    struct GetRefnumsFunctor
+    {
+        GetRefnumsFunctor(std::set<ESM::RefNum>& output) : mOutput(output) {}
+        void operator()(MWRender::ChunkId chunkId, osg::Object* obj)
+        {
+            if (!std::get<2>(chunkId)) return;
+            const osg::Vec2f& center = std::get<0>(chunkId);
+            bool activeGrid = (center.x() > mActiveGrid.x() || center.y() > mActiveGrid.y() || center.x() < mActiveGrid.z() || center.y() < mActiveGrid.w());
+            if (!activeGrid) return;
+
+            osg::UserDataContainer* udc = obj->getUserDataContainer();
+            if (udc && udc->getNumUserObjects())
+            {
+                RefnumSet* refnums = dynamic_cast<RefnumSet*>(udc->getUserObject(0));
+                if (!refnums) return;
+                mOutput.insert(refnums->mRefnums.begin(), refnums->mRefnums.end());
+            }
+        }
+        osg::Vec4i mActiveGrid;
+        std::set<ESM::RefNum>& mOutput;
+    };
+
+    void ObjectPaging::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    {
+        GetRefnumsFunctor grf(out);
+        grf.mActiveGrid = activeGrid;
+        mCache->call(grf);
     }
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats *stats) const

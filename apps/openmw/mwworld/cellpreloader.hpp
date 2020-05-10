@@ -73,7 +73,7 @@ namespace MWWorld
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
         bool getTerrainPreloadInProgress(int& progress, int& progressRange, double timestamp);
-        void abortTerrainPreloadExcept(const osg::Vec3f& exceptPos);
+        void abortTerrainPreloadExcept(const PositionCellGrid &exceptPos);
 
     private:
         Resource::ResourceSystem* mResourceSystem;

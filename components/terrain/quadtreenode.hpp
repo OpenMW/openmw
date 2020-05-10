@@ -50,7 +50,13 @@ namespace Terrain
     public:
         virtual ~LodCallback() {}
 
-        virtual bool isSufficientDetail(QuadTreeNode *node, float dist) = 0;
+        enum ReturnValue
+        {
+            Deeper,
+            StopTraversal,
+            StopTraversalAndUse
+        };
+        virtual ReturnValue isSufficientDetail(QuadTreeNode *node, float dist) = 0;
     };
 
     class ViewData;
@@ -97,7 +103,7 @@ namespace Terrain
         const osg::Vec2f& getCenter() const;
 
         /// Traverse nodes according to LOD selection.
-        void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
+        void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback);
 
         /// Adds all leaf nodes which intersect the line from start to end
         void intersect(ViewData* vd, TerrainLineIntersector& intersector);

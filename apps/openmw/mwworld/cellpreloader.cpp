@@ -450,13 +450,13 @@ namespace MWWorld
         }
     }
 
-    void CellPreloader::abortTerrainPreloadExcept(const osg::Vec3f& exceptPos)
+    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid& exceptPos)
     {
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
             const float resetThreshold = ESM::Land::REAL_SIZE;
             for (auto pos : mTerrainPreloadPositions)
-                if ((pos.first-exceptPos).length2() < resetThreshold*resetThreshold)
+                if ((pos.first-exceptPos.first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos.second)
                     return;
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();

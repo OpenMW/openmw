@@ -88,6 +88,8 @@ namespace MWWorld
 
             osg::Vec3f mLastPlayerPos;
 
+            std::set<ESM::RefNum> mPagedRefs;
+
             void insertCell (CellStore &cell, Loading::Listener* loadingListener, bool test = false);
             osg::Vec2i mCurrentGridCenter;
 
