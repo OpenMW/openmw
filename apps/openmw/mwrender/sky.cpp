@@ -1559,7 +1559,7 @@ void SkyManager::destroyRain()
     if (!mRainNode)
         return;
 
-    mRootNode->removeChild(mRainNode);
+    mSceneRootNode->removeChild(mRainNode);
     mRainNode = nullptr;
     mPlacer = nullptr;
     mCounter = nullptr;
@@ -1652,7 +1652,8 @@ void SkyManager::setEnabled(bool enabled)
     if (enabled && !mCreated)
         create();
 
-    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
+    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);    
+    mSceneRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
 }
