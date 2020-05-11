@@ -63,6 +63,16 @@ namespace MWRender
         SizeCache mSizeCache;
     };
 
+    class RefnumMarker : public osg::Object
+    {
+    public:
+        RefnumMarker() : mNumVertices(0) {}
+        RefnumMarker(const RefnumMarker &copy, osg::CopyOp co) : mRefnum(copy.mRefnum), mNumVertices(copy.mNumVertices) {}
+        META_Object(MWRender, RefnumMarker)
+
+        ESM::RefNum mRefnum;
+        unsigned int mNumVertices;
+    };
 }
 
 #endif

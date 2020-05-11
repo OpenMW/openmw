@@ -157,6 +157,7 @@ namespace MWRender
             osg::Vec3f mHitNormalWorld;
             osg::Vec3f mHitPointWorld;
             MWWorld::Ptr mHitObject;
+            ESM::RefNum mHitRefnum;
             float mRatio;
         };
 

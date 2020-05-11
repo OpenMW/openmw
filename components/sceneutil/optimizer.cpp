@@ -1824,6 +1824,10 @@ bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geom
     lhs.dirtyBound();
     lhs.dirtyDisplayList();
 
+    if (osg::UserDataContainer* rhsUserData = rhs.getUserDataContainer())
+        for (unsigned int i=0; i<rhsUserData->getNumUserObjects(); ++i)
+            lhs.getOrCreateUserDataContainer()->addUserObject(rhsUserData->getUserObject(i));
+
     return true;
 }
 

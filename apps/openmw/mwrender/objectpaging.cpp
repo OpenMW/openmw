@@ -14,6 +14,8 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/optimizer.hpp>
 #include <components/sceneutil/clone.hpp>
+#include <components/sceneutil/util.hpp>
+#include <components/vfs/manager.hpp>
 
 #include <osgParticle/ParticleProcessor>
 #include <osgParticle/ParticleSystemUpdater>
@@ -33,18 +35,16 @@
 namespace MWRender
 {
 
-    bool typeFilter(int type, bool far, bool activeGrid)
+    bool typeFilter(int type, bool far)
     {
         switch (type)
         {
           case ESM::REC_STAT:
-            return true;
-
-          case ESM::REC_ACTI: // TODO enable when intersectionvisitor supported
+          case ESM::REC_ACTI:
           case ESM::REC_DOOR:
-            return !activeGrid;
+            return true;
           case ESM::REC_CONT:
-            return far ? false : !activeGrid;
+            return !far;
 
         default:
             return false;
@@ -321,6 +321,21 @@ namespace MWRender
         }
     };
 
+    class AddRefnumMarkerVisitor : public osg::NodeVisitor
+    {
+    public:
+        AddRefnumMarkerVisitor(const ESM::RefNum &refnum) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mRefnum(refnum) {}
+        ESM::RefNum mRefnum;
+        virtual void apply(osg::Geometry &node)
+        {
+            osg::ref_ptr<RefnumMarker> marker (new RefnumMarker);
+            marker->mRefnum = mRefnum;
+            if (osg::Array* array = node.getVertexArray())
+                marker->mNumVertices = array->getNumElements();
+            node.getOrCreateUserDataContainer()->addUserObject(marker);
+        }
+    };
+
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
             : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
@@ -365,7 +380,7 @@ namespace MWRender
                         {
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
                             int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
-                            if (!typeFilter(type,size>=2,activeGrid)) continue;
+                            if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
                             refs[ref.mRefNum] = ref;
                         }
@@ -381,7 +396,7 @@ namespace MWRender
                     bool deleted = it->second;
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
                     int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
-                    if (!typeFilter(type,size>=2,activeGrid)) continue;
+                    if (!typeFilter(type,size>=2)) continue;
                     refs[ref.mRefNum] = ref;
                 }
             }
@@ -446,15 +461,32 @@ namespace MWRender
             std::string model = getModel(type, id, store);
             if (model.empty()) continue;
             model = "meshes/" + model;
-/*
+
             bool useAnim = type != ESM::REC_STAT;
             if (useAnim)
+            {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
-*/
+                if (activeGrid)
+                {
+                    std::string kfname = Misc::StringUtils::lowerCase(model);
+                    if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
+                    {
+                        kfname.replace(kfname.size()-4, 4, ".kf");
+                        if (mSceneManager->getVFS()->exists(kfname))
+                            continue;
+                    }
+                }
+            }
+
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
             if (activeGrid)
-                refnumSet->mRefnums.insert(pair.first);
+            {
+                if (cnode->getNumChildrenRequiringUpdateTraversal() > 0 || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel) || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
+                    continue;
+                else
+                    refnumSet->mRefnums.insert(pair.first);
+            }
 
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
@@ -471,9 +503,6 @@ namespace MWRender
                 }
                 continue;
             }
-
-            if (activeGrid && cnode->getNumChildrenRequiringUpdateTraversal() > 0)
-                continue;
 
             auto emplaced = nodes.emplace(cnode, InstanceList());
             if (emplaced.second)
@@ -536,6 +565,20 @@ namespace MWRender
                 co.mViewVector = (viewPoint - worldCenter);
                 osg::ref_ptr<osg::Node> node = osg::clone(cnode, co);
                 node->setUserDataContainer(nullptr);
+
+                if (activeGrid)
+                {
+                    if (merge)
+                    {
+                        AddRefnumMarkerVisitor visitor(ref.mRefNum);
+                        node->accept(visitor);
+                    }
+                    else
+                    {
+                        osg::ref_ptr<RefnumMarker> marker = new RefnumMarker; marker->mRefnum = ref.mRefNum;
+                        node->getOrCreateUserDataContainer()->addUserObject(marker);
+                    }
+                }
 
                 trans->addChild(node);
 
@@ -636,7 +679,7 @@ namespace MWRender
 
     bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled)
     {
-        if (!typeFilter(type, false, false))
+        if (!typeFilter(type, false))
             return false;
 
         {
@@ -655,7 +698,7 @@ namespace MWRender
 
     bool ObjectPaging::blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos)
     {
-        if (!typeFilter(type, false, true))
+        if (!typeFilter(type, false))
             return false;
 
         {

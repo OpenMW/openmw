@@ -1965,6 +1965,14 @@ namespace MWWorld
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
         facedObject = rayToObject.mHitObject;
+        if (facedObject.isEmpty() && rayToObject.mHitRefnum.hasContentFile())
+        {
+            for (CellStore* cellstore : mWorldScene->getActiveCells())
+            {
+                facedObject = cellstore->searchViaRefNum(rayToObject.mHitRefnum);
+                if (!facedObject.isEmpty()) break;
+            }
+        }
         if (rayToObject.mHit)
             mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else

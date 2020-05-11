@@ -165,28 +165,6 @@ namespace
         ref.load (state);
         collection.mList.push_back (ref);
     }
-
-    struct SearchByRefNumVisitor
-    {
-        MWWorld::LiveCellRefBase* mFound;
-        ESM::RefNum mRefNumToFind;
-
-        SearchByRefNumVisitor(const ESM::RefNum& toFind)
-            : mFound(nullptr)
-            , mRefNumToFind(toFind)
-        {
-        }
-
-        bool operator()(const MWWorld::Ptr& ptr)
-        {
-            if (ptr.getCellRef().getRefNum() == mRefNumToFind)
-            {
-                mFound = ptr.getBase();
-                return false;
-            }
-            return true;
-        }
-    };
 }
 
 namespace MWWorld
@@ -263,9 +241,7 @@ namespace MWWorld
             throw std::runtime_error("moveTo: can't move object from a non-loaded cell (how did you get this object anyway?)");
 
         // Ensure that the object actually exists in the cell
-        SearchByRefNumVisitor searchVisitor(object.getCellRef().getRefNum());
-        forEach(searchVisitor);
-        if (!searchVisitor.mFound)
+        if (searchViaRefNum(object.getCellRef().getRefNum()).isEmpty())
             throw std::runtime_error("moveTo: object is not in this cell");
 
 
@@ -942,26 +918,22 @@ namespace MWWorld
             movedTo.load(reader);
 
             // Search for the reference. It might no longer exist if its content file was removed.
-            SearchByRefNumVisitor visitor(refnum);
-            forEachInternal(visitor);
-
-            if (!visitor.mFound)
+            Ptr movedRef = searchViaRefNum(refnum);
+            if (movedRef.isEmpty())
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex << " (moved object no longer exists)";
                 continue;
             }
 
-            MWWorld::LiveCellRefBase* movedRef = visitor.mFound;
-
             CellStore* otherCell = callback->getCellStore(movedTo);
 
             if (otherCell == nullptr)
             {
-                Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef->mRef.getRefId()
+                Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef.getCellRef().getRefId()
                                     << " (target cell " << movedTo.mWorldspace << " no longer exists). Reference moved back to its original location.";
                 // Note by dropping tag the object will automatically re-appear in its original cell, though potentially at inapproriate coordinates.
                 // Restore original coordinates:
-                movedRef->mData.setPosition(movedRef->mRef.getPosition());
+                movedRef.getRefData().setPosition(movedRef.getCellRef().getPosition());
                 continue;
             }
 
@@ -972,7 +944,7 @@ namespace MWWorld
                 continue;
             }
 
-            moveTo(MWWorld::Ptr(movedRef, this), otherCell);
+            moveTo(movedRef, otherCell);
         }
     }
 
