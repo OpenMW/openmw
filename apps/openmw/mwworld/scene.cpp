@@ -87,6 +87,19 @@ namespace
         );
     }
 
+    std::string getModel(const MWWorld::Ptr &ptr, const VFS::Manager *vfs)
+    {
+        bool useAnim = ptr.getClass().useAnim();
+        std::string model = ptr.getClass().getModel(ptr);
+        if (useAnim)
+            model = Misc::ResourceHelpers::correctActorModelPath(model, vfs);
+
+        const std::string &id = ptr.getCellRef().getRefId();
+        if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+            model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+        return model;
+    }
+
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
                    MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs)
     {
@@ -97,13 +110,7 @@ namespace
         }
 
         bool useAnim = ptr.getClass().useAnim();
-        std::string model = ptr.getClass().getModel(ptr);
-        if (useAnim)
-            model = Misc::ResourceHelpers::correctActorModelPath(model, rendering.getResourceSystem()->getVFS());
-
-        std::string id = ptr.getCellRef().getRefId();
-        if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
-            model = ""; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
+        std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
@@ -188,27 +195,6 @@ namespace
         }
     }
 
-    void updateObjectRotation (const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                                    MWRender::RenderingManager& rendering, RotationOrder order)
-    {
-        setNodeRotation(ptr, rendering, order);
-        physics.updateRotation(ptr);
-    }
-
-    void updateObjectScale(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                            MWRender::RenderingManager& rendering)
-    {
-        if (ptr.getRefData().getBaseNode() != nullptr)
-        {
-            float scale = ptr.getCellRef().getScale();
-            osg::Vec3f scaleVec (scale, scale, scale);
-            ptr.getClass().adjustScale(ptr, scaleVec, true);
-            rendering.scaleObject(ptr, scaleVec);
-
-            physics.updateScale(ptr);
-        }
-    }
-
     struct InsertVisitor
     {
         MWWorld::CellStore& mCell;
@@ -281,23 +267,49 @@ namespace
 namespace MWWorld
 {
 
-    void Scene::updateObjectRotation(const Ptr& ptr, RotationOrder order)
+    void Scene::removeFromPagedRefs(const Ptr &ptr)
     {
-        ::updateObjectRotation(ptr, *mPhysics, mRendering, order);
+        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        if (refnum.hasContentFile() && mPagedRefs.erase(refnum))
+        {
+            if (!ptr.getRefData().getBaseNode()) return;
+            ptr.getClass().insertObjectRendering(ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
+            setNodeRotation(ptr, mRendering, RotationOrder::direct);
+            reloadTerrain();
+        }
+    }
+
+    void Scene::updateObjectPosition(const Ptr &ptr, const osg::Vec3f &pos, bool movePhysics)
+    {
+        mRendering.moveObject(ptr, pos);
+        if (movePhysics)
+        {
+            mPhysics->updatePosition(ptr);
+        }
+    }
+
+    void Scene::updateObjectRotation(const Ptr &ptr, RotationOrder order)
+    {
+        setNodeRotation(ptr, mRendering, order);
+        mPhysics->updateRotation(ptr);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
     {
-        ::updateObjectScale(ptr, *mPhysics, mRendering);
+        float scale = ptr.getCellRef().getScale();
+        osg::Vec3f scaleVec (scale, scale, scale);
+        ptr.getClass().adjustScale(ptr, scaleVec, true);
+        mRendering.scaleObject(ptr, scaleVec);
+        mPhysics->updateScale(ptr);
     }
 
     void Scene::update (float duration, bool paused)
     {
-        mPreloadTimer += duration;
-        if (mPreloadTimer > 0.1f)
+        mPreloadTimer -= duration;
+        if (mPreloadTimer <= 0.f)
         {
             preloadCells(0.1f);
-            mPreloadTimer = 0.f;
+            mPreloadTimer = 0.1f;
         }
 
         mRendering.update (duration, paused);
@@ -954,7 +966,6 @@ namespace MWWorld
         if (ptr.getClass().isActor())
             mRendering.removeWaterRippleEmitter(ptr);
         ptr.getRefData().setBaseNode(nullptr);
-        mPagedRefs.erase(ptr.getCellRef().getRefNum());
     }
 
     bool Scene::isCellActive(const CellStore &cell)
@@ -1149,6 +1160,7 @@ namespace MWWorld
 
     void Scene::reloadTerrain()
     {
+        mPreloadTimer = 0;
         mPreloader->setTerrainPreloadPositions(std::vector<PositionCellGrid>());
     }
 

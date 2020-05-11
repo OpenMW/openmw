@@ -1483,14 +1483,23 @@ namespace MWRender
     }
     bool RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
     {
-        if (!ptr.isInCell() || !ptr.getCell()->isExterior())
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
             return false;
-        if (mObjectPaging && mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getRefData().getPosition().asVec3(), enabled))
+        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), enabled))
         {
             mTerrain->rebuildViews();
             return true;
         }
         return false;
+    }
+    void RenderingManager::pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr)
+    {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
+            return;
+        const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
+        if (!refnum.hasContentFile()) return;
+        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
+            mTerrain->rebuildViews();
     }
     void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
     {

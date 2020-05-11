@@ -242,6 +242,7 @@ namespace MWRender
         void setActiveGrid(const osg::Vec4i &grid);
 
         bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
+        void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
         void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
 
     private:

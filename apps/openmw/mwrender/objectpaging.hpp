@@ -33,8 +33,11 @@ namespace MWRender
 
         virtual unsigned int getNodeMask() override;
 
-        /// @return true if something changed
+        /// @return true if view needs rebuild
         bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled);
+
+        /// @return true if view needs rebuild
+        bool blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos);
 
         void clear();
 
@@ -53,6 +56,7 @@ namespace MWRender
 
         OpenThreads::Mutex mDisabledMutex;
         std::set<ESM::RefNum> mDisabled;
+        std::set<ESM::RefNum> mBlacklist;
 
         OpenThreads::Mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;

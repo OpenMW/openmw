@@ -1204,20 +1204,22 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(newPtr, vec);
+            mWorldScene->updateObjectPosition(newPtr, vec, movePhysics);
             if (movePhysics)
             {
-                mPhysics->updatePosition(newPtr);
-                mPhysics->updatePtr(ptr, newPtr);
-
-                if (const auto object = mPhysics->getObject(newPtr))
+                if (const auto object = mPhysics->getObject(ptr))
                     updateNavigatorObject(object);
             }
         }
+
         if (isPlayer)
-        {
             mWorldScene->playerMoved(vec);
+        else
+        {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(newPtr);
         }
+
         return newPtr;
     }
 
@@ -1246,9 +1248,15 @@ namespace MWWorld
         if (mPhysics->getActor(ptr))
             mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
 
-        ptr.getCellRef().setScale(scale);
+        if (scale != ptr.getCellRef().getScale())
+        {
+            ptr.getCellRef().setScale(scale);
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+        }
 
-        mWorldScene->updateObjectScale(ptr);
+        if(ptr.getRefData().getBaseNode() != 0)
+            mWorldScene->updateObjectScale(ptr);
 
         if (mPhysics->getActor(ptr))
             mNavigator->addAgent(getPathfindingHalfExtents(ptr));
@@ -1291,6 +1299,9 @@ namespace MWWorld
         }
 
         ptr.getRefData().setPosition(pos);
+
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
 
         if(ptr.getRefData().getBaseNode() != 0)
         {
@@ -3565,6 +3576,8 @@ namespace MWWorld
     std::string World::exportSceneGraph(const Ptr &ptr)
     {
         std::string file = mUserDataPath + "/openmw.osgt";
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
         mRendering->exportSceneGraph(ptr, file, "Ascii");
         return file;
     }

@@ -389,8 +389,9 @@ namespace MWRender
 
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-            for (auto disabled : mDisabled)
-                refs.erase(disabled);
+            if (activeGrid)
+                for (auto ref : mBlacklist)
+                    refs.erase(ref);
         }
 
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
@@ -424,7 +425,9 @@ namespace MWRender
                     continue;
             }
 
+
             float d = (viewPoint - pos).length();
+            if (!activeGrid)
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
                 SizeCache::iterator found = mSizeCache.find(pair.first);
@@ -450,6 +453,15 @@ namespace MWRender
 */
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
+            if (activeGrid)
+                refnumSet->mRefnums.insert(pair.first);
+
+            {
+                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+                if (mDisabled.count(pair.first))
+                    continue;
+            }
+
             float radius = cnode->getBound().radius() * ref.mScale;
             if (radius < d*minSize)
             {
@@ -473,9 +485,6 @@ namespace MWRender
             else
                 analyzeVisitor.addInstance(emplaced.first->second.mAnalyzeResult);
             emplaced.first->second.mInstances.push_back(&ref);
-
-            if (activeGrid)
-                refnumSet->mRefnums.insert(pair.first);
         }
 
         osg::ref_ptr<osg::Group> group = new osg::Group;
@@ -614,6 +623,7 @@ namespace MWRender
         }
         bool intersects(ChunkId id, osg::Vec3f pos)
         {
+            if (mActiveGridOnly && !std::get<2>(id)) return false;
             pos /= ESM::Land::REAL_SIZE;
             osg::Vec2f center = std::get<0>(id);
             float halfSize = std::get<1>(id)/2;
@@ -621,6 +631,7 @@ namespace MWRender
         }
         osg::Vec3f mPosition;
         std::set<MWRender::ChunkId> mToClear;
+        bool mActiveGridOnly = false;
     };
 
     bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled)
@@ -642,13 +653,33 @@ namespace MWRender
         return true;
     }
 
+    bool ObjectPaging::blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos)
+    {
+        if (!typeFilter(type, false, true))
+            return false;
+
+        {
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+            if (!mBlacklist.insert(refnum).second) return false;
+        }
+
+        ClearCacheFunctor ccf;
+        ccf.mPosition = pos;
+        ccf.mActiveGridOnly = true;
+        mCache->call(ccf);
+        if (ccf.mToClear.empty()) return false;
+        for (auto chunk : ccf.mToClear)
+            mCache->removeFromObjectCache(chunk);
+        return true;
+    }
+
+
     void ObjectPaging::clear()
     {
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-            if (mDisabled.empty())
-                return;
             mDisabled.clear();
+            mBlacklist.clear();
         }
         mCache->clear();
     }
