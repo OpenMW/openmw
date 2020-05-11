@@ -2289,8 +2289,12 @@ void CharacterController::update(float duration, bool animationOnly)
         }
         else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
         {
-            float speedmult = speed / mMovementAnimSpeed;
-            mAnimation->adjustSpeedMult(mCurrentMovement, speedmult);
+            // Vanilla caps the played animation speed.
+            const float maxSpeedMult = 10.f;
+            const float speedMult = speed / mMovementAnimSpeed;
+            mAnimation->adjustSpeedMult(mCurrentMovement, std::min(maxSpeedMult, speedMult));
+            // Make sure the actual speed is the "expected" speed even though the animation is slower
+            scale *= std::max(1.f, speedMult / maxSpeedMult);
         }
 
         if (!mSkipAnim)
