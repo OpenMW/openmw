@@ -1934,8 +1934,15 @@ namespace MWWorld
             // retrieve object dimensions so we know where to place the floating label
             if (!object.isEmpty ())
             {
-                osg::Vec4f screenBounds = mRendering->getScreenBounds(object);
-
+                osg::BoundingBox bb = mPhysics->getBoundingBox(object);
+                if (!bb.valid() && object.getRefData().getBaseNode())
+                {
+                    osg::ComputeBoundsVisitor computeBoundsVisitor;
+                    computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+                    object.getRefData().getBaseNode()->accept(computeBoundsVisitor);
+                    bb = computeBoundsVisitor.getBoundingBox();
+                }
+                osg::Vec4f screenBounds = mRendering->getScreenBounds(bb);
                 MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
                     screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
             }

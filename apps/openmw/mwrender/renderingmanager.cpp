@@ -977,20 +977,14 @@ namespace MWRender
         renderCameraToImage(rttCamera.get(),image,w,h);
     }
 
-    osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
+    osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox &worldbb)
     {
-        if (!ptr.getRefData().getBaseNode())
-            return osg::Vec4f();
-
-        osg::ComputeBoundsVisitor computeBoundsVisitor;
-        computeBoundsVisitor.setTraversalMask(~(Mask_ParticleSystem|Mask_Effect));
-        ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
-
+        if (!worldbb.valid()) return osg::Vec4f();
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
         float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
         for (int i=0; i<8; ++i)
         {
-            osg::Vec3f corner = computeBoundsVisitor.getBoundingBox().corner(i);
+            osg::Vec3f corner = worldbb.corner(i);
             corner = corner * viewProj;
 
             float x = (corner.x() + 1.f) * 0.5f;

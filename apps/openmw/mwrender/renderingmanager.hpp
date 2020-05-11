@@ -168,7 +168,7 @@ namespace MWRender
         RayResult castCameraToViewportRay(const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors=false);
 
         /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
-        osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
+        osg::Vec4f getScreenBounds(const osg::BoundingBox &worldbb);
 
         void setSkyEnabled(bool enabled);
 
