@@ -2,38 +2,11 @@
 #define OPENMW_COMPONENTS_TERRAIN_QUADTREENODE_H
 
 #include <osg/Group>
-#include <osgUtil/LineSegmentIntersector>
 
 #include "defs.hpp"
 
 namespace Terrain
 {
-
-    class TerrainLineIntersector : public osgUtil::LineSegmentIntersector
-    {
-    public:
-        TerrainLineIntersector(osgUtil::LineSegmentIntersector* intersector, osg::Matrix& matrix) :
-            osgUtil::LineSegmentIntersector(intersector->getStart() * matrix, intersector->getEnd() * matrix)
-        {
-            setPrecisionHint(intersector->getPrecisionHint());
-            _intersectionLimit = intersector->getIntersectionLimit();
-            _parent = intersector;
-        }
-
-        TerrainLineIntersector(osgUtil::LineSegmentIntersector* intersector) :
-            osgUtil::LineSegmentIntersector(intersector->getStart(), intersector->getEnd())
-        {
-            setPrecisionHint(intersector->getPrecisionHint());
-            _intersectionLimit = intersector->getIntersectionLimit();
-            _parent = intersector;
-        }
-
-        bool intersectAndClip(const osg::BoundingBox& bbInput)
-        {
-            osg::Vec3d s(_start), e(_end);
-            return osgUtil::LineSegmentIntersector::intersectAndClip(s, e, bbInput);
-        }
-    };
 
     enum ChildDirection
     {
@@ -104,9 +77,6 @@ namespace Terrain
 
         /// Traverse nodes according to LOD selection.
         void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback);
-
-        /// Adds all leaf nodes which intersect the line from start to end
-        void intersect(ViewData* vd, TerrainLineIntersector& intersector);
 
     private:
         QuadTreeNode* mParent;

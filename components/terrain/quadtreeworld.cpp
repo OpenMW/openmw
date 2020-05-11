@@ -418,44 +418,15 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
         return;
     }
 
+    osg::Object * viewer = isCullVisitor ? static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera() : nullptr;
     bool needsUpdate = true;
-    ViewData* vd = nullptr;
-    if (isCullVisitor)
-        vd = mViewDataMap->getViewData(static_cast<osgUtil::CullVisitor*>(&nv)->getCurrentCamera(), nv.getViewPoint(), mActiveGrid, needsUpdate);
-    else
-    {
-        static ViewData sIntersectionViewData;
-        vd = &sIntersectionViewData;
-        vd->clear(); // we can't reuse intersection views in the next frame because they only contain what is touched by the intersection ray.
-    }
+    ViewData *vd = mViewDataMap->getViewData(viewer, nv.getViewPoint(), mActiveGrid, needsUpdate);
 
     if (needsUpdate)
     {
         vd->reset();
-        if (isCullVisitor)
-        {
-            DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, mActiveGrid);
-            mRootNode->traverseNodes(vd, nv.getViewPoint(), &lodCallback);
-        }
-        else
-        {
-            osgUtil::IntersectionVisitor* iv = static_cast<osgUtil::IntersectionVisitor*>(&nv);
-            osgUtil::LineSegmentIntersector* lineIntersector = dynamic_cast<osgUtil::LineSegmentIntersector*>(iv->getIntersector());
-            if (!lineIntersector)
-                throw std::runtime_error("Cannot update QuadTreeWorld: node visitor is not LineSegmentIntersector");
-
-            if (lineIntersector->getCoordinateFrame() == osgUtil::Intersector::CoordinateFrame::MODEL && iv->getModelMatrix() == 0)
-            {
-                TerrainLineIntersector terrainIntersector(lineIntersector);
-                mRootNode->intersect(vd, terrainIntersector);
-            }
-            else
-            {
-                osg::Matrix matrix(lineIntersector->getTransformation(*iv, lineIntersector->getCoordinateFrame()));
-                TerrainLineIntersector terrainIntersector(lineIntersector, matrix);
-                mRootNode->intersect(vd, terrainIntersector);
-            }
-        }
+        DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, mActiveGrid);
+        mRootNode->traverseNodes(vd, nv.getViewPoint(), &lodCallback);
     }
 
     const float cellWorldSize = mStorage->getCellWorldSize();

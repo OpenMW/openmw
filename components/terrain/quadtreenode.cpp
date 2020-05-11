@@ -124,23 +124,6 @@ void QuadTreeNode::traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodC
         vd->add(this);
 }
 
-void QuadTreeNode::intersect(ViewData* vd, TerrainLineIntersector& intersector)
-{
-    if (!hasValidBounds())
-        return;
-
-    if (!intersector.intersectAndClip(getBoundingBox()))
-        return;
-
-    if (getNumChildren() == 0)
-        vd->add(this);
-    else
-    {
-        for (unsigned int i=0; i<getNumChildren(); ++i)
-            getChild(i)->intersect(vd, intersector);
-    }
-}
-
 void QuadTreeNode::setBoundingBox(const osg::BoundingBox &boundingBox)
 {
     mBoundingBox = boundingBox;
