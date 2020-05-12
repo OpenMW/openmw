@@ -444,14 +444,11 @@ namespace MWRender
             if (size < 1.f)
             {
                 osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
-                cellPos.x() = std::max(cellPos.x(), std::floor(minBound.x()));
-                cellPos.x() = std::min(cellPos.x(), std::ceil(maxBound.x()));
-                cellPos.y() = std::max(cellPos.y(), std::floor(minBound.y()));
-                cellPos.y() = std::min(cellPos.y(), std::ceil(maxBound.y()));
-                if (cellPos.x() < minBound.x() || cellPos.x() > maxBound.x() || cellPos.y() < minBound.y() || cellPos.y() > maxBound.y())
+                if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y()))
+                    continue;
+                if ((maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (minBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
                     continue;
             }
-
 
             float d = (viewPoint - pos).length();
             if (!activeGrid)
@@ -619,7 +616,7 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
-            if ((relativeViewPoint - mergeGroup->getBound().center()).length2() > mergeGroup->getBound().radius2())
+            if ((relativeViewPoint - mergeGroup->getBound().center()).length() > mergeGroup->getBound().radius()*2)
             {
                 optimizer.setViewPoint(relativeViewPoint);
                 optimizer.setMergeAlphaBlending(true);
@@ -630,16 +627,15 @@ namespace MWRender
 
             group->addChild(mergeGroup);
 
-            if (compile)
-            {
-                stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
-                mergeGroup->accept(stateToCompile);
-            }
-
             if (mDebugBatches)
             {
                 DebugVisitor dv;
                 mergeGroup->accept(dv);
+            }
+            if (compile)
+            {
+                stateToCompile._mode = osgUtil::GLObjectsVisitor::COMPILE_DISPLAY_LISTS;
+                mergeGroup->accept(stateToCompile);
             }
         }
 
