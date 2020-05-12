@@ -210,13 +210,15 @@ namespace ESM
     std::string Cell::getDescription() const
     {
         if (mData.mFlags & Interior)
-        {
             return mName;
-        }
-        else
-        {
-            return std::to_string(mData.mX) + ", " + std::to_string(mData.mY);
-        }
+
+        std::string cellGrid = "(" + std::to_string(mData.mX) + ", " + std::to_string(mData.mY) + ")";
+        if (!mName.empty())
+            return mName + ' ' + cellGrid;
+        // FIXME: should use sDefaultCellname GMST instead, but it's not available in this scope
+        std::string region = !mRegion.empty() ? mRegion : "Wilderness";
+
+        return region + ' ' + cellGrid;
     }
 
     bool Cell::getNextRef(ESMReader &esm, CellRef &ref, bool &isDeleted, bool ignoreMoves, MovedCellRef *mref)
