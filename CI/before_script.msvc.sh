@@ -36,6 +36,7 @@ PLATFORM=""
 CONFIGURATION=""
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
+INSTALL_PREFIX="."
 
 while [ $# -gt 0 ]; do
 	ARGSTR=$1
@@ -83,9 +84,13 @@ while [ $# -gt 0 ]; do
 			t )
 				TEST_FRAMEWORK=true ;;
 
+			i )
+				INSTALL_PREFIX=$(echo "$1" | sed 's;\\;/;g' | sed -E 's;/+;/;g')
+				shift ;;
+
 			h )
 				cat <<EOF
-Usage: $0 [-cdehkpuvV]
+Usage: $0 [-cdehkpuvVi]
 Options:
 	-c <Release/Debug>
 		Set the configuration, can also be set with environment variable CONFIGURATION.
@@ -109,6 +114,8 @@ Options:
 		Produce NMake makefiles instead of a Visual Studio solution.
 	-V
 		Run verbosely
+	-i
+		CMake install prefix
 EOF
 				exit 0
 				;;
@@ -759,8 +766,8 @@ echo
 cd $DEPS_INSTALL/..
 echo
 echo "Setting up OpenMW build..."
-add_cmake_opts -DBUILD_MYGUI_PLUGIN=no \
-	-DOPENMW_MP_BUILD=on
+add_cmake_opts -DOPENMW_MP_BUILD=on
+add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
 if [ ! -z $CI ]; then
 	case $STEP in
 		components )
