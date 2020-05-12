@@ -5,6 +5,7 @@
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
@@ -170,7 +171,6 @@
     Bug #5103: Sneaking state behavior is still inconsistent
     Bug #5104: Black Dart's enchantment doesn't trigger at low Enchant levels
     Bug #5106: Still can jump even when encumbered
-    Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5110: ModRegion with a redundant numerical argument breaks script execution
     Bug #5112: Insufficient magicka for current spell not reflected on HUD icon
     Bug #5113: Unknown alchemy question mark not centered
