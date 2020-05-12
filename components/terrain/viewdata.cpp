@@ -145,15 +145,15 @@ ViewData *ViewDataMap::getViewData(osg::Object *viewer, const osg::Vec3f& viewPo
     {
         float shortestDist = std::numeric_limits<float>::max();
         const ViewData* mostSuitableView = nullptr;
-        for (const ViewData& other : mViewVector)
+        for (const ViewData* other : mUsedViews)
         {
-            if (other.suitableToUse(activeGrid) && other.getWorldUpdateRevision() >= mWorldUpdateRevision)
+            if (other->suitableToUse(activeGrid) && other->getWorldUpdateRevision() >= mWorldUpdateRevision)
             {
-                float dist = (viewPoint-other.getViewPoint()).length2();
+                float dist = (viewPoint-other->getViewPoint()).length2();
                 if (dist < shortestDist)
                 {
                     shortestDist = dist;
-                    mostSuitableView = &other;
+                    mostSuitableView = other;
                 }
             }
         }
@@ -195,6 +195,7 @@ ViewData *ViewDataMap::createOrReuseView()
         mViewVector.push_back(ViewData());
         vd = &mViewVector.back();
     }
+    mUsedViews.push_back(vd);
     vd->setWorldUpdateRevision(mWorldUpdateRevision);
     return vd;
 }
@@ -215,13 +216,16 @@ void ViewDataMap::clearUnusedViews(double referenceTime)
         else
             ++it;
     }
-    for (ViewData& vd : mViewVector)
+    for (std::deque<ViewData*>::iterator it = mUsedViews.begin(); it != mUsedViews.end(); )
     {
-        if (vd.getLastUsageTimeStamp() + mExpiryDelay < referenceTime)
+        if ((*it)->getLastUsageTimeStamp() + mExpiryDelay < referenceTime)
         {
-            vd.clear();
-            mUnusedViews.push_back(&vd);
+            (*it)->clear();
+            mUnusedViews.push_back(*it);
+            it = mUsedViews.erase(it);
         }
+        else
+            ++it;
     }
 }
 

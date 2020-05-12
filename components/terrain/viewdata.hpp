@@ -106,6 +106,7 @@ namespace Terrain
 
         unsigned int mWorldUpdateRevision;
 
+        std::deque<ViewData*> mUsedViews;
         std::deque<ViewData*> mUnusedViews;
     };
 

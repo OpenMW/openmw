@@ -305,11 +305,10 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
+        mPreloader->updateCache(mRendering.getReferenceTime());
         preloadCells(duration);
 
         mRendering.update (duration, paused);
-
-        mPreloader->updateCache(mRendering.getReferenceTime());
     }
 
     void Scene::unloadCell (CellStoreCollection::iterator iter, bool test)
