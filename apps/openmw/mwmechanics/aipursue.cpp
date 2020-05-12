@@ -3,6 +3,7 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -42,8 +43,9 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
         return true;
 
-    if (isTargetMagicallyHidden(target))
-        return true;
+    if (!MWBase::Environment::get().getWorld()->getLOS(target, actor)
+     || !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
+        return false;
 
     if (target.getClass().getCreatureStats(target).isDead())
         return true;
