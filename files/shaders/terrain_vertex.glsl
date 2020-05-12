@@ -9,9 +9,8 @@ varying float linearDepth;
 #if !PER_PIXEL_LIGHTING
 centroid varying vec4 lighting;
 centroid varying vec3 shadowDiffuseLighting;
-#else
-centroid varying vec4 passColor;
 #endif
+centroid varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
@@ -32,9 +31,8 @@ void main(void)
 
 #if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
-#else
-    passColor = gl_Color;
 #endif
+    passColor = gl_Color;
     passNormal = gl_Normal.xyz;
     passViewPos = viewPos.xyz;
 
