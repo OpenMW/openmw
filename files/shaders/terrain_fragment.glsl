@@ -83,10 +83,12 @@ void main()
 
 #if @specularMap
     float shininess = 128.0; // TODO: make configurable
-    vec3 matSpec = vec3(diffuseTex.a, diffuseTex.a, diffuseTex.a);
+    vec3 matSpec = vec3(diffuseTex.a);
 #else
     float shininess = gl_FrontMaterial.shininess;
     vec3 matSpec = gl_FrontMaterial.specular.xyz;
+    if (colorMode == ColorMode_Specular)
+        matSpec = passColor.xyz;
 #endif
 
     gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;

@@ -2,6 +2,13 @@
 
 uniform int colorMode;
 
+const int ColorMode_None = 0;
+const int ColorMode_Emission = 1;
+const int ColorMode_AmbientAndDiffuse = 2;
+const int ColorMode_Ambient = 3;
+const int ColorMode_Diffuse = 4;
+const int ColorMode_Specular = 5;
+
 void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
@@ -22,22 +29,25 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, float shadowing
 vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadowDiffuse)
 #endif
 {
-    vec4 diffuse;
-    vec3 ambient;
-    if (colorMode == 3)
-    {
-        diffuse = gl_FrontMaterial.diffuse;
-        ambient = vertexColor.xyz;
-    }
-    else if (colorMode == 2)
+    vec4 diffuse = gl_FrontMaterial.diffuse;
+    vec3 ambient = gl_FrontMaterial.ambient.xyz;
+    vec3 emission = gl_FrontMaterial.emission.xyz;
+    if (colorMode == ColorMode_AmbientAndDiffuse)
     {
         diffuse = vertexColor;
         ambient = vertexColor.xyz;
     }
-    else
+    else if (colorMode == ColorMode_Ambient)
     {
-        diffuse = gl_FrontMaterial.diffuse;
-        ambient = gl_FrontMaterial.ambient.xyz;
+        ambient = vertexColor.xyz;
+    }
+    else if (colorMode == ColorMode_Diffuse)
+    {
+        diffuse = vertexColor;
+    }
+    else if (colorMode == ColorMode_Emission)
+    {
+        emission = vertexColor.xyz;
     }
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
@@ -55,12 +65,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
         lightResult.xyz += ambientLight + diffuseLight;
     }
 
-    lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
-
-    if (colorMode == 1)
-        lightResult.xyz += vertexColor.xyz;
-    else
-        lightResult.xyz += gl_FrontMaterial.emission.xyz;
+    lightResult.xyz += gl_LightModel.ambient.xyz * ambient + emission;
 
 #if @clamp
     lightResult = clamp(lightResult, vec4(0.0), vec4(1.0));
