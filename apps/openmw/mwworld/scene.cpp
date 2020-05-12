@@ -510,13 +510,10 @@ namespace MWWorld
 
         osg::Vec2i newCell = getNewGridCenter(pos, &mCurrentGridCenter);
         if (newCell != mCurrentGridCenter)
-        {
-            preloadTerrain(pos);
-            changeCellGrid(newCell.x(), newCell.y());
-        }
+            changeCellGrid(pos, newCell.x(), newCell.y());
     }
 
-    void Scene::changeCellGrid (int playerCellX, int playerCellY, bool changeEvent)
+    void Scene::changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent)
     {
         CellStoreCollection::iterator active = mActiveCells.begin();
         while (active!=mActiveCells.end())
@@ -538,8 +535,8 @@ namespace MWWorld
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
 
+        preloadTerrain(pos, true);
         mPagedRefs.clear();
-        checkTerrainLoaded();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
         std::size_t refsToLoad = 0;
@@ -867,38 +864,13 @@ namespace MWWorld
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
-        preloadTerrain(position.asVec3());
-        checkTerrainLoaded();
-        changeCellGrid(x, y, changeEvent);
+        changeCellGrid(position.asVec3(), x, y, changeEvent);
 
         CellStore* current = MWBase::Environment::get().getWorld()->getExterior(x, y);
         changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
-    }
-
-    void Scene::checkTerrainLoaded()
-    {
-        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        Loading::ScopedLoad load(loadingListener);
-        int progress = 0, initialProgress = -1, progressRange = 0;
-        while (mPreloader->getTerrainPreloadInProgress(progress, progressRange, mRendering.getReferenceTime()))
-        {
-            if (initialProgress == -1)
-            {
-                loadingListener->setLabel("#{sLoadingMessage4}");
-                initialProgress = progress;
-            }
-            if (progress)
-            {
-                loadingListener->setProgressRange(std::max(0, progressRange-initialProgress));
-                loadingListener->setProgress(progress-initialProgress);
-            }
-            else
-                loadingListener->setProgress(0);
-            OpenThreads::Thread::microSleep(5000);
-        }
     }
 
     CellStore* Scene::getCurrentCell ()
@@ -1145,12 +1117,36 @@ namespace MWWorld
             mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
-    void Scene::preloadTerrain(const osg::Vec3f &pos)
+    void Scene::preloadTerrain(const osg::Vec3f &pos, bool sync)
     {
         std::vector<PositionCellGrid> vec;
         vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-        mPreloader->abortTerrainPreloadExcept(vec[0]);
+        if (sync && mRendering.pagingUnlockCache())
+            mPreloader->abortTerrainPreloadExcept(nullptr);
+        else
+            mPreloader->abortTerrainPreloadExcept(&vec[0]);
         mPreloader->setTerrainPreloadPositions(vec);
+        if (!sync) return;
+
+        Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        Loading::ScopedLoad load(loadingListener);
+        int progress = 0, initialProgress = -1, progressRange = 0;
+        while (!mPreloader->syncTerrainLoad(vec, progress, progressRange, mRendering.getReferenceTime()))
+        {
+            if (initialProgress == -1)
+            {
+                loadingListener->setLabel("#{sLoadingMessage4}");
+                initialProgress = progress;
+            }
+            if (progress)
+            {
+                loadingListener->setProgressRange(std::max(0, progressRange-initialProgress));
+                loadingListener->setProgress(progress-initialProgress);
+            }
+            else
+                loadingListener->setProgress(0);
+            OpenThreads::Thread::microSleep(5000);
+        }
     }
 
     void Scene::reloadTerrain()

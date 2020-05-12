@@ -419,36 +419,44 @@ namespace MWWorld
         mUnrefQueue = unrefQueue;
     }
 
-    bool CellPreloader::getTerrainPreloadInProgress(int& progress, int& progressRange, double timestamp)
+    bool CellPreloader::syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp)
     {
         if (!mTerrainPreloadItem)
-            return false;
+            return true;
         else if (mTerrainPreloadItem->isDone())
         {
-            mTerrainPreloadItem->storeViews(timestamp);
-            mTerrainPreloadItem = nullptr;
-            return false;
+            if (mTerrainPreloadItem->storeViews(timestamp))
+            {
+                mTerrainPreloadItem = nullptr;
+                return true;
+            }
+            else
+            {
+                setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
+                setTerrainPreloadPositions(positions);
+                return false;
+            }
         }
         else
         {
             progress = mTerrainPreloadItem->getProgress();
             progressRange = mTerrainPreloadItem->getProgressRange();
-            return !progress || progress < progressRange;
+            return false;
         }
     }
 
-    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid& exceptPos)
+    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid *exceptPos)
     {
+        const float resetThreshold = ESM::Land::REAL_SIZE;
+        for (auto pos : mTerrainPreloadPositions)
+            if (exceptPos && (pos.first-exceptPos->first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos->second)
+                return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
-            const float resetThreshold = ESM::Land::REAL_SIZE;
-            for (auto pos : mTerrainPreloadPositions)
-                if ((pos.first-exceptPos.first).length2() < resetThreshold*resetThreshold && pos.second == exceptPos.second)
-                    return;
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
-            mTerrainPreloadItem = nullptr;
         }
+        setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
     }
 
     bool contains(const std::vector<CellPreloader::PositionCellGrid>& container, const std::vector<CellPreloader::PositionCellGrid>& contained)

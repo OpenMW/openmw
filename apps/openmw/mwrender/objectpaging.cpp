@@ -339,6 +339,7 @@ namespace MWRender
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
             : GenericResourceManager<ChunkId>(nullptr)
          , mSceneManager(sceneManager)
+         , mRefTrackerLocked(false)
     {
         mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
         mDebugBatches = Settings::Manager::getBool("object paging debug batches", "Terrain");
@@ -403,9 +404,9 @@ namespace MWRender
         }
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
             if (activeGrid)
-                for (auto ref : mBlacklist)
+                for (auto ref : getRefTracker().mBlacklist)
                     refs.erase(ref);
         }
 
@@ -489,8 +490,8 @@ namespace MWRender
             }
 
             {
-                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-                if (mDisabled.count(pair.first))
+                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+                if (getRefTracker().mDisabled.count(pair.first))
                     continue;
             }
 
@@ -683,14 +684,16 @@ namespace MWRender
             return false;
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-            if (enabled && !mDisabled.erase(refnum)) return false;
-            if (!enabled && !mDisabled.insert(refnum).second) return false;
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            if (enabled && !getWritableRefTracker().mDisabled.erase(refnum)) return false;
+            if (!enabled && !getWritableRefTracker().mDisabled.insert(refnum).second) return false;
+            if (mRefTrackerLocked) return false;
         }
 
         ClearCacheFunctor ccf;
         ccf.mPosition = pos;
         mCache->call(ccf);
+        if (ccf.mToClear.empty()) return false;
         for (auto chunk : ccf.mToClear)
             mCache->removeFromObjectCache(chunk);
         return true;
@@ -702,8 +705,9 @@ namespace MWRender
             return false;
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-            if (!mBlacklist.insert(refnum).second) return false;
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            if (!getWritableRefTracker().mBlacklist.insert(refnum).second) return false;
+            if (mRefTrackerLocked) return false;
         }
 
         ClearCacheFunctor ccf;
@@ -719,12 +723,25 @@ namespace MWRender
 
     void ObjectPaging::clear()
     {
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+        mRefTrackerNew.mDisabled.clear();
+        mRefTrackerNew.mBlacklist.clear();
+        mRefTrackerLocked = true;
+    }
+
+    bool ObjectPaging::unlockCache()
+    {
+        if (!mRefTrackerLocked) return false;
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mDisabledMutex);
-            mDisabled.clear();
-            mBlacklist.clear();
+            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            mRefTrackerLocked = false;
+            if (mRefTracker == mRefTrackerNew)
+                return false;
+            else
+                mRefTracker = mRefTrackerNew;
         }
         mCache->clear();
+        return true;
     }
 
     struct GetRefnumsFunctor

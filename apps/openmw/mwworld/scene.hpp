@@ -93,7 +93,7 @@ namespace MWWorld
             osg::Vec2i mCurrentGridCenter;
 
             // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-            void changeCellGrid (int playerCellX, int playerCellY, bool changeEvent = true);
+            void changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent = true);
 
             typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
 
@@ -101,8 +101,6 @@ namespace MWWorld
             void preloadTeleportDoorDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions);
             void preloadExteriorGrid(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos);
             void preloadFastTravelDestinations(const osg::Vec3f& playerPos, const osg::Vec3f& predictedPos, std::vector<PositionCellGrid>& exteriorPositions);
-
-            void checkTerrainLoaded();
 
             osg::Vec4i gridCenterToBounds(const osg::Vec2i &centerCell) const;
             osg::Vec2i getNewGridCenter(const osg::Vec3f &pos, const osg::Vec2i *currentGridCenter = nullptr) const;
@@ -115,7 +113,7 @@ namespace MWWorld
             ~Scene();
 
             void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding=false);
-            void preloadTerrain(const osg::Vec3f& pos);
+            void preloadTerrain(const osg::Vec3f& pos, bool sync=false);
             void reloadTerrain();
 
             void unloadCell (CellStoreCollection::iterator iter, bool test = false);

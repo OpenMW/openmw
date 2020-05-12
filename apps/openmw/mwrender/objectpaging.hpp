@@ -41,6 +41,10 @@ namespace MWRender
 
         void clear();
 
+        /// Must be called after clear() before rendering starts.
+        /// @return true if view needs rebuild
+        bool unlockCache();
+
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
         void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
@@ -54,9 +58,19 @@ namespace MWRender
         float mMinSizeMergeFactor;
         float mMinSizeCostMultiplier;
 
-        OpenThreads::Mutex mDisabledMutex;
-        std::set<ESM::RefNum> mDisabled;
-        std::set<ESM::RefNum> mBlacklist;
+        OpenThreads::Mutex mRefTrackerMutex;
+        struct RefTracker
+        {
+            std::set<ESM::RefNum> mDisabled;
+            std::set<ESM::RefNum> mBlacklist;
+            bool operator==(const RefTracker&other) { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
+        };
+        RefTracker mRefTracker;
+        RefTracker mRefTrackerNew;
+        bool mRefTrackerLocked;
+
+        const RefTracker& getRefTracker() const { return mRefTracker; }
+        RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
 
         OpenThreads::Mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;

@@ -1511,6 +1511,15 @@ namespace MWRender
         if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
             mTerrain->rebuildViews();
     }
+    bool RenderingManager::pagingUnlockCache()
+    {
+        if (mObjectPaging && mObjectPaging->unlockCache())
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
+    }
     void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
     {
         if (mObjectPaging)
