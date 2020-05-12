@@ -285,7 +285,7 @@ struct NiLODNode : public NiSwitchNode
     void read(NIFStream *nif)
     {
         NiSwitchNode::read(nif);
-        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_ZT2)
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
             lodCenter = nif->getVector3();
         unsigned int numLodLevels = nif->getUInt();
         for (unsigned int i=0; i<numLodLevels; ++i)
