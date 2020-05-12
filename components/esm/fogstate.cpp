@@ -69,7 +69,7 @@ void ESM::FogState::load (ESMReader &esm)
         tex.mImageData.resize(imageSize);
         esm.getExact(&tex.mImageData[0], imageSize);
 
-        if (dataFormat < 6)
+        if (dataFormat < 7)
             convertFogOfWar(tex.mImageData);
 
         mFogTextures.push_back(tex);
