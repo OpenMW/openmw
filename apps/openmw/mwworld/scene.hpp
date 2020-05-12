@@ -75,7 +75,6 @@ namespace MWWorld
             MWRender::RenderingManager& mRendering;
             DetourNavigator::Navigator& mNavigator;
             std::unique_ptr<CellPreloader> mPreloader;
-            float mPreloadTimer;
             int mHalfGridSize;
             float mCellLoadingThreshold;
             float mPreloadDistance;

@@ -305,12 +305,7 @@ namespace MWWorld
 
     void Scene::update (float duration, bool paused)
     {
-        mPreloadTimer -= duration;
-        if (mPreloadTimer <= 0.f)
-        {
-            preloadCells(0.1f);
-            mPreloadTimer = 0.1f;
-        }
+        preloadCells(duration);
 
         mRendering.update (duration, paused);
 
@@ -760,13 +755,12 @@ namespace MWWorld
 
         MWBase::Environment::get().getWorld()->adjustSky();
 
-        mLastPlayerPos = pos.asVec3();
+        mLastPlayerPos = player.getRefData().getPosition().asVec3();
     }
 
     Scene::Scene (MWRender::RenderingManager& rendering, MWPhysics::PhysicsSystem *physics,
                   DetourNavigator::Navigator& navigator)
     : mCurrentCell (0), mCellChanged (false), mPhysics(physics), mRendering(rendering), mNavigator(navigator)
-    , mPreloadTimer(0.f)
     , mHalfGridSize(Settings::Manager::getInt("exterior cell load distance", "Cells"))
     , mCellLoadingThreshold(1024.f)
     , mPreloadDistance(Settings::Manager::getInt("preload distance", "Cells"))
@@ -1025,6 +1019,7 @@ namespace MWWorld
 
     void Scene::preloadCells(float dt)
     {
+        if (dt<=1e-06) return;
         std::vector<PositionCellGrid> exteriorPositions;
 
         const MWWorld::ConstPtr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
@@ -1160,7 +1155,6 @@ namespace MWWorld
 
     void Scene::reloadTerrain()
     {
-        mPreloadTimer = 0;
         mPreloader->setTerrainPreloadPositions(std::vector<PositionCellGrid>());
     }
 

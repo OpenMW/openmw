@@ -8,6 +8,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
+#include <components/vfs/manager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/terrain/world.hpp>
@@ -65,23 +66,7 @@ namespace MWWorld
             mTerrainView = mTerrain->createView();
 
             ListModelsVisitor visitor (mMeshes);
-            if (cell->getState() == MWWorld::CellStore::State_Loaded)
-            {
-                cell->forEach(visitor);
-            }
-            else
-            {
-                const std::vector<std::string>& objectIds = cell->getPreloadedIds();
-
-                // could possibly build the model list in the worker thread if we manage to make the Store thread safe
-                for (const std::string& id : objectIds)
-                {
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id);
-                    std::string model = ref.getPtr().getClass().getModel(ref.getPtr());
-                    if (!model.empty())
-                        mMeshes.push_back(model);
-                }
-            }
+            cell->forEach(visitor);
         }
 
         virtual void abort()
@@ -97,7 +82,7 @@ namespace MWWorld
                 try
                 {
                     mTerrain->cacheCell(mTerrainView.get(), mX, mY);
-                    mPreloadedObjects.push_back(mLandManager->getLand(mX, mY));
+                    mPreloadedObjects.insert(mLandManager->getLand(mX, mY));
                 }
                 catch(std::exception& e)
                 {
@@ -113,17 +98,7 @@ namespace MWWorld
                 {
                     mesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mSceneManager->getVFS());
 
-                    if (mPreloadInstances)
-                    {
-                        mPreloadedObjects.push_back(mSceneManager->cacheInstance(mesh));
-                        mPreloadedObjects.push_back(mBulletShapeManager->cacheInstance(mesh));
-                    }
-                    else
-                    {
-                        mPreloadedObjects.push_back(mSceneManager->getTemplate(mesh));
-                        mPreloadedObjects.push_back(mBulletShapeManager->getShape(mesh));
-                    }
-
+                    bool animated = false;
                     size_t slashpos = mesh.find_last_of("/\\");
                     if (slashpos != std::string::npos && slashpos != mesh.size()-1)
                     {
@@ -134,11 +109,23 @@ namespace MWWorld
                             if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
                             {
                                 kfname.replace(kfname.size()-4, 4, ".kf");
-                                mPreloadedObjects.push_back(mKeyframeManager->get(kfname));
+                                if (mSceneManager->getVFS()->exists(kfname))
+                                {
+                                    mPreloadedObjects.insert(mKeyframeManager->get(kfname));
+                                    animated = true;
+                                }
                             }
-
                         }
                     }
+                    if (mPreloadInstances && animated)
+                        mPreloadedObjects.insert(mSceneManager->cacheInstance(mesh));
+                    else
+                        mPreloadedObjects.insert(mSceneManager->getTemplate(mesh));
+                    if (mPreloadInstances)
+                        mPreloadedObjects.insert(mBulletShapeManager->cacheInstance(mesh));
+                    else
+                        mPreloadedObjects.insert(mBulletShapeManager->getShape(mesh));
+
                 }
                 catch (std::exception& e)
                 {
@@ -166,7 +153,7 @@ namespace MWWorld
         osg::ref_ptr<Terrain::View> mTerrainView;
 
         // keep a ref to the loaded objects to make sure it stays loaded as long as this cell is in the preloaded state
-        std::vector<osg::ref_ptr<const osg::Object> > mPreloadedObjects;
+        std::set<osg::ref_ptr<const osg::Object> > mPreloadedObjects;
     };
 
     class TerrainPreloadItem : public SceneUtil::WorkItem
