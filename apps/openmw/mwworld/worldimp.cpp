@@ -11,6 +11,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/cellref.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -752,6 +753,11 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId (actorId);
     }
 
+    Ptr World::searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum)
+    {
+        return mCells.getPtr (id, refNum);
+    }
+
     struct FindContainerVisitor
     {
         ConstPtr mContainedPtr;
@@ -1290,6 +1296,7 @@ namespace MWWorld
                     mRendering->updatePtr(ptr, newPtr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);

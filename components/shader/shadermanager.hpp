@@ -44,6 +44,9 @@ namespace Shader
 
         void releaseGLObjects(osg::State* state);
 
+        const osg::ref_ptr<osg::Uniform> getShadowMapAlphaTestEnableUniform();
+        const osg::ref_ptr<osg::Uniform> getShadowMapAlphaTestDisableUniform();
+
     private:
         std::string mPath;
 
@@ -61,6 +64,9 @@ namespace Shader
         ProgramMap mPrograms;
 
         OpenThreads::Mutex mMutex;
+
+        const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestEnableUniform = new osg::Uniform();
+        const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestDisableUniform = new osg::Uniform();
     };
 
     bool parseFors(std::string& source, const std::string& templateName);

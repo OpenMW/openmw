@@ -12,7 +12,11 @@ void ESM::GlobalScript::load (ESMReader &esm)
     mRunning = 0;
     esm.getHNOT (mRunning, "RUN_");
 
-    mTargetId = esm.getHNOString ("TARG");
+    mTargetRef.unset();
+    if (esm.peekNextSub("TARG"))
+        mTargetId = esm.getHNString ("TARG");
+    if (esm.peekNextSub("FRMR"))
+        mTargetRef.load(esm, true, "FRMR");
 }
 
 void ESM::GlobalScript::save (ESMWriter &esm) const
@@ -24,5 +28,10 @@ void ESM::GlobalScript::save (ESMWriter &esm) const
     if (mRunning)
         esm.writeHNT ("RUN_", mRunning);
 
-    esm.writeHNOString ("TARG", mTargetId);
+    if (!mTargetId.empty())
+    {
+        esm.writeHNOString ("TARG", mTargetId);
+        if (mTargetRef.hasContentFile())
+            mTargetRef.save (esm, true, "FRMR");
+    }
 }

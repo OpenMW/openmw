@@ -612,7 +612,7 @@ namespace NifOsg
                 bool hasVisController = false;
                 for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
                 {
-                    if (hasVisController |= (ctrl->recType == Nif::RC_NiVisController))
+                    if ((hasVisController |= (ctrl->recType == Nif::RC_NiVisController)))
                         break;
                 }
 
@@ -1111,7 +1111,7 @@ namespace NifOsg
 
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, true, animflags, true);
+            applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
             // particle system updater (after the emitters and affectors in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other way
@@ -1203,7 +1203,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, vertexColorsPresent, animflags, false);
+            applyDrawableProperties(parentNode, drawableProps, composite, vertexColorsPresent, animflags);
         }
 
         void handleTriShape(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
@@ -1755,7 +1755,7 @@ namespace NifOsg
         }
 
         void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties, SceneUtil::CompositeStateSetUpdater* composite,
-                                             bool hasVertexColors, int animflags, bool particleMaterial)
+                                             bool hasVertexColors, int animflags)
         {
             osg::StateSet* stateset = node->getOrCreateStateSet();
 

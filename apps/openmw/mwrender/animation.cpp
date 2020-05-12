@@ -16,6 +16,7 @@
 
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -35,6 +36,8 @@
 #include <components/sceneutil/util.hpp>
 
 #include <components/settings/settings.hpp>
+
+#include <components/shader/shadermanager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -502,8 +505,9 @@ namespace MWRender
     class TransparencyUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        TransparencyUpdater(const float alpha)
+        TransparencyUpdater(const float alpha, osg::ref_ptr<osg::Uniform> shadowUniform)
             : mAlpha(alpha)
+            , mShadowUniform(shadowUniform)
         {
         }
 
@@ -517,6 +521,9 @@ namespace MWRender
         {
             osg::BlendFunc* blendfunc (new osg::BlendFunc);
             stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            // TODO: don't do this anymore once custom shadow renderbin is handling it
+            if (mShadowUniform)
+                stateset->addUniform(mShadowUniform);
 
             // FIXME: overriding diffuse/ambient/emissive colors
             osg::Material* material = new osg::Material;
@@ -535,6 +542,7 @@ namespace MWRender
 
     private:
         float mAlpha;
+        osg::ref_ptr<osg::Uniform> mShadowUniform;
     };
 
     struct Animation::AnimSource
@@ -1744,7 +1752,7 @@ namespace MWRender
         {
             if (mTransparencyUpdater == nullptr)
             {
-                mTransparencyUpdater = new TransparencyUpdater(alpha);
+                mTransparencyUpdater = new TransparencyUpdater(alpha, mResourceSystem->getSceneManager()->getShaderManager().getShadowMapAlphaTestEnableUniform());
                 mObjectRoot->addUpdateCallback(mTransparencyUpdater);
             }
             else

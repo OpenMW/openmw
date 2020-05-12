@@ -2,13 +2,17 @@
 ------
 
     Bug #1952: Incorrect particle lighting
+    Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #3676: NiParticleColorModifier isn't applied properly
+    Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
     Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
     Bug #5370: Opening an unlocked but trapped door uses the key
+    Bug #5400: Editor: Verifier checks race of non-skin bodyparts
     Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0

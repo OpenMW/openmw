@@ -323,6 +323,7 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
         return;
     }
     cv->pushCurrentMask();
+    static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
     for (unsigned int i=0; i<vd->getNumEntries(); ++i)
     {
         ViewData::Entry& entry = vd->getEntry(i);
@@ -337,7 +338,6 @@ void updateWaterCullingView(HeightCullCallback* callback, ViewData* vd, osgUtil:
             continue;
         lowZ = bb._min.z();
 
-        static bool debug = getenv("OPENMW_WATER_CULLING_DEBUG") != nullptr;
         if (!debug)
             break;
         osg::Box* b = new osg::Box;
