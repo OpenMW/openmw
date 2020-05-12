@@ -26,7 +26,7 @@ namespace Interpreter
             {
                 std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                 runtime.pop();
-                runtime.getContext().startScript (name, runtime.getContext().getTargetId());
+                runtime.getContext().startScript (name);
             }
     };
 

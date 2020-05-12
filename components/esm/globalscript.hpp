@@ -2,6 +2,7 @@
 #define OPENMW_ESM_GLOBALSCRIPT_H
 
 #include "locals.hpp"
+#include "cellref.hpp"
 
 namespace ESM
 {
@@ -16,6 +17,7 @@ namespace ESM
         Locals mLocals;
         int mRunning;
         std::string mTargetId; // for targeted scripts
+        RefNum mTargetRef;
 
         void load (ESMReader &esm);
         void save (ESMWriter &esm) const;

@@ -6,6 +6,7 @@
 
 #include <components/esm/cellstate.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/cellref.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/objectstate.hpp>
@@ -433,6 +434,32 @@ namespace MWWorld
         }
 
         return Ptr();
+    }
+
+    class RefNumSearchVisitor
+    {
+        const ESM::RefNum& mRefNum;
+    public:
+        RefNumSearchVisitor(const ESM::RefNum& refNum) : mRefNum(refNum) {}
+
+        Ptr mFound;
+
+        bool operator()(const Ptr& ptr)
+        {
+            if (ptr.getCellRef().getRefNum() == mRefNum)
+            {
+                mFound = ptr;
+                return false;
+            }
+            return true;
+        }
+    };
+
+    Ptr CellStore::searchViaRefNum (const ESM::RefNum& refNum)
+    {
+        RefNumSearchVisitor searchVisitor(refNum);
+        forEach(searchVisitor);
+        return searchVisitor.mFound;
     }
 
     float CellStore::getWaterLevel() const

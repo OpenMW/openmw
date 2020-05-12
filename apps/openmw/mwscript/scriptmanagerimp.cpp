@@ -19,6 +19,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "extensions.hpp"
+#include "interpretercontext.hpp"
 
 namespace MWScript
 {
@@ -88,7 +89,7 @@ namespace MWScript
         return false;
     }
 
-    void ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
+    bool ScriptManager::run (const std::string& name, Interpreter::Context& interpreterContext)
     {
         // compile script
         ScriptCollection::iterator iter = mScripts.find (name);
@@ -100,7 +101,7 @@ namespace MWScript
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
                 mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
-                return;
+                return false;
             }
 
             iter = mScripts.find (name);
@@ -118,14 +119,19 @@ namespace MWScript
                 }
 
                 mInterpreter.run (&iter->second.first[0], iter->second.first.size(), interpreterContext);
+                return true;
+            }
+            catch (const MissingImplicitRefError& e)
+            {
+                Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
             }
             catch (const std::exception& e)
             {
-                Log(Debug::Error) << "Execution of script " << name << " failed:";
-                Log(Debug::Error) << e.what();
+                Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
 
                 iter->second.first.clear(); // don't execute again.
             }
+        return false;
     }
 
     std::pair<int, int> ScriptManager::compileAll()

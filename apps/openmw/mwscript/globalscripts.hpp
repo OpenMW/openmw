@@ -1,17 +1,24 @@
 #ifndef GAME_SCRIPT_GLOBALSCRIPTS_H
 #define GAME_SCRIPT_GLOBALSCRIPTS_H
 
+#include <boost/variant/variant.hpp>
+
 #include <string>
 #include <map>
+#include <memory>
+#include <utility>
 
 #include <stdint.h>
 
 #include "locals.hpp"
 
+#include "../mwworld/ptr.hpp"
+
 namespace ESM
 {
     class ESMWriter;
     class ESMReader;
+    struct RefNum;
 }
 
 namespace Loading
@@ -30,21 +37,25 @@ namespace MWScript
     {
         bool mRunning;
         Locals mLocals;
-        std::string mId; // ID used to start targeted script (empty if not a targeted script)
+        boost::variant<MWWorld::Ptr, std::pair<ESM::RefNum, std::string> > mTarget; // Used to start targeted script
 
         GlobalScriptDesc();
+
+        const MWWorld::Ptr* getPtrIfPresent() const; // Returns a Ptr if one has been resolved
+
+        MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
     };
 
     class GlobalScripts
     {
             const MWWorld::ESMStore& mStore;
-            std::map<std::string, GlobalScriptDesc> mScripts;
+            std::map<std::string, std::shared_ptr<GlobalScriptDesc> > mScripts;
 
         public:
 
             GlobalScripts (const MWWorld::ESMStore& store);
 
-            void addScript (const std::string& name, const std::string& targetId = "");
+            void addScript (const std::string& name, const MWWorld::Ptr& target = MWWorld::Ptr());
 
             void removeScript (const std::string& name);
 
@@ -70,6 +81,9 @@ namespace MWScript
             Locals& getLocals (const std::string& name);
             ///< If the script \a name has not been added as a global script yet, it is added
             /// automatically, but is not set to running state.
+
+            void updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
+            ///< Update the Ptrs stored in mTarget. Should be called after the reference has been moved to a new cell.
     };
 }
 
