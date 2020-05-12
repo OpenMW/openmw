@@ -25,7 +25,8 @@ add_openmw_dir (mwrender
     )
 
 add_openmw_dir (mwinput
-    inputmanagerimp
+    actions actionmanager bindingsmanager controllermanager controlswitch
+    inputmanagerimp mousemanager keyboardmanager sdlmappings sensormanager
     )
 
 add_openmw_dir (mwgui
