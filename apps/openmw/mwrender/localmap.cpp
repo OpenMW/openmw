@@ -181,6 +181,10 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
     camera->setNodeMask(Mask_RenderToTexture);
 
+    // Disable small feature culling, it's not going to be reliable for this camera
+    osg::Camera::CullingMode cullingMode = (osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING) & ~(osg::CullStack::SMALL_FEATURE_CULLING);
+    camera->setCullingMode(cullingMode);
+
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
 
