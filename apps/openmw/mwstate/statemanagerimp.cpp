@@ -232,7 +232,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         // Make sure the animation state held by references is up to date before saving the game.
         MWBase::Environment::get().getMechanicsManager()->persistAnimationStates();
 
-        Log(Debug::Info) << "Writing saved game '" << description << "' for character " << profile.mPlayerName;
+        Log(Debug::Info) << "Writing saved game '" << description << "' for character '" << profile.mPlayerName << "'";
 
         // Write to a memory stream first. If there is an exception during the save process, we don't want to trash the
         // existing save file we are overwriting.
@@ -384,7 +384,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
     {
         cleanup();
 
-        Log(Debug::Info) << "Reading saved game " << filepath;
+        Log(Debug::Info) << "Reading save file " << boost::filesystem::path(filepath).filename().string();
 
         ESM::ESMReader reader;
         reader.open (filepath);
@@ -424,7 +424,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
                             return;
                         }
                         mTimePlayed = profile.mTimePlayed;
-                        Log(Debug::Info) << "Loading saved game '" << profile.mDescription << "' for character " << profile.mPlayerName;
+                        Log(Debug::Info) << "Loading saved game '" << profile.mDescription << "' for character '" << profile.mPlayerName << "'";
                     }
                     break;
 
