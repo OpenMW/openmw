@@ -162,6 +162,17 @@ namespace MWRender
             {
                 if (callback->className() == std::string("BillboardCallback"))
                     handleBillboard(cloned);
+                else
+                {
+                    if (node->getCullCallback()->getNestedCallback())
+                    {
+                        osg::Callback *clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
+                        clonedCallback->setNestedCallback(nullptr);
+                        cloned->addCullCallback(clonedCallback);
+                    }
+                    else
+                        cloned->addCullCallback(const_cast<osg::Callback*>(callback));
+                }
                 callback = callback->getNestedCallback();
             }
         }
