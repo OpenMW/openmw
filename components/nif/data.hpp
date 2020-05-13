@@ -124,7 +124,8 @@ public:
     };
     Format fmt;
 
-    unsigned int rmask, gmask, bmask, amask, bpp;
+    unsigned int colorMask[4];
+    unsigned int bpp;
 
     NiPalettePtr palette;
     unsigned int numberOfMipmaps;

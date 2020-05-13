@@ -163,11 +163,8 @@ void NiPixelData::read(NIFStream *nif)
 {
     fmt = (Format)nif->getUInt();
 
-    rmask = nif->getUInt(); // usually 0xff
-    gmask = nif->getUInt(); // usually 0xff00
-    bmask = nif->getUInt(); // usually 0xff0000
-    amask = nif->getUInt(); // usually 0xff000000 or zero
-
+    for (unsigned int i = 0; i < 4; ++i)
+        colorMask[i] = nif->getUInt();
     bpp = nif->getUInt();
 
     // 8 bytes of "Old Fast Compare". Whatever that means.
@@ -190,10 +187,9 @@ void NiPixelData::read(NIFStream *nif)
     }
 
     // Read the data
-    unsigned int dataSize = nif->getUInt();
-    data.reserve(dataSize);
-    for (unsigned i=0; i<dataSize; ++i)
-        data.push_back((unsigned char)nif->getChar());
+    unsigned int numPixels = nif->getUInt();
+    if (numPixels)
+        nif->getUChars(data, numPixels);
 }
 
 void NiPixelData::post(NIFFile *nif)
@@ -225,7 +221,7 @@ void NiSkinData::read(NIFStream *nif)
     trafo.scale = nif->getFloat();
 
     int boneNum = nif->getInt();
-    if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_GAMEBRYO)
+    if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,1,0,0))
         nif->skip(4); // NiSkinPartition link
 
     bones.resize(boneNum);
