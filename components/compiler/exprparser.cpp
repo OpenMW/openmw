@@ -372,9 +372,7 @@ namespace Compiler
             keyword==Scanner::K_elseif || keyword==Scanner::K_while ||
             keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
-            keyword==Scanner::K_to || keyword==Scanner::K_startscript ||
-            keyword==Scanner::K_stopscript || keyword==Scanner::K_enable ||
-            keyword==Scanner::K_disable)
+            keyword==Scanner::K_to)
         {
             return parseName (loc.mLiteral, loc, scanner);
         }
@@ -385,53 +383,6 @@ namespace Compiler
         {
             if (mRefOp && mNextOperand)
             {
-                if (keyword==Scanner::K_getdisabled)
-                {
-                    start();
-
-                    mTokenLoc = loc;
-
-                    Generator::getDisabled (mCode, mLiterals, mExplicit);
-                    mOperands.push_back ('l');
-                    mExplicit.clear();
-                    mRefOp = false;
-
-                    std::vector<Interpreter::Type_Code> ignore;
-                    parseArguments ("x", scanner, ignore);
-
-                    mNextOperand = false;
-                    return true;
-                }
-                else if (keyword==Scanner::K_getdistance)
-                {
-                    start();
-
-                    mTokenLoc = loc;
-                    parseArguments ("c", scanner);
-
-                    Generator::getDistance (mCode, mLiterals, mExplicit);
-                    mOperands.push_back ('f');
-                    mExplicit.clear();
-                    mRefOp = false;
-
-                    mNextOperand = false;
-                    return true;
-                }
-                else if (keyword==Scanner::K_scriptrunning)
-                {
-                    start();
-
-                    mTokenLoc = loc;
-                    parseArguments ("c", scanner);
-
-                    Generator::scriptRunning (mCode);
-                    mOperands.push_back ('l');
-
-                    mExplicit.clear();
-                    mRefOp = false;
-                    mNextOperand = false;
-                    return true;
-                }
 
                 // check for custom extensions
                 if (const Extensions *extensions = getContext().getExtensions())
@@ -508,32 +459,6 @@ namespace Compiler
                 mNextOperand = false;
                 return true;
             }
-            else if (keyword==Scanner::K_scriptrunning)
-            {
-                start();
-
-                mTokenLoc = loc;
-                parseArguments ("c", scanner);
-
-                Generator::scriptRunning (mCode);
-                mOperands.push_back ('l');
-
-                mNextOperand = false;
-                return true;
-            }
-            else if (keyword==Scanner::K_getdistance)
-            {
-                start();
-
-                mTokenLoc = loc;
-                parseArguments ("c", scanner);
-
-                Generator::getDistance (mCode, mLiterals, "");
-                mOperands.push_back ('f');
-
-                mNextOperand = false;
-                return true;
-            }
             else if (keyword==Scanner::K_getsecondspassed)
             {
                 start();
@@ -542,21 +467,6 @@ namespace Compiler
 
                 Generator::getSecondsPassed (mCode);
                 mOperands.push_back ('f');
-
-                mNextOperand = false;
-                return true;
-            }
-            else if (keyword==Scanner::K_getdisabled)
-            {
-                start();
-
-                mTokenLoc = loc;
-
-                Generator::getDisabled (mCode, mLiterals, "");
-                mOperands.push_back ('l');
-
-                std::vector<Interpreter::Type_Code> ignore;
-                parseArguments ("x", scanner, ignore);
 
                 mNextOperand = false;
                 return true;

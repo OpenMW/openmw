@@ -211,10 +211,7 @@ namespace Compiler
                 K_getsquareroot,
                 K_menumode,
                 K_random,
-                K_startscript, K_stopscript, K_scriptrunning,
-                K_getdistance,
-                K_getsecondspassed,
-                K_enable, K_disable, K_getdisabled
+                K_getsecondspassed
             };
 
             enum special

@@ -241,6 +241,12 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
+            extensions.registerFunction ("scriptrunning", 'l', "c", opcodeScriptRunning);
+            extensions.registerInstruction ("startscript", "c", opcodeStartScript, opcodeStartScriptExplicit);
+            extensions.registerInstruction ("stopscript", "c", opcodeStopScript);
+            extensions.registerInstruction ("enable", "", opcodeEnable, opcodeEnableExplicit);
+            extensions.registerInstruction ("disable", "", opcodeDisable, opcodeDisableExplicit);
+            extensions.registerFunction ("getdisabled", 'l', "x", opcodeGetDisabled, opcodeGetDisabledExplicit);
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate, opcodeOnActivateExplicit);
             extensions.registerInstruction ("activate", "x", opcodeActivate, opcodeActivateExplicit);
@@ -533,6 +539,7 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
+            extensions.registerFunction("getdistance",'f',"c",opcodeGetDistance,opcodeGetDistanceExplicit);
             extensions.registerInstruction("setscale","f",opcodeSetScale,opcodeSetScaleExplicit);
             extensions.registerFunction("getscale",'f',"",opcodeGetScale,opcodeGetScaleExplicit);
             extensions.registerInstruction("setangle","cf",opcodeSetAngle,opcodeSetAngleExplicit);

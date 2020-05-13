@@ -109,21 +109,7 @@ namespace Compiler
 
         void random (CodeContainer& code);
 
-        void scriptRunning (CodeContainer& code);
-
-        void startScript (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void stopScript (CodeContainer& code);
-
-        void getDistance (CodeContainer& code, Literals& literals, const std::string& id);
-
         void getSecondsPassed (CodeContainer& code);
-
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void enable (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void disable (CodeContainer& code, Literals& literals, const std::string& id);
     }
 }
 

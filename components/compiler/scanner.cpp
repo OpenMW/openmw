@@ -268,10 +268,7 @@ namespace Compiler
         "getsquareroot",
         "menumode",
         "random",
-        "startscript", "stopscript", "scriptrunning",
-        "getdistance",
         "getsecondspassed",
-        "enable", "disable", "getdisabled",
         0
     };
 

@@ -78,6 +78,80 @@ namespace MWScript
 {
     namespace Misc
     {
+        template<class R>
+        class OpStartScript : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    MWWorld::Ptr target = R()(runtime, false);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, target);
+                }
+        };
+
+        class OpScriptRunning : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    runtime.push(MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name));
+                }
+        };
+
+        class OpStopScript : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
+                }
+        };
+
+        template<class R>
+        class OpEnable : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->enable (ptr);
+                }
+        };
+
+        template<class R>
+        class OpDisable : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->disable (ptr);
+                }
+        };
+
+        template<class R>
+        class OpGetDisabled : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (!ptr.getRefData().isEnabled());
+                }
+        };
+
         class OpPlayBink : public Interpreter::Opcode0
         {
         public:
@@ -1456,6 +1530,16 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
+            interpreter.installSegment5 (Compiler::Misc::opcodeScriptRunning, new OpScriptRunning);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStartScript, new OpStartScript<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStartScriptExplicit, new OpStartScript<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStopScript, new OpStopScript);
+            interpreter.installSegment5 (Compiler::Misc::opcodeEnable, new OpEnable<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeEnableExplicit, new OpEnable<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeDisable, new OpDisable<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeDisableExplicit, new OpDisable<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabled, new OpGetDisabled<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabledExplicit, new OpGetDisabled<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
             interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeOnActivateExplicit, new OpOnActivate<ExplicitRef>);

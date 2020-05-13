@@ -201,6 +201,16 @@ namespace Compiler
 
     namespace Misc
     {
+        const int opcodeScriptRunning = 46;
+        const int opcodeStartScript = 47;
+        const int opcodeStopScript = 48;
+        const int opcodeEnable = 51;
+        const int opcodeDisable = 52;
+        const int opcodeGetDisabled = 53;
+        const int opcodeEnableExplicit = 54;
+        const int opcodeDisableExplicit = 55;
+        const int opcodeGetDisabledExplicit = 56;
+        const int opcodeStartScriptExplicit = 71;
         const int opcodeXBox = 0x200000c;
         const int opcodeOnActivate = 0x200000d;
         const int opcodeOnActivateExplicit = 0x2000306;
@@ -473,6 +483,8 @@ namespace Compiler
 
     namespace Transformation
     {
+        const int opcodeGetDistance = 49;
+        const int opcodeGetDistanceExplicit = 57;
         const int opcodeSetScale = 0x2000164;
         const int opcodeSetScaleExplicit = 0x2000165;
         const int opcodeSetAngle = 0x2000166;
