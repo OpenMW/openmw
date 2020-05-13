@@ -521,4 +521,50 @@ void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv
     traverse(node, nv);
 }
 
+PathController::PathController(const PathController &copy, const osg::CopyOp &copyop)
+    : osg::NodeCallback(copy, copyop)
+    , Controller(copy)
+    , mPath(copy.mPath)
+    , mPercent(copy.mPercent)
+    , mFlags(copy.mFlags)
+{
+}
+
+PathController::PathController(const Nif::NiPathController* ctrl)
+    : mPath(ctrl->posData->mKeyList, osg::Vec3f())
+    , mPercent(ctrl->floatData->mKeyList, 1.f)
+    , mFlags(ctrl->flags)
+{
+}
+
+float PathController::getPercent(float time) const
+{
+    float percent = mPercent.interpKey(time);
+    if (percent < 0.f)
+        percent = std::fmod(percent, 1.f) + 1.f;
+    else if (percent > 1.f)
+        percent = std::fmod(percent, 1.f);
+    return percent;
+}
+
+void PathController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+{
+    if (mPath.empty() || mPercent.empty() || !hasInput())
+    {
+        traverse(node, nv);
+        return;
+    }
+
+    osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
+    osg::Matrix mat = trans->getMatrix();
+
+    float time = getInputValue(nv);
+    float percent = getPercent(time);
+    osg::Vec3f pos(mPath.interpKey(percent));
+    mat.setTrans(pos);
+    trans->setMatrix(mat);
+
+    traverse(node, nv);
+}
+
 }

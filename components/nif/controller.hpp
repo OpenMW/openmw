@@ -96,6 +96,20 @@ public:
     NiPosDataPtr posData;
     NiFloatDataPtr floatData;
 
+    enum Flags
+    {
+        Flag_OpenCurve      = 0x020,
+        Flag_AllowFlip      = 0x040,
+        Flag_Bank           = 0x080,
+        Flag_ConstVelocity  = 0x100,
+        Flag_Follow         = 0x200,
+        Flag_FlipFollowAxis = 0x400
+    };
+
+    int bankDir;
+    float maxBankAngle, smoothing;
+    short followAxis;
+
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };

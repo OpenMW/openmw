@@ -752,6 +752,17 @@ namespace NifOsg
                         node->addUpdateCallback(callback);
                     }
                 }
+                else if (ctrl->recType == Nif::RC_NiPathController)
+                {
+                    const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
+                    if (!path->posData.empty() && !path->floatData.empty())
+                    {
+                        osg::ref_ptr<PathController> callback(new PathController(path));
+
+                        setupController(path, callback, animflags);
+                        node->addUpdateCallback(callback);
+                    }
+                }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
@@ -777,6 +788,17 @@ namespace NifOsg
                         osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
 
                         setupController(key, callback, animflags);
+                        transformNode->addUpdateCallback(callback);
+                    }
+                }
+                else if (ctrl->recType == Nif::RC_NiPathController)
+                {
+                    const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
+                    if (!path->posData.empty() && !path->floatData.empty())
+                    {
+                        osg::ref_ptr<PathController> callback(new PathController(path));
+
+                        setupController(path, callback, animflags);
                         transformNode->addUpdateCallback(callback);
                     }
                 }

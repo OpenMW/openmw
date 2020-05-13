@@ -342,6 +342,25 @@ namespace NifOsg
         float mEmitStop;
     };
 
+    class PathController : public osg::NodeCallback, public SceneUtil::Controller
+    {
+    public:
+        PathController(const Nif::NiPathController* ctrl);
+        PathController() = default;
+        PathController(const PathController& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, PathController)
+
+        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+
+    private:
+        Vec3Interpolator mPath;
+        FloatInterpolator mPercent;
+        int mFlags{0};
+
+        float getPercent(float time) const;
+    };
+
 }
 
 #endif
