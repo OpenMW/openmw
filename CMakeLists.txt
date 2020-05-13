@@ -513,6 +513,11 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
 
+    IF(DESIRED_QT_VERSION MATCHES 5)
+        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/platforms" DESTINATION "." CONFIGURATIONS Debug)
+        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/platforms" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+    ENDIF()
+
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/resources" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/resources" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
 
