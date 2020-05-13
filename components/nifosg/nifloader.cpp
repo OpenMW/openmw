@@ -247,22 +247,23 @@ namespace NifOsg
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
-            if(nif->numRoots() < 1)
+            const Nif::NiSequenceStreamHelper *seq;
+            for (size_t i = 0; i < nif->numRoots(); ++i)
             {
-                nif->warn("Found no root nodes");
-                return;
+                const Nif::Record *r = nif->getRoot(i);
+                assert(r != nullptr);
+                if (r->recType == Nif::RC_NiSequenceStreamHelper)
+                {
+                    seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
+                    break;
+                }
             }
 
-            const Nif::Record *r = nif->getRoot(0);
-            assert(r != nullptr);
-
-            if(r->recType != Nif::RC_NiSequenceStreamHelper)
+            if (!seq)
             {
-                nif->warn("First root was not a NiSequenceStreamHelper, but a "+
-                          r->recName+".");
+                nif->warn("Found no NiSequenceStreamHelper root record");
                 return;
             }
-            const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
 
             Nif::ExtraPtr extra = seq->extra;
             if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
@@ -303,14 +304,15 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
-            if (nif->numRoots() < 1)
+            const Nif::Node* nifNode;
+            for (size_t i = 0; i < nif->numRoots(); ++i)
+            {
+                const Nif::Record* r = nif->getRoot(i);
+                if ((nifNode = dynamic_cast<const Nif::Node*>(r)))
+                    break;
+            }
+            if (!nifNode)
                 nif->fail("Found no root nodes");
-
-            const Nif::Record* r = nif->getRoot(0);
-
-            const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-            if (nifNode == nullptr)
-                nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
