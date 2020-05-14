@@ -649,11 +649,7 @@ namespace NifOsg
                 const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
                 if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
-                    Nif::NiSkinInstancePtr skin;
-                    if (nifNode->recType == Nif::RC_NiTriShape)
-                        skin = static_cast<const Nif::NiTriShape*>(nifNode)->skin;
-                    else // if (nifNode->recType == Nif::RC_NiTriStrips)
-                        skin = static_cast<const Nif::NiTriStrips*>(nifNode)->skin;
+                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 
                     if (skin.empty())
                         handleTriShape(nifNode, node, composite, boundTextures, animflags);
@@ -1294,12 +1290,7 @@ namespace NifOsg
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
 
-            Nif::NiSkinInstancePtr skinPtr;
-            if (nifNode->recType == Nif::RC_NiTriShape)
-                skinPtr = static_cast<const Nif::NiTriShape*>(nifNode)->skin;
-            else
-                skinPtr = static_cast<const Nif::NiTriStrips*>(nifNode)->skin;
-            const Nif::NiSkinInstance *skin = skinPtr.getPtr();
+            const Nif::NiSkinInstance *skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)

@@ -128,7 +128,12 @@ struct NiNode : Node
     }
 };
 
-struct NiTriShape : Node
+struct NiGeometry : Node
+{
+    NiSkinInstancePtr skin;
+};
+
+struct NiTriShape : NiGeometry
 {
     /* Possible flags:
         0x40 - mesh has no vertex normals ?
@@ -138,7 +143,6 @@ struct NiTriShape : Node
     */
 
     NiTriShapeDataPtr data;
-    NiSkinInstancePtr skin;
 
     void read(NIFStream *nif)
     {
@@ -157,10 +161,9 @@ struct NiTriShape : Node
     }
 };
 
-struct NiTriStrips : Node
+struct NiTriStrips : NiGeometry
 {
     NiTriStripsDataPtr data;
-    NiSkinInstancePtr skin;
 
     void read(NIFStream *nif)
     {
