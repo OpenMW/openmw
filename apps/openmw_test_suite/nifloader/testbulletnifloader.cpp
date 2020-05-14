@@ -349,19 +349,6 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_root_not_nif_node_should_return_default)
-    {
-        StrictMock<RecordMock> record;
-
-        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
-        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&record));
-        const auto result = mLoader.load(mNifFile);
-
-        Resource::BulletShape expected;
-
-        EXPECT_EQ(*result, expected);
-    }
-
     TEST_F(TestBulletNifLoader, for_default_root_nif_node_should_return_default)
     {
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));

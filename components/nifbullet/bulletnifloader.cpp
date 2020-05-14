@@ -132,20 +132,18 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     mStaticMesh.reset();
     mAvoidStaticMesh.reset();
 
-    if (nif.numRoots() < 1)
+    Nif::Node* node = nullptr;
+    const size_t numRoots = nif.numRoots();
+    for (size_t i = 0; i < numRoots; ++i)
+    {
+        Nif::Record* r = nif.getRoot(i);
+        assert(r != nullptr);
+        if ((node = dynamic_cast<Nif::Node*>(r)))
+            break;
+    }
+    if (!node)
     {
         warn("Found no root nodes in NIF.");
-        return mShape;
-    }
-
-    Nif::Record *r = nif.getRoot(0);
-    assert(r != nullptr);
-
-    Nif::Node *node = dynamic_cast<Nif::Node*>(r);
-    if (node == nullptr)
-    {
-        warn("First root in file was not a node, but a " +
-             r->recName + ". Skipping file.");
         return mShape;
     }
 

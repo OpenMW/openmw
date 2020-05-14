@@ -13,6 +13,7 @@
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
     Bug #5370: Opening an unlocked but trapped door uses the key
     Bug #5400: Editor: Verifier checks race of non-skin bodyparts
+    Bug #5416: Junk non-node records before the root node are not handled gracefully
     Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0
