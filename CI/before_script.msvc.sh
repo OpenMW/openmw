@@ -622,7 +622,7 @@ printf "MyGUI 3.4.0... "
 		SUFFIX=""
 		MYGUI_CONFIGURATION="RelWithDebInfo"
 	fi
-	add_runtime_dlls "$(pwd)/MyGUI/bin/${CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
+	add_runtime_dlls "$(pwd)/MyGUI/bin/${MYGUI_CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
 	echo Done.
 }
 cd $DEPS
