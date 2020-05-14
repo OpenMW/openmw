@@ -17,53 +17,60 @@ void ESM::CreatureStats::load (ESMReader &esm)
     mTradeTime.mHour = 0;
     esm.getHNOT (mTradeTime, "TIME");
 
+    int flags = 0;
     mDead = false;
-    esm.getHNOT (mDead, "DEAD");
-
     mDeathAnimationFinished = false;
-    esm.getHNOT (mDeathAnimationFinished, "DFNT");
-
-    if (esm.getFormat() < 3 && mDead)
-        mDeathAnimationFinished = true;
-
     mDied = false;
-    esm.getHNOT (mDied, "DIED");
-
     mMurdered = false;
-    esm.getHNOT (mMurdered, "MURD");
-
-    if (esm.isNextSub("FRHT"))
-        esm.skipHSub(); // Friendly hits, no longer used
-
     mTalkedTo = false;
-    esm.getHNOT (mTalkedTo, "TALK");
-
     mAlarmed = false;
-    esm.getHNOT (mAlarmed, "ALRM");
-
     mAttacked = false;
-    esm.getHNOT (mAttacked, "ATKD");
-
-    if (esm.isNextSub("HOST"))
-        esm.skipHSub(); // Hostile, no longer used
-
-    if (esm.isNextSub("ATCK"))
-        esm.skipHSub(); // attackingOrSpell, no longer used
-
     mKnockdown = false;
-    esm.getHNOT (mKnockdown, "KNCK");
-
     mKnockdownOneFrame = false;
-    esm.getHNOT (mKnockdownOneFrame, "KNC1");
-
     mKnockdownOverOneFrame = false;
-    esm.getHNOT (mKnockdownOverOneFrame, "KNCO");
-
     mHitRecovery = false;
-    esm.getHNOT (mHitRecovery, "HITR");
-
     mBlock = false;
-    esm.getHNOT (mBlock, "BLCK");
+    mRecalcDynamicStats = false;
+    if (esm.getFormat() < 8)
+    {
+        esm.getHNOT (mDead, "DEAD");
+        esm.getHNOT (mDeathAnimationFinished, "DFNT");
+        if (esm.getFormat() < 3 && mDead)
+            mDeathAnimationFinished = true;
+        esm.getHNOT (mDied, "DIED");
+        esm.getHNOT (mMurdered, "MURD");
+        if (esm.isNextSub("FRHT"))
+            esm.skipHSub(); // Friendly hits, no longer used
+        esm.getHNOT (mTalkedTo, "TALK");
+        esm.getHNOT (mAlarmed, "ALRM");
+        esm.getHNOT (mAttacked, "ATKD");
+        if (esm.isNextSub("HOST"))
+            esm.skipHSub(); // Hostile, no longer used
+        if (esm.isNextSub("ATCK"))
+            esm.skipHSub(); // attackingOrSpell, no longer used
+        esm.getHNOT (mKnockdown, "KNCK");
+        esm.getHNOT (mKnockdownOneFrame, "KNC1");
+        esm.getHNOT (mKnockdownOverOneFrame, "KNCO");
+        esm.getHNOT (mHitRecovery, "HITR");
+        esm.getHNOT (mBlock, "BLCK");
+    }
+    else
+    {
+        esm.getHNOT(flags, "AFLG");
+        mDead = flags & Dead;
+        mDeathAnimationFinished = flags & DeathAnimationFinished;
+        mDied = flags & Died;
+        mMurdered = flags & Murdered;
+        mTalkedTo = flags & TalkedTo;
+        mAlarmed = flags & Alarmed;
+        mAttacked = flags & Attacked;
+        mKnockdown = flags & Knockdown;
+        mKnockdownOneFrame = flags & KnockdownOneFrame;
+        mKnockdownOverOneFrame = flags & KnockdownOverOneFrame;
+        mHitRecovery = flags & HitRecovery;
+        mBlock = flags & Block;
+        mRecalcDynamicStats = flags & RecalcDynamicStats;
+    }
 
     mMovementFlags = 0;
     esm.getHNOT (mMovementFlags, "MOVE");
@@ -78,8 +85,8 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mLastHitAttemptObject = esm.getHNOString ("LHAT");
 
-    mRecalcDynamicStats = false;
-    esm.getHNOT (mRecalcDynamicStats, "CALC");
+    if (esm.getFormat() < 8)
+        esm.getHNOT (mRecalcDynamicStats, "CALC");
 
     mDrawState = 0;
     esm.getHNOT (mDrawState, "DRAW");
@@ -89,9 +96,6 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
     mActorId = -1;
     esm.getHNOT (mActorId, "ACID");
-
-    //mHitAttemptActorId = -1;
-    //esm.getHNOT(mHitAttemptActorId, "HAID");
 
     mDeathAnimation = -1;
     esm.getHNOT (mDeathAnimation, "DANM");
@@ -134,7 +138,6 @@ void ESM::CreatureStats::load (ESMReader &esm)
 
 void ESM::CreatureStats::save (ESMWriter &esm) const
 {
-
     for (int i=0; i<8; ++i)
         mAttributes[i].save (esm);
 
@@ -147,41 +150,23 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mTradeTime.mDay != 0 || mTradeTime.mHour != 0)
         esm.writeHNT ("TIME", mTradeTime);
 
-    if (mDead)
-        esm.writeHNT ("DEAD", mDead);
+    int flags = 0;
+    if (mDead) flags |= Dead;
+    if (mDeathAnimationFinished) flags |= DeathAnimationFinished;
+    if (mDied) flags |= Died;
+    if (mMurdered) flags |= Murdered;
+    if (mTalkedTo) flags |= TalkedTo;
+    if (mAlarmed) flags |= Alarmed;
+    if (mAttacked) flags |= Attacked;
+    if (mKnockdown) flags |= Knockdown;
+    if (mKnockdownOneFrame) flags |= KnockdownOneFrame;
+    if (mKnockdownOverOneFrame) flags |= KnockdownOverOneFrame;
+    if (mHitRecovery) flags |= HitRecovery;
+    if (mBlock) flags |= Block;
+    if (mRecalcDynamicStats) flags |= RecalcDynamicStats;
 
-    if (mDeathAnimationFinished)
-        esm.writeHNT ("DFNT", mDeathAnimationFinished);
-
-    if (mDied)
-        esm.writeHNT ("DIED", mDied);
-
-    if (mMurdered)
-        esm.writeHNT ("MURD", mMurdered);
-
-    if (mTalkedTo)
-        esm.writeHNT ("TALK", mTalkedTo);
-
-    if (mAlarmed)
-        esm.writeHNT ("ALRM", mAlarmed);
-
-    if (mAttacked)
-        esm.writeHNT ("ATKD", mAttacked);
-
-    if (mKnockdown)
-        esm.writeHNT ("KNCK", mKnockdown);
-
-    if (mKnockdownOneFrame)
-        esm.writeHNT ("KNC1", mKnockdownOneFrame);
-
-    if (mKnockdownOverOneFrame)
-        esm.writeHNT ("KNCO", mKnockdownOverOneFrame);
-
-    if (mHitRecovery)
-        esm.writeHNT ("HITR", mHitRecovery);
-
-    if (mBlock)
-        esm.writeHNT ("BLCK", mBlock);
+    if (flags)
+        esm.writeHNT ("AFLG", flags);
 
     if (mMovementFlags)
         esm.writeHNT ("MOVE", mMovementFlags);
@@ -195,9 +180,6 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (!mLastHitAttemptObject.empty())
         esm.writeHNString ("LHAT", mLastHitAttemptObject);
 
-    if (mRecalcDynamicStats)
-        esm.writeHNT ("CALC", mRecalcDynamicStats);
-
     if (mDrawState)
         esm.writeHNT ("DRAW", mDrawState);
 
@@ -207,13 +189,10 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     if (mActorId != -1)
         esm.writeHNT ("ACID", mActorId);
 
-    //if (mHitAttemptActorId != -1)
-    //    esm.writeHNT("HAID", mHitAttemptActorId);
-
     if (mDeathAnimation != -1)
         esm.writeHNT ("DANM", mDeathAnimation);
 
-    if (mTimeOfDeath.mHour != 0 && mTimeOfDeath.mDay != 0)
+    if (mTimeOfDeath.mHour != 0 || mTimeOfDeath.mDay != 0)
         esm.writeHNT ("DTIM", mTimeOfDeath);
 
     mSpells.save(esm);
@@ -247,7 +226,6 @@ void ESM::CreatureStats::blank()
     mTradeTime.mDay = 0;
     mGoldPool = 0;
     mActorId = -1;
-    //mHitAttemptActorId = -1;
     mHasAiSettings = false;
     mDead = false;
     mDeathAnimationFinished = false;

@@ -5,6 +5,7 @@
 
 void ESM::InventoryState::load (ESMReader &esm)
 {
+    // obsolete
     int index = 0;
     while (esm.isNextSub ("IOBJ"))
     {
@@ -31,6 +32,22 @@ void ESM::InventoryState::load (ESMReader &esm)
 
         ++index;
     }
+
+    int itemsCount = 0;
+    esm.getHNOT(itemsCount, "ICNT");
+    for (int i = 0; i < itemsCount; i++)
+    {
+        ObjectState state;
+
+        state.mRef.loadId(esm, true);
+        state.load (esm);
+
+        if (state.mCount == 0)
+            continue;
+
+        mItems.push_back (state);
+    }
+
     //Next item is Levelled item
     while (esm.isNextSub("LEVM"))
     {
@@ -72,18 +89,35 @@ void ESM::InventoryState::load (ESMReader &esm)
         mEquipmentSlots[equipIndex] = slot;
     }
 
+    if (esm.isNextSub("EQIP"))
+    {
+        esm.getSubHeader();
+        int slotsCount = 0;
+        esm.getT(slotsCount);
+        for (int i = 0; i < slotsCount; i++)
+        {
+            int equipIndex;
+            esm.getT(equipIndex);
+            int slot;
+            esm.getT(slot);
+            mEquipmentSlots[equipIndex] = slot;
+        }
+    }
+
     mSelectedEnchantItem = -1;
     esm.getHNOT(mSelectedEnchantItem, "SELE");
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const
 {
-    for (std::vector<ObjectState>::const_iterator iter (mItems.begin()); iter!=mItems.end(); ++iter)
+    int itemsCount = static_cast<int>(mItems.size());
+    if (itemsCount > 0)
     {
-        int unused = 0;
-        esm.writeHNT ("IOBJ", unused);
-
-        iter->save (esm, true);
+        esm.writeHNT ("ICNT", itemsCount);
+        for (const ObjectState& state : mItems)
+        {
+            state.save (esm, true);
+        }
     }
 
     for (std::map<std::pair<std::string, std::string>, int>::const_iterator it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
@@ -105,12 +139,17 @@ void ESM::InventoryState::save (ESMWriter &esm) const
         }
     }
 
-    for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+    int slotsCount = static_cast<int>(mEquipmentSlots.size());
+    if (slotsCount > 0)
     {
-        esm.startSubRecord("EQUI");
-        esm.writeT(it->first);
-        esm.writeT(it->second);
-        esm.endRecord("EQUI");
+        esm.startSubRecord("EQIP");
+        esm.writeT(slotsCount);
+        for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+        {
+            esm.writeT(it->first);
+            esm.writeT(it->second);
+        }
+        esm.endRecord("EQIP");
     }
 
     if (mSelectedEnchantItem != -1)
