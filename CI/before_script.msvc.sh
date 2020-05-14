@@ -38,6 +38,9 @@ CONFIGURATION=""
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
+BULLET_DOUBLE=""
+BULLET_DBL=""
+BULLET_DBL_DISPLAY="Single precision"
 
 while [ $# -gt 0 ]; do
 	ARGSTR=$1
@@ -57,6 +60,9 @@ while [ $# -gt 0 ]; do
 
 			d )
 				SKIP_DOWNLOAD=true ;;
+
+			D )
+				BULLET_DOUBLE=true ;;
 
 			e )
 				SKIP_EXTRACT=true ;;
@@ -100,6 +106,8 @@ Options:
 		Set the configuration, can also be set with environment variable CONFIGURATION.
 	-d
 		Skip checking the downloads.
+	-D
+		Use double-precision Bullet
 	-e
 		Skip extracting dependencies.
 	-h
@@ -371,6 +379,11 @@ if ! [ -z $UNITY_BUILD ]; then
 	add_cmake_opts "-DOPENMW_UNITY_BUILD=True"
 fi
 
+if [ -n "$BULLET_DOUBLE" ]; then
+	BULLET_DBL="-double"
+	BULLET_DBL_DISPLAY="Double precision"
+fi
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
@@ -395,9 +408,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# Bullet
-	download "Bullet 2.86" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" \
-		"Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z"
+	download "Bullet 2.89 (${BULLET_DBL_DISPLAY})" \
+		"https://rgw.ctrl-c.liu.se/openmw/Deps/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" \
+		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z"
 
 	# FFmpeg
 	download "FFmpeg 3.2.4" \
@@ -407,9 +420,15 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"ffmpeg-3.2.4-dev-win${BITS}.zip"
 
 	# MyGUI
-	download "MyGUI 3.2.2" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z" \
-		"MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z"
+	download "MyGUI 3.4.0" \
+		"https://rgw.ctrl-c.liu.se/openmw/Deps/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+
+	if [ -n "$PDBS" ]; then
+		download "MyGUI symbols" \
+			"https://rgw.ctrl-c.liu.se/openmw/Deps/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+	fi
 
 	# OpenAL
 	download "OpenAL-Soft 1.19.1" \
@@ -417,14 +436,14 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"OpenAL-Soft-1.19.1.zip"
 
 	# OSG
-	download "OpenSceneGraph 3.4.2-experimental" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
-		"OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
+	download "OpenSceneGraph 3.6.5" \
+		"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "OpenSceneGraph symbols" \
-			"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
-			"OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
+			"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# Qt
@@ -541,15 +560,15 @@ fi
 cd $DEPS
 echo
 # Bullet
-printf "Bullet 2.86... "
+printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 {
 	cd $DEPS_INSTALL
 	if [ -d Bullet ]; then
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
+		mv "Bullet-2.86-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
 	fi
 	export BULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
@@ -580,25 +599,28 @@ printf "FFmpeg 3.2.4... "
 cd $DEPS
 echo
 # MyGUI
-printf "MyGUI 3.2.2... "
+printf "MyGUI 3.4.0... "
 {
 	cd $DEPS_INSTALL
 	if [ -d MyGUI ] && \
 		grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_MINOR 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_PATCH 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
+		grep "MYGUI_VERSION_MINOR 4" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
+		grep "MYGUI_VERSION_PATCH 0" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf MyGUI
-		eval 7z x -y "${DEPS}/MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}.7z" $STRIP
-		mv "MyGUI-3.2.2-msvc${MSVC_YEAR}-win${BITS}" MyGUI
+		eval 7z x -y "${DEPS}/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}" MyGUI
 	fi
 	export MYGUI_HOME="$(real_pwd)/MyGUI"
 	if [ $CONFIGURATION == "Debug" ]; then
 		SUFFIX="_d"
+		MYGUI_CONFIGURATION="Debug"
 	else
 		SUFFIX=""
+		MYGUI_CONFIGURATION="RelWithDebInfo"
 	fi
 	add_runtime_dlls "$(pwd)/MyGUI/bin/${CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
 	echo Done.
@@ -623,20 +645,20 @@ printf "OpenAL-Soft 1.19.1... "
 cd $DEPS
 echo
 # OSG
-printf "OSG 3.4.2-experimental... "
+printf "OSG 3.6.5... "
 {
 	cd $DEPS_INSTALL
 	if [ -d OSG ] && \
 		grep "OPENSCENEGRAPH_MAJOR_VERSION    3" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_MINOR_VERSION    4" OSG/include/osg/Version > /dev/null && \
-		grep "OPENSCENEGRAPH_PATCH_VERSION    2" OSG/include/osg/Version > /dev/null
+		grep "OPENSCENEGRAPH_MINOR_VERSION    6" OSG/include/osg/Version > /dev/null && \
+		grep "OPENSCENEGRAPH_PATCH_VERSION    5" OSG/include/osg/Version > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf OSG
-		eval 7z x -y "${DEPS}/OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "OSG-3.4.2-experimental-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
+		eval 7z x -y "${DEPS}/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}" OSG
 	fi
 	OSG_SDK="$(real_pwd)/OSG"
 	add_cmake_opts -DOSG_DIR="$OSG_SDK"
@@ -647,8 +669,8 @@ printf "OSG 3.4.2-experimental... "
 	fi
 	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
 		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.2/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.4.2/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
+	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
 	echo Done.
 }
 cd $DEPS
