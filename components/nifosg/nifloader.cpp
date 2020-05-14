@@ -247,8 +247,9 @@ namespace NifOsg
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
-            const Nif::NiSequenceStreamHelper *seq;
-            for (size_t i = 0; i < nif->numRoots(); ++i)
+            const Nif::NiSequenceStreamHelper *seq = nullptr;
+            const size_t numRoots = nif->numRoots();
+            for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record *r = nif->getRoot(i);
                 assert(r != nullptr);
@@ -304,8 +305,9 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
-            const Nif::Node* nifNode;
-            for (size_t i = 0; i < nif->numRoots(); ++i)
+            const Nif::Node* nifNode = nullptr;
+            const size_t numRoots = nif->numRoots();
+            for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record* r = nif->getRoot(i);
                 if ((nifNode = dynamic_cast<const Nif::Node*>(r)))

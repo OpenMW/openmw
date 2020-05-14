@@ -132,8 +132,9 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     mStaticMesh.reset();
     mAvoidStaticMesh.reset();
 
-    Nif::Node* node;
-    for (size_t i = 0; i < nif.numRoots(); ++i)
+    Nif::Node* node = nullptr;
+    const size_t numRoots = nif.numRoots();
+    for (size_t i = 0; i < numRoots; ++i)
     {
         Nif::Record* r = nif.getRoot(i);
         assert(r != nullptr);
