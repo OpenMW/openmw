@@ -5,6 +5,7 @@ MISSINGTOOLS=0
 
 command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
 command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
+command -v python >/dev/null 2>&1 || { echo "Error: Python is not on the path."; MISSINGTOOLS=1; }
 
 if [ $MISSINGTOOLS -ne 0 ]; then
 	exit 1
@@ -280,9 +281,9 @@ case $VS_VERSION in
 		MSVC_YEAR="2015"
 		MSVC_REAL_YEAR="2019"
 		MSVC_DISPLAY_YEAR="2019"
-		BOOST_VER="1.71.0"
-		BOOST_VER_URL="1_71_0"
-		BOOST_VER_SDK="107100"
+		BOOST_VER="1.72.0"
+		BOOST_VER_URL="1_72_0"
+		BOOST_VER_SDK="107200"
 		;;
 
 	15|15.0|2017 )
@@ -413,11 +414,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z"
 
 	# FFmpeg
-	download "FFmpeg 3.2.4" \
-		"https://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-3.2.4-win${BITS}-shared.zip" \
-		"ffmpeg-3.2.4-win${BITS}.zip" \
-		"https://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-3.2.4-win${BITS}-dev.zip" \
-		"ffmpeg-3.2.4-dev-win${BITS}.zip"
+	download "FFmpeg 4.2.2" \
+		"https://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-4.2.2-win${BITS}-shared.zip" \
+		"ffmpeg-4.2.2-win${BITS}.zip" \
+		"https://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-4.2.2-win${BITS}-dev.zip" \
+		"ffmpeg-4.2.2-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.4.0" \
@@ -431,9 +432,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# OpenAL
-	download "OpenAL-Soft 1.19.1" \
-		"http://openal-soft.org/openal-binaries/openal-soft-1.19.1-bin.zip" \
-		"OpenAL-Soft-1.19.1.zip"
+	download "OpenAL-Soft 1.20.1" \
+		"http://openal-soft.org/openal-binaries/openal-soft-1.20.1-bin.zip" \
+		"OpenAL-Soft-1.20.1.zip"
 
 	# OSG
 	download "OpenSceneGraph 3.6.5" \
@@ -448,17 +449,17 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Qt
 	if [ -z $APPVEYOR ]; then
-		if [ $BITS == "64" ]; then
-			QT_SUFFIX="_64"
-		else
-			QT_SUFFIX=""
+		if [ "${MSVC_REAL_YEAR}" = "2015" ] && [ "${BITS}" = "32" ]; then
+			echo "Qt no longer provides MSVC2015 Win32 packages, switch to 64-bit or a newer Visual Studio. Sorry."
+			exit 1
 		fi
 
-		download "Qt 5.7.0" \
-			"https://download.qt.io/new_archive/qt/5.7/5.7.0/qt-opensource-windows-x86-msvc${MSVC_YEAR}${QT_SUFFIX}-5.7.0.exe" \
-			"qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" \
-			"https://www.lysator.liu.se/~ace/OpenMW/deps/qt-5-install.qs" \
-			"qt-5-install.qs"
+		download "AQt installer" \
+			"https://files.pythonhosted.org/packages/f3/bb/aee972f08deecca31bfc46b5aedfad1ce6c7f3aaf1288d685e4a914b53ac/aqtinstall-0.8-py2.py3-none-any.whl"
+			"aqtinstall-0.8-py2.py3-none-any.whl"
+
+		[ -d 'aqt-venv' ] || eval python -m venv aqt-venv $STRIP
+		[ -e 'aqt-venv/bin/aqt' ] || eval aqt-venv/bin/pip install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
 	fi
 
 	# SDL2
@@ -576,21 +577,21 @@ printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 cd $DEPS
 echo
 # FFmpeg
-printf "FFmpeg 3.2.4... "
+printf "FFmpeg 4.2.2... "
 {
 	cd $DEPS_INSTALL
-	if [ -d FFmpeg ] && grep "FFmpeg version: 3.2.4" FFmpeg/README.txt > /dev/null; then
+	if [ -d FFmpeg ] && grep "FFmpeg version: 4.2.2" FFmpeg/README.txt > /dev/null; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
-		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-win${BITS}.zip" $STRIP
-		eval 7z x -y "${DEPS}/ffmpeg-3.2.4-dev-win${BITS}.zip" $STRIP
-		mv "ffmpeg-3.2.4-win${BITS}-shared" FFmpeg
-		cp -r "ffmpeg-3.2.4-win${BITS}-dev/"* FFmpeg/
-		rm -rf "ffmpeg-3.2.4-win${BITS}-dev"
+		eval 7z x -y "${DEPS}/ffmpeg-4.2.2-win${BITS}.zip" $STRIP
+		eval 7z x -y "${DEPS}/ffmpeg-4.2.2-dev-win${BITS}.zip" $STRIP
+		mv "ffmpeg-4.2.2-win${BITS}-shared" FFmpeg
+		cp -r "ffmpeg-4.2.2-win${BITS}-dev/"* FFmpeg/
+		rm -rf "ffmpeg-4.2.2-win${BITS}-dev"
 	fi
 	export FFMPEG_HOME="$(real_pwd)/FFmpeg"
-	add_runtime_dlls "$(pwd)/FFmpeg/bin/"{avcodec-57,avformat-57,avutil-55,swresample-2,swscale-4}.dll
+	add_runtime_dlls "$(pwd)/FFmpeg/bin/"{avcodec-58,avformat-58,avutil-56,swresample-3,swscale-5}.dll
 	if [ $BITS -eq 32 ]; then
 		add_cmake_opts "-DCMAKE_EXE_LINKER_FLAGS=\"/machine:X86 /safeseh:no\""
 	fi
@@ -628,18 +629,18 @@ printf "MyGUI 3.4.0... "
 cd $DEPS
 echo
 # OpenAL
-printf "OpenAL-Soft 1.19.1... "
+printf "OpenAL-Soft 1.20.1... "
 {
-	if [ -d openal-soft-1.19.1-bin ]; then
+	if [ -d openal-soft-1.20.1-bin ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-1.19.1-bin
-		eval 7z x -y OpenAL-Soft-1.19.1.zip $STRIP
+		rm -rf openal-soft-1.20.1-bin
+		eval 7z x -y OpenAL-Soft-1.20.1.zip $STRIP
 	fi
-	OPENAL_SDK="$(real_pwd)/openal-soft-1.19.1-bin"
+	OPENAL_SDK="$(real_pwd)/openal-soft-1.20.1-bin"
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
-	add_runtime_dlls "$(pwd)/openal-soft-1.19.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+	add_runtime_dlls "$(pwd)/openal-soft-1.20.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
 	echo Done.
 }
 cd $DEPS
@@ -677,7 +678,7 @@ cd $DEPS
 echo
 # Qt
 if [ -z $APPVEYOR ]; then
-	printf "Qt 5.7.0... "
+	printf "Qt 5.14.2... "
 else
 	printf "Qt 5.13 AppVeyor... "
 fi
@@ -689,21 +690,23 @@ fi
 	fi
 	if [ -z $APPVEYOR ]; then
 		cd $DEPS_INSTALL
-		QT_SDK="$(real_pwd)/Qt/5.7/msvc${MSVC_YEAR}${SUFFIX}"
-		if [ -d Qt ] && head -n2 Qt/InstallationLog.txt | grep "5.7.0" > /dev/null; then
+		QT_SDK="$(real_pwd)/Qt/5.14.2/msvc${MSVC_YEAR}${SUFFIX}"
+
+		if [ -d 'Qt/5.14.2' ]; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Qt
-			cp "${DEPS}/qt-5-install.qs" qt-install.qs
-			sed -i "s|INSTALL_DIR|$(real_pwd)/Qt|" qt-install.qs
-			sed -i "s/qt.VERSION.winBITS_msvcYEAR/qt.57.win${BITS}_msvc${MSVC_YEAR}${SUFFIX}/" qt-install.qs
-			printf -- "(Installation might take a while) "
-			"${DEPS}/qt-5.7.0-msvc${MSVC_YEAR}-win${BITS}.exe" --script qt-install.qs --silent
-			mv qt-install.qs Qt/
+
+			mkdir Qt
+			cd Qt
+
+			eval "${DEPS}/aqt-venv/bin/aqt" install 5.14.2 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}" $STRIP
 			echo Done.
+
 			printf "  Cleaning up extraneous data... "
-			rm -r "$(real_pwd)/Qt/"{dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml,qt-install.qs}
+			rm -r "$(real_pwd)/Qt/"{dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
 		fi
+
 		cd $QT_SDK
 		add_cmake_opts -DDESIRED_QT_VERSION=5 \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
