@@ -871,10 +871,10 @@ fi
 	done
 	echo
 	echo "- OSG Plugin DLLs..."
-	mkdir -p ${DLL_PREFIX}osgPlugins-3.4.2
+	mkdir -p ${DLL_PREFIX}osgPlugins-3.6.5
 	for DLL in $OSG_PLUGINS; do
 		echo "    $(basename $DLL)."
-		cp "$DLL" ${DLL_PREFIX}osgPlugins-3.4.2
+		cp "$DLL" ${DLL_PREFIX}osgPlugins-3.6.5
 	done
 	echo
 	echo "- Qt Platform DLLs..."
