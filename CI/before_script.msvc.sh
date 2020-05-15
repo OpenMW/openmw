@@ -383,6 +383,7 @@ fi
 if [ -n "$BULLET_DOUBLE" ]; then
 	BULLET_DBL="-double"
 	BULLET_DBL_DISPLAY="Double precision"
+	add_cmake_opts "-DBULLET_USE_DOUBLES=True"
 fi
 
 echo
