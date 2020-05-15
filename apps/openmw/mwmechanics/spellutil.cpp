@@ -101,6 +101,9 @@ namespace MWMechanics
 
     float getSpellSuccessChance (const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
+        // NB: Base chance is calculated here because the effective school pointer must be filled
+        float baseChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool);
+
         bool godmode = actor == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
@@ -124,7 +127,7 @@ namespace MWMechanics
             return 100;
 
         float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
-        float castChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool) + castBonus;
+        float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 
         return std::max(0.f, cap ? std::min(100.f, castChance) : castChance);
