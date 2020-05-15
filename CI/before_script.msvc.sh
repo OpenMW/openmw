@@ -693,7 +693,7 @@ cd $DEPS
 echo
 # Qt
 if [ -z $APPVEYOR ]; then
-	printf "Qt 5.14.2... "
+	printf "Qt 5.15.0... "
 else
 	printf "Qt 5.13 AppVeyor... "
 fi
@@ -705,9 +705,9 @@ fi
 	fi
 	if [ -z $APPVEYOR ]; then
 		cd $DEPS_INSTALL
-		QT_SDK="$(real_pwd)/Qt/5.14.2/msvc${MSVC_YEAR}${SUFFIX}"
+		QT_SDK="$(real_pwd)/Qt/5.15.0/msvc${MSVC_YEAR}${SUFFIX}"
 
-		if [ -d 'Qt/5.14.2' ]; then
+		if [ -d 'Qt/5.15.0' ]; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
 			rm -rf Qt
@@ -715,11 +715,11 @@ fi
 			mkdir Qt
 			cd Qt
 
-			eval "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install 5.14.2 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}" $STRIP
+			eval "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install 5.15.0 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}" $STRIP
 			echo Done.
 
 			printf "  Cleaning up extraneous data... "
-			rm -r "$(real_pwd)/Qt/"{dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
+			rm -r "$(real_pwd)/Qt/"{aqtinstall.log,dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
 		fi
 
 		cd $QT_SDK
