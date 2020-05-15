@@ -455,11 +455,26 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		fi
 
 		download "AQt installer" \
-			"https://files.pythonhosted.org/packages/f3/bb/aee972f08deecca31bfc46b5aedfad1ce6c7f3aaf1288d685e4a914b53ac/aqtinstall-0.8-py2.py3-none-any.whl"
+			"https://files.pythonhosted.org/packages/f3/bb/aee972f08deecca31bfc46b5aedfad1ce6c7f3aaf1288d685e4a914b53ac/aqtinstall-0.8-py2.py3-none-any.whl" \
 			"aqtinstall-0.8-py2.py3-none-any.whl"
 
-		[ -d 'aqt-venv' ] || eval python -m venv aqt-venv $STRIP
-		[ -e 'aqt-venv/bin/aqt' ] || eval aqt-venv/bin/pip install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
+		if ! [ -d 'aqt-venv' ]; then
+			echo "Creating Virtualenv for aqt..."
+			eval python -m venv aqt-venv $STRIP
+		fi
+		if [ -d 'aqt-venv/bin' ]; then
+			VENV_BIN_DIR='bin'
+		elif [ -d 'aqt-venv/Scripts' ]; then
+			VENV_BIN_DIR='Scripts'
+		else
+			echo "Failed to create virtualenv."
+			exit 1
+		fi
+
+		if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
+			echo "Installing aqt wheel into virtualenv..."
+			eval "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
+		fi
 	fi
 
 	# SDL2
@@ -700,7 +715,7 @@ fi
 			mkdir Qt
 			cd Qt
 
-			eval "${DEPS}/aqt-venv/bin/aqt" install 5.14.2 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}" $STRIP
+			eval "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install 5.14.2 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}" $STRIP
 			echo Done.
 
 			printf "  Cleaning up extraneous data... "
