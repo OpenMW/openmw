@@ -31,7 +31,7 @@ void NiSkinInstance::post(NIFFile *nif)
     }
 }
 
-void ShapeData::read(NIFStream *nif)
+void NiGeometryData::read(NIFStream *nif)
 {
     int verts = nif->getUShort();
 
@@ -69,7 +69,7 @@ void ShapeData::read(NIFStream *nif)
 
 void NiTriShapeData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     /*int tris =*/ nif->getUShort();
 
@@ -92,7 +92,7 @@ void NiTriShapeData::read(NIFStream *nif)
 
 void NiTriStripsData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     // Every strip with n points defines n-2 triangles, so this should be unnecessary.
     /*int tris =*/ nif->getUShort();
@@ -112,7 +112,7 @@ void NiTriStripsData::read(NIFStream *nif)
 
 void NiAutoNormalParticlesData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     // Should always match the number of vertices
     numParticles = nif->getUShort();
