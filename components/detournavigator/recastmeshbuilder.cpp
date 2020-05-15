@@ -163,15 +163,15 @@ namespace DetourNavigator
 
         transformBoundingBox(transform, aabbMin, aabbMax);
 
-        aabbMin.setX(std::max(mBounds.mMin.x(), aabbMin.x()));
-        aabbMin.setX(std::min(mBounds.mMax.x(), aabbMin.x()));
-        aabbMin.setY(std::max(mBounds.mMin.y(), aabbMin.y()));
-        aabbMin.setY(std::min(mBounds.mMax.y(), aabbMin.y()));
+        aabbMin.setX(std::max(static_cast<btScalar>(mBounds.mMin.x()), aabbMin.x()));
+        aabbMin.setX(std::min(static_cast<btScalar>(mBounds.mMax.x()), aabbMin.x()));
+        aabbMin.setY(std::max(static_cast<btScalar>(mBounds.mMin.y()), aabbMin.y()));
+        aabbMin.setY(std::min(static_cast<btScalar>(mBounds.mMax.y()), aabbMin.y()));
 
-        aabbMax.setX(std::max(mBounds.mMin.x(), aabbMax.x()));
-        aabbMax.setX(std::min(mBounds.mMax.x(), aabbMax.x()));
-        aabbMax.setY(std::max(mBounds.mMin.y(), aabbMax.y()));
-        aabbMax.setY(std::min(mBounds.mMax.y(), aabbMax.y()));
+        aabbMax.setX(std::max(static_cast<btScalar>(mBounds.mMin.x()), aabbMax.x()));
+        aabbMax.setX(std::min(static_cast<btScalar>(mBounds.mMax.x()), aabbMax.x()));
+        aabbMax.setY(std::max(static_cast<btScalar>(mBounds.mMin.y()), aabbMax.y()));
+        aabbMax.setY(std::min(static_cast<btScalar>(mBounds.mMax.y()), aabbMax.y()));
 
         transformBoundingBox(transform.inverse(), aabbMin, aabbMax);
 
