@@ -15,6 +15,9 @@
 #include <MyGUI_ClipboardManager.h>
 #include <MyGUI_WidgetManager.h>
 
+// For BT_NO_PROFILE
+#include <LinearMath/btQuickprof.h>
+
 #include <SDL_keyboard.h>
 #include <SDL_clipboard.h>
 
@@ -2202,7 +2205,9 @@ namespace MWGui
 
     void WindowManager::toggleDebugWindow()
     {
+#ifndef BT_NO_PROFILE
         mDebugWindow->setVisible(!mDebugWindow->isVisible());
+#endif
     }
 
     void WindowManager::cycleSpell(bool next)
