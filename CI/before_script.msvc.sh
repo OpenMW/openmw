@@ -5,7 +5,7 @@ MISSINGTOOLS=0
 
 command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
 command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
-command -v python >/dev/null 2>&1 || { echo "Error: Python is not on the path."; MISSINGTOOLS=1; }
+command -v python >/dev/null 2>&1 || { echo "Warning: Python is not on the path, automatic Qt installation impossible."; }
 
 if [ $MISSINGTOOLS -ne 0 ]; then
 	exit 1
@@ -458,24 +458,6 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		download "AQt installer" \
 			"https://files.pythonhosted.org/packages/f3/bb/aee972f08deecca31bfc46b5aedfad1ce6c7f3aaf1288d685e4a914b53ac/aqtinstall-0.8-py2.py3-none-any.whl" \
 			"aqtinstall-0.8-py2.py3-none-any.whl"
-
-		if ! [ -d 'aqt-venv' ]; then
-			echo "  Creating Virtualenv for aqt..."
-			eval python -m venv aqt-venv $STRIP
-		fi
-		if [ -d 'aqt-venv/bin' ]; then
-			VENV_BIN_DIR='bin'
-		elif [ -d 'aqt-venv/Scripts' ]; then
-			VENV_BIN_DIR='Scripts'
-		else
-			echo "Error: Failed to create virtualenv."
-			exit 1
-		fi
-
-		if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
-			echo "  Installing aqt wheel into virtualenv..."
-			eval "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
-		fi
 	fi
 
 	# SDL2
@@ -711,16 +693,37 @@ fi
 		if [ -d 'Qt/5.15.0' ]; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
+			pushd "$DEPS" > /dev/null
+			if ! [ -d 'aqt-venv' ]; then
+				echo "  Creating Virtualenv for aqt..."
+				eval python -m venv aqt-venv $STRIP
+			fi
+			if [ -d 'aqt-venv/bin' ]; then
+				VENV_BIN_DIR='bin'
+			elif [ -d 'aqt-venv/Scripts' ]; then
+				VENV_BIN_DIR='Scripts'
+			else
+				echo "Error: Failed to create virtualenv."
+				exit 1
+			fi
+
+			if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
+				echo "  Installing aqt wheel into virtualenv..."
+				eval "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
+			fi
+			popd > /dev/null
+
 			rm -rf Qt
 
 			mkdir Qt
 			cd Qt
 
 			eval "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install 5.15.0 windows desktop "win${BITS}_msvc${MSVC_REAL_YEAR}${SUFFIX}" $STRIP
-			echo Done.
 
 			printf "  Cleaning up extraneous data... "
-			rm -rf "$(real_pwd)/Qt/"{aqtinstall.log,dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
+			rm -rf Qt/{aqtinstall.log,Tools}
+
+			echo Done.
 		fi
 
 		cd $QT_SDK
