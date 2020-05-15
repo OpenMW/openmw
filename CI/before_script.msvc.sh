@@ -459,7 +459,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			"aqtinstall-0.8-py2.py3-none-any.whl"
 
 		if ! [ -d 'aqt-venv' ]; then
-			echo "Creating Virtualenv for aqt..."
+			echo "  Creating Virtualenv for aqt..."
 			eval python -m venv aqt-venv $STRIP
 		fi
 		if [ -d 'aqt-venv/bin' ]; then
@@ -467,12 +467,12 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		elif [ -d 'aqt-venv/Scripts' ]; then
 			VENV_BIN_DIR='Scripts'
 		else
-			echo "Failed to create virtualenv."
+			echo "Error: Failed to create virtualenv."
 			exit 1
 		fi
 
 		if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
-			echo "Installing aqt wheel into virtualenv..."
+			echo "  Installing aqt wheel into virtualenv..."
 			eval "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall-0.8-py2.py3-none-any.whl $STRIP
 		fi
 	fi
