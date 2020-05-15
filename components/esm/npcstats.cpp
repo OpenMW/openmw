@@ -35,7 +35,7 @@ void ESM::NpcStats::load (ESMReader &esm)
         mSkills[i].load (esm);
 
     mWerewolfDeprecatedData = false;
-    if (esm.peekNextSub("STBA"))
+    if (esm.getFormat() < 8 && esm.peekNextSub("STBA"))
     {
         // we have deprecated werewolf skills, stored interleaved
         // Load into one big vector, then remove every 2nd value
@@ -95,7 +95,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mLevelProgress = 0;
     esm.getHNOT (mLevelProgress, "LPRO");
 
-    esm.getHNT (mSkillIncrease, "INCR");
+    for (int i = 0; i < 8; ++i)
+        mSkillIncrease[i] = 0;
+    esm.getHNOT (mSkillIncrease, "INCR");
 
     for (int i=0; i<3; ++i)
         mSpecIncreases[i] = 0;
@@ -160,8 +162,21 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mLevelProgress)
         esm.writeHNT ("LPRO", mLevelProgress);
 
-    esm.writeHNT ("INCR", mSkillIncrease);
+    bool saveSkillIncreases = false;
+    for (int i = 0; i < 8; ++i)
+    {
+        if (mSkillIncrease[i] != 0)
+        {
+            saveSkillIncreases = true;
+            break;
+        }
+    }
+    if (saveSkillIncreases)
+        esm.writeHNT ("INCR", mSkillIncrease);
 
+    if (mSpecIncreases[0] != 0 ||
+        mSpecIncreases[1] != 0 ||
+        mSpecIncreases[2] != 0)
     esm.writeHNT ("SPEC", mSpecIncreases);
 
     for (std::vector<std::string>::const_iterator iter (mUsedIds.begin()); iter!=mUsedIds.end();

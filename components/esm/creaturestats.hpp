@@ -40,6 +40,22 @@ namespace ESM
         int mActorId;
         //int mHitAttemptActorId;
 
+        enum Flags
+        {
+            Dead                   = 0x0001,
+            DeathAnimationFinished = 0x0002,
+            Died                   = 0x0004,
+            Murdered               = 0x0008,
+            TalkedTo               = 0x0010,
+            Alarmed                = 0x0020,
+            Attacked               = 0x0040,
+            Knockdown              = 0x0080,
+            KnockdownOneFrame      = 0x0100,
+            KnockdownOverOneFrame  = 0x0200,
+            HitRecovery            = 0x0400,
+            Block                  = 0x0800,
+            RecalcDynamicStats     = 0x1000
+        };
         bool mDead;
         bool mDeathAnimationFinished;
         bool mDied;

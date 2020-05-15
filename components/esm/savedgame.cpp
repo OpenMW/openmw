@@ -5,7 +5,7 @@
 #include "defs.hpp"
 
 unsigned int ESM::SavedGame::sRecordId = ESM::REC_SAVE;
-int ESM::SavedGame::sCurrentFormat = 7;
+int ESM::SavedGame::sCurrentFormat = 8;
 
 void ESM::SavedGame::load (ESMReader &esm)
 {
