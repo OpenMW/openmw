@@ -49,8 +49,6 @@ namespace SceneUtil
                 return;
 
             osg::Node* node = &drawable;
-            if (!node)
-                return;
             while (node->getNumParents())
             {
                 osg::Group* parent = node->getParent(0);
