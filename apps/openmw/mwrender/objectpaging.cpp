@@ -450,14 +450,14 @@ namespace MWRender
                     continue;
             }
 
-            float d = (viewPoint - pos).length();
+            float dSqr = (viewPoint - pos).length2();
             if (!activeGrid)
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
                 SizeCache::iterator found = mSizeCache.find(pair.first);
                 if (found != mSizeCache.end())
                 {
-                    if (found->second < d*minSize)
+                    if (found->second < dSqr*minSize*minSize)
                         continue;
                 }
             }
@@ -503,12 +503,12 @@ namespace MWRender
                     continue;
             }
 
-            float radius = cnode->getBound().radius() * ref.mScale;
-            if (radius < d*minSize)
+            float radius2 = cnode->getBound().radius2() * ref.mScale*ref.mScale;
+            if (radius2 < dSqr*minSize*minSize)
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
                 {
-                    mSizeCache[pair.first] = radius;
+                    mSizeCache[pair.first] = radius2;
                 }
                 continue;
             }
@@ -551,13 +551,8 @@ namespace MWRender
                 const ESM::CellRef& ref = *cref;
                 osg::Vec3f pos = ref.mPos.asVec3();
 
-                if (minSizeMerged != minSize)
-                {
-                    float d = (viewPoint - pos).length();
-                    float radius = cnode->getBound().radius() * cref->mScale;
-                    if (radius < d*minSizeMerged)
-                        continue;
-                }
+                if (minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
+                    continue;
 
                 osg::Matrixf matrix;
                 matrix.preMultTranslate(pos - worldCenter);
@@ -616,7 +611,7 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
-            if ((relativeViewPoint - mergeGroup->getBound().center()).length() > mergeGroup->getBound().radius()*2)
+            if ((relativeViewPoint - mergeGroup->getBound().center()).length2() > mergeGroup->getBound().radius2()*2*2)
             {
                 optimizer.setViewPoint(relativeViewPoint);
                 optimizer.setMergeAlphaBlending(true);
