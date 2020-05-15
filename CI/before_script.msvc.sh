@@ -595,7 +595,7 @@ echo
 printf "FFmpeg 4.2.2... "
 {
 	cd $DEPS_INSTALL
-	if [ -d FFmpeg ] && grep "FFmpeg version: 4.2.2" FFmpeg/README.txt > /dev/null; then
+	if [ -d FFmpeg ] && grep "4.2.2" FFmpeg/README.txt > /dev/null; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf FFmpeg
@@ -719,7 +719,7 @@ fi
 			echo Done.
 
 			printf "  Cleaning up extraneous data... "
-			rm -r "$(real_pwd)/Qt/"{aqtinstall.log,dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
+			rm -rf "$(real_pwd)/Qt/"{aqtinstall.log,dist,Docs,Examples,Tools,vcredist,components.xml,MaintenanceTool.dat,MaintenanceTool.exe,MaintenanceTool.ini,network.xml}
 		fi
 
 		cd $QT_SDK
