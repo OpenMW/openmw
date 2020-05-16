@@ -89,6 +89,11 @@ namespace MWMechanics
             const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
             return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
         }
+
+        void stopMovement(const MWWorld::Ptr& actor)
+        {
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        }
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -206,7 +211,7 @@ namespace MWMechanics
         {
             if (storage.mState == AiWanderStorage::Wander_Walking)
             {
-                stopWalking(actor, false);
+                stopMovement(actor);
                 mObstacleCheck.clear();
                 storage.setState(AiWanderStorage::Wander_IdleNow);
             }
@@ -609,14 +614,11 @@ namespace MWMechanics
         return TypeIdWander;
     }
 
-    void AiWander::stopWalking(const MWWorld::Ptr& actor, bool clearPath)
+    void AiWander::stopWalking(const MWWorld::Ptr& actor)
     {
-        if (clearPath)
-        {
-            mPathFinder.clearPath();
-            mHasDestination = false;
-        }
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        mPathFinder.clearPath();
+        mHasDestination = false;
+        stopMovement(actor);
     }
 
     bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)

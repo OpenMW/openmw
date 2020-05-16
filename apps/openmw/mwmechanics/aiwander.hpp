@@ -118,7 +118,7 @@ namespace MWMechanics
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
-            void stopWalking(const MWWorld::Ptr& actor, bool clearPath = true);
+            void stopWalking(const MWWorld::Ptr& actor);
 
             /// Have the given actor play an idle animation
             /// @return Success or error
