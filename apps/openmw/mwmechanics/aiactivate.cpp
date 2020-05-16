@@ -44,11 +44,6 @@ namespace MWMechanics
         return false;
     }
 
-    int AiActivate::getTypeId() const
-    {
-        return TypeIdActivate;
-    }
-
     void AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::unique_ptr<ESM::AiSequence::AiActivate> activate(new ESM::AiSequence::AiActivate());

@@ -338,7 +338,7 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
             dest = actor.getRefData().getPosition().asVec3();
         }
 
-        MWMechanics::AiTravel travelPackage(dest.x(), dest.y(), dest.z(), true);
+        MWMechanics::AiInternalTravel travelPackage(dest.x(), dest.y(), dest.z());
         stack(travelPackage, actor, false);
     }
 
@@ -478,7 +478,11 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
         }
         case ESM::AiSequence::Ai_Travel:
         {
-            package.reset(new AiTravel(static_cast<ESM::AiSequence::AiTravel*>(it->mPackage)));
+            const auto source = static_cast<const ESM::AiSequence::AiTravel*>(it->mPackage);
+            if (source->mHidden)
+                package.reset(new AiInternalTravel(source));
+            else
+                package.reset(new AiTravel(source));
             break;
         }
         case ESM::AiSequence::Ai_Escort:

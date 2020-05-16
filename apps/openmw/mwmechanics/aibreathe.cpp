@@ -31,13 +31,3 @@ bool MWMechanics::AiBreathe::execute (const MWWorld::Ptr& actor, CharacterContro
 
     return true;
 }
-
-int MWMechanics::AiBreathe::getTypeId() const
-{
-    return TypeIdBreathe;
-}
-
-unsigned int MWMechanics::AiBreathe::getPriority() const
-{
-    return 2;
-}

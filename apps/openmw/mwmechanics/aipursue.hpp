@@ -27,14 +27,20 @@ namespace MWMechanics
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
-            int getTypeId() const final;
+
+            static constexpr TypeId getTypeId() { return TypeIdPursue; }
+
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mCanCancel = false;
+                options.mShouldCancelPreviousAi = false;
+                return options;
+            }
 
             MWWorld::Ptr getTarget() const final;
 
             void writeState (ESM::AiSequence::AiSequence& sequence) const final;
-
-            bool canCancel() const final { return false; }
-            bool shouldCancelPreviousAi() const final { return false; }
     };
 }
 #endif
