@@ -118,7 +118,7 @@ namespace MWMechanics
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
-            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath = true);
+            void stopWalking(const MWWorld::Ptr& actor, bool clearPath = true);
 
             /// Have the given actor play an idle animation
             /// @return Success or error
@@ -133,7 +133,7 @@ namespace MWMechanics
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
-            bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            bool isPackageCompleted(const MWWorld::Ptr& actor);
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);

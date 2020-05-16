@@ -165,7 +165,7 @@ namespace MWMechanics
      * actors will enter combat (i.e. no longer wandering) and different pathfinding
      * will kick in.
      */
-    bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
+    bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& /*characterController*/, AiState& state, float duration)
     {
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if (cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
@@ -206,7 +206,7 @@ namespace MWMechanics
         {
             if (storage.mState == AiWanderStorage::Wander_Walking)
             {
-                stopWalking(actor, storage, false);
+                stopWalking(actor, false);
                 mObstacleCheck.clear();
                 storage.setState(AiWanderStorage::Wander_IdleNow);
             }
@@ -230,7 +230,7 @@ namespace MWMechanics
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
 
-        if (isPackageCompleted(actor, storage))
+        if (isPackageCompleted(actor))
         {
             // Reset package so it can be used again
             mRemainingDuration=mDuration;
@@ -315,14 +315,14 @@ namespace MWMechanics
         return actor.getRefData().getPosition().asVec3();
     }
 
-    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor)
     {
         if (mDuration)
         {
             // End package if duration is complete
             if (mRemainingDuration <= 0)
             {
-                stopWalking(actor, storage);
+                stopWalking(actor);
                 return true;
             }
         }
@@ -395,7 +395,7 @@ namespace MWMechanics
     }
 
     void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
-        stopWalking(actor, storage);
+        stopWalking(actor);
         mObstacleCheck.clear();
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
@@ -460,7 +460,7 @@ namespace MWMechanics
         // Is there no destination or are we there yet?
         if ((!mPathFinder.isPathConstructed()) || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
         {
-            stopWalking(actor, storage);
+            stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
         }
         else
@@ -518,7 +518,7 @@ namespace MWMechanics
                 storage.mTrimCurrentNode = true;
                 trimAllowedNodes(storage.mAllowedNodes, mPathFinder);
                 mObstacleCheck.clear();
-                stopWalking(actor, storage);
+                stopWalking(actor);
                 storage.setState(AiWanderStorage::Wander_MoveNow);
             }
 
@@ -529,7 +529,7 @@ namespace MWMechanics
         if (storage.mStuckCount >= getCountBeforeReset(actor)) // something has gone wrong, reset
         {
             mObstacleCheck.clear();
-            stopWalking(actor, storage);
+            stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
             storage.mStuckCount = 0;
         }
@@ -609,7 +609,7 @@ namespace MWMechanics
         return TypeIdWander;
     }
 
-    void AiWander::stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath)
+    void AiWander::stopWalking(const MWWorld::Ptr& actor, bool clearPath)
     {
         if (clearPath)
         {
