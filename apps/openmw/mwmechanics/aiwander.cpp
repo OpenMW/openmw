@@ -235,8 +235,9 @@ namespace MWMechanics
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
 
-        if (isPackageCompleted(actor))
+        if (isPackageCompleted())
         {
+            stopWalking(actor);
             // Reset package so it can be used again
             mRemainingDuration=mDuration;
             init();
@@ -320,19 +321,10 @@ namespace MWMechanics
         return actor.getRefData().getPosition().asVec3();
     }
 
-    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor)
+    bool AiWander::isPackageCompleted() const
     {
-        if (mDuration)
-        {
-            // End package if duration is complete
-            if (mRemainingDuration <= 0)
-            {
-                stopWalking(actor);
-                return true;
-            }
-        }
-        // if get here, not yet completed
-        return false;
+        // End package if duration is complete
+        return mDuration && mRemainingDuration <= 0;
     }
 
     /*
