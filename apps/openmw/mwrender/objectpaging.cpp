@@ -95,21 +95,15 @@ namespace MWRender
         }
         virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
         {
-            return true;
+            return (node->getDataVariance() != osg::Object::DYNAMIC);
         }
     };
 
     class CopyOp : public osg::CopyOp
     {
     public:
-        CopyOp(bool deep) : mSqrDistance(0.f) {
-            unsigned int flags = osg::CopyOp::DEEP_COPY_NODES;
-            if (deep)
-                flags |= osg::CopyOp::DEEP_COPY_DRAWABLES;
-            setCopyFlags(flags);
-        }
-
-        float mSqrDistance;
+        bool mOptimizeBillboards = true;
+        float mSqrDistance = 0.f;
         osg::Vec3f mViewVector;
         mutable std::vector<const osg::Node*> mNodePath;
 
@@ -157,23 +151,27 @@ namespace MWRender
         }
         void handleCallbacks(const osg::Node* node, osg::Node *cloned) const
         {
-            const osg::Callback* callback = node->getCullCallback();
-            while (callback)
+            for (const osg::Callback* callback = node->getCullCallback(); callback != nullptr; callback = callback->getNestedCallback())
             {
                 if (callback->className() == std::string("BillboardCallback"))
-                    handleBillboard(cloned);
-                else
                 {
-                    if (node->getCullCallback()->getNestedCallback())
+                    if (mOptimizeBillboards)
                     {
-                        osg::Callback *clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
-                        clonedCallback->setNestedCallback(nullptr);
-                        cloned->addCullCallback(clonedCallback);
+                        handleBillboard(cloned);
+                        continue;
                     }
                     else
-                        cloned->addCullCallback(const_cast<osg::Callback*>(callback));
+                        cloned->setDataVariance(osg::Object::DYNAMIC);
                 }
-                callback = callback->getNestedCallback();
+
+                if (node->getCullCallback()->getNestedCallback())
+                {
+                    osg::Callback *clonedCallback = osg::clone(callback, osg::CopyOp::SHALLOW_COPY);
+                    clonedCallback->setNestedCallback(nullptr);
+                    cloned->addCullCallback(clonedCallback);
+                }
+                else
+                    cloned->addCullCallback(const_cast<osg::Callback*>(callback));
             }
         }
         void handleBillboard(osg::Node* node) const
@@ -414,11 +412,11 @@ namespace MWRender
             }
         }
 
+        if (activeGrid)
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
-            if (activeGrid)
-                for (auto ref : getRefTracker().mBlacklist)
-                    refs.erase(ref);
+            for (auto ref : getRefTracker().mBlacklist)
+                refs.erase(ref);
         }
 
         osg::Vec2f minBound = (center - osg::Vec2f(size/2.f, size/2.f));
@@ -444,9 +442,8 @@ namespace MWRender
             if (size < 1.f)
             {
                 osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
-                if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y()))
-                    continue;
-                if ((maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (minBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
+                if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x()) || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
+                 || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x()) || (minBound.y() < std::ceil(maxBound.y()) && cellPos.y() >= maxBound.y()))
                     continue;
             }
 
@@ -455,11 +452,8 @@ namespace MWRender
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
                 SizeCache::iterator found = mSizeCache.find(pair.first);
-                if (found != mSizeCache.end())
-                {
-                    if (found->second < dSqr*minSize*minSize)
-                        continue;
-                }
+                if (found != mSizeCache.end() && found->second < dSqr*minSize*minSize)
+                    continue;
             }
 
             std::string id = Misc::StringUtils::lowerCase(ref.mRefID);
@@ -504,12 +498,10 @@ namespace MWRender
             }
 
             float radius2 = cnode->getBound().radius2() * ref.mScale*ref.mScale;
-            if (radius2 < dSqr*minSize*minSize)
+            if (radius2 < dSqr*minSize*minSize && !activeGrid)
             {
                 OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
-                {
-                    mSizeCache[pair.first] = radius2;
-                }
+                mSizeCache[pair.first] = radius2;
                 continue;
             }
 
@@ -551,7 +543,7 @@ namespace MWRender
                 const ESM::CellRef& ref = *cref;
                 osg::Vec3f pos = ref.mPos.asVec3();
 
-                if (minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
+                if (!activeGrid && minSizeMerged != minSize && cnode->getBound().radius2() * cref->mScale*cref->mScale < (viewPoint-pos).length2()*minSizeMerged*minSizeMerged)
                     continue;
 
                 osg::Matrixf matrix;
@@ -563,7 +555,9 @@ namespace MWRender
                 osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(matrix);
                 trans->setDataVariance(osg::Object::STATIC);
 
-                CopyOp co = CopyOp(merge);
+                CopyOp co;
+                co.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
+                co.mOptimizeBillboards = (size > 1/4.f);
                 co.mNodePath.push_back(trans);
                 co.mSqrDistance = (viewPoint - pos).length2();
                 co.mViewVector = (viewPoint - worldCenter);
@@ -611,7 +605,7 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
-            if ((relativeViewPoint - mergeGroup->getBound().center()).length2() > mergeGroup->getBound().radius2()*2*2)
+            if (size > 1/8.f)
             {
                 optimizer.setViewPoint(relativeViewPoint);
                 optimizer.setMergeAlphaBlending(true);

@@ -28,6 +28,7 @@
 #include <osg/Notify>
 #include <osg/Timer>
 #include <osg/io_utils>
+#include <osg/Depth>
 
 #include <osgUtil/TransformAttributeFunctor>
 #include <osgUtil/Statistics>
@@ -1542,6 +1543,12 @@ bool Optimizer::MergeGeometryVisitor::mergeGroup(osg::Group& group)
                     // prefer to use vbo for merged geometries as vbo uses less memory than display lists.
                     geom->setUseVertexBufferObjects(true);
                     geom->setUseDisplayList(false);
+                }
+                if (_alphaBlendingActive && _mergeAlphaBlending && !geom->getStateSet())
+                {
+                    osg::Depth* d = new osg::Depth;
+                    d->setWriteMask(0);
+                    geom->getOrCreateStateSet()->setAttribute(d);
                 }
             }
         }
