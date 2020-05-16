@@ -118,7 +118,7 @@ namespace MWMechanics
         private:
             // NOTE: mDistance and mDuration must be set already
             void init();
-            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath = true);
+            void stopWalking(const MWWorld::Ptr& actor);
 
             /// Have the given actor play an idle animation
             /// @return Success or error
@@ -126,14 +126,14 @@ namespace MWMechanics
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
-            void evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
             void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
-            bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            inline bool isPackageCompleted() const;
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);

@@ -361,7 +361,7 @@ namespace MWMechanics
     }
 
     void PathFinder::buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
-        const DetourNavigator::Flags flags, const float pointTolerance)
+        const DetourNavigator::Flags flags)
     {
         if (mPath.empty())
             return;

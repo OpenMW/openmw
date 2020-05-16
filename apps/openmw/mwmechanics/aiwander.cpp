@@ -89,6 +89,11 @@ namespace MWMechanics
             const auto maxHalfExtent = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z()));
             return world->isAreaOccupiedByOtherActor(destination, 2 * maxHalfExtent, actor);
         }
+
+        void stopMovement(const MWWorld::Ptr& actor)
+        {
+            actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        }
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
@@ -165,7 +170,7 @@ namespace MWMechanics
      * actors will enter combat (i.e. no longer wandering) and different pathfinding
      * will kick in.
      */
-    bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
+    bool AiWander::execute (const MWWorld::Ptr& actor, CharacterController& /*characterController*/, AiState& state, float duration)
     {
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if (cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
@@ -206,7 +211,7 @@ namespace MWMechanics
         {
             if (storage.mState == AiWanderStorage::Wander_Walking)
             {
-                stopWalking(actor, storage, false);
+                stopMovement(actor);
                 mObstacleCheck.clear();
                 storage.setState(AiWanderStorage::Wander_IdleNow);
             }
@@ -230,8 +235,9 @@ namespace MWMechanics
         if (mDistance <= 0)
             storage.mCanWanderAlongPathGrid = false;
 
-        if (isPackageCompleted(actor, storage))
+        if (isPackageCompleted())
         {
+            stopWalking(actor);
             // Reset package so it can be used again
             mRemainingDuration=mDuration;
             init();
@@ -315,19 +321,10 @@ namespace MWMechanics
         return actor.getRefData().getPosition().asVec3();
     }
 
-    bool AiWander::isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage)
+    bool AiWander::isPackageCompleted() const
     {
-        if (mDuration)
-        {
-            // End package if duration is complete
-            if (mRemainingDuration <= 0)
-            {
-                stopWalking(actor, storage);
-                return true;
-            }
-        }
-        // if get here, not yet completed
-        return false;
+        // End package if duration is complete
+        return mDuration && mRemainingDuration <= 0;
     }
 
     /*
@@ -395,7 +392,7 @@ namespace MWMechanics
     }
 
     void AiWander::completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage) {
-        stopWalking(actor, storage);
+        stopWalking(actor);
         mObstacleCheck.clear();
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
@@ -460,13 +457,13 @@ namespace MWMechanics
         // Is there no destination or are we there yet?
         if ((!mPathFinder.isPathConstructed()) || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
         {
-            stopWalking(actor, storage);
+            stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
         }
         else
         {
             // have not yet reached the destination
-            evadeObstacles(actor, duration, storage);
+            evadeObstacles(actor, storage);
         }
     }
 
@@ -497,15 +494,12 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
+    void AiWander::evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         if (mUsePathgrid)
         {
             const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-            const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
-                    + 1.2 * std::max(halfExtents.x(), halfExtents.y());
-            const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
-            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor), pointTolerance);
+            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor));
         }
 
         if (mObstacleCheck.isEvading())
@@ -518,7 +512,7 @@ namespace MWMechanics
                 storage.mTrimCurrentNode = true;
                 trimAllowedNodes(storage.mAllowedNodes, mPathFinder);
                 mObstacleCheck.clear();
-                stopWalking(actor, storage);
+                stopWalking(actor);
                 storage.setState(AiWanderStorage::Wander_MoveNow);
             }
 
@@ -529,7 +523,7 @@ namespace MWMechanics
         if (storage.mStuckCount >= getCountBeforeReset(actor)) // something has gone wrong, reset
         {
             mObstacleCheck.clear();
-            stopWalking(actor, storage);
+            stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);
             storage.mStuckCount = 0;
         }
@@ -609,14 +603,11 @@ namespace MWMechanics
         return TypeIdWander;
     }
 
-    void AiWander::stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath)
+    void AiWander::stopWalking(const MWWorld::Ptr& actor)
     {
-        if (clearPath)
-        {
-            mPathFinder.clearPath();
-            mHasDestination = false;
-        }
-        actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
+        mPathFinder.clearPath();
+        mHasDestination = false;
+        stopMovement(actor);
     }
 
     bool AiWander::playIdle(const MWWorld::Ptr& actor, unsigned short idleSelect)
