@@ -3,6 +3,10 @@
 
 #include <osg/ref_ptr>
 
+#include <LinearMath/btScalar.h>
+
+#include <vector>
+
 class btCollisionObject;
 class btHeightfieldTerrainShape;
 
@@ -27,6 +31,7 @@ namespace MWPhysics
         btHeightfieldTerrainShape* mShape;
         btCollisionObject* mCollisionObject;
         osg::ref_ptr<const osg::Object> mHoldObject;
+        std::vector<btScalar> mHeights;
 
         void operator=(const HeightField&);
         HeightField(const HeightField&);

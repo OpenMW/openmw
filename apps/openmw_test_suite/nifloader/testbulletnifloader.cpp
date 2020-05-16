@@ -9,6 +9,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include <algorithm>
+
 namespace
 {
     template <class T>
@@ -29,6 +31,34 @@ namespace
         shape.getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
         shape.processAllTriangles(&callback, aabbMin, aabbMax);
         return result;
+    }
+
+    bool isNear(btScalar lhs, btScalar rhs)
+    {
+        return std::abs(lhs - rhs) <= 1e-5;
+    }
+
+    bool isNear(const btVector3& lhs, const btVector3& rhs)
+    {
+        return std::equal(
+            static_cast<const btScalar*>(lhs),
+            static_cast<const btScalar*>(lhs) + 3,
+            static_cast<const btScalar*>(rhs),
+            [] (btScalar lhs, btScalar rhs) { return isNear(lhs, rhs); }
+        );
+    }
+
+    bool isNear(const btMatrix3x3& lhs, const btMatrix3x3& rhs)
+    {
+        for (int i = 0; i < 3; ++i)
+            if (!isNear(lhs[i], rhs[i]))
+                return false;
+        return true;
+    }
+
+    bool isNear(const btTransform& lhs, const btTransform& rhs)
+    {
+        return isNear(lhs.getOrigin(), rhs.getOrigin()) && isNear(lhs.getBasis(), rhs.getBasis());
     }
 }
 
@@ -157,7 +187,7 @@ static bool operator ==(const btCompoundShape& lhs, const btCompoundShape& rhs)
     for (int i = 0; i < lhs.getNumChildShapes(); ++i)
     {
         if (!compareObjects(lhs.getChildShape(i), rhs.getChildShape(i))
-                || !(lhs.getChildTransform(i) == rhs.getChildTransform(i)))
+                || !isNear(lhs.getChildTransform(i), rhs.getChildTransform(i)))
             return false;
     }
     return true;
@@ -165,13 +195,13 @@ static bool operator ==(const btCompoundShape& lhs, const btCompoundShape& rhs)
 
 static bool operator ==(const btBoxShape& lhs, const btBoxShape& rhs)
 {
-    return lhs.getLocalScaling() == rhs.getLocalScaling()
+    return isNear(lhs.getLocalScaling(), rhs.getLocalScaling())
         && lhs.getHalfExtentsWithoutMargin() == rhs.getHalfExtentsWithoutMargin();
 }
 
 static bool operator ==(const btBvhTriangleMeshShape& lhs, const btBvhTriangleMeshShape& rhs)
 {
-    return lhs.getLocalScaling() == rhs.getLocalScaling()
+    return isNear(lhs.getLocalScaling(), rhs.getLocalScaling())
         && lhs.usesQuantizedAabbCompression() == rhs.usesQuantizedAabbCompression()
         && lhs.getOwnsBvh() == rhs.getOwnsBvh()
         && getTriangles(lhs) == getTriangles(rhs);
@@ -342,19 +372,6 @@ namespace
     TEST_F(TestBulletNifLoader, for_zero_num_roots_should_return_default)
     {
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(0));
-        const auto result = mLoader.load(mNifFile);
-
-        Resource::BulletShape expected;
-
-        EXPECT_EQ(*result, expected);
-    }
-
-    TEST_F(TestBulletNifLoader, for_root_not_nif_node_should_return_default)
-    {
-        StrictMock<RecordMock> record;
-
-        EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
-        EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&record));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;

@@ -247,22 +247,24 @@ namespace NifOsg
 
         static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
         {
-            if(nif->numRoots() < 1)
+            const Nif::NiSequenceStreamHelper *seq = nullptr;
+            const size_t numRoots = nif->numRoots();
+            for (size_t i = 0; i < numRoots; ++i)
             {
-                nif->warn("Found no root nodes");
-                return;
+                const Nif::Record *r = nif->getRoot(i);
+                assert(r != nullptr);
+                if (r->recType == Nif::RC_NiSequenceStreamHelper)
+                {
+                    seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
+                    break;
+                }
             }
 
-            const Nif::Record *r = nif->getRoot(0);
-            assert(r != nullptr);
-
-            if(r->recType != Nif::RC_NiSequenceStreamHelper)
+            if (!seq)
             {
-                nif->warn("First root was not a NiSequenceStreamHelper, but a "+
-                          r->recName+".");
+                nif->warn("Found no NiSequenceStreamHelper root record");
                 return;
             }
-            const Nif::NiSequenceStreamHelper *seq = static_cast<const Nif::NiSequenceStreamHelper*>(r);
 
             Nif::ExtraPtr extra = seq->extra;
             if(extra.empty() || extra->recType != Nif::RC_NiTextKeyExtraData)
@@ -303,14 +305,16 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
-            if (nif->numRoots() < 1)
+            const Nif::Node* nifNode = nullptr;
+            const size_t numRoots = nif->numRoots();
+            for (size_t i = 0; i < numRoots; ++i)
+            {
+                const Nif::Record* r = nif->getRoot(i);
+                if ((nifNode = dynamic_cast<const Nif::Node*>(r)))
+                    break;
+            }
+            if (!nifNode)
                 nif->fail("Found no root nodes");
-
-            const Nif::Record* r = nif->getRoot(0);
-
-            const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
-            if (nifNode == nullptr)
-                nif->fail("First root was not a node, but a " + r->recName);
 
             osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
 
@@ -645,11 +649,7 @@ namespace NifOsg
                 const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
                 if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName) && nodeName.compare(0, shadowName2.size(), shadowName2))
                 {
-                    Nif::NiSkinInstancePtr skin;
-                    if (nifNode->recType == Nif::RC_NiTriShape)
-                        skin = static_cast<const Nif::NiTriShape*>(nifNode)->skin;
-                    else // if (nifNode->recType == Nif::RC_NiTriStrips)
-                        skin = static_cast<const Nif::NiTriStrips*>(nifNode)->skin;
+                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 
                     if (skin.empty())
                         handleTriShape(nifNode, node, composite, boundTextures, animflags);
@@ -752,6 +752,17 @@ namespace NifOsg
                         node->addUpdateCallback(callback);
                     }
                 }
+                else if (ctrl->recType == Nif::RC_NiPathController)
+                {
+                    const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
+                    if (!path->posData.empty() && !path->floatData.empty())
+                    {
+                        osg::ref_ptr<PathController> callback(new PathController(path));
+
+                        setupController(path, callback, animflags);
+                        node->addUpdateCallback(callback);
+                    }
+                }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
                     handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
@@ -777,6 +788,17 @@ namespace NifOsg
                         osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
 
                         setupController(key, callback, animflags);
+                        transformNode->addUpdateCallback(callback);
+                    }
+                }
+                else if (ctrl->recType == Nif::RC_NiPathController)
+                {
+                    const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
+                    if (!path->posData.empty() && !path->floatData.empty())
+                    {
+                        osg::ref_ptr<PathController> callback(new PathController(path));
+
+                        setupController(path, callback, animflags);
                         transformNode->addUpdateCallback(callback);
                     }
                 }
@@ -1268,12 +1290,7 @@ namespace NifOsg
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map (new SceneUtil::RigGeometry::InfluenceMap);
 
-            Nif::NiSkinInstancePtr skinPtr;
-            if (nifNode->recType == Nif::RC_NiTriShape)
-                skinPtr = static_cast<const Nif::NiTriShape*>(nifNode)->skin;
-            else
-                skinPtr = static_cast<const Nif::NiTriStrips*>(nifNode)->skin;
-            const Nif::NiSkinInstance *skin = skinPtr.getPtr();
+            const Nif::NiSkinInstance *skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData *data = skin->data.getPtr();
             const Nif::NodeList &bones = skin->bones;
             for(size_t i = 0;i < bones.length();i++)

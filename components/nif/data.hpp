@@ -32,7 +32,7 @@ namespace Nif
 {
 
 // Common ancestor for several data classes
-class ShapeData : public Record
+class NiGeometryData : public Record
 {
 public:
     std::vector<osg::Vec3f> vertices, normals;
@@ -44,7 +44,7 @@ public:
     void read(NIFStream *nif);
 };
 
-class NiTriShapeData : public ShapeData
+class NiTriShapeData : public NiGeometryData
 {
 public:
     // Triangles, three vertex indices per triangle
@@ -53,7 +53,7 @@ public:
     void read(NIFStream *nif);
 };
 
-class NiTriStripsData : public ShapeData
+class NiTriStripsData : public NiGeometryData
 {
 public:
     // Triangle strips, series of vertex indices.
@@ -62,7 +62,7 @@ public:
     void read(NIFStream *nif);
 };
 
-class NiAutoNormalParticlesData : public ShapeData
+class NiAutoNormalParticlesData : public NiGeometryData
 {
 public:
     int numParticles;
@@ -124,7 +124,8 @@ public:
     };
     Format fmt;
 
-    unsigned int rmask, gmask, bmask, amask, bpp;
+    unsigned int colorMask[4];
+    unsigned int bpp;
 
     NiPalettePtr palette;
     unsigned int numberOfMipmaps;
