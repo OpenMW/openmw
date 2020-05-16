@@ -93,7 +93,7 @@ namespace MWMechanics
 
             bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            static constexpr TypeId getTypeId() { return TypeIdWander; }
+            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Wander; }
 
             static constexpr Options makeDefaultOptions()
             {

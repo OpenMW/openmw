@@ -17,7 +17,7 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            static constexpr TypeId getTypeId() { return TypeIdCast; }
+            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Cast; }
 
             MWWorld::Ptr getTarget() const final;
 

@@ -1277,7 +1277,7 @@ namespace MWMechanics
         {
             bool reported = false;
             if (victim.getClass().isClass(victim, "guard")
-                && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
                 reported = reportCrime(player, victim, type, std::string(), arg);
 
             if (!reported)
@@ -1300,7 +1300,7 @@ namespace MWMechanics
             return false;
 
         // Player's followers should not attack player, or try to arrest him
-        if (actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackage::TypeIdFollow))
+        if (actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackageTypeId::Follow))
         {
             if (playerFollowers.find(actor) != playerFollowers.end())
                 return false;
@@ -1417,7 +1417,7 @@ namespace MWMechanics
                 // once the bounty has been paid.
                 actor.getClass().getNpcStats(actor).setCrimeId(id);
 
-                if (!actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                if (!actor.getClass().getCreatureStats(actor).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
                 {
                     actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiPursue(player), actor);
                 }
@@ -1495,7 +1495,7 @@ namespace MWMechanics
             {
                 // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
                 // Note: accidental or collateral damage attacks are ignored.
-                if (!victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+                if (!victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
                     startCombat(victim, player);
 
                 // Set the crime ID, which we will use to calm down participants
@@ -1541,7 +1541,7 @@ namespace MWMechanics
         {
             // Attacker is in combat with us, but we are not in combat with the attacker yet. Time to fight back.
             // Note: accidental or collateral damage attacks are ignored.
-            if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue))
+            if (!target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
             {
                 // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
@@ -1566,7 +1566,7 @@ namespace MWMechanics
         const MWMechanics::AiSequence& seq = target.getClass().getCreatureStats(target).getAiSequence();
         return target.getClass().isNpc() && !attacker.isEmpty() && !seq.isInCombat(attacker)
                 && !isAggressive(target, attacker) && !seq.isEngagedWithActor()
-                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackage::TypeIdPursue);
+                && !target.getClass().getCreatureStats(target).getAiSequence().hasPackage(AiPackageTypeId::Pursue);
     }
 
     void MechanicsManager::actorKilled(const MWWorld::Ptr &victim, const MWWorld::Ptr &attacker)
@@ -1702,7 +1702,7 @@ namespace MWMechanics
                     if (iter->first.getClass().isClass(iter->first, "Guard"))
                     {
                         MWMechanics::AiSequence& aiSeq = iter->first.getClass().getCreatureStats(iter->first).getAiSequence();
-                        if (aiSeq.getTypeId() == MWMechanics::AiPackage::TypeIdPursue)
+                        if (aiSeq.getTypeId() == MWMechanics::AiPackageTypeId::Pursue)
                         {
                             aiSeq.stopPursuit();
                             aiSeq.stack(MWMechanics::AiCombat(target), ptr);

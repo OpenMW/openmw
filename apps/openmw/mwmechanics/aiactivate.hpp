@@ -30,7 +30,7 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            static constexpr TypeId getTypeId() { return TypeIdActivate; }
+            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Activate; }
 
             void writeState(ESM::AiSequence::AiSequence& sequence) const final;
 

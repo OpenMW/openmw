@@ -115,7 +115,7 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
     auto it = stats.getAiSequence().begin();
     for (; it != stats.getAiSequence().end(); ++it)
     {
-        if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
+        if ((*it)->getTypeId() == MWMechanics::AiPackageTypeId::Follow &&
                 static_cast<const MWMechanics::AiFollow*>(it->get())->isCommanded())
         {
             hasCommandPackage = true;
@@ -453,7 +453,7 @@ namespace MWMechanics
             return;
 
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
-        if (seq.isInCombat() || seq.hasPackage(AiPackage::TypeIdFollow) || seq.hasPackage(AiPackage::TypeIdEscort))
+        if (seq.isInCombat() || seq.hasPackage(AiPackageTypeId::Follow) || seq.hasPackage(AiPackageTypeId::Escort))
             return;
 
         const osg::Vec3f playerPos(getPlayer().getRefData().getPosition().asVec3());
@@ -497,11 +497,11 @@ namespace MWMechanics
 
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         const MWMechanics::AiSequence& seq = stats.getAiSequence();
-        int packageId = seq.getTypeId();
+        const auto packageId = seq.getTypeId();
 
         if (seq.isInCombat() ||
             MWBase::Environment::get().getWorld()->isSwimming(actor) ||
-            (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
+            (packageId != AiPackageTypeId::Wander && packageId != AiPackageTypeId::Travel && packageId != AiPackageTypeId::None))
         {
             actorState.setTurningToPlayer(false);
             actorState.setGreetingTimer(0);
@@ -724,7 +724,7 @@ namespace MWMechanics
                     followerOrEscorter = true;
                     break;
                 }
-                else if (package->getTypeId() != MWMechanics::AiPackage::TypeIdCombat)
+                else if (package->getTypeId() != MWMechanics::AiPackageTypeId::Combat)
                     break;
             }
             if (!followerOrEscorter)
@@ -1259,7 +1259,7 @@ namespace MWMechanics
         if (!isPlayer && stats.getTimeToStartDrowning() < fHoldBreathTime / 2)
         {
             AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            if (seq.getTypeId() != AiPackage::TypeIdBreathe) //Only add it once
+            if (seq.getTypeId() != AiPackageTypeId::Breathe) //Only add it once
                 seq.stack(AiBreathe(), ptr);
         }
 
@@ -1410,7 +1410,7 @@ namespace MWMechanics
             if (player.getClass().getNpcStats(player).isWerewolf())
                 return;
 
-            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackage::TypeIdPursue && !creatureStats.getAiSequence().isInCombat()
+            if (ptr.getClass().isClass(ptr, "Guard") && creatureStats.getAiSequence().getTypeId() != AiPackageTypeId::Pursue && !creatureStats.getAiSequence().isInCombat()
                 && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
             {
                 const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -1773,7 +1773,7 @@ namespace MWMechanics
                             // 3. Player character does not use headtracking in the 1st-person view
                             if (!stats.getKnockedDown() &&
                                 !stats.getAiSequence().isInCombat() &&
-                                !stats.getAiSequence().hasPackage(AiPackage::TypeIdPursue) &&
+                                !stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue) &&
                                 !firstPersonPlayer)
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
@@ -2276,7 +2276,7 @@ namespace MWMechanics
                     }
                     break;
                 }
-                else if (package->getTypeId() != AiPackage::TypeIdCombat && package->getTypeId() != AiPackage::TypeIdWander)
+                else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
                     break;
             }
         }
@@ -2302,7 +2302,7 @@ namespace MWMechanics
             {
                 if (package->followTargetThroughDoors() && package->getTarget() == actor)
                     list.push_back(iteratedActor);
-                else if (package->getTypeId() != AiPackage::TypeIdCombat && package->getTypeId() != AiPackage::TypeIdWander)
+                else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
                     break;
             }
         }
@@ -2368,7 +2368,7 @@ namespace MWMechanics
                     list.push_back(static_cast<const AiFollow*>(package.get())->getFollowIndex());
                     break;
                 }
-                else if (package->getTypeId() != AiPackage::TypeIdCombat && package->getTypeId() != AiPackage::TypeIdWander)
+                else if (package->getTypeId() != AiPackageTypeId::Combat && package->getTypeId() != AiPackageTypeId::Wander)
                     break;
             }
         }
