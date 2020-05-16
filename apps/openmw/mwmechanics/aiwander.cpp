@@ -292,7 +292,8 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
-        if (storage.mState == AiWanderStorage::Wander_Walking
+        if (storage.mIsWanderingManually
+            && storage.mState == AiWanderStorage::Wander_Walking
             && (mPathFinder.getPathSize() == 0
                 || isDestinationHidden(actor, mPathFinder.getPath().back())
                 || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
