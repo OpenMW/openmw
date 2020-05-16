@@ -276,8 +276,7 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
-        AiWanderStorage::WanderState& wanderState = storage.mState;
-        if ((wanderState == AiWanderStorage::Wander_MoveNow) && storage.mCanWanderAlongPathGrid)
+        if (storage.mState == AiWanderStorage::Wander_MoveNow && storage.mCanWanderAlongPathGrid)
         {
             // Construct a new path if there isn't one
             if(!mPathFinder.isPathConstructed())
@@ -293,7 +292,7 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
-        if (wanderState == AiWanderStorage::Wander_Walking
+        if (storage.mState == AiWanderStorage::Wander_Walking
             && (isDestinationHidden(actor, mPathFinder.getPath().back())
                 || isAreaOccupiedByOtherActor(actor, mPathFinder.getPath().back())))
             completeManualWalking(actor, storage);
