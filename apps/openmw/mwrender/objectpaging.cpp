@@ -107,8 +107,23 @@ namespace MWRender
         osg::Vec3f mViewVector;
         mutable std::vector<const osg::Node*> mNodePath;
 
+        void copy(const osg::Node* toCopy, osg::Group* attachTo)
+        {
+            const osg::Group* groupToCopy = toCopy->asGroup();
+            if (toCopy->getStateSet() || toCopy->asTransform() || !groupToCopy)
+                attachTo->addChild(operator()(toCopy));
+            else
+            {
+                for (unsigned int i=0; i<groupToCopy->getNumChildren(); ++i)
+                    attachTo->addChild(operator()(groupToCopy->getChild(i)));
+            }
+        }
+
         virtual osg::Node* operator() (const osg::Node* node) const
         {
+            if (const osg::Drawable* d = node->asDrawable())
+                return operator()(d);
+
             if (dynamic_cast<const osgParticle::ParticleProcessor*>(node))
                 return nullptr;
             if (dynamic_cast<const osgParticle::ParticleSystemUpdater*>(node))
@@ -133,12 +148,9 @@ namespace MWRender
                 return n;
             }
 
-            if (const osg::Drawable* d = node->asDrawable())
-                return operator()(d);
-
             mNodePath.push_back(node);
 
-            osg::Node* cloned = osg::clone(node, *this);
+            osg::Node* cloned = static_cast<osg::Node*>(node->clone(*this));
             cloned->setDataVariance(osg::Object::STATIC);
             cloned->setUserDataContainer(nullptr);
             cloned->setName("");
@@ -222,14 +234,14 @@ namespace MWRender
 
             if (getCopyFlags() & DEEP_COPY_DRAWABLES)
             {
-                osg::Drawable* d = osg::clone(drawable, *this);
+                osg::Drawable* d = static_cast<osg::Drawable*>(drawable->clone(*this));
                 d->setDataVariance(osg::Object::STATIC);
                 d->setUserDataContainer(nullptr);
                 d->setName("");
                 return d;
             }
             else
-                return osg::CopyOp::operator()(drawable);
+                return const_cast<osg::Drawable*>(drawable);
         }
         virtual osg::Callback* operator() (const osg::Callback* callback) const
         {
@@ -388,8 +400,9 @@ namespace MWRender
                         bool deleted = false;
                         while(cell->getNextRef(esm[index], ref, deleted))
                         {
+                            Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum) != cell->mMovedRefs.end()) continue;
-                            int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
+                            int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
                             refs[ref.mRefNum] = ref;
@@ -403,9 +416,10 @@ namespace MWRender
                 for (ESM::CellRefTracker::const_iterator it = cell->mLeasedRefs.begin(); it != cell->mLeasedRefs.end(); ++it)
                 {
                     ESM::CellRef ref = it->first;
+                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     bool deleted = it->second;
                     if (deleted) { refs.erase(ref.mRefNum); continue; }
-                    int type = store.findStatic(Misc::StringUtils::lowerCase(ref.mRefID));
+                    int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type,size>=2)) continue;
                     refs[ref.mRefNum] = ref;
                 }
@@ -456,28 +470,23 @@ namespace MWRender
                     continue;
             }
 
-            std::string id = Misc::StringUtils::lowerCase(ref.mRefID);
-            if (id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker")
+            if (ref.mRefID == "prisonmarker" || ref.mRefID == "divinemarker" || ref.mRefID == "templemarker" || ref.mRefID == "northmarker")
                 continue; // marker objects that have a hardcoded function in the game logic, should be hidden from the player
 
-            int type = store.findStatic(id);
-            std::string model = getModel(type, id, store);
+            int type = store.findStatic(ref.mRefID);
+            std::string model = getModel(type, ref.mRefID, store);
             if (model.empty()) continue;
             model = "meshes/" + model;
 
-            bool useAnim = type != ESM::REC_STAT;
-            if (useAnim)
+            if (activeGrid && type != ESM::REC_STAT)
             {
                 model = Misc::ResourceHelpers::correctActorModelPath(model, mSceneManager->getVFS());
-                if (activeGrid)
+                std::string kfname = Misc::StringUtils::lowerCase(model);
+                if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
                 {
-                    std::string kfname = Misc::StringUtils::lowerCase(model);
-                    if(kfname.size() > 4 && kfname.compare(kfname.size()-4, 4, ".nif") == 0)
-                    {
-                        kfname.replace(kfname.size()-4, 4, ".kf");
-                        if (mSceneManager->getVFS()->exists(kfname))
-                            continue;
-                    }
+                    kfname.replace(kfname.size()-4, 4, ".kf");
+                    if (mSceneManager->getVFS()->exists(kfname))
+                        continue;
                 }
             }
 
@@ -521,6 +530,7 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
+        CopyOp copyop;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;
@@ -555,35 +565,29 @@ namespace MWRender
                 osg::ref_ptr<osg::MatrixTransform> trans = new osg::MatrixTransform(matrix);
                 trans->setDataVariance(osg::Object::STATIC);
 
-                CopyOp co;
-                co.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
-                co.mOptimizeBillboards = (size > 1/4.f);
-                co.mNodePath.push_back(trans);
-                co.mSqrDistance = (viewPoint - pos).length2();
-                co.mViewVector = (viewPoint - worldCenter);
-                osg::ref_ptr<osg::Node> node = osg::clone(cnode, co);
-                node->setUserDataContainer(nullptr);
+                copyop.setCopyFlags(merge ? osg::CopyOp::DEEP_COPY_NODES|osg::CopyOp::DEEP_COPY_DRAWABLES : osg::CopyOp::DEEP_COPY_NODES);
+                copyop.mOptimizeBillboards = (size > 1/4.f);
+                copyop.mNodePath.push_back(trans);
+                copyop.mSqrDistance = (viewPoint - pos).length2();
+                copyop.mViewVector = (viewPoint - worldCenter);
+                copyop.copy(cnode, trans);
 
                 if (activeGrid)
                 {
                     if (merge)
                     {
                         AddRefnumMarkerVisitor visitor(ref.mRefNum);
-                        node->accept(visitor);
+                        trans->accept(visitor);
                     }
                     else
                     {
                         osg::ref_ptr<RefnumMarker> marker = new RefnumMarker; marker->mRefnum = ref.mRefNum;
-                        node->getOrCreateUserDataContainer()->addUserObject(marker);
+                        trans->getOrCreateUserDataContainer()->addUserObject(marker);
                     }
                 }
 
-                trans->addChild(node);
-
-                if (merge)
-                    mergeGroup->addChild(trans);
-                else
-                    group->addChild(trans);
+                osg::Group* attachTo = merge ? mergeGroup : group;
+                attachTo->addChild(trans);
                 ++numinstances;
             }
             if (numinstances > 0)

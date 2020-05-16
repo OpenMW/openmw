@@ -139,15 +139,12 @@ namespace MWWorld
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
         typename Dynamic::const_iterator dit = mDynamic.find(idLower);
-        if (dit != mDynamic.end()) {
+        if (dit != mDynamic.end())
             return &dit->second;
-        }
 
         typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
-
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end())
             return &(it->second);
-        }
 
         return 0;
     }
@@ -156,10 +153,8 @@ namespace MWWorld
     {
         std::string idLower = Misc::StringUtils::lowerCase(id);
         typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
-
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end())
             return &(it->second);
-        }
 
         return 0;
     }
@@ -289,7 +284,7 @@ namespace MWWorld
 
         typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
 
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end()) {
             // delete from the static part of mShared
             typename std::vector<T *>::iterator sharedIter = mShared.begin();
             typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
@@ -566,7 +561,7 @@ namespace MWWorld
 
         std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
 
-        if (it != mInt.end() && Misc::StringUtils::ciEqual(it->second.mName, id)) {
+        if (it != mInt.end()) {
             return &(it->second);
         }
 
@@ -1129,9 +1124,8 @@ namespace MWWorld
     {
         auto it = mStatic.find(Misc::StringUtils::lowerCase(id));
 
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end())
             mStatic.erase(it);
-        }
 
         return true;
     }

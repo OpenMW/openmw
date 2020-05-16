@@ -1372,7 +1372,7 @@ namespace MWRender
             osg::Group* sheathParent = findVisitor.mFoundNode;
             if (sheathParent)
             {
-                osg::Node* copy = osg::clone(nodePair.first, osg::CopyOp::DEEP_COPY_NODES);
+                osg::Node* copy = static_cast<osg::Node*>(nodePair.first->clone(osg::CopyOp::DEEP_COPY_NODES));
                 sheathParent->addChild(copy);
             }
         }

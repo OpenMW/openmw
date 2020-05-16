@@ -600,7 +600,7 @@ bool needvbo(const osg::Geometry* geom)
 
 osg::Array* cloneArray(osg::Array* array, osg::VertexBufferObject*& vbo, const osg::Geometry* geom)
 {
-    array = osg::clone(array, osg::CopyOp::DEEP_COPY_ALL);
+    array = static_cast<osg::Array*>(array->clone(osg::CopyOp::DEEP_COPY_ALL));
     if (!vbo && needvbo(geom))
         vbo = new osg::VertexBufferObject;
     if (vbo)
@@ -1135,7 +1135,7 @@ osg::PrimitiveSet* clonePrimitive(osg::PrimitiveSet* ps, osg::ElementBufferObjec
 {
     if (ps->referenceCount() <= 1)
         return ps;
-    ps = osg::clone(ps, osg::CopyOp::DEEP_COPY_ALL);
+    ps = static_cast<osg::PrimitiveSet*>(ps->clone(osg::CopyOp::DEEP_COPY_ALL));
 
     osg::DrawElements* drawElements = ps->getDrawElements();
     if (!drawElements) return ps;

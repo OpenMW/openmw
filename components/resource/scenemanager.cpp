@@ -577,7 +577,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const osg::Node *base)
     {
-        osg::ref_ptr<osg::Node> cloned = osg::clone(base, SceneUtil::CopyOp());
+        osg::ref_ptr<osg::Node> cloned = static_cast<osg::Node*>(base->clone(SceneUtil::CopyOp()));
 
         // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
         cloned->getOrCreateUserDataContainer()->addUserObject(new TemplateRef(base));

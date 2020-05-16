@@ -372,7 +372,7 @@ AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp 
 
 void AlphaController::setDefaults(osg::StateSet *stateset)
 {
-    stateset->setAttribute(osg::clone(mBaseMaterial.get(), osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+    stateset->setAttribute(static_cast<osg::Material*>(mBaseMaterial->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::StateAttribute::ON);
 }
 
 void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -408,7 +408,7 @@ MaterialColorController::MaterialColorController(const MaterialColorController &
 
 void MaterialColorController::setDefaults(osg::StateSet *stateset)
 {
-    stateset->setAttribute(osg::clone(mBaseMaterial.get(), osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+    stateset->setAttribute(static_cast<osg::Material*>(mBaseMaterial->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::StateAttribute::ON);
 }
 
 void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
