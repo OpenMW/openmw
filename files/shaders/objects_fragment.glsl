@@ -49,7 +49,7 @@ uniform vec2 envMapLumaBias;
 uniform mat2 bumpMapMatrix;
 #endif
 
-uniform bool simpleWater = false;
+uniform bool simpleWater;
 
 varying float euclideanDepth;
 varying float linearDepth;
