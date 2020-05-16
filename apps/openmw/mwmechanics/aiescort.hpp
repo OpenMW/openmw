@@ -32,11 +32,11 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdEscort; }
 
-            bool useVariableSpeed() const final { return true; }
+            static constexpr bool defaultUseVariableSpeed() { return true; }
 
-            bool sideWithTarget() const final { return true; }
+            static constexpr bool defaultSideWithTarget() { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 

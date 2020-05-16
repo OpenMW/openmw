@@ -14,13 +14,3 @@ bool MWMechanics::AiFace::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
     osg::Vec3f dir = osg::Vec3f(mTargetX, mTargetY, 0) - actor.getRefData().getPosition().asVec3();
     return zTurn(actor, std::atan2(dir.x(), dir.y()), osg::DegreesToRadians(3.f));
 }
-
-int MWMechanics::AiFace::getTypeId() const
-{
-    return AiPackage::TypeIdFace;
-}
-
-unsigned int MWMechanics::AiFace::getPriority() const
-{
-    return 2;
-}

@@ -79,13 +79,3 @@ MWWorld::Ptr MWMechanics::AiCast::getTarget() const
 
     return target;
 }
-
-int MWMechanics::AiCast::getTypeId() const
-{
-    return AiPackage::TypeIdCast;
-}
-
-unsigned int MWMechanics::AiCast::getPriority() const
-{
-    return 3;
-}

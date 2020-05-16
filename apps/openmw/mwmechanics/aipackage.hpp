@@ -55,10 +55,37 @@ namespace MWMechanics
                 TypeIdCast = 11
             };
 
-            ///Default constructor
-            AiPackage();
+            struct Options
+            {
+                unsigned int mPriority;
+                bool mUseVariableSpeed;
+                bool mSideWithTarget;
+                bool mFollowTargetThroughDoors;
+                bool mShouldCancelPreviousAi;
+                bool mCanCancel;
+                bool mRepeat;
+                bool mAlwaysActive;
+            };
+
+            AiPackage(TypeId typeId, const Options& options);
 
             virtual ~AiPackage() = default;
+
+            static constexpr unsigned int defaultPriority() { return 0; }
+
+            static constexpr bool defaultUseVariableSpeed() { return false; }
+
+            static constexpr bool defaultSideWithTarget() { return false; }
+
+            static constexpr bool defaultFollowTargetThroughDoors() { return false; }
+
+            static constexpr bool defaultCanCancel() { return true; }
+
+            static constexpr bool defaultShouldCancelPreviousAi() { return true; }
+
+            static constexpr bool defaultRepeat() { return false; }
+
+            static constexpr bool defaultAlwaysActive() { return false; }
 
             ///Clones the package
             virtual std::unique_ptr<AiPackage> clone() const = 0;
@@ -69,13 +96,13 @@ namespace MWMechanics
 
             /// Returns the TypeID of the AiPackage
             /// \see enum TypeId
-            virtual int getTypeId() const = 0;
+            TypeId getTypeId() const { return mTypeId; }
 
             /// Higher number is higher priority (0 being the lowest)
-            virtual unsigned int getPriority() const {return 0;}
+            unsigned int getPriority() const { return mOptions.mPriority; }
 
             /// Check if package use movement with variable speed
-            virtual bool useVariableSpeed() const { return false;}
+            bool useVariableSpeed() const { return mOptions.mUseVariableSpeed; }
 
             virtual void writeState (ESM::AiSequence::AiSequence& sequence) const {}
 
@@ -89,24 +116,24 @@ namespace MWMechanics
             virtual osg::Vec3f getDestination(const MWWorld::Ptr& actor) const { return osg::Vec3f(0, 0, 0); };
 
             /// Return true if having this AiPackage makes the actor side with the target in fights (default false)
-            virtual bool sideWithTarget() const;
+            bool sideWithTarget() const { return mOptions.mSideWithTarget; }
 
             /// Return true if the actor should follow the target through teleport doors (default false)
-            virtual bool followTargetThroughDoors() const;
+            bool followTargetThroughDoors() const { return mOptions.mFollowTargetThroughDoors; }
 
             /// Can this Ai package be canceled? (default true)
-            virtual bool canCancel() const;
+            bool canCancel() const { return mOptions.mCanCancel; }
 
             /// Upon adding this Ai package, should the Ai Sequence attempt to cancel previous Ai packages (default true)?
-            virtual bool shouldCancelPreviousAi() const;
+            bool shouldCancelPreviousAi() const { return mOptions.mShouldCancelPreviousAi; }
 
             /// Return true if this package should repeat. Currently only used for Wander packages.
-            virtual bool getRepeat() const;
+            bool getRepeat() const { return mOptions.mRepeat; }
 
             virtual osg::Vec3f getDestination() const { return osg::Vec3f(0, 0, 0); }
 
-            // Return true if any loaded actor with this AI package must be active.
-            virtual bool alwaysActive() const { return false; }
+            /// Return true if any loaded actor with this AI package must be active.
+            bool alwaysActive() const { return mOptions.mAlwaysActive; }
 
             /// Reset pathfinding state
             void reset();
@@ -138,6 +165,9 @@ namespace MWMechanics
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
             DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
+
+            const TypeId mTypeId = TypeIdNone;
+            Options mOptions;
 
             // TODO: all this does not belong here, move into temporary storage
             PathFinder mPathFinder;

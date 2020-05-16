@@ -24,12 +24,13 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdAvoidDoor; }
 
-            unsigned int getPriority() const final;
+            static constexpr unsigned int defaultPriority() { return 2; }
 
-            bool canCancel() const final { return false; }
-            bool shouldCancelPreviousAi() const final { return false; }
+            static constexpr bool defaultCanCancel() { return false; }
+
+            static constexpr bool defaultShouldCancelPreviousAi() { return false; }
 
         private:
             float mDuration;

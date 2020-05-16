@@ -93,15 +93,15 @@ namespace MWMechanics
 
             bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdWander; }
 
-            bool useVariableSpeed() const final { return true; }
+            static constexpr bool defaultUseVariableSpeed() { return true; }
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
             void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            bool getRepeat() const final;
+            static constexpr bool defaultRepeat() { return false; }
 
             osg::Vec3f getDestination(const MWWorld::Ptr& actor) const final;
 
@@ -141,7 +141,6 @@ namespace MWMechanics
             float mRemainingDuration;
             int mTimeOfDay;
             std::vector<unsigned char> mIdle;
-            bool mRepeat;
 
             bool mStoredInitialActorPosition;
             osg::Vec3f mInitialActorPosition; // Note: an original engine does not reset coordinates even when actor changes a cell

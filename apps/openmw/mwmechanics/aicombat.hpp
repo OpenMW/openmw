@@ -104,17 +104,18 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdCombat; }
 
-            unsigned int getPriority() const final;
+            static constexpr unsigned int defaultPriority() { return 1; }
 
             ///Returns target ID
             MWWorld::Ptr getTarget() const final;
 
             void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            bool canCancel() const final { return false; }
-            bool shouldCancelPreviousAi() const final { return false; }
+            static constexpr bool defaultCanCancel() { return false; }
+
+            static constexpr bool defaultShouldCancelPreviousAi() { return false; }
 
         private:
             /// Returns true if combat should end
