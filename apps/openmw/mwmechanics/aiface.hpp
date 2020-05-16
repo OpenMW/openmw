@@ -6,20 +6,20 @@
 namespace MWMechanics
 {
     /// AiPackage which makes an actor face a certain direction.
-    class AiFace : public AiPackage {
+    class AiFace final : public AiPackage {
         public:
             AiFace(float targetX, float targetY);
 
-            virtual AiPackage *clone() const;
+            AiPackage *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual unsigned int getPriority() const;
+            unsigned int getPriority() const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
 
         private:
             float mTargetX, mTargetY;

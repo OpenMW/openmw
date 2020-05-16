@@ -11,22 +11,22 @@ namespace MWWorld
 namespace MWMechanics
 {
     /// AiPackage which makes an actor to cast given spell.
-    class AiCast : public AiPackage {
+    class AiCast final : public AiPackage {
         public:
             AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell=false);
 
-            virtual AiPackage *clone() const;
+            AiPackage *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual MWWorld::Ptr getTarget() const;
+            MWWorld::Ptr getTarget() const final;
 
-            virtual unsigned int getPriority() const;
+            unsigned int getPriority() const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
 
         private:
             std::string mTargetId;

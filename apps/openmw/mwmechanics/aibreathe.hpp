@@ -7,21 +7,21 @@ namespace MWMechanics
 {
     /// \brief AiPackage to have an actor resurface to breathe
     // The AI will go up if lesser than half breath left
-    class AiBreathe : public AiPackage
+    class AiBreathe final : public AiPackage
     {
         public:
             AiBreathe();
 
-            virtual AiBreathe *clone() const;
+            AiBreathe *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual unsigned int getPriority() const;
+            unsigned int getPriority() const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
     };
 }
 #endif

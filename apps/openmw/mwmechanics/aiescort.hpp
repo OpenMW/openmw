@@ -16,7 +16,7 @@ namespace AiSequence
 namespace MWMechanics
 {
     /// \brief AI Package to have an NPC lead the player to a specific point
-    class AiEscort : public AiPackage
+    class AiEscort final : public AiPackage
     {
         public:
             /// Implementation of AiEscort
@@ -30,21 +30,21 @@ namespace MWMechanics
 
             AiEscort(const ESM::AiSequence::AiEscort* escort);
 
-            virtual AiEscort *clone() const;
+            AiEscort *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual bool useVariableSpeed() const { return true;}
+            bool useVariableSpeed() const final { return true; }
 
-            virtual bool sideWithTarget() const { return true; }
+            bool sideWithTarget() const final { return true; }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            virtual osg::Vec3f getDestination() const { return osg::Vec3f(mX, mY, mZ); }
+            osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             std::string mCellId;

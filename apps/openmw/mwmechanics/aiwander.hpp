@@ -78,7 +78,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the Actor to wander within a specified range
-    class AiWander : public AiPackage
+    class AiWander final : public AiPackage
     {
         public:
             /// Constructor
@@ -91,23 +91,23 @@ namespace MWMechanics
 
             AiWander (const ESM::AiSequence::AiWander* wander);
 
-            virtual AiPackage *clone() const;
+            AiPackage *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual bool useVariableSpeed() const { return true;}
+            bool useVariableSpeed() const final { return true; }
 
-            virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            bool getRepeat() const;
+            bool getRepeat() const final;
 
-            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const final;
 
-            virtual osg::Vec3f getDestination() const
+            osg::Vec3f getDestination() const final
             {
                 if (!mHasDestination)
                     return osg::Vec3f(0, 0, 0);

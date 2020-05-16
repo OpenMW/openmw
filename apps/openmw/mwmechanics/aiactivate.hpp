@@ -19,7 +19,7 @@ namespace MWMechanics
 {
     /// \brief Causes actor to walk to activatable object and activate it
     /** Will activate when close to object **/
-    class AiActivate : public AiPackage
+    class AiActivate final : public AiPackage
     {
         public:
             /// Constructor
@@ -28,11 +28,11 @@ namespace MWMechanics
 
             AiActivate(const ESM::AiSequence::AiActivate* activate);
 
-            virtual AiActivate *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
-            virtual int getTypeId() const;
+            AiActivate *clone() const final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            int getTypeId() const final;
 
-            virtual void writeState(ESM::AiSequence::AiSequence& sequence) const;
+            void writeState(ESM::AiSequence::AiSequence& sequence) const final;
 
         private:
             std::string mObjectId;
