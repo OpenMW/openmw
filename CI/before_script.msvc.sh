@@ -1,24 +1,48 @@
 #!/bin/bash
 # set -x  # turn-on for debugging
 
+function wrappedExit {
+	if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+		exit $1
+	else
+		return $1
+	fi
+}
+
 MISSINGTOOLS=0
 
 command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
 command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
 
 if [ $MISSINGTOOLS -ne 0 ]; then
-	exit 1
+	wrappedExit 1
 fi
 
 WORKINGDIR="$(pwd)"
 case "$WORKINGDIR" in
 	*[[:space:]]*)
 		echo "Error: Working directory contains spaces."
-		exit 1
+		wrappedExit 1
 		;;
 esac
 
 set -euo pipefail
+
+function windowsPathAsUnix {
+	if command -v cygpath >/dev/null 2>&1; then
+		cygpath -u $1
+	else
+		echo "$1" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,"
+	fi
+}
+
+function unixPathAsWindows {
+	if command -v cygpath >/dev/null 2>&1; then
+		cygpath -w $1
+	else
+		echo "$1" | sed "s,^/\([^/]\)/,\\1:/," | sed "s,/,\\\\,g"
+	fi
+}
 
 APPVEYOR=${APPVEYOR:-}
 CI=${CI:-}
@@ -32,11 +56,15 @@ KEEP=""
 UNITY_BUILD=""
 VS_VERSION=""
 NMAKE=""
+NINJA=""
 PLATFORM=""
 CONFIGURATION=""
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
+
+ACTIVATE_MSVC=""
+SINGLE_CONFIG=""
 
 while [ $# -gt 0 ]; do
 	ARGSTR=$1
@@ -45,7 +73,7 @@ while [ $# -gt 0 ]; do
 	if [ ${ARGSTR:0:1} != "-" ]; then
 		echo "Unknown argument $ARGSTR"
 		echo "Try '$0 -h'"
-		exit 1
+		wrappedExit 1
 	fi
 
 	for (( i=1; i<${#ARGSTR}; i++ )); do
@@ -72,6 +100,9 @@ while [ $# -gt 0 ]; do
 
 			n )
 				NMAKE=true ;;
+			
+			N )
+				NINJA=true ;;
 
 			p )
 				PLATFORM=$1
@@ -111,25 +142,31 @@ Options:
 	-v <2013/2015/2017/2019>
 		Choose the Visual Studio version to use.
 	-n
-		Produce NMake makefiles instead of a Visual Studio solution.
+		Produce NMake makefiles instead of a Visual Studio solution. Cannout be used with -N.
+	-N
+		Produce Ninja (multi-config if CMake is new enough to support it) files instead of a Visual Studio solution. Cannot be used with -n.
 	-V
 		Run verbosely
 	-i
 		CMake install prefix
 EOF
-				exit 0
+				wrappedExit 0
 				;;
 
 			* )
 				echo "Unknown argument $ARG."
 				echo "Try '$0 -h'"
-				exit 1 ;;
+				wrappedExit 1 ;;
 		esac
 	done
 done
 
-if [ -n "$NMAKE" ]; then
-	command -v nmake -? >/dev/null 2>&1 || { echo "Error: nmake (NMake) is not on the path. Make sure you have the necessary environment variables set for command-line C++ development (for example, by starting from a Developer Command Prompt)."; exit 1; }
+if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
+	if [ -n "$NMAKE" ] && [ -n "$NINJA" ]; then
+		echo "Cannout run in NMake and Ninja mode at the same time."
+		wrappedExit 1
+	fi
+	ACTIVATE_MSVC=true
 fi
 
 if [ -z $VERBOSE ]; then
@@ -139,7 +176,7 @@ fi
 if [ -z $APPVEYOR ]; then
 	echo "Running prebuild outside of Appveyor."
 
-	DIR=$(echo "$0" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+	DIR=$(windowsPathAsUnix "${BASH_SOURCE[0]}")
 	cd $(dirname "$DIR")/..
 else
 	echo "Running prebuild in Appveyor."
@@ -322,7 +359,7 @@ case $PLATFORM in
 
 	* )
 		echo "Unknown platform $PLATFORM."
-		exit 1
+		wrappedExit 1
 		;;
 esac
 
@@ -349,9 +386,18 @@ fi
 
 if [ -n "$NMAKE" ]; then
 	GENERATOR="NMake Makefiles"
+	SINGLE_CONFIG=true
 fi
 
-if [ $MSVC_REAL_VER -ge 16 ]; then
+if [ -n "$NINJA" ]; then
+	GENERATOR="Ninja Multi-Config"
+	if ! cmake -E capabilities | grep -F "$GENERATOR" > /dev/null; then
+		SINGLE_CONFIG=true
+		GENERATOR="Ninja"
+	fi
+fi
+
+if [ $MSVC_REAL_VER -ge 16 ] && [ -z "$NMAKE" ] && [ -z "$NINJA" ]; then
 	if [ $BITS -eq 64 ]; then
 		add_cmake_opts "-G\"$GENERATOR\" -A x64"
 	else
@@ -361,7 +407,7 @@ else
 	add_cmake_opts "-G\"$GENERATOR\""
 fi
 
-if [ -n "$NMAKE" ]; then
+if [ -n "$SINGLE_CONFIG" ]; then
 	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
 fi
 
@@ -456,7 +502,13 @@ cd .. #/..
 BUILD_DIR="MSVC${MSVC_DISPLAY_YEAR}_${BITS}"
 
 if [ -n "$NMAKE" ]; then
-	BUILD_DIR="${BUILD_DIR}_NMake_${BUILD_CONFIG}"
+	BUILD_DIR="${BUILD_DIR}_NMake"
+elif [ -n "$NINJA" ]; then
+	BUILD_DIR="${BUILD_DIR}_Ninja"
+fi
+
+if [ -n "$SINGLE_CONFIG" ]; then
+	BUILD_DIR="${BUILD_DIR}_${BUILD_CONFIG}"
 fi
 
 if [ -z $KEEP ]; then
@@ -494,10 +546,10 @@ fi
 		# We work around this by installing to root of the current working drive and then move it to our deps
 		# get the current working drive's root, we'll install to that temporarily
 		CWD_DRIVE_ROOT="$(powershell -command '(get-location).Drive.Root')Boost_temp"
-		CWD_DRIVE_ROOT_BASH=$(echo "$CWD_DRIVE_ROOT" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+		CWD_DRIVE_ROOT_BASH=$(windowsPathAsUnix "$CWD_DRIVE_ROOT")
 		if [ -d CWD_DRIVE_ROOT_BASH ]; then
 			printf "Cannot continue, ${CWD_DRIVE_ROOT_BASH} aka ${CWD_DRIVE_ROOT} already exists. Please remove before re-running. ";
-			exit 1;
+			wrappedExit 1;
 		fi
 
 		if [ -d ${BOOST_SDK} ] && grep "BOOST_VERSION ${BOOST_VER_SDK}" Boost/boost/version.hpp > /dev/null; then
@@ -695,7 +747,7 @@ fi
 		else
 			SUFFIX=""
 		fi
-		DIR=$(echo "${QT_SDK}" | sed "s,\\\\,/,g" | sed "s,\(.\):,/\\1,")
+		DIR=$(windowsPathAsUnix "${QT_SDK}")
 		add_runtime_dlls "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
 		add_qt_platform_dlls "${DIR}/plugins/platforms/qwindows${SUFFIX}.dll"
 		echo Done.
@@ -806,14 +858,15 @@ fi
 #if [ -z $CI ]; then
 	echo "- Copying Runtime DLLs..."
 	DLL_PREFIX=""
-	if [ -z $NMAKE ]; then
+	if [ -z $SINGLE_CONFIG ]; then
 		mkdir -p $BUILD_CONFIG
 		DLL_PREFIX="$BUILD_CONFIG/"
 	fi
 	for DLL in $RUNTIME_DLLS; do
 		TARGET="$(basename "$DLL")"
 		if [[ "$DLL" == *":"* ]]; then
-			IFS=':'; SPLIT=( ${DLL} ); unset IFS
+			originalIFS="$IFS"
+			IFS=':'; SPLIT=( ${DLL} ); IFS=$originalIFS
 			DLL=${SPLIT[0]}
 			TARGET=${SPLIT[1]}
 		fi
@@ -836,6 +889,42 @@ fi
 	done
 	echo
 #fi
+
+if ! [ -z $ACTIVATE_MSVC ]; then
+	echo -n "- Activating MSVC in the current shell... "
+	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
+
+	MSVC_INSTALLATION_PATH=$(vswhere -legacy -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	if [ $MSVC_REAL_VER -ge 15 ]; then
+		echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
+	else
+		if [ $(uname -m) == 'x86_64' ]; then
+			if [ $BITS -eq 64 ]; then
+				compiler=amd64
+			else
+				compiler=amd64_x86
+			fi
+		else
+			if [ $BITS -eq 64 ]; then
+				compiler=x86_amd64
+			else
+				compiler=x86
+			fi
+		fi
+		echo "@\"${MSVC_INSTALLATION_PATH}\VC\vcvarsall.bat\" $compiler" > ActivateMSVC.bat
+	fi
+	
+	cp "../CI/activate_msvc.sh" .
+	sed -i "s/\$MSVC_DISPLAY_YEAR/$MSVC_DISPLAY_YEAR/g" activate_msvc.sh
+	source ./activate_msvc.sh
+	
+	cp "../CI/ActivateMSVC.ps1" .
+	sed -i "s/\$MSVC_DISPLAY_YEAR/$MSVC_DISPLAY_YEAR/g" ActivateMSVC.ps1
+
+	echo "done."
+	echo
+fi
+
 if [ -z $VERBOSE ]; then
 	printf -- "- Configuring... "
 else
@@ -846,8 +935,34 @@ RET=$?
 if [ -z $VERBOSE ]; then
 	if [ $RET -eq 0 ]; then
 		echo Done.
+		if [ -n $ACTIVATE_MSVC ]; then
+			echo
+			echo "Note: you must manually activate MSVC for the shell in which you want to do the build."
+			echo
+			echo "Some scripts have been created in the build directory to do so in an existing shell."
+			echo "Bash: source activate_msvc.sh"
+			echo "CMD: ActivateMSVC.bat"
+			echo "PowerShell: ActivateMSVC.ps1"
+			echo
+			echo "You may find options to launch a Development/Native Tools/Cross Tools shell in your start menu or Visual Studio."
+			echo
+			if [ $(uname -m) == 'x86_64' ]; then
+				if [ $BITS -eq 64 ]; then
+					inheritEnvironments=msvc_x64_x64
+				else
+					inheritEnvironments=msvc_x64
+				fi
+			else
+				if [ $BITS -eq 64 ]; then
+					inheritEnvironments=msvc_x86_x64
+				else
+					inheritEnvironments=msvc_x86
+				fi
+			fi
+			echo "In Visual Studio 15.3 (2017 Update 3) or later, try setting '\"inheritEnvironments\": [ \"$inheritEnvironments\" ]' in CMakeSettings.json to build in the IDE."
+		fi
 	else
 		echo Failed.
 	fi
 fi
-exit $RET
+wrappedExit $RET
