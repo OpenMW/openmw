@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include <iomanip>
+#include <fstream>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -738,6 +739,14 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
+    std::ofstream stats;
+    if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
+    {
+        stats.open(path, std::ios_base::out);
+        if (!stats)
+            Log(Debug::Warning) << "Failed to open file for stats: " << path;
+    }
+
     // Start the main rendering loop
     osg::Timer frameTimer;
     double simulationTime = 0.0;
@@ -766,6 +775,12 @@ void OMW::Engine::go()
             bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
             if (!guiActive)
                 simulationTime += dt;
+        }
+
+        if (stats)
+        {
+            const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+            mViewer->getViewerStats()->report(stats, frameNumber);
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());
