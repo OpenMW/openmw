@@ -16,22 +16,22 @@ namespace MWMechanics
     /// \brief AiPackage to have an actor avoid an opening door
     /** The AI will retreat from the door until it has finished opening, walked far away from it, or one second has passed, in an attempt to avoid it
     **/
-    class AiAvoidDoor : public AiPackage
+    class AiAvoidDoor final : public AiPackage
     {
         public:
             /// Avoid door until the door is fully open
             AiAvoidDoor(const MWWorld::ConstPtr& doorPtr);
 
-            virtual AiAvoidDoor *clone() const;
+            AiAvoidDoor *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual unsigned int getPriority() const;
+            unsigned int getPriority() const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
 
         private:
             float mDuration;

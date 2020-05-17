@@ -91,7 +91,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the actor to fight another actor
-    class AiCombat : public AiPackage
+    class AiCombat final : public AiPackage
     {
         public:
             ///Constructor
@@ -102,21 +102,21 @@ namespace MWMechanics
 
             void init();
 
-            virtual AiCombat *clone() const;
+            AiCombat *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual unsigned int getPriority() const;
+            unsigned int getPriority() const final;
 
             ///Returns target ID
-            MWWorld::Ptr getTarget() const;
+            MWWorld::Ptr getTarget() const final;
 
-            virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
 
         private:
             /// Returns true if combat should end

@@ -17,7 +17,7 @@ namespace MWMechanics
     /** Used for arresting players. Causes the actor to run to the pursued actor and activate them, to arrest them.
         Note that while very similar to AiActivate, it will ONLY activate when evry close to target (Not also when the
         path is completed). **/
-    class AiPursue : public AiPackage
+    class AiPursue final : public AiPackage
     {
         public:
             ///Constructor
@@ -26,16 +26,16 @@ namespace MWMechanics
 
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
-            virtual AiPursue *clone() const;
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
-            virtual int getTypeId() const;
+            AiPursue *clone() const final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            int getTypeId() const final;
 
-            MWWorld::Ptr getTarget() const;
+            MWWorld::Ptr getTarget() const final;
 
-            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+            void writeState (ESM::AiSequence::AiSequence& sequence) const final;
 
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            bool canCancel() const final { return false; }
+            bool shouldCancelPreviousAi() const final { return false; }
     };
 }
 #endif

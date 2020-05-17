@@ -14,7 +14,7 @@ namespace AiSequence
 namespace MWMechanics
 {
     /// \brief Causes the AI to travel to the specified point
-    class AiTravel : public AiPackage
+    class AiTravel final : public AiPackage
     {
         public:
             /// Default constructor
@@ -22,21 +22,21 @@ namespace MWMechanics
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
-            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            virtual AiTravel *clone() const;
+            AiTravel *clone() const final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual int getTypeId() const;
+            int getTypeId() const final;
 
-            virtual bool useVariableSpeed() const { return true;}
+            bool useVariableSpeed() const final { return true; }
 
-            virtual bool alwaysActive() const { return true; }
+            bool alwaysActive() const final { return true; }
 
-            virtual osg::Vec3f getDestination() const { return osg::Vec3f(mX, mY, mZ); }
+            osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             float mX;
