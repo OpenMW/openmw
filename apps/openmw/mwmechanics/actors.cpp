@@ -447,7 +447,7 @@ namespace MWMechanics
         actor.getClass().getMovementSettings(actor).mSpeedFactor = newSpeedFactor;
     }
 
-    void Actors::updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly)
+    void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor* actorState, bool turnOnly)
     {
         if (!actor.getClass().isActor() || actor == getPlayer())
             return;
@@ -460,9 +460,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->isSwimming(actor) ||
             (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
         {
-            stats.setTurningToPlayer(false);
-            stats.setGreetingTimer(0);
-            stats.setGreetingState(Greet_None);
+            actorState->setTurningToPlayer(false);
+            actorState->setGreetingTimer(0);
+            actorState->setGreetingState(Greet_None);
             return;
         }
 
@@ -471,14 +471,14 @@ namespace MWMechanics
         osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         osg::Vec3f dir = playerPos - actorPos;
 
-        if (stats.isTurningToPlayer())
+        if (actorState->isTurningToPlayer())
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, stats.getAngleToPlayer(), osg::DegreesToRadians(5.f)))
+            if (zTurn(actor, actorState->getAngleToPlayer(), osg::DegreesToRadians(5.f)))
             {
-                stats.setTurningToPlayer(false);
+                actorState->setTurningToPlayer(false);
                 // An original engine launches an endless idle2 when an actor greets player.
                 playAnimationGroup (actor, "idle2", 0, std::numeric_limits<int>::max(), false);
             }
@@ -493,8 +493,8 @@ namespace MWMechanics
 
         float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
 
-        int greetingTimer = stats.getGreetingTimer();
-        GreetingState greetingState = stats.getGreetingState();
+        int greetingTimer = actorState->getGreetingTimer();
+        GreetingState greetingState = actorState->getGreetingState();
         if (greetingState == Greet_None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
@@ -516,7 +516,7 @@ namespace MWMechanics
             greetingTimer++;
 
             if (greetingTimer <= GREETING_SHOULD_END || MWBase::Environment::get().getSoundManager()->sayActive(actor))
-                turnActorToFacePlayer(actor, dir);
+                turnActorToFacePlayer(actor, actorState, dir);
 
             if (greetingTimer >= GREETING_COOLDOWN)
             {
@@ -532,20 +532,19 @@ namespace MWMechanics
                 greetingState = Greet_None;
         }
 
-        stats.setGreetingTimer(greetingTimer);
-        stats.setGreetingState(greetingState);
+        actorState->setGreetingTimer(greetingTimer);
+        actorState->setGreetingState(greetingState);
     }
 
-    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, const osg::Vec3f& dir)
+    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor* actorState, const osg::Vec3f& dir)
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
 
-        CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        if (!stats.isTurningToPlayer())
+        if (!actorState->isTurningToPlayer())
         {
-            stats.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
-            stats.setTurningToPlayer(true);
+            actorState->setAngleToPlayer(std::atan2(dir.x(), dir.y()));
+            actorState->setTurningToPlayer(true);
         }
     }
 
@@ -1695,7 +1694,7 @@ namespace MWMechanics
                             if (isConscious(iter->first))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
-                                updateGreetingState(iter->first, timerUpdateHello > 0);
+                                updateGreetingState(iter->first, iter->second, timerUpdateHello > 0);
                                 playIdleDialogue(iter->first);
                                 updateMovementSpeed(iter->first);
                             }
@@ -2388,6 +2387,42 @@ namespace MWMechanics
         CharacterController* ctrl = it->second->getCharacterController();
 
         return ctrl->isAttackingOrSpell();
+    }
+
+    int Actors::getGreetingTimer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return 0;
+
+        return it->second->getGreetingTimer();
+    }
+
+    float Actors::getAngleToPlayer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return 0.f;
+
+        return it->second->getAngleToPlayer();
+    }
+
+    GreetingState Actors::getGreetingState(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return Greet_None;
+
+        return it->second->getGreetingState();
+    }
+
+    bool Actors::isTurningToPlayer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->isTurningToPlayer();
     }
 
     void Actors::fastForwardAi()

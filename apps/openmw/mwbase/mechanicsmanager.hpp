@@ -7,6 +7,9 @@
 #include <set>
 #include <stdint.h>
 
+#include "../mwmechanics/actorutil.hpp"
+// For MWMechanics::GreetingState
+
 #include "../mwworld/ptr.hpp"
 
 namespace osg
@@ -272,6 +275,11 @@ namespace MWBase
             virtual bool isSneaking(const MWWorld::Ptr& ptr) = 0;
 
             virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+
+            virtual int getGreetingTimer(const MWWorld::Ptr& ptr) const = 0;
+            virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const  = 0;
+            virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
+            virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
     };
 }
 

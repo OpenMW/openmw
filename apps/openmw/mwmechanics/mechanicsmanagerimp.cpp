@@ -1951,4 +1951,24 @@ namespace MWMechanics
         stats.setAttribute(frameNumber, "Mechanics Actors", mActors.size());
         stats.setAttribute(frameNumber, "Mechanics Objects", mObjects.size());
     }
+
+    int MechanicsManager::getGreetingTimer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getGreetingTimer(ptr);
+    }
+
+    float MechanicsManager::getAngleToPlayer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getAngleToPlayer(ptr);
+    }
+
+    GreetingState MechanicsManager::getGreetingState(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getGreetingState(ptr);
+    }
+
+    bool MechanicsManager::isTurningToPlayer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isTurningToPlayer(ptr);
+    }
 }

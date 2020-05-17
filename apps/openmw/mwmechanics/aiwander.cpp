@@ -206,7 +206,7 @@ namespace MWMechanics
                 storage.setState(AiWanderStorage::Wander_Walking);
         }
 
-        GreetingState greetingState = cStats.getGreetingState();
+        GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
         if (greetingState == Greet_InProgress)
         {
             if (storage.mState == AiWanderStorage::Wander_Walking)
@@ -442,7 +442,7 @@ namespace MWMechanics
         }
 
         // Check if idle animation finished
-        GreetingState greetingState = actor.getClass().getCreatureStats(actor).getGreetingState();
+        GreetingState greetingState = MWBase::Environment::get().getMechanicsManager()->getGreetingState(actor);
         if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             if (mPathFinder.isPathConstructed())

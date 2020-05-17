@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "../mwmechanics/actorutil.hpp"
+
 namespace MWRender
 {
     class Animation;
@@ -27,8 +29,24 @@ namespace MWMechanics
 
         CharacterController* getCharacterController();
 
+        int getGreetingTimer() const;
+        void setGreetingTimer(int timer);
+
+        float getAngleToPlayer() const;
+        void setAngleToPlayer(float angle);
+
+        GreetingState getGreetingState() const;
+        void setGreetingState(GreetingState state);
+
+        bool isTurningToPlayer() const;
+        void setTurningToPlayer(bool turning);
+
     private:
         std::unique_ptr<CharacterController> mCharacterController;
+        int mGreetingTimer{0};
+        float mTargetAngleRadians{0.f};
+        GreetingState mGreetingState{Greet_None};
+        bool mIsTurningToPlayer{false};
     };
 
 }

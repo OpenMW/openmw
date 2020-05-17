@@ -7,6 +7,8 @@
 #include <list>
 #include <map>
 
+#include "../mwmechanics/actorutil.hpp"
+
 namespace ESM
 {
     class ESMReader;
@@ -123,8 +125,8 @@ namespace MWMechanics
 
             void playIdleDialogue(const MWWorld::Ptr& actor);
             void updateMovementSpeed(const MWWorld::Ptr& actor);
-            void updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly);
-            void turnActorToFacePlayer(const MWWorld::Ptr& actor, const osg::Vec3f& dir);
+            void updateGreetingState(const MWWorld::Ptr& actor, Actor* actorState, bool turnOnly);
+            void turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor* actorState, const osg::Vec3f& dir);
 
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);
@@ -194,6 +196,11 @@ namespace MWMechanics
             bool isCastingSpell(const MWWorld::Ptr& ptr) const;
             bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
             bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
+
+            int getGreetingTimer(const MWWorld::Ptr& ptr) const;
+            float getAngleToPlayer(const MWWorld::Ptr& ptr) const;
+            GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;
+            bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
     private:
         void updateVisibility (const MWWorld::Ptr& ptr, CharacterController* ctrl);

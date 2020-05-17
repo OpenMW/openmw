@@ -13,6 +13,7 @@
     Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
     Bug #5370: Opening an unlocked but trapped door uses the key
+    Bug #5397: NPC greeting does not reset if you leave + reenter area
     Bug #5400: Editor: Verifier checks race of non-skin bodyparts
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
