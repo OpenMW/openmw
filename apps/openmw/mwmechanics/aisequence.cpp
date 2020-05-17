@@ -265,16 +265,15 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 }
             }
 
-            if (!mPackages.empty())
-            {
-                if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
-                {
-                    // move combat package with nearest target to the front
-                    mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
-                }
+            assert(!mPackages.empty());
 
-                package = mPackages.front();
+            if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
+            {
+                // move combat package with nearest target to the front
+                mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
             }
+
+            package = mPackages.front();
         }
 
         try
