@@ -275,6 +275,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             }
 
             package = mPackages.front();
+            packageTypeId = package->getTypeId();
         }
 
         try
