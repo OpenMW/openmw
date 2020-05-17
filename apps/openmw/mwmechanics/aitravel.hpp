@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AITRAVEL_H
 #define GAME_MWMECHANICS_AITRAVEL_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace ESM
 {
@@ -14,7 +14,7 @@ namespace AiSequence
 namespace MWMechanics
 {
     /// \brief Causes the AI to travel to the specified point
-    class AiTravel final : public AiPackage
+    class AiTravel final : public TypedAiPackage<AiTravel>
     {
         public:
             /// Default constructor

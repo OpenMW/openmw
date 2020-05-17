@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIACTIVATE_H
 #define GAME_MWMECHANICS_AIACTIVATE_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <string>
 
@@ -19,7 +19,7 @@ namespace MWMechanics
 {
     /// \brief Causes actor to walk to activatable object and activate it
     /** Will activate when close to object **/
-    class AiActivate final : public AiPackage
+    class AiActivate final : public TypedAiPackage<AiActivate>
     {
         public:
             /// Constructor

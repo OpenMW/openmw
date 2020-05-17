@@ -1,17 +1,15 @@
 #ifndef GAME_MWMECHANICS_AIBREATHE_H
 #define GAME_MWMECHANICS_AIBREATHE_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace MWMechanics
 {
     /// \brief AiPackage to have an actor resurface to breathe
     // The AI will go up if lesser than half breath left
-    class AiBreathe final : public AiPackage
+    class AiBreathe final : public TypedAiPackage<AiBreathe>
     {
         public:
-            AiBreathe();
-
             AiBreathe *clone() const final;
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;

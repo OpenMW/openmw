@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIFOLLOW_H
 #define GAME_MWMECHANICS_AIFOLLOW_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <string>
 
@@ -39,7 +39,7 @@ namespace MWMechanics
     /// \brief AiPackage for an actor to follow another actor/the PC
     /** The AI will follow the target until a condition (time, or position) are set. Both can be disabled to cause the actor to follow the other indefinitely
     **/
-    class AiFollow final : public AiPackage
+    class AiFollow final : public TypedAiPackage<AiFollow>
     {
         public:
             AiFollow(const std::string &actorId, float duration, float x, float y, float z);

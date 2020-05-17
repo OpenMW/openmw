@@ -11,12 +11,6 @@
 #include "movement.hpp"
 #include "steering.hpp"
 
-MWMechanics::AiBreathe::AiBreathe()
-: AiPackage()
-{
-
-}
-
 bool MWMechanics::AiBreathe::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fHoldBreathTime")->mValue.getFloat();

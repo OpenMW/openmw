@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIESCORT_H
 #define GAME_MWMECHANICS_AIESCORT_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <string>
 
@@ -16,7 +16,7 @@ namespace AiSequence
 namespace MWMechanics
 {
     /// \brief AI Package to have an NPC lead the player to a specific point
-    class AiEscort final : public AiPackage
+    class AiEscort final : public TypedAiPackage<AiEscort>
     {
         public:
             /// Implementation of AiEscort

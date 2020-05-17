@@ -16,7 +16,7 @@
 static const int MAX_DIRECTIONS = 4;
 
 MWMechanics::AiAvoidDoor::AiAvoidDoor(const MWWorld::ConstPtr& doorPtr)
-: AiPackage(), mDuration(1), mDoorPtr(doorPtr), mDirection(0)
+: mDuration(1), mDoorPtr(doorPtr), mDirection(0)
 {
 
 }

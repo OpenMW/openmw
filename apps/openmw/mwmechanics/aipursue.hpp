@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIPURSUE_H
 #define GAME_MWMECHANICS_AIPURSUE_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace ESM
 {
@@ -17,7 +17,7 @@ namespace MWMechanics
     /** Used for arresting players. Causes the actor to run to the pursued actor and activate them, to arrest them.
         Note that while very similar to AiActivate, it will ONLY activate when evry close to target (Not also when the
         path is completed). **/
-    class AiPursue final : public AiPackage
+    class AiPursue final : public TypedAiPackage<AiPursue>
     {
         public:
             ///Constructor

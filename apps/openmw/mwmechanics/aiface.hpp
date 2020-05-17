@@ -1,12 +1,12 @@
 #ifndef GAME_MWMECHANICS_AIFACE_H
 #define GAME_MWMECHANICS_AIFACE_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace MWMechanics
 {
     /// AiPackage which makes an actor face a certain direction.
-    class AiFace final : public AiPackage {
+    class AiFace final : public TypedAiPackage<AiFace> {
         public:
             AiFace(float targetX, float targetY);
 

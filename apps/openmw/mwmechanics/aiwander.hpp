@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIWANDER_H
 #define GAME_MWMECHANICS_AIWANDER_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <vector>
 
@@ -78,7 +78,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the Actor to wander within a specified range
-    class AiWander final : public AiPackage
+    class AiWander final : public TypedAiPackage<AiWander>
     {
         public:
             /// Constructor
