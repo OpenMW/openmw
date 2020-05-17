@@ -28,7 +28,6 @@ namespace MWMechanics
 
             AiActivate(const ESM::AiSequence::AiActivate* activate);
 
-            AiActivate *clone() const final;
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
             int getTypeId() const final;
 

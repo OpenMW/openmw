@@ -15,8 +15,6 @@ namespace MWMechanics
         public:
             AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell=false);
 
-            AiPackage *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;

@@ -26,7 +26,6 @@ namespace MWMechanics
 
             AiPursue(const ESM::AiSequence::AiPursue* pursue);
 
-            AiPursue *clone() const final;
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
             int getTypeId() const final;
 

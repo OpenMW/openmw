@@ -10,8 +10,6 @@ namespace MWMechanics
     class AiBreathe final : public TypedAiPackage<AiBreathe>
     {
         public:
-            AiBreathe *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;

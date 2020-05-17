@@ -18,11 +18,6 @@ MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spel
     mDistance = action.getCombatRange(isRanged);
 }
 
-MWMechanics::AiPackage *MWMechanics::AiCast::clone() const
-{
-    return new AiCast(*this);
-}
-
 bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::CharacterController& characterController, MWMechanics::AiState& state, float duration)
 {
     MWWorld::Ptr target;

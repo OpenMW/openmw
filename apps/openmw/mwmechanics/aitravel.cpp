@@ -36,11 +36,6 @@ namespace MWMechanics
     {
     }
 
-    AiTravel *MWMechanics::AiTravel::clone() const
-    {
-        return new AiTravel(*this);
-    }
-
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         auto& stats = actor.getClass().getCreatureStats(actor);

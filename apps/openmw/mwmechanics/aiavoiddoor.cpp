@@ -72,11 +72,6 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
     return false;
 }
 
-MWMechanics::AiAvoidDoor *MWMechanics::AiAvoidDoor::clone() const
-{
-    return new AiAvoidDoor(*this);
-}
-
 int MWMechanics::AiAvoidDoor::getTypeId() const
 {
     return TypeIdAvoidDoor;

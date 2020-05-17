@@ -32,11 +32,6 @@ bool MWMechanics::AiBreathe::execute (const MWWorld::Ptr& actor, CharacterContro
     return true;
 }
 
-MWMechanics::AiBreathe *MWMechanics::AiBreathe::clone() const
-{
-    return new AiBreathe(*this);
-}
-
 int MWMechanics::AiBreathe::getTypeId() const
 {
     return TypeIdBreathe;

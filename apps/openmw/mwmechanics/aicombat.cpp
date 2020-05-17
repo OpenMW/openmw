@@ -421,11 +421,6 @@ namespace MWMechanics
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     }
 
-    AiCombat *MWMechanics::AiCombat::clone() const
-    {
-        return new AiCombat(*this);
-    }
-
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::unique_ptr<ESM::AiSequence::AiCombat> combat(new ESM::AiSequence::AiCombat());

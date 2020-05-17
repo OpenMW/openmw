@@ -57,8 +57,6 @@ namespace MWMechanics
             bool followTargetThroughDoors() const final { return true; }
             bool shouldCancelPreviousAi() const final { return !mCommanded; }
 
-            AiFollow *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;

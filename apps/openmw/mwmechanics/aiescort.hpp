@@ -30,8 +30,6 @@ namespace MWMechanics
 
             AiEscort(const ESM::AiSequence::AiEscort* escort);
 
-            AiEscort *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;

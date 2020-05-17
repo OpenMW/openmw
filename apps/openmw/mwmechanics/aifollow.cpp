@@ -201,11 +201,6 @@ std::string AiFollow::getFollowedActor()
     return mTargetActorRefId;
 }
 
-AiFollow *MWMechanics::AiFollow::clone() const
-{
-    return new AiFollow(*this);
-}
-
 int AiFollow::getTypeId() const
 {
     return TypeIdFollow;

@@ -22,8 +22,6 @@ namespace MWMechanics
             /// Avoid door until the door is fully open
             AiAvoidDoor(const MWWorld::ConstPtr& doorPtr);
 
-            AiAvoidDoor *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;

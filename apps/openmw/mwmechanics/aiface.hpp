@@ -10,8 +10,6 @@ namespace MWMechanics
         public:
             AiFace(float targetX, float targetY);
 
-            AiPackage *clone() const final;
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
             int getTypeId() const final;
