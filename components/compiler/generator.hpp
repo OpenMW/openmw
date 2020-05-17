@@ -91,8 +91,6 @@ namespace Compiler
 
         void compare (CodeContainer& code, char op, char valueType1, char valueType2);
 
-        void menuMode (CodeContainer& code);
-
         void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name, const CodeContainer& value, char valueType);
 
@@ -106,10 +104,6 @@ namespace Compiler
         void fetchMember (CodeContainer& code, Literals& literals, char memberType,
             const std::string& name, const std::string& id, bool global);
         ///< \param global Member of a global script instead of a script of a reference.
-
-        void random (CodeContainer& code);
-
-        void getSecondsPassed (CodeContainer& code);
     }
 }
 

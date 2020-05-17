@@ -222,11 +222,6 @@ namespace
         code.push_back (Compiler::Generator::segment5 (37));
     }
 
-    void opMenuMode (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (38));
-    }
-
     void opStoreGlobalShort (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (39));
@@ -285,16 +280,6 @@ namespace
     void opFetchMemberFloat (Compiler::Generator::CodeContainer& code, bool global)
     {
         code.push_back (Compiler::Generator::segment5 (global ? 70 : 64));
-    }
-
-    void opRandom (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (45));
-    }
-
-    void opGetSecondsPassed (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (50));
     }
 }
 
@@ -590,11 +575,6 @@ namespace Compiler
             }
         }
 
-        void menuMode (CodeContainer& code)
-        {
-            opMenuMode (code);
-        }
-
         void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name, const CodeContainer& value, char valueType)
         {
@@ -750,16 +730,6 @@ namespace Compiler
 
                     assert (0);
             }
-        }
-
-        void random (CodeContainer& code)
-        {
-            opRandom (code);
-        }
-
-        void getSecondsPassed (CodeContainer& code)
-        {
-            opGetSecondsPassed (code);
         }
     }
 }

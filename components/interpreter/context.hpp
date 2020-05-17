@@ -35,8 +35,6 @@ namespace Interpreter
 
             virtual void report (const std::string& message) = 0;
 
-            virtual bool menuMode() = 0;
-
             virtual int getGlobalShort (const std::string& name) const = 0;
 
             virtual int getGlobalLong (const std::string& name) const = 0;
@@ -78,8 +76,6 @@ namespace Interpreter
             virtual int getPCBounty() const = 0;
 
             virtual std::string getCurrentCellName() const = 0;
-
-            virtual float getSecondsPassed() const = 0;
 
             virtual int getMemberShort (const std::string& id, const std::string& name, bool global) const = 0;
 

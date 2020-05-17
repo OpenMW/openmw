@@ -241,9 +241,12 @@ namespace Compiler
     {
         void registerExtensions (Extensions& extensions)
         {
+            extensions.registerFunction ("menumode", 'l', "", opcodeMenuMode);
+            extensions.registerFunction ("random", 'f', "l", opcodeRandom);
             extensions.registerFunction ("scriptrunning", 'l', "c", opcodeScriptRunning);
             extensions.registerInstruction ("startscript", "c", opcodeStartScript, opcodeStartScriptExplicit);
             extensions.registerInstruction ("stopscript", "c", opcodeStopScript);
+            extensions.registerFunction ("getsecondspassed", 'f', "", opcodeGetSecondsPassed);
             extensions.registerInstruction ("enable", "", opcodeEnable, opcodeEnableExplicit);
             extensions.registerInstruction ("disable", "", opcodeDisable, opcodeDisableExplicit);
             extensions.registerFunction ("getdisabled", 'l', "x", opcodeGetDisabled, opcodeGetDisabledExplicit);

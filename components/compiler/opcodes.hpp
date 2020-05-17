@@ -201,9 +201,12 @@ namespace Compiler
 
     namespace Misc
     {
+        const int opcodeMenuMode = 38;
+        const int opcodeRandom = 45;
         const int opcodeScriptRunning = 46;
         const int opcodeStartScript = 47;
         const int opcodeStopScript = 48;
+        const int opcodeGetSecondsPassed = 50;
         const int opcodeEnable = 51;
         const int opcodeDisable = 52;
         const int opcodeGetDisabled = 53;

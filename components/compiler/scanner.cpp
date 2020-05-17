@@ -266,9 +266,6 @@ namespace Compiler
         "messagebox",
         "set", "to",
         "getsquareroot",
-        "menumode",
-        "random",
-        "getsecondspassed",
         0
     };
 

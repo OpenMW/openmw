@@ -208,10 +208,7 @@ namespace Compiler
                 K_return,
                 K_messagebox,
                 K_set, K_to,
-                K_getsquareroot,
-                K_menumode,
-                K_random,
-                K_getsecondspassed
+                K_getsquareroot
             };
 
             enum special

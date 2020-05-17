@@ -192,11 +192,6 @@ namespace MWScript
     {
     }
 
-    bool InterpreterContext::menuMode()
-    {
-        return MWBase::Environment::get().getWindowManager()->isGuiMode();
-    }
-
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
         return MWBase::Environment::get().getWorld()->getGlobalInt (name);
@@ -423,11 +418,6 @@ namespace MWScript
         {
             updatePtr(ptr, action->getTarget());
         }
-    }
-
-    float InterpreterContext::getSecondsPassed() const
-    {
-        return MWBase::Environment::get().getFrameDuration();
     }
 
     int InterpreterContext::getMemberShort (const std::string& id, const std::string& name,

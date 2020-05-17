@@ -434,43 +434,6 @@ namespace Compiler
                 mNextOperand = false;
                 return true;
             }
-            else if (keyword==Scanner::K_menumode)
-            {
-                start();
-
-                mTokenLoc = loc;
-
-                Generator::menuMode (mCode);
-                mOperands.push_back ('l');
-
-                mNextOperand = false;
-                return true;
-            }
-            else if (keyword==Scanner::K_random)
-            {
-                start();
-
-                mTokenLoc = loc;
-                parseArguments ("l", scanner);
-
-                Generator::random (mCode);
-                mOperands.push_back ('f');
-
-                mNextOperand = false;
-                return true;
-            }
-            else if (keyword==Scanner::K_getsecondspassed)
-            {
-                start();
-
-                mTokenLoc = loc;
-
-                Generator::getSecondsPassed (mCode);
-                mOperands.push_back ('f');
-
-                mNextOperand = false;
-                return true;
-            }
             else
             {
                 // check for custom extensions

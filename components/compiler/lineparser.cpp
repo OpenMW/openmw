@@ -433,18 +433,6 @@ namespace Compiler
             return true;
         }
 
-        if (mAllowExpression)
-        {
-            if (keyword==Scanner::K_getsquareroot || keyword==Scanner::K_menumode ||
-                keyword==Scanner::K_random || keyword==Scanner::K_getsecondspassed)
-            {
-                scanner.putbackKeyword (keyword, loc);
-                parseExpression (scanner, loc);
-                mState = EndState;
-                return true;
-            }
-        }
-
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 

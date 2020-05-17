@@ -95,9 +95,6 @@ namespace Interpreter
 
         // misc
         interpreter.installSegment3 (0, new OpMessageBox);
-        interpreter.installSegment5 (38, new OpMenuMode);
-        interpreter.installSegment5 (45, new OpRandom);
-        interpreter.installSegment5 (50, new OpGetSecondsPassed);
         interpreter.installSegment5 (58, new OpReport);
     }
 }
