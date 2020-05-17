@@ -212,7 +212,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
             return;
         }
 
-        MWMechanics::AiPackage* package = mPackages.front();
+        auto packageIt = mPackages.begin();
+        MWMechanics::AiPackage* package = *packageIt;
         if (!package->alwaysActive() && outOfRange)
             return;
 
@@ -274,7 +275,8 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
             }
 
-            package = mPackages.front();
+            packageIt = mPackages.begin();
+            package = *packageIt;
             packageTypeId = package->getTypeId();
         }
 
@@ -290,9 +292,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 }
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)
-                std::list<MWMechanics::AiPackage*>::iterator toRemove =
-                        std::find(mPackages.begin(), mPackages.end(), package);
-                mPackages.erase(toRemove);
+                mPackages.erase(packageIt);
                 delete package;
                 if (isActualAiPackage(packageTypeId))
                     mDone = true;
