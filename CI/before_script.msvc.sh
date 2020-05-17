@@ -740,7 +740,7 @@ fi
 	fi
 	if [ -z $APPVEYOR ]; then
 		cd $DEPS_INSTALL
-		QT_SDK="$(real_pwd)/Qt/5.15.0/msvc${MSVC_YEAR}${SUFFIX}"
+		QT_SDK="$(real_pwd)/Qt/5.15.0/msvc${MSVC_REAL_YEAR}${SUFFIX}"
 
 		if [ -d 'Qt/5.15.0' ]; then
 			printf "Exists. "
