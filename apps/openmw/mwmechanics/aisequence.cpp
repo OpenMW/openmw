@@ -223,7 +223,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
         // if active package is combat one, choose nearest target
         if (packageTypeId == AiPackage::TypeIdCombat)
         {
-            std::list<AiPackage *>::iterator itActualCombat;
+            auto itActualCombat = mPackages.end();
 
             float nearestDist = std::numeric_limits<float>::max();
             osg::Vec3f vActorPos = actor.getRefData().getPosition().asVec3();
@@ -269,6 +269,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
 
             if (nearestDist < std::numeric_limits<float>::max() && mPackages.begin() != itActualCombat)
             {
+                assert(itActualCombat != mPackages.end());
                 // move combat package with nearest target to the front
                 mPackages.splice(mPackages.begin(), mPackages, itActualCombat);
             }
