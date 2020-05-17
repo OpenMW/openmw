@@ -56,8 +56,7 @@ namespace MWMechanics
             ///Default constructor
             AiPackage();
 
-            ///Default Deconstructor
-            virtual ~AiPackage();
+            virtual ~AiPackage() = default;
 
             ///Clones the package
             virtual AiPackage *clone() const = 0;

@@ -24,8 +24,6 @@
 
 #include <osg/Quat>
 
-MWMechanics::AiPackage::~AiPackage() {}
-
 MWMechanics::AiPackage::AiPackage() :
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mTargetActorRefId(""),
