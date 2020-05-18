@@ -125,8 +125,8 @@ namespace MWMechanics
 
             void playIdleDialogue(const MWWorld::Ptr& actor);
             void updateMovementSpeed(const MWWorld::Ptr& actor);
-            void updateGreetingState(const MWWorld::Ptr& actor, Actor* actorState, bool turnOnly);
-            void turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor* actorState, const osg::Vec3f& dir);
+            void updateGreetingState(const MWWorld::Ptr& actor, Actor& actorState, bool turnOnly);
+            void turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir);
 
             void updateHeadTracking(const MWWorld::Ptr& actor, const MWWorld::Ptr& targetActor,
                                             MWWorld::Ptr& headTrackTarget, float& sqrHeadTrackDistance);

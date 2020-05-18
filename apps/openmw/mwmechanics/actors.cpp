@@ -447,7 +447,7 @@ namespace MWMechanics
         actor.getClass().getMovementSettings(actor).mSpeedFactor = newSpeedFactor;
     }
 
-    void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor* actorState, bool turnOnly)
+    void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor& actorState, bool turnOnly)
     {
         if (!actor.getClass().isActor() || actor == getPlayer())
             return;
@@ -460,9 +460,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->isSwimming(actor) ||
             (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
         {
-            actorState->setTurningToPlayer(false);
-            actorState->setGreetingTimer(0);
-            actorState->setGreetingState(Greet_None);
+            actorState.setTurningToPlayer(false);
+            actorState.setGreetingTimer(0);
+            actorState.setGreetingState(Greet_None);
             return;
         }
 
@@ -471,14 +471,14 @@ namespace MWMechanics
         osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         osg::Vec3f dir = playerPos - actorPos;
 
-        if (actorState->isTurningToPlayer())
+        if (actorState.isTurningToPlayer())
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, actorState->getAngleToPlayer(), osg::DegreesToRadians(5.f)))
+            if (zTurn(actor, actorState.getAngleToPlayer(), osg::DegreesToRadians(5.f)))
             {
-                actorState->setTurningToPlayer(false);
+                actorState.setTurningToPlayer(false);
                 // An original engine launches an endless idle2 when an actor greets player.
                 playAnimationGroup (actor, "idle2", 0, std::numeric_limits<int>::max(), false);
             }
@@ -493,8 +493,8 @@ namespace MWMechanics
 
         float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
 
-        int greetingTimer = actorState->getGreetingTimer();
-        GreetingState greetingState = actorState->getGreetingState();
+        int greetingTimer = actorState.getGreetingTimer();
+        GreetingState greetingState = actorState.getGreetingState();
         if (greetingState == Greet_None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
@@ -532,19 +532,19 @@ namespace MWMechanics
                 greetingState = Greet_None;
         }
 
-        actorState->setGreetingTimer(greetingTimer);
-        actorState->setGreetingState(greetingState);
+        actorState.setGreetingTimer(greetingTimer);
+        actorState.setGreetingState(greetingState);
     }
 
-    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor* actorState, const osg::Vec3f& dir)
+    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir)
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
 
-        if (!actorState->isTurningToPlayer())
+        if (!actorState.isTurningToPlayer())
         {
-            actorState->setAngleToPlayer(std::atan2(dir.x(), dir.y()));
-            actorState->setTurningToPlayer(true);
+            actorState.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
+            actorState.setTurningToPlayer(true);
         }
     }
 
@@ -1694,7 +1694,7 @@ namespace MWMechanics
                             if (isConscious(iter->first))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
-                                updateGreetingState(iter->first, iter->second, timerUpdateHello > 0);
+                                updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
                                 playIdleDialogue(iter->first);
                                 updateMovementSpeed(iter->first);
                             }

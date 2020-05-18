@@ -435,8 +435,7 @@ namespace MWScript
                         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
                         bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
                         bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
-                        if ((greeting && sayActive) || mechMgr->isTurningToPlayer(actor))
-                            targetsAreEqual = true;
+                        targetsAreEqual = (greeting && sayActive) || mechMgr->isTurningToPlayer(actor);
                     }
                     runtime.push(int(targetsAreEqual));
                 }
