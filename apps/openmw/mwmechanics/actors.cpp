@@ -774,6 +774,9 @@ namespace MWMechanics
                 if (visitor.mRemainingTime > 0)
                 {
                     double timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+                    if(timeScale == 0.0)
+                        timeScale = 1;
+
                     restoreHours = std::max(0.0, hours - visitor.mRemainingTime * timeScale / 3600.f);
                 }
                 else if (visitor.mRemainingTime == -1)
@@ -1619,6 +1622,8 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
+                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
                 // For dead actors we need to remove looping spell particles
                 if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                     ctrl->updateContinuousVfx();
@@ -1935,7 +1940,11 @@ namespace MWMechanics
 
     void Actors::rest(double hours, bool sleep)
     {
-        float duration = hours * 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        float duration = hours * 3600.f;
+        float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        if (timeScale != 0.f)
+            duration /= timeScale;
+
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
