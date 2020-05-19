@@ -1,6 +1,8 @@
 & "${env:COMSPEC}" /c ActivateMSVC.bat "&&" set | ForEach-Object {
-    $name, $value = $_ -split '=', 2
-    Set-Content env:\"$name" $value
+    if ($_.Contains("=")) {
+        $name, $value = $_ -split '=', 2
+        Set-Content env:\"$name" $value
+    }
 }
 
 $MissingTools = $false
