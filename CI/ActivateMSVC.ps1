@@ -4,8 +4,8 @@
 }
 
 $MissingTools = $false
-$tools = "cl", "link", "rc", "mt", "awooga"
-$descriptions = "MSVC Compiler", "MSVC Linker", "MS Windows Resource Compiler", "MS Windows Manifest Tool", "A made up command"
+$tools = "cl", "link", "rc", "mt"
+$descriptions = "MSVC Compiler", "MSVC Linker", "MS Windows Resource Compiler", "MS Windows Manifest Tool"
 for ($i = 0; $i -lt $tools.Length; $i++) {
     $present = $true
     try {
