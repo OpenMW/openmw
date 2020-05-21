@@ -1064,7 +1064,7 @@ namespace MWRender
     void Animation::resetActiveGroups()
     {
         // remove all previous external controllers from the scene graph
-        for (ControllerMap::iterator it = mActiveControllers.begin(); it != mActiveControllers.end(); ++it)
+        for (auto it = mActiveControllers.begin(); it != mActiveControllers.end(); ++it)
         {
             osg::Node* node = it->first;
             node->removeUpdateCallback(it->second);
@@ -1103,7 +1103,7 @@ namespace MWRender
                     osg::ref_ptr<osg::Node> node = getNodeMap().at(it->first); // this should not throw, we already checked for the node existing in addAnimSource
 
                     node->addUpdateCallback(it->second);
-                    mActiveControllers.insert(std::make_pair(node, it->second));
+                    mActiveControllers.emplace_back(node, it->second);
 
                     if (blendMask == 0 && node == mAccumRoot)
                     {
@@ -1116,7 +1116,7 @@ namespace MWRender
                             mResetAccumRootCallback->setAccumulate(mAccumulate);
                         }
                         mAccumRoot->addUpdateCallback(mResetAccumRootCallback);
-                        mActiveControllers.insert(std::make_pair(mAccumRoot, mResetAccumRootCallback));
+                        mActiveControllers.emplace_back(mAccumRoot, mResetAccumRootCallback);
                     }
                 }
             }
@@ -1850,7 +1850,7 @@ namespace MWRender
                 {
                     mHeadController = new RotateController(mObjectRoot.get());
                     node->addUpdateCallback(mHeadController);
-                    mActiveControllers.insert(std::make_pair(node, mHeadController));
+                    mActiveControllers.emplace_back(node, mHeadController);
                 }
             }
         }

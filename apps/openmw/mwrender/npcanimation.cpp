@@ -956,7 +956,7 @@ void NpcAnimation::addControllers()
             osg::MatrixTransform* node = found->second.get();
             mFirstPersonNeckController = new NeckController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
-            mActiveControllers.emplace(node, mFirstPersonNeckController);
+            mActiveControllers.emplace_back(node, mFirstPersonNeckController);
         }
     }
     else if (mViewMode == VM_Normal)
