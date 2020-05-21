@@ -198,3 +198,9 @@ const MWBase::Environment& MWBase::Environment::get()
     assert (sThis);
     return *sThis;
 }
+
+void MWBase::Environment::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+{
+    mMechanicsManager->reportStats(frameNumber, stats);
+    mWorld->reportStats(frameNumber, stats);
+}

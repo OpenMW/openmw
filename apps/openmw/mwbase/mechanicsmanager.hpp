@@ -11,6 +11,7 @@
 
 namespace osg
 {
+    class Stats;
     class Vec3f;
 }
 
@@ -269,6 +270,8 @@ namespace MWBase
             virtual bool isAttackPreparing(const MWWorld::Ptr& ptr) = 0;
             virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;
             virtual bool isSneaking(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
     };
 }
 

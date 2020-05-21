@@ -203,12 +203,14 @@ bool OMW::Engine::frame(float frametime)
 
         if (stats->collectStats("resource"))
         {
+            stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
+
             mResourceSystem->reportStats(frameNumber, stats);
 
             stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
             stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
 
-            mEnvironment.getWorld()->getNavigator()->reportStats(frameNumber, *stats);
+            mEnvironment.reportStats(frameNumber, *stats);
         }
 
     }
