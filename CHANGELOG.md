@@ -17,6 +17,7 @@
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
     Bug #5424: Creatures do not headtrack player
+    Bug #5427: GetDistance unknown ID error is misleading
     Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0

@@ -46,10 +46,10 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    MWWorld::Ptr from = R()(runtime);
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
 
-                    MWWorld::Ptr from = R()(runtime);
                     if (from.getContainerStore()) // is the object contained?
                     {
                         MWWorld::Ptr container = MWBase::Environment::get().getWorld()->findContainer(from);
@@ -57,10 +57,24 @@ namespace MWScript
                         if (!container.isEmpty())
                             from = container;
                         else
-                            throw std::runtime_error("failed to find container ptr");
+                        {
+                            std::string error = "Failed to find the container of object '" + from.getCellRef().getRefId() + "'";
+                            runtime.getContext().report(error);
+                            Log(Debug::Error) << error;
+                            runtime.push(0.f);
+                            return;
+                        }
                     }
 
-                    const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->getPtr(name, false);
+                    const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
+                    if (to.isEmpty())
+                    {
+                        std::string error = "Failed to find an instance of object '" + name + "'";
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     float distance;
                     // If the objects are in different worldspaces, return a large value (just like vanilla)
