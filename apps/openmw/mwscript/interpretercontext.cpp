@@ -192,11 +192,6 @@ namespace MWScript
     {
     }
 
-    bool InterpreterContext::menuMode()
-    {
-        return MWBase::Environment::get().getWindowManager()->isGuiMode();
-    }
-
     int InterpreterContext::getGlobalShort (const std::string& name) const
     {
         return MWBase::Environment::get().getWorld()->getGlobalInt (name);
@@ -415,58 +410,6 @@ namespace MWScript
         return  MWBase::Environment::get().getWorld()->getCellName();
     }
 
-    bool InterpreterContext::isScriptRunning (const std::string& name) const
-    {
-        return MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name);
-    }
-
-    void InterpreterContext::startScript (const std::string& name, const std::string& targetId)
-    {
-        MWWorld::Ptr target;
-        if (targetId.empty())
-            target = getReference(false);
-        else
-            target = getReferenceImp(targetId);
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, target);
-    }
-
-    void InterpreterContext::stopScript (const std::string& name)
-    {
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
-    }
-
-    float InterpreterContext::getDistance (const std::string& name, const std::string& id) const
-    {
-        // NOTE: id may be empty, indicating an implicit reference
-
-        MWWorld::Ptr ref2 = getReferenceImp(id);
-
-        if (ref2.getContainerStore()) // is the object contained?
-        {
-            MWWorld::Ptr container = MWBase::Environment::get().getWorld()->findContainer(ref2);
-
-            if (!container.isEmpty())
-                ref2 = container;
-            else
-                throw std::runtime_error("failed to find container ptr");
-        }
-
-        const MWWorld::Ptr ref = MWBase::Environment::get().getWorld()->getPtr(name, false);
-
-        // If the objects are in different worldspaces, return a large value (just like vanilla)
-        if (!ref.isInCell() || !ref2.isInCell() || ref.getCell()->getCell()->getCellId().mWorldspace != ref2.getCell()->getCell()->getCellId().mWorldspace)
-            return std::numeric_limits<float>::max();
-
-        double diff[3];
-
-        const float* const pos1 = ref.getRefData().getPosition().pos;
-        const float* const pos2 = ref2.getRefData().getPosition().pos;
-        for (int i=0; i<3; ++i)
-            diff[i] = pos1[i] - pos2[i];
-
-        return static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
-    }
-
     void InterpreterContext::executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor)
     {
         std::shared_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
@@ -475,29 +418,6 @@ namespace MWScript
         {
             updatePtr(ptr, action->getTarget());
         }
-    }
-
-    float InterpreterContext::getSecondsPassed() const
-    {
-        return MWBase::Environment::get().getFrameDuration();
-    }
-
-    bool InterpreterContext::isDisabled (const std::string& id) const
-    {
-        const MWWorld::Ptr ref = getReferenceImp (id, false);
-        return !ref.getRefData().isEnabled();
-    }
-
-    void InterpreterContext::enable (const std::string& id)
-    {
-        MWWorld::Ptr ref = getReferenceImp (id, false);
-        MWBase::Environment::get().getWorld()->enable (ref);
-    }
-
-    void InterpreterContext::disable (const std::string& id)
-    {
-        MWWorld::Ptr ref = getReferenceImp (id, false);
-        MWBase::Environment::get().getWorld()->disable (ref);
     }
 
     int InterpreterContext::getMemberShort (const std::string& id, const std::string& name,

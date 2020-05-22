@@ -77,8 +77,6 @@ namespace MWScript
             virtual void report (const std::string& message);
             ///< By default, do nothing.
 
-            virtual bool menuMode();
-
             virtual int getGlobalShort (const std::string& name) const;
 
             virtual int getGlobalLong (const std::string& name) const;
@@ -121,25 +119,8 @@ namespace MWScript
 
             virtual std::string getCurrentCellName() const;
 
-            virtual bool isScriptRunning (const std::string& name) const;
-
-            virtual void startScript (const std::string& name, const std::string& targetId = "");
-
-            virtual void stopScript (const std::string& name);
-
-            virtual float getDistance (const std::string& name, const std::string& id = "") const;
-            ///< @note if \a id is empty, assumes an implicit reference
-
             void executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
-
-            virtual float getSecondsPassed() const;
-
-            virtual bool isDisabled (const std::string& id = "") const;
-
-            virtual void enable (const std::string& id = "");
-
-            virtual void disable (const std::string& id = "");
 
             virtual int getMemberShort (const std::string& id, const std::string& name, bool global) const;
 

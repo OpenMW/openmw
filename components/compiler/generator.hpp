@@ -91,8 +91,6 @@ namespace Compiler
 
         void compare (CodeContainer& code, char op, char valueType1, char valueType2);
 
-        void menuMode (CodeContainer& code);
-
         void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name, const CodeContainer& value, char valueType);
 
@@ -106,24 +104,6 @@ namespace Compiler
         void fetchMember (CodeContainer& code, Literals& literals, char memberType,
             const std::string& name, const std::string& id, bool global);
         ///< \param global Member of a global script instead of a script of a reference.
-
-        void random (CodeContainer& code);
-
-        void scriptRunning (CodeContainer& code);
-
-        void startScript (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void stopScript (CodeContainer& code);
-
-        void getDistance (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void getSecondsPassed (CodeContainer& code);
-
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void enable (CodeContainer& code, Literals& literals, const std::string& id);
-
-        void disable (CodeContainer& code, Literals& literals, const std::string& id);
     }
 }
 
