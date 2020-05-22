@@ -157,7 +157,8 @@ namespace
                     nextpos = std::distance(str.begin(), ++last);
                 }
                 std::string result = str.substr(pos, nextpos-pos);
-                textkeys.insert(std::make_pair(tk->list[i].time, Misc::StringUtils::lowerCase(result)));
+                Misc::StringUtils::lowerCaseInPlace(result);
+                textkeys.emplace(tk->list[i].time, std::move(result));
 
                 pos = nextpos;
             }

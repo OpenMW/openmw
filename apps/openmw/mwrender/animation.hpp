@@ -5,6 +5,7 @@
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/nifosg/textkeymap.hpp>
 
 #include <vector>
 
@@ -149,8 +150,8 @@ public:
     class TextKeyListener
     {
     public:
-        virtual void handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
-                           const std::multimap<float, std::string>& map) = 0;
+        virtual void handleTextKey(const std::string &groupname, NifOsg::TextKeyMap::ConstIterator key,
+                                   const NifOsg::TextKeyMap& map) = 0;
 
         virtual ~TextKeyListener() = default;
     };
@@ -297,12 +298,12 @@ protected:
      * the marker is not found, or if the markers are the same, it returns
      * false.
      */
-    bool reset(AnimState &state, const std::multimap<float, std::string> &keys,
+    bool reset(AnimState &state, const NifOsg::TextKeyMap &keys,
                const std::string &groupname, const std::string &start, const std::string &stop,
                float startpoint, bool loopfallback);
 
-    void handleTextKey(AnimState &state, const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key,
-                       const std::multimap<float, std::string>& map);
+    void handleTextKey(AnimState &state, const std::string &groupname, NifOsg::TextKeyMap::ConstIterator key,
+                       const NifOsg::TextKeyMap& map);
 
     /** Sets the root model of the object.
      *

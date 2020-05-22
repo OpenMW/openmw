@@ -7,6 +7,7 @@
 #include <osg/Referenced>
 
 #include "controller.hpp"
+#include "textkeymap.hpp"
 
 namespace osg
 {
@@ -20,8 +21,6 @@ namespace Resource
 
 namespace NifOsg
 {
-    typedef std::multimap<float,std::string> TextKeyMap;
-
     struct TextKeyMapHolder : public osg::Object
     {
     public:
