@@ -6,6 +6,8 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <vector>
+
 namespace ESM
 {
     struct Light;
@@ -246,8 +248,7 @@ protected:
 
     // Keep track of controllers that we added to our scene graph.
     // We may need to rebuild these controllers when the active animation groups / sources change.
-    typedef std::multimap<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback> > ControllerMap;
-    ControllerMap mActiveControllers;
+    std::vector<std::pair<osg::ref_ptr<osg::Node>, osg::ref_ptr<osg::NodeCallback>>> mActiveControllers;
 
     std::shared_ptr<AnimationTime> mAnimationTimePtr[sNumBlendMasks];
 
