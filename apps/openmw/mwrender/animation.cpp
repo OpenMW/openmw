@@ -1815,33 +1815,30 @@ namespace MWRender
     {
         mHeadController = nullptr;
 
-        if (mPtr.getClass().isBipedal(mPtr))
+        NodeMap::const_iterator found = getNodeMap().find("bip01 head");
+        if (found == getNodeMap().end())
+            return;
+
+        osg::MatrixTransform* node = found->second;
+
+        bool foundKeyframeCtrl = false;
+        osg::Callback* cb = node->getUpdateCallback();
+        while (cb)
         {
-            NodeMap::const_iterator found = getNodeMap().find("bip01 head");
-            if (found != getNodeMap().end())
+            if (dynamic_cast<NifOsg::KeyframeController*>(cb))
             {
-                osg::MatrixTransform* node = found->second;
-
-                bool foundKeyframeCtrl = false;
-                osg::Callback* cb = node->getUpdateCallback();
-                while (cb)
-                {
-                    if (dynamic_cast<NifOsg::KeyframeController*>(cb))
-                    {
-                        foundKeyframeCtrl = true;
-                        break;
-                    }
-                    cb = cb->getNestedCallback();
-                }
-
-                if (foundKeyframeCtrl)
-                {
-                    mHeadController = new RotateController(mObjectRoot.get());
-                    node->addUpdateCallback(mHeadController);
-                    mActiveControllers.emplace_back(node, mHeadController);
-                }
+                foundKeyframeCtrl = true;
+                break;
             }
+            cb = cb->getNestedCallback();
         }
+
+        if (!foundKeyframeCtrl)
+            return;
+
+        mHeadController = new RotateController(mObjectRoot.get());
+        node->addUpdateCallback(mHeadController);
+        mActiveControllers.emplace_back(node, mHeadController);
     }
 
     void Animation::setHeadPitch(float pitchRadians)
