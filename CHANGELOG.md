@@ -16,6 +16,7 @@
     Bug #5400: Editor: Verifier checks race of non-skin bodyparts
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
+    Bug #5424: Creatures do not headtrack player
     Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0
