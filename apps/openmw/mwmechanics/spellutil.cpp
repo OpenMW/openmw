@@ -31,9 +31,12 @@ namespace MWMechanics
             magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
         bool hasMagnitude = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude);
         bool hasDuration = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration);
+        bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
         int minMagn = hasMagnitude ? effect.mMagnMin : 1;
         int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
         int duration = hasDuration ? effect.mDuration : 1;
+        if (!appliedOnce)
+            duration = std::max(1, duration);
         static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
         float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));

@@ -394,8 +394,9 @@ namespace MWMechanics
                     priority = 10;
                 const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
                 const DynamicStat<float>& current = stats.getDynamic(effect.mEffectID - ESM::MagicEffect::RestoreHealth);
+                // NB: this currently assumes the hardcoded magic effect flags are used
                 const float magnitude = (effect.mMagnMin + effect.mMagnMax)/2.f;
-                const float toHeal = magnitude * effect.mDuration;
+                const float toHeal = magnitude * std::max(1, effect.mDuration);
                 // Effect doesn't heal more than we need, *or* we are below 1/2 health
                 if (current.getModified() - current.getCurrent() > toHeal
                         || current.getCurrent() < current.getModified()*0.5)
