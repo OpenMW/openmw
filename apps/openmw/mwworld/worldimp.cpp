@@ -741,7 +741,10 @@ namespace MWWorld
         Ptr ret = searchPtr(name, activeOnly);
         if (!ret.isEmpty())
             return ret;
-        throw std::runtime_error ("unknown ID: " + name);
+        std::string error = "failed to find an instance of object '" + name + "'";
+        if (activeOnly)
+            error += " in active cells";
+        throw std::runtime_error(error);
     }
 
     Ptr World::searchPtrViaActorId (int actorId)
