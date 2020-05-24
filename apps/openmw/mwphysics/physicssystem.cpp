@@ -648,7 +648,7 @@ namespace MWPhysics
             bool cmode = found->second->getCollisionMode();
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
-            found->second->enableCollisionBody(cmode);
+            // NB: Collision body isn't disabled for vanilla TCL compatibility
             return cmode;
         }
 
