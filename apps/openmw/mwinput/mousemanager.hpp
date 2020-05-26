@@ -20,6 +20,7 @@ namespace MWInput
 
         virtual ~MouseManager() = default;
 
+        void updateCursorMode();
         void update(float dt);
 
         virtual void mouseMoved(const SDLUtil::MouseMotionEvent &arg);
@@ -40,6 +41,7 @@ namespace MWInput
     private:
         bool mInvertX;
         bool mInvertY;
+        bool mGrabCursor;
         float mCameraSensitivity;
         float mCameraYMultiplier;
 

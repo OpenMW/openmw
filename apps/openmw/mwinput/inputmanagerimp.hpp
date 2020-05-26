@@ -101,8 +101,6 @@ namespace MWInput
 
         void handleGuiArrowKey(int action);
 
-        void updateCursorMode();
-
         void quickKey(int index);
         void showQuickKeysMenu();
 
@@ -111,7 +109,6 @@ namespace MWInput
 
         SDLUtil::InputWrapper* mInputWrapper;
 
-        bool mGrabCursor;
         bool mControlsDisabled;
 
         ControlSwitch* mControlSwitch;
