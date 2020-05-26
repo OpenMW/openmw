@@ -464,5 +464,20 @@ op 0x200030d: RepairedOnMe, explicit
 op 0x200030e: TestCells
 op 0x200030f: TestInteriorCells
 op 0x2000310: ToggleRecastMesh
+op 0x2000311: MenuMode
+op 0x2000312: Random
+op 0x2000313: ScriptRunning
+op 0x2000314: StartScript
+op 0x2000315: StopScript
+op 0x2000316: GetSecondsPassed
+op 0x2000317: Enable
+op 0x2000318: Disable
+op 0x2000319: GetDisabled
+op 0x200031a: Enable, explicit
+op 0x200031b: Disable, explicit
+op 0x200031c: GetDisabled, explicit
+op 0x200031d: StartScript, explicit
+op 0x200031e: GetDistance
+op 0x200031f: GetDistance, explicit
 
-opcodes 0x2000311-0x3ffffff unused
+opcodes 0x2000320-0x3ffffff unused

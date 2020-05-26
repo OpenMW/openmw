@@ -96,27 +96,14 @@ op  34: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser than
 op  35: compare (float) stack[1] with stack[0]; pop twice; push 1 if lesser or equal, 0 else
 op  36: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater than, 0 else
 op  37: compare (float) stack[1] with stack[0]; pop twice; push 1 if greater or equal, 0 else
-op  38: push 1 if game is in menu mode, 0 else
+opcode 38 unused
 op  39: store stack[0] in global short stack[1] and pop twice
 op  40: store stack[0] in global long stack[1] and pop twice
 op  41: store stack[0] in global float stack[1] and pop twice
 op  42: replace stack[0] with global short stack[0]
 op  43: replace stack[0] with global long stack[0]
 op  44: replace stack[0] with global float stack[0]
-op  45: replace stack[0] with a random integer value in the range [0, stack[0]-1]
-op  46: replace stack[0] with 1, if global script stack[0] is running, 0 else
-op  47: start script stack[0] and pop
-op  48: stop script stack[0] and pop
-op  49: replace stack[0] with distance between implicit reference and a reference of ID stack[0]
-op  50: push frame duration (float)
-op  51: enable implicit reference
-op  52: disable implicit reference
-op  53: push 1, if implicit reference is disabled, 0 else
-op  54: explicit reference = stack[0]; pop; enable explicit reference
-op  55: explicit reference = stack[0]; pop; disable explicit reference
-op  56: explicit reference = stack[0]; pop; push 1, if explicit reference is disabled, 0 else
-op  57: explicit reference = stack[0]; pop;
-        replace stack[0] with distance between explicit reference and a reference of ID stack[0]
+opcodes 45-57 unused
 op  58: report string literal index in stack[0];
          additional arguments (if any) in stack[n]..stack[1];
          n is determined according to the message string
@@ -133,6 +120,5 @@ op 67: store stack[0] in member float stack[2] of global script with ID stack[1]
 op 68: replace stack[0] with member short stack[1] of global script with ID stack[0]
 op 69: replace stack[0] with member short stack[1] of global script with ID stack[0]
 op 70: replace stack[0] with member short stack[1] of global script with ID stack[0]
-op 71: explicit reference (target) = stack[0]; pop; start script stack[0] and pop
-opcodes 72-33554431 unused
+opcodes 71-33554431 unused
 opcodes 33554432-67108863 reserved for extensions
