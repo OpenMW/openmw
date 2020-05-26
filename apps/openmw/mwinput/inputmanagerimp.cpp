@@ -30,8 +30,7 @@ namespace MWInput
             osgViewer::ScreenCaptureHandler::CaptureOperation *screenCaptureOperation,
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
-        : mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
-        , mControlsDisabled(false)
+        : mControlsDisabled(false)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputWrapper->setWindowEventCallback(MWBase::Environment::get().getWindowManager());
@@ -81,29 +80,6 @@ namespace MWInput
         mActionManager->setAttemptJump(jumping);
     }
 
-    void InputManager::updateCursorMode()
-    {
-        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
-             && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
-
-        bool wasRelative = mInputWrapper->getMouseRelative();
-        bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
-
-        // don't keep the pointer away from the window edge in gui mode
-        // stop using raw mouse motions and switch to system cursor movements
-        mInputWrapper->setMouseRelative(isRelative);
-
-        //we let the mouse escape in the main menu
-        mInputWrapper->setGrabPointer(grab && (mGrabCursor || isRelative));
-
-        //we switched to non-relative mode, move our cursor to where the in-game
-        //cursor is
-        if (!isRelative && wasRelative != isRelative)
-        {
-            mMouseManager->warpMouse();
-        }
-    }
-
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mControlsDisabled = disableControls;
@@ -113,13 +89,13 @@ namespace MWInput
 
         if (disableControls)
         {
-            updateCursorMode();
+            mMouseManager->updateCursorMode();
             return;
         }
 
         mBindingsManager->update(dt);
 
-        updateCursorMode();
+        mMouseManager->updateCursorMode();
 
         bool controllerMove = mControllerManager->update(dt);
         mMouseManager->update(dt);
@@ -153,12 +129,6 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        for (const auto& setting : changed)
-        {
-            if (setting.first == "Input" && setting.second == "grab cursor")
-                mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
-        }
-
         mMouseManager->processChangedSettings(changed);
         mSensorManager->processChangedSettings(changed);
     }

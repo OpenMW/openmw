@@ -24,8 +24,9 @@ namespace MWInput
     MouseManager::MouseManager(BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
         : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
         , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
-        , mCameraSensitivity (Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mCameraYMultiplier (Settings::Manager::getFloat("camera y multiplier", "Input"))
+        , mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
+        , mCameraSensitivity(Settings::Manager::getFloat("camera sensitivity", "Input"))
+        , mCameraYMultiplier(Settings::Manager::getFloat("camera y multiplier", "Input"))
         , mBindingsManager(bindingsManager)
         , mInputWrapper(inputWrapper)
         , mInvUiScalingFactor(1.f)
@@ -58,6 +59,9 @@ namespace MWInput
 
             if (setting.first == "Input" && setting.second == "camera sensitivity")
                 mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
+
+            if (setting.first == "Input" && setting.second == "grab cursor")
+                mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
         }
     }
 
@@ -167,6 +171,29 @@ namespace MWInput
         // Don't trigger any mouse bindings while in settings menu, otherwise rebinding controls becomes impossible
         if (MWBase::Environment::get().getWindowManager()->getMode() != MWGui::GM_Settings)
             mBindingsManager->mousePressed(arg, id);
+    }
+
+    void MouseManager::updateCursorMode()
+    {
+        bool grab = !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+             && !MWBase::Environment::get().getWindowManager()->isConsoleMode();
+
+        bool wasRelative = mInputWrapper->getMouseRelative();
+        bool isRelative = !MWBase::Environment::get().getWindowManager()->isGuiMode();
+
+        // don't keep the pointer away from the window edge in gui mode
+        // stop using raw mouse motions and switch to system cursor movements
+        mInputWrapper->setMouseRelative(isRelative);
+
+        //we let the mouse escape in the main menu
+        mInputWrapper->setGrabPointer(grab && (mGrabCursor || isRelative));
+
+        //we switched to non-relative mode, move our cursor to where the in-game
+        //cursor is
+        if (!isRelative && wasRelative != isRelative)
+        {
+            warpMouse();
+        }
     }
 
     void MouseManager::update(float dt)
