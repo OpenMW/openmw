@@ -31,6 +31,7 @@ namespace MWInput
             const std::string& userFile, bool userFileExists, const std::string& userControllerBindingsFile,
             const std::string& controllerBindingsFile, bool grab)
         : mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
+        , mControlsDisabled(false)
     {
         mInputWrapper = new SDLUtil::InputWrapper(window, viewer, grab);
         mInputWrapper->setWindowEventCallback(MWBase::Environment::get().getWindowManager());
@@ -105,10 +106,11 @@ namespace MWInput
 
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
+        mControlsDisabled = disableControls;
+
         mInputWrapper->setMouseVisible(MWBase::Environment::get().getWindowManager()->getCursorVisible());
         mInputWrapper->capture(disableEvents);
 
-        mKeyboardManager->setControlsDisabled(disableControls);
         if (disableControls)
         {
             updateCursorMode();
@@ -119,8 +121,8 @@ namespace MWInput
 
         updateCursorMode();
 
-        bool controllerMove = mControllerManager->update(dt, disableControls);
-        mMouseManager->update(dt, disableControls);
+        bool controllerMove = mControllerManager->update(dt);
+        mMouseManager->update(dt);
         mSensorManager->update(dt);
         mActionManager->update(dt, controllerMove);
     }

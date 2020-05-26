@@ -94,6 +94,8 @@ namespace MWInput
 
         virtual void executeAction(int action);
 
+        virtual bool controlsDisabled() { return mControlsDisabled; }
+
     private:
         void convertMousePosForMyGUI(int& x, int& y);
 
@@ -110,6 +112,7 @@ namespace MWInput
         SDLUtil::InputWrapper* mInputWrapper;
 
         bool mGrabCursor;
+        bool mControlsDisabled;
 
         ControlSwitch* mControlSwitch;
 

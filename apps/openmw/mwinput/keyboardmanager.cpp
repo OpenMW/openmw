@@ -18,7 +18,6 @@ namespace MWInput
 {
     KeyboardManager::KeyboardManager(BindingsManager* bindingsManager)
         : mBindingsManager(bindingsManager)
-        , mControlsDisabled(false)
     {
     }
 
@@ -53,10 +52,11 @@ namespace MWInput
         if (arg.repeat)
             return;
 
-        if (!mControlsDisabled && !consumed)
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        if (!input->controlsDisabled() && !consumed)
             mBindingsManager->keyPressed(arg);
 
-        MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
+        input->setJoystickLastUsed(false);
     }
 
     void KeyboardManager::keyReleased(const SDL_KeyboardEvent &arg)

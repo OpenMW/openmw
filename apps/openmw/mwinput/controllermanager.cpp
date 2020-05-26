@@ -36,7 +36,6 @@ namespace MWInput
         , mSneakToggleShortcutTimer(0.f)
         , mGamepadZoom(0)
         , mGamepadGuiCursorEnabled(true)
-        , mControlsDisabled(false)
         , mJoystickLastUsed(false)
         , mSneakGamepadShortcut(false)
         , mGamepadPreviewMode(false)
@@ -83,9 +82,8 @@ namespace MWInput
         }
     }
 
-    bool ControllerManager::update(float dt, bool disableControls)
+    bool ControllerManager::update(float dt)
     {
-        mControlsDisabled = disableControls;
         mGamepadPreviewMode = mActionManager->getPreviewDelay() == 1.f;
 
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
@@ -232,7 +230,7 @@ namespace MWInput
         auto kc = sdlKeyToMyGUI(SDLK_ESCAPE);
         mBindingsManager->setPlayerControlsEnabled(!MyGUI::InputManager::getInstance().injectKeyPress(kc, 0));
 
-        if (!mControlsDisabled)
+        if (!MWBase::Environment::get().getInputManager()->controlsDisabled())
             mBindingsManager->controllerButtonPressed(deviceID, arg);
     }
 
@@ -244,7 +242,7 @@ namespace MWInput
             return;
         }
 
-        if (!mJoystickEnabled || mControlsDisabled)
+        if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
 
         mJoystickLastUsed = true;
@@ -275,7 +273,7 @@ namespace MWInput
 
     void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg)
     {
-        if (!mJoystickEnabled || mControlsDisabled)
+        if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
 
         mJoystickLastUsed = true;
