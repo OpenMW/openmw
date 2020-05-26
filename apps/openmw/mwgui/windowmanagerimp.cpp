@@ -956,7 +956,7 @@ namespace MWGui
         mHud->setPlayerPos(x, y, u, v);
     }
 
-    void WindowManager::onFrame (float frameDuration)
+    void WindowManager::update (float frameDuration)
     {
         bool gameRunning = MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame;

@@ -280,7 +280,7 @@ namespace MWGui
 
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
-    virtual void onFrame (float frameDuration);
+    virtual void update (float duration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given

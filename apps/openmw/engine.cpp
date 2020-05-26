@@ -181,7 +181,7 @@ bool OMW::Engine::frame(float frametime)
         osg::Timer_t afterWorldTick = osg::Timer::instance()->tick();
 
         // update GUI
-        mEnvironment.getWindowManager()->onFrame(frametime);
+        mEnvironment.getWindowManager()->update(frametime);
 
         unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         osg::Stats* stats = mViewer->getViewerStats();

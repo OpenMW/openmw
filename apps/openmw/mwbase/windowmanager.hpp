@@ -251,7 +251,7 @@ namespace MWBase
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
 
-            virtual void onFrame (float frameDuration) = 0;
+            virtual void update (float duration) = 0;
 
             /**
              * Fetches a GMST string from the store, if there is no setting with the given
