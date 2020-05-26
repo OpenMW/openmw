@@ -117,19 +117,8 @@
 #include "keyboardnavigation.hpp"
 #include "resourceskin.hpp"
 
-namespace
-{
-
-    MyGUI::Colour getTextColour(const std::string& type)
-    {
-        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
-    }
-
-}
-
 namespace MWGui
 {
-
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
@@ -392,26 +381,7 @@ namespace MWGui
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
-        mTextColours.header = getTextColour("header");
-        mTextColours.normal = getTextColour("normal");
-        mTextColours.notify = getTextColour("notify");
-
-        mTextColours.link = getTextColour("link");
-        mTextColours.linkOver = getTextColour("link_over");
-        mTextColours.linkPressed = getTextColour("link_pressed");
-
-        mTextColours.answer = getTextColour("answer");
-        mTextColours.answerOver = getTextColour("answer_over");
-        mTextColours.answerPressed = getTextColour("answer_pressed");
-
-        mTextColours.journalLink = getTextColour("journal_link");
-        mTextColours.journalLinkOver = getTextColour("journal_link_over");
-        mTextColours.journalLinkPressed = getTextColour("journal_link_pressed");
-
-        mTextColours.journalTopic = getTextColour("journal_topic");
-        mTextColours.journalTopicOver = getTextColour("journal_topic_over");
-        mTextColours.journalTopicPressed = getTextColour("journal_topic_pressed");
-
+        mTextColours.loadColours();
 
         mDragAndDrop = new DragAndDrop();
 
