@@ -114,9 +114,9 @@ namespace MWScript
 
                 virtual void execute (Interpreter::Runtime& runtime)
                 {
+                    MWWorld::Ptr target = R()(runtime, false);
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
-                    MWWorld::Ptr target = R()(runtime, false);
                     MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, target);
                 }
         };
