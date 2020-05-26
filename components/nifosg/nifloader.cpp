@@ -870,6 +870,8 @@ namespace NifOsg
                 else if (affectors->recType == Nif::RC_NiParticleColorModifier)
                 {
                     const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
+                    if (cl->data.empty())
+                        continue;
                     const Nif::NiColorData *clrdata = cl->data.getPtr();
                     program->addOperator(new ParticleColorAffector(clrdata));
                 }
