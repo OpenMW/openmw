@@ -1175,12 +1175,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             triShapeToGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
-            Nif::ControllerPtr ctrl;
-            if (nifNode->recType == Nif::RC_NiTriShape)
-                ctrl = static_cast<const Nif::NiTriShape*>(nifNode)->controller;
-            else
-                ctrl = static_cast<const Nif::NiTriStrips*>(nifNode)->controller;
-            for (; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
                     continue;
