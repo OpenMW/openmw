@@ -33,7 +33,6 @@ namespace MWInput
         , mGuiCursorY(0)
         , mMouseWheel(0)
         , mMouseLookEnabled(false)
-        , mControlsDisabled(false)
         , mGuiCursorEnabled(true)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
@@ -88,7 +87,7 @@ namespace MWInput
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);
         }
 
-        if (mMouseLookEnabled && !mControlsDisabled)
+        if (mMouseLookEnabled && !input->controlsDisabled())
         {
             float x = arg.xrel * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
             float y = arg.yrel * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
@@ -136,10 +135,11 @@ namespace MWInput
 
     void MouseManager::mouseWheelMoved(const SDL_MouseWheelEvent &arg)
     {
-        if (mBindingsManager->isDetectingBindingState() || !mControlsDisabled)
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        if (mBindingsManager->isDetectingBindingState() || !input->controlsDisabled())
             mBindingsManager->mouseWheelMoved(arg);
 
-        MWBase::Environment::get().getInputManager()->setJoystickLastUsed(false);
+        input->setJoystickLastUsed(false);
     }
 
     void MouseManager::mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id)
@@ -169,10 +169,8 @@ namespace MWInput
             mBindingsManager->mousePressed(arg, id);
     }
 
-    void MouseManager::update(float dt, bool disableControls)
+    void MouseManager::update(float dt)
     {
-        mControlsDisabled = disableControls;
-
         if (!mMouseLookEnabled)
             return;
 

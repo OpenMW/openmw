@@ -19,12 +19,8 @@ namespace MWInput
         virtual void keyPressed(const SDL_KeyboardEvent &arg);
         virtual void keyReleased(const SDL_KeyboardEvent &arg);
 
-        void setControlsDisabled(bool disabled) { mControlsDisabled = disabled; }
-
     private:
         BindingsManager* mBindingsManager;
-
-        bool mControlsDisabled;
     };
 }
 #endif
