@@ -1260,10 +1260,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         }
     }
 
-    // Use blending only with 3d-person movement animations for bipedal actors
-    bool firstPersonPlayer = (mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson());
+    // For biped actors, blend weapon animations with lower body animations with higher priority
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    if (!firstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+    if (mPtr.getClass().isBipedal(mPtr))
         priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;

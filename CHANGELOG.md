@@ -18,6 +18,7 @@
     Bug #5416: Junk non-node records before the root node are not handled gracefully
     Bug #5424: Creatures do not headtrack player
     Bug #5427: GetDistance unknown ID error is misleading
+    Bug #5441: Enemies can't push a player character when in critical strike stance
     Feature #5362: Show the soul gems' trapped soul in count dialog
 
 0.46.0
