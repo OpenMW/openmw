@@ -117,19 +117,8 @@
 #include "keyboardnavigation.hpp"
 #include "resourceskin.hpp"
 
-namespace
-{
-
-    MyGUI::Colour getTextColour(const std::string& type)
-    {
-        return MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=" + type + "}"));
-    }
-
-}
-
 namespace MWGui
 {
-
     WindowManager::WindowManager(
             SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::string& logpath, const std::string& resourcePath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
@@ -182,12 +171,6 @@ namespace MWGui
       , mCursorVisible(true)
       , mCursorActive(false)
       , mPlayerBounty(-1)
-      , mPlayerName()
-      , mPlayerRaceId()
-      , mPlayerAttributes()
-      , mPlayerMajorSkills()
-      , mPlayerMinorSkills()
-      , mPlayerSkillValues()
       , mGui(nullptr)
       , mGuiModes()
       , mCursorManager(nullptr)
@@ -398,26 +381,7 @@ namespace MWGui
         int w = MyGUI::RenderManager::getInstance().getViewSize().width;
         int h = MyGUI::RenderManager::getInstance().getViewSize().height;
 
-        mTextColours.header = getTextColour("header");
-        mTextColours.normal = getTextColour("normal");
-        mTextColours.notify = getTextColour("notify");
-
-        mTextColours.link = getTextColour("link");
-        mTextColours.linkOver = getTextColour("link_over");
-        mTextColours.linkPressed = getTextColour("link_pressed");
-
-        mTextColours.answer = getTextColour("answer");
-        mTextColours.answerOver = getTextColour("answer_over");
-        mTextColours.answerPressed = getTextColour("answer_pressed");
-
-        mTextColours.journalLink = getTextColour("journal_link");
-        mTextColours.journalLinkOver = getTextColour("journal_link_over");
-        mTextColours.journalLinkPressed = getTextColour("journal_link_pressed");
-
-        mTextColours.journalTopic = getTextColour("journal_topic");
-        mTextColours.journalTopicOver = getTextColour("journal_topic_over");
-        mTextColours.journalTopicPressed = getTextColour("journal_topic_pressed");
-
+        mTextColours.loadColours();
 
         mDragAndDrop = new DragAndDrop();
 
@@ -593,17 +557,6 @@ namespace MWGui
         mHud->setVisible(true);
 
         mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
-
-        // Setup player stats
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-        {
-            mPlayerAttributes.insert(std::make_pair(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue()));
-        }
-
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-        {
-            mPlayerSkillValues.insert(std::make_pair(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue()));
-        }
 
         updatePinnedWindows();
 
@@ -797,32 +750,7 @@ namespace MWGui
     {
         mStatsWindow->setValue (id, value);
         mCharGen->setValue(id, value);
-
-        static const char *ids[] =
-        {
-            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
-            "AttribVal6", "AttribVal7", "AttribVal8"
-        };
-        static ESM::Attribute::AttributeID attributes[] =
-        {
-            ESM::Attribute::Strength,
-            ESM::Attribute::Intelligence,
-            ESM::Attribute::Willpower,
-            ESM::Attribute::Agility,
-            ESM::Attribute::Speed,
-            ESM::Attribute::Endurance,
-            ESM::Attribute::Personality,
-            ESM::Attribute::Luck
-        };
-        for (size_t i = 0; i < sizeof(ids)/sizeof(ids[0]); ++i)
-        {
-            if (id != ids[i])
-                continue;
-            mPlayerAttributes[attributes[i]] = value;
-            break;
-        }
     }
-
 
     void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
     {
@@ -830,7 +758,6 @@ namespace MWGui
         /// allow custom skills.
         mStatsWindow->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
         mCharGen->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
-        mPlayerSkillValues[parSkill] = value;
     }
 
     void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
@@ -843,10 +770,6 @@ namespace MWGui
     void WindowManager::setValue (const std::string& id, const std::string& value)
     {
         mStatsWindow->setValue (id, value);
-        if (id=="name")
-            mPlayerName = value;
-        else if (id=="race")
-            mPlayerRaceId = value;
     }
 
     void WindowManager::setValue (const std::string& id, int value)
@@ -868,8 +791,6 @@ namespace MWGui
     {
         mStatsWindow->configureSkills (major, minor);
         mCharGen->configureSkills(major, minor);
-        mPlayerMajorSkills = major;
-        mPlayerMinorSkills = minor;
     }
 
     void WindowManager::updateSkillArea()
@@ -1005,7 +926,7 @@ namespace MWGui
         mHud->setPlayerPos(x, y, u, v);
     }
 
-    void WindowManager::onFrame (float frameDuration)
+    void WindowManager::update (float frameDuration)
     {
         bool gameRunning = MWBase::Environment::get().getStateManager()->getState()!=
             MWBase::StateManager::State_NoGame;
@@ -1637,26 +1558,6 @@ namespace MWGui
         if (mGuiModes.empty())
             return GM_None;
         return mGuiModes.back();
-    }
-
-    std::map<int, MWMechanics::SkillValue > WindowManager::getPlayerSkillValues()
-    {
-        return mPlayerSkillValues;
-    }
-
-    std::map<int, MWMechanics::AttributeValue > WindowManager::getPlayerAttributeValues()
-    {
-        return mPlayerAttributes;
-    }
-
-    WindowManager::SkillList WindowManager::getPlayerMinorSkills()
-    {
-        return mPlayerMinorSkills;
-    }
-
-    WindowManager::SkillList WindowManager::getPlayerMajorSkills()
-    {
-        return mPlayerMajorSkills;
     }
 
     void WindowManager::disallowMouse()

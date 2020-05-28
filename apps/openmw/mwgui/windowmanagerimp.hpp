@@ -280,13 +280,7 @@ namespace MWGui
 
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
-    virtual void onFrame (float frameDuration);
-
-    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues();
-    virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues();
-    virtual SkillList getPlayerMinorSkills();
-    virtual SkillList getPlayerMajorSkills();
+    virtual void update (float duration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
@@ -473,14 +467,6 @@ namespace MWGui
     int mPlayerBounty;
 
     void setCursorVisible(bool visible);
-
-    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    // Various stats about player as needed by window manager
-    std::string mPlayerName;
-    std::string mPlayerRaceId;
-    std::map<int, MWMechanics::AttributeValue > mPlayerAttributes;
-    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<int, MWMechanics::SkillValue > mPlayerSkillValues;
 
     MyGUI::Gui *mGui; // Gui
 
