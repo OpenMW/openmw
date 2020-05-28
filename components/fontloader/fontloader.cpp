@@ -21,6 +21,8 @@
 
 #include <components/myguiplatform/myguitexture.hpp>
 
+#include <components/settings/settings.hpp>
+
 namespace
 {
     unsigned long utf8ToUnicode(const std::string& utf8)
@@ -147,15 +149,24 @@ namespace Gui
     FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, const std::string& userDataPath)
         : mVFS(vfs)
         , mUserDataPath(userDataPath)
+        , mFontHeight(16)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
             mEncoding = ToUTF8::CP437;
         else
             mEncoding = encoding;
+
+        int fontSize = Settings::Manager::getInt("font size", "GUI");
+        mFontHeight = std::min(std::max(12, fontSize), 20);
+
+        MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
+        MyGUI::ResourceManager::getInstance().registerLoadXmlDelegate("Resource") = MyGUI::newDelegate(this, &FontLoader::loadFontFromXml);
     }
 
     FontLoader::~FontLoader()
     {
+        MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
+
         for (std::vector<MyGUI::ITexture*>::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
             delete *it;
         mTextures.clear();
@@ -190,7 +201,7 @@ namespace Gui
             {
                 size_t pos = name.find_last_of('.');
                 if (pos != std::string::npos && name.compare(pos, name.size()-pos, ".fnt") == 0)
-                    loadFont(name, exportToFile);
+                    loadBitmapFont(name, exportToFile);
             }
             else
                 break;
@@ -238,7 +249,7 @@ namespace Gui
         float ascent;
     } GlyphInfo;
 
-    void FontLoader::loadFont(const std::string &fileName, bool exportToFile)
+    void FontLoader::loadBitmapFont(const std::string &fileName, bool exportToFile)
     {
         Files::IStreamPtr file = mVFS->get(fileName);
 
@@ -527,4 +538,96 @@ namespace Gui
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
     }
 
+    void FontLoader::loadFontFromXml(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
+    {
+        MyGUI::xml::ElementEnumerator resourceNode = _node->getElementEnumerator();
+        bool createCopy = false;
+        while (resourceNode.next("Resource"))
+        {
+            std::string type, name;
+            resourceNode->findAttribute("type", type);
+            resourceNode->findAttribute("name", name);
+
+            if (name.empty())
+                continue;
+
+            if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
+            {
+                createCopy = true;
+
+                // For TrueType fonts we should override Size and Resolution properties
+                // to allow to configure font size via config file, without need to edit XML files.
+                // Also we should take UI scaling factor in account.
+                int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+                resolution = std::min(960, std::max(48, resolution));
+
+                float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
+                resolution *= uiScale;
+
+                MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
+                resolutionNode->addAttribute("key", "Resolution");
+                resolutionNode->addAttribute("value", std::to_string(resolution));
+
+                MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
+                sizeNode->addAttribute("key", "Size");
+                sizeNode->addAttribute("value", std::to_string(mFontHeight));
+            }
+            else if (Misc::StringUtils::ciEqual(type, "ResourceSkin") ||
+                     Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
+            {
+                // We should adjust line height for MyGUI widgets depending on font size
+                MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
+                heightNode->addAttribute("key", "HeightLine");
+                heightNode->addAttribute("value", std::to_string(mFontHeight+2));
+            }
+        }
+
+        MyGUI::ResourceManager::getInstance().loadFromXmlNode(_node, _file, _version);
+
+        if (createCopy)
+        {
+            MyGUI::xml::ElementPtr copy = _node->createCopy();
+
+            MyGUI::xml::ElementEnumerator copyFont = copy->getElementEnumerator();
+            while (copyFont.next("Resource"))
+            {
+                std::string type, name;
+                copyFont->findAttribute("type", type);
+                copyFont->findAttribute("name", name);
+
+                if (name.empty())
+                    continue;
+
+                if (Misc::StringUtils::ciEqual(type, "ResourceTrueTypeFont"))
+                {
+                    // Since the journal and books use the custom scaling factor depending on resolution,
+                    // setup separate fonts with different Resolution to fit these windows.
+                    // These fonts have an internal prefix.
+                    int resolution = Settings::Manager::getInt("ttf resolution", "GUI");
+                    resolution = std::min(960, std::max(48, resolution));
+
+                    float currentX = Settings::Manager::getInt("resolution x", "Video");
+                    float currentY = Settings::Manager::getInt("resolution y", "Video");
+                    // TODO: read size from openmw_layout.xml somehow
+                    float heightScale = (currentY / 520);
+                    float widthScale = (currentX / 600);
+                    float uiScale = std::min(widthScale, heightScale);
+                    resolution *= uiScale;
+
+                    MyGUI::xml::ElementPtr resolutionNode = copyFont->createChild("Property");
+                    resolutionNode->addAttribute("key", "Resolution");
+                    resolutionNode->addAttribute("value", std::to_string(resolution));
+
+                    copyFont->setAttribute("name", "Journalbook " + name);
+                }
+            }
+
+            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
+        }
+    }
+
+    int FontLoader::getFontHeight()
+    {
+        return mFontHeight;
+    }
 }

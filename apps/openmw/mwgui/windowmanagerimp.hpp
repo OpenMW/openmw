@@ -411,8 +411,6 @@ namespace MWGui
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
 
-    void loadFontDelegate(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
-
     std::vector<WindowModal*> mCurrentModals;
 
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
@@ -516,8 +514,6 @@ namespace MWGui
     int mShowOwned;
 
     ToUTF8::FromType mEncoding;
-
-    int mFontHeight;
 
     std::string mVersionDescription;
 

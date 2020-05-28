@@ -3,6 +3,9 @@
 
 #include "boost/filesystem/operations.hpp"
 
+#include <MyGUI_XmlDocument.h>
+#include <MyGUI_Version.h>
+
 #include <components/myguiplatform/myguidatamanager.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -19,8 +22,6 @@ namespace MyGUI
 
 namespace Gui
 {
-
-
     /// @brief loads Morrowind's .fnt/.tex fonts for use with MyGUI and OSG
     /// @note The FontLoader needs to remain in scope as long as you want to use the loaded fonts.
     class FontLoader
@@ -33,16 +34,21 @@ namespace Gui
         void loadBitmapFonts (bool exportToFile);
         void loadTrueTypeFonts ();
 
+        void loadFontFromXml(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
+
+        int getFontHeight();
+
     private:
         ToUTF8::FromType mEncoding;
         const VFS::Manager* mVFS;
         std::string mUserDataPath;
+        int mFontHeight;
 
         std::vector<MyGUI::ITexture*> mTextures;
         std::vector<MyGUI::ResourceManualFont*> mFonts;
 
         /// @param exportToFile export the converted font (Image and XML with glyph metrics) to files?
-        void loadFont (const std::string& fileName, bool exportToFile);
+        void loadBitmapFont (const std::string& fileName, bool exportToFile);
 
         FontLoader(const FontLoader&);
         void operator=(const FontLoader&);
