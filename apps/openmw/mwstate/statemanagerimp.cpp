@@ -240,12 +240,8 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
 
         ESM::ESMWriter writer;
 
-        const std::vector<std::string>& current =
-            MWBase::Environment::get().getWorld()->getContentFiles();
-
-        for (std::vector<std::string>::const_iterator iter (current.begin()); iter!=current.end();
-            ++iter)
-            writer.addMaster (*iter, 0); // not using the size information anyway -> use value of 0
+        for (const std::string& contentFile : MWBase::Environment::get().getWorld()->getContentFiles())
+            writer.addMaster(contentFile, 0); // not using the size information anyway -> use value of 0
 
         writer.setFormat (ESM::SavedGame::sCurrentFormat);
 
@@ -346,10 +342,10 @@ void MWState::StateManager::quickSave (std::string name)
 
     if (currentCharacter)
     {
-        for (Character::SlotIterator it = currentCharacter->begin(); it != currentCharacter->end(); ++it)
+        for (auto& save : *currentCharacter)
         {
             //Visiting slots allows the quicksave finder to find the oldest quicksave
-            saveFinder.visitSave(&*it);
+            saveFinder.visitSave(&save);
         }
     }
 
@@ -360,12 +356,10 @@ void MWState::StateManager::quickSave (std::string name)
 
 void MWState::StateManager::loadGame(const std::string& filepath)
 {
-    for (CharacterIterator it = mCharacterManager.begin(); it != mCharacterManager.end(); ++it)
+    for (const auto& character : mCharacterManager)
     {
-        const MWState::Character& character = *it;
-        for (MWState::Character::SlotIterator slotIt = character.begin(); slotIt != character.end(); ++slotIt)
+        for (const auto& slot : character)
         {
-            const MWState::Slot& slot = *slotIt;
             if (slot.mPath == boost::filesystem::path(filepath))
             {
                 loadGame(&character, slot.mPath.string());
@@ -630,13 +624,12 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
 {
     const std::vector<std::string>& selectedContentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
     bool notFound = false;
-    for (std::vector<std::string>::const_iterator it = profile.mContentFiles.begin();
-         it != profile.mContentFiles.end(); ++it)
+    for (const std::string& contentFile : profile.mContentFiles)
     {
-        if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), *it)
+        if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), contentFile)
                 == selectedContentFiles.end())
         {
-            Log(Debug::Warning) << "Warning: Saved game dependency " << *it << " is missing.";
+            Log(Debug::Warning) << "Warning: Saved game dependency " << contentFile << " is missing.";
             notFound = true;
         }
     }
