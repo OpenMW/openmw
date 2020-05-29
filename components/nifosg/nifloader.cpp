@@ -496,14 +496,6 @@ namespace NifOsg
 
             switch (nifNode->recType)
             {
-            case Nif::RC_NiAutoNormalParticles:
-            case Nif::RC_NiRotatingParticles:
-                // Leaf nodes in the NIF hierarchy, so won't be able to dynamically attach children.
-                // No support for keyframe controllers (just crashes in the original engine).
-                if (nifNode->trafo.isIdentity())
-                    node = new osg::Group;
-                dataVariance = osg::Object::STATIC;
-                break;
             case Nif::RC_NiBillboardNode:
                 dataVariance = osg::Object::DYNAMIC;
                 break;
@@ -520,17 +512,9 @@ namespace NifOsg
                 // This takes advantage of the fact root nodes can't have additional controllers
                 // loaded from an external .kf file (original engine just throws "can't find node" errors if you try).
                 if (!nifNode->parent && nifNode->controller.empty() && nifNode->trafo.isIdentity())
-                {
                     node = new osg::Group;
-                    dataVariance = osg::Object::STATIC;
-                }
-                else
-                {
-                    dataVariance = (nifNode->controller.empty() ? osg::Object::STATIC : osg::Object::DYNAMIC);
-                }
 
-                if (nifNode->isBone)
-                    dataVariance = osg::Object::DYNAMIC;
+                dataVariance = nifNode->isBone ? osg::Object::DYNAMIC : osg::Object::STATIC;
 
                 break;
             }
@@ -543,7 +527,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool isAnimated, TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
+                                std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
         {
             if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return nullptr;
@@ -554,9 +538,6 @@ namespace NifOsg
             {
                 node->addCullCallback(new BillboardCallback);
             }
-
-            if (!nifNode->controller.empty() && nifNode->controller->recType == Nif::RC_NiKeyframeController)
-                isAnimated = true;
 
             node->setName(nifNode->name);
 
@@ -627,16 +608,6 @@ namespace NifOsg
                 node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
-            if ((skipMeshes || hasMarkers) && isAnimated) // make sure the empty node is not optimized away so the physicssystem can find it.
-            {
-                node->setDataVariance(osg::Object::DYNAMIC);
-            }
-
-            if ((nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips) && isAnimated) // Same thing for animated shapes
-            {
-                node->setDataVariance(osg::Object::DYNAMIC);
-            }
-
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
@@ -668,9 +639,12 @@ namespace NifOsg
             if (composite->getNumControllers() > 0)
                 node->addUpdateCallback(composite);
 
-            if (nifNode->recType != Nif::RC_NiTriShape && nifNode->recType != Nif::RC_NiTriStrips
-                    && !nifNode->controller.empty() && node->getDataVariance() == osg::Object::DYNAMIC)
-                handleNodeControllers(nifNode, static_cast<osg::MatrixTransform*>(node.get()), animflags);
+            bool isAnimated = false;
+            handleNodeControllers(nifNode, node, animflags, isAnimated);
+            hasAnimatedParents |= isAnimated;
+            // Make sure empty nodes are not optimized away so the physics system can find them.
+            if (isAnimated || (hasAnimatedParents && (skipMeshes || hasMarkers)))
+                node->setDataVariance(osg::Object::DYNAMIC);
 
             // LOD and Switch nodes must be wrapped by a transform (the current node) to support transformations properly
             // and we need to attach their children to the osg::LOD/osg::Switch nodes
@@ -711,7 +685,7 @@ namespace NifOsg
                 for(size_t i = 0;i < children.length();++i)
                 {
                     if(!children[i].empty())
-                        handleNode(children[i].getPtr(), currentNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, isAnimated, textKeys, rootNode);
+                        handleNode(children[i].getPtr(), currentNode, imageManager, boundTextures, animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
                 }
             }
 
@@ -742,40 +716,10 @@ namespace NifOsg
                     setupController(niuvctrl, uvctrl, animflags);
                     composite->addController(uvctrl);
                 }
-                else if (ctrl->recType == Nif::RC_NiKeyframeController)
-                {
-                    const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                    if(!key->data.empty())
-                    {
-                        osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
-
-                        setupController(key, callback, animflags);
-                        node->addUpdateCallback(callback);
-                    }
-                }
-                else if (ctrl->recType == Nif::RC_NiPathController)
-                {
-                    const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
-                    if (!path->posData.empty() && !path->floatData.empty())
-                    {
-                        osg::ref_ptr<PathController> callback(new PathController(path));
-
-                        setupController(path, callback, animflags);
-                        node->addUpdateCallback(callback);
-                    }
-                }
-                else if (ctrl->recType == Nif::RC_NiVisController)
-                {
-                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), node, animflags);
-                }
-                else if(ctrl->recType == Nif::RC_NiGeomMorpherController)
-                {} // handled in handleTriShape
-                else
-                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
         }
 
-        void handleNodeControllers(const Nif::Node* nifNode, osg::MatrixTransform* transformNode, int animflags)
+        void handleNodeControllers(const Nif::Node* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -784,54 +728,52 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiKeyframeController)
                 {
                     const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                    if(!key->data.empty())
-                    {
-                        osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
-
-                        setupController(key, callback, animflags);
-                        transformNode->addUpdateCallback(callback);
-                    }
+                    if (key->data.empty())
+                        continue;
+                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
+                    setupController(key, callback, animflags);
+                    node->addUpdateCallback(callback);
+                    isAnimated = true;
                 }
                 else if (ctrl->recType == Nif::RC_NiPathController)
                 {
                     const Nif::NiPathController *path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
-                    if (!path->posData.empty() && !path->floatData.empty())
-                    {
-                        osg::ref_ptr<PathController> callback(new PathController(path));
-
-                        setupController(path, callback, animflags);
-                        transformNode->addUpdateCallback(callback);
-                    }
+                    if (path->posData.empty() || path->floatData.empty())
+                        continue;
+                    osg::ref_ptr<PathController> callback(new PathController(path));
+                    setupController(path, callback, animflags);
+                    node->addUpdateCallback(callback);
+                    isAnimated = true;
                 }
                 else if (ctrl->recType == Nif::RC_NiVisController)
                 {
-                    handleVisController(static_cast<const Nif::NiVisController*>(ctrl.getPtr()), transformNode, animflags);
+                    const Nif::NiVisController *visctrl = static_cast<const Nif::NiVisController*>(ctrl.getPtr());
+                    if (visctrl->data.empty())
+                        continue;
+                    osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr(), Loader::getHiddenNodeMask()));
+                    setupController(visctrl, callback, animflags);
+                    node->addUpdateCallback(callback);
                 }
                 else if (ctrl->recType == Nif::RC_NiRollController)
                 {
-                    handleRollController(static_cast<const Nif::NiRollController*>(ctrl.getPtr()), transformNode, animflags);
+                    const Nif::NiRollController *rollctrl = static_cast<const Nif::NiRollController*>(ctrl.getPtr());
+                    if (rollctrl->data.empty())
+                        continue;
+                    osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
+                    setupController(rollctrl, callback, animflags);
+                    node->addUpdateCallback(callback);
+                    isAnimated = true;
+                }
+                else if (ctrl->recType == Nif::RC_NiGeomMorpherController
+                      || ctrl->recType == Nif::RC_NiParticleSystemController
+                      || ctrl->recType == Nif::RC_NiBSPArrayController
+                      || ctrl->recType == Nif::RC_NiUVController)
+                {
+                    // These controllers are handled elsewhere
                 }
                 else
                     Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
-        }
-
-        void handleVisController(const Nif::NiVisController* visctrl, osg::Node* node, int animflags)
-        {
-            if (visctrl->data.empty())
-                return;
-            osg::ref_ptr<VisController> callback(new VisController(visctrl->data.getPtr(), Loader::getHiddenNodeMask()));
-            setupController(visctrl, callback, animflags);
-            node->addUpdateCallback(callback);
-        }
-
-        void handleRollController(const Nif::NiRollController* rollctrl, osg::Node* node, int animflags)
-        {
-            if (rollctrl->data.empty())
-                return;
-            osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
-            setupController(rollctrl, callback, animflags);
-            node->addUpdateCallback(callback);
         }
 
         void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
@@ -928,6 +870,8 @@ namespace NifOsg
                 else if (affectors->recType == Nif::RC_NiParticleColorModifier)
                 {
                     const Nif::NiParticleColorModifier *cl = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
+                    if (cl->data.empty())
+                        continue;
                     const Nif::NiColorData *clrdata = cl->data.getPtr();
                     program->addOperator(new ParticleColorAffector(clrdata));
                 }
@@ -1070,8 +1014,6 @@ namespace NifOsg
                     continue;
                 if(ctrl->recType == Nif::RC_NiParticleSystemController || ctrl->recType == Nif::RC_NiBSPArrayController)
                     partctrl = static_cast<Nif::NiParticleSystemController*>(ctrl.getPtr());
-                else
-                    Log(Debug::Info) << "Unhandled controller " << ctrl->recName << " on node " << nifNode->recIndex << " in " << mFilename;
             }
             if (!partctrl)
             {
@@ -1235,12 +1177,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             triShapeToGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
-            Nif::ControllerPtr ctrl;
-            if (nifNode->recType == Nif::RC_NiTriShape)
-                ctrl = static_cast<const Nif::NiTriShape*>(nifNode)->controller;
-            else
-                ctrl = static_cast<const Nif::NiTriStrips*>(nifNode)->controller;
-            for (; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
                     continue;
