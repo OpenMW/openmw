@@ -77,13 +77,13 @@ namespace MWWorld
 
     class World final: public MWBase::World
     {
+        private:
             Resource::ResourceSystem* mResourceSystem;
 
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-            bool mSky;
 
             ESM::Variant* mGameHour;
             ESM::Variant* mDaysPassed;
@@ -104,6 +104,7 @@ namespace MWWorld
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
             std::shared_ptr<ProjectileManager> mProjectileManager;
 
+            bool mSky;
             bool mGodMode;
             bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
@@ -111,18 +112,31 @@ namespace MWWorld
             std::string mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
-            bool mShouldUpdateNavigator = false;
-
-            // not implemented
-            World (const World&);
-            World& operator= (const World&);
+            bool mShouldUpdateNavigator;
 
             int mActivationDistanceOverride;
+
+            std::string mStartCell;
+
+            float mSwimHeightScale;
+
+            float mDistanceToFacedObject;
+
+            bool mTeleportEnabled;
+            bool mLevitationEnabled;
+            bool mGoToJail;
+            int mDaysInPrison;
+            bool mPlayerTraveling;
+            bool mPlayerInJail;
+
+            float mSpellPreloadTimer;
 
             std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
             ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
-            std::string mStartCell;
+            // not implemented
+            World (const World&);
+            World& operator= (const World&);
 
             void updateWeather(float duration, bool paused = false);
             int getDaysPerMonth (int month) const;
@@ -141,10 +155,6 @@ namespace MWWorld
 
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
-    public: // FIXME
-            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
-            void removeContainerScripts(const Ptr& reference) override;
-    private:
             void PCDropped (const Ptr& item);
 
             bool rotateDoor(const Ptr door, DoorState state, float duration);
@@ -172,19 +182,6 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            float mSwimHeightScale;
-
-            float mDistanceToFacedObject;
-
-            bool mTeleportEnabled;
-            bool mLevitationEnabled;
-            bool mGoToJail;
-            int mDaysInPrison;
-            bool mPlayerTraveling;
-            bool mPlayerInJail;
-
-            float mSpellPreloadTimer;
-
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
 
@@ -192,6 +189,9 @@ namespace MWWorld
             MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
 
         public:
+            // FIXME
+            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
+            void removeContainerScripts(const Ptr& reference) override;
 
             World (
                 osgViewer::Viewer* viewer,
