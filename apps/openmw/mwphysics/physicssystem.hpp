@@ -17,6 +17,7 @@ namespace osg
 {
     class Group;
     class Object;
+    class Stats;
 }
 
 namespace MWRender
@@ -185,6 +186,8 @@ namespace MWPhysics
             }
 
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const;
+
+            void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
         private:
 

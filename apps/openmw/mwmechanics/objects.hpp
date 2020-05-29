@@ -52,6 +52,11 @@ namespace MWMechanics
         void persistAnimationStates();
 
         void getObjectsInRange (const osg::Vec3f& position, float radius, std::vector<MWWorld::Ptr>& out);
+
+        std::size_t size() const
+        {
+            return mObjects.size();
+        }
     };
 }
 

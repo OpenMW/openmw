@@ -70,6 +70,7 @@ namespace MWMechanics
 
             PtrActorMap::const_iterator begin() { return mActors.begin(); }
             PtrActorMap::const_iterator end() { return mActors.end(); }
+            std::size_t size() const { return mActors.size(); }
 
             void notifyDied(const MWWorld::Ptr &actor);
 

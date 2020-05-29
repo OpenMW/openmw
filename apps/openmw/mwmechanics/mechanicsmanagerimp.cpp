@@ -1,5 +1,7 @@
 #include "mechanicsmanagerimp.hpp"
 
+#include <osg/Stats>
+
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
@@ -1944,4 +1946,9 @@ namespace MWMechanics
         mActors.cleanupSummonedCreature(caster.getClass().getCreatureStats(caster), creatureActorId);
     }
 
+    void MechanicsManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        stats.setAttribute(frameNumber, "Mechanics Actors", mActors.size());
+        stats.setAttribute(frameNumber, "Mechanics Objects", mObjects.size());
+    }
 }

@@ -240,6 +240,8 @@ namespace MWMechanics
             virtual bool isRunning(const MWWorld::Ptr& ptr) override;
             virtual bool isSneaking(const MWWorld::Ptr& ptr) override;
 
+            virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
+
         private:
             bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
             bool canReportCrime(const MWWorld::Ptr &actor, const MWWorld::Ptr &victim, std::set<MWWorld::Ptr> &playerFollowers);

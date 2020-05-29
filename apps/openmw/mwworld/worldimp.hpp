@@ -20,6 +20,7 @@
 namespace osg
 {
     class Group;
+    class Stats;
 }
 
 namespace osgViewer
@@ -732,6 +733,8 @@ namespace MWWorld
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
+
+            void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
     };
 }
 

@@ -3950,4 +3950,10 @@ namespace MWWorld
     {
         return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
     }
+
+    void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mNavigator->reportStats(frameNumber, stats);
+        mPhysics->reportStats(frameNumber, stats);
+    }
 }
