@@ -110,6 +110,32 @@ void NiTriStripsData::read(NIFStream *nif)
         nif->getUShorts(strips[i], lengths[i]);
 }
 
+void NiLinesData::read(NIFStream *nif)
+{
+    NiGeometryData::read(nif);
+    size_t num = vertices.size();
+    std::vector<char> flags;
+    nif->getChars(flags, num);
+    // Can't construct a line from a single vertex.
+    if (num < 2)
+        return;
+    // Convert connectivity flags into usable geometry. The last element needs special handling.
+    for (size_t i = 0; i < num-1; ++i)
+    {
+        if (flags[i] & 1)
+        {
+            lines.emplace_back(i);
+            lines.emplace_back(i+1);
+        }
+    }
+    // If there are just two vertices, they can be connected twice. Probably isn't critical.
+    if (flags[num-1] & 1)
+    {
+        lines.emplace_back(num-1);
+        lines.emplace_back(0);
+    }
+}
+
 void NiAutoNormalParticlesData::read(NIFStream *nif)
 {
     NiGeometryData::read(nif);
