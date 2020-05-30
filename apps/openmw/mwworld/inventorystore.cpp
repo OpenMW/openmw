@@ -572,7 +572,8 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 
     mMagicEffects = MWMechanics::MagicEffects();
 
-    if (actor.getClass().getCreatureStats(actor).isDead())
+    const auto& stats = actor.getClass().getCreatureStats(actor);
+    if (stats.isDead() && stats.isDeathAnimationFinished())
         return;
 
     for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)

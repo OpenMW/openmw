@@ -15,6 +15,7 @@
     Bug #5370: Opening an unlocked but trapped door uses the key
     Bug #5397: NPC greeting does not reset if you leave + reenter area
     Bug #5400: Editor: Verifier checks race of non-skin bodyparts
+    Bug #5403: Enchantment effect doesn't show on an enemy during death animation
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
     Bug #5424: Creatures do not headtrack player

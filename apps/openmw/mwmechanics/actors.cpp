@@ -1623,9 +1623,14 @@ namespace MWMechanics
 
                 iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
 
-                // For dead actors we need to remove looping spell particles
+                // For dead actors we need to update looping spell particles
                 if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+                {
+                    // They can be added during the death animation
+                    if (!iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished())
+                        adjustMagicEffects(iter->first);
                     ctrl->updateContinuousVfx();
+                }
                 else
                 {
                     bool cellChanged = world->hasCellChanged();
