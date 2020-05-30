@@ -8,6 +8,13 @@ namespace MWWorld
 
 namespace MWMechanics
 {
+    enum GreetingState
+    {
+        Greet_None,
+        Greet_InProgress,
+        Greet_Done
+    };
+
     MWWorld::Ptr getPlayer();
     bool isPlayerInCombat();
     bool canActorMoveByZAxis(const MWWorld::Ptr& actor);

@@ -430,13 +430,12 @@ namespace MWScript
                         if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
-                    else
+                    else if (testedTargetId == "player") // Currently the player ID is hardcoded
                     {
-                        bool turningToPlayer = creatureStats.isTurningToPlayer();
-                        bool greeting = creatureStats.getGreetingState() == MWMechanics::Greet_InProgress;
+                        MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
+                        bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
                         bool sayActive = MWBase::Environment::get().getSoundManager()->sayActive(actor);
-                        if (turningToPlayer || (greeting && sayActive))
-                            targetsAreEqual = (testedTargetId == "player"); // Currently the player ID is hardcoded
+                        targetsAreEqual = (greeting && sayActive) || mechMgr->isTurningToPlayer(actor);
                     }
                     runtime.push(int(targetsAreEqual));
                 }

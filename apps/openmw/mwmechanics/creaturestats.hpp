@@ -19,13 +19,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    enum GreetingState
-    {
-        Greet_None,
-        Greet_InProgress,
-        Greet_Done
-    };
-
     /// \brief Common creature stats
     ///
     ///
@@ -77,11 +70,6 @@ namespace MWMechanics
 
         MWWorld::TimeStamp mTimeOfDeath;
 
-        GreetingState mGreetingState;
-        int mGreetingTimer;
-        float mTargetAngleRadians;
-        bool mIsTurningToPlayer;
-
     public:
         typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
     private:
@@ -96,18 +84,6 @@ namespace MWMechanics
 
     public:
         CreatureStats();
-
-        int getGreetingTimer() const;
-        void setGreetingTimer(int timer);
-
-        float getAngleToPlayer() const;
-        void setAngleToPlayer(float angle);
-
-        GreetingState getGreetingState() const;
-        void setGreetingState(GreetingState state);
-
-        bool isTurningToPlayer() const;
-        void setTurningToPlayer(bool turning);
 
         DrawState_ getDrawState() const;
         void setDrawState(DrawState_ state);

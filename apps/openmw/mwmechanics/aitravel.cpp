@@ -3,6 +3,7 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
@@ -43,14 +44,15 @@ namespace MWMechanics
 
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        auto& stats = actor.getClass().getCreatureStats(actor);
+        MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
 
-        if (stats.isTurningToPlayer() || stats.getGreetingState() == Greet_InProgress)
+        if (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress)
             return false;
 
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         const osg::Vec3f targetPos(mX, mY, mZ);
 
+        auto& stats = actor.getClass().getCreatureStats(actor);
         stats.setMovementFlag(CreatureStats::Flag_Run, false);
         stats.setDrawState(DrawState_Nothing);
 
