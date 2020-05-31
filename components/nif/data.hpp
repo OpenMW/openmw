@@ -62,6 +62,14 @@ public:
     void read(NIFStream *nif);
 };
 
+struct NiLinesData : public NiGeometryData
+{
+    // Lines, series of indices that correspond to connected vertices.
+    std::vector<unsigned short> lines;
+
+    void read(NIFStream *nif);
+};
+
 class NiAutoNormalParticlesData : public NiGeometryData
 {
 public:
