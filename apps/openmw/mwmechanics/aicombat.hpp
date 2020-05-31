@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AICOMBAT_H
 #define GAME_MWMECHANICS_AICOMBAT_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include "../mwworld/cellstore.hpp" // for Doors
 
@@ -91,7 +91,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the actor to fight another actor
-    class AiCombat final : public AiPackage
+    class AiCombat final : public TypedAiPackage<AiCombat>
     {
         public:
             ///Constructor
@@ -101,8 +101,6 @@ namespace MWMechanics
             AiCombat (const ESM::AiSequence::AiCombat* combat);
 
             void init();
-
-            AiCombat *clone() const final;
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 

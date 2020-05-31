@@ -55,12 +55,6 @@ namespace MWMechanics
             mDuration = 0;
     }
 
-
-    AiEscort *MWMechanics::AiEscort::clone() const
-    {
-        return new AiEscort(*this);
-    }
-
     bool AiEscort::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         // If AiEscort has ran for as long or longer then the duration specified

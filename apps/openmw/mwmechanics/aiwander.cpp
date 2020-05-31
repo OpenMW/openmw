@@ -115,11 +115,6 @@ namespace MWMechanics
             mDuration = 0;
     }
 
-    AiPackage * MWMechanics::AiWander::clone() const
-    {
-        return new AiWander(*this);
-    }
-
     /*
      * AiWander high level states (0.29.0). Not entirely accurate in some cases
      * e.g. non-NPC actors do not greet and some creatures may be moving even in

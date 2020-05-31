@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIWANDER_H
 #define GAME_MWMECHANICS_AIWANDER_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <vector>
 
@@ -78,7 +78,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the Actor to wander within a specified range
-    class AiWander final : public AiPackage
+    class AiWander final : public TypedAiPackage<AiWander>
     {
         public:
             /// Constructor
@@ -90,8 +90,6 @@ namespace MWMechanics
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
 
             AiWander (const ESM::AiSequence::AiWander* wander);
-
-            AiPackage *clone() const final;
 
             bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 

@@ -27,10 +27,6 @@ AiPursue::AiPursue(const ESM::AiSequence::AiPursue *pursue)
     mTargetActorId = pursue->mTargetActorId;
 }
 
-AiPursue *MWMechanics::AiPursue::clone() const
-{
-    return new AiPursue(*this);
-}
 bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor.getClass().getCreatureStats(actor).isDead())

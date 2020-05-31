@@ -37,11 +37,6 @@ namespace MWMechanics
     {
     }
 
-    AiTravel *MWMechanics::AiTravel::clone() const
-    {
-        return new AiTravel(*this);
-    }
-
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();

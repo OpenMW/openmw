@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AICAST_H
 #define GAME_MWMECHANICS_AICAST_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace MWWorld
 {
@@ -11,11 +11,9 @@ namespace MWWorld
 namespace MWMechanics
 {
     /// AiPackage which makes an actor to cast given spell.
-    class AiCast final : public AiPackage {
+    class AiCast final : public TypedAiPackage<AiCast> {
         public:
             AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell=false);
-
-            AiPackage *clone() const final;
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
