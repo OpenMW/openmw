@@ -3063,7 +3063,7 @@ namespace MWWorld
             {
                 if (actor != MWMechanics::getPlayer())
                 {
-                    for (const MWMechanics::AiPackage* package : stats.getAiSequence())
+                    for (const auto& package : stats.getAiSequence())
                     {
                         if (package->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
                         {

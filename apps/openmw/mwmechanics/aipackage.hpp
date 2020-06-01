@@ -1,6 +1,8 @@
 #ifndef GAME_MWMECHANICS_AIPACKAGE_H
 #define GAME_MWMECHANICS_AIPACKAGE_H
 
+#include <memory>
+
 #include <components/esm/defs.hpp>
 
 #include "pathfinding.hpp"
@@ -59,7 +61,7 @@ namespace MWMechanics
             virtual ~AiPackage() = default;
 
             ///Clones the package
-            virtual AiPackage *clone() const = 0;
+            virtual std::unique_ptr<AiPackage> clone() const = 0;
 
             /// Updates and runs the package (Should run every frame)
             /// \return Package completed?

@@ -112,11 +112,11 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
 
     bool hasCommandPackage = false;
 
-    std::list<MWMechanics::AiPackage*>::const_iterator it;
-    for (it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+    auto it = stats.getAiSequence().begin();
+    for (; it != stats.getAiSequence().end(); ++it)
     {
         if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
-                static_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
+                static_cast<const MWMechanics::AiFollow*>(it->get())->isCommanded())
         {
             hasCommandPackage = true;
             break;
@@ -419,7 +419,7 @@ namespace MWMechanics
         if (world->isSwimming(actor) || (playerPos - actorPos).length2() >= 3000 * 3000)
             return;
 
-        // Our implementation is not FPS-dependent unlike Morrowind's so it needs to be recalibrated. 
+        // Our implementation is not FPS-dependent unlike Morrowind's so it needs to be recalibrated.
         // We chose to use the chance MW would have when run at 60 FPS with the default value of the GMST.
         const float delta = MWBase::Environment::get().getFrameDuration() * 6.f;
         static const float fVoiceIdleOdds = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
@@ -435,9 +435,9 @@ namespace MWMechanics
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         MWMechanics::AiSequence& seq = stats.getAiSequence();
 
-        if (!seq.isEmpty() && seq.getActivePackage()->useVariableSpeed())
+        if (!seq.isEmpty() && seq.getActivePackage().useVariableSpeed())
         {
-            osg::Vec3f targetPos = seq.getActivePackage()->getDestination();
+            osg::Vec3f targetPos = seq.getActivePackage().getDestination();
             osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
             float distance = (targetPos - actorPos).length();
             if (distance < DECELERATE_DISTANCE)
@@ -604,7 +604,7 @@ namespace MWMechanics
         bool isPlayerFollowerOrEscorter = playerAllies.find(actor1) != playerAllies.end();
 
         // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
-        // Doesn't apply for player followers/escorters        
+        // Doesn't apply for player followers/escorters
         if (!aggressive && !isPlayerFollowerOrEscorter)
         {
             // Check that actor2 is in combat with actor1
@@ -673,7 +673,7 @@ namespace MWMechanics
                 return;
 
             bool followerOrEscorter = false;
-            for (const AiPackage* package : creatureStats2.getAiSequence())
+            for (const auto& package : creatureStats2.getAiSequence())
             {
                 // The follow package must be first or have nothing but combat before it
                 if (package->sideWithTarget())
@@ -1738,7 +1738,7 @@ namespace MWMechanics
                 if (!isPlayer && isConscious(iter->first) && !stats.isParalyzed())
                 {
                     MWMechanics::AiSequence& seq = stats.getAiSequence();
-                    alwaysActive = !seq.isEmpty() && seq.getActivePackage()->alwaysActive();
+                    alwaysActive = !seq.isEmpty() && seq.getActivePackage().alwaysActive();
                 }
                 bool inRange = isPlayer || dist <= mActorsProcessingRange || alwaysActive;
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
@@ -2158,7 +2158,7 @@ namespace MWMechanics
 
             // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat and Wander packages before the Follow/Escort package
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
-            for (const AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->sideWithTarget() && !package->getTarget().isEmpty())
                 {
@@ -2192,9 +2192,9 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow is the current AiPackage, 
+            // An actor counts as following if AiFollow is the current AiPackage,
             // or there are only Combat and Wander packages before the AiFollow package
-            for (const AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->followTargetThroughDoors() && package->getTarget() == actor)
                     list.push_back(iteratedActor);
@@ -2257,11 +2257,11 @@ namespace MWMechanics
 
             // An actor counts as following if AiFollow is the current AiPackage,
             // or there are only Combat and Wander packages before the AiFollow package
-            for (AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->followTargetThroughDoors() && package->getTarget() == actor)
                 {
-                    list.push_back(static_cast<AiFollow*>(package)->getFollowIndex());
+                    list.push_back(static_cast<const AiFollow*>(package.get())->getFollowIndex());
                     break;
                 }
                 else if (package->getTypeId() != AiPackage::TypeIdCombat && package->getTypeId() != AiPackage::TypeIdWander)
