@@ -287,5 +287,5 @@ endif()
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
 
 if (BULLET_USE_DOUBLES)
-    add_definitions(-DBT_USE_DOUBLE_PRECISION)
+    target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
 endif()
