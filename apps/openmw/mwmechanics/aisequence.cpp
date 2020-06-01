@@ -27,7 +27,7 @@ void AiSequence::copy (const AiSequence& sequence)
 {
     for (std::list<AiPackage *>::const_iterator iter (sequence.mPackages.begin());
         iter!=sequence.mPackages.end(); ++iter)
-        mPackages.push_back ((*iter)->clone());
+        mPackages.push_back ((*iter)->clone().release());
 
     // We need to keep an AiWander storage, if present - it has a state machine.
     // Not sure about another temporary storages
@@ -288,7 +288,7 @@ void AiSequence::execute (const MWWorld::Ptr& actor, CharacterController& charac
                 if (isActualAiPackage(packageTypeId) && (mRepeat || package->getRepeat()))
                 {
                     package->reset();
-                    mPackages.push_back(package->clone());
+                    mPackages.push_back(package->clone().release());
                 }
                 // To account for the rare case where AiPackage::execute() queued another AI package
                 // (e.g. AiPursue executing a dialogue script that uses startCombat)
@@ -380,12 +380,12 @@ void AiSequence::stack (const AiPackage& package, const MWWorld::Ptr& actor, boo
 
         if((*it)->getPriority() <= package.getPriority())
         {
-            mPackages.insert(it,package.clone());
+            mPackages.insert(it,package.clone().release());
             return;
         }
     }
 
-    mPackages.push_back (package.clone());
+    mPackages.push_back (package.clone().release());
 
     // Make sure that temporary storage is empty
     if (cancelOther)
