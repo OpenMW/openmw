@@ -27,11 +27,11 @@ namespace MWMechanics
             bool shouldCancelPreviousAi() const final { return false; }
 
         private:
-            std::string mTargetId;
-            std::string mSpellId;
+            const std::string mTargetId;
+            const std::string mSpellId;
             bool mCasting;
-            bool mManual;
-            float mDistance;
+            const bool mManual;
+            const float mDistance;
     };
 }
 

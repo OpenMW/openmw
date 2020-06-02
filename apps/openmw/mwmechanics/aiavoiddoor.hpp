@@ -33,7 +33,7 @@ namespace MWMechanics
 
         private:
             float mDuration;
-            MWWorld::ConstPtr mDoorPtr;
+            const MWWorld::ConstPtr mDoorPtr;
             osg::Vec3f mLastPos;
             int mDirection;
 

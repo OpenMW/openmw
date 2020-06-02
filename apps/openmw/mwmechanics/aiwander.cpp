@@ -1,5 +1,7 @@
 #include "aiwander.hpp"
 
+#include <algorithm>
+
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
@@ -32,6 +34,8 @@ namespace MWMechanics
 
     // distance must be long enough that NPC will need to move to get there.
     static const int MINIMUM_WANDER_DISTANCE = DESTINATION_TOLERANCE * 2;
+
+    static const std::size_t MAX_IDLE_SIZE = 8;
 
     const std::string AiWander::sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1] =
     {
@@ -94,25 +98,28 @@ namespace MWMechanics
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         }
+
+        std::vector<unsigned char> getInitialIdle(const std::vector<unsigned char>& idle)
+        {
+            std::vector<unsigned char> result(MAX_IDLE_SIZE, 0);
+            std::copy_n(idle.begin(), std::min(MAX_IDLE_SIZE, idle.size()), result.begin());
+            return result;
+        }
+
+        std::vector<unsigned char> getInitialIdle(const unsigned char (&idle)[MAX_IDLE_SIZE])
+        {
+            return std::vector<unsigned char>(std::begin(idle), std::end(idle));
+        }
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
-        mDistance(distance), mDuration(duration), mRemainingDuration(duration), mTimeOfDay(timeOfDay), mIdle(idle),
+        mDistance(std::max(0, distance)),
+        mDuration(std::max(0, duration)),
+        mRemainingDuration(duration), mTimeOfDay(timeOfDay),
+        mIdle(getInitialIdle(idle)),
         mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)),
         mHasDestination(false), mDestination(osg::Vec3f(0, 0, 0)), mUsePathgrid(false)
     {
-        mIdle.resize(8, 0);
-        init();
-    }
-
-    void AiWander::init()
-    {
-        // NOTE: mDistance and mDuration must be set already
-
-        if(mDistance < 0)
-            mDistance = 0;
-        if(mDuration < 0)
-            mDuration = 0;
     }
 
     /*
@@ -235,7 +242,6 @@ namespace MWMechanics
             stopWalking(actor);
             // Reset package so it can be used again
             mRemainingDuration=mDuration;
-            init();
             return true;
         }
 
@@ -879,10 +885,11 @@ namespace MWMechanics
     }
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
-        : mDistance(wander->mData.mDistance)
-        , mDuration(wander->mData.mDuration)
+        : mDistance(std::max(static_cast<short>(0), wander->mData.mDistance))
+        , mDuration(std::max(static_cast<short>(0), wander->mData.mDuration))
         , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mTimeOfDay(wander->mData.mTimeOfDay)
+        , mIdle(getInitialIdle(wander->mData.mIdle))
         , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
         , mHasDestination(false)
@@ -891,11 +898,7 @@ namespace MWMechanics
     {
         if (mStoredInitialActorPosition)
             mInitialActorPosition = wander->mInitialActorPosition;
-        for (int i=0; i<8; ++i)
-            mIdle.push_back(wander->mData.mIdle[i]);
         if (mRemainingDuration <= 0 || mRemainingDuration >= 24)
             mRemainingDuration = mDuration;
-
-        init();
     }
 }

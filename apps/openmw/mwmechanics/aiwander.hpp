@@ -114,8 +114,6 @@ namespace MWMechanics
             }
 
         private:
-            // NOTE: mDistance and mDuration must be set already
-            void init();
             void stopWalking(const MWWorld::Ptr& actor);
 
             /// Have the given actor play an idle animation
@@ -136,12 +134,12 @@ namespace MWMechanics
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
-            int mDistance; // how far the actor can wander from the spawn point
-            int mDuration;
+            const int mDistance; // how far the actor can wander from the spawn point
+            const int mDuration;
             float mRemainingDuration;
-            int mTimeOfDay;
-            std::vector<unsigned char> mIdle;
-            bool mRepeat;
+            const int mTimeOfDay;
+            const std::vector<unsigned char> mIdle;
+            const bool mRepeat;
 
             bool mStoredInitialActorPosition;
             osg::Vec3f mInitialActorPosition; // Note: an original engine does not reset coordinates even when actor changes a cell

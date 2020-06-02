@@ -37,11 +37,11 @@ namespace MWMechanics
             osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
-            float mX;
-            float mY;
-            float mZ;
+            const float mX;
+            const float mY;
+            const float mZ;
 
-            bool mHidden;
+            const bool mHidden;
     };
 }
 
