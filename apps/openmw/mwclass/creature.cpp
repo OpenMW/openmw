@@ -878,4 +878,9 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
         scale *= ref->mBase->mScale;
     }
+
+    void Creature::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    {
+        MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
+    }
 }

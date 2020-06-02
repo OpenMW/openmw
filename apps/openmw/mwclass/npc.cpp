@@ -1437,4 +1437,9 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->getFactionRank();
     }
+
+    void Npc::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    {
+        MWMechanics::setBaseAISetting<ESM::NPC>(id, setting, value);
+    }
 }
