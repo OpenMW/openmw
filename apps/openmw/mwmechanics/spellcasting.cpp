@@ -60,8 +60,13 @@ namespace MWMechanics
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
                             const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
-        if (!target.isEmpty() && target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())
-            return;
+        if (!target.isEmpty() && target.getClass().isActor())
+        {
+            // Early-out for characters that have departed.
+            const auto& stats = target.getClass().getCreatureStats(target);
+            if (stats.isDead() && stats.isDeathAnimationFinished())
+                return;
+        }
 
         // If none of the effects need to apply, we can early-out
         bool found = false;
@@ -201,9 +206,9 @@ namespace MWMechanics
                     }
 
                     bool effectAffectsHealth = isHarmful || effectIt->mEffectID == ESM::MagicEffect::RestoreHealth;
-                    if (castByPlayer && target != caster && effectAffectsHealth)
+                    if (castByPlayer && target != caster && !target.getClass().getCreatureStats(target).isDead() && effectAffectsHealth)
                     {
-                        // If player is attempting to cast a harmful spell or is healing someone, show the target's HP bar.
+                        // If player is attempting to cast a harmful spell on or is healing a living target, show the target's HP bar.
                         MWBase::Environment::get().getWindowManager()->setEnemy(target);
                     }
 
