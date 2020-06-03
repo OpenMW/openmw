@@ -13,7 +13,16 @@ MISSINGTOOLS=0
 
 command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
 command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
-command -v python >/dev/null 2>&1 || { echo "Warning: Python is not on the path, automatic Qt installation impossible."; }
+
+MISSINGPYTHON=0
+if ! command -v python >/dev/null 2>&1; then
+	echo "Warning: Python is not on the path, automatic Qt installation impossible."
+	MISSINGPYTHON=1
+elif ! python --version >/dev/null 2>&1; then
+	echo "Warning: Python is (probably) fake stub Python that comes bundled with newer versions of Windows, automatic Qt installation impossible."
+	echo "If you think you have Python installed, try changing the order of your PATH environment variable in Advanced System Settings."
+	MISSINGPYTHON=1
+fi
 
 if [ $MISSINGTOOLS -ne 0 ]; then
 	wrappedExit 1
@@ -745,6 +754,11 @@ fi
 		if [ -d 'Qt/5.15.0' ]; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
+			if [ $MISSINGTOOLS -ne 0 ]; then
+				echo "Can't be automatically installed without Python."
+				wrappedExit 1
+			fi
+
 			pushd "$DEPS" > /dev/null
 			if ! [ -d 'aqt-venv' ]; then
 				echo "  Creating Virtualenv for aqt..."
