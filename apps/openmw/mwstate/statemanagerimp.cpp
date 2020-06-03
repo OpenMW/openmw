@@ -213,11 +213,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
             profile.mPlayerClassId = classId;
 
         profile.mPlayerCell = world.getCellName();
-
-        profile.mInGameTime.mGameHour = world.getTimeStamp().getHour();
-        profile.mInGameTime.mDay = world.getDay();
-        profile.mInGameTime.mMonth = world.getMonth();
-        profile.mInGameTime.mYear = world.getYear();
+        profile.mInGameTime = world.getEpochTimeStamp();
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 

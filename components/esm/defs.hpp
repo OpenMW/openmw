@@ -14,6 +14,14 @@ struct TimeStamp
     int mDay;
 };
 
+struct EpochTimeStamp
+{
+    float mGameHour;
+    int mDay;
+    int mMonth;
+    int mYear;
+};
+
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
 typedef uint32_t Color;
 
