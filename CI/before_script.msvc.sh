@@ -754,7 +754,7 @@ fi
 		if [ -d 'Qt/5.15.0' ]; then
 			printf "Exists. "
 		elif [ -z $SKIP_EXTRACT ]; then
-			if [ $MISSINGTOOLS -ne 0 ]; then
+			if [ $MISSINGPYTHON -ne 0 ]; then
 				echo "Can't be automatically installed without Python."
 				wrappedExit 1
 			fi
