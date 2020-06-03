@@ -257,8 +257,10 @@ namespace MWScript
                     Interpreter::Type_Integer value = runtime[0].mInteger;
                     runtime.pop();
 
-                    ptr.getClass().getCreatureStats (ptr).setAiSetting (mIndex,
-                        ptr.getClass().getCreatureStats (ptr).getAiSetting (mIndex).getBase() + value);
+                    int modified = ptr.getClass().getCreatureStats (ptr).getAiSetting (mIndex).getBase() + value;
+
+                    ptr.getClass().getCreatureStats (ptr).setAiSetting (mIndex, modified);
+                    ptr.getClass().setBaseAISetting(ptr.getCellRef().getRefId(), mIndex, modified);
                 }
         };
         template<class R>
@@ -277,6 +279,7 @@ namespace MWScript
                     MWMechanics::Stat<int> stat = ptr.getClass().getCreatureStats(ptr).getAiSetting(mIndex);
                     stat.setModified(value, 0);
                     ptr.getClass().getCreatureStats(ptr).setAiSetting(mIndex, stat);
+                    ptr.getClass().setBaseAISetting(ptr.getCellRef().getRefId(), mIndex, value);
                 }
         };
 

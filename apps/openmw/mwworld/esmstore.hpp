@@ -239,6 +239,9 @@ namespace MWWorld
 
         bool readRecord (ESM::ESMReader& reader, uint32_t type);
         ///< \return Known type?
+
+        // To be called when we are done with dynamic record loading
+        void checkPlayer();
     };
 
     template <>

@@ -404,6 +404,7 @@ namespace MWWorld
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
             case ESM::REC_PLAY:
+                mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
                 if (getPlayerPtr().isInCell())
                 {
@@ -1812,6 +1813,16 @@ namespace MWWorld
     }
 
     const ESM::ItemLevList *World::createOverrideRecord(const ESM::ItemLevList &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::Creature *World::createOverrideRecord(const ESM::Creature &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::NPC *World::createOverrideRecord(const ESM::NPC &record)
     {
         return mStore.overrideRecord(record);
     }

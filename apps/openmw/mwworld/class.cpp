@@ -516,4 +516,9 @@ namespace MWWorld
         result.z() = magicEffect->mData.mBlue / 255.f;
         return result;
     }
+
+    void Class::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    {
+        throw std::runtime_error ("class does not have creature stats");
+    }
 }

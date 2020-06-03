@@ -129,6 +129,8 @@ namespace MWClass
 
             virtual void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
+
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
     };
 }
 

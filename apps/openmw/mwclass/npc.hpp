@@ -164,6 +164,8 @@ namespace MWClass
 
             virtual std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const;
             virtual int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const;
+
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
     };
 }
 

@@ -10,6 +10,7 @@
 
 #include "ptr.hpp"
 #include "doorstate.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace ESM
 {
@@ -28,7 +29,6 @@ namespace MWPhysics
 
 namespace MWMechanics
 {
-    class CreatureStats;
     class NpcStats;
     struct Movement;
 }
@@ -360,6 +360,8 @@ namespace MWWorld
             virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
 
             virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
+
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
     };
 }
 
