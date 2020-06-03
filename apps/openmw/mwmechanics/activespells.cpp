@@ -29,13 +29,23 @@ namespace MWMechanics
                 }
                 else
                 {
+                    bool interrupt = false;
                     std::vector<ActiveEffect>& effects = iter->second.mEffects;
                     for (std::vector<ActiveEffect>::iterator effectIt = effects.begin(); effectIt != effects.end();)
                     {
                         if (effectIt->mTimeLeft <= 0)
                         {
-                            effectIt = effects.erase(effectIt);
                             rebuild = true;
+
+                            // Note: it we expire a Corprus effect, we should remove the whole spell.
+                            if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                            {
+                                iter = mSpells.erase (iter);
+                                interrupt = true;
+                                break;
+                            }
+
+                            effectIt = effects.erase(effectIt);
                         }
                         else
                         {
@@ -43,7 +53,9 @@ namespace MWMechanics
                             ++effectIt;
                         }
                     }
-                    ++iter;
+
+                    if (!interrupt)
+                        ++iter;
                 }
             }
         }
@@ -276,6 +288,31 @@ namespace MWMechanics
             }
         }
         mSpellsChanged = true;
+    }
+
+    void ActiveSpells::purgeCorprusDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            bool hasCorprusEffect = false;
+            for (std::vector<ActiveEffect>::iterator effectIt = iter->second.mEffects.begin();
+                 effectIt != iter->second.mEffects.end();++effectIt)
+            {
+                if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                {
+                    hasCorprusEffect = true;
+                    break;
+                }
+            }
+
+            if (hasCorprusEffect)
+            {
+                mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
+            else
+                ++iter;
+        }
     }
 
     void ActiveSpells::clear()

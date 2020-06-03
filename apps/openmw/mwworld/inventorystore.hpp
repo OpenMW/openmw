@@ -203,10 +203,10 @@ namespace MWWorld
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor);
 
-            void purgeEffect (short effectId);
+            void purgeEffect (short effectId, bool wholeSpell = false);
             ///< Remove a magic effect
 
-            void purgeEffect (short effectId, const std::string& sourceId);
+            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false);
             ///< Remove a magic effect
 
             virtual void clear();

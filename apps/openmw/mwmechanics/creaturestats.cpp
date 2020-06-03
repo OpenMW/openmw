@@ -551,6 +551,14 @@ namespace MWMechanics
         state.mHasAiSettings = true;
         for (int i=0; i<4; ++i)
             mAiSettings[i].writeState (state.mAiSettings[i]);
+
+        for (auto it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
+        {
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                state.mCorprusSpells[it->first].mWorsenings[i] = mCorprusSpells.at(it->first).mWorsenings[i];
+
+            state.mCorprusSpells[it->first].mNextWorsening = mCorprusSpells.at(it->first).mNextWorsening.toEsm();
+        }
     }
 
     void CreatureStats::readState (const ESM::CreatureStats& state)
@@ -589,7 +597,7 @@ namespace MWMechanics
         mTimeOfDeath = MWWorld::TimeStamp(state.mTimeOfDeath);
         //mHitAttemptActorId = state.mHitAttemptActorId;
 
-        mSpells.readState(state.mSpells);
+        mSpells.readState(state.mSpells, this);
         mActiveSpells.readState(state.mActiveSpells);
         mAiSequence.readState(state.mAiSequence);
         mMagicEffects.readState(state.mMagicEffects);
@@ -600,6 +608,15 @@ namespace MWMechanics
         if (state.mHasAiSettings)
             for (int i=0; i<4; ++i)
                 mAiSettings[i].readState(state.mAiSettings[i]);
+
+        mCorprusSpells.clear();
+        for (auto it = state.mCorprusSpells.begin(); it != state.mCorprusSpells.end(); ++it)
+        {
+            for (int i=0; i<ESM::Attribute::Length; ++i)
+                mCorprusSpells[it->first].mWorsenings[i] = state.mCorprusSpells.at(it->first).mWorsenings[i];
+
+            mCorprusSpells[it->first].mNextWorsening = MWWorld::TimeStamp(state.mCorprusSpells.at(it->first).mNextWorsening);
+        }
     }
 
     void CreatureStats::setLastRestockTime(MWWorld::TimeStamp tradeTime)
@@ -674,5 +691,24 @@ namespace MWMechanics
     std::vector<int>& CreatureStats::getSummonedCreatureGraveyard()
     {
         return mSummonGraveyard;
+    }
+
+    std::map<std::string, CorprusStats> &CreatureStats::getCorprusSpells()
+    {
+        return mCorprusSpells;
+    }
+
+    void CreatureStats::addCorprusSpell(const std::string& sourceId, CorprusStats& stats)
+    {
+        mCorprusSpells[sourceId] = stats;
+    }
+
+    void CreatureStats::removeCorprusSpell(const std::string& sourceId)
+    {
+        auto corprusIt = mCorprusSpells.find(sourceId);
+        if (corprusIt != mCorprusSpells.end())
+        {
+            mCorprusSpells.erase(corprusIt);
+        }
     }
 }

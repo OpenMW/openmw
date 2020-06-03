@@ -256,10 +256,17 @@ namespace MWMechanics
 
     void AttributeValue::damage(float damage)
     {
-        mDamage += std::min(damage, (float)getModified());
+        float threshold = mBase + mModifier;
+
+        if (mDamage + damage > threshold)
+            mDamage = threshold;
+        else
+            mDamage += damage;
     }
     void AttributeValue::restore(float amount)
     {
+        if (mDamage <= 0) return;
+
         mDamage -= std::min(mDamage, amount);
     }
 

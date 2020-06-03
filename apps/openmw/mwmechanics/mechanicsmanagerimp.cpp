@@ -289,6 +289,24 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
+    void MechanicsManager::restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId)
+    {
+        auto& stats = actor.getClass().getCreatureStats (actor);
+        auto& corprusSpells = stats.getCorprusSpells();
+
+        auto corprusIt = corprusSpells.find(sourceId);
+
+        if (corprusIt != corprusSpells.end())
+        {
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                MWMechanics::AttributeValue attr = stats.getAttribute(i);
+                attr.restore(corprusIt->second.mWorsenings[i]);
+                actor.getClass().getCreatureStats(actor).setAttribute(i, attr);
+            }
+        }
+    }
+
     void MechanicsManager::update(float duration, bool paused)
     {
         if(!mWatched.isEmpty())

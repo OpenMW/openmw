@@ -9,6 +9,7 @@
 
 #include "defs.hpp"
 
+#include "attr.hpp"
 #include "spellstate.hpp"
 #include "activespells.hpp"
 #include "magiceffects.hpp"
@@ -22,7 +23,13 @@ namespace ESM
     // format 0, saved games only
     struct CreatureStats
     {
-        StatState<int> mAttributes[8];
+        struct CorprusStats
+        {
+            int mWorsenings[Attribute::Length];
+            TimeStamp mNextWorsening;
+        };
+
+        StatState<int> mAttributes[Attribute::Length];
         StatState<float> mDynamic[3];
 
         MagicEffects mMagicEffects;
@@ -76,9 +83,9 @@ namespace ESM
         int mDrawState;
         signed char mDeathAnimation;
         ESM::TimeStamp mTimeOfDeath;
-
         int mLevel;
 
+        std::map<std::string, CorprusStats> mCorprusSpells;
         SpellState mSpells;
         ActiveSpells mActiveSpells;
 

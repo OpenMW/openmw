@@ -921,16 +921,16 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
     }
 }
 
-void MWWorld::InventoryStore::purgeEffect(short effectId)
+void MWWorld::InventoryStore::purgeEffect(short effectId, bool wholeSpell)
 {
     for (TSlots::const_iterator it = mSlots.begin(); it != mSlots.end(); ++it)
     {
         if (*it != end())
-            purgeEffect(effectId, (*it)->getCellRef().getRefId());
+            purgeEffect(effectId, (*it)->getCellRef().getRefId(), wholeSpell);
     }
 }
 
-void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId)
+void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId, bool wholeSpell)
 {
     TEffectMagnitudes::iterator effectMagnitudeIt = mPermanentMagicEffectMagnitudes.find(sourceId);
     if (effectMagnitudeIt == mPermanentMagicEffectMagnitudes.end())
@@ -962,6 +962,12 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
             {
                 if (effectIt->mEffectID != effectId)
                     continue;
+
+                if (wholeSpell)
+                {
+                    mPermanentMagicEffectMagnitudes.erase(sourceId);
+                    return;
+                }
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
                 magnitude *= params[i].mMultiplier;

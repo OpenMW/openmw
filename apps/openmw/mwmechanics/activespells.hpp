@@ -99,6 +99,8 @@ namespace MWMechanics
             bool isSpellActive (const std::string& id) const;
             ///< case insensitive
 
+            void purgeCorprusDisease();
+
             const MagicEffects& getMagicEffects() const;
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
