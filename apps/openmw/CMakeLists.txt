@@ -15,10 +15,6 @@ set(GAME_HEADER
     engine.hpp
 )
 
-if (BULLET_USE_DOUBLES)
-    add_definitions(-DBT_USE_DOUBLE_PRECISION)
-endif()
-
 source_group(game FILES ${GAME} ${GAME_HEADER})
 
 add_openmw_dir (mwrender
