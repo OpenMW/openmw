@@ -34,7 +34,7 @@ namespace MWMechanics
             void writeState(ESM::AiSequence::AiSequence& sequence) const final;
 
         private:
-            std::string mObjectId;
+            const std::string mObjectId;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

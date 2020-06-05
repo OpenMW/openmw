@@ -86,16 +86,16 @@ namespace MWMechanics
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
-            bool mAlwaysFollow;
-            bool mCommanded;
-            float mDuration; // Hours
+            const bool mAlwaysFollow;
+            const bool mCommanded;
+            const float mDuration; // Hours
             float mRemainingDuration; // Hours
-            float mX;
-            float mY;
-            float mZ;
-            std::string mCellId;
+            const float mX;
+            const float mY;
+            const float mZ;
+            const std::string mCellId;
             bool mActive; // have we spotted the target?
-            int mFollowIndex;
+            const int mFollowIndex;
 
             static int mFollowIndexCounter;
     };

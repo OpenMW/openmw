@@ -45,16 +45,16 @@ namespace MWMechanics
             osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
-            std::string mCellId;
-            float mX;
-            float mY;
-            float mZ;
-            float mMaxDist;
-            float mDuration; // In hours
+            const std::string mCellId;
+            const float mX;
+            const float mY;
+            const float mZ;
+            float mMaxDist = 450;
+            const float mDuration; // In hours
             float mRemainingDuration; // In hours
 
-            int mCellX;
-            int mCellY;
+            const int mCellX;
+            const int mCellY;
     };
 }
 #endif

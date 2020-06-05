@@ -20,7 +20,8 @@ namespace MWMechanics
             bool shouldCancelPreviousAi() const final { return false; }
 
         private:
-            float mTargetX, mTargetY;
+            const float mTargetX;
+            const float mTargetY;
     };
 }
 

@@ -58,18 +58,17 @@ AiFollow::AiFollow(const MWWorld::Ptr& actor, bool commanded)
 }
 
 AiFollow::AiFollow(const ESM::AiSequence::AiFollow *follow)
-    : mAlwaysFollow(follow->mAlwaysFollow), mCommanded(follow->mCommanded), mRemainingDuration(follow->mRemainingDuration)
+    : mAlwaysFollow(follow->mAlwaysFollow), mCommanded(follow->mCommanded)
+    // mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
+    // The exact value of mDuration only matters for repeating packages.
+    // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
+    , mDuration(follow->mRemainingDuration)
+    , mRemainingDuration(follow->mRemainingDuration)
     , mX(follow->mData.mX), mY(follow->mData.mY), mZ(follow->mData.mZ)
     , mCellId(follow->mCellId), mActive(follow->mActive), mFollowIndex(mFollowIndexCounter++)
 {
     mTargetActorRefId = follow->mTargetId;
     mTargetActorId = follow->mTargetActorId;
-    // mDuration isn't saved in the save file, so just giving it "1" for now if the package had a duration.
-    // The exact value of mDuration only matters for repeating packages.
-    if (mRemainingDuration > 0) // Previously mRemainingDuration could be negative even when mDuration was 0. Checking for > 0 should fix old saves.
-       mDuration = 1;
-    else
-       mDuration = 0;
 }
 
 bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)

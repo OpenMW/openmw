@@ -10,12 +10,22 @@
 #include "creaturestats.hpp"
 #include "steering.hpp"
 
-MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
-    : mTargetId(targetId), mSpellId(spellId), mCasting(false), mManual(manualSpell), mDistance(0)
+namespace MWMechanics
 {
-    ActionSpell action = ActionSpell(spellId);
-    bool isRanged;
-    mDistance = action.getCombatRange(isRanged);
+    namespace
+    {
+        float getInitialDistance(const std::string& spellId)
+        {
+            ActionSpell action = ActionSpell(spellId);
+            bool isRanged;
+            return action.getCombatRange(isRanged);
+        }
+    }
+}
+
+MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
+    : mTargetId(targetId), mSpellId(spellId), mCasting(false), mManual(manualSpell), mDistance(getInitialDistance(spellId))
+{
 }
 
 bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::CharacterController& characterController, MWMechanics::AiState& state, float duration)
