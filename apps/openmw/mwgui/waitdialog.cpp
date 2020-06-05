@@ -150,11 +150,10 @@ namespace MWGui
         if (hour >= 13) hour -= 12;
         if (hour == 0) hour = 12;
 
-        std::string dateTimeText =
-                MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getDay ()) + " "
-                + month + " (#{sDay} " + MyGUI::utility::toString(MWBase::Environment::get().getWorld ()->getTimeStamp ().getDay())
-                + ") " + MyGUI::utility::toString(hour) + " " + (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
-
+        ESM::EpochTimeStamp currentDate = MWBase::Environment::get().getWorld()->getEpochTimeStamp();
+        int daysPassed = MWBase::Environment::get().getWorld()->getTimeStamp().getDay();
+        std::string formattedHour = pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}";
+        std::string dateTimeText = Misc::StringUtils::format("%i %s (#{sDay} %i) %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);
         mDateTimeText->setCaptionWithReplacing (dateTimeText);
     }
 

@@ -69,6 +69,7 @@ namespace MWPhysics
 
 namespace MWWorld
 {
+    class DateTimeManager;
     class WeatherManager;
     class Player;
     class ProjectileManager;
@@ -85,13 +86,6 @@ namespace MWWorld
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
 
-            ESM::Variant* mGameHour;
-            ESM::Variant* mDaysPassed;
-            ESM::Variant* mDay;
-            ESM::Variant* mMonth;
-            ESM::Variant* mYear;
-            ESM::Variant* mTimeScale;
-
             Cells mCells;
 
             std::string mCurrentWorldSpace;
@@ -102,6 +96,7 @@ namespace MWWorld
             std::unique_ptr<MWRender::RenderingManager> mRendering;
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
+            std::unique_ptr<MWWorld::DateTimeManager> mCurrentDate;
             std::shared_ptr<ProjectileManager> mProjectileManager;
 
             bool mSky;
@@ -139,7 +134,6 @@ namespace MWWorld
             World& operator= (const World&);
 
             void updateWeather(float duration, bool paused = false);
-            int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags);
 
@@ -172,6 +166,8 @@ namespace MWWorld
             void ensureNeededRecords();
 
             void fillGlobalVariables();
+
+            void updateSkyDate();
 
             /**
              * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
@@ -318,24 +314,14 @@ namespace MWWorld
             void advanceTime (double hours, bool incremental = false) override;
             ///< Advance in-game time.
 
-            void setHour (double hour) override;
-            ///< Set in-game time hour.
-
-            void setMonth (int month) override;
-            ///< Set in-game time month.
-
-            void setDay (int day) override;
-            ///< Set in-game time day.
-
-            int getDay() const override;
-            int getMonth() const override;
-            int getYear() const override;
-
             std::string getMonthName (int month = -1) const override;
             ///< Return name of month (-1: current month)
 
             TimeStamp getTimeStamp() const override;
-            ///< Return current in-game time stamp.
+            ///< Return current in-game time and number of day since new game start.
+
+            ESM::EpochTimeStamp getEpochTimeStamp() const override;
+            ///< Return current in-game date and time.
 
             bool toggleSky() override;
             ///< \return Resulting mode
