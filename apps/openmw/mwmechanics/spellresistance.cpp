@@ -40,8 +40,8 @@ namespace MWMechanics
 
         float resistance = getEffectResistanceAttribute(effectId, magicEffects);
 
-        int willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
-        float luck = static_cast<float>(stats.getAttribute(ESM::Attribute::Luck).getModified());
+        float willpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
+        float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
         float x = (willpower + 0.1f * luck) * stats.getFatigueTerm();
 
         // This makes spells that are easy to cast harder to resist and vice versa

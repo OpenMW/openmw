@@ -94,8 +94,8 @@ namespace MWMechanics
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        int actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
-        int actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+        float actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
+        float actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
         float castChance = (lowestSkill - spell->mData.mCost + 0.2f * actorWillpower + 0.1f * actorLuck);
 

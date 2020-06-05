@@ -9,19 +9,44 @@ namespace ESM
     StatState<T>::StatState() : mBase(0), mMod(0), mCurrent(0), mDamage(0), mProgress(0) {}
 
     template<typename T>
-    void StatState<T>::load(ESMReader &esm)
+    void StatState<T>::load(ESMReader &esm, bool intFallback)
     {
-        esm.getHNT(mBase, "STBA");
+        // We changed stats values from integers to floats; ensure backwards compatibility
+        if (intFallback)
+        {
+            int base = 0;
+            esm.getHNT(base, "STBA");
+            mBase = static_cast<float>(base);
 
-        mMod = 0;
-        esm.getHNOT(mMod, "STMO");
-        mCurrent = 0;
-        esm.getHNOT(mCurrent, "STCU");
+            int mod = 0;
+            esm.getHNOT(mod, "STMO");
+            mMod = static_cast<float>(mod);
 
-        // mDamage was changed to a float; ensure backwards compatibility
-        T oldDamage = 0;
-        esm.getHNOT(oldDamage, "STDA");
-        mDamage = static_cast<float>(oldDamage);
+            int current = 0;
+            esm.getHNOT(current, "STCU");
+            mCurrent = static_cast<float>(current);
+
+            // mDamage was changed to a float; ensure backwards compatibility
+            int oldDamage = 0;
+            esm.getHNOT(oldDamage, "STDA");
+            mDamage = static_cast<float>(oldDamage);
+        }
+        else
+        {
+            mBase = 0;
+            esm.getHNT(mBase, "STBA");
+
+            mMod = 0;
+            esm.getHNOT(mMod, "STMO");
+
+            mCurrent = 0;
+            esm.getHNOT(mCurrent, "STCU");
+
+            mDamage = 0;
+            esm.getHNOT(mDamage, "STDF");
+
+            mProgress = 0;
+        }
 
         esm.getHNOT(mDamage, "STDF");
 

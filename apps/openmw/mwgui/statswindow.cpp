@@ -159,7 +159,7 @@ namespace MWGui
         for (int i=0; ids[i]; ++i)
             if (ids[i]==id)
             {
-                setText (id, std::to_string(value.getModified()));
+                setText (id, std::to_string(static_cast<int>(value.getModified())));
 
                 MyGUI::TextBox* box;
                 getWidget(box, id);

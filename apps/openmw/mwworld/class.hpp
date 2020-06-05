@@ -321,7 +321,7 @@ namespace MWWorld
             bool isPureLandCreature(const MWWorld::Ptr& ptr) const;
             bool isMobile(const MWWorld::Ptr& ptr) const;
 
-            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+            virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
                 const;

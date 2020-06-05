@@ -421,7 +421,7 @@ namespace MWWorld
         return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
     }
 
-    int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         throw std::runtime_error("class does not support skills");
     }

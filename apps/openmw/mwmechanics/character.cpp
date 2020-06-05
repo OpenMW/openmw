@@ -2128,7 +2128,7 @@ void CharacterController::update(float duration, bool animationOnly)
                     cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
                 }
 
-                const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
+                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
                     if (!godmode)

@@ -29,7 +29,7 @@ namespace ESM
             TimeStamp mNextWorsening;
         };
 
-        StatState<int> mAttributes[Attribute::Length];
+        StatState<float> mAttributes[Attribute::Length];
         StatState<float> mDynamic[3];
 
         MagicEffects mMagicEffects;

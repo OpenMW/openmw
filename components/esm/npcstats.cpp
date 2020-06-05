@@ -31,8 +31,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mDisposition = 0;
     esm.getHNOT (mDisposition, "DISP");
 
+    bool intFallback = esm.getFormat() < 11;
     for (int i=0; i<27; ++i)
-        mSkills[i].load (esm);
+        mSkills[i].load (esm, intFallback);
 
     mWerewolfDeprecatedData = false;
     if (esm.getFormat() < 8 && esm.peekNextSub("STBA"))
@@ -40,17 +41,17 @@ void ESM::NpcStats::load (ESMReader &esm)
         // we have deprecated werewolf skills, stored interleaved
         // Load into one big vector, then remove every 2nd value
         mWerewolfDeprecatedData = true;
-        std::vector<ESM::StatState<int> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
+        std::vector<ESM::StatState<float> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
 
         for (int i=0; i<27; ++i)
         {
-            ESM::StatState<int> skill;
-            skill.load(esm);
+            ESM::StatState<float> skill;
+            skill.load(esm, intFallback);
             skills.push_back(skill);
         }
 
         int i=0;
-        for (std::vector<ESM::StatState<int> >::iterator it = skills.begin(); it != skills.end(); ++i)
+        for (std::vector<ESM::StatState<float> >::iterator it = skills.begin(); it != skills.end(); ++i)
         {
             if (i%2 == 1)
                 it = skills.erase(it);
@@ -68,7 +69,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     {
         ESM::StatState<int> dummy;
         for (int i=0; i<8; ++i)
-            dummy.load(esm);
+            dummy.load(esm, intFallback);
         mWerewolfDeprecatedData = true;
     }
 

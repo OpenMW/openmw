@@ -43,12 +43,13 @@ void ESM::Player::load (ESMReader &esm)
             checkPrevItems = false;
     }
 
+    bool intFallback = esm.getFormat() < 11;
     if (esm.hasMoreSubs())
     {
         for (int i=0; i<ESM::Attribute::Length; ++i)
-            mSaveAttributes[i].load(esm);
+            mSaveAttributes[i].load(esm, intFallback);
         for (int i=0; i<ESM::Skill::Length; ++i)
-            mSaveSkills[i].load(esm);
+            mSaveSkills[i].load(esm, intFallback);
     }
 }
 
