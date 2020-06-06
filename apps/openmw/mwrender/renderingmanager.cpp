@@ -213,10 +213,8 @@ namespace MWRender
         , mUnderwaterIndoorFog(Fallback::Map::getFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
         , mDistantFog(false)
-        , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
-        , mBorders(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -290,9 +288,7 @@ namespace MWRender
         DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
         DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
-
         mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
-        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
 
         const std::string normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
         const std::string heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
@@ -302,7 +298,7 @@ namespace MWRender
 
         mTerrainStorage = new TerrainStorage(mResourceSystem, normalMapPattern, heightMapPattern, useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
 
-        if (mDistantTerrain)
+        if (Settings::Manager::getBool("distant terrain", "Terrain"))
         {
             const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
             int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
@@ -558,9 +554,9 @@ namespace MWRender
 
     bool RenderingManager::toggleBorders()
     {
-        mBorders = !mBorders;
-        mTerrain->setBordersVisible(mBorders);
-        return mBorders;
+        bool borders = !mTerrain->getBordersVisible();
+        mTerrain->setBordersVisible(borders);
+        return borders;
     }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)
