@@ -26,6 +26,7 @@
     Bug #5427: GetDistance unknown ID error is misleading
     Bug #5435: Enemies can't hurt the player when collision is off
     Bug #5441: Enemies can't push a player character when in critical strike stance
+    Bug #5451: Magic projectiles don't disappear with the caster
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
 

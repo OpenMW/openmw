@@ -387,6 +387,18 @@ namespace MWWorld
     {
         for (std::vector<MagicBoltState>::iterator it = mMagicBolts.begin(); it != mMagicBolts.end();)
         {
+            // If the actor caster is gone, the magic bolt needs to be removed from the scene during the next frame.
+            MWWorld::Ptr caster = it->getCaster();
+            if (!caster.isEmpty() && caster.getClass().isActor())
+            {
+                if (caster.getRefData().getCount() <= 0 || caster.getClass().getCreatureStats(caster).isDead())
+                {
+                    cleanupMagicBolt(*it);
+                    it = mMagicBolts.erase(it);
+                    continue;
+                }
+            }
+
             osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->mValue.getFloat();
@@ -404,8 +416,6 @@ namespace MWWorld
             it->mNode->setPosition(newPos);
 
             update(*it, duration);
-
-            MWWorld::Ptr caster = it->getCaster();
 
             // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
             std::vector<MWWorld::Ptr> targetActors;
