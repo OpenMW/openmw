@@ -299,12 +299,10 @@ namespace MWRender
         float mNearClip;
         float mViewDistance;
         bool mDistantFog : 1;
-        bool mDistantTerrain : 1;
         bool mFieldOfViewOverridden : 1;
         float mFieldOfViewOverride;
         float mFieldOfView;
         float mFirstPersonFieldOfView;
-        bool mBorders;
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);
