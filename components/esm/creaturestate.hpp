@@ -9,7 +9,7 @@ namespace ESM
 {
     // format 0, saved games only
 
-    struct CreatureState : public ObjectState
+    struct CreatureState final : public ObjectState
     {
         InventoryState mInventory;
         CreatureStats mCreatureStats;
@@ -17,14 +17,14 @@ namespace ESM
         /// Initialize to default state
         void blank();
 
-        virtual void load (ESMReader &esm);
-        virtual void save (ESMWriter &esm, bool inInventory = false) const;
+        void load (ESMReader &esm) final;
+        void save (ESMWriter &esm, bool inInventory = false) const final;
 
-        virtual CreatureState& asCreatureState()
+        CreatureState& asCreatureState() final
         {
             return *this;
         }
-        virtual const CreatureState& asCreatureState() const
+        const CreatureState& asCreatureState() const final
         {
             return *this;
         }
