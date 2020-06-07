@@ -4,7 +4,7 @@
 #include "esmwriter.hpp"
 
 unsigned int ESM::SavedGame::sRecordId = ESM::REC_SAVE;
-int ESM::SavedGame::sCurrentFormat = 11;
+int ESM::SavedGame::sCurrentFormat = 12;
 
 void ESM::SavedGame::load (ESMReader &esm)
 {
