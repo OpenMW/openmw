@@ -66,11 +66,6 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     return false;
 }
 
-int AiPursue::getTypeId() const
-{
-    return TypeIdPursue;
-}
-
 MWWorld::Ptr AiPursue::getTarget() const
 {
     return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);

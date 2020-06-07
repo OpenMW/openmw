@@ -406,16 +406,6 @@ namespace MWMechanics
         }
     }
 
-    int AiCombat::getTypeId() const
-    {
-        return TypeIdCombat;
-    }
-
-    unsigned int AiCombat::getPriority() const
-    {
-        return 1;
-    }
-
     MWWorld::Ptr AiCombat::getTarget() const
     {
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);

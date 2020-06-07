@@ -12,13 +12,16 @@ namespace MWMechanics
         public:
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdBreathe; }
 
-            unsigned int getPriority() const final;
-
-            bool canCancel() const final { return false; }
-            bool shouldCancelPreviousAi() const final { return false; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mPriority = 2;
+                options.mCanCancel = false;
+                options.mShouldCancelPreviousAi = false;
+                return options;
+            }
     };
 }
 #endif
-

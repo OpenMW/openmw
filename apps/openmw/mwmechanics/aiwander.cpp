@@ -113,11 +113,12 @@ namespace MWMechanics
     }
 
     AiWander::AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat):
+        TypedAiPackage<AiWander>(makeDefaultOptions().withRepeat(repeat)),
         mDistance(std::max(0, distance)),
         mDuration(std::max(0, duration)),
         mRemainingDuration(duration), mTimeOfDay(timeOfDay),
         mIdle(getInitialIdle(idle)),
-        mRepeat(repeat), mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)),
+        mStoredInitialActorPosition(false), mInitialActorPosition(osg::Vec3f(0, 0, 0)),
         mHasDestination(false), mDestination(osg::Vec3f(0, 0, 0)), mUsePathgrid(false)
     {
     }
@@ -307,11 +308,6 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
 
         return false; // AiWander package not yet completed
-    }
-
-    bool AiWander::getRepeat() const
-    {
-        return mRepeat;
     }
 
     osg::Vec3f AiWander::getDestination(const MWWorld::Ptr& actor) const
@@ -599,11 +595,6 @@ namespace MWMechanics
         }
     }
 
-    int AiWander::getTypeId() const
-    {
-        return TypeIdWander;
-    }
-
     void AiWander::stopWalking(const MWWorld::Ptr& actor)
     {
         mPathFinder.clearPath();
@@ -873,7 +864,7 @@ namespace MWMechanics
         assert (mIdle.size() == 8);
         for (int i=0; i<8; ++i)
             wander->mData.mIdle[i] = mIdle[i];
-        wander->mData.mShouldRepeat = mRepeat;
+        wander->mData.mShouldRepeat = mOptions.mRepeat;
         wander->mStoredInitialActorPosition = mStoredInitialActorPosition;
         if (mStoredInitialActorPosition)
             wander->mInitialActorPosition = mInitialActorPosition;
@@ -885,12 +876,12 @@ namespace MWMechanics
     }
 
     AiWander::AiWander (const ESM::AiSequence::AiWander* wander)
-        : mDistance(std::max(static_cast<short>(0), wander->mData.mDistance))
+        : TypedAiPackage<AiWander>(makeDefaultOptions().withRepeat(wander->mData.mShouldRepeat != 0))
+        , mDistance(std::max(static_cast<short>(0), wander->mData.mDistance))
         , mDuration(std::max(static_cast<short>(0), wander->mData.mDuration))
         , mRemainingDuration(wander->mDurationData.mRemainingDuration)
         , mTimeOfDay(wander->mData.mTimeOfDay)
         , mIdle(getInitialIdle(wander->mData.mIdle))
-        , mRepeat(wander->mData.mShouldRepeat != 0)
         , mStoredInitialActorPosition(wander->mStoredInitialActorPosition)
         , mHasDestination(false)
         , mDestination(osg::Vec3f(0, 0, 0))

@@ -95,11 +95,6 @@ namespace MWMechanics
         return false;
     }
 
-    int AiEscort::getTypeId() const
-    {
-        return TypeIdEscort;
-    }
-
     void AiEscort::writeState(ESM::AiSequence::AiSequence &sequence) const
     {
         std::unique_ptr<ESM::AiSequence::AiEscort> escort(new ESM::AiSequence::AiEscort());

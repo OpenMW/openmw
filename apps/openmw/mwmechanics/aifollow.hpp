@@ -53,15 +53,18 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            bool sideWithTarget() const final { return true; }
-            bool followTargetThroughDoors() const final { return true; }
-            bool shouldCancelPreviousAi() const final { return !mCommanded; }
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdFollow; }
 
-            bool useVariableSpeed() const final { return true; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mSideWithTarget = true;
+                options.mFollowTargetThroughDoors = true;
+                return options;
+            }
 
             /// Returns the actor being followed
             std::string getFollowedActor();
@@ -87,7 +90,6 @@ namespace MWMechanics
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
             const bool mAlwaysFollow;
-            const bool mCommanded;
             const float mDuration; // Hours
             float mRemainingDuration; // Hours
             const float mX;
