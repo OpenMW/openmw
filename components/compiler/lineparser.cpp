@@ -86,13 +86,6 @@ namespace Compiler
     bool LineParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (mState==PotentialEndState)
-        {
-            getErrorHandler().warning ("Stray string argument", loc);
-            mState = EndState;
-            return true;
-        }
-
         if (mState==SetState)
         {
             std::string name2 = Misc::StringUtils::lowerCase (name);
@@ -445,8 +438,7 @@ namespace Compiler
             return true;
         }
 
-        if (code==Scanner::S_newline &&
-            (mState==EndState || mState==BeginState || mState==PotentialEndState))
+        if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
 
         if (code==Scanner::S_comma && mState==MessageState)

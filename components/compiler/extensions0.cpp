@@ -247,8 +247,8 @@ namespace Compiler
             extensions.registerInstruction ("startscript", "c", opcodeStartScript, opcodeStartScriptExplicit);
             extensions.registerInstruction ("stopscript", "c", opcodeStopScript);
             extensions.registerFunction ("getsecondspassed", 'f', "", opcodeGetSecondsPassed);
-            extensions.registerInstruction ("enable", "", opcodeEnable, opcodeEnableExplicit);
-            extensions.registerInstruction ("disable", "", opcodeDisable, opcodeDisableExplicit);
+            extensions.registerInstruction ("enable", "x", opcodeEnable, opcodeEnableExplicit);
+            extensions.registerInstruction ("disable", "x", opcodeDisable, opcodeDisableExplicit);
             extensions.registerFunction ("getdisabled", 'l', "x", opcodeGetDisabled, opcodeGetDisabledExplicit);
             extensions.registerFunction ("xbox", 'l', "", opcodeXBox);
             extensions.registerFunction ("onactivate", 'l', "", opcodeOnActivate, opcodeOnActivateExplicit);
