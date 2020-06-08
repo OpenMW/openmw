@@ -2051,6 +2051,8 @@ namespace MWMechanics
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
+            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 continue;
 
