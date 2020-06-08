@@ -1002,34 +1002,36 @@ RET=$?
 if [ -z $VERBOSE ]; then
 	if [ $RET -eq 0 ]; then
 		echo Done.
-		if [ -n $ACTIVATE_MSVC ]; then
-			echo
-			echo "Note: you must manually activate MSVC for the shell in which you want to do the build."
-			echo
-			echo "Some scripts have been created in the build directory to do so in an existing shell."
-			echo "Bash: source activate_msvc.sh"
-			echo "CMD: ActivateMSVC.bat"
-			echo "PowerShell: ActivateMSVC.ps1"
-			echo
-			echo "You may find options to launch a Development/Native Tools/Cross Tools shell in your start menu or Visual Studio."
-			echo
-			if [ $(uname -m) == 'x86_64' ]; then
-				if [ $BITS -eq 64 ]; then
-					inheritEnvironments=msvc_x64_x64
-				else
-					inheritEnvironments=msvc_x64
-				fi
-			else
-				if [ $BITS -eq 64 ]; then
-					inheritEnvironments=msvc_x86_x64
-				else
-					inheritEnvironments=msvc_x86
-				fi
-			fi
-			echo "In Visual Studio 15.3 (2017 Update 3) or later, try setting '\"inheritEnvironments\": [ \"$inheritEnvironments\" ]' in CMakeSettings.json to build in the IDE."
-		fi
 	else
 		echo Failed.
 	fi
 fi
+
+if [ -n $ACTIVATE_MSVC ]; then
+	echo
+	echo "Note: you must manually activate MSVC for the shell in which you want to do the build."
+	echo
+	echo "Some scripts have been created in the build directory to do so in an existing shell."
+	echo "Bash: source activate_msvc.sh"
+	echo "CMD: ActivateMSVC.bat"
+	echo "PowerShell: ActivateMSVC.ps1"
+	echo
+	echo "You may find options to launch a Development/Native Tools/Cross Tools shell in your start menu or Visual Studio."
+	echo
+	if [ $(uname -m) == 'x86_64' ]; then
+		if [ $BITS -eq 64 ]; then
+			inheritEnvironments=msvc_x64_x64
+		else
+			inheritEnvironments=msvc_x64
+		fi
+	else
+		if [ $BITS -eq 64 ]; then
+			inheritEnvironments=msvc_x86_x64
+		else
+			inheritEnvironments=msvc_x86
+		fi
+	fi
+	echo "In Visual Studio 15.3 (2017 Update 3) or later, try setting '\"inheritEnvironments\": [ \"$inheritEnvironments\" ]' in CMakeSettings.json to build in the IDE."
+fi
+
 wrappedExit $RET
