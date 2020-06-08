@@ -24,7 +24,9 @@
 
 #include <osg/Quat>
 
-MWMechanics::AiPackage::AiPackage() :
+MWMechanics::AiPackage::AiPackage(TypeId typeId, const Options& options) :
+    mTypeId(typeId),
+    mOptions(options),
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mTargetActorRefId(""),
     mTargetActorId(-1),
@@ -56,31 +58,6 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     else
         return MWWorld::Ptr();
-}
-
-bool MWMechanics::AiPackage::sideWithTarget() const
-{
-    return false;
-}
-
-bool MWMechanics::AiPackage::followTargetThroughDoors() const
-{
-    return false;
-}
-
-bool MWMechanics::AiPackage::canCancel() const
-{
-    return true;
-}
-
-bool MWMechanics::AiPackage::shouldCancelPreviousAi() const
-{
-    return true;
-}
-
-bool MWMechanics::AiPackage::getRepeat() const
-{
-    return false;
 }
 
 void MWMechanics::AiPackage::reset()

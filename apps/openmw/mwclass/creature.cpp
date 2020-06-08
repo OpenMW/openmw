@@ -605,7 +605,7 @@ namespace MWClass
     float Creature::getCapacity (const MWWorld::Ptr& ptr) const
     {
         const MWMechanics::CreatureStats& stats = getCreatureStats (ptr);
-        return static_cast<float>(stats.getAttribute(ESM::Attribute::Strength).getModified() * 5);
+        return stats.getAttribute(ESM::Attribute::Strength).getModified() * 5;
     }
 
     int Creature::getServices(const MWWorld::ConstPtr &actor) const
@@ -745,7 +745,7 @@ namespace MWClass
         throw std::runtime_error(std::string("Unexpected soundgen type: ")+name);
     }
 
-    int Creature::getSkill(const MWWorld::Ptr &ptr, int skill) const
+    float Creature::getSkill(const MWWorld::Ptr &ptr, int skill) const
     {
         MWWorld::LiveCellRef<ESM::Creature> *ref =
             ptr.get<ESM::Creature>();

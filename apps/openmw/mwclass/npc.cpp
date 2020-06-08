@@ -127,8 +127,8 @@ namespace
         }
 
         // initial health
-        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
-        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+        float strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
+        float endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
 
         int multiplier = 3;
 
@@ -1011,7 +1011,7 @@ namespace MWClass
                                           gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = static_cast<float>(getSkill(ptr, ESM::Skill::Acrobatics));
+        float a = getSkill(ptr, ESM::Skill::Acrobatics);
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1136,7 +1136,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        int unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
+        float unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
@@ -1283,7 +1283,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         return getNpcStats(ptr).getSkill(skill).getModified();
     }

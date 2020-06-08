@@ -13,12 +13,18 @@ namespace AiSequence
 
 namespace MWMechanics
 {
+    struct AiInternalTravel;
+
     /// \brief Causes the AI to travel to the specified point
-    class AiTravel final : public TypedAiPackage<AiTravel>
+    class AiTravel : public TypedAiPackage<AiTravel>
     {
         public:
-            /// Default constructor
-            AiTravel(float x, float y, float z, bool hidden = false);
+            AiTravel(float x, float y, float z, AiTravel* derived);
+
+            AiTravel(float x, float y, float z, AiInternalTravel* derived);
+
+            AiTravel(float x, float y, float z);
+
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
@@ -28,20 +34,35 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdTravel; }
 
-            bool useVariableSpeed() const final { return true; }
-
-            bool alwaysActive() const final { return true; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mAlwaysActive = true;
+                return options;
+            }
 
             osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
-            float mX;
-            float mY;
-            float mZ;
+            const float mX;
+            const float mY;
+            const float mZ;
 
-            bool mHidden;
+            const bool mHidden;
+    };
+
+    struct AiInternalTravel final : public AiTravel
+    {
+        AiInternalTravel(float x, float y, float z);
+
+        explicit AiInternalTravel(const ESM::AiSequence::AiTravel* travel);
+
+        static constexpr TypeId getTypeId() { return TypeIdInternalTravel; }
+
+        std::unique_ptr<AiPackage> clone() const final;
     };
 }
 

@@ -17,21 +17,25 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdCast; }
 
             MWWorld::Ptr getTarget() const final;
 
-            unsigned int getPriority() const final;
-
-            bool canCancel() const final { return false; }
-            bool shouldCancelPreviousAi() const final { return false; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mPriority = 3;
+                options.mCanCancel = false;
+                options.mShouldCancelPreviousAi = false;
+                return options;
+            }
 
         private:
-            std::string mTargetId;
-            std::string mSpellId;
+            const std::string mTargetId;
+            const std::string mSpellId;
             bool mCasting;
-            bool mManual;
-            float mDistance;
+            const bool mManual;
+            const float mDistance;
     };
 }
 

@@ -139,6 +139,7 @@ namespace Terrain
         virtual void enable(bool enabled) {}
 
         virtual void setBordersVisible(bool visible);
+        virtual bool getBordersVisible() { return mBorderVisible; }
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.

@@ -132,7 +132,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+    float endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
     health = 0.1f * endurance;
 
     float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
@@ -765,7 +765,7 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
+        float intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
         if (ptr == getPlayer())
@@ -844,7 +844,7 @@ namespace MWMechanics
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->mValue.getFloat ();
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+        float endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
         float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
         if (normalizedEncumbrance > 1)
@@ -871,7 +871,7 @@ namespace MWMechanics
             return;
 
         // Restore fatigue
-        int endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
+        float endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
         static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
@@ -2051,6 +2051,8 @@ namespace MWMechanics
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
+            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 continue;
 

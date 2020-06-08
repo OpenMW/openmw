@@ -29,12 +29,13 @@ namespace MWMechanics
             AiActivate(const ESM::AiSequence::AiActivate* activate);
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
-            int getTypeId() const final;
+
+            static constexpr TypeId getTypeId() { return TypeIdActivate; }
 
             void writeState(ESM::AiSequence::AiSequence& sequence) const final;
 
         private:
-            std::string mObjectId;
+            const std::string mObjectId;
     };
 }
 #endif // GAME_MWMECHANICS_AIACTIVATE_H

@@ -5,6 +5,7 @@
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
+    Bug #4021: Attributes and skills are not stored as floats
     Bug #4623: Corprus implementation is incorrect
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
     Bug #5108: Savegame bloating due to inefficient fog textures format
@@ -25,6 +26,7 @@
     Bug #5427: GetDistance unknown ID error is misleading
     Bug #5435: Enemies can't hurt the player when collision is off
     Bug #5441: Enemies can't push a player character when in critical strike stance
+    Bug #5451: Magic projectiles don't disappear with the caster
     Bug #5452: Autowalk is being included in savegames
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
@@ -299,7 +301,7 @@
     Feature #5147: Show spell magicka cost in spell buying window
     Feature #5170: Editor: Land shape editing, land selection
     Feature #5172: Editor: Delete instances/references with keypress in scene window
-    Feature #5193: Weapon sheathing
+    Feature #5193: Shields sheathing
     Feature #5201: Editor: Show tool outline in scene view, when using editmodes
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape

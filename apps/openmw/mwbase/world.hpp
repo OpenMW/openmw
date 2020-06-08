@@ -48,6 +48,7 @@ namespace ESM
     struct EffectList;
     struct CreatureLevList;
     struct ItemLevList;
+    struct TimeStamp;
 }
 
 namespace MWRender
@@ -204,24 +205,14 @@ namespace MWBase
             virtual void advanceTime (double hours, bool incremental = false) = 0;
             ///< Advance in-game time.
 
-            virtual void setHour (double hour) = 0;
-            ///< Set in-game time hour.
-
-            virtual void setMonth (int month) = 0;
-            ///< Set in-game time month.
-
-            virtual void setDay (int day) = 0;
-            ///< Set in-game time day.
-
-            virtual int getDay() const = 0;
-            virtual int getMonth() const = 0;
-            virtual int getYear() const = 0;
-
             virtual std::string getMonthName (int month = -1) const = 0;
             ///< Return name of month (-1: current month)
 
             virtual MWWorld::TimeStamp getTimeStamp() const = 0;
-            ///< Return current in-game time stamp.
+            ///< Return current in-game time and number of day since new game start.
+
+            virtual ESM::EpochTimeStamp getEpochTimeStamp() const = 0;
+            ///< Return current in-game date and time.
 
             virtual bool toggleSky() = 0;
             ///< \return Resulting mode

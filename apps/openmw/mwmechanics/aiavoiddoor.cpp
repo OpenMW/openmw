@@ -72,16 +72,6 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
     return false;
 }
 
-int MWMechanics::AiAvoidDoor::getTypeId() const
-{
-    return TypeIdAvoidDoor;
-}
-
-unsigned int MWMechanics::AiAvoidDoor::getPriority() const
-{
- return 2;
-}
-
 bool MWMechanics::AiAvoidDoor::isStuck(const osg::Vec3f& actorPos) const
 {
     return (actorPos - mLastPos).length2() < 10 * 10;

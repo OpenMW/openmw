@@ -284,12 +284,12 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
     // rate weapon
     for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
     {
-        int max = 0;
+        float max = 0;
         int maxWeaponSkill = -1;
 
         for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
         {
-            int skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
+            float skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
             if (skillValue > max && !weaponSkillVisited[j])
             {
                 max = skillValue;
@@ -399,7 +399,7 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
 
-    int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
+    float unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)

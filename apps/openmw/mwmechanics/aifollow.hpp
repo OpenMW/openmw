@@ -53,15 +53,18 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            bool sideWithTarget() const final { return true; }
-            bool followTargetThroughDoors() const final { return true; }
-            bool shouldCancelPreviousAi() const final { return !mCommanded; }
-
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            int getTypeId() const final;
+            static constexpr TypeId getTypeId() { return TypeIdFollow; }
 
-            bool useVariableSpeed() const final { return true; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mSideWithTarget = true;
+                options.mFollowTargetThroughDoors = true;
+                return options;
+            }
 
             /// Returns the actor being followed
             std::string getFollowedActor();
@@ -86,16 +89,15 @@ namespace MWMechanics
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
-            bool mAlwaysFollow;
-            bool mCommanded;
-            float mDuration; // Hours
+            const bool mAlwaysFollow;
+            const float mDuration; // Hours
             float mRemainingDuration; // Hours
-            float mX;
-            float mY;
-            float mZ;
-            std::string mCellId;
+            const float mX;
+            const float mY;
+            const float mZ;
+            const std::string mCellId;
             bool mActive; // have we spotted the target?
-            int mFollowIndex;
+            const int mFollowIndex;
 
             static int mFollowIndexCounter;
     };
