@@ -809,6 +809,12 @@ namespace MWClass
             return;
         }
 
+        if (ptr.getRefData().getCount() <= 0)
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         const CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
         ESM::CreatureState& creatureState = state.asCreatureState();
         customData.mContainerStore->writeState (creatureState.mInventory);

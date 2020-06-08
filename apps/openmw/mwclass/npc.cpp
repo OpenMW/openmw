@@ -1327,6 +1327,12 @@ namespace MWClass
             return;
         }
 
+        if (ptr.getRefData().getCount() <= 0)
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         const NpcCustomData& customData = ptr.getRefData().getCustomData()->asNpcCustomData();
         ESM::NpcState& npcState = state.asNpcState();
         customData.mInventoryStore.writeState (npcState.mInventory);
