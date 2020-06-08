@@ -84,7 +84,7 @@ namespace MWMechanics
         float mSideMovementAngle;
 
     public:
-        typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
+        typedef std::tuple<int, std::string, int> SummonKey; // <ESM::MagicEffect index, source ID, effect index>
     private:
         std::map<SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
 

@@ -24,6 +24,7 @@ namespace ESM
                     esm.writeHNT ("ARG_", effectIt->mArg);
                 esm.writeHNT ("MAGN", effectIt->mMagnitude);
                 esm.writeHNT ("DURA", effectIt->mDuration);
+                esm.writeHNT ("EIND", effectIt->mEffectIndex);
                 esm.writeHNT ("LEFT", effectIt->mTimeLeft);
             }
         }
@@ -53,6 +54,8 @@ namespace ESM
                 esm.getHNOT(effect.mArg, "ARG_");
                 esm.getHNT (effect.mMagnitude, "MAGN");
                 esm.getHNT (effect.mDuration, "DURA");
+                effect.mEffectIndex = -1;
+                esm.getHNOT (effect.mEffectIndex, "EIND");
                 if (format < 9)
                     effect.mTimeLeft = effect.mDuration;
                 else

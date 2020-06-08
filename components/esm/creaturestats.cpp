@@ -115,9 +115,11 @@ void ESM::CreatureStats::load (ESMReader &esm)
         int magicEffect;
         esm.getHT(magicEffect);
         std::string source = esm.getHNOString("SOUR");
+        int effectIndex = -1;
+        esm.getHNOT (effectIndex, "EIND");
         int actorId;
         esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[std::make_pair(magicEffect, source)] = actorId;
+        mSummonedCreatureMap[std::make_tuple(magicEffect, source, effectIndex)] = actorId;
     }
 
     while (esm.isNextSub("GRAV"))
@@ -212,10 +214,13 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (std::map<std::pair<int, std::string>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    for (std::map<std::tuple<int, std::string, int>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
     {
-        esm.writeHNT ("SUMM", it->first.first);
-        esm.writeHNString ("SOUR", it->first.second);
+        esm.writeHNT ("SUMM", std::get<0>(it->first));
+        esm.writeHNString ("SOUR", std::get<1>(it->first));
+        int effectIndex = std::get<2>(it->first);
+        if (effectIndex != -1)
+            esm.writeHNT ("EIND", effectIndex);
         esm.writeHNT ("ACID", it->second);
     }
 

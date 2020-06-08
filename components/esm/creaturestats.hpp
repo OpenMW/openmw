@@ -39,7 +39,7 @@ namespace ESM
         bool mHasAiSettings;
         StatState<int> mAiSettings[4];
 
-        std::map<std::pair<int, std::string>, int> mSummonedCreatureMap;
+        std::map<std::tuple<int, std::string, int>, int> mSummonedCreatureMap;
         std::vector<int> mSummonGraveyard;
 
         ESM::TimeStamp mTradeTime;

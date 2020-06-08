@@ -65,11 +65,11 @@ namespace MWMechanics
     {
     }
 
-    void UpdateSummonedCreatures::visit(EffectKey key, const std::string &sourceName, const std::string &sourceId, int casterActorId, float magnitude, float remainingTime, float totalTime)
+    void UpdateSummonedCreatures::visit(EffectKey key, int effectIndex, const std::string &sourceName, const std::string &sourceId, int casterActorId, float magnitude, float remainingTime, float totalTime)
     {
         if (isSummoningEffect(key.mId) && magnitude > 0)
         {
-            mActiveEffects.insert(std::make_pair(key.mId, sourceId));
+            mActiveEffects.insert(std::make_tuple(key.mId, sourceId, effectIndex));
         }
     }
 
@@ -78,12 +78,12 @@ namespace MWMechanics
         MWMechanics::CreatureStats& creatureStats = mActor.getClass().getCreatureStats(mActor);
         std::map<CreatureStats::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
 
-        for (std::set<std::pair<int, std::string> >::iterator it = mActiveEffects.begin(); it != mActiveEffects.end(); ++it)
+        for (std::set<CreatureStats::SummonKey>::iterator it = mActiveEffects.begin(); it != mActiveEffects.end(); ++it)
         {
-            bool found = creatureMap.find(std::make_pair(it->first, it->second)) != creatureMap.end();
+            bool found = creatureMap.find(*it) != creatureMap.end();
             if (!found)
             {
-                std::string creatureID = getSummonedCreature(it->first);
+                std::string creatureID = getSummonedCreature(std::get<0>(*it));
                 if (!creatureID.empty())
                 {
                     int creatureActorId = -1;
@@ -115,7 +115,7 @@ namespace MWMechanics
                         // still insert into creatureMap so we don't try to spawn again every frame, that would spam the warning log
                     }
 
-                    creatureMap.insert(std::make_pair(*it, creatureActorId));
+                    creatureMap.emplace(*it, creatureActorId);
                 }
             }
         }
@@ -149,9 +149,10 @@ namespace MWMechanics
             if (ptr.isEmpty() || (ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished()))
             {
                 // Purge the magic effect so a new creature can be summoned if desired
-                creatureStats.getActiveSpells().purgeEffect(it->first.first, it->first.second);
+                creatureStats.getActiveSpells().purgeEffect(std::get<0>(it->first), std::get<1>(it->first), std::get<2>(it->first));
+                creatureStats.getSpells().purgeEffect(std::get<0>(it->first), std::get<1>(it->first));
                 if (mActor.getClass().hasInventoryStore(mActor))
-                    mActor.getClass().getInventoryStore(mActor).purgeEffect(it->first.first, it->first.second);
+                    mActor.getClass().getInventoryStore(mActor).purgeEffect(std::get<0>(it->first), std::get<1>(it->first), false, std::get<2>(it->first));
 
                 MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mActor, it->second);
                 creatureMap.erase(it++);

@@ -22,6 +22,7 @@ namespace ESM
         int mArg; // skill or attribute
         float mDuration;
         float mTimeLeft;
+        int mEffectIndex;
     };
 
     // format 0, saved games only

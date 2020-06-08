@@ -50,7 +50,10 @@ namespace MWMechanics
                 for (const auto& effect : spell->mEffects.mList)
                 {
                     if (iter.second.mPurgedEffects.find(i) != iter.second.mPurgedEffects.end())
+                    {
+                        ++i;
                         continue; // effect was purged
+                    }
 
                     float random = 1.f;
                     if (iter.second.mEffectRands.find(i) != iter.second.mEffectRands.end())
@@ -108,7 +111,7 @@ namespace MWMechanics
 
             SpellParams params;
             params.mEffectRands = random;
-            mSpells.insert (std::make_pair (spell, params));
+            mSpells.emplace(spell, params);
             mSpellsChanged = true;
         }
     }
@@ -272,7 +275,8 @@ namespace MWMechanics
             const ESM::Spell * spell = it.first;
             for (const auto& effectIt : it.second)
             {
-                visitor.visit(effectIt.first, spell->mName, spell->mId, -1, effectIt.second.getMagnitude());
+                // FIXME: since Spells merges effects with the same ID, there is no sense to use multiple effects with same ID here
+                visitor.visit(effectIt.first, -1, spell->mName, spell->mId, -1, effectIt.second.getMagnitude());
             }
         }
     }
@@ -308,20 +312,24 @@ namespace MWMechanics
 
     void Spells::purgeEffect(int effectId, const std::string & sourceId)
     {
-        const ESM::Spell * spell = SpellList::getSpell(sourceId);
+        // Effect source may be not a spell
+        const ESM::Spell * spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(sourceId);
+        if (spell == nullptr)
+            return;
+
         auto spellIt = mSpells.find(spell);
         if (spellIt == mSpells.end())
             return;
 
-        int i = 0;
+        int index = 0;
         for (auto& effectIt : spellIt->first->mEffects.mList)
         {
             if (effectIt.mEffectID == effectId)
             {
-                spellIt->second.mPurgedEffects.insert(i);
+                spellIt->second.mPurgedEffects.insert(index);
                 mSpellsChanged = true;
             }
-            ++i;
+            ++index;
         }
     }
 
@@ -441,7 +449,7 @@ namespace MWMechanics
                 ESM::SpellState::SpellParams params;
                 params.mEffectRands = it.second.mEffectRands;
                 params.mPurgedEffects = it.second.mPurgedEffects;
-                state.mSpells.insert(std::make_pair(it.first->mId, params));
+                state.mSpells.emplace(it.first->mId, params);
             }
         }
 

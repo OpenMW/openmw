@@ -121,8 +121,9 @@ namespace MWMechanics
         // Try absorbing the spell. Some handling must still happen for absorbed effects.
         bool absorbed = absorbSpell(spell, caster, target);
 
+        int currentEffectIndex = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
-             !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt)
+             !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt, ++currentEffectIndex)
         {
             if (effectIt->mRange != range)
                 continue;
@@ -189,6 +190,7 @@ namespace MWMechanics
                     effect.mArg = MWMechanics::EffectKey(*effectIt).mArg;
                     effect.mMagnitude = magnitude;
                     effect.mTimeLeft = 0.f;
+                    effect.mEffectIndex = currentEffectIndex;
 
                     // Avoid applying absorb effects if the caster is the target
                     // We still need the spell to be added
@@ -268,7 +270,7 @@ namespace MWMechanics
                 if (isSummoningEffect(effectIt->mEffectID) && !target.isEmpty() && target.getClass().isActor())
                 {
                     CreatureStats& targetStats = target.getClass().getCreatureStats(target);
-                    std::map<CreatureStats::SummonKey, int>::iterator findCreature = targetStats.getSummonedCreatureMap().find(std::make_pair(effectIt->mEffectID, mId));
+                    std::map<CreatureStats::SummonKey, int>::iterator findCreature = targetStats.getSummonedCreatureMap().find(std::make_tuple(effectIt->mEffectID, mId, currentEffectIndex));
                     if (findCreature != targetStats.getSummonedCreatureMap().end())
                     {
                         MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, findCreature->second);
