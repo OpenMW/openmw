@@ -21,8 +21,9 @@ void ESM::Player::load (ESMReader &esm)
     else
         mHasMark = false;
 
-    mAutoMove = 0;
-    esm.getHNOT (mAutoMove, "AMOV");
+    // Automove, no longer used.
+    if (esm.isNextSub("AMOV"))
+        esm.skipHSub();
 
     mBirthsign = esm.getHNString ("SIGN");
 
@@ -66,9 +67,6 @@ void ESM::Player::save (ESMWriter &esm) const
         esm.writeHNT ("MARK", mMarkedPosition, 24);
         mMarkedCell.save (esm);
     }
-
-    if (mAutoMove)
-        esm.writeHNT ("AMOV", mAutoMove);
 
     esm.writeHNString ("SIGN", mBirthsign);
 

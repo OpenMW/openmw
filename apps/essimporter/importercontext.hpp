@@ -63,7 +63,6 @@ namespace ESSImport
             , mHour(0.f)
             , mNextActorId(0)
         {
-            mPlayer.mAutoMove = 0;
             ESM::CellId playerCellId;
             playerCellId.mPaged = true;
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;

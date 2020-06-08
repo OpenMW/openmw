@@ -25,9 +25,8 @@ namespace ESM
         unsigned char mHasMark;
         ESM::Position mMarkedPosition;
         CellId mMarkedCell;
-        unsigned char mAutoMove;
         std::string mBirthsign;
-        
+
         int mCurrentCrimeId;
         int mPaidCrimeId;
 
