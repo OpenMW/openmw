@@ -80,7 +80,6 @@ namespace MWWorld
             int mActorId;
             int mProjectileId;
 
-            bool mHit;
             osg::Vec3f mHitPosition;
 
             // TODO: this will break when the game is saved and reloaded, since there is currently

@@ -278,7 +278,6 @@ namespace MWWorld
         MagicBoltState state;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
-        state.mHit = false;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -329,7 +328,6 @@ namespace MWWorld
         state.mAttackStrength = attackStrength;
         int type = projectile.get<ESM::Weapon>()->mBase->mData.mType;
         state.mThrown = MWMechanics::getWeaponType(type)->mWeaponClass == ESM::WeaponType::Thrown;
-        state.mHit = false;
 
         MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), projectile.getCellRef().getRefId());
         MWWorld::Ptr ptr = ref.getPtr();
@@ -403,20 +401,6 @@ namespace MWWorld
                 }
             }
 
-            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-            std::vector<MWWorld::Ptr> targetActors;
-            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-
-            if (it->mHit)
-            {
-                MWBase::Environment::get().getWorld()->explodeSpell(it->mHitPosition, it->mEffects, caster, MWWorld::Ptr(),
-                                                    ESM::RT_Target, it->mSpellId, it->mSourceName);
-
-                it = mMagicBolts.erase(it);
-                continue;
-            }
-
             osg::Quat orient = it->mNode->getAttitude();
             static float fTargetSpellMaxSpeed = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
                         .find("fTargetSpellMaxSpeed")->mValue.getFloat();
@@ -436,6 +420,11 @@ namespace MWWorld
             mPhysics->updateProjectile(it->mProjectileId, newPos);
 
             update(*it, duration);
+
+            // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
+            std::vector<MWWorld::Ptr> targetActors;
+            if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
+                caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
@@ -483,12 +472,6 @@ namespace MWWorld
     {
         for (std::vector<ProjectileState>::iterator it = mProjectiles.begin(); it != mProjectiles.end();)
         {
-            if (it->mHit)
-            {
-                it = mProjectiles.erase(it);
-                continue;
-            }
-
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
             // simulating aerodynamics at all
             it->mVelocity -= osg::Vec3f(0, 0, Constants::GravityConst * Constants::UnitsPerMeter * 0.1f) * duration;
@@ -560,9 +543,6 @@ namespace MWWorld
         {
             if (it->mProjectileId == projectileId)
             {
-                if (it->mHit)
-                    return;
-
                 MWWorld::Ptr caster = it->getCaster();
                 if (caster == target)
                     return;
@@ -586,8 +566,8 @@ namespace MWWorld
 
                 it->mHitPosition = pos;
                 cleanupProjectile(*it);
-                it->mHit = true;
                 MWMechanics::projectileHit(caster, target, bow, projectileRef.getPtr(), pos, it->mAttackStrength);
+                mProjectiles.erase(it);
                 return;
             }
         }
@@ -595,9 +575,6 @@ namespace MWWorld
         {
             if (it->mProjectileId == projectileId)
             {
-                if (it->mHit)
-                    return;
-
                 MWWorld::Ptr caster = it->getCaster();
                 if (caster == target)
                     return;
@@ -607,7 +584,6 @@ namespace MWWorld
 
                 it->mHitPosition = pos;
                 cleanupMagicBolt(*it);
-                it->mHit = true;
 
                 MWMechanics::CastSpell cast(caster, target);
                 cast.mHitPosition = pos;
@@ -617,6 +593,7 @@ namespace MWWorld
                 cast.inflict(target, caster, it->mEffects, ESM::RT_Target, false, true);
 
                 MWBase::Environment::get().getWorld()->explodeSpell(pos, it->mEffects, caster, target, ESM::RT_Target, it->mSpellId, it->mSourceName);
+                mMagicBolts.erase(it);
 
                 return;
             }
@@ -732,7 +709,6 @@ namespace MWWorld
             state.mVelocity = esm.mVelocity;
             state.mIdArrow = esm.mId;
             state.mAttackStrength = esm.mAttackStrength;
-            state.mHit = false;
 
             std::string model;
             try
@@ -764,7 +740,6 @@ namespace MWWorld
             state.mIdMagic.push_back(esm.mId);
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
-            state.mHit = false;
             std::string texture = "";
 
             try
