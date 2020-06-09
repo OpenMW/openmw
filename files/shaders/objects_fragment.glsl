@@ -176,18 +176,22 @@ void main()
     vec3 matSpec = specTex.xyz;
 #else
     float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = gl_FrontMaterial.specular.xyz;
+    vec3 matSpec;
     if (colorMode == ColorMode_Specular)
         matSpec = passColor.xyz;
+    else
+        matSpec = gl_FrontMaterial.specular.xyz;
 #endif
 
     if (matSpec != vec3(0.0))
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
 #if @radialFog
-    float depth = euclideanDepth;
+    float depth;
     // For the less detailed mesh of simple water we need to recalculate depth on per-pixel basis
     if (simpleWater)
         depth = length(passViewPos);
+    else
+        depth = euclideanDepth;
     float fogValue = clamp((depth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #else
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
