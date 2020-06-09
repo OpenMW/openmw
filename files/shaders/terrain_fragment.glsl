@@ -90,7 +90,8 @@ void main()
         matSpec = passColor.xyz;
 #endif
 
-    gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;
+    if (matSpec != vec3(0.0))
+        gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;
 
 #if @radialFog
     float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
