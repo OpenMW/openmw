@@ -10,13 +10,13 @@ namespace ESSImport
     {
         out.mBirthsign = pcdt.mBirthsign;
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
-        for (std::vector<PCDT::FNAM>::const_iterator it = pcdt.mFactions.begin(); it != pcdt.mFactions.end(); ++it)
+        for (const auto & essFaction : pcdt.mFactions)
         {
             ESM::NpcStats::Faction faction;
-            faction.mExpelled = (it->mFlags & 0x2) != 0;
-            faction.mRank = it->mRank;
-            faction.mReputation = it->mReputation;
-            out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(it->mFactionName.toString())] = faction;
+            faction.mExpelled = (essFaction.mFlags & 0x2) != 0;
+            faction.mRank = essFaction.mRank;
+            faction.mReputation = essFaction.mReputation;
+            out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(essFaction.mFactionName.toString())] = faction;
         }
         for (int i=0; i<3; ++i)
             out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
@@ -35,10 +35,9 @@ namespace ESSImport
         teleportingEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_TeleportingDisabled);
         levitationEnabled = !(pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_LevitationDisabled);
 
-        for (std::vector<std::string>::const_iterator it = pcdt.mKnownDialogueTopics.begin();
-             it != pcdt.mKnownDialogueTopics.end(); ++it)
+        for (const auto & knownDialogueTopic : pcdt.mKnownDialogueTopics)
         {
-            outDialogueTopics.push_back(Misc::StringUtils::lowerCase(*it));
+            outDialogueTopics.push_back(Misc::StringUtils::lowerCase(knownDialogueTopic));
         }
 
         controls.mViewSwitchDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ViewSwitchDisabled;

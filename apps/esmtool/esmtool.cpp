@@ -352,12 +352,12 @@ int load(Arguments& info)
             std::cout << "Author: " << esm.getAuthor() << std::endl
                  << "Description: " << esm.getDesc() << std::endl
                  << "File format version: " << esm.getFVer() << std::endl;
-            std::vector<ESM::Header::MasterData> m = esm.getGameFiles();
-            if (!m.empty())
+            std::vector<ESM::Header::MasterData> masterData = esm.getGameFiles();
+            if (!masterData.empty())
             {
                 std::cout << "Masters:" << std::endl;
-                for(unsigned int i=0;i<m.size();i++)
-                    std::cout << "  " << m[i].name << ", " << m[i].size << " bytes" << std::endl;
+                for(const auto& master : masterData)
+                    std::cout << "  " << master.name << ", " << master.size << " bytes" << std::endl;
             }
         }
 
@@ -369,7 +369,7 @@ int load(Arguments& info)
             esm.getRecHeader(flags);
 
             EsmTool::RecordBase *record = EsmTool::RecordBase::create(n);
-            if (record == 0)
+            if (record == nullptr)
             {
                 if (std::find(skipped.begin(), skipped.end(), n.intval) == skipped.end())
                 {
@@ -538,8 +538,8 @@ int comp(Arguments& info)
     Arguments fileOne;
     Arguments fileTwo;
 
-    fileOne.raw_given = 0;
-    fileTwo.raw_given = 0;
+    fileOne.raw_given = false;
+    fileTwo.raw_given = false;
 
     fileOne.mode = "clone";
     fileTwo.mode = "clone";

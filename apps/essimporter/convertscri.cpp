@@ -1,18 +1,16 @@
 #include "convertscri.hpp"
 
-#include <iostream>
-
 namespace
 {
 
     template <typename T, ESM::VarType VariantType>
     void storeVariables(const std::vector<T>& variables, ESM::Locals& locals, const std::string& scriptname)
     {
-        for (typename std::vector<T>::const_iterator it = variables.begin(); it != variables.end(); ++it)
+        for (const auto& variable : variables)
         {
-            ESM::Variant val(*it);
+            ESM::Variant val(variable);
             val.setType(VariantType);
-            locals.mVariables.push_back(std::make_pair(std::string(), val));
+            locals.mVariables.emplace_back(std::string(), val);
         }
     }
 

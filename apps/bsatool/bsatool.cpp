@@ -183,19 +183,19 @@ int list(Bsa::BSAFile& bsa, Arguments& info)
 {
     // List all files
     const Bsa::BSAFile::FileList &files = bsa.getList();
-    for(unsigned int i=0; i<files.size(); i++)
+    for (const auto& file : files)
     {
         if(info.longformat)
         {
             // Long format
             std::ios::fmtflags f(std::cout.flags());
-            std::cout << std::setw(50) << std::left << files[i].name;
-            std::cout << std::setw(8) << std::left << std::dec << files[i].fileSize;
-            std::cout << "@ 0x" << std::hex << files[i].offset << std::endl;
+            std::cout << std::setw(50) << std::left << file.name;
+            std::cout << std::setw(8) << std::left << std::dec << file.fileSize;
+            std::cout << "@ 0x" << std::hex << file.offset << std::endl;
             std::cout.flags(f);
         }
         else
-            std::cout << files[i].name << std::endl;
+            std::cout << file.name << std::endl;
     }
 
     return 0;
@@ -252,14 +252,9 @@ int extract(Bsa::BSAFile& bsa, Arguments& info)
 
 int extractAll(Bsa::BSAFile& bsa, Arguments& info)
 {
-    // Get the list of files present in the archive
-    Bsa::BSAFile::FileList list = bsa.getList();
-
-    // Iter on the list
-    for(Bsa::BSAFile::FileList::iterator it = list.begin(); it != list.end(); ++it) {
-        const char* archivePath = it->name;
-
-        std::string extractPath (archivePath);
+    for (const auto &file : bsa.getList())
+    {
+        std::string extractPath(file.name);
         replaceAll(extractPath, "\\", "/");
 
         // Get the target path (the path the file will be extracted to)
@@ -278,7 +273,7 @@ int extractAll(Bsa::BSAFile& bsa, Arguments& info)
 
         // Get a stream for the file to extract
         // (inefficient because getFile iter on the list again)
-        Files::IStreamPtr data = bsa.getFile(archivePath);
+        Files::IStreamPtr data = bsa.getFile(file.name);
         bfs::ofstream out(target, std::ios::binary);
 
         // Write the file to disk

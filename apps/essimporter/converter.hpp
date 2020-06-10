@@ -79,9 +79,9 @@ template <typename T>
 class DefaultConverter : public Converter
 {
 public:
-    virtual int getStage() { return 0; }
+    int getStage() override { return 0; }
 
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         T record;
         bool isDeleted = false;
@@ -90,7 +90,7 @@ public:
         mRecords[record.mId] = record;
     }
 
-    virtual void write(ESM::ESMWriter& esm)
+    void write(ESM::ESMWriter& esm) override
     {
         for (typename std::map<std::string, T>::const_iterator it = mRecords.begin(); it != mRecords.end(); ++it)
         {
@@ -107,7 +107,7 @@ protected:
 class ConvertNPC : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         ESM::NPC npc;
         bool isDeleted = false;
@@ -127,8 +127,8 @@ public:
             ESM::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
-            for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
-                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+            for (const auto & spell : npc.mSpells.mList)
+                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[spell] = empty;
 
             // Clear the list now that we've written it, this prevents issues cropping up with
             // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.
@@ -144,7 +144,7 @@ public:
 class ConvertCREA : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         // See comment in ConvertNPC
         ESM::Creature creature;
@@ -162,7 +162,7 @@ public:
 class ConvertGlobal : public DefaultConverter<ESM::Global>
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         ESM::Global global;
         bool isDeleted = false;
@@ -183,7 +183,7 @@ public:
 class ConvertClass : public DefaultConverter<ESM::Class>
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         ESM::Class class_;
         bool isDeleted = false;
@@ -199,7 +199,7 @@ public:
 class ConvertBook : public DefaultConverter<ESM::Book>
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         ESM::Book book;
         bool isDeleted = false;
@@ -215,7 +215,7 @@ public:
 class ConvertNPCC : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         std::string id = esm.getHNString("NAME");
         NPCC npcc;
@@ -235,7 +235,7 @@ public:
 class ConvertREFR : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         REFR refr;
         refr.load(esm);
@@ -261,7 +261,7 @@ public:
             }
         }
     }
-    virtual void write(ESM::ESMWriter& esm)
+    void write(ESM::ESMWriter& esm) override
     {
         esm.startRecord(ESM::REC_ASPL);
         esm.writeHNString("ID__", mSelectedSpell);
@@ -280,14 +280,14 @@ public:
           mLevitationEnabled(true)
     {}
 
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         PCDT pcdt;
         pcdt.load(esm);
 
         convertPCDT(pcdt, mContext->mPlayer, mContext->mDialogueState.mKnownTopics, mFirstPersonCam, mTeleportingEnabled, mLevitationEnabled, mContext->mControlsState);
     }
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
         esm.startRecord(ESM::REC_ENAB);
         esm.writeHNT("TELE", mTeleportingEnabled);
@@ -306,7 +306,7 @@ private:
 
 class ConvertCNTC : public Converter
 {
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         std::string id = esm.getHNString("NAME");
         CNTC cntc;
@@ -318,7 +318,7 @@ class ConvertCNTC : public Converter
 class ConvertCREC : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         std::string id = esm.getHNString("NAME");
         CREC crec;
@@ -330,8 +330,8 @@ public:
 class ConvertFMAP : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm);
-    virtual void write(ESM::ESMWriter &esm);
+    void read(ESM::ESMReader &esm) override;
+    void write(ESM::ESMWriter &esm) override;
 
 private:
     osg::ref_ptr<osg::Image> mGlobalMapImage;
@@ -340,8 +340,8 @@ private:
 class ConvertCell : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm);
-    virtual void write(ESM::ESMWriter& esm);
+    void read(ESM::ESMReader& esm) override;
+    void write(ESM::ESMWriter& esm) override;
 
 private:
     struct Cell
@@ -362,7 +362,7 @@ private:
 class ConvertKLST : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         KLST klst;
         klst.load(esm);
@@ -371,7 +371,7 @@ public:
         mContext->mPlayer.mObject.mNpcStats.mWerewolfKills = klst.mWerewolfKills;
     }
 
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
         esm.startRecord(ESM::REC_DCOU);
         for (std::map<std::string, int>::const_iterator it = mKillCounter.begin(); it != mKillCounter.end(); ++it)
@@ -389,7 +389,7 @@ private:
 class ConvertFACT : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         ESM::Faction faction;
         bool isDeleted = false;
@@ -409,7 +409,7 @@ public:
 class ConvertSTLN : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         std::string itemid = esm.getHNString("NAME");
         Misc::StringUtils::lowerCaseInPlace(itemid);
@@ -428,15 +428,15 @@ public:
             }
         }
     }
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
         ESM::StolenItems items;
         for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             std::map<std::pair<std::string, bool>, int> owners;
-            for (std::set<Owner>::const_iterator ownerIt = it->second.begin(); ownerIt != it->second.end(); ++ownerIt)
+            for (const auto & ownerIt : it->second)
             {
-                owners.insert(std::make_pair(std::make_pair(ownerIt->first, ownerIt->second)
+                owners.insert(std::make_pair(std::make_pair(ownerIt.first, ownerIt.second)
                                              // Since OpenMW doesn't suffer from the owner contamination bug,
                                              // it needs a count argument. But for legacy savegames, we don't know
                                              // this count, so must assume all items of that ID are stolen,
@@ -467,7 +467,7 @@ private:
 class ConvertINFO : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         INFO info;
         info.load(esm);
@@ -477,7 +477,7 @@ public:
 class ConvertDIAL : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         std::string id = esm.getHNString("NAME");
         DIAL dial;
@@ -485,7 +485,7 @@ public:
         if (dial.mIndex > 0)
             mDials[id] = dial;
     }
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
         for (std::map<std::string, DIAL>::const_iterator it = mDials.begin(); it != mDials.end(); ++it)
         {
@@ -505,7 +505,7 @@ private:
 class ConvertQUES : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         std::string id = esm.getHNString("NAME");
         QUES quest;
@@ -516,7 +516,7 @@ public:
 class ConvertJOUR : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm)
+    void read(ESM::ESMReader& esm) override
     {
         JOUR journal;
         journal.load(esm);
@@ -531,7 +531,7 @@ public:
     {
     }
 
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         mGame.load(esm);
         mHasGame = true;
@@ -551,7 +551,7 @@ public:
         }
     }
 
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
         if (!mHasGame)
             return;
@@ -578,7 +578,7 @@ private:
 class ConvertSCPT : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader &esm)
+    void read(ESM::ESMReader &esm) override
     {
         SCPT script;
         script.load(esm);
@@ -586,12 +586,12 @@ public:
         convertSCPT(script, out);
         mScripts.push_back(out);
     }
-    virtual void write(ESM::ESMWriter &esm)
+    void write(ESM::ESMWriter &esm) override
     {
-        for (std::vector<ESM::GlobalScript>::const_iterator it = mScripts.begin(); it != mScripts.end(); ++it)
+        for (const auto & script : mScripts)
         {
             esm.startRecord(ESM::REC_GSCR);
-            it->save(esm);
+            script.save(esm);
             esm.endRecord(ESM::REC_GSCR);
         }
     }
@@ -603,9 +603,9 @@ private:
 class ConvertPROJ : public Converter
 {
 public:
-    virtual int getStage() override { return 2; }
-    virtual void read(ESM::ESMReader& esm) override;
-    virtual void write(ESM::ESMWriter& esm) override;
+    int getStage() override { return 2; }
+    void read(ESM::ESMReader& esm) override;
+    void write(ESM::ESMWriter& esm) override;
 private:
     void convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam);
     PROJ mProj;
@@ -614,8 +614,8 @@ private:
 class ConvertSPLM : public Converter
 {
 public:
-    virtual void read(ESM::ESMReader& esm) override;
-    virtual void write(ESM::ESMWriter& esm) override;
+    void read(ESM::ESMReader& esm) override;
+    void write(ESM::ESMWriter& esm) override;
 private:
     SPLM mSPLM;
 };

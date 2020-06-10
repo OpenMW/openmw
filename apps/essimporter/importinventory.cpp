@@ -4,8 +4,6 @@
 
 #include <components/esm/esmreader.hpp>
 
-#include <components/esm/loadcont.hpp>
-
 namespace ESSImport
 {
 
