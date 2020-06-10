@@ -147,10 +147,11 @@ namespace MWSound
         volume = static_cast<float>(pow(10.0, (sound->mData.mVolume / 255.0*3348.0 - 3348.0) / 2000.0));
         min = sound->mData.mMinRange;
         max = sound->mData.mMaxRange;
-        if (min == 0)
+        if (min == 0 && max == 0)
+        {
             min = fAudioDefaultMinDistance;
-        if (max == 0)
             max = fAudioDefaultMaxDistance;
+        }
 
         min *= fAudioMinDistanceMult;
         max *= fAudioMaxDistanceMult;
