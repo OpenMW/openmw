@@ -779,7 +779,7 @@ std::string creatureListFlags(int flags)
 
 std::string lightFlags(int flags)
 {
-    std::string properties = "";
+    std::string properties;
     if (flags == 0) properties += "[None] ";
     if (flags & ESM::Light::Dynamic) properties += "Dynamic ";
     if (flags & ESM::Light::Fire) properties += "Fire ";

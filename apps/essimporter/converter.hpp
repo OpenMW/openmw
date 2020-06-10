@@ -127,8 +127,8 @@ public:
             ESM::SpellState::SpellParams empty;
             // FIXME: player start spells and birthsign spells aren't listed here,
             // need to fix openmw to account for this
-            for (std::vector<std::string>::const_iterator it = npc.mSpells.mList.begin(); it != npc.mSpells.mList.end(); ++it)
-                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[*it] = empty;
+            for (const auto & spell : npc.mSpells.mList)
+                mContext->mPlayer.mObject.mCreatureStats.mSpells.mSpells[spell] = empty;
 
             // Clear the list now that we've written it, this prevents issues cropping up with
             // ensureCustomData() in OpenMW tripping over no longer existing spells, where an error would be fatal.
@@ -434,9 +434,9 @@ public:
         for (std::map<std::string, std::set<Owner> >::const_iterator it = mStolenItems.begin(); it != mStolenItems.end(); ++it)
         {
             std::map<std::pair<std::string, bool>, int> owners;
-            for (std::set<Owner>::const_iterator ownerIt = it->second.begin(); ownerIt != it->second.end(); ++ownerIt)
+            for (const auto & ownerIt : it->second)
             {
-                owners.insert(std::make_pair(std::make_pair(ownerIt->first, ownerIt->second)
+                owners.insert(std::make_pair(std::make_pair(ownerIt.first, ownerIt.second)
                                              // Since OpenMW doesn't suffer from the owner contamination bug,
                                              // it needs a count argument. But for legacy savegames, we don't know
                                              // this count, so must assume all items of that ID are stolen,
@@ -588,10 +588,10 @@ public:
     }
     virtual void write(ESM::ESMWriter &esm)
     {
-        for (std::vector<ESM::GlobalScript>::const_iterator it = mScripts.begin(); it != mScripts.end(); ++it)
+        for (const auto & script : mScripts)
         {
             esm.startRecord(ESM::REC_GSCR);
-            it->save(esm);
+            script.save(esm);
             esm.endRecord(ESM::REC_GSCR);
         }
     }

@@ -16,15 +16,12 @@
 #include <components/esm/player.hpp>
 
 #include <components/esm/loadalch.hpp>
-#include <components/esm/loadclas.hpp>
 #include <components/esm/loadspel.hpp>
 #include <components/esm/loadarmo.hpp>
 #include <components/esm/loadweap.hpp>
 #include <components/esm/loadclot.hpp>
 #include <components/esm/loadench.hpp>
-#include <components/esm/loadweap.hpp>
 #include <components/esm/loadlevlist.hpp>
-#include <components/esm/loadglob.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -49,7 +46,7 @@ namespace
         image->allocateImage(128, 128, 1, GL_RGB, GL_UNSIGNED_BYTE);
 
         // need to convert pixel format from BGRA to RGB as the jpg readerwriter doesn't support it otherwise
-        std::vector<unsigned char>::const_iterator it = fileHeader.mSCRS.begin();
+        auto it = fileHeader.mSCRS.begin();
         for (int y=0; y<128; ++y)
         {
             for (int x=0; x<128; ++x)
@@ -317,10 +314,9 @@ namespace ESSImport
 
         std::set<unsigned int> unknownRecords;
 
-        for (std::map<unsigned int, std::shared_ptr<Converter> >::const_iterator it = converters.begin();
-             it != converters.end(); ++it)
+        for (const auto & converter : converters)
         {
-            it->second->setContext(context);
+            converter.second->setContext(context);
         }
 
         while (esm.hasMoreRecs())
@@ -328,7 +324,7 @@ namespace ESSImport
             ESM::NAME n = esm.getRecName();
             esm.getRecHeader();
 
-            std::map<unsigned int, std::shared_ptr<Converter> >::iterator it = converters.find(n.intval);
+            auto it = converters.find(n.intval);
             if (it != converters.end())
             {
                 it->second->read(esm);
@@ -358,17 +354,15 @@ namespace ESSImport
         writer.setDescription("");
         writer.setRecordCount (0);
 
-        for (std::vector<ESM::Header::MasterData>::const_iterator it = header.mMaster.begin();
-             it != header.mMaster.end(); ++it)
-            writer.addMaster (it->name, 0); // not using the size information anyway -> use value of 0
+        for (const auto & master : header.mMaster)
+            writer.addMaster(master.name, 0); // not using the size information anyway -> use value of 0
 
         writer.save (stream);
 
         ESM::SavedGame profile;
-        for (std::vector<ESM::Header::MasterData>::const_iterator it = header.mMaster.begin();
-             it != header.mMaster.end(); ++it)
+        for (const auto & master : header.mMaster)
         {
-            profile.mContentFiles.push_back(it->name);
+            profile.mContentFiles.push_back(master.name);
         }
         profile.mDescription = esm.getDesc();
         profile.mInGameTime.mDay = context.mDay;
