@@ -85,9 +85,11 @@ void main()
     vec3 matSpec = vec3(diffuseTex.a);
 #else
     float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec = gl_FrontMaterial.specular.xyz;
+    vec3 matSpec;
     if (colorMode == ColorMode_Specular)
         matSpec = passColor.xyz;
+    else
+        matSpec = gl_FrontMaterial.specular.xyz;
 #endif
 
     if (matSpec != vec3(0.0))

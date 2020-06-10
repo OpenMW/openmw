@@ -29,25 +29,27 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, float shadowing
 vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadowDiffuse)
 #endif
 {
-    vec4 diffuse = gl_FrontMaterial.diffuse;
-    vec3 ambient = gl_FrontMaterial.ambient.xyz;
-    vec3 emission = gl_FrontMaterial.emission.xyz;
+    vec4 diffuse;
+    vec3 ambient;
     if (colorMode == ColorMode_AmbientAndDiffuse)
     {
         diffuse = vertexColor;
         ambient = vertexColor.xyz;
     }
-    else if (colorMode == ColorMode_Ambient)
-    {
-        ambient = vertexColor.xyz;
-    }
     else if (colorMode == ColorMode_Diffuse)
     {
         diffuse = vertexColor;
+        ambient = gl_FrontMaterial.ambient.xyz;
     }
-    else if (colorMode == ColorMode_Emission)
+    else if (colorMode == ColorMode_Ambient)
     {
-        emission = vertexColor.xyz;
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient = vertexColor.xyz;
+    }
+    else
+    {
+        diffuse = gl_FrontMaterial.diffuse;
+        ambient = gl_FrontMaterial.ambient.xyz;
     }
     vec4 lightResult = vec4(0.0, 0.0, 0.0, diffuse.a);
 
@@ -65,7 +67,12 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
         lightResult.xyz += ambientLight + diffuseLight;
     }
 
-    lightResult.xyz += gl_LightModel.ambient.xyz * ambient + emission;
+    lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
+
+    if (colorMode == ColorMode_Emission)
+        lightResult.xyz += vertexColor.xyz;
+    else
+        lightResult.xyz += gl_FrontMaterial.emission.xyz;
 
 #if @clamp
     lightResult = clamp(lightResult, vec4(0.0), vec4(1.0));
