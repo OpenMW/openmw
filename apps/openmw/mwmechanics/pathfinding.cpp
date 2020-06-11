@@ -7,6 +7,7 @@
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -17,7 +18,6 @@
 #include "../mwworld/class.hpp"
 
 #include "pathgrid.hpp"
-#include "coordinateconverter.hpp"
 #include "actorutil.hpp"
 
 namespace
@@ -164,7 +164,7 @@ namespace MWMechanics
         }
 
         // NOTE: getClosestPoint expects local coordinates
-        CoordinateConverter converter(mCell->getCell());
+        Misc::CoordinateConverter converter(mCell->getCell());
 
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing
@@ -330,6 +330,10 @@ namespace MWMechanics
 
         if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
             buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+
+        if (mPath.empty())
+            buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
+                                     flags | DetourNavigator::Flag_usePathgrid, std::back_inserter(mPath));
 
         if (mPath.empty())
             buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));

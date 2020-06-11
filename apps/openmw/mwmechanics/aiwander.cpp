@@ -6,6 +6,7 @@
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
 #include <components/detournavigator/navigator.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -21,7 +22,6 @@
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "coordinateconverter.hpp"
 #include "actorutil.hpp"
 
 namespace MWMechanics
@@ -566,7 +566,7 @@ namespace MWMechanics
 
     void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
     {
-        CoordinateConverter(cell).toWorld(point);
+        Misc::CoordinateConverter(cell).toWorld(point);
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
@@ -767,7 +767,7 @@ namespace MWMechanics
         {
             // get NPC's position in local (i.e. cell) coordinates
             osg::Vec3f npcPos(mInitialActorPosition);
-            CoordinateConverter(cell).toLocal(npcPos);
+            Misc::CoordinateConverter(cell).toLocal(npcPos);
 
             // Find closest pathgrid point
             int closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);

@@ -2,6 +2,9 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/esm/loadpgrd.hpp>
+#include <components/misc/coordinateconverter.hpp>
+
 #include <Recast.h>
 
 namespace DetourNavigator
@@ -54,7 +57,8 @@ namespace DetourNavigator
             mNavMeshManager.addOffMeshConnection(
                 id,
                 toNavMeshCoordinates(mSettings, shapes.mConnectionStart),
-                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd)
+                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd),
+                AreaType_door
             );
             return true;
         }
@@ -95,7 +99,7 @@ namespace DetourNavigator
         const auto water = mWaterIds.find(id);
         if (water != mWaterIds.end())
             result = mNavMeshManager.removeObject(water->second) || result;
-        mNavMeshManager.removeOffMeshConnection(id);
+        mNavMeshManager.removeOffMeshConnections(id);
         return result;
     }
 
@@ -109,6 +113,27 @@ namespace DetourNavigator
     bool NavigatorImpl::removeWater(const osg::Vec2i& cellPosition)
     {
         return mNavMeshManager.removeWater(cellPosition);
+    }
+
+    void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
+    {
+        Misc::CoordinateConverter converter(&cell);
+        for (auto edge : pathgrid.mEdges)
+        {
+            const auto src = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV0]));
+            const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));
+            mNavMeshManager.addOffMeshConnection(
+                ObjectId(&pathgrid),
+                toNavMeshCoordinates(mSettings, src),
+                toNavMeshCoordinates(mSettings, dst),
+                AreaType_pathgrid
+            );
+        }
+    }
+
+    void NavigatorImpl::removePathgrid(const ESM::Pathgrid& pathgrid)
+    {
+        mNavMeshManager.removeOffMeshConnections(ObjectId(&pathgrid));
     }
 
     void NavigatorImpl::update(const osg::Vec3f& playerPosition)

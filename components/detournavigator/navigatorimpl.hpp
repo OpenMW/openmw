@@ -4,6 +4,8 @@
 #include "navigator.hpp"
 #include "navmeshmanager.hpp"
 
+#include <set>
+
 namespace DetourNavigator
 {
     class NavigatorImpl final : public Navigator
@@ -38,6 +40,10 @@ namespace DetourNavigator
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
 
+        void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) final;
+
+        void removePathgrid(const ESM::Pathgrid& pathgrid) final;
+
         void update(const osg::Vec3f& playerPosition) override;
 
         void wait() override;
@@ -58,6 +64,7 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::size_t> mAgents;
         std::unordered_map<ObjectId, ObjectId> mAvoidIds;
         std::unordered_map<ObjectId, ObjectId> mWaterIds;
+        std::multimap<ObjectId, ObjectId> mOffMeshConnectionIds;
 
         void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
         void updateWaterShapeId(const ObjectId id, const ObjectId waterId);

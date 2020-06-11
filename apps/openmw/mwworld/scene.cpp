@@ -365,6 +365,9 @@ namespace MWWorld
         if ((*iter)->getCell()->hasWater())
             navigator->removeWater(osg::Vec2i(cellX, cellY));
 
+        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*(*iter)->getCell()))
+            navigator->removePathgrid(*pathgrid);
+
         const auto player = world->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
 
@@ -393,7 +396,8 @@ namespace MWWorld
             float verts = ESM::Land::LAND_SIZE;
             float worldsize = ESM::Land::REAL_SIZE;
 
-            const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+            const auto world = MWBase::Environment::get().getWorld();
+            const auto navigator = world->getNavigator();
 
             const int cellX = cell->getCell()->getGridX();
             const int cellY = cell->getCell()->getGridY();
@@ -418,6 +422,9 @@ namespace MWWorld
                     navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
                             heightField->getCollisionObject()->getWorldTransform());
             }
+
+            if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
+                navigator->addPathgrid(*cell->getCell(), *pathgrid);
 
             // register local scripts
             // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
