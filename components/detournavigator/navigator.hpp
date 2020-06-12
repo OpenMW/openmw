@@ -9,6 +9,12 @@
 #include "recastmesh.hpp"
 #include "recastmeshtiles.hpp"
 
+namespace ESM
+{
+    struct Cell;
+    struct Pathgrid;
+}
+
 namespace DetourNavigator
 {
     struct ObjectShapes
@@ -138,6 +144,10 @@ namespace DetourNavigator
          * @return true if there was water at given cell.
          */
         virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
+
+        virtual void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) = 0;
+
+        virtual void removePathgrid(const ESM::Pathgrid& pathgrid) = 0;
 
         /**
          * @brief update start background navmesh update using current scene state.

@@ -39,9 +39,9 @@ namespace DetourNavigator
 
         bool reset(const osg::Vec3f& agentHalfExtents);
 
-        void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end);
+        void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, const AreaType areaType);
 
-        void removeOffMeshConnection(const ObjectId id);
+        void removeOffMeshConnections(const ObjectId id);
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 

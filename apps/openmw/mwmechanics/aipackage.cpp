@@ -4,6 +4,7 @@
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/detournavigator/navigator.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -20,7 +21,6 @@
 #include "movement.hpp"
 #include "steering.hpp"
 #include "actorutil.hpp"
-#include "coordinateconverter.hpp"
 
 #include <osg/Quat>
 
@@ -341,7 +341,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
-        CoordinateConverter(playerCell).toLocal(position);
+        Misc::CoordinateConverter(playerCell).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
