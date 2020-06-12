@@ -114,7 +114,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
-                    pathfindingHalfExtents, getNavigatorFlags(actor));
+                    pathfindingHalfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -401,4 +401,28 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
+}
+
+DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::Ptr& actor) const
+{
+    DetourNavigator::AreaCosts costs;
+    const DetourNavigator::Flags flags = getNavigatorFlags(actor);
+    const MWWorld::Class& actorClass = actor.getClass();
+
+    if (flags & DetourNavigator::Flag_swim)
+        costs.mWater = costs.mWater / actorClass.getSwimSpeed(actor);
+
+    if (flags & DetourNavigator::Flag_walk)
+    {
+        float walkCost;
+        if (getTypeId() == TypeIdWander)
+            walkCost = 1.0 / actorClass.getWalkSpeed(actor);
+        else
+            walkCost = 1.0 / actorClass.getRunSpeed(actor);
+        costs.mDoor = costs.mDoor * walkCost;
+        costs.mPathgrid = costs.mPathgrid * walkCost;
+        costs.mGround = costs.mGround * walkCost;
+    }
+
+    return costs;
 }
