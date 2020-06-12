@@ -513,16 +513,11 @@ namespace MWClass
 
         const GMST& gmst = getGmst();
 
-        float walkSpeed = gmst.fMinWalkSpeedCreature->mValue.getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
+        const float walkSpeed = gmst.fMinWalkSpeedCreature->mValue.getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
                 * (gmst.fMaxWalkSpeedCreature->mValue.getFloat() - gmst.fMinWalkSpeedCreature->mValue.getFloat());
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
-
-        // The Run speed difference for creatures comes from the animation speed difference (see runStateToWalkState in character.cpp)
-        float runSpeed = walkSpeed;
 
         float moveSpeed;
 
@@ -542,15 +537,11 @@ namespace MWClass
         else if(world->isSwimming(ptr))
         {
             float swimSpeed = walkSpeed;
-            if(running)
-                swimSpeed = runSpeed;
             swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
             swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
                                                     gmst.fSwimRunAthleticsMult->mValue.getFloat();
             moveSpeed = swimSpeed;
         }
-        else if(running)
-            moveSpeed = runSpeed;
         else
             moveSpeed = walkSpeed;
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
