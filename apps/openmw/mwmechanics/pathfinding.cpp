@@ -158,10 +158,7 @@ namespace MWMechanics
         // Maybe there is no pathgrid for this cell.  Just go to destination and let
         // physics take care of any blockages.
         if(!pathgrid || pathgrid->mPoints.empty())
-        {
-            *out++ = endPoint;
             return;
-        }
 
         // NOTE: getClosestPoint expects local coordinates
         Misc::CoordinateConverter converter(mCell->getCell());
@@ -178,6 +175,9 @@ namespace MWMechanics
         std::pair<int, bool> endNode = getClosestReachablePoint(pathgrid, &pathgridGraph,
             endPointInLocalCoords,
                 startNode);
+
+        if (!endNode.second)
+            return;
 
         // if it's shorter for actor to travel from start to end, than to travel from either
         // start or end to nearest pathgrid point, just travel from start to end.
@@ -249,8 +249,7 @@ namespace MWMechanics
         // unreachable pathgrid point.
         //
         // The AI routines will have to deal with such situations.
-        if(endNode.second)
-            *out++ = endPoint;
+        *out++ = endPoint;
     }
 
     float PathFinder::getZAngleToNext(float x, float y) const
@@ -328,15 +327,20 @@ namespace MWMechanics
         mPath.clear();
         mCell = cell;
 
-        if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
-            buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+        bool hasNavMesh = false;
 
-        if (mPath.empty())
+        if (!actor.getClass().isPureWaterCreature(actor) && !actor.getClass().isPureFlyingCreature(actor))
+            hasNavMesh = buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, std::back_inserter(mPath));
+
+        if (hasNavMesh && mPath.empty())
             buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents,
                                      flags | DetourNavigator::Flag_usePathgrid, std::back_inserter(mPath));
 
         if (mPath.empty())
             buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
+
+        if (!hasNavMesh && mPath.empty())
+            mPath.push_back(endPoint);
 
         mConstructed = true;
     }
