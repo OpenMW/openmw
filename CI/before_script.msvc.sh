@@ -957,7 +957,7 @@ fi
 	echo
 #fi
 
-if ! [ -z $ACTIVATE_MSVC ]; then
+if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
@@ -1007,7 +1007,7 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 
-if [ -n $ACTIVATE_MSVC ]; then
+if [ -n "$ACTIVATE_MSVC" ]; then
 	echo
 	echo "Note: you must manually activate MSVC for the shell in which you want to do the build."
 	echo
