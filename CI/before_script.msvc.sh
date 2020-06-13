@@ -213,8 +213,8 @@ run_cmd() {
 	shift
 
 	if [ -z $VERBOSE ]; then
-		eval $CMD $@ > output.log 2>&1
-		RET=$?
+		RET=0
+		eval $CMD $@ > output.log 2>&1 || RET=$?
 
 		if [ $RET -ne 0 ]; then
 			if [ -z $APPVEYOR ]; then
@@ -230,8 +230,9 @@ run_cmd() {
 
 		return $RET
 	else
-		eval $CMD $@
-		return $?
+		RET=0
+		eval $CMD $@ || RET=$?
+		return RET
 	fi
 }
 
@@ -256,15 +257,16 @@ download() {
 			printf "  Downloading $FILE... "
 
 			if [ -z $VERBOSE ]; then
-				curl --silent --retry 10 -kLy 5 -o $FILE $URL
-				RET=$?
+				RET=0
+				curl --silent --retry 10 -kLy 5 -o $FILE $URL || RET=$?
 			else
-				curl --retry 10 -kLy 5 -o $FILE $URL
-				RET=$?
+				RET=0
+				curl --retry 10 -kLy 5 -o $FILE $URL || RET=$?
 			fi
 
 			if [ $RET -ne 0 ]; then
 				echo "Failed!"
+				wrappedExit $RET
 			else
 				echo "Done."
 			fi
@@ -997,14 +999,17 @@ if [ -z $VERBOSE ]; then
 else
 	echo "- cmake .. $CMAKE_OPTS"
 fi
-run_cmd cmake .. $CMAKE_OPTS
-RET=$?
+RET=0
+run_cmd cmake .. $CMAKE_OPTS || RET=$?
 if [ -z $VERBOSE ]; then
 	if [ $RET -eq 0 ]; then
 		echo Done.
 	else
 		echo Failed.
 	fi
+fi
+if [ $RET -ne 0 ]; then
+	wrappedExit $RET
 fi
 
 if [ -n $ACTIVATE_MSVC ]; then
