@@ -521,4 +521,19 @@ namespace MWWorld
     {
         throw std::runtime_error ("class does not have creature stats");
     }
+
+    float Class::getWalkSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
+    }
+
+    float Class::getRunSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
+    }
+
+    float Class::getSwimSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
+    }
 }

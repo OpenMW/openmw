@@ -172,7 +172,8 @@ namespace DetourNavigator
          */
         template <class OutputIterator>
         Status findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
-            const osg::Vec3f& end, const Flags includeFlags, OutputIterator& out) const
+            const osg::Vec3f& end, const Flags includeFlags, const DetourNavigator::AreaCosts& areaCosts,
+            OutputIterator& out) const
         {
             static_assert(
                 std::is_same<
@@ -187,7 +188,7 @@ namespace DetourNavigator
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
-                toNavMeshCoordinates(settings, end), includeFlags, settings, out);
+                toNavMeshCoordinates(settings, end), includeFlags, areaCosts, settings, out);
         }
 
         /**

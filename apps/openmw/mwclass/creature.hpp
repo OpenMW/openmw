@@ -131,6 +131,12 @@ namespace MWClass
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
             virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+
+            float getWalkSpeed(const MWWorld::Ptr& ptr) const final;
+
+            float getRunSpeed(const MWWorld::Ptr& ptr) const final;
+
+            float getSwimSpeed(const MWWorld::Ptr& ptr) const final;
     };
 }
 

@@ -37,6 +37,7 @@ namespace
         std::deque<osg::Vec3f> mPath;
         std::back_insert_iterator<std::deque<osg::Vec3f>> mOut;
         float mStepSize;
+        AreaCosts mAreaCosts;
 
         DetourNavigatorNavigatorTest()
             : mPlayerPosition(0, 0, 0)
@@ -80,7 +81,7 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_empty_should_return_empty)
     {
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
                   Status::NavMeshNotFound);
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>());
     }
@@ -88,7 +89,7 @@ namespace
     TEST_F(DetourNavigatorNavigatorTest, find_path_for_existing_agent_with_no_navmesh_should_throw_exception)
     {
         mNavigator->addAgent(mAgentHalfExtents);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
                   Status::StartPolygonNotFound);
     }
 
@@ -97,7 +98,7 @@ namespace
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->addAgent(mAgentHalfExtents);
         mNavigator->removeAgent(mAgentHalfExtents);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut),
                   Status::StartPolygonNotFound);
     }
 
@@ -118,7 +119,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.85963428020477294921875),
@@ -168,7 +169,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.85963428020477294921875),
@@ -202,7 +203,7 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.87826788425445556640625),
@@ -253,7 +254,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.87826788425445556640625),
@@ -289,7 +290,7 @@ namespace
 
         mPath.clear();
         mOut = std::back_inserter(mPath);
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.85963428020477294921875),
@@ -346,7 +347,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.96328866481781005859375),
@@ -402,7 +403,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.9393787384033203125),
@@ -455,7 +456,7 @@ namespace
         mEnd.x() = 0;
         mEnd.z() = 300;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim, mAreaCosts, mOut), Status::Success);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
             osg::Vec3f(0, 215, 185.33331298828125),
@@ -501,7 +502,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mOut),
                   Status::Success);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
@@ -548,7 +549,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mOut),
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_swim | Flag_walk, mAreaCosts, mOut),
                   Status::Success);
 
         EXPECT_EQ(mPath, std::deque<osg::Vec3f>({
@@ -595,7 +596,7 @@ namespace
         mStart.x() = 0;
         mEnd.x() = 0;
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(0, 215, -94.75363922119140625),
@@ -644,7 +645,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.85963428020477294921875),
@@ -739,7 +740,7 @@ namespace
         mNavigator->update(mPlayerPosition);
         mNavigator->wait();
 
-        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mOut), Status::Success);
+        EXPECT_EQ(mNavigator->findPath(mAgentHalfExtents, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mOut), Status::Success);
 
         EXPECT_THAT(mPath, ElementsAre(
             Vec3fEq(-215, 215, 1.8782780170440673828125),
