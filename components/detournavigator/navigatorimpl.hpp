@@ -64,7 +64,6 @@ namespace DetourNavigator
         std::map<osg::Vec3f, std::size_t> mAgents;
         std::unordered_map<ObjectId, ObjectId> mAvoidIds;
         std::unordered_map<ObjectId, ObjectId> mWaterIds;
-        std::multimap<ObjectId, ObjectId> mOffMeshConnectionIds;
 
         void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
         void updateWaterShapeId(const ObjectId id, const ObjectId waterId);
