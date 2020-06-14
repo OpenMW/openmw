@@ -1476,7 +1476,6 @@ namespace MWClass
 
     float Npc::getSwimSpeed(const MWWorld::Ptr& ptr) const
     {
-        const GMST& gmst = getGmst();
         const MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         const NpcCustomData* npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
@@ -1486,17 +1485,6 @@ namespace MWClass
         const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run)
                 && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
-        float swimSpeed;
-
-        if (running)
-            swimSpeed = getRunSpeed(ptr);
-        else
-            swimSpeed = getWalkSpeed(ptr);
-
-        swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-        swimSpeed *= gmst.fSwimRunBase->mValue.getFloat()
-                + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat();
-
-        return swimSpeed;
+        return getSwimSpeedImpl(ptr, getGmst(), mageffects, running ? getRunSpeed(ptr) : getWalkSpeed(ptr));
     }
 }
