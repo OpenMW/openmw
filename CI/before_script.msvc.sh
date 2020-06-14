@@ -1007,6 +1007,9 @@ if [ -z $VERBOSE ]; then
 	fi
 fi
 
+echo "Script completed successfully."
+echo "You now have an OpenMW build system at $(unixPathAsWindows "$(pwd)")"
+
 if [ -n "$ACTIVATE_MSVC" ]; then
 	echo
 	echo "Note: you must manually activate MSVC for the shell in which you want to do the build."

@@ -362,6 +362,12 @@ namespace MWWorld
             virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
             virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+
+            virtual float getWalkSpeed(const Ptr& ptr) const;
+
+            virtual float getRunSpeed(const Ptr& ptr) const;
+
+            virtual float getSwimSpeed(const Ptr& ptr) const;
     };
 }
 

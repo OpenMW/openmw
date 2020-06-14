@@ -507,22 +507,15 @@ namespace MWClass
 
     float Creature::getSpeed(const MWWorld::Ptr &ptr) const
     {
-        MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+
         if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
         const GMST& gmst = getGmst();
 
-        float walkSpeed = gmst.fMinWalkSpeedCreature->mValue.getFloat() + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
-                * (gmst.fMaxWalkSpeedCreature->mValue.getFloat() - gmst.fMinWalkSpeedCreature->mValue.getFloat());
-
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWMechanics::MagicEffects &mageffects = stats.getMagicEffects();
-
-        bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run);
-
-        // The Run speed difference for creatures comes from the animation speed difference (see runStateToWalkState in character.cpp)
-        float runSpeed = walkSpeed;
 
         float moveSpeed;
 
@@ -540,19 +533,9 @@ namespace MWClass
             moveSpeed = flySpeed;
         }
         else if(world->isSwimming(ptr))
-        {
-            float swimSpeed = walkSpeed;
-            if(running)
-                swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics) *
-                                                    gmst.fSwimRunAthleticsMult->mValue.getFloat();
-            moveSpeed = swimSpeed;
-        }
-        else if(running)
-            moveSpeed = runSpeed;
+            moveSpeed = getSwimSpeed(ptr);
         else
-            moveSpeed = walkSpeed;
+            moveSpeed = getWalkSpeed(ptr);
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
@@ -888,5 +871,32 @@ namespace MWClass
     void Creature::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
     {
         MWMechanics::setBaseAISetting<ESM::Creature>(id, setting, value);
+    }
+
+    float Creature::getWalkSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const GMST& gmst = getGmst();
+
+        return gmst.fMinWalkSpeedCreature->mValue.getFloat()
+                + 0.01f * stats.getAttribute(ESM::Attribute::Speed).getModified()
+                * (gmst.fMaxWalkSpeedCreature->mValue.getFloat() - gmst.fMinWalkSpeedCreature->mValue.getFloat());
+    }
+
+    float Creature::getRunSpeed(const MWWorld::Ptr& ptr) const
+    {
+        return getWalkSpeed(ptr);
+    }
+
+    float Creature::getSwimSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const GMST& gmst = getGmst();
+        const MWMechanics::MagicEffects& mageffects = stats.getMagicEffects();
+
+        return getWalkSpeed(ptr)
+            * (1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude())
+            * (gmst.fSwimRunBase->mValue.getFloat()
+               + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat());
     }
 }
