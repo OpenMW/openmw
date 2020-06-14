@@ -82,12 +82,13 @@ namespace MWClass
 
     const Creature::GMST& Creature::getGmst()
     {
-        static GMST gmst;
-        static bool inited = false;
-        if (!inited)
+        static const GMST gmst = []
         {
+            GMST gmst;
+
             const MWBase::World *world = MWBase::Environment::get().getWorld();
             const MWWorld::Store<ESM::GameSetting> &store = world->getStore().get<ESM::GameSetting>();
+
             gmst.fMinWalkSpeedCreature = store.find("fMinWalkSpeedCreature");
             gmst.fMaxWalkSpeedCreature = store.find("fMaxWalkSpeedCreature");
             gmst.fEncumberedMoveEffect = store.find("fEncumberedMoveEffect");
@@ -101,8 +102,9 @@ namespace MWClass
             gmst.fKnockDownMult = store.find("fKnockDownMult");
             gmst.iKnockDownOddsMult = store.find("iKnockDownOddsMult");
             gmst.iKnockDownOddsBase = store.find("iKnockDownOddsBase");
-            inited = true;
-        }
+
+            return gmst;
+        } ();
         return gmst;
     }
 
