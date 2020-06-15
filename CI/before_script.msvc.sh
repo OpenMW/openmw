@@ -961,7 +961,7 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
-	MSVC_INSTALLATION_PATH=$(vswhere -legacy -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	MSVC_INSTALLATION_PATH=$(vswhere -legacy -products '*' -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
 	if [ $MSVC_REAL_VER -ge 15 ]; then
 		echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
 	else
