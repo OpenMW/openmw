@@ -23,17 +23,23 @@ namespace DetourNavigator
 namespace
 {
     template <class T>
-    struct Wrapper {
+    struct Wrapper
+    {
         const T& mValue;
     };
 
     template <class Range>
-    inline testing::Message& writeRange(testing::Message& message, const Range& range)
+    inline testing::Message& writeRange(testing::Message& message, const Range& range, std::size_t newLine)
     {
-        message << "{\n";
+        message << "{";
+        std::size_t i = 0;
         for (const auto& v : range)
-            message << Wrapper<typename std::decay<decltype(v)>::type> {v} << ",\n";
-        return message << "}";
+        {
+            if (i++ % newLine == 0)
+                message << "\n";
+            message << Wrapper<typename std::decay<decltype(v)>::type> {v} << ", ";
+        }
+        return message << "\n}";
     }
 }
 
@@ -61,21 +67,33 @@ namespace testing
     }
 
     template <>
+    inline testing::Message& Message::operator <<(const Wrapper<int>& value)
+    {
+        return (*this) << value.mValue;
+    }
+
+    template <>
     inline testing::Message& Message::operator <<(const std::deque<osg::Vec3f>& value)
     {
-        return writeRange(*this, value);
+        return writeRange(*this, value, 1);
     }
 
     template <>
     inline testing::Message& Message::operator <<(const std::vector<osg::Vec3f>& value)
     {
-        return writeRange(*this, value);
+        return writeRange(*this, value, 1);
     }
 
     template <>
     inline testing::Message& Message::operator <<(const std::vector<float>& value)
     {
-        return writeRange(*this, value);
+        return writeRange(*this, value, 3);
+    }
+
+    template <>
+    inline testing::Message& Message::operator <<(const std::vector<int>& value)
+    {
+        return writeRange(*this, value, 3);
     }
 }
 
