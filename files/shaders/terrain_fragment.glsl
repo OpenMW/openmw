@@ -43,8 +43,10 @@ void main()
     mat3 tbnTranspose = mat3(tangent, binormal, normalizedNormal);
 
     vec3 viewNormal = normalize(gl_NormalMatrix * (tbnTranspose * (normalTex.xyz * 2.0 - 1.0)));
-#else
-    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+#endif
+
+#if (!@normalMap && (@parallax || @forcePPL))
+    vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
 
 #if @parallax
@@ -93,7 +95,12 @@ void main()
 #endif
 
     if (matSpec != vec3(0.0))
+    {
+#if (!normalMap && !@parallax && !forcePPL)
+        vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
+#endif
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos), shininess, matSpec) * shadowing;
+    }
 
 #if @radialFog
     float fogValue = clamp((euclideanDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
