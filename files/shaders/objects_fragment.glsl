@@ -83,7 +83,9 @@ void main()
     mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
 
     vec3 viewNormal = gl_NormalMatrix * normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-#else
+#endif
+
+#if (!@normalMap && (@parallax || @forcePPL))
     vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
 #endif
 
@@ -184,7 +186,12 @@ void main()
 #endif
 
     if (matSpec != vec3(0.0))
+    {
+#if (!normalMap && !@parallax && !forcePPL)
+        vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
+#endif
         gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
+    }
 #if @radialFog
     float depth;
     // For the less detailed mesh of simple water we need to recalculate depth on per-pixel basis
