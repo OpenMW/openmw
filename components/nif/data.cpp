@@ -47,10 +47,9 @@ void NiGeometryData::read(NIFStream *nif)
     if (nif->getBoolean())
         nif->getVector4s(colors, verts);
 
-    // Only the first 6 bits are used as a count. I think the rest are
-    // flags of some sort.
+    // In Morrowind this field only corresponds to the number of UV sets.
+    // NifTools research is inaccurate.
     int uvs = nif->getUShort();
-    uvs &= 0x3f;
 
     if(nif->getInt())
     {
