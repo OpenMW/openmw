@@ -26,22 +26,22 @@ namespace Terrain
 
         void accept(osg::NodeVisitor& nv);
 
-        virtual void enable(bool enabled);
+        void enable(bool enabled) override;
 
-        virtual void setViewDistance(float distance) { mViewDistance = distance; }
+        void setViewDistance(float distance) override { mViewDistance = distance; }
 
-        void cacheCell(View *view, int x, int y) {}
+        void cacheCell(View *view, int x, int y) override {}
         /// @note Not thread safe.
-        virtual void loadCell(int x, int y);
+        void loadCell(int x, int y) override;
         /// @note Not thread safe.
-        virtual void unloadCell(int x, int y);
+        void unloadCell(int x, int y) override;
 
-        View* createView();
-        void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange);
-        bool storeView(const View* view, double referenceTime);
+        View* createView() override;
+        void preload(View* view, const osg::Vec3f& eyePoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange) override;
+        bool storeView(const View* view, double referenceTime) override;
         void rebuildViews() override;
 
-        void reportStats(unsigned int frameNumber, osg::Stats* stats);
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) override;
 
         class ChunkManager
         {
