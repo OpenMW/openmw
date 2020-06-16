@@ -232,7 +232,7 @@ run_cmd() {
 	else
 		RET=0
 		eval $CMD $@ || RET=$?
-		return RET
+		return $RET
 	fi
 }
 
