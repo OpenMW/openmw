@@ -30,8 +30,8 @@ configuration:
 clone_depth: 1
 
 cache:
-    - C:\projects\openmw\deps\Bullet-2.86-msvc2015-win32.7z
-    - C:\projects\openmw\deps\Bullet-2.86-msvc2015-win64.7z
+    - C:\projects\openmw\deps\Bullet-2.87-msvc2015-win32.7z
+    - C:\projects\openmw\deps\Bullet-2.87-msvc2015-win64.7z
     - C:\projects\openmw\deps\MyGUI-3.2.2-msvc2015-win32.7z
     - C:\projects\openmw\deps\MyGUI-3.2.2-msvc2015-win64.7z
     - C:\projects\openmw\deps\OSG-3.4.1-scrawl-msvc2015-win32.7z
@@ -50,15 +50,16 @@ install:
 
 before_build:
     - cmd: git submodule update --init --recursive
-    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V
+    - cmd: sh %APPVEYOR_BUILD_FOLDER%\CI\before_script.msvc.sh -c %configuration% -p %PLATFORM% -v %msvc% -V -i %APPVEYOR_BUILD_FOLDER%\install
 
 build_script:
     - cmd: if %PLATFORM%==Win32 set build=MSVC%msvc%_32
     - cmd: if %PLATFORM%==x64 set build=MSVC%msvc%_64
     - cmd: msbuild %build%\OpenMW.sln /t:Build /p:Configuration=%configuration% /m:2 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - cmd: cmake --install %build% --config %configuration%
 
 after_build:
-    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\ -xr"!*.pdb"
+    - cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%.zip %APPVEYOR_BUILD_FOLDER%\install -xr"!*.pdb"
     #- cmd: if %PLATFORM%==x64 7z a OpenMW_MSVC%msvc%_%platform%_%appveyor_pull_request_number%_%appveyor_pull_request_head_commit%_pdb.zip %APPVEYOR_BUILD_FOLDER%\MSVC%msvc%_64\%configuration%\*.pdb
 
 test: off

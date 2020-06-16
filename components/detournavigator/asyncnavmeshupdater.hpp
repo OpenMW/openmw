@@ -32,6 +32,21 @@ namespace DetourNavigator
         update = 3,
     };
 
+    inline std::ostream& operator <<(std::ostream& stream, ChangeType value)
+    {
+        switch (value) {
+            case ChangeType::remove:
+                return stream << "ChangeType::remove";
+            case ChangeType::mixed:
+                return stream << "ChangeType::mixed";
+            case ChangeType::add:
+                return stream << "ChangeType::add";
+            case ChangeType::update:
+                return stream << "ChangeType::update";
+        }
+        return stream << "ChangeType::" << static_cast<int>(value);
+    }
+
     class AsyncNavMeshUpdater
     {
     public:
@@ -56,10 +71,11 @@ namespace DetourNavigator
             ChangeType mChangeType;
             int mDistanceToPlayer;
             int mDistanceToOrigin;
+            std::chrono::steady_clock::time_point mProcessTime;
 
-            std::tuple<unsigned, ChangeType, int, int> getPriority() const
+            std::tuple<std::chrono::steady_clock::time_point, unsigned, ChangeType, int, int> getPriority() const
             {
-                return std::make_tuple(mTryNumber, mChangeType, mDistanceToPlayer, mDistanceToOrigin);
+                return std::make_tuple(mProcessTime, mTryNumber, mChangeType, mDistanceToPlayer, mDistanceToOrigin);
             }
 
             friend inline bool operator <(const Job& lhs, const Job& rhs)
@@ -86,12 +102,14 @@ namespace DetourNavigator
         mutable std::mutex mMutex;
         std::condition_variable mHasJob;
         std::condition_variable mDone;
+        std::condition_variable mProcessed;
         Jobs mJobs;
         std::map<osg::Vec3f, std::set<TilePosition>> mPushed;
         Misc::ScopeGuarded<TilePosition> mPlayerTile;
         Misc::ScopeGuarded<boost::optional<std::chrono::steady_clock::time_point>> mFirstStart;
         NavMeshTilesCache mNavMeshTilesCache;
         Misc::ScopeGuarded<std::map<osg::Vec3f, std::map<TilePosition, std::thread::id>>> mProcessingTiles;
+        std::map<osg::Vec3f, std::map<TilePosition, std::chrono::steady_clock::time_point>> mLastUpdates;
         std::map<std::thread::id, Queue> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
@@ -101,7 +119,7 @@ namespace DetourNavigator
 
         boost::optional<Job> getNextJob();
 
-        static Job getJob(Jobs& jobs, Pushed& pushed);
+        boost::optional<Job> getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate);
 
         void postThreadJob(Job&& job, Queue& queue);
 
@@ -116,6 +134,8 @@ namespace DetourNavigator
         void unlockTile(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile);
 
         inline std::size_t getTotalThreadJobsUnsafe() const;
+
+        void cleanupLastUpdates();
     };
 }
 

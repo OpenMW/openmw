@@ -2,14 +2,34 @@
 ------
 
     Bug #1952: Incorrect particle lighting
+    Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #3676: NiParticleColorModifier isn't applied properly
+    Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
+    Bug #4021: Attributes and skills are not stored as floats
+    Bug #4623: Corprus implementation is incorrect
+    Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5108: Savegame bloating due to inefficient fog textures format
+    Bug #5165: Active spells should use real time intead of timestamps
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
     Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
     Bug #5370: Opening an unlocked but trapped door uses the key
+    Bug #5397: NPC greeting does not reset if you leave + reenter area
+    Bug #5400: Editor: Verifier checks race of non-skin bodyparts
+    Bug #5403: Enchantment effect doesn't show on an enemy during death animation
+    Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
+    Bug #5416: Junk non-node records before the root node are not handled gracefully
+    Bug #5424: Creatures do not headtrack player
+    Bug #5425: Poison effect only appears for one frame
+    Bug #5427: GetDistance unknown ID error is misleading
+    Bug #5435: Enemies can't hurt the player when collision is off
+    Bug #5441: Enemies can't push a player character when in critical strike stance
+    Bug #5451: Magic projectiles don't disappear with the caster
+    Bug #5452: Autowalk is being included in savegames
     Feature #5362: Show the soul gems' trapped soul in count dialog
+    Feature #5445: Handle NiLines
 
 0.46.0
 ------
@@ -182,8 +202,8 @@
     Bug #5158: Objects without a name don't fallback to their ID
     Bug #5159: NiMaterialColorController can only control the diffuse color
     Bug #5161: Creature companions can't be activated when they are knocked down
-    Bug #5164: Faction owned items handling is incorrect
     Bug #5163: UserData is not copied during node cloning
+    Bug #5164: Faction owned items handling is incorrect
     Bug #5166: Scripts still should be executed after player's death
     Bug #5167: Player can select and cast spells before magic menu is enabled
     Bug #5168: Force1stPerson and Force3rdPerson commands are not really force view change
@@ -217,7 +237,6 @@
     Bug #5264: "Damage Fatigue" Magic Effect Can Bring Fatigue below 0
     Bug #5269: Editor: Cell lighting in resaved cleaned content files is corrupted
     Bug #5278: Console command Show doesn't fall back to global variable after local var not found
-    Bug #5300: NPCs don't switch from torch to shield when starting combat
     Bug #5308: World map copying makes save loading much slower
     Bug #5313: Node properties of identical type are not applied in the correct order
     Bug #5326: Formatting issues in the settings.cfg
@@ -282,7 +301,7 @@
     Feature #5147: Show spell magicka cost in spell buying window
     Feature #5170: Editor: Land shape editing, land selection
     Feature #5172: Editor: Delete instances/references with keypress in scene window
-    Feature #5193: Weapon sheathing
+    Feature #5193: Shields sheathing
     Feature #5201: Editor: Show tool outline in scene view, when using editmodes
     Feature #5219: Impelement TestCells console command
     Feature #5224: Handle NiKeyframeController for NiTriShape

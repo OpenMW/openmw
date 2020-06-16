@@ -74,7 +74,7 @@ namespace EsmTool
             : mIsDeleted(false)
         {}
 
-        std::string getId() const {
+        std::string getId() const override {
             return mData.mId;
         }
 
@@ -82,15 +82,15 @@ namespace EsmTool
             return mData;
         }
 
-        void save(ESM::ESMWriter &esm) {
+        void save(ESM::ESMWriter &esm) override {
             mData.save(esm, mIsDeleted);
         }
 
-        void load(ESM::ESMReader &esm) {
+        void load(ESM::ESMReader &esm) override {
             mData.load(esm, mIsDeleted);
         }
 
-        void print();
+        void print() override;
     };
     
     template<> std::string Record<ESM::Cell>::getId() const;

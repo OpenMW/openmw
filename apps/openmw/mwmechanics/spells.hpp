@@ -22,6 +22,8 @@ namespace ESM
 
 namespace MWMechanics
 {
+    class CreatureStats;
+
     class MagicEffects;
 
     /// \brief Spell list
@@ -33,7 +35,8 @@ namespace MWMechanics
         public:
 
             typedef const ESM::Spell* SpellKey;
-            struct SpellParams {
+            struct SpellParams
+            {
                 std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
                 std::set<int> mPurgedEffects; // indices of purged effects
             };
@@ -41,26 +44,13 @@ namespace MWMechanics
             typedef std::map<SpellKey, SpellParams> TContainer;
             typedef TContainer::const_iterator TIterator;
 
-            struct CorprusStats
-            {
-                static const int sWorseningPeriod = 24;
-
-                int mWorsenings;
-                MWWorld::TimeStamp mNextWorsening;
-            };
-
         private:
             TContainer mSpells;
-
-            // spell-tied effects that will be applied even after removing the spell (currently used to keep positive effects when corprus is removed)
-            std::map<SpellKey, MagicEffects> mPermanentSpellEffects;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
             std::map<SpellKey, MWWorld::TimeStamp> mUsedPowers;
-
-            std::map<SpellKey, CorprusStats> mCorprusSpells;
 
             mutable bool mSpellsChanged;
             mutable MagicEffects mEffects;
@@ -73,9 +63,7 @@ namespace MWMechanics
         public:
             Spells();
 
-            void worsenCorprus(const ESM::Spell* spell);
             static bool hasCorprusEffect(const ESM::Spell *spell);
-            const std::map<SpellKey, CorprusStats> & getCorprusSpells() const;
 
             void purgeEffect(int effectId);
             void purgeEffect(int effectId, const std::string & sourceId);
@@ -128,7 +116,7 @@ namespace MWMechanics
 
             void visitEffectSources (MWMechanics::EffectSourceVisitor& visitor) const;
 
-            void readState (const ESM::SpellState& state);
+            void readState (const ESM::SpellState& state, CreatureStats* creatureStats);
             void writeState (ESM::SpellState& state) const;
     };
 }

@@ -12,14 +12,12 @@
 
 namespace MWMechanics
 {
-    void ActiveSpells::update() const
+    void ActiveSpells::update(float duration) const
     {
         bool rebuild = false;
 
-        MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
-
         // Erase no longer active spells and effects
-        if (mLastUpdate!=now)
+        if (duration > 0)
         {
             TContainer::iterator iter (mSpells.begin());
             while (iter!=mSpells.end())
@@ -31,24 +29,35 @@ namespace MWMechanics
                 }
                 else
                 {
+                    bool interrupt = false;
                     std::vector<ActiveEffect>& effects = iter->second.mEffects;
                     for (std::vector<ActiveEffect>::iterator effectIt = effects.begin(); effectIt != effects.end();)
                     {
-                        MWWorld::TimeStamp start = iter->second.mTimeStamp;
-                        MWWorld::TimeStamp end = start + static_cast<double>(effectIt->mDuration)*MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
-                        if (end <= now)
+                        if (effectIt->mTimeLeft <= 0)
                         {
-                            effectIt = effects.erase(effectIt);
                             rebuild = true;
+
+                            // Note: it we expire a Corprus effect, we should remove the whole spell.
+                            if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                            {
+                                iter = mSpells.erase (iter);
+                                interrupt = true;
+                                break;
+                            }
+
+                            effectIt = effects.erase(effectIt);
                         }
                         else
+                        {
+                            effectIt->mTimeLeft -= duration;
                             ++effectIt;
+                        }
                     }
-                    ++iter;
+
+                    if (!interrupt)
+                        ++iter;
                 }
             }
-
-            mLastUpdate = now;
         }
 
         if (mSpellsChanged)
@@ -63,24 +72,15 @@ namespace MWMechanics
 
     void ActiveSpells::rebuildEffects() const
     {
-        MWWorld::TimeStamp now = MWBase::Environment::get().getWorld()->getTimeStamp();
-
         mEffects = MagicEffects();
 
         for (TIterator iter (begin()); iter!=end(); ++iter)
         {
-            const MWWorld::TimeStamp& start = iter->second.mTimeStamp;
-
             const std::vector<ActiveEffect>& effects = iter->second.mEffects;
 
             for (std::vector<ActiveEffect>::const_iterator effectIt = effects.begin(); effectIt != effects.end(); ++effectIt)
             {
-                double duration = effectIt->mDuration;
-                MWWorld::TimeStamp end = start;
-                end += duration * 
-                    MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
-
-                if (end>now)
+                if (effectIt->mTimeLeft > 0)
                     mEffects.add(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), MWMechanics::EffectParam(effectIt->mMagnitude));
             }
         }
@@ -88,12 +88,11 @@ namespace MWMechanics
 
     ActiveSpells::ActiveSpells()
         : mSpellsChanged (false)
-        , mLastUpdate (MWBase::Environment::get().getWorld()->getTimeStamp())
     {}
 
     const MagicEffects& ActiveSpells::getMagicEffects() const
     {
-        update();
+        update(0.f);
         return mEffects;
     }
 
@@ -116,19 +115,14 @@ namespace MWMechanics
         for (std::vector<ActiveEffect>::const_iterator iter (effects.begin());
             iter!=effects.end(); ++iter)
         {
-            if (iter->mDuration > duration)
-                duration = iter->mDuration;
+            if (iter->mTimeLeft > duration)
+                duration = iter->mTimeLeft;
         }
 
-        double scaledDuration = duration *
-              MWBase::Environment::get().getWorld()->getTimeScaleFactor()/(60*60);
-
-        double usedUp = MWBase::Environment::get().getWorld()->getTimeStamp() - iterator->second.mTimeStamp;
-
-        if (usedUp>=scaledDuration)
+        if (duration < 0)
             return 0;
 
-        return scaledDuration-usedUp;
+        return duration;
     }
 
     bool ActiveSpells::isSpellActive(const std::string& id) const
@@ -152,7 +146,6 @@ namespace MWMechanics
         TContainer::iterator it(mSpells.find(id));
 
         ActiveSpellParams params;
-        params.mTimeStamp = MWBase::Environment::get().getWorld()->getTimeStamp();
         params.mEffects = effects;
         params.mDisplayName = displayName;
         params.mCasterActorId = casterActorId;
@@ -211,19 +204,15 @@ namespace MWMechanics
     {
         for (TContainer::const_iterator it = begin(); it != end(); ++it)
         {
-            float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
-
             for (std::vector<ActiveEffect>::const_iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end(); ++effectIt)
             {
                 std::string name = it->second.mDisplayName;
 
-                float remainingTime = effectIt->mDuration +
-                        static_cast<float>(it->second.mTimeStamp - MWBase::Environment::get().getWorld()->getTimeStamp())*3600/timeScale;
                 float magnitude = effectIt->mMagnitude;
 
                 if (magnitude)
-                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->first, it->second.mCasterActorId, magnitude, remainingTime, effectIt->mDuration);
+                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->first, it->second.mCasterActorId, magnitude, effectIt->mTimeLeft, effectIt->mDuration);
             }
         }
     }
@@ -301,6 +290,31 @@ namespace MWMechanics
         mSpellsChanged = true;
     }
 
+    void ActiveSpells::purgeCorprusDisease()
+    {
+        for (TContainer::iterator iter = mSpells.begin(); iter!=mSpells.end();)
+        {
+            bool hasCorprusEffect = false;
+            for (std::vector<ActiveEffect>::iterator effectIt = iter->second.mEffects.begin();
+                 effectIt != iter->second.mEffects.end();++effectIt)
+            {
+                if (effectIt->mEffectId == ESM::MagicEffect::Corprus)
+                {
+                    hasCorprusEffect = true;
+                    break;
+                }
+            }
+
+            if (hasCorprusEffect)
+            {
+                mSpells.erase(iter++);
+                mSpellsChanged = true;
+            }
+            else
+                ++iter;
+        }
+    }
+
     void ActiveSpells::clear()
     {
         mSpells.clear();
@@ -316,7 +330,6 @@ namespace MWMechanics
             params.mEffects = it->second.mEffects;
             params.mCasterActorId = it->second.mCasterActorId;
             params.mDisplayName = it->second.mDisplayName;
-            params.mTimeStamp = it->second.mTimeStamp.toEsm();
 
             state.mSpells.insert (std::make_pair(it->first, params));
         }
@@ -331,7 +344,6 @@ namespace MWMechanics
             params.mEffects = it->second.mEffects;
             params.mCasterActorId = it->second.mCasterActorId;
             params.mDisplayName = it->second.mDisplayName;
-            params.mTimeStamp = MWWorld::TimeStamp(it->second.mTimeStamp);
 
             mSpells.insert (std::make_pair(it->first, params));
             mSpellsChanged = true;

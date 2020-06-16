@@ -24,6 +24,7 @@ namespace osg
 {
     class Node;
     class StateSet;
+    class Material;
 }
 
 namespace osgParticle
@@ -268,9 +269,9 @@ namespace NifOsg
     {
     private:
         FloatInterpolator mData;
-
+        osg::ref_ptr<const osg::Material> mBaseMaterial;
     public:
-        AlphaController(const Nif::NiFloatData *data);
+        AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial);
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
@@ -291,7 +292,7 @@ namespace NifOsg
             Specular = 2,
             Emissive = 3
         };
-        MaterialColorController(const Nif::NiPosData *data, TargetColor color);
+        MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
@@ -304,6 +305,7 @@ namespace NifOsg
     private:
         Vec3Interpolator mData;
         TargetColor mTargetColor = Ambient;
+        osg::ref_ptr<const osg::Material> mBaseMaterial;
     };
 
     class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
@@ -340,6 +342,25 @@ namespace NifOsg
     private:
         float mEmitStart;
         float mEmitStop;
+    };
+
+    class PathController : public osg::NodeCallback, public SceneUtil::Controller
+    {
+    public:
+        PathController(const Nif::NiPathController* ctrl);
+        PathController() = default;
+        PathController(const PathController& copy, const osg::CopyOp& copyop);
+
+        META_Object(NifOsg, PathController)
+
+        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+
+    private:
+        Vec3Interpolator mPath;
+        FloatInterpolator mPercent;
+        int mFlags{0};
+
+        float getPercent(float time) const;
     };
 
 }

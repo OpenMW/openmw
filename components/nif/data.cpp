@@ -31,7 +31,7 @@ void NiSkinInstance::post(NIFFile *nif)
     }
 }
 
-void ShapeData::read(NIFStream *nif)
+void NiGeometryData::read(NIFStream *nif)
 {
     int verts = nif->getUShort();
 
@@ -47,10 +47,9 @@ void ShapeData::read(NIFStream *nif)
     if (nif->getBoolean())
         nif->getVector4s(colors, verts);
 
-    // Only the first 6 bits are used as a count. I think the rest are
-    // flags of some sort.
+    // In Morrowind this field only corresponds to the number of UV sets.
+    // NifTools research is inaccurate.
     int uvs = nif->getUShort();
-    uvs &= 0x3f;
 
     if(nif->getInt())
     {
@@ -69,7 +68,7 @@ void ShapeData::read(NIFStream *nif)
 
 void NiTriShapeData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     /*int tris =*/ nif->getUShort();
 
@@ -92,7 +91,7 @@ void NiTriShapeData::read(NIFStream *nif)
 
 void NiTriStripsData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     // Every strip with n points defines n-2 triangles, so this should be unnecessary.
     /*int tris =*/ nif->getUShort();
@@ -110,9 +109,35 @@ void NiTriStripsData::read(NIFStream *nif)
         nif->getUShorts(strips[i], lengths[i]);
 }
 
+void NiLinesData::read(NIFStream *nif)
+{
+    NiGeometryData::read(nif);
+    size_t num = vertices.size();
+    std::vector<char> flags;
+    nif->getChars(flags, num);
+    // Can't construct a line from a single vertex.
+    if (num < 2)
+        return;
+    // Convert connectivity flags into usable geometry. The last element needs special handling.
+    for (size_t i = 0; i < num-1; ++i)
+    {
+        if (flags[i] & 1)
+        {
+            lines.emplace_back(i);
+            lines.emplace_back(i+1);
+        }
+    }
+    // If there are just two vertices, they can be connected twice. Probably isn't critical.
+    if (flags[num-1] & 1)
+    {
+        lines.emplace_back(num-1);
+        lines.emplace_back(0);
+    }
+}
+
 void NiAutoNormalParticlesData::read(NIFStream *nif)
 {
-    ShapeData::read(nif);
+    NiGeometryData::read(nif);
 
     // Should always match the number of vertices
     numParticles = nif->getUShort();
@@ -163,11 +188,8 @@ void NiPixelData::read(NIFStream *nif)
 {
     fmt = (Format)nif->getUInt();
 
-    rmask = nif->getUInt(); // usually 0xff
-    gmask = nif->getUInt(); // usually 0xff00
-    bmask = nif->getUInt(); // usually 0xff0000
-    amask = nif->getUInt(); // usually 0xff000000 or zero
-
+    for (unsigned int i = 0; i < 4; ++i)
+        colorMask[i] = nif->getUInt();
     bpp = nif->getUInt();
 
     // 8 bytes of "Old Fast Compare". Whatever that means.
@@ -190,10 +212,9 @@ void NiPixelData::read(NIFStream *nif)
     }
 
     // Read the data
-    unsigned int dataSize = nif->getUInt();
-    data.reserve(dataSize);
-    for (unsigned i=0; i<dataSize; ++i)
-        data.push_back((unsigned char)nif->getChar());
+    unsigned int numPixels = nif->getUInt();
+    if (numPixels)
+        nif->getUChars(data, numPixels);
 }
 
 void NiPixelData::post(NIFFile *nif)
@@ -225,7 +246,7 @@ void NiSkinData::read(NIFStream *nif)
     trafo.scale = nif->getFloat();
 
     int boneNum = nif->getInt();
-    if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_GAMEBRYO)
+    if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,1,0,0))
         nif->skip(4); // NiSkinPartition link
 
     bones.resize(boneNum);

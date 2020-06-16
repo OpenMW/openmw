@@ -222,11 +222,6 @@ namespace
         code.push_back (Compiler::Generator::segment5 (37));
     }
 
-    void opMenuMode (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (38));
-    }
-
     void opStoreGlobalShort (Compiler::Generator::CodeContainer& code)
     {
         code.push_back (Compiler::Generator::segment5 (39));
@@ -285,71 +280,6 @@ namespace
     void opFetchMemberFloat (Compiler::Generator::CodeContainer& code, bool global)
     {
         code.push_back (Compiler::Generator::segment5 (global ? 70 : 64));
-    }
-
-    void opRandom (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (45));
-    }
-
-    void opScriptRunning (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (46));
-    }
-
-    void opStartScript (Compiler::Generator::CodeContainer& code, bool targeted)
-    {
-        code.push_back (Compiler::Generator::segment5 (targeted ? 71 : 47));
-    }
-
-    void opStopScript (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (48));
-    }
-
-    void opGetDistance (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (49));
-    }
-
-    void opGetSecondsPassed (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (50));
-    }
-
-    void opEnable (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (51));
-    }
-
-    void opDisable (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (52));
-    }
-
-    void opGetDisabled (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (53));
-    }
-
-    void opEnableExplicit (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (54));
-    }
-
-    void opDisableExplicit (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (55));
-    }
-
-    void opGetDisabledExplicit (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (56));
-    }
-
-    void opGetDistanceExplicit (Compiler::Generator::CodeContainer& code)
-    {
-        code.push_back (Compiler::Generator::segment5 (57));
     }
 }
 
@@ -645,11 +575,6 @@ namespace Compiler
             }
         }
 
-        void menuMode (CodeContainer& code)
-        {
-            opMenuMode (code);
-        }
-
         void assignToGlobal (CodeContainer& code, Literals& literals, char localType,
             const std::string& name, const CodeContainer& value, char valueType)
         {
@@ -804,94 +729,6 @@ namespace Compiler
                 default:
 
                     assert (0);
-            }
-        }
-
-        void random (CodeContainer& code)
-        {
-            opRandom (code);
-        }
-
-        void scriptRunning (CodeContainer& code)
-        {
-            opScriptRunning (code);
-        }
-
-        void startScript (CodeContainer& code, Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-                opStartScript (code, false);
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opStartScript (code, true);
-            }
-        }
-
-        void stopScript (CodeContainer& code)
-        {
-            opStopScript (code);
-        }
-
-        void getDistance (CodeContainer& code, Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opGetDistance (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opGetDistanceExplicit (code);
-            }
-        }
-
-        void getSecondsPassed (CodeContainer& code)
-        {
-            opGetSecondsPassed (code);
-        }
-
-        void getDisabled (CodeContainer& code, Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opGetDisabled (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opGetDisabledExplicit (code);
-            }
-        }
-
-        void enable (CodeContainer& code, Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opEnable (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opEnableExplicit (code);
-            }
-        }
-
-        void disable (CodeContainer& code, Literals& literals, const std::string& id)
-        {
-            if (id.empty())
-            {
-                opDisable (code);
-            }
-            else
-            {
-                int index = literals.addString (id);
-                opPushInt (code, index);
-                opDisableExplicit (code);
             }
         }
     }

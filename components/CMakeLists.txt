@@ -111,7 +111,7 @@ add_component_dir (compiler
 
 add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
-    miscopcodes opcodes runtime scriptopcodes spatialopcodes types defines
+    miscopcodes opcodes runtime types defines
     )
 
 add_component_dir (translation
@@ -139,7 +139,7 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper OISCompat events sdlcursormanager
+    sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager
     )
 
 add_component_dir (version
@@ -285,3 +285,7 @@ endif()
 
 # Make the variable accessible for other subdirectories
 set(COMPONENT_FILES ${COMPONENT_FILES} PARENT_SCOPE)
+
+if (BULLET_USE_DOUBLES)
+    target_compile_definitions(components PUBLIC BT_USE_DOUBLE_PRECISION)
+endif()

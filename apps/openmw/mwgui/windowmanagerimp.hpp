@@ -15,6 +15,7 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -70,6 +71,7 @@ namespace SceneUtil
 namespace SDLUtil
 {
     class SDLCursorManager;
+    class VideoWrapper;
 }
 
 namespace osgMyGUI
@@ -124,13 +126,14 @@ namespace MWGui
   class JailScreen;
   class KeyboardNavigation;
 
-  class WindowManager : public MWBase::WindowManager
+  class WindowManager :
+      public MWBase::WindowManager
   {
   public:
     typedef std::pair<std::string, int> Faction;
     typedef std::vector<Faction> FactionList;
 
-    WindowManager(osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
+    WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot, Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
                   const std::string& logpath, const std::string& cacheDir, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
                   ToUTF8::FromType encoding, bool exportFonts, const std::string& versionDescription, const std::string& localPath);
     virtual ~WindowManager();
@@ -277,13 +280,7 @@ namespace MWGui
 
     virtual int readPressedButton (); ///< returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
 
-    virtual void onFrame (float frameDuration);
-
-    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues();
-    virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues();
-    virtual SkillList getPlayerMinorSkills();
-    virtual SkillList getPlayerMajorSkills();
+    virtual void update (float duration);
 
     /**
      * Fetches a GMST string from the store, if there is no setting with the given
@@ -296,7 +293,10 @@ namespace MWGui
 
     virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
 
+    virtual void windowVisibilityChange(bool visible);
     virtual void windowResized(int x, int y);
+    virtual void windowClosed();
+    virtual bool isWindowVisible();
 
     virtual void executeInConsole (const std::string& path);
 
@@ -411,8 +411,6 @@ namespace MWGui
     MWWorld::Ptr mSelectedEnchantItem;
     MWWorld::Ptr mSelectedWeapon;
 
-    void loadFontDelegate(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
-
     std::vector<WindowModal*> mCurrentModals;
 
     // Markers placed manually by the player. Must be shared between both map views (the HUD map and the map window).
@@ -468,14 +466,6 @@ namespace MWGui
 
     void setCursorVisible(bool visible);
 
-    /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-    // Various stats about player as needed by window manager
-    std::string mPlayerName;
-    std::string mPlayerRaceId;
-    std::map<int, MWMechanics::AttributeValue > mPlayerAttributes;
-    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
-    std::map<int, MWMechanics::SkillValue > mPlayerSkillValues;
-
     MyGUI::Gui *mGui; // Gui
 
     struct GuiModeState
@@ -525,13 +515,15 @@ namespace MWGui
 
     ToUTF8::FromType mEncoding;
 
-    int mFontHeight;
-
     std::string mVersionDescription;
+
+    bool mWindowVisible;
 
     MWGui::TextColours mTextColours;
 
     std::unique_ptr<KeyboardNavigation> mKeyboardNavigation;
+
+    SDLUtil::VideoWrapper* mVideoWrapper;
 
     /**
      * Called when MyGUI tries to retrieve a tag's value. Tags must be denoted in #{tag} notation and will be replaced upon setting a user visible text/property.

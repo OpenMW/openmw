@@ -11,7 +11,6 @@
 #include "runtime.hpp"
 #include "defines.hpp"
 
-#include <components/misc/rng.hpp>
 #include <components/misc/messageformatparser.hpp>
 
 namespace Interpreter
@@ -165,116 +164,6 @@ namespace Interpreter
                 std::string formattedMessage = formatMessage (message, runtime);
 
                 runtime.getContext().report (formattedMessage);
-            }
-    };
-
-    class OpMenuMode : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                runtime.push (runtime.getContext().menuMode());
-            }
-    };
-
-    class OpRandom : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                Type_Integer limit = runtime[0].mInteger;
-
-                if (limit<0)
-                    throw std::runtime_error (
-                        "random: argument out of range (Don't be so negative!)");
-
-                runtime[0].mFloat = static_cast<Type_Float>(Misc::Rng::rollDice(limit)); // [o, limit)
-            }
-    };
-
-    class OpGetSecondsPassed : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                Type_Float duration = runtime.getContext().getSecondsPassed();
-
-                runtime.push (duration);
-            }
-    };
-
-    class OpEnable : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                runtime.getContext().enable();
-            }
-    };
-
-    class OpDisable : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                runtime.getContext().disable();
-            }
-    };
-
-    class OpGetDisabled : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                runtime.push (runtime.getContext().isDisabled());
-            }
-    };
-
-    class OpEnableExplicit : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                int index = runtime[0].mInteger;
-                runtime.pop();
-                std::string id = runtime.getStringLiteral (index);
-
-                runtime.getContext().enable (id);
-            }
-    };
-
-    class OpDisableExplicit : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                int index = runtime[0].mInteger;
-                runtime.pop();
-                std::string id = runtime.getStringLiteral (index);
-
-                runtime.getContext().disable (id);
-            }
-    };
-
-    class OpGetDisabledExplicit : public Opcode0
-    {
-        public:
-
-            virtual void execute (Runtime& runtime)
-            {
-                int index = runtime[0].mInteger;
-                runtime.pop();
-                std::string id = runtime.getStringLiteral (index);
-
-                runtime.push (runtime.getContext().isDisabled (id));
             }
     };
 

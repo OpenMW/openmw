@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AISEQUENCE_H
 
 #include <list>
+#include <memory>
 
 #include "aistate.hpp"
 
@@ -36,7 +37,7 @@ namespace MWMechanics
     class AiSequence
     {
             ///AiPackages to run though
-            std::list<AiPackage *> mPackages;
+            std::list<std::unique_ptr<AiPackage>> mPackages;
 
             ///Finished with top AIPackage, set for one frame
             bool mDone;
@@ -64,10 +65,10 @@ namespace MWMechanics
             virtual ~AiSequence();
 
             /// Iterator may be invalidated by any function calls other than begin() or end().
-            std::list<AiPackage*>::const_iterator begin() const;
-            std::list<AiPackage*>::const_iterator end() const;
+            std::list<std::unique_ptr<AiPackage>>::const_iterator begin() const;
+            std::list<std::unique_ptr<AiPackage>>::const_iterator end() const;
 
-            void erase (std::list<AiPackage*>::const_iterator package);
+            void erase(std::list<std::unique_ptr<AiPackage>>::const_iterator package);
 
             /// Returns currently executing AiPackage type
             /** \see enum AiPackage::TypeId **/
@@ -125,7 +126,7 @@ namespace MWMechanics
 
             /// Return the current active package.
             /** If there is no active package, it will throw an exception **/
-            AiPackage* getActivePackage();
+            const AiPackage& getActivePackage();
 
             /// Fills the AiSequence with packages
             /** Typically used for loading from the ESM

@@ -18,6 +18,7 @@
 #include "npcstats.hpp"
 #include "movement.hpp"
 #include "spellcasting.hpp"
+#include "spellresistance.hpp"
 #include "difficultyscaling.hpp"
 #include "actorutil.hpp"
 #include "pathfinding.hpp"
@@ -100,7 +101,7 @@ namespace MWMechanics
             blockerTerm *= gmst.find("fBlockStillBonus")->mValue.getFloat();
         blockerTerm *= blockerStats.getFatigueTerm();
 
-        int attackerSkill = 0;
+        float attackerSkill = 0;
         if (weapon.isEmpty())
             attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
         else

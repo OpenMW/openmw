@@ -40,6 +40,7 @@
 #include "summoning.hpp"
 #include "combat.hpp"
 #include "actorutil.hpp"
+#include "tickableeffects.hpp"
 
 namespace
 {
@@ -111,11 +112,11 @@ void adjustCommandedActor (const MWWorld::Ptr& actor)
 
     bool hasCommandPackage = false;
 
-    std::list<MWMechanics::AiPackage*>::const_iterator it;
-    for (it = stats.getAiSequence().begin(); it != stats.getAiSequence().end(); ++it)
+    auto it = stats.getAiSequence().begin();
+    for (; it != stats.getAiSequence().end(); ++it)
     {
         if ((*it)->getTypeId() == MWMechanics::AiPackage::TypeIdFollow &&
-                static_cast<MWMechanics::AiFollow*>(*it)->isCommanded())
+                static_cast<const MWMechanics::AiFollow*>(it->get())->isCommanded())
         {
             hasCommandPackage = true;
             break;
@@ -131,7 +132,7 @@ void getRestorationPerHourOfSleep (const MWWorld::Ptr& ptr, float& health, float
     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats (ptr);
     const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-    int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+    float endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
     health = 0.1f * endurance;
 
     float fRestMagicMult = settings.find("fRestMagicMult")->mValue.getFloat ();
@@ -173,6 +174,49 @@ namespace MWMechanics
                     mRemainingTime = remainingTime;
             }
         }
+    };
+
+    class GetCurrentMagnitudes : public MWMechanics::EffectSourceVisitor
+    {
+        std::string mSpellId;
+
+    public:
+        GetCurrentMagnitudes(const std::string& spellId)
+            : mSpellId(spellId)
+        {
+        }
+
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (magnitude <= 0)
+                return;
+
+            if (sourceId != mSpellId)
+                return;
+
+            mMagnitudes.push_back(std::make_pair(key, magnitude));
+        }
+
+        std::vector<std::pair<MWMechanics::EffectKey, float>> mMagnitudes;
+    };
+
+    class GetCorprusSpells : public MWMechanics::EffectSourceVisitor
+    {
+
+    public:
+        virtual void visit (MWMechanics::EffectKey key,
+                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
+                            float magnitude, float remainingTime = -1, float totalTime = -1)
+        {
+            if (key.mId != ESM::MagicEffect::Corprus)
+                return;
+
+            mSpells.push_back(sourceId);
+        }
+
+        std::vector<std::string> mSpells;
     };
 
     class SoulTrap : public MWMechanics::EffectSourceVisitor
@@ -418,7 +462,7 @@ namespace MWMechanics
         if (world->isSwimming(actor) || (playerPos - actorPos).length2() >= 3000 * 3000)
             return;
 
-        // Our implementation is not FPS-dependent unlike Morrowind's so it needs to be recalibrated. 
+        // Our implementation is not FPS-dependent unlike Morrowind's so it needs to be recalibrated.
         // We chose to use the chance MW would have when run at 60 FPS with the default value of the GMST.
         const float delta = MWBase::Environment::get().getFrameDuration() * 6.f;
         static const float fVoiceIdleOdds = world->getStore().get<ESM::GameSetting>().find("fVoiceIdleOdds")->mValue.getFloat();
@@ -434,9 +478,9 @@ namespace MWMechanics
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         MWMechanics::AiSequence& seq = stats.getAiSequence();
 
-        if (!seq.isEmpty() && seq.getActivePackage()->useVariableSpeed())
+        if (!seq.isEmpty() && seq.getActivePackage().useVariableSpeed())
         {
-            osg::Vec3f targetPos = seq.getActivePackage()->getDestination();
+            osg::Vec3f targetPos = seq.getActivePackage().getDestination();
             osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
             float distance = (targetPos - actorPos).length();
             if (distance < DECELERATE_DISTANCE)
@@ -446,7 +490,7 @@ namespace MWMechanics
         actor.getClass().getMovementSettings(actor).mSpeedFactor = newSpeedFactor;
     }
 
-    void Actors::updateGreetingState(const MWWorld::Ptr& actor, bool turnOnly)
+    void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor& actorState, bool turnOnly)
     {
         if (!actor.getClass().isActor() || actor == getPlayer())
             return;
@@ -459,9 +503,9 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->isSwimming(actor) ||
             (packageId != AiPackage::TypeIdWander && packageId != AiPackage::TypeIdTravel && packageId != -1))
         {
-            stats.setTurningToPlayer(false);
-            stats.setGreetingTimer(0);
-            stats.setGreetingState(Greet_None);
+            actorState.setTurningToPlayer(false);
+            actorState.setGreetingTimer(0);
+            actorState.setGreetingState(Greet_None);
             return;
         }
 
@@ -470,14 +514,14 @@ namespace MWMechanics
         osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         osg::Vec3f dir = playerPos - actorPos;
 
-        if (stats.isTurningToPlayer())
+        if (actorState.isTurningToPlayer())
         {
             // Reduce the turning animation glitch by using a *HUGE* value of
             // epsilon...  TODO: a proper fix might be in either the physics or the
             // animation subsystem
-            if (zTurn(actor, stats.getAngleToPlayer(), osg::DegreesToRadians(5.f)))
+            if (zTurn(actor, actorState.getAngleToPlayer(), osg::DegreesToRadians(5.f)))
             {
-                stats.setTurningToPlayer(false);
+                actorState.setTurningToPlayer(false);
                 // An original engine launches an endless idle2 when an actor greets player.
                 playAnimationGroup (actor, "idle2", 0, std::numeric_limits<int>::max(), false);
             }
@@ -492,8 +536,8 @@ namespace MWMechanics
 
         float helloDistance = static_cast<float>(stats.getAiSetting(CreatureStats::AI_Hello).getModified() * iGreetDistanceMultiplier);
 
-        int greetingTimer = stats.getGreetingTimer();
-        GreetingState greetingState = stats.getGreetingState();
+        int greetingTimer = actorState.getGreetingTimer();
+        GreetingState greetingState = actorState.getGreetingState();
         if (greetingState == Greet_None)
         {
             if ((playerPos - actorPos).length2() <= helloDistance*helloDistance &&
@@ -515,7 +559,7 @@ namespace MWMechanics
             greetingTimer++;
 
             if (greetingTimer <= GREETING_SHOULD_END || MWBase::Environment::get().getSoundManager()->sayActive(actor))
-                turnActorToFacePlayer(actor, dir);
+                turnActorToFacePlayer(actor, actorState, dir);
 
             if (greetingTimer >= GREETING_COOLDOWN)
             {
@@ -531,20 +575,19 @@ namespace MWMechanics
                 greetingState = Greet_None;
         }
 
-        stats.setGreetingTimer(greetingTimer);
-        stats.setGreetingState(greetingState);
+        actorState.setGreetingTimer(greetingTimer);
+        actorState.setGreetingState(greetingState);
     }
 
-    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, const osg::Vec3f& dir)
+    void Actors::turnActorToFacePlayer(const MWWorld::Ptr& actor, Actor& actorState, const osg::Vec3f& dir)
     {
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
 
-        CreatureStats &stats = actor.getClass().getCreatureStats(actor);
-        if (!stats.isTurningToPlayer())
+        if (!actorState.isTurningToPlayer())
         {
-            stats.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
-            stats.setTurningToPlayer(true);
+            actorState.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
+            actorState.setTurningToPlayer(true);
         }
     }
 
@@ -604,7 +647,7 @@ namespace MWMechanics
         bool isPlayerFollowerOrEscorter = playerAllies.find(actor1) != playerAllies.end();
 
         // If actor2 and at least one actor2 are in combat with actor1, actor1 and its allies start combat with them
-        // Doesn't apply for player followers/escorters        
+        // Doesn't apply for player followers/escorters
         if (!aggressive && !isPlayerFollowerOrEscorter)
         {
             // Check that actor2 is in combat with actor1
@@ -673,7 +716,7 @@ namespace MWMechanics
                 return;
 
             bool followerOrEscorter = false;
-            for (const AiPackage* package : creatureStats2.getAiSequence())
+            for (const auto& package : creatureStats2.getAiSequence())
             {
                 // The follow package must be first or have nothing but combat before it
                 if (package->sideWithTarget())
@@ -722,7 +765,7 @@ namespace MWMechanics
     {
         CreatureStats& creatureStats = ptr.getClass().getCreatureStats (ptr);
 
-        int intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
+        float intelligence = creatureStats.getAttribute(ESM::Attribute::Intelligence).getModified();
 
         float base = 1.f;
         if (ptr == getPlayer())
@@ -773,6 +816,9 @@ namespace MWMechanics
                 if (visitor.mRemainingTime > 0)
                 {
                     double timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+                    if(timeScale == 0.0)
+                        timeScale = 1;
+
                     restoreHours = std::max(0.0, hours - visitor.mRemainingTime * timeScale / 3600.f);
                 }
                 else if (visitor.mRemainingTime == -1)
@@ -798,7 +844,7 @@ namespace MWMechanics
         float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
         float fEndFatigueMult = settings.find("fEndFatigueMult")->mValue.getFloat ();
 
-        int endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
+        float endurance = stats.getAttribute (ESM::Attribute::Endurance).getModified ();
 
         float normalizedEncumbrance = ptr.getClass().getNormalizedEncumbrance(ptr);
         if (normalizedEncumbrance > 1)
@@ -825,7 +871,7 @@ namespace MWMechanics
             return;
 
         // Restore fatigue
-        int endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
+        float endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const MWWorld::Store<ESM::GameSetting>& settings = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat ();
         static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat ();
@@ -939,20 +985,74 @@ namespace MWMechanics
         if (creatureStats.needToRecalcDynamicStats())
             calculateDynamicStats(ptr);
 
+        if (ptr == getPlayer())
         {
-            Spells & spells = creatureStats.getSpells();
-            for (Spells::TIterator it = spells.begin(); it != spells.end(); ++it)
-            {
-                if (spells.getCorprusSpells().find(it->first) != spells.getCorprusSpells().end())
-                {
-                    if (MWBase::Environment::get().getWorld()->getTimeStamp() >= spells.getCorprusSpells().at(it->first).mNextWorsening)
-                    {
-                        spells.worsenCorprus(it->first);
+            GetCorprusSpells getCorprusSpellsVisitor;
+            creatureStats.getSpells().visitEffectSources(getCorprusSpellsVisitor);
+            creatureStats.getActiveSpells().visitEffectSources(getCorprusSpellsVisitor);
+            ptr.getClass().getInventoryStore(ptr).visitEffectSources(getCorprusSpellsVisitor);
+            std::vector<std::string> corprusSpells = getCorprusSpellsVisitor.mSpells;
+            std::vector<std::string> corprusSpellsToRemove;
 
-                        if (ptr == getPlayer())
-                            MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
-                    }
+            for (auto it = creatureStats.getCorprusSpells().begin(); it != creatureStats.getCorprusSpells().end(); ++it)
+            {
+                if(std::find(corprusSpells.begin(), corprusSpells.end(), it->first) == corprusSpells.end())
+                {
+                    // Corprus effect expired, remove entry and restore stats.
+                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, it->first);
+                    corprusSpellsToRemove.push_back(it->first);
+                    corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
+                    continue;
                 }
+
+                corprusSpells.erase(std::remove(corprusSpells.begin(), corprusSpells.end(), it->first), corprusSpells.end());
+
+                if (MWBase::Environment::get().getWorld()->getTimeStamp() >= it->second.mNextWorsening)
+                {
+                    it->second.mNextWorsening += CorprusStats::sWorseningPeriod;
+                    GetCurrentMagnitudes getMagnitudesVisitor (it->first);
+                    creatureStats.getSpells().visitEffectSources(getMagnitudesVisitor);
+                    creatureStats.getActiveSpells().visitEffectSources(getMagnitudesVisitor);
+                    ptr.getClass().getInventoryStore(ptr).visitEffectSources(getMagnitudesVisitor);
+                    for (auto& effectMagnitude : getMagnitudesVisitor.mMagnitudes)
+                    {
+                        if (effectMagnitude.first.mId == ESM::MagicEffect::FortifyAttribute)
+                        {
+                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
+                            attr.damage(-effectMagnitude.second);
+                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
+                            it->second.mWorsenings[effectMagnitude.first.mArg] = 0;
+                        }
+                        else if (effectMagnitude.first.mId == ESM::MagicEffect::DrainAttribute)
+                        {
+                            AttributeValue attr = creatureStats.getAttribute(effectMagnitude.first.mArg);
+                            int currentDamage = attr.getDamage();
+                            if (currentDamage >= 0)
+                                it->second.mWorsenings[effectMagnitude.first.mArg] = std::min(it->second.mWorsenings[effectMagnitude.first.mArg], currentDamage);
+
+                            it->second.mWorsenings[effectMagnitude.first.mArg] += effectMagnitude.second;
+                            attr.damage(effectMagnitude.second);
+                            creatureStats.setAttribute(effectMagnitude.first.mArg, attr);
+                        }
+                    }
+
+                    MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicCorprusWorsens}");
+                }
+            }
+
+            for (std::string& oldCorprusSpell : corprusSpellsToRemove)
+            {
+                 creatureStats.removeCorprusSpell(oldCorprusSpell);
+            }
+
+            for (std::string& newCorprusSpell : corprusSpells)
+            {
+                CorprusStats corprus;
+                for (int i=0; i<ESM::Attribute::Length; ++i)
+                    corprus.mWorsenings[i] = 0;
+                corprus.mNextWorsening = MWBase::Environment::get().getWorld()->getTimeStamp() + CorprusStats::sWorseningPeriod;
+
+                creatureStats.addCorprusSpell(newCorprusSpell, corprus);
             }
         }
 
@@ -1234,11 +1334,6 @@ namespace MWMechanics
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getTypeName() != typeid(ESM::Light).name())
                             inventoryStore.unequipItem(*heldIter, ptr);
-                    }
-                    else if (heldIter == inventoryStore.end() || heldIter->getTypeName() == typeid(ESM::Light).name())
-                    {
-                        // For hostile NPCs, see if they have anything better to equip first
-                        inventoryStore.autoEquip(ptr);
                     }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -1623,9 +1718,16 @@ namespace MWMechanics
                         player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
                 }
 
-                // For dead actors we need to remove looping spell particles
+                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
+                // For dead actors we need to update looping spell particles
                 if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+                {
+                    // They can be added during the death animation
+                    if (!iter->first.getClass().getCreatureStats(iter->first).isDeathAnimationFinished())
+                        adjustMagicEffects(iter->first);
                     ctrl->updateContinuousVfx();
+                }
                 else
                 {
                     bool cellChanged = world->hasCellChanged();
@@ -1694,7 +1796,7 @@ namespace MWMechanics
                             if (isConscious(iter->first))
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
-                                updateGreetingState(iter->first, timerUpdateHello > 0);
+                                updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
                                 playIdleDialogue(iter->first);
                                 updateMovementSpeed(iter->first);
                             }
@@ -1738,7 +1840,7 @@ namespace MWMechanics
                 if (!isPlayer && isConscious(iter->first) && !stats.isParalyzed())
                 {
                     MWMechanics::AiSequence& seq = stats.getAiSequence();
-                    alwaysActive = !seq.isEmpty() && seq.getActivePackage()->alwaysActive();
+                    alwaysActive = !seq.isEmpty() && seq.getActivePackage().alwaysActive();
                 }
                 bool inRange = isPlayer || dist <= mActorsProcessingRange || alwaysActive;
                 int activeFlag = 1; // Can be changed back to '2' to keep updating bounding boxes off screen (more accurate, but slower)
@@ -1939,12 +2041,18 @@ namespace MWMechanics
 
     void Actors::rest(double hours, bool sleep)
     {
-        float duration = hours * 3600.f / MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        float duration = hours * 3600.f;
+        float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        if (timeScale != 0.f)
+            duration /= timeScale;
+
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
+            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 continue;
 
@@ -2154,7 +2262,7 @@ namespace MWMechanics
 
             // An actor counts as siding with this actor if Follow or Escort is the current AI package, or there are only Combat and Wander packages before the Follow/Escort package
             // Actors that are targeted by this actor's Follow or Escort packages also side with them
-            for (const AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->sideWithTarget() && !package->getTarget().isEmpty())
                 {
@@ -2188,9 +2296,9 @@ namespace MWMechanics
             if (stats.isDead())
                 continue;
 
-            // An actor counts as following if AiFollow is the current AiPackage, 
+            // An actor counts as following if AiFollow is the current AiPackage,
             // or there are only Combat and Wander packages before the AiFollow package
-            for (const AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->followTargetThroughDoors() && package->getTarget() == actor)
                     list.push_back(iteratedActor);
@@ -2253,11 +2361,11 @@ namespace MWMechanics
 
             // An actor counts as following if AiFollow is the current AiPackage,
             // or there are only Combat and Wander packages before the AiFollow package
-            for (AiPackage* package : stats.getAiSequence())
+            for (const auto& package : stats.getAiSequence())
             {
                 if (package->followTargetThroughDoors() && package->getTarget() == actor)
                 {
-                    list.push_back(static_cast<AiFollow*>(package)->getFollowIndex());
+                    list.push_back(static_cast<const AiFollow*>(package.get())->getFollowIndex());
                     break;
                 }
                 else if (package->getTypeId() != AiPackage::TypeIdCombat && package->getTypeId() != AiPackage::TypeIdWander)
@@ -2383,6 +2491,42 @@ namespace MWMechanics
         CharacterController* ctrl = it->second->getCharacterController();
 
         return ctrl->isAttackingOrSpell();
+    }
+
+    int Actors::getGreetingTimer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return 0;
+
+        return it->second->getGreetingTimer();
+    }
+
+    float Actors::getAngleToPlayer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return 0.f;
+
+        return it->second->getAngleToPlayer();
+    }
+
+    GreetingState Actors::getGreetingState(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return Greet_None;
+
+        return it->second->getGreetingState();
+    }
+
+    bool Actors::isTurningToPlayer(const MWWorld::Ptr& ptr) const
+    {
+        PtrActorMap::const_iterator it = mActors.find(ptr);
+        if (it == mActors.end())
+            return false;
+
+        return it->second->isTurningToPlayer();
     }
 
     void Actors::fastForwardAi()

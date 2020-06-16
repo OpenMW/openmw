@@ -8,6 +8,7 @@
 #include "settingsutils.hpp"
 #include "debug.hpp"
 #include "status.hpp"
+#include "areatype.hpp"
 
 #include <DetourCommon.h>
 #include <DetourNavMesh.h>
@@ -269,7 +270,7 @@ namespace DetourNavigator
 
     template <class OutputIterator>
     Status findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const float stepSize,
-            const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
+            const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
             const Settings& settings, OutputIterator& out)
     {
         dtNavMeshQuery navMeshQuery;
@@ -278,6 +279,10 @@ namespace DetourNavigator
 
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
+        queryFilter.setAreaCost(AreaType_water, areaCosts.mWater);
+        queryFilter.setAreaCost(AreaType_door, areaCosts.mDoor);
+        queryFilter.setAreaCost(AreaType_pathgrid, areaCosts.mPathgrid);
+        queryFilter.setAreaCost(AreaType_ground, areaCosts.mGround);
 
         dtPolyRef startRef = 0;
         osg::Vec3f startPolygonPosition;

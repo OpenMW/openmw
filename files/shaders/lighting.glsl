@@ -2,6 +2,13 @@
 
 uniform int colorMode;
 
+const int ColorMode_None = 0;
+const int ColorMode_Emission = 1;
+const int ColorMode_AmbientAndDiffuse = 2;
+const int ColorMode_Ambient = 3;
+const int ColorMode_Diffuse = 4;
+const int ColorMode_Specular = 5;
+
 void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal, vec4 diffuse, vec3 ambient)
 {
     vec3 lightDir;
@@ -24,14 +31,19 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
 {
     vec4 diffuse;
     vec3 ambient;
-    if (colorMode == 3)
-    {
-        diffuse = gl_FrontMaterial.diffuse;
-        ambient = vertexColor.xyz;
-    }
-    else if (colorMode == 2)
+    if (colorMode == ColorMode_AmbientAndDiffuse)
     {
         diffuse = vertexColor;
+        ambient = vertexColor.xyz;
+    }
+    else if (colorMode == ColorMode_Diffuse)
+    {
+        diffuse = vertexColor;
+        ambient = gl_FrontMaterial.ambient.xyz;
+    }
+    else if (colorMode == ColorMode_Ambient)
+    {
+        diffuse = gl_FrontMaterial.diffuse;
         ambient = vertexColor.xyz;
     }
     else
@@ -57,7 +69,7 @@ vec4 doLighting(vec3 viewPos, vec3 viewNormal, vec4 vertexColor, out vec3 shadow
 
     lightResult.xyz += gl_LightModel.ambient.xyz * ambient;
 
-    if (colorMode == 1)
+    if (colorMode == ColorMode_Emission)
         lightResult.xyz += vertexColor.xyz;
     else
         lightResult.xyz += gl_FrontMaterial.emission.xyz;

@@ -40,36 +40,46 @@ namespace Terrain
     class ChunkManager;
     class CompositeMapRenderer;
 
-class HeightCullCallback : public osg::NodeCallback
-{
-public:
-    HeightCullCallback() : mLowZ(-std::numeric_limits<float>::max()), mHighZ(std::numeric_limits<float>::max()), mMask(~0) {}
-
-    void setLowZ(float z)
+    class HeightCullCallback : public osg::NodeCallback
     {
-        mLowZ = z;
-    }
-    float getLowZ() const { return mLowZ; }
+    public:
+        void setLowZ(float z)
+        {
+            mLowZ = z;
+        }
+        float getLowZ() const
+        {
+            return mLowZ;
+        }
 
-    void setHighZ(float highZ)
-    {
-        mHighZ = highZ;
-    }
-    float getHighZ() const { return mHighZ; }
+        void setHighZ(float highZ)
+        {
+            mHighZ = highZ;
+        }
+        float getHighZ() const
+        {
+            return mHighZ;
+        }
 
-    void setCullMask(unsigned int mask) { mMask = mask; }
-    unsigned int getCullMask() const { return mMask; }
+        void setCullMask(unsigned int mask)
+        {
+            mMask = mask;
+        }
+        unsigned int getCullMask() const
+        {
+            return mMask;
+        }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
-    {
-        if (mLowZ <= mHighZ)
-            traverse(node, nv);
-    }
-private:
-    float mLowZ;
-    float mHighZ;
-    unsigned int mMask;
-};
+        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        {
+            if (mLowZ <= mHighZ)
+                traverse(node, nv);
+        }
+    private:
+        float mLowZ{-std::numeric_limits<float>::max()};
+        float mHighZ{std::numeric_limits<float>::max()};
+        unsigned int mMask{~0u};
+    };
 
     /**
      * @brief A View is a collection of rendering objects that are visible from a given camera/intersection.
@@ -129,6 +139,7 @@ private:
         virtual void enable(bool enabled) {}
 
         virtual void setBordersVisible(bool visible);
+        virtual bool getBordersVisible() { return mBorderVisible; }
 
         /// Create a View to use with preload feature. The caller is responsible for deleting the view.
         /// @note Thread safe.
@@ -136,11 +147,13 @@ private:
 
         /// @note Thread safe, as long as you do not attempt to load into the same view from multiple threads.
 
-        virtual void preload(View* view, const osg::Vec3f& viewPoint, std::atomic<bool>& abort) {}
+        virtual void preload(View* view, const osg::Vec3f& viewPoint, const osg::Vec4i &cellgrid, std::atomic<bool>& abort, std::atomic<int>& progress, int& progressRange) {}
 
         /// Store a preloaded view into the cache with the intent that the next rendering traversal can use it.
         /// @note Not thread safe.
-        virtual void storeView(const View* view, double referenceTime) {}
+        virtual bool storeView(const View* view, double referenceTime) {return true;}
+
+        virtual void rebuildViews() {}
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) {}
 
@@ -149,6 +162,8 @@ private:
         Storage* getStorage() { return mStorage; }
 
         osg::Callback* getHeightCullCallback(float highz, unsigned int mask);
+
+        void setActiveGrid(const osg::Vec4i &grid) { mActiveGrid = grid; }
 
     protected:
         Storage* mStorage;
@@ -170,6 +185,8 @@ private:
 
         std::set<std::pair<int,int>> mLoadedCells;
         osg::ref_ptr<HeightCullCallback> mHeightCullCallback;
+
+        osg::Vec4i mActiveGrid;
     };
 }
 

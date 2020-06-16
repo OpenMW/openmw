@@ -65,7 +65,7 @@ class Optimizer
 
     public:
 
-        Optimizer() {}
+        Optimizer() : _mergeAlphaBlending(false) {}
         virtual ~Optimizer() {}
 
         enum OptimizationOptions
@@ -117,6 +117,9 @@ class Optimizer
                                 TEXTURE_ATLAS_BUILDER |
                                 STATIC_OBJECT_DETECTION
         };
+
+        void setMergeAlphaBlending(bool merge) { _mergeAlphaBlending = merge; }
+        void setViewPoint(const osg::Vec3f& viewPoint) { _viewPoint = viewPoint; }
 
         /** Reset internal data to initial state - the getPermissibleOptionsMap is cleared.*/
         void reset();
@@ -252,6 +255,9 @@ class Optimizer
         typedef std::map<const osg::Object*,unsigned int> PermissibleOptimizationsMap;
         PermissibleOptimizationsMap _permissibleOptimizationsMap;
 
+        osg::Vec3f _viewPoint;
+        bool _mergeAlphaBlending;
+
     public:
 
         /** Flatten Static Transform nodes by applying their transform to the
@@ -321,8 +327,6 @@ class Optimizer
                     BaseOptimizerVisitor(optimizer, REMOVE_REDUNDANT_NODES) {}
 
                 virtual void apply(osg::Group& group);
-                virtual void apply(osg::LOD& lod);
-                virtual void apply(osg::Switch& switchNode);
 
                 void removeEmptyNodes();
 
@@ -373,7 +377,16 @@ class Optimizer
                 /// default to traversing all children.
                 MergeGeometryVisitor(Optimizer* optimizer=0) :
                     BaseOptimizerVisitor(optimizer, MERGE_GEOMETRY),
-                    _targetMaximumNumberOfVertices(10000), _allowedToMerge(true) {}
+                    _targetMaximumNumberOfVertices(10000), _alphaBlendingActive(false), _mergeAlphaBlending(false) {}
+
+                void setMergeAlphaBlending(bool merge)
+                {
+                    _mergeAlphaBlending = merge;
+                }
+                void setViewPoint(const osg::Vec3f& viewPoint)
+                {
+                    _viewPoint = viewPoint;
+                }
 
                 void setTargetMaximumNumberOfVertices(unsigned int num)
                 {
@@ -387,14 +400,12 @@ class Optimizer
 
                 void pushStateSet(osg::StateSet* stateSet);
                 void popStateSet();
-                void checkAllowedToMerge();
+                void checkAlphaBlendingActive();
 
                 virtual void apply(osg::Group& group);
                 virtual void apply(osg::Billboard&) { /* don't do anything*/ }
 
                 bool mergeGroup(osg::Group& group);
-
-                static bool geometryContainsSharedArrays(osg::Geometry& geom);
 
                 static bool mergeGeometry(osg::Geometry& lhs,osg::Geometry& rhs);
 
@@ -408,7 +419,9 @@ class Optimizer
 
                 unsigned int _targetMaximumNumberOfVertices;
                 std::vector<osg::StateSet*> _stateSetStack;
-                bool _allowedToMerge;
+                bool _alphaBlendingActive;
+                bool _mergeAlphaBlending;
+                osg::Vec3f _viewPoint;
         };
 
 };

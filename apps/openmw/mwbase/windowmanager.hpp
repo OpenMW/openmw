@@ -11,6 +11,8 @@
 
 #include "../mwgui/mode.hpp"
 
+#include <components/sdlutil/events.hpp>
+
 namespace Loading
 {
     class Listener;
@@ -86,7 +88,7 @@ namespace SFO
 namespace MWBase
 {
     /// \brief Interface for widnow manager (implemented in MWGui)
-    class WindowManager
+    class WindowManager : public SDLUtil::WindowListener
     {
             WindowManager (const WindowManager&);
             ///< not implemented
@@ -249,13 +251,7 @@ namespace MWBase
             /// returns the index of the pressed button or -1 if no button was pressed (->MessageBoxmanager->InteractiveMessageBox)
             virtual int readPressedButton() = 0;
 
-            virtual void onFrame (float frameDuration) = 0;
-
-            /// \todo get rid of this stuff. Move it to the respective UI element classes, if needed.
-            virtual std::map<int, MWMechanics::SkillValue > getPlayerSkillValues() = 0;
-            virtual std::map<int, MWMechanics::AttributeValue > getPlayerAttributeValues() = 0;
-            virtual SkillList getPlayerMinorSkills() = 0;
-            virtual SkillList getPlayerMajorSkills() = 0;
+            virtual void update (float duration) = 0;
 
             /**
              * Fetches a GMST string from the store, if there is no setting with the given
@@ -267,8 +263,6 @@ namespace MWBase
             virtual std::string getGameSettingString(const std::string &id, const std::string &default_) = 0;
 
             virtual void processChangedSettings(const std::set< std::pair<std::string, std::string> >& changed) = 0;
-
-            virtual void windowResized(int x, int y) = 0;
 
             virtual void executeInConsole (const std::string& path) = 0;
 
@@ -360,6 +354,11 @@ namespace MWBase
 
             virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat) = 0;
             virtual bool injectKeyRelease(MyGUI::KeyCode key) = 0;
+
+            virtual void windowVisibilityChange(bool visible) = 0;
+            virtual void windowResized(int x, int y) = 0;
+            virtual void windowClosed() = 0;
+            virtual bool isWindowVisible() = 0;
     };
 }
 

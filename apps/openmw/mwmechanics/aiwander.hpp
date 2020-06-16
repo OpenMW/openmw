@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIWANDER_H
 #define GAME_MWMECHANICS_AIWANDER_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <vector>
 
@@ -78,7 +78,7 @@ namespace MWMechanics
     };
 
     /// \brief Causes the Actor to wander within a specified range
-    class AiWander : public AiPackage
+    class AiWander final : public TypedAiPackage<AiWander>
     {
         public:
             /// Constructor
@@ -91,23 +91,25 @@ namespace MWMechanics
 
             AiWander (const ESM::AiSequence::AiWander* wander);
 
-            virtual AiPackage *clone() const;
+            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            static constexpr TypeId getTypeId() { return TypeIdWander; }
 
-            virtual int getTypeId() const;
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mRepeat = false;
+                return options;
+            }
 
-            virtual bool useVariableSpeed() const { return true;}
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            virtual void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const final;
 
-            bool getRepeat() const;
-
-            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const;
-
-            virtual osg::Vec3f getDestination() const
+            osg::Vec3f getDestination() const final
             {
                 if (!mHasDestination)
                     return osg::Vec3f(0, 0, 0);
@@ -116,9 +118,7 @@ namespace MWMechanics
             }
 
         private:
-            // NOTE: mDistance and mDuration must be set already
-            void init();
-            void stopWalking(const MWWorld::Ptr& actor, AiWanderStorage& storage, bool clearPath = true);
+            void stopWalking(const MWWorld::Ptr& actor);
 
             /// Have the given actor play an idle animation
             /// @return Success or error
@@ -126,24 +126,23 @@ namespace MWMechanics
             bool checkIdle(const MWWorld::Ptr& actor, unsigned short idleSelect);
             short unsigned getRandomIdle();
             void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
-            void evadeObstacles(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+            void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             void turnActorToFacePlayer(const osg::Vec3f& actorPosition, const osg::Vec3f& playerPosition, AiWanderStorage& storage);
             void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
             void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
             bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
-            bool isPackageCompleted(const MWWorld::Ptr& actor, AiWanderStorage& storage);
+            inline bool isPackageCompleted() const;
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
 
-            int mDistance; // how far the actor can wander from the spawn point
-            int mDuration;
+            const int mDistance; // how far the actor can wander from the spawn point
+            const int mDuration;
             float mRemainingDuration;
-            int mTimeOfDay;
-            std::vector<unsigned char> mIdle;
-            bool mRepeat;
+            const int mTimeOfDay;
+            const std::vector<unsigned char> mIdle;
 
             bool mStoredInitialActorPosition;
             osg::Vec3f mInitialActorPosition; // Note: an original engine does not reset coordinates even when actor changes a cell
@@ -178,7 +177,7 @@ namespace MWMechanics
             static const std::string sIdleSelectToGroupName[GroupIndex_MaxIdle - GroupIndex_MinIdle + 1];
 
             static int OffsetToPreventOvercrowding();
-    }; 
+    };
 }
 
 #endif

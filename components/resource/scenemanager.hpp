@@ -81,7 +81,7 @@ namespace Resource
         /// @note If the given filename does not exist or fails to load, an error marker mesh will be used instead.
         ///  If even the error marker mesh can not be found, an exception is thrown.
         /// @note Thread safe.
-        osg::ref_ptr<const osg::Node> getTemplate(const std::string& name);
+        osg::ref_ptr<const osg::Node> getTemplate(const std::string& name, bool compile=true);
 
         /// Create an instance of the given scene template and cache it for later use, so that future calls to getInstance() can simply
         /// return this cached object instead of creating a new one.

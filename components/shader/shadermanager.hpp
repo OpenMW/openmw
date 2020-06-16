@@ -30,7 +30,7 @@ namespace Shader
         /// @param shaderType The type of shader (usually vertex or fragment shader).
         /// @note May return nullptr on failure.
         /// @note Thread safe.
-        osg::ref_ptr<osg::Shader> getShader(const std::string& shaderTemplate, const DefineMap& defines, osg::Shader::Type shaderType);
+        osg::ref_ptr<osg::Shader> getShader(const std::string& templateName, const DefineMap& defines, osg::Shader::Type shaderType);
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader);
 
@@ -43,6 +43,9 @@ namespace Shader
         void setGlobalDefines(DefineMap & globalDefines);
 
         void releaseGLObjects(osg::State* state);
+
+        const osg::ref_ptr<osg::Uniform> getShadowMapAlphaTestEnableUniform();
+        const osg::ref_ptr<osg::Uniform> getShadowMapAlphaTestDisableUniform();
 
     private:
         std::string mPath;
@@ -61,8 +64,15 @@ namespace Shader
         ProgramMap mPrograms;
 
         OpenThreads::Mutex mMutex;
+
+        const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestEnableUniform = new osg::Uniform();
+        const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestDisableUniform = new osg::Uniform();
     };
 
+    bool parseFors(std::string& source, const std::string& templateName);
+
+    bool parseDefines(std::string& source, const ShaderManager::DefineMap& defines,
+        const ShaderManager::DefineMap& globalDefines, const std::string& templateName);
 }
 
 #endif

@@ -14,6 +14,14 @@ struct TimeStamp
     int mDay;
 };
 
+struct EpochTimeStamp
+{
+    float mGameHour;
+    int mDay;
+    int mMonth;
+    int mYear;
+};
+
 // Pixel color value. Standard four-byte rr,gg,bb,aa format.
 typedef uint32_t Color;
 
@@ -49,6 +57,26 @@ struct Position
 };
 #pragma pack(pop)
 
+bool inline operator== (const Position& left, const Position& right) noexcept
+{
+    return left.pos[0] == right.pos[0] &&
+           left.pos[1] == right.pos[1] &&
+           left.pos[2] == right.pos[2] &&
+           left.rot[0] == right.rot[0] &&
+           left.rot[1] == right.rot[1] &&
+           left.rot[2] == right.rot[2];
+}
+
+bool inline operator!= (const Position& left, const Position& right) noexcept
+{
+    return left.pos[0] != right.pos[0] ||
+           left.pos[1] != right.pos[1] ||
+           left.pos[2] != right.pos[2] ||
+           left.rot[0] != right.rot[0] ||
+           left.rot[1] != right.rot[1] ||
+           left.rot[2] != right.rot[2];
+}
+
 template <int a, int b, int c, int d>
 struct FourCC
 {
@@ -58,51 +86,51 @@ struct FourCC
 enum RecNameInts
 {
     // format 0 / legacy
-    REC_ACTI = 0x49544341,
-    REC_ALCH = 0x48434c41,
-    REC_APPA = 0x41505041,
-    REC_ARMO = 0x4f4d5241,
-    REC_BODY = 0x59444f42,
-    REC_BOOK = 0x4b4f4f42,
-    REC_BSGN = 0x4e475342,
-    REC_CELL = 0x4c4c4543,
-    REC_CLAS = 0x53414c43,
-    REC_CLOT = 0x544f4c43,
-    REC_CNTC = 0x43544e43,
-    REC_CONT = 0x544e4f43,
-    REC_CREA = 0x41455243,
-    REC_CREC = 0x43455243,
-    REC_DIAL = 0x4c414944,
-    REC_DOOR = 0x524f4f44,
-    REC_ENCH = 0x48434e45,
-    REC_FACT = 0x54434146,
-    REC_GLOB = 0x424f4c47,
-    REC_GMST = 0x54534d47,
-    REC_INFO = 0x4f464e49,
-    REC_INGR = 0x52474e49,
-    REC_LAND = 0x444e414c,
-    REC_LEVC = 0x4356454c,
-    REC_LEVI = 0x4956454c,
-    REC_LIGH = 0x4847494c,
-    REC_LOCK = 0x4b434f4c,
-    REC_LTEX = 0x5845544c,
-    REC_MGEF = 0x4645474d,
-    REC_MISC = 0x4353494d,
-    REC_NPC_ = 0x5f43504e,
-    REC_NPCC = 0x4343504e,
-    REC_PGRD = 0x44524750,
-    REC_PROB = 0x424f5250,
-    REC_RACE = 0x45434152,
-    REC_REGN = 0x4e474552,
-    REC_REPA = 0x41504552,
-    REC_SCPT = 0x54504353,
-    REC_SKIL = 0x4c494b53,
-    REC_SNDG = 0x47444e53,
-    REC_SOUN = 0x4e554f53,
-    REC_SPEL = 0x4c455053,
-    REC_SSCR = 0x52435353,
-    REC_STAT = 0x54415453,
-    REC_WEAP = 0x50414557,
+    REC_ACTI = FourCC<'A','C','T','I'>::value,
+    REC_ALCH = FourCC<'A','L','C','H'>::value,
+    REC_APPA = FourCC<'A','P','P','A'>::value,
+    REC_ARMO = FourCC<'A','R','M','O'>::value,
+    REC_BODY = FourCC<'B','O','D','Y'>::value,
+    REC_BOOK = FourCC<'B','O','O','K'>::value,
+    REC_BSGN = FourCC<'B','S','G','N'>::value,
+    REC_CELL = FourCC<'C','E','L','L'>::value,
+    REC_CLAS = FourCC<'C','L','A','S'>::value,
+    REC_CLOT = FourCC<'C','L','O','T'>::value,
+    REC_CNTC = FourCC<'C','N','T','C'>::value,
+    REC_CONT = FourCC<'C','O','N','T'>::value,
+    REC_CREA = FourCC<'C','R','E','A'>::value,
+    REC_CREC = FourCC<'C','R','E','C'>::value,
+    REC_DIAL = FourCC<'D','I','A','L'>::value,
+    REC_DOOR = FourCC<'D','O','O','R'>::value,
+    REC_ENCH = FourCC<'E','N','C','H'>::value,
+    REC_FACT = FourCC<'F','A','C','T'>::value,
+    REC_GLOB = FourCC<'G','L','O','B'>::value,
+    REC_GMST = FourCC<'G','M','S','T'>::value,
+    REC_INFO = FourCC<'I','N','F','O'>::value,
+    REC_INGR = FourCC<'I','N','G','R'>::value,
+    REC_LAND = FourCC<'L','A','N','D'>::value,
+    REC_LEVC = FourCC<'L','E','V','C'>::value,
+    REC_LEVI = FourCC<'L','E','V','I'>::value,
+    REC_LIGH = FourCC<'L','I','G','H'>::value,
+    REC_LOCK = FourCC<'L','O','C','K'>::value,
+    REC_LTEX = FourCC<'L','T','E','X'>::value,
+    REC_MGEF = FourCC<'M','G','E','F'>::value,
+    REC_MISC = FourCC<'M','I','S','C'>::value,
+    REC_NPC_ = FourCC<'N','P','C','_'>::value,
+    REC_NPCC = FourCC<'N','P','C','C'>::value,
+    REC_PGRD = FourCC<'P','G','R','D'>::value,
+    REC_PROB = FourCC<'P','R','O','B'>::value,
+    REC_RACE = FourCC<'R','A','C','E'>::value,
+    REC_REGN = FourCC<'R','E','G','N'>::value,
+    REC_REPA = FourCC<'R','E','P','A'>::value,
+    REC_SCPT = FourCC<'S','C','P','T'>::value,
+    REC_SKIL = FourCC<'S','K','I','L'>::value,
+    REC_SNDG = FourCC<'S','N','D','G'>::value,
+    REC_SOUN = FourCC<'S','O','U','N'>::value,
+    REC_SPEL = FourCC<'S','P','E','L'>::value,
+    REC_SSCR = FourCC<'S','S','C','R'>::value,
+    REC_STAT = FourCC<'S','T','A','T'>::value,
+    REC_WEAP = FourCC<'W','E','A','P'>::value,
 
     // format 0 - saved games
     REC_SAVE = FourCC<'S','A','V','E'>::value,

@@ -129,7 +129,7 @@ namespace MWClass
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
-            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+            virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
             virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;
@@ -164,6 +164,14 @@ namespace MWClass
 
             virtual std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const;
             virtual int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const;
+
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+
+            float getWalkSpeed(const MWWorld::Ptr& ptr) const final;
+
+            float getRunSpeed(const MWWorld::Ptr& ptr) const final;
+
+            float getSwimSpeed(const MWWorld::Ptr& ptr) const final;
     };
 }
 

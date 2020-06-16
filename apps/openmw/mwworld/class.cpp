@@ -421,7 +421,7 @@ namespace MWWorld
         return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
     }
 
-    int Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         throw std::runtime_error("class does not support skills");
     }
@@ -515,5 +515,25 @@ namespace MWWorld
         result.y() = magicEffect->mData.mGreen / 255.f;
         result.z() = magicEffect->mData.mBlue / 255.f;
         return result;
+    }
+
+    void Class::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    {
+        throw std::runtime_error ("class does not have creature stats");
+    }
+
+    float Class::getWalkSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
+    }
+
+    float Class::getRunSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
+    }
+
+    float Class::getSwimSpeed(const Ptr& /*ptr*/) const
+    {
+        return 0;
     }
 }

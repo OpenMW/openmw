@@ -81,6 +81,12 @@ namespace MWGui
         MWBase::Environment::get().getMechanicsManager()->rest(mDays * 24, true);
         MWBase::Environment::get().getWorld()->advanceTime(mDays * 24);
 
+        // We should not worsen corprus when in prison
+        for (auto& spell : player.getClass().getCreatureStats(player).getCorprusSpells())
+        {
+            spell.second.mNextWorsening += mDays * 24;
+        }
+
         std::set<int> skills;
         for (int day=0; day<mDays; ++day)
         {
@@ -89,9 +95,9 @@ namespace MWGui
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
             if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
-                value.setBase(std::min(100, value.getBase()+1));
+                value.setBase(std::min(100.f, value.getBase()+1));
             else
-                value.setBase(std::max(0, value.getBase()-1));
+                value.setBase(std::max(0.f, value.getBase()-1));
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();

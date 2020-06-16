@@ -131,6 +131,7 @@ void registerSerializers()
             "NifOsg::StaticBoundingBoxCallback",
             "NifOsg::GeomMorpherController",
             "NifOsg::UpdateMorphGeometry",
+            "NifOsg::CollisionSwitch",
             "osgMyGUI::Drawable",
             "osg::DrawCallback",
             "osgOQ::ClearQueriesCallback",

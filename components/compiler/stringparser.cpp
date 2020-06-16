@@ -63,12 +63,7 @@ namespace Compiler
             keyword==Scanner::K_elseif || keyword==Scanner::K_while ||
             keyword==Scanner::K_endwhile || keyword==Scanner::K_return ||
             keyword==Scanner::K_messagebox || keyword==Scanner::K_set ||
-            keyword==Scanner::K_to || keyword==Scanner::K_startscript ||
-            keyword==Scanner::K_stopscript || keyword==Scanner::K_enable ||
-            keyword==Scanner::K_disable || keyword==Scanner::K_getdisabled ||
-            keyword==Scanner::K_getdistance || keyword==Scanner::K_scriptrunning ||
-            keyword==Scanner::K_getsquareroot || keyword==Scanner::K_menumode ||
-            keyword==Scanner::K_random || keyword==Scanner::K_getsecondspassed)
+            keyword==Scanner::K_to || keyword==Scanner::K_getsquareroot)
         {
             return parseName (loc.mLiteral, loc, scanner);
         }

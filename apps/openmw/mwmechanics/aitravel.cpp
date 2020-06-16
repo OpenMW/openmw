@@ -3,6 +3,7 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
@@ -26,31 +27,39 @@ bool isWithinMaxRange(const osg::Vec3f& pos1, const osg::Vec3f& pos2)
 
 namespace MWMechanics
 {
-    AiTravel::AiTravel(float x, float y, float z, bool hidden)
-    : mX(x),mY(y),mZ(z),mHidden(hidden)
+    AiTravel::AiTravel(float x, float y, float z, AiTravel*)
+        : mX(x), mY(y), mZ(z), mHidden(false)
+    {
+    }
+
+    AiTravel::AiTravel(float x, float y, float z, AiInternalTravel* derived)
+        : TypedAiPackage<AiTravel>(derived), mX(x), mY(y), mZ(z), mHidden(true)
+    {
+    }
+
+    AiTravel::AiTravel(float x, float y, float z)
+        : AiTravel(x, y, z, this)
     {
     }
 
     AiTravel::AiTravel(const ESM::AiSequence::AiTravel *travel)
-        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(travel->mHidden)
+        : mX(travel->mData.mX), mY(travel->mData.mY), mZ(travel->mData.mZ), mHidden(false)
     {
-    }
-
-    AiTravel *MWMechanics::AiTravel::clone() const
-    {
-        return new AiTravel(*this);
+        // Hidden ESM::AiSequence::AiTravel package should be converted into MWMechanics::AiInternalTravel type
+        assert(!travel->mHidden);
     }
 
     bool AiTravel::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
-        auto& stats = actor.getClass().getCreatureStats(actor);
+        MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
 
-        if (stats.isTurningToPlayer() || stats.getGreetingState() == Greet_InProgress)
+        if (mechMgr->isTurningToPlayer(actor) || mechMgr->getGreetingState(actor) == Greet_InProgress)
             return false;
 
         const osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
         const osg::Vec3f targetPos(mX, mY, mZ);
 
+        auto& stats = actor.getClass().getCreatureStats(actor);
         stats.setMovementFlag(CreatureStats::Flag_Run, false);
         stats.setDrawState(DrawState_Nothing);
 
@@ -81,11 +90,6 @@ namespace MWMechanics
         return false;
     }
 
-    int AiTravel::getTypeId() const
-    {
-        return mHidden ? TypeIdInternalTravel : TypeIdTravel;
-    }
-
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
         if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
@@ -109,6 +113,21 @@ namespace MWMechanics
         package.mType = ESM::AiSequence::Ai_Travel;
         package.mPackage = travel.release();
         sequence.mPackages.push_back(package);
+    }
+
+    AiInternalTravel::AiInternalTravel(float x, float y, float z)
+        : AiTravel(x, y, z, this)
+    {
+    }
+
+    AiInternalTravel::AiInternalTravel(const ESM::AiSequence::AiTravel* travel)
+        : AiTravel(travel->mData.mX, travel->mData.mY, travel->mData.mZ, this)
+    {
+    }
+
+    std::unique_ptr<AiPackage> AiInternalTravel::clone() const
+    {
+        return std::make_unique<AiInternalTravel>(*this);
     }
 }
 

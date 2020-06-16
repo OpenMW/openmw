@@ -2,10 +2,9 @@
 
 #include <stdexcept>
 
-#include <components/misc/stringops.hpp>
-
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/esmreader.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "esmstore.hpp"
 

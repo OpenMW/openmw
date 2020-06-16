@@ -74,7 +74,7 @@ private:
 
     void updateNpcBase();
 
-    NpcType getNpcType();
+    NpcType getNpcType() const;
 
     PartHolderPtr insertBoundedPart(const std::string &model, const std::string &bonename,
                                         const std::string &bonefilter, bool enchantedGlow, osg::Vec4f* glowColor=nullptr);
@@ -88,12 +88,13 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
 
-    virtual void setRenderBin();
+    void setRenderBin();
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
 
     static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
     static bool isFemalePart(const ESM::BodyPart* bodypart);
+    static NpcType getNpcType(const MWWorld::Ptr& ptr);
 
 protected:
     virtual void addControllers();

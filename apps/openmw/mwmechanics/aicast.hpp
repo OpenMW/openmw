@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AICAST_H
 #define GAME_MWMECHANICS_AICAST_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace MWWorld
 {
@@ -11,29 +11,31 @@ namespace MWWorld
 namespace MWMechanics
 {
     /// AiPackage which makes an actor to cast given spell.
-    class AiCast : public AiPackage {
+    class AiCast final : public TypedAiPackage<AiCast> {
         public:
             AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell=false);
 
-            virtual AiPackage *clone() const;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            static constexpr TypeId getTypeId() { return TypeIdCast; }
 
-            virtual int getTypeId() const;
+            MWWorld::Ptr getTarget() const final;
 
-            virtual MWWorld::Ptr getTarget() const;
-
-            virtual unsigned int getPriority() const;
-
-            virtual bool canCancel() const { return false; }
-            virtual bool shouldCancelPreviousAi() const { return false; }
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mPriority = 3;
+                options.mCanCancel = false;
+                options.mShouldCancelPreviousAi = false;
+                return options;
+            }
 
         private:
-            std::string mTargetId;
-            std::string mSpellId;
+            const std::string mTargetId;
+            const std::string mSpellId;
             bool mCasting;
-            bool mManual;
-            float mDistance;
+            const bool mManual;
+            const float mDistance;
     };
 }
 

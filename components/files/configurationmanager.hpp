@@ -41,6 +41,7 @@ struct ConfigurationManager
     const boost::filesystem::path& getCachePath() const;
 
     const boost::filesystem::path& getLogPath() const;
+    const boost::filesystem::path& getScreenshotPath() const;
 
     private:
         typedef Files::FixedPath<> FixedPathType;
@@ -57,6 +58,7 @@ struct ConfigurationManager
         FixedPathType mFixedPath;
 
         boost::filesystem::path mLogPath;
+        boost::filesystem::path mScreenshotPath;
 
         TokensMappingContainer mTokensMapping;
 

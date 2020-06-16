@@ -9,7 +9,7 @@
 namespace
 {
 
-void printAIPackage(ESM::AIPackage p)
+void printAIPackage(const ESM::AIPackage& p)
 {
     std::cout << "  AI Type: " << aiTypeLabel(p.mType)
               << " (" << Misc::StringUtils::format("0x%08X", p.mType) << ")" << std::endl;
@@ -53,7 +53,7 @@ void printAIPackage(ESM::AIPackage p)
         std::cout << "    Cell Name: " << p.mCellName << std::endl;
 }
 
-std::string ruleString(ESM::DialInfo::SelectStruct ss)
+std::string ruleString(const ESM::DialInfo::SelectStruct& ss)
 {
     std::string rule = ss.mSelectRule;
 
@@ -126,7 +126,7 @@ std::string ruleString(ESM::DialInfo::SelectStruct ss)
     return result;
 }
 
-void printEffectList(ESM::EffectList effects)
+void printEffectList(const ESM::EffectList& effects)
 {
     int i = 0;
     for (const ESM::ENAMstruct& effect : effects.mList)
@@ -174,7 +174,7 @@ namespace EsmTool {
 RecordBase *
 RecordBase::create(ESM::NAME type)
 {
-    RecordBase *record = 0;
+    RecordBase *record = nullptr;
 
     switch (type.intval) {
     case ESM::REC_ACTI:
@@ -388,7 +388,7 @@ RecordBase::create(ESM::NAME type)
         break;
     }
     default:
-        record = 0;
+        record = nullptr;
     }
     if (record) {
         record->mType = type;
@@ -728,10 +728,9 @@ void Record<ESM::Faction>::print()
               << " (" << mData.mData.mAttribute[0] << ")" << std::endl;
     std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1])
               << " (" << mData.mData.mAttribute[1] << ")" << std::endl;
-    for (int i = 0; i < 7; i++)
-        if (mData.mData.mSkills[i] != -1)
-            std::cout << "  Skill: " << skillLabel(mData.mData.mSkills[i])
-                      << " (" << mData.mData.mSkills[i] << ")" << std::endl;
+    for (int skill : mData.mData.mSkills)
+        if (skill != -1)
+            std::cout << "  Skill: " << skillLabel(skill) << " (" << skill << ")" << std::endl;
     for (int i = 0; i != 10; i++)
         if (!mData.mRanks[i].empty())
         {

@@ -262,7 +262,6 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
     stateset->setAttribute(new osg::PolygonMode(), osg::StateAttribute::PROTECTED);
 #endif
 
-    osg::Vec3 pos(_statsWidth-420.f, _statsHeight-500.0f,0.0f);
     osg::Vec4 backgroundColor(0.0, 0.0, 0.0f, 0.3);
     osg::Vec4 staticTextColor(1.0, 1.0, 0.0f, 1.0);
     osg::Vec4 dynamicTextColor(1.0, 1.0, 1.0f, 1.0);
@@ -277,6 +276,8 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         _switch->addChild(group, false);
 
         static const std::vector<std::string> statNames({
+            "FrameNumber",
+            "",
             "Compiling",
             "WorkQueue",
             "WorkThread",
@@ -291,6 +292,7 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "Nif",
             "Keyframe",
             "",
+            "Object Chunk",
             "Terrain Chunk",
             "Terrain Texture",
             "Land",
@@ -302,16 +304,25 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
             "NavMesh CacheSize",
             "NavMesh UsedTiles",
             "NavMesh CachedTiles",
+            "",
+            "Mechanics Actors",
+            "Mechanics Objects",
+            "",
+            "Physics Actors",
+            "Physics Objects",
+            "Physics HeightFields",
         });
 
         static const auto longest = std::max_element(statNames.begin(), statNames.end(),
             [] (const std::string& lhs, const std::string& rhs) { return lhs.size() < rhs.size(); });
-        const int numLines = statNames.size();
         const float statNamesWidth = 13 * _characterSize + 2 * backgroundMargin;
+        const float statTextWidth = 7 * _characterSize + 2 * backgroundMargin;
+        const float statHeight = statNames.size() * _characterSize + 2 * backgroundMargin;
+        osg::Vec3 pos(_statsWidth - statNamesWidth - backgroundSpacing - statTextWidth, statHeight, 0.0f);
 
         group->addChild(createBackgroundRectangle(pos + osg::Vec3(-backgroundMargin, _characterSize + backgroundMargin, 0),
                                                         statNamesWidth,
-                                                        numLines * _characterSize + 2 * backgroundMargin,
+                                                        statHeight,
                                                         backgroundColor));
 
         osg::ref_ptr<osgText::Text> staticText = new osgText::Text;
@@ -335,8 +346,8 @@ void StatsHandler::setUpScene(osgViewer::ViewerBase *viewer)
         pos.x() += statNamesWidth + backgroundSpacing;
 
         group->addChild(createBackgroundRectangle(pos + osg::Vec3(-backgroundMargin, _characterSize + backgroundMargin, 0),
-                                                        7 * _characterSize + 2 * backgroundMargin,
-                                                        numLines * _characterSize + 2 * backgroundMargin,
+                                                        statTextWidth,
+                                                        statHeight,
                                                         backgroundColor));
 
         osg::ref_ptr<osgText::Text> statsText = new osgText::Text;

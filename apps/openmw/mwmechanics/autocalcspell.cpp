@@ -1,5 +1,4 @@
 #include "autocalcspell.hpp"
-#include "spellcasting.hpp"
 
 #include <limits>
 
@@ -8,6 +7,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
 
+#include "spellutil.hpp"
 
 namespace MWMechanics
 {
@@ -262,6 +262,8 @@ namespace MWMechanics
             int duration = 0;
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::NoDuration))
                 duration = effect.mDuration;
+            if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
+                duration = std::max(1, duration);
 
             static const float fEffectCostMult = MWBase::Environment::get().getWorld()->getStore()
                 .get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();

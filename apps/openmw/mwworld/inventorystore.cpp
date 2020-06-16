@@ -13,7 +13,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 
 #include "../mwmechanics/npcstats.hpp"
-#include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellresistance.hpp"
+#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
@@ -283,12 +284,12 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
     // rate weapon
     for (int i = 0; i < static_cast<int>(weaponSkillsLength); ++i)
     {
-        int max = 0;
+        float max = 0;
         int maxWeaponSkill = -1;
 
         for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
         {
-            int skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
+            float skillValue = actor.getClass().getSkill(actor, static_cast<int>(weaponSkills[j]));
             if (skillValue > max && !weaponSkillVisited[j])
             {
                 max = skillValue;
@@ -398,7 +399,7 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
     static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
 
-    int unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
+    float unarmoredSkill = actor.getClass().getSkill(actor, ESM::Skill::Unarmored);
     float unarmoredRating = (fUnarmoredBase1 * unarmoredSkill) * (fUnarmoredBase2 * unarmoredSkill);
 
     for (ContainerStoreIterator iter (begin(ContainerStore::Type_Clothing | ContainerStore::Type_Armor)); iter!=end(); ++iter)
@@ -571,7 +572,8 @@ void MWWorld::InventoryStore::updateMagicEffects(const Ptr& actor)
 
     mMagicEffects = MWMechanics::MagicEffects();
 
-    if (actor.getClass().getCreatureStats(actor).isDead())
+    const auto& stats = actor.getClass().getCreatureStats(actor);
+    if (stats.isDead() && stats.isDeathAnimationFinished())
         return;
 
     for (TSlots::const_iterator iter (mSlots.begin()); iter!=mSlots.end(); ++iter)
@@ -920,16 +922,16 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
     }
 }
 
-void MWWorld::InventoryStore::purgeEffect(short effectId)
+void MWWorld::InventoryStore::purgeEffect(short effectId, bool wholeSpell)
 {
     for (TSlots::const_iterator it = mSlots.begin(); it != mSlots.end(); ++it)
     {
         if (*it != end())
-            purgeEffect(effectId, (*it)->getCellRef().getRefId());
+            purgeEffect(effectId, (*it)->getCellRef().getRefId(), wholeSpell);
     }
 }
 
-void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId)
+void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId, bool wholeSpell)
 {
     TEffectMagnitudes::iterator effectMagnitudeIt = mPermanentMagicEffectMagnitudes.find(sourceId);
     if (effectMagnitudeIt == mPermanentMagicEffectMagnitudes.end())
@@ -961,6 +963,12 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
             {
                 if (effectIt->mEffectID != effectId)
                     continue;
+
+                if (wholeSpell)
+                {
+                    mPermanentMagicEffectMagnitudes.erase(sourceId);
+                    return;
+                }
 
                 float magnitude = effectIt->mMagnMin + (effectIt->mMagnMax - effectIt->mMagnMin) * params[i].mRandom;
                 magnitude *= params[i].mMultiplier;

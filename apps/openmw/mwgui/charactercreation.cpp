@@ -105,23 +105,32 @@ namespace MWGui
         mGenerateClassSpecializations[0] = 0;
         mGenerateClassSpecializations[1] = 0;
         mGenerateClassSpecializations[2] = 0;
+
+        // Setup player stats
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
+            mPlayerAttributes.emplace(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue());
+
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+            mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
     {
-        if (mReviewDialog)
+        static const char *ids[] =
         {
-           static const char *ids[] =
-            {
-                "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4", "AttribVal5",
-                "AttribVal6", "AttribVal7", "AttribVal8",
-                0
-            };
+            "AttribVal1", "AttribVal2", "AttribVal3", "AttribVal4",
+            "AttribVal5", "AttribVal6", "AttribVal7", "AttribVal8", 0
+        };
 
-            for (int i=0; ids[i]; ++i)
+        for (int i=0; ids[i]; ++i)
+        {
+            if (ids[i]==id)
             {
-                if (ids[i]==id)
-                    mReviewDialog->setAttribute(ESM::Attribute::AttributeID(i), value);
+                mPlayerAttributes[static_cast<ESM::Attribute::AttributeID>(i)] = value;
+                if (mReviewDialog)
+                    mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID>(i), value);
+
+                break;
             }
         }
     }
@@ -147,6 +156,7 @@ namespace MWGui
 
     void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
     {
+        mPlayerSkillValues[parSkill] = value;
         if (mReviewDialog)
             mReviewDialog->setSkillValue(parSkill, value);
     }
@@ -155,6 +165,9 @@ namespace MWGui
     {
         if (mReviewDialog)
             mReviewDialog->configureSkills(major, minor);
+
+        mPlayerMajorSkills = major;
+        mPlayerMinorSkills = minor;
     }
 
     void CharacterCreation::onFrame(float duration)
@@ -269,31 +282,21 @@ namespace MWGui
                     mReviewDialog->setClass(*playerClass);
                     mReviewDialog->setBirthSign(player.getBirthSign());
 
-                    {
-                        MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
-                        const MWMechanics::CreatureStats& stats = playerPtr.getClass().getCreatureStats(playerPtr);
+                    MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
+                    const MWMechanics::CreatureStats& stats = playerPtr.getClass().getCreatureStats(playerPtr);
 
-                        mReviewDialog->setHealth ( stats.getHealth()  );
-                        mReviewDialog->setMagicka( stats.getMagicka() );
-                        mReviewDialog->setFatigue( stats.getFatigue() );
-                    }
-
+                    mReviewDialog->setHealth(stats.getHealth());
+                    mReviewDialog->setMagicka(stats.getMagicka());
+                    mReviewDialog->setFatigue(stats.getFatigue());
+                    for (auto& attributePair : mPlayerAttributes)
                     {
-                        std::map<int, MWMechanics::AttributeValue > attributes = MWBase::Environment::get().getWindowManager()->getPlayerAttributeValues();
-                        for (auto& attributePair : attributes)
-                        {
-                            mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (attributePair.first), attributePair.second);
-                        }
+                        mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID> (attributePair.first), attributePair.second);
                     }
-
+                    for (auto& skillPair : mPlayerSkillValues)
                     {
-                        std::map<int, MWMechanics::SkillValue > skills = MWBase::Environment::get().getWindowManager()->getPlayerSkillValues();
-                        for (auto& skillPair : skills)
-                        {
-                            mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (skillPair.first), skillPair.second);
-                        }
-                        mReviewDialog->configureSkills(MWBase::Environment::get().getWindowManager()->getPlayerMajorSkills(), MWBase::Environment::get().getWindowManager()->getPlayerMinorSkills());
+                        mReviewDialog->setSkillValue(static_cast<ESM::Skill::SkillEnum> (skillPair.first), skillPair.second);
                     }
+                    mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
 
                     mReviewDialog->eventDone += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogDone);
                     mReviewDialog->eventBack += MyGUI::newDelegate(this, &CharacterCreation::onReviewDialogBack);

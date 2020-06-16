@@ -12,6 +12,8 @@
 #include <components/interpreter/runtime.hpp>
 #include <components/interpreter/opcodes.hpp>
 
+#include <components/misc/rng.hpp>
+
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadcrea.hpp>
 
@@ -78,6 +80,117 @@ namespace MWScript
 {
     namespace Misc
     {
+        class OpMenuMode : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push (MWBase::Environment::get().getWindowManager()->isGuiMode());
+                }
+        };
+
+        class OpRandom : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    Interpreter::Type_Integer limit = runtime[0].mInteger;
+                    runtime.pop();
+
+                    if (limit<0)
+                        throw std::runtime_error (
+                            "random: argument out of range (Don't be so negative!)");
+
+                    runtime.push (static_cast<Interpreter::Type_Float>(::Misc::Rng::rollDice(limit))); // [o, limit)
+                }
+        };
+
+        template<class R>
+        class OpStartScript : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr target = R()(runtime, false);
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript (name, target);
+                }
+        };
+
+        class OpScriptRunning : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    runtime.push(MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning (name));
+                }
+        };
+
+        class OpStopScript : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript (name);
+                }
+        };
+
+        class OpGetSecondsPassed : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    runtime.push (MWBase::Environment::get().getFrameDuration());
+                }
+        };
+
+        template<class R>
+        class OpEnable : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->enable (ptr);
+                }
+        };
+
+        template<class R>
+        class OpDisable : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    MWBase::Environment::get().getWorld()->disable (ptr);
+                }
+        };
+
+        template<class R>
+        class OpGetDisabled : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr ptr = R()(runtime);
+                    runtime.push (!ptr.getRefData().isEnabled());
+                }
+        };
+
         class OpPlayBink : public Interpreter::Opcode0
         {
         public:
@@ -1456,6 +1569,19 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
+            interpreter.installSegment5 (Compiler::Misc::opcodeMenuMode, new OpMenuMode);
+            interpreter.installSegment5 (Compiler::Misc::opcodeRandom, new OpRandom);
+            interpreter.installSegment5 (Compiler::Misc::opcodeScriptRunning, new OpScriptRunning);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStartScript, new OpStartScript<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStartScriptExplicit, new OpStartScript<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeStopScript, new OpStopScript);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetSecondsPassed, new OpGetSecondsPassed);
+            interpreter.installSegment5 (Compiler::Misc::opcodeEnable, new OpEnable<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeEnableExplicit, new OpEnable<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeDisable, new OpDisable<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeDisableExplicit, new OpDisable<ExplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabled, new OpGetDisabled<ImplicitRef>);
+            interpreter.installSegment5 (Compiler::Misc::opcodeGetDisabledExplicit, new OpGetDisabled<ExplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeXBox, new OpXBox);
             interpreter.installSegment5 (Compiler::Misc::opcodeOnActivate, new OpOnActivate<ImplicitRef>);
             interpreter.installSegment5 (Compiler::Misc::opcodeOnActivateExplicit, new OpOnActivate<ExplicitRef>);

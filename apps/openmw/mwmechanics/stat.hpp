@@ -122,20 +122,20 @@ namespace MWMechanics
 
     class AttributeValue
     {
-        int mBase;
-        int mModifier;
+        float mBase;
+        float mModifier;
         float mDamage; // needs to be float to allow continuous damage
 
     public:
         AttributeValue();
 
-        int getModified() const;
-        int getBase() const;
-        int getModifier() const;
+        float getModified() const;
+        float getBase() const;
+        float getModifier() const;
 
-        void setBase(int base);
+        void setBase(float base);
 
-        void setModifier(int mod);
+        void setModifier(float mod);
 
         // Maximum attribute damage is limited to the modified value.
         // Note: I think MW applies damage directly to mModified, since you can also
@@ -145,8 +145,8 @@ namespace MWMechanics
 
         float getDamage() const;
 
-        void writeState (ESM::StatState<int>& state) const;
-        void readState (const ESM::StatState<int>& state);
+        void writeState (ESM::StatState<float>& state) const;
+        void readState (const ESM::StatState<float>& state);
     };
 
     class SkillValue : public AttributeValue
@@ -157,8 +157,8 @@ namespace MWMechanics
         float getProgress() const;
         void setProgress(float progress);
 
-        void writeState (ESM::StatState<int>& state) const;
-        void readState (const ESM::StatState<int>& state);
+        void writeState (ESM::StatState<float>& state) const;
+        void readState (const ESM::StatState<float>& state);
     };
 
     inline bool operator== (const AttributeValue& left, const AttributeValue& right)

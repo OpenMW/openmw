@@ -40,6 +40,63 @@ namespace MWScript
         }
 
         template<class R>
+        class OpGetDistance : public Interpreter::Opcode0
+        {
+            public:
+
+                virtual void execute (Interpreter::Runtime& runtime)
+                {
+                    MWWorld::Ptr from = R()(runtime);
+                    std::string name = runtime.getStringLiteral (runtime[0].mInteger);
+                    runtime.pop();
+
+                    if (from.getContainerStore()) // is the object contained?
+                    {
+                        MWWorld::Ptr container = MWBase::Environment::get().getWorld()->findContainer(from);
+
+                        if (!container.isEmpty())
+                            from = container;
+                        else
+                        {
+                            std::string error = "Failed to find the container of object '" + from.getCellRef().getRefId() + "'";
+                            runtime.getContext().report(error);
+                            Log(Debug::Error) << error;
+                            runtime.push(0.f);
+                            return;
+                        }
+                    }
+
+                    const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
+                    if (to.isEmpty())
+                    {
+                        std::string error = "Failed to find an instance of object '" + name + "'";
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        runtime.push(0.f);
+                        return;
+                    }
+
+                    float distance;
+                    // If the objects are in different worldspaces, return a large value (just like vanilla)
+                    if (!to.isInCell() || !from.isInCell() || to.getCell()->getCell()->getCellId().mWorldspace != from.getCell()->getCell()->getCellId().mWorldspace)
+                        distance = std::numeric_limits<float>::max();
+                    else
+                    {
+                        double diff[3];
+
+                        const float* const pos1 = to.getRefData().getPosition().pos;
+                        const float* const pos2 = from.getRefData().getPosition().pos;
+                        for (int i=0; i<3; ++i)
+                            diff[i] = pos1[i] - pos2[i];
+
+                        distance = static_cast<float>(std::sqrt(diff[0] * diff[0] + diff[1] * diff[1] + diff[2] * diff[2]));
+                    }
+
+                    runtime.push(distance);
+                }
+        };
+
+        template<class R>
         class OpSetScale : public Interpreter::Opcode0
         {
             public:
@@ -396,7 +453,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItemCell : public Interpreter::Opcode0
         {
             public:
@@ -450,7 +506,6 @@ namespace MWScript
                 }
         };
 
-        template<class R>
         class OpPlaceItem : public Interpreter::Opcode0
         {
             public:
@@ -732,6 +787,8 @@ namespace MWScript
 
         void installOpcodes (Interpreter::Interpreter& interpreter)
         {
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetDistance, new OpGetDistance<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodeGetDistanceExplicit, new OpGetDistance<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeSetScale,new OpSetScale<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeSetScaleExplicit,new OpSetScale<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodeSetAngle,new OpSetAngle<ImplicitRef>);
@@ -750,8 +807,8 @@ namespace MWScript
             interpreter.installSegment5(Compiler::Transformation::opcodePositionExplicit,new OpPosition<ExplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCell,new OpPositionCell<ImplicitRef>);
             interpreter.installSegment5(Compiler::Transformation::opcodePositionCellExplicit,new OpPositionCell<ExplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell<ImplicitRef>);
-            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem<ImplicitRef>);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItemCell,new OpPlaceItemCell);
+            interpreter.installSegment5(Compiler::Transformation::opcodePlaceItem,new OpPlaceItem);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtPc,new OpPlaceAt<ImplicitRef, true>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMe,new OpPlaceAt<ImplicitRef, false>);
             interpreter.installSegment5(Compiler::Transformation::opcodePlaceAtMeExplicit,new OpPlaceAt<ExplicitRef, false>);

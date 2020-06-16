@@ -1,9 +1,13 @@
 #include "mechanicsmanagerimp.hpp"
 
+#include <osg/Stats>
+
 #include <components/misc/rng.hpp>
 
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/stolenitems.hpp>
+
+#include <components/detournavigator/navigator.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -21,7 +25,7 @@
 
 #include "aicombat.hpp"
 #include "aipursue.hpp"
-#include "spellcasting.hpp"
+#include "spellutil.hpp"
 #include "autocalcspell.hpp"
 #include "npcstats.hpp"
 #include "actorutil.hpp"
@@ -287,6 +291,24 @@ namespace MWMechanics
         mWatched = ptr;
     }
 
+    void MechanicsManager::restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId)
+    {
+        auto& stats = actor.getClass().getCreatureStats (actor);
+        auto& corprusSpells = stats.getCorprusSpells();
+
+        auto corprusIt = corprusSpells.find(sourceId);
+
+        if (corprusIt != corprusSpells.end())
+        {
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            {
+                MWMechanics::AttributeValue attr = stats.getAttribute(i);
+                attr.restore(corprusIt->second.mWorsenings[i]);
+                actor.getClass().getCreatureStats(actor).setAttribute(i, attr);
+            }
+        }
+    }
+
     void MechanicsManager::update(float duration, bool paused)
     {
         if(!mWatched.isEmpty())
@@ -376,7 +398,7 @@ namespace MWMechanics
             {
                 const std::string& spell = winMgr->getSelectedSpell();
                 if (!spell.empty())
-                    winMgr->setSelectedSpell(spell, int(MWMechanics::getSpellSuccessChance(spell, mWatched)));
+                    winMgr->setSelectedSpell(spell, int(getSpellSuccessChance(spell, mWatched)));
                 else
                     winMgr->unsetSelectedSpell();
             }
@@ -668,10 +690,10 @@ namespace MWMechanics
         // I suppose the temporary disposition change (second param to getDerivedDisposition()) _has_ to be considered here,
         // otherwise one would get different prices when exiting and re-entering the dialogue window...
         int clampedDisposition = getDerivedDisposition(ptr);
-        float a = static_cast<float>(std::min(playerPtr.getClass().getSkill(playerPtr, ESM::Skill::Mercantile), 100));
+        float a = std::min(playerPtr.getClass().getSkill(playerPtr, ESM::Skill::Mercantile), 100.f);
         float b = std::min(0.1f * playerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float c = std::min(0.2f * playerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
-        float d = static_cast<float>(std::min(ptr.getClass().getSkill(ptr, ESM::Skill::Mercantile), 100));
+        float d = std::min(ptr.getClass().getSkill(ptr, ESM::Skill::Mercantile), 100.f);
         float e = std::min(0.1f * sellerStats.getAttribute(ESM::Attribute::Luck).getModified(), 10.f);
         float f = std::min(0.2f * sellerStats.getAttribute(ESM::Attribute::Personality).getModified(), 10.f);
         float pcTerm = (clampedDisposition - 50 + a + b + c) * playerStats.getFatigueTerm();
@@ -880,6 +902,12 @@ namespace MWMechanics
     bool MechanicsManager::toggleAI()
     {
         mAI = !mAI;
+
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        world->getNavigator()->setUpdatesEnabled(mAI);
+        if (mAI)
+           world->getNavigator()->update(world->getPlayerPtr().getRefData().getPosition().asVec3());
+
         return mAI;
     }
 
@@ -1197,7 +1225,7 @@ namespace MWMechanics
 
         if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
         {
-            if (victim.isEmpty() || (victim.getClass().isActor() && !victim.getClass().getCreatureStats(victim).isDead()))
+            if (victim.isEmpty() || (victim.getClass().isActor() && victim.getRefData().getCount() > 0 && !victim.getClass().getCreatureStats(victim).isDead()))
                 mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
         }
         if (alarm)
@@ -1601,8 +1629,8 @@ namespace MWMechanics
             static float fSneakSkillMult = store.find("fSneakSkillMult")->mValue.getFloat();
             static float fSneakBootMult = store.find("fSneakBootMult")->mValue.getFloat();
             float sneak = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Sneak));
-            int agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
-            int luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
+            float agility = stats.getAttribute(ESM::Attribute::Agility).getModified();
+            float luck = stats.getAttribute(ESM::Attribute::Luck).getModified();
             float bootWeight = 0;
             if (ptr.getClass().isNpc() && MWBase::Environment::get().getWorld()->isOnGround(ptr))
             {
@@ -1625,10 +1653,10 @@ namespace MWMechanics
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon + invisibility;
 
         CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
-        int obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
-        int obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
+        float obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
+        float obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
         float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
-        int obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
+        float obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
 
         float obsTerm = obsSneak + 0.2f * obsAgility + 0.1f * obsLuck - obsBlind;
 
@@ -1944,4 +1972,29 @@ namespace MWMechanics
         mActors.cleanupSummonedCreature(caster.getClass().getCreatureStats(caster), creatureActorId);
     }
 
+    void MechanicsManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        stats.setAttribute(frameNumber, "Mechanics Actors", mActors.size());
+        stats.setAttribute(frameNumber, "Mechanics Objects", mObjects.size());
+    }
+
+    int MechanicsManager::getGreetingTimer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getGreetingTimer(ptr);
+    }
+
+    float MechanicsManager::getAngleToPlayer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getAngleToPlayer(ptr);
+    }
+
+    GreetingState MechanicsManager::getGreetingState(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.getGreetingState(ptr);
+    }
+
+    bool MechanicsManager::isTurningToPlayer(const MWWorld::Ptr &ptr) const
+    {
+        return mActors.isTurningToPlayer(ptr);
+    }
 }

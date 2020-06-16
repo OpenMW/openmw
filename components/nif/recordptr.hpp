@@ -142,6 +142,7 @@ class NiRotatingParticlesData;
 class NiAutoNormalParticlesData;
 class NiPalette;
 struct NiParticleModifier;
+struct NiLinesData;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -158,6 +159,7 @@ using NiColorDataPtr = RecordPtrT<NiColorData>;
 using NiKeyframeDataPtr = RecordPtrT<NiKeyframeData>;
 using NiTriShapeDataPtr = RecordPtrT<NiTriShapeData>;
 using NiTriStripsDataPtr = RecordPtrT<NiTriStripsData>;
+using NiLinesDataPtr = RecordPtrT<NiLinesData>;
 using NiSkinInstancePtr = RecordPtrT<NiSkinInstance>;
 using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
 using NiRotatingParticlesDataPtr = RecordPtrT<NiRotatingParticlesData>;

@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AITRAVEL_H
 #define GAME_MWMECHANICS_AITRAVEL_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 namespace ESM
 {
@@ -13,37 +13,56 @@ namespace AiSequence
 
 namespace MWMechanics
 {
+    struct AiInternalTravel;
+
     /// \brief Causes the AI to travel to the specified point
-    class AiTravel : public AiPackage
+    class AiTravel : public TypedAiPackage<AiTravel>
     {
         public:
-            /// Default constructor
-            AiTravel(float x, float y, float z, bool hidden = false);
+            AiTravel(float x, float y, float z, AiTravel* derived);
+
+            AiTravel(float x, float y, float z, AiInternalTravel* derived);
+
+            AiTravel(float x, float y, float z);
+
             AiTravel(const ESM::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
-            virtual void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
 
-            virtual AiTravel *clone() const;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
+            static constexpr TypeId getTypeId() { return TypeIdTravel; }
 
-            virtual int getTypeId() const;
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mAlwaysActive = true;
+                return options;
+            }
 
-            virtual bool useVariableSpeed() const { return true;}
-
-            virtual bool alwaysActive() const { return true; }
-
-            virtual osg::Vec3f getDestination() const { return osg::Vec3f(mX, mY, mZ); }
+            osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
 
         private:
-            float mX;
-            float mY;
-            float mZ;
+            const float mX;
+            const float mY;
+            const float mZ;
 
-            bool mHidden;
+            const bool mHidden;
+    };
+
+    struct AiInternalTravel final : public AiTravel
+    {
+        AiInternalTravel(float x, float y, float z);
+
+        explicit AiInternalTravel(const ESM::AiSequence::AiTravel* travel);
+
+        static constexpr TypeId getTypeId() { return TypeIdInternalTravel; }
+
+        std::unique_ptr<AiPackage> clone() const final;
     };
 }
 

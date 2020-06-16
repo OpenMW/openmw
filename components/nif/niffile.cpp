@@ -54,6 +54,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiBillboardNode",            &construct <NiNode>                      , RC_NiBillboardNode               ));
     newFactory.insert(makeEntry("NiTriShape",                 &construct <NiTriShape>                  , RC_NiTriShape                    ));
     newFactory.insert(makeEntry("NiTriStrips",                &construct <NiTriStrips>                 , RC_NiTriStrips                   ));
+    newFactory.insert(makeEntry("NiLines",                    &construct <NiLines>                     , RC_NiLines                       ));
     newFactory.insert(makeEntry("NiRotatingParticles",        &construct <NiRotatingParticles>         , RC_NiRotatingParticles           ));
     newFactory.insert(makeEntry("NiAutoNormalParticles",      &construct <NiAutoNormalParticles>       , RC_NiAutoNormalParticles         ));
     newFactory.insert(makeEntry("NiCamera",                   &construct <NiCamera>                    , RC_NiCamera                      ));
@@ -97,6 +98,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     newFactory.insert(makeEntry("NiFloatData",                &construct <NiFloatData>                 , RC_NiFloatData                   ));
     newFactory.insert(makeEntry("NiTriShapeData",             &construct <NiTriShapeData>              , RC_NiTriShapeData                ));
     newFactory.insert(makeEntry("NiTriStripsData",            &construct <NiTriStripsData>             , RC_NiTriStripsData               ));
+    newFactory.insert(makeEntry("NiLinesData",                &construct <NiLinesData>                 , RC_NiLinesData                   ));
     newFactory.insert(makeEntry("NiVisData",                  &construct <NiVisData>                   , RC_NiVisData                     ));
     newFactory.insert(makeEntry("NiColorData",                &construct <NiColorData>                 , RC_NiColorData                   ));
     newFactory.insert(makeEntry("NiPixelData",                &construct <NiPixelData>                 , RC_NiPixelData                   ));
@@ -144,7 +146,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     ver = nif.getUInt();
     // 4.0.0.0 is an older, practically identical version of the format.
     // It's not used by Morrowind assets but Morrowind supports it.
-    if(ver != nif.generateVersion(4,0,0,0) && ver != VER_MW)
+    if(ver != NIFStream::generateVersion(4,0,0,0) && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
     // Number of records
     size_t recNum = nif.getInt();

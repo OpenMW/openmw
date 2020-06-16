@@ -7,10 +7,14 @@
 #include <set>
 #include <stdint.h>
 
+#include "../mwmechanics/actorutil.hpp"
+// For MWMechanics::GreetingState
+
 #include "../mwworld/ptr.hpp"
 
 namespace osg
 {
+    class Stats;
     class Vec3f;
 }
 
@@ -269,6 +273,15 @@ namespace MWBase
             virtual bool isAttackPreparing(const MWWorld::Ptr& ptr) = 0;
             virtual bool isRunning(const MWWorld::Ptr& ptr) = 0;
             virtual bool isSneaking(const MWWorld::Ptr& ptr) = 0;
+
+            virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
+
+            virtual int getGreetingTimer(const MWWorld::Ptr& ptr) const = 0;
+            virtual float getAngleToPlayer(const MWWorld::Ptr& ptr) const  = 0;
+            virtual MWMechanics::GreetingState getGreetingState(const MWWorld::Ptr& ptr) const = 0;
+            virtual bool isTurningToPlayer(const MWWorld::Ptr& ptr) const = 0;
+
+            virtual void restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId) = 0;
     };
 }
 

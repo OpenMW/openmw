@@ -19,8 +19,8 @@ namespace MWMechanics
         : mActor(actor)
     {
         CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
-        mAgility = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Agility).getModified());
-        mLuck = static_cast<float>(creatureStats.getAttribute(ESM::Attribute::Luck).getModified());
+        mAgility = creatureStats.getAttribute(ESM::Attribute::Agility).getModified();
+        mLuck = creatureStats.getAttribute(ESM::Attribute::Luck).getModified();
         mSecuritySkill = static_cast<float>(actor.getClass().getSkill(actor, ESM::Skill::Security));
         mFatigueTerm = creatureStats.getFatigueTerm();
     }

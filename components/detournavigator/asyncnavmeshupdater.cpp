@@ -89,6 +89,9 @@ namespace DetourNavigator
                 job.mChangeType = changedTile.second;
                 job.mDistanceToPlayer = getManhattanDistance(changedTile.first, playerTile);
                 job.mDistanceToOrigin = getManhattanDistance(changedTile.first, TilePosition {0, 0});
+                job.mProcessTime = job.mChangeType == ChangeType::update
+                    ? mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] + mSettings.get().mMinUpdateInterval
+                    : std::chrono::steady_clock::time_point();
 
                 mJobs.push(std::move(job));
             }
@@ -102,8 +105,11 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::wait()
     {
-        std::unique_lock<std::mutex> lock(mMutex);
-        mDone.wait(lock, [&] { return mJobs.empty() && getTotalThreadJobsUnsafe() == 0; });
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mDone.wait(lock, [&] { return mJobs.empty() && getTotalThreadJobsUnsafe() == 0; });
+        }
+        mProcessingTiles.wait(mProcessed, [] (const auto& v) { return v.empty(); });
     }
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
@@ -122,7 +128,7 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::process() throw()
     {
-        Log(Debug::Debug) << "Start process navigator jobs";
+        Log(Debug::Debug) << "Start process navigator jobs by thread=" << std::this_thread::get_id();
         while (!mShouldStop)
         {
             try
@@ -134,18 +140,21 @@ namespace DetourNavigator
                     if (!processed)
                         repost(std::move(*job));
                 }
+                else
+                    cleanupLastUpdates();
             }
             catch (const std::exception& e)
             {
                 Log(Debug::Error) << "AsyncNavMeshUpdater::process exception: " << e.what();
             }
         }
-        Log(Debug::Debug) << "Stop navigator jobs processing";
+        Log(Debug::Debug) << "Stop navigator jobs processing by thread=" << std::this_thread::get_id();
     }
 
     bool AsyncNavMeshUpdater::processJob(const Job& job)
     {
-        Log(Debug::Debug) << "Process job for agent=(" << std::fixed << std::setprecision(2) << job.mAgentHalfExtents << ")";
+        Log(Debug::Debug) << "Process job for agent=(" << std::fixed << std::setprecision(2) << job.mAgentHalfExtents << ")"
+            " by thread=" << std::this_thread::get_id();
 
         const auto start = std::chrono::steady_clock::now();
 
@@ -172,11 +181,13 @@ namespace DetourNavigator
         const auto locked = navMeshCacheItem->lockConst();
         Log(Debug::Debug) << std::fixed << std::setprecision(2) <<
             "Cache updated for agent=(" << job.mAgentHalfExtents << ")" <<
+            " tile=" << job.mChangedTile <<
             " status=" << status <<
             " generation=" << locked->getGeneration() <<
             " revision=" << locked->getNavMeshRevision() <<
             " time=" << std::chrono::duration_cast<FloatMs>(finish - start).count() << "ms" <<
-            " total_time=" << std::chrono::duration_cast<FloatMs>(finish - firstStart).count() << "ms";
+            " total_time=" << std::chrono::duration_cast<FloatMs>(finish - firstStart).count() << "ms"
+            " thread=" << std::this_thread::get_id();
 
         return isSuccess(status);
     }
@@ -190,43 +201,57 @@ namespace DetourNavigator
 
         while (true)
         {
-            const auto hasJob = [&] { return !mJobs.empty() || !threadQueue.mJobs.empty(); };
+            const auto hasJob = [&] {
+                return (!mJobs.empty() && mJobs.top().mProcessTime <= std::chrono::steady_clock::now())
+                    || !threadQueue.mJobs.empty();
+            };
 
             if (!mHasJob.wait_for(lock, std::chrono::milliseconds(10), hasJob))
             {
                 mFirstStart.lock()->reset();
-                if (getTotalThreadJobsUnsafe() == 0)
+                if (mJobs.empty() && getTotalThreadJobsUnsafe() == 0)
                     mDone.notify_all();
                 return boost::none;
             }
 
             Log(Debug::Debug) << "Got " << mJobs.size() << " navigator jobs and "
-                << threadQueue.mJobs.size() << " thread jobs";
+                << threadQueue.mJobs.size() << " thread jobs by thread=" << std::this_thread::get_id();
 
             auto job = threadQueue.mJobs.empty()
-                ? getJob(mJobs, mPushed)
-                : getJob(threadQueue.mJobs, threadQueue.mPushed);
+                ? getJob(mJobs, mPushed, true)
+                : getJob(threadQueue.mJobs, threadQueue.mPushed, false);
 
-            const auto owner = lockTile(job.mAgentHalfExtents, job.mChangedTile);
+            if (!job)
+                continue;
+
+            const auto owner = lockTile(job->mAgentHalfExtents, job->mChangedTile);
 
             if (owner == threadId)
                 return job;
 
-            postThreadJob(std::move(job), mThreadsQueues[owner]);
+            postThreadJob(std::move(*job), mThreadsQueues[owner]);
         }
     }
 
-    AsyncNavMeshUpdater::Job AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed)
+    boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
     {
-        auto job = jobs.top();
+        const auto now = std::chrono::steady_clock::now();
+
+        if (jobs.top().mProcessTime > now)
+            return {};
+
+        Job job = std::move(jobs.top());
         jobs.pop();
+
+        if (changeLastUpdate && job.mChangeType == ChangeType::update)
+            mLastUpdates[job.mAgentHalfExtents][job.mChangedTile] = now;
 
         const auto it = pushed.find(job.mAgentHalfExtents);
         it->second.erase(job.mChangedTile);
         if (it->second.empty())
             pushed.erase(it);
 
-        return job;
+        return {std::move(job)};
     }
 
     void AsyncNavMeshUpdater::writeDebugFiles(const Job& job, const RecastMesh* recastMesh) const
@@ -329,11 +354,37 @@ namespace DetourNavigator
 
         if (agent->second.empty())
             locked->erase(agent);
+
+        if (locked->empty())
+            mProcessed.notify_all();
     }
 
     std::size_t AsyncNavMeshUpdater::getTotalThreadJobsUnsafe() const
     {
         return std::accumulate(mThreadsQueues.begin(), mThreadsQueues.end(), std::size_t(0),
             [] (auto r, const auto& v) { return r + v.second.mJobs.size(); });
+    }
+
+    void AsyncNavMeshUpdater::cleanupLastUpdates()
+    {
+        const auto now = std::chrono::steady_clock::now();
+
+        const std::lock_guard<std::mutex> lock(mMutex);
+
+        for (auto agent = mLastUpdates.begin(); agent != mLastUpdates.end();)
+        {
+            for (auto tile = agent->second.begin(); tile != agent->second.end();)
+            {
+                if (now - tile->second > mSettings.get().mMinUpdateInterval)
+                    tile = agent->second.erase(tile);
+                else
+                    ++tile;
+            }
+
+            if (agent->second.empty())
+                agent = mLastUpdates.erase(agent);
+            else
+                ++agent;
+        }
     }
 }

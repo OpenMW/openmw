@@ -5,13 +5,11 @@
 
 namespace MWGui
 {
-
     struct TextColours
     {
         MyGUI::Colour header;
         MyGUI::Colour normal;
         MyGUI::Colour notify;
-
 
         MyGUI::Colour link;
         MyGUI::Colour linkOver;
@@ -28,6 +26,9 @@ namespace MWGui
         MyGUI::Colour journalTopic;
         MyGUI::Colour journalTopicOver;
         MyGUI::Colour journalTopicPressed;
+
+    public:
+        void loadColours();
     };
 
 }

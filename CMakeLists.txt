@@ -8,10 +8,10 @@ option(BUILD_ESSIMPORTER        "Build ESS (Morrowind save game) importer" ON)
 option(BUILD_BSATOOL            "Build BSA extractor" ON)
 option(BUILD_ESMTOOL            "Build ESM inspector" ON)
 option(BUILD_NIFTEST            "Build nif file tester" ON)
-option(BUILD_MYGUI_PLUGIN       "Build MyGUI plugin for OpenMW resources, to use with MyGUI tools" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
+option(BULLET_USE_DOUBLES       "Use double precision for Bullet" OFF)
 
 if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
    set(USE_QT FALSE)
@@ -468,9 +468,6 @@ IF(NOT WIN32 AND NOT APPLE)
     IF(BUILD_WIZARD)
         INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/openmw-wizard" DESTINATION "${BINDIR}" )
     ENDIF(BUILD_WIZARD)
-    #if(BUILD_MYGUI_PLUGIN)
-    #    INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Plugin_MyGUI_OpenMW_Resources.so" DESTINATION "${LIBDIR}" )
-    #ENDIF(BUILD_MYGUI_PLUGIN)
 
     # Install licenses
     INSTALL(FILES "files/mygui/DejaVu Font License.txt" DESTINATION "${LICDIR}" )
@@ -516,11 +513,6 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/settings-default.cfg" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-
-    if(BUILD_MYGUI_PLUGIN)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Debug/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION "." CONFIGURATIONS Debug)
-        INSTALL(PROGRAMS "${OpenMW_BINARY_DIR}/Release/Plugin_MyGUI_OpenMW_Resources.dll" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    ENDIF(BUILD_MYGUI_PLUGIN)
 
     IF(DESIRED_QT_VERSION MATCHES 5)
         INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/platforms" DESTINATION "." CONFIGURATIONS Debug)
@@ -913,4 +905,3 @@ if (DOXYGEN_FOUND)
         WORKING_DIRECTORY ${OpenMW_BINARY_DIR}
         COMMENT "Generating documentation for the github-pages at ${DOXYGEN_PAGES_OUTPUT_DIR}" VERBATIM)
 endif ()
-

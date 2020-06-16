@@ -1,6 +1,7 @@
 #include "physicssystem.hpp"
 
 #include <osg/Group>
+#include <osg/Stats>
 
 #include <BulletCollision/CollisionShapes/btConeShape.h>
 #include <BulletCollision/CollisionShapes/btSphereShape.h>
@@ -396,6 +397,15 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
+    osg::BoundingBox PhysicsSystem::getBoundingBox(const MWWorld::ConstPtr &object) const
+    {
+        const Object * physobject = getObject(object);
+        if (!physobject) return osg::BoundingBox();
+        btVector3 min, max;
+        physobject->getCollisionObject()->getCollisionShape()->getAabb(physobject->getCollisionObject()->getWorldTransform(), min, max);
+        return osg::BoundingBox(Misc::Convert::toOsg(min), Misc::Convert::toOsg(max));
+    }
+
     osg::Vec3f PhysicsSystem::getCollisionObjectPosition(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);
@@ -647,7 +657,7 @@ namespace MWPhysics
             bool cmode = found->second->getCollisionMode();
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
-            found->second->enableCollisionBody(cmode);
+            // NB: Collision body isn't disabled for vanilla TCL compatibility
             return cmode;
         }
 
@@ -882,5 +892,12 @@ namespace MWPhysics
         HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
         mCollisionWorld->getBroadphase()->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
+    }
+
+    void PhysicsSystem::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        stats.setAttribute(frameNumber, "Physics Actors", mActors.size());
+        stats.setAttribute(frameNumber, "Physics Objects", mObjects.size());
+        stats.setAttribute(frameNumber, "Physics HeightFields", mHeightFields.size());
     }
 }

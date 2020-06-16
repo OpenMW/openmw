@@ -21,8 +21,9 @@ void ESM::Player::load (ESMReader &esm)
     else
         mHasMark = false;
 
-    mAutoMove = 0;
-    esm.getHNOT (mAutoMove, "AMOV");
+    // Automove, no longer used.
+    if (esm.isNextSub("AMOV"))
+        esm.skipHSub();
 
     mBirthsign = esm.getHNString ("SIGN");
 
@@ -43,12 +44,13 @@ void ESM::Player::load (ESMReader &esm)
             checkPrevItems = false;
     }
 
+    bool intFallback = esm.getFormat() < 11;
     if (esm.hasMoreSubs())
     {
         for (int i=0; i<ESM::Attribute::Length; ++i)
-            mSaveAttributes[i].load(esm);
+            mSaveAttributes[i].load(esm, intFallback);
         for (int i=0; i<ESM::Skill::Length; ++i)
-            mSaveSkills[i].load(esm);
+            mSaveSkills[i].load(esm, intFallback);
     }
 }
 
@@ -65,9 +67,6 @@ void ESM::Player::save (ESMWriter &esm) const
         esm.writeHNT ("MARK", mMarkedPosition, 24);
         mMarkedCell.save (esm);
     }
-
-    if (mAutoMove)
-        esm.writeHNT ("AMOV", mAutoMove);
 
     esm.writeHNString ("SIGN", mBirthsign);
 

@@ -136,6 +136,10 @@ void ESMStore::setUp(bool validateRecords)
                 mIds[*record] = storeIt->first;
         }
     }
+
+    if (mStaticIds.empty())
+        mStaticIds = mIds;
+
     mSkills.setUp();
     mMagicEffects.setUp();
     mAttributes.setUp();
@@ -273,7 +277,8 @@ void ESMStore::validate()
             +mSpells.getDynamicSize()
             +mWeapons.getDynamicSize()
             +mCreatureLists.getDynamicSize()
-            +mItemLists.getDynamicSize();
+            +mItemLists.getDynamicSize()
+            +mCreatures.getDynamicSize();
     }
 
     void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -295,6 +300,7 @@ void ESMStore::validate()
         mNpcs.write (writer, progress);
         mItemLists.write (writer, progress);
         mCreatureLists.write (writer, progress);
+        mCreatures.write (writer, progress);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
@@ -312,24 +318,8 @@ void ESMStore::validate()
             case ESM::REC_NPC_:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
-
-                {
-                    mStores[type]->read (reader);
-                }
-
-                if (type==ESM::REC_NPC_)
-                {
-                    // NPC record will always be last and we know that there can be only one
-                    // dynamic NPC record (player) -> We are done here with dynamic record loading
-                    setUp();
-
-                    const ESM::NPC *player = mNpcs.find ("player");
-
-                    if (!mRaces.find (player->mRace) ||
-                        !mClasses.find (player->mClass))
-                        throw std::runtime_error ("Invalid player record (race or class unavailable");
-                }
-
+            case ESM::REC_CREA:
+                mStores[type]->read (reader);
                 return true;
 
             case ESM::REC_DYNA:
@@ -341,6 +331,17 @@ void ESMStore::validate()
 
                 return false;
         }
+    }
+
+    void ESMStore::checkPlayer()
+    {
+        setUp();
+
+        const ESM::NPC *player = mNpcs.find ("player");
+
+        if (!mRaces.find (player->mRace) ||
+            !mClasses.find (player->mClass))
+            throw std::runtime_error ("Invalid player record (race or class unavailable");
     }
 
 } // end namespace

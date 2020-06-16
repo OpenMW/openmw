@@ -27,6 +27,10 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         detournavigator/tilecachedrecastmeshmanager.cpp
 
         settings/parser.cpp
+
+        shader/parsedefines.cpp
+        shader/parsefors.cpp
+        shader/shadermanager.cpp
     )
 
     source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})

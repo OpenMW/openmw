@@ -10,6 +10,7 @@
 
 #include "ptr.hpp"
 #include "doorstate.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 namespace ESM
 {
@@ -28,7 +29,6 @@ namespace MWPhysics
 
 namespace MWMechanics
 {
-    class CreatureStats;
     class NpcStats;
     struct Movement;
 }
@@ -321,7 +321,7 @@ namespace MWWorld
             bool isPureLandCreature(const MWWorld::Ptr& ptr) const;
             bool isMobile(const MWWorld::Ptr& ptr) const;
 
-            virtual int getSkill(const MWWorld::Ptr& ptr, int skill) const;
+            virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
 
             virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
                 const;
@@ -360,6 +360,14 @@ namespace MWWorld
             virtual float getEffectiveArmorRating(const MWWorld::ConstPtr& armor, const MWWorld::Ptr& actor) const;
 
             virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
+
+            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+
+            virtual float getWalkSpeed(const Ptr& ptr) const;
+
+            virtual float getRunSpeed(const Ptr& ptr) const;
+
+            virtual float getSwimSpeed(const Ptr& ptr) const;
     };
 }
 

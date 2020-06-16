@@ -86,13 +86,6 @@ namespace Compiler
     bool LineParser::parseName (const std::string& name, const TokenLoc& loc,
         Scanner& scanner)
     {
-        if (mState==PotentialEndState)
-        {
-            getErrorHandler().warning ("Stray string argument", loc);
-            mState = EndState;
-            return true;
-        }
-
         if (mState==SetState)
         {
             std::string name2 = Misc::StringUtils::lowerCase (name);
@@ -247,35 +240,6 @@ namespace Compiler
 
         if (mState==BeginState || mState==ExplicitState)
         {
-            switch (keyword)
-            {
-                case Scanner::K_enable:
-
-                    Generator::enable (mCode, mLiterals, mExplicit);
-                    mState = PotentialEndState;
-                    return true;
-
-                case Scanner::K_disable:
-
-                    Generator::disable (mCode, mLiterals, mExplicit);
-                    mState = PotentialEndState;
-                    return true;
-
-                case Scanner::K_startscript:
-
-                    mExprParser.parseArguments ("c", scanner, mCode);
-                    Generator::startScript (mCode, mLiterals, mExplicit);
-                    mState = EndState;
-                    return true;
-
-                case Scanner::K_stopscript:
-
-                    mExprParser.parseArguments ("c", scanner, mCode);
-                    Generator::stopScript (mCode);
-                    mState = EndState;
-                    return true;
-            }
-
             // check for custom extensions
             if (const Extensions *extensions = getContext().getExtensions())
             {
@@ -321,21 +285,6 @@ namespace Compiler
                     mState = EndState;
                     return true;
                 }
-            }
-
-            if (keyword==Scanner::K_getdisabled || keyword==Scanner::K_getdistance)
-            {
-                if (mAllowExpression)
-                {
-                    scanner.putbackKeyword (keyword, loc);
-                    parseExpression (scanner, loc);
-                }
-                else
-                {
-                    getErrorHandler().warning ("Unexpected naked expression", loc);
-                }
-                mState = EndState;
-                return true;
             }
 
             if (const Extensions *extensions = getContext().getExtensions())
@@ -416,13 +365,6 @@ namespace Compiler
                     mState = EndState;
                     return true;
 
-                case Scanner::K_stopscript:
-
-                    mExprParser.parseArguments ("c", scanner, mCode);
-                    Generator::stopScript (mCode);
-                    mState = EndState;
-                    return true;
-
                 case Scanner::K_else:
 
                     getErrorHandler().warning ("Stray else", loc);
@@ -484,19 +426,6 @@ namespace Compiler
             return true;
         }
 
-        if (mAllowExpression)
-        {
-            if (keyword==Scanner::K_getsquareroot || keyword==Scanner::K_menumode ||
-                keyword==Scanner::K_random || keyword==Scanner::K_scriptrunning ||
-                keyword==Scanner::K_getsecondspassed)
-            {
-                scanner.putbackKeyword (keyword, loc);
-                parseExpression (scanner, loc);
-                mState = EndState;
-                return true;
-            }
-        }
-
         return Parser::parseKeyword (keyword, loc, scanner);
     }
 
@@ -509,8 +438,7 @@ namespace Compiler
             return true;
         }
 
-        if (code==Scanner::S_newline &&
-            (mState==EndState || mState==BeginState || mState==PotentialEndState))
+        if (code==Scanner::S_newline && (mState==EndState || mState==BeginState))
             return false;
 
         if (code==Scanner::S_comma && mState==MessageState)

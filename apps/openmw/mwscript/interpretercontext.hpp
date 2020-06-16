@@ -1,7 +1,12 @@
 #ifndef GAME_SCRIPT_INTERPRETERCONTEXT_H
 #define GAME_SCRIPT_INTERPRETERCONTEXT_H
 
+#include <memory>
+#include <stdexcept>
+
 #include <components/interpreter/context.hpp>
+
+#include "globalscripts.hpp"
 
 #include "../mwworld/ptr.hpp"
 
@@ -19,17 +24,17 @@ namespace MWScript
 {
     class Locals;
 
+    class MissingImplicitRefError : public std::runtime_error
+    {
+        public:
+            MissingImplicitRefError();
+    };
+
     class InterpreterContext : public Interpreter::Context
     {
             Locals *mLocals;
             mutable MWWorld::Ptr mReference;
-
-            std::string mTargetId;
-
-            /// If \a id is empty, a reference the script is run from is returned or in case
-            /// of a non-local script the reference derived from the target ID.
-            MWWorld::Ptr getReferenceImp (const std::string& id = "", bool activeOnly = false,
-                bool doThrow=true);
+            std::shared_ptr<GlobalScriptDesc> mGlobalScriptDesc;
 
             /// If \a id is empty, a reference the script is run from is returned or in case
             /// of a non-local script the reference derived from the target ID.
@@ -47,9 +52,9 @@ namespace MWScript
                 char type) const;
 
         public:
+            InterpreterContext (std::shared_ptr<GlobalScriptDesc> globalScriptDesc);
 
-            InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference,
-                const std::string& targetId = "");
+            InterpreterContext (MWScript::Locals *locals, const MWWorld::Ptr& reference);
             ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
             virtual int getLocalShort (int index) const;
@@ -71,8 +76,6 @@ namespace MWScript
 
             virtual void report (const std::string& message);
             ///< By default, do nothing.
-
-            virtual bool menuMode();
 
             virtual int getGlobalShort (const std::string& name) const;
 
@@ -116,25 +119,8 @@ namespace MWScript
 
             virtual std::string getCurrentCellName() const;
 
-            virtual bool isScriptRunning (const std::string& name) const;
-
-            virtual void startScript (const std::string& name, const std::string& targetId = "");
-
-            virtual void stopScript (const std::string& name);
-
-            virtual float getDistance (const std::string& name, const std::string& id = "") const;
-            ///< @note if \a id is empty, assumes an implicit reference
-
             void executeActivation(MWWorld::Ptr ptr, MWWorld::Ptr actor);
             ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
-
-            virtual float getSecondsPassed() const;
-
-            virtual bool isDisabled (const std::string& id = "") const;
-
-            virtual void enable (const std::string& id = "");
-
-            virtual void disable (const std::string& id = "");
 
             virtual int getMemberShort (const std::string& id, const std::string& name, bool global) const;
 
@@ -153,8 +139,6 @@ namespace MWScript
 
             void updatePtr(const MWWorld::Ptr& base, const MWWorld::Ptr& updated);
             ///< Update the Ptr stored in mReference, if there is one stored there. Should be called after the reference has been moved to a new cell.
-
-            virtual std::string getTargetId() const;
     };
 }
 

@@ -266,16 +266,22 @@ void HeadAnimationTime::setBlinkStop(float value)
 
 // ----------------------------------------------------
 
-NpcAnimation::NpcType NpcAnimation::getNpcType()
+NpcAnimation::NpcType NpcAnimation::getNpcType() const
 {
     const MWWorld::Class &cls = mPtr.getClass();
     // Dead vampires should typically stay vampires.
     if (mNpcType == Type_Vampire && cls.getNpcStats(mPtr).isDead() && !cls.getNpcStats(mPtr).isWerewolf())
         return mNpcType;
+    return getNpcType(mPtr);
+}
+
+NpcAnimation::NpcType NpcAnimation::getNpcType(const MWWorld::Ptr& ptr)
+{
+    const MWWorld::Class &cls = ptr.getClass();
     NpcAnimation::NpcType curType = Type_Normal;
-    if (cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
+    if (cls.getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
         curType = Type_Vampire;
-    if (cls.getNpcStats(mPtr).isWerewolf())
+    if (cls.getNpcStats(ptr).isWerewolf())
         curType = Type_Werewolf;
 
     return curType;
@@ -326,7 +332,7 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
     mViewMode(viewMode),
     mShowWeapons(false),
     mShowCarriedLeft(true),
-    mNpcType(getNpcType()),
+    mNpcType(getNpcType(ptr)),
     mFirstPersonFieldOfView(firstPersonFieldOfView),
     mSoundsDisabled(disableSounds),
     mAccurateAiming(false),
@@ -429,12 +435,10 @@ void NpcAnimation::setRenderBin()
             osgUtil::RenderBin::addRenderBinPrototype("DepthClear", depthClearBin);
             prototypeAdded = true;
         }
-
-        osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
-        stateset->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+        mObjectRoot->getOrCreateStateSet()->setRenderBinDetails(RenderBin_FirstPerson, "DepthClear", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
     }
-    else
-        Animation::setRenderBin();
+    else if (osg::StateSet* stateset = mObjectRoot->getStateSet())
+        stateset->setRenderBinToInherit();
 }
 
 void NpcAnimation::rebuild()
@@ -950,7 +954,7 @@ void NpcAnimation::addControllers()
             osg::MatrixTransform* node = found->second.get();
             mFirstPersonNeckController = new NeckController(mObjectRoot.get());
             node->addUpdateCallback(mFirstPersonNeckController);
-            mActiveControllers.emplace(node, mFirstPersonNeckController);
+            mActiveControllers.emplace_back(node, mFirstPersonNeckController);
         }
     }
     else if (mViewMode == VM_Normal)
@@ -1127,7 +1131,7 @@ void NpcAnimation::equipmentChanged()
     static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
     if (shieldSheathing)
     {
-        int weaptype;
+        int weaptype = ESM::Weapon::None;
         MWMechanics::getActiveWeapon(mPtr, &weaptype);
         showCarriedLeft(updateCarriedLeftVisible(weaptype));
     }

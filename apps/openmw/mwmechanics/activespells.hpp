@@ -44,15 +44,14 @@ namespace MWMechanics
 
             TIterator end() const;
 
+            void update(float duration) const;
+
         private:
 
             mutable TContainer mSpells;
             mutable MagicEffects mEffects;
             mutable bool mSpellsChanged;
-            mutable MWWorld::TimeStamp mLastUpdate;
 
-            void update() const;
-            
             void rebuildEffects() const;
 
             /// Add any effects that are in "from" and not in "addTo" to "addTo"
@@ -99,6 +98,8 @@ namespace MWMechanics
 
             bool isSpellActive (const std::string& id) const;
             ///< case insensitive
+
+            void purgeCorprusDisease();
 
             const MagicEffects& getMagicEffects() const;
 

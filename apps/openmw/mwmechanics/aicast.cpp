@@ -10,17 +10,22 @@
 #include "creaturestats.hpp"
 #include "steering.hpp"
 
-MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
-    : mTargetId(targetId), mSpellId(spellId), mCasting(false), mManual(manualSpell), mDistance(0)
+namespace MWMechanics
 {
-    ActionSpell action = ActionSpell(spellId);
-    bool isRanged;
-    mDistance = action.getCombatRange(isRanged);
+    namespace
+    {
+        float getInitialDistance(const std::string& spellId)
+        {
+            ActionSpell action = ActionSpell(spellId);
+            bool isRanged;
+            return action.getCombatRange(isRanged);
+        }
+    }
 }
 
-MWMechanics::AiPackage *MWMechanics::AiCast::clone() const
+MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
+    : mTargetId(targetId), mSpellId(spellId), mCasting(false), mManual(manualSpell), mDistance(getInitialDistance(spellId))
 {
-    return new AiCast(*this);
 }
 
 bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::CharacterController& characterController, MWMechanics::AiState& state, float duration)
@@ -83,14 +88,4 @@ MWWorld::Ptr MWMechanics::AiCast::getTarget() const
     MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mTargetId, false);
 
     return target;
-}
-
-int MWMechanics::AiCast::getTypeId() const
-{
-    return AiPackage::TypeIdCast;
-}
-
-unsigned int MWMechanics::AiCast::getPriority() const
-{
-    return 3;
 }

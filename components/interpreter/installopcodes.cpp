@@ -8,8 +8,6 @@
 #include "mathopcodes.hpp"
 #include "controlopcodes.hpp"
 #include "miscopcodes.hpp"
-#include "scriptopcodes.hpp"
-#include "spatialopcodes.hpp"
 
 namespace Interpreter
 {
@@ -97,25 +95,6 @@ namespace Interpreter
 
         // misc
         interpreter.installSegment3 (0, new OpMessageBox);
-        interpreter.installSegment5 (38, new OpMenuMode);
-        interpreter.installSegment5 (45, new OpRandom);
-        interpreter.installSegment5 (50, new OpGetSecondsPassed);
-        interpreter.installSegment5 (51, new OpEnable);
-        interpreter.installSegment5 (52, new OpDisable);
-        interpreter.installSegment5 (53, new OpGetDisabled);
-        interpreter.installSegment5 (54, new OpEnableExplicit);
-        interpreter.installSegment5 (55, new OpDisableExplicit);
-        interpreter.installSegment5 (56, new OpGetDisabledExplicit);
         interpreter.installSegment5 (58, new OpReport);
-
-        // script control
-        interpreter.installSegment5 (46, new OpScriptRunning);
-        interpreter.installSegment5 (47, new OpStartScript);
-        interpreter.installSegment5 (48, new OpStopScript);
-        interpreter.installSegment5 (71, new OpStartScriptExplicit);
-
-        // spacial
-        interpreter.installSegment5 (49, new OpGetDistance);
-        interpreter.installSegment5 (57, new OpGetDistanceExplicit);
     }
 }

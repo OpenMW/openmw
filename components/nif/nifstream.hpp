@@ -200,6 +200,18 @@ public:
         return result;
     }
 
+    void getChars(std::vector<char> &vec, size_t size)
+    {
+        vec.resize(size);
+        readLittleEndianDynamicBufferOfType<char,char>(inp, vec.data(), size);
+    }
+
+    void getUChars(std::vector<unsigned char> &vec, size_t size)
+    {
+        vec.resize(size);
+        readLittleEndianDynamicBufferOfType<unsigned char,unsigned char>(inp, vec.data(), size);
+    }
+
     void getUShorts(std::vector<unsigned short> &vec, size_t size)
     {
         vec.resize(size);

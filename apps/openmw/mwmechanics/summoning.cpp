@@ -13,20 +13,55 @@
 
 #include "../mwrender/animation.hpp"
 
-#include "spellcasting.hpp"
 #include "creaturestats.hpp"
 #include "aifollow.hpp"
 
 namespace MWMechanics
 {
 
-    UpdateSummonedCreatures::UpdateSummonedCreatures(const MWWorld::Ptr &actor)
-        : mActor(actor)
+    bool isSummoningEffect(int effectId)
     {
-
+        return ((effectId >= ESM::MagicEffect::SummonScamp && effectId <= ESM::MagicEffect::SummonStormAtronach)
+             || (effectId == ESM::MagicEffect::SummonCenturionSphere)
+             || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
     }
 
-    UpdateSummonedCreatures::~UpdateSummonedCreatures()
+    std::string getSummonedCreature(int effectId)
+    {
+        static const std::map<int, std::string> summonMap
+        {
+            {ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID"},
+            {ESM::MagicEffect::SummonBonelord, "sMagicBonelordID"},
+            {ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID"},
+            {ESM::MagicEffect::SummonCenturionSphere, "sMagicCenturionSphereID"},
+            {ESM::MagicEffect::SummonClannfear, "sMagicClannfearID"},
+            {ESM::MagicEffect::SummonDaedroth, "sMagicDaedrothID"},
+            {ESM::MagicEffect::SummonDremora, "sMagicDremoraID"},
+            {ESM::MagicEffect::SummonFabricant, "sMagicFabricantID"},
+            {ESM::MagicEffect::SummonFlameAtronach, "sMagicFlameAtronachID"},
+            {ESM::MagicEffect::SummonFrostAtronach, "sMagicFrostAtronachID"},
+            {ESM::MagicEffect::SummonGoldenSaint, "sMagicGoldenSaintID"},
+            {ESM::MagicEffect::SummonGreaterBonewalker, "sMagicGreaterBonewalkerID"},
+            {ESM::MagicEffect::SummonHunger, "sMagicHungerID"},
+            {ESM::MagicEffect::SummonScamp, "sMagicScampID"},
+            {ESM::MagicEffect::SummonSkeletalMinion, "sMagicSkeletalMinionID"},
+            {ESM::MagicEffect::SummonStormAtronach, "sMagicStormAtronachID"},
+            {ESM::MagicEffect::SummonWingedTwilight, "sMagicWingedTwilightID"},
+            {ESM::MagicEffect::SummonWolf, "sMagicCreature01ID"},
+            {ESM::MagicEffect::SummonBear, "sMagicCreature02ID"},
+            {ESM::MagicEffect::SummonBonewolf, "sMagicCreature03ID"},
+            {ESM::MagicEffect::SummonCreature04, "sMagicCreature04ID"},
+            {ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID"}
+        };
+
+        auto it = summonMap.find(effectId);
+        if (it != summonMap.end())
+            return MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(it->second)->mValue.getString();
+        return std::string();
+    }
+
+    UpdateSummonedCreatures::UpdateSummonedCreatures(const MWWorld::Ptr &actor)
+        : mActor(actor)
     {
     }
 

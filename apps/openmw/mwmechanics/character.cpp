@@ -942,7 +942,7 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     }
 }
 
-void CharacterController::handleTextKey(const std::string &groupname, const std::multimap<float, std::string>::const_iterator &key, const std::multimap<float, std::string> &map)
+void CharacterController::handleTextKey(const std::string &groupname, NifOsg::TextKeyMap::ConstIterator key, const NifOsg::TextKeyMap& map)
 {
     const std::string &evt = key->second;
 
@@ -1260,10 +1260,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
         }
     }
 
-    // Use blending only with 3d-person movement animations for bipedal actors
-    bool firstPersonPlayer = (mPtr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->isFirstPerson());
+    // For biped actors, blend weapon animations with lower body animations with higher priority
     MWRender::Animation::AnimPriority priorityWeapon(Priority_Weapon);
-    if (!firstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
+    if (mPtr.getClass().isBipedal(mPtr))
         priorityWeapon[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
 
     bool forcestateupdate = false;
@@ -2129,7 +2128,7 @@ void CharacterController::update(float duration, bool animationOnly)
                     cls.onHit(mPtr, realHealthLost, true, MWWorld::Ptr(), MWWorld::Ptr(), osg::Vec3f(), true);
                 }
 
-                const int acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
+                const float acrobaticsSkill = cls.getSkill(mPtr, ESM::Skill::Acrobatics);
                 if (healthLost > (acrobaticsSkill * fatigueTerm))
                 {
                     if (!godmode)
@@ -2289,8 +2288,12 @@ void CharacterController::update(float duration, bool animationOnly)
         }
         else if (mMovementState != CharState_None && mAdjustMovementAnimSpeed)
         {
-            float speedmult = speed / mMovementAnimSpeed;
-            mAnimation->adjustSpeedMult(mCurrentMovement, speedmult);
+            // Vanilla caps the played animation speed.
+            const float maxSpeedMult = 10.f;
+            const float speedMult = speed / mMovementAnimSpeed;
+            mAnimation->adjustSpeedMult(mCurrentMovement, std::min(maxSpeedMult, speedMult));
+            // Make sure the actual speed is the "expected" speed even though the animation is slower
+            scale *= std::max(1.f, speedMult / maxSpeedMult);
         }
 
         if (!mSkipAnim)

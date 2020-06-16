@@ -31,26 +31,27 @@ void ESM::NpcStats::load (ESMReader &esm)
     mDisposition = 0;
     esm.getHNOT (mDisposition, "DISP");
 
+    bool intFallback = esm.getFormat() < 11;
     for (int i=0; i<27; ++i)
-        mSkills[i].load (esm);
+        mSkills[i].load (esm, intFallback);
 
     mWerewolfDeprecatedData = false;
-    if (esm.peekNextSub("STBA"))
+    if (esm.getFormat() < 8 && esm.peekNextSub("STBA"))
     {
         // we have deprecated werewolf skills, stored interleaved
         // Load into one big vector, then remove every 2nd value
         mWerewolfDeprecatedData = true;
-        std::vector<ESM::StatState<int> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
+        std::vector<ESM::StatState<float> > skills(mSkills, mSkills + sizeof(mSkills)/sizeof(mSkills[0]));
 
         for (int i=0; i<27; ++i)
         {
-            ESM::StatState<int> skill;
-            skill.load(esm);
+            ESM::StatState<float> skill;
+            skill.load(esm, intFallback);
             skills.push_back(skill);
         }
 
         int i=0;
-        for (std::vector<ESM::StatState<int> >::iterator it = skills.begin(); it != skills.end(); ++i)
+        for (std::vector<ESM::StatState<float> >::iterator it = skills.begin(); it != skills.end(); ++i)
         {
             if (i%2 == 1)
                 it = skills.erase(it);
@@ -68,7 +69,7 @@ void ESM::NpcStats::load (ESMReader &esm)
     {
         ESM::StatState<int> dummy;
         for (int i=0; i<8; ++i)
-            dummy.load(esm);
+            dummy.load(esm, intFallback);
         mWerewolfDeprecatedData = true;
     }
 
@@ -95,7 +96,9 @@ void ESM::NpcStats::load (ESMReader &esm)
     mLevelProgress = 0;
     esm.getHNOT (mLevelProgress, "LPRO");
 
-    esm.getHNT (mSkillIncrease, "INCR");
+    for (int i = 0; i < 8; ++i)
+        mSkillIncrease[i] = 0;
+    esm.getHNOT (mSkillIncrease, "INCR");
 
     for (int i=0; i<3; ++i)
         mSpecIncreases[i] = 0;
@@ -160,8 +163,21 @@ void ESM::NpcStats::save (ESMWriter &esm) const
     if (mLevelProgress)
         esm.writeHNT ("LPRO", mLevelProgress);
 
-    esm.writeHNT ("INCR", mSkillIncrease);
+    bool saveSkillIncreases = false;
+    for (int i = 0; i < 8; ++i)
+    {
+        if (mSkillIncrease[i] != 0)
+        {
+            saveSkillIncreases = true;
+            break;
+        }
+    }
+    if (saveSkillIncreases)
+        esm.writeHNT ("INCR", mSkillIncrease);
 
+    if (mSpecIncreases[0] != 0 ||
+        mSpecIncreases[1] != 0 ||
+        mSpecIncreases[2] != 0)
     esm.writeHNT ("SPEC", mSpecIncreases);
 
     for (std::vector<std::string>::const_iterator iter (mUsedIds.begin()); iter!=mUsedIds.end();

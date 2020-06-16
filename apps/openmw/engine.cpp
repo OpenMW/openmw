@@ -1,6 +1,7 @@
 #include "engine.hpp"
 
 #include <iomanip>
+#include <fstream>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -96,7 +97,7 @@ bool OMW::Engine::frame(float frametime)
         // When the window is minimized, pause the game. Currently this *has* to be here to work around a MyGUI bug.
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
-        if (!mEnvironment.getInputManager()->isWindowVisible())
+        if (!mEnvironment.getWindowManager()->isWindowVisible())
         {
             mEnvironment.getSoundManager()->pausePlayback();
             return false;
@@ -180,7 +181,7 @@ bool OMW::Engine::frame(float frametime)
         osg::Timer_t afterWorldTick = osg::Timer::instance()->tick();
 
         // update GUI
-        mEnvironment.getWindowManager()->onFrame(frametime);
+        mEnvironment.getWindowManager()->update(frametime);
 
         unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
         osg::Stats* stats = mViewer->getViewerStats();
@@ -202,12 +203,14 @@ bool OMW::Engine::frame(float frametime)
 
         if (stats->collectStats("resource"))
         {
+            stats->setAttribute(frameNumber, "FrameNumber", frameNumber);
+
             mResourceSystem->reportStats(frameNumber, stats);
 
             stats->setAttribute(frameNumber, "WorkQueue", mWorkQueue->getNumItems());
             stats->setAttribute(frameNumber, "WorkThread", mWorkQueue->getNumActiveThreads());
 
-            mEnvironment.getWorld()->getNavigator()->reportStats(frameNumber, *stats);
+            mEnvironment.reportStats(frameNumber, *stats);
         }
 
     }
@@ -532,19 +535,19 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
     else
         gameControllerdb = ""; //if it doesn't exist, pass in an empty string
 
-    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
-    mEnvironment.setInputManager (input);
-
     std::string myguiResources = (mResDir / "mygui").string();
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
     guiRoot->setName("GUI Root");
     guiRoot->setNodeMask(MWRender::Mask_GUI);
     rootNode->addChild(guiRoot);
-    MWGui::WindowManager* window = new MWGui::WindowManager(mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
+    MWGui::WindowManager* window = new MWGui::WindowManager(mWindow, mViewer, guiRoot, mResourceSystem.get(), mWorkQueue.get(),
                 mCfgMgr.getLogPath().string() + std::string("/"), myguiResources,
                 mScriptConsoleMode, mTranslationDataStorage, mEncoding, mExportFonts,
                 Version::getOpenmwVersionDescription(mResDir.string()), mCfgMgr.getUserConfigPath().string());
     mEnvironment.setWindowManager (window);
+
+    MWInput::InputManager* input = new MWInput::InputManager (mWindow, mViewer, mScreenCaptureHandler, mScreenCaptureOperation, keybinderUser, keybinderUserExists, userGameControllerdb, gameControllerdb, mGrab);
+    mEnvironment.setInputManager (input);
 
     // Create sound system
     mEnvironment.setSoundManager (new MWSound::SoundManager(mVFS.get(), mUseSound));
@@ -561,7 +564,6 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
         mFileCollections, mContentFiles, mEncoder, mActivationDistanceOverride, mCellName,
         mStartupScript, mResDir.string(), mCfgMgr.getUserDataPath().string()));
     mEnvironment.getWorld()->setupPlayer();
-    input->setPlayer(&mEnvironment.getWorld()->getPlayer());
 
     window->setStore(mEnvironment.getWorld()->getStore());
     window->initUI();
@@ -658,7 +660,6 @@ private:
 };
 
 // Initialise and enter main loop.
-
 void OMW::Engine::go()
 {
     assert (!mContentFiles.empty());
@@ -687,7 +688,8 @@ void OMW::Engine::go()
     mViewer->setUseConfigureAffinity(false);
 #endif
 
-    mScreenCaptureOperation = new WriteScreenshotToFileOperation(mCfgMgr.getUserDataPath().string(),
+    mScreenCaptureOperation = new WriteScreenshotToFileOperation(
+        mCfgMgr.getScreenshotPath().string(),
         Settings::Manager::getString("screenshot format", "General"));
 
     mScreenCaptureHandler = new osgViewer::ScreenCaptureHandler(mScreenCaptureOperation);
@@ -739,6 +741,14 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
+    std::ofstream stats;
+    if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
+    {
+        stats.open(path, std::ios_base::out);
+        if (!stats)
+            Log(Debug::Warning) << "Failed to open file for stats: " << path;
+    }
+
     // Start the main rendering loop
     osg::Timer frameTimer;
     double simulationTime = 0.0;
@@ -767,6 +777,12 @@ void OMW::Engine::go()
             bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
             if (!guiActive)
                 simulationTime += dt;
+        }
+
+        if (stats)
+        {
+            const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+            mViewer->getViewerStats()->report(stats, frameNumber);
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());

@@ -227,39 +227,46 @@ namespace MWMechanics
     }
 
     AttributeValue::AttributeValue() :
-        mBase(0), mModifier(0), mDamage(0)
+        mBase(0.f), mModifier(0.f), mDamage(0.f)
     {
     }
 
-    int AttributeValue::getModified() const
+    float AttributeValue::getModified() const
     {
-        return std::max(0, mBase - (int) mDamage + mModifier);
+        return std::max(0.f, mBase - mDamage + mModifier);
     }
-    int AttributeValue::getBase() const
+    float AttributeValue::getBase() const
     {
         return mBase;
     }
-    int AttributeValue::getModifier() const
+    float AttributeValue::getModifier() const
     {
         return mModifier;
     }
 
-    void AttributeValue::setBase(int base)
+    void AttributeValue::setBase(float base)
     {
         mBase = base;
     }
 
-    void AttributeValue::setModifier(int mod)
+    void AttributeValue::setModifier(float mod)
     {
         mModifier = mod;
     }
 
     void AttributeValue::damage(float damage)
     {
-        mDamage += std::min(damage, (float)getModified());
+        float threshold = mBase + mModifier;
+
+        if (mDamage + damage > threshold)
+            mDamage = threshold;
+        else
+            mDamage += damage;
     }
     void AttributeValue::restore(float amount)
     {
+        if (mDamage <= 0) return;
+
         mDamage -= std::min(mDamage, amount);
     }
 
@@ -268,14 +275,14 @@ namespace MWMechanics
         return mDamage;
     }
 
-    void AttributeValue::writeState (ESM::StatState<int>& state) const
+    void AttributeValue::writeState (ESM::StatState<float>& state) const
     {
         state.mBase = mBase;
         state.mMod = mModifier;
         state.mDamage = mDamage;
     }
 
-    void AttributeValue::readState (const ESM::StatState<int>& state)
+    void AttributeValue::readState (const ESM::StatState<float>& state)
     {
         mBase = state.mBase;
         mModifier = state.mMod;
@@ -296,13 +303,13 @@ namespace MWMechanics
         mProgress = progress;
     }
 
-    void SkillValue::writeState (ESM::StatState<int>& state) const
+    void SkillValue::writeState (ESM::StatState<float>& state) const
     {
         AttributeValue::writeState (state);
         state.mProgress = mProgress;
     }
 
-    void SkillValue::readState (const ESM::StatState<int>& state)
+    void SkillValue::readState (const ESM::StatState<float>& state)
     {
         AttributeValue::readState (state);
         mProgress = state.mProgress;

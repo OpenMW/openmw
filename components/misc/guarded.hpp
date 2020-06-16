@@ -3,6 +3,7 @@
 
 #include <mutex>
 #include <memory>
+#include <condition_variable>
 
 namespace Misc
 {
@@ -77,6 +78,13 @@ namespace Misc
             Locked<const T> lockConst()
             {
                 return Locked<const T>(mMutex, mValue);
+            }
+
+            template <class Predicate>
+            void wait(std::condition_variable& cv, Predicate&& predicate)
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                cv.wait(lock, [&] { return predicate(mValue); });
             }
 
         private:

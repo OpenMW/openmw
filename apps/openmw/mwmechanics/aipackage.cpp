@@ -4,6 +4,7 @@
 #include <components/esm/loadland.hpp>
 #include <components/esm/loadmgef.hpp>
 #include <components/detournavigator/navigator.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -20,13 +21,12 @@
 #include "movement.hpp"
 #include "steering.hpp"
 #include "actorutil.hpp"
-#include "coordinateconverter.hpp"
 
 #include <osg/Quat>
 
-MWMechanics::AiPackage::~AiPackage() {}
-
-MWMechanics::AiPackage::AiPackage() :
+MWMechanics::AiPackage::AiPackage(TypeId typeId, const Options& options) :
+    mTypeId(typeId),
+    mOptions(options),
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mTargetActorRefId(""),
     mTargetActorId(-1),
@@ -58,31 +58,6 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
     else
         return MWWorld::Ptr();
-}
-
-bool MWMechanics::AiPackage::sideWithTarget() const
-{
-    return false;
-}
-
-bool MWMechanics::AiPackage::followTargetThroughDoors() const
-{
-    return false;
-}
-
-bool MWMechanics::AiPackage::canCancel() const
-{
-    return true;
-}
-
-bool MWMechanics::AiPackage::shouldCancelPreviousAi() const
-{
-    return true;
-}
-
-bool MWMechanics::AiPackage::getRepeat() const
-{
-    return false;
 }
 
 void MWMechanics::AiPackage::reset()
@@ -139,7 +114,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
-                    pathfindingHalfExtents, getNavigatorFlags(actor));
+                    pathfindingHalfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
                 mRotateOnTheRunChecks = 3;
 
                 // give priority to go directly on target if there is minimal opportunity
@@ -366,7 +341,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
-        CoordinateConverter(playerCell).toLocal(position);
+        Misc::CoordinateConverter(playerCell).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
@@ -426,4 +401,28 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
+}
+
+DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::Ptr& actor) const
+{
+    DetourNavigator::AreaCosts costs;
+    const DetourNavigator::Flags flags = getNavigatorFlags(actor);
+    const MWWorld::Class& actorClass = actor.getClass();
+
+    if (flags & DetourNavigator::Flag_swim)
+        costs.mWater = costs.mWater / actorClass.getSwimSpeed(actor);
+
+    if (flags & DetourNavigator::Flag_walk)
+    {
+        float walkCost;
+        if (getTypeId() == TypeIdWander)
+            walkCost = 1.0 / actorClass.getWalkSpeed(actor);
+        else
+            walkCost = 1.0 / actorClass.getRunSpeed(actor);
+        costs.mDoor = costs.mDoor * walkCost;
+        costs.mPathgrid = costs.mPathgrid * walkCost;
+        costs.mGround = costs.mGround * walkCost;
+    }
+
+    return costs;
 }

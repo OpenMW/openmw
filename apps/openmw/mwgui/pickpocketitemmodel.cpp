@@ -22,7 +22,7 @@ namespace MWGui
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         mSourceModel = sourceModel;
-        int chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
+        float chance = player.getClass().getSkill(player, ESM::Skill::Sneak);
 
         mSourceModel->update();
 

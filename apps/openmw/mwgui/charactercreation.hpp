@@ -4,6 +4,7 @@
 #include <components/esm/loadskil.hpp>
 #include <components/esm/loadclas.hpp>
 
+#include <map>
 #include <vector>
 
 #include "../mwmechanics/stat.hpp"
@@ -55,6 +56,10 @@ namespace MWGui
     private:
     osg::Group* mParent;
     Resource::ResourceSystem* mResourceSystem;
+
+    SkillList mPlayerMajorSkills, mPlayerMinorSkills;
+    std::map<int, MWMechanics::AttributeValue> mPlayerAttributes;
+    std::map<int, MWMechanics::SkillValue> mPlayerSkillValues;
 
     //Dialogs
     TextInputDialog* mNameDialog;

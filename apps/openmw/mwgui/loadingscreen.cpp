@@ -16,6 +16,7 @@
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -29,9 +30,9 @@
 namespace MWGui
 {
 
-    LoadingScreen::LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer)
+    LoadingScreen::LoadingScreen(Resource::ResourceSystem* resourceSystem, osgViewer::Viewer* viewer)
         : WindowBase("openmw_loading_screen.layout")
-        , mVFS(vfs)
+        , mResourceSystem(resourceSystem)
         , mViewer(viewer)
         , mTargetFrameRate(120.0)
         , mLastWallpaperChangeTime(0.0)
@@ -64,9 +65,9 @@ namespace MWGui
 
     void LoadingScreen::findSplashScreens()
     {
-        const std::map<std::string, VFS::File*>& index = mVFS->getIndex();
+        const std::map<std::string, VFS::File*>& index = mResourceSystem->getVFS()->getIndex();
         std::string pattern = "Splash/";
-        mVFS->normalizeFilename(pattern);
+        mResourceSystem->getVFS()->normalizeFilename(pattern);
 
         /* priority given to the left */
         const std::array<std::string, 7> supported_extensions {{".tga", ".dds", ".ktx", ".png", ".bmp", ".jpeg", ".jpg"}};
@@ -171,6 +172,11 @@ namespace MWGui
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
         mViewer->getSceneData()->setComputeBoundingSphereCallback(new DontComputeBoundCallback);
 
+        if (const osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation()) {
+            mOldIcoMin = ico->getMinimumTimeAvailableForGLCompileAndDeletePerFrame();
+            mOldIcoMax = ico->getMaximumNumOfObjectsToCompilePerFrame();
+        }
+
         mVisible = visible;
         mLoadingBox->setVisible(mVisible);
         setVisible(true);
@@ -214,6 +220,12 @@ namespace MWGui
 
         //std::cout << "loading took " << mTimer.time_m() - mLoadingOnTime << std::endl;
         setVisible(false);
+
+        if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
+        {
+            ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(mOldIcoMin);
+            ico->setMaximumNumOfObjectsToCompilePerFrame(mOldIcoMax);
+        }
 
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Loading);
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_LoadingWallpaper);
@@ -336,7 +348,13 @@ namespace MWGui
 
         MWBase::Environment::get().getInputManager()->update(0, true, true);
 
-        //osg::Timer timer;
+        mResourceSystem->reportStats(mViewer->getFrameStamp()->getFrameNumber(), mViewer->getViewerStats());
+        if (osgUtil::IncrementalCompileOperation* ico = mViewer->getIncrementalCompileOperation())
+        {
+            ico->setMinimumTimeAvailableForGLCompileAndDeletePerFrame(1.f/getTargetFrameRate());
+            ico->setMaximumNumOfObjectsToCompilePerFrame(1000);
+        }
+
         // at the time this function is called we are in the middle of a frame,
         // so out of order calls are necessary to get a correct frameNumber for the next frame.
         // refer to the advance() and frame() order in Engine::go()
@@ -344,10 +362,6 @@ namespace MWGui
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
-        //std::cout << "frame took " << timer.time_m() << std::endl;
-
-        //if (mViewer->getIncrementalCompileOperation())
-            //std::cout << "num to compile " << mViewer->getIncrementalCompileOperation()->getToCompile().size() << std::endl;
 
         mLastRenderTime = mTimer.time_m();
     }

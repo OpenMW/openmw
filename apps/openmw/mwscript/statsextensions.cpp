@@ -95,7 +95,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value =
+                    Interpreter::Type_Float value =
                         ptr.getClass()
                             .getCreatureStats (ptr)
                             .getAttribute(mIndex)
@@ -118,7 +118,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::AttributeValue attribute = ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex);
@@ -140,7 +140,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::AttributeValue attribute = ptr.getClass()
@@ -155,9 +155,9 @@ namespace MWScript
                         return;
 
                     if (value < 0)
-                        attribute.setBase(std::max(0, attribute.getBase() + value));
+                        attribute.setBase(std::max(0.f, attribute.getBase() + value));
                     else
-                        attribute.setBase(std::min(100, attribute.getBase() + value));
+                        attribute.setBase(std::min(100.f, attribute.getBase() + value));
 
                     ptr.getClass().getCreatureStats(ptr).setAttribute(mIndex, attribute);
                 }
@@ -345,7 +345,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = ptr.getClass().getSkill(ptr, mIndex);
+                    Interpreter::Type_Float value = ptr.getClass().getSkill(ptr, mIndex);
 
                     runtime.push (value);
                 }
@@ -364,7 +364,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats (ptr);
@@ -386,7 +386,7 @@ namespace MWScript
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
-                    Interpreter::Type_Integer value = runtime[0].mInteger;
+                    Interpreter::Type_Float value = runtime[0].mFloat;
                     runtime.pop();
 
                     MWMechanics::SkillValue &skill = ptr.getClass()
@@ -396,14 +396,14 @@ namespace MWScript
                     if (value == 0)
                         return;
 
-                    if (((skill.getBase() <= 0) && (value < 0))
-                        || ((skill.getBase() >= 100) && (value > 0)))
+                    if (((skill.getBase() <= 0.f) && (value < 0.f))
+                        || ((skill.getBase() >= 100.f) && (value > 0.f)))
                         return;
 
                     if (value < 0)
-                        skill.setBase(std::max(0, skill.getBase() + value));
+                        skill.setBase(std::max(0.f, skill.getBase() + value));
                     else
-                        skill.setBase(std::min(100, skill.getBase() + value));
+                        skill.setBase(std::min(100.f, skill.getBase() + value));
                 }
         };
 
@@ -499,6 +499,7 @@ namespace MWScript
                             creatureStats.getSpells().purgeEffect(effect.first.mId);
                     }
 
+                    MWBase::Environment::get().getMechanicsManager()->restoreStatsAfterCorprus(ptr, id);
                     creatureStats.getSpells().remove (id);
 
                     MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();

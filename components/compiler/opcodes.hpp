@@ -305,6 +305,19 @@ namespace Compiler
         const int opcodeRepairedOnMe = 0x200030c;
         const int opcodeRepairedOnMeExplicit = 0x200030d;
         const int opcodeToggleRecastMesh = 0x2000310;
+        const int opcodeMenuMode = 0x2000311;
+        const int opcodeRandom = 0x2000312;
+        const int opcodeScriptRunning = 0x2000313;
+        const int opcodeStartScript = 0x2000314;
+        const int opcodeStopScript = 0x2000315;
+        const int opcodeGetSecondsPassed = 0x2000316;
+        const int opcodeEnable = 0x2000317;
+        const int opcodeDisable = 0x2000318;
+        const int opcodeGetDisabled = 0x2000319;
+        const int opcodeEnableExplicit = 0x200031a;
+        const int opcodeDisableExplicit = 0x200031b;
+        const int opcodeGetDisabledExplicit = 0x200031c;
+        const int opcodeStartScriptExplicit = 0x200031d;
     }
 
     namespace Sky
@@ -513,6 +526,8 @@ namespace Compiler
         const int opcodeMoveWorldExplicit = 0x2000209;
         const int opcodeResetActors = 0x20002f4;
         const int opcodeFixme = 0x2000302;
+        const int opcodeGetDistance = 0x200031e;
+        const int opcodeGetDistanceExplicit = 0x200031f;
     }
 
     namespace User

@@ -18,11 +18,6 @@ namespace MWMechanics
     {
     }
 
-    AiActivate *MWMechanics::AiActivate::clone() const
-    {
-        return new AiActivate(*this);
-    }
-
     bool AiActivate::execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         const MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(mObjectId, false); //The target to follow
@@ -47,11 +42,6 @@ namespace MWMechanics
             MWBase::Environment::get().getWorld()->activate(target, actor);
         }
         return false;
-    }
-
-    int AiActivate::getTypeId() const
-    {
-        return TypeIdActivate;
     }
 
     void AiActivate::writeState(ESM::AiSequence::AiSequence &sequence) const

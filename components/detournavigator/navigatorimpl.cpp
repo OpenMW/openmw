@@ -2,6 +2,9 @@
 #include "debug.hpp"
 #include "settingsutils.hpp"
 
+#include <components/esm/loadpgrd.hpp>
+#include <components/misc/coordinateconverter.hpp>
+
 #include <Recast.h>
 
 namespace DetourNavigator
@@ -9,6 +12,7 @@ namespace DetourNavigator
     NavigatorImpl::NavigatorImpl(const Settings& settings)
         : mSettings(settings)
         , mNavMeshManager(mSettings)
+        , mUpdatesEnabled(true)
     {
     }
 
@@ -54,7 +58,8 @@ namespace DetourNavigator
             mNavMeshManager.addOffMeshConnection(
                 id,
                 toNavMeshCoordinates(mSettings, shapes.mConnectionStart),
-                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd)
+                toNavMeshCoordinates(mSettings, shapes.mConnectionEnd),
+                AreaType_door
             );
             return true;
         }
@@ -95,7 +100,7 @@ namespace DetourNavigator
         const auto water = mWaterIds.find(id);
         if (water != mWaterIds.end())
             result = mNavMeshManager.removeObject(water->second) || result;
-        mNavMeshManager.removeOffMeshConnection(id);
+        mNavMeshManager.removeOffMeshConnections(id);
         return result;
     }
 
@@ -111,11 +116,39 @@ namespace DetourNavigator
         return mNavMeshManager.removeWater(cellPosition);
     }
 
+    void NavigatorImpl::addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid)
+    {
+        Misc::CoordinateConverter converter(&cell);
+        for (auto edge : pathgrid.mEdges)
+        {
+            const auto src = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV0]));
+            const auto dst = Misc::Convert::makeOsgVec3f(converter.toWorldPoint(pathgrid.mPoints[edge.mV1]));
+            mNavMeshManager.addOffMeshConnection(
+                ObjectId(&pathgrid),
+                toNavMeshCoordinates(mSettings, src),
+                toNavMeshCoordinates(mSettings, dst),
+                AreaType_pathgrid
+            );
+        }
+    }
+
+    void NavigatorImpl::removePathgrid(const ESM::Pathgrid& pathgrid)
+    {
+        mNavMeshManager.removeOffMeshConnections(ObjectId(&pathgrid));
+    }
+
     void NavigatorImpl::update(const osg::Vec3f& playerPosition)
     {
+        if (!mUpdatesEnabled)
+            return;
         removeUnusedNavMeshes();
         for (const auto& v : mAgents)
             mNavMeshManager.update(playerPosition, v.first);
+    }
+
+    void NavigatorImpl::setUpdatesEnabled(bool enabled)
+    {
+        mUpdatesEnabled = enabled;
     }
 
     void NavigatorImpl::wait()

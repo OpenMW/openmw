@@ -20,9 +20,9 @@ namespace osg
     class Texture2D;
 }
 
-namespace VFS
+namespace Resource
 {
-    class Manager;
+    class ResourceSystem;
 }
 
 namespace MWGui
@@ -32,7 +32,7 @@ namespace MWGui
     class LoadingScreen : public WindowBase, public Loading::Listener
     {
     public:
-        LoadingScreen(const VFS::Manager* vfs, osgViewer::Viewer* viewer);
+        LoadingScreen(Resource::ResourceSystem* resourceSystem, osgViewer::Viewer* viewer);
         virtual ~LoadingScreen();
 
         /// Overridden from Loading::Listener, see the Loading::Listener documentation for usage details
@@ -53,7 +53,7 @@ namespace MWGui
 
         void setupCopyFramebufferToTextureCallback();
 
-        const VFS::Manager* mVFS;
+        Resource::ResourceSystem* mResourceSystem;
         osg::ref_ptr<osgViewer::Viewer> mViewer;
 
         double mTargetFrameRate;
@@ -70,6 +70,8 @@ namespace MWGui
         size_t mProgress;
 
         bool mShowWallpaper;
+        float mOldIcoMin = 0.f;
+        unsigned int mOldIcoMax = 0;
 
         MyGUI::Widget* mLoadingBox;
 

@@ -114,8 +114,20 @@ namespace ESM
             void blank();
     };
 
-    bool operator== (const RefNum& left, const RefNum& right);
-    bool operator< (const RefNum& left, const RefNum& right);
+    inline bool operator== (const RefNum& left, const RefNum& right)
+    {
+        return left.mIndex==right.mIndex && left.mContentFile==right.mContentFile;
+    }
+
+    inline bool operator< (const RefNum& left, const RefNum& right)
+    {
+        if (left.mIndex<right.mIndex)
+            return true;
+        if (left.mIndex>right.mIndex)
+            return false;
+        return left.mContentFile<right.mContentFile;
+    }
+
 }
 
 #endif

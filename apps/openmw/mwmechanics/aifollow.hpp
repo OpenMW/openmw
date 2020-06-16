@@ -1,7 +1,7 @@
 #ifndef GAME_MWMECHANICS_AIFOLLOW_H
 #define GAME_MWMECHANICS_AIFOLLOW_H
 
-#include "aipackage.hpp"
+#include "typedaipackage.hpp"
 
 #include <string>
 
@@ -39,7 +39,7 @@ namespace MWMechanics
     /// \brief AiPackage for an actor to follow another actor/the PC
     /** The AI will follow the target until a condition (time, or position) are set. Both can be disabled to cause the actor to follow the other indefinitely
     **/
-    class AiFollow : public AiPackage
+    class AiFollow final : public TypedAiPackage<AiFollow>
     {
         public:
             AiFollow(const std::string &actorId, float duration, float x, float y, float z);
@@ -53,30 +53,31 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            virtual bool sideWithTarget() const { return true; }
-            virtual bool followTargetThroughDoors() const { return true; }
-            virtual bool shouldCancelPreviousAi() const { return !mCommanded; }
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            virtual AiFollow *clone() const;
+            static constexpr TypeId getTypeId() { return TypeIdFollow; }
 
-            virtual bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration);
-
-            virtual int getTypeId() const;
-
-            virtual bool useVariableSpeed() const { return true;}
+            static constexpr Options makeDefaultOptions()
+            {
+                AiPackage::Options options;
+                options.mUseVariableSpeed = true;
+                options.mSideWithTarget = true;
+                options.mFollowTargetThroughDoors = true;
+                return options;
+            }
 
             /// Returns the actor being followed
             std::string getFollowedActor();
 
-            virtual void writeState (ESM::AiSequence::AiSequence& sequence) const;
+            void writeState (ESM::AiSequence::AiSequence& sequence) const final;
 
             bool isCommanded() const;
 
             int getFollowIndex() const;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state);
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
 
-            virtual osg::Vec3f getDestination() const
+            osg::Vec3f getDestination() const final
             {
                 MWWorld::Ptr target = getTarget();
                 if (target.isEmpty())
@@ -88,16 +89,15 @@ namespace MWMechanics
         private:
             /// This will make the actor always follow.
             /** Thus ignoring mDuration and mX,mY,mZ (used for summoned creatures). **/
-            bool mAlwaysFollow;
-            bool mCommanded;
-            float mDuration; // Hours
+            const bool mAlwaysFollow;
+            const float mDuration; // Hours
             float mRemainingDuration; // Hours
-            float mX;
-            float mY;
-            float mZ;
-            std::string mCellId;
+            const float mX;
+            const float mY;
+            const float mZ;
+            const std::string mCellId;
             bool mActive; // have we spotted the target?
-            int mFollowIndex;
+            const int mFollowIndex;
 
             static int mFollowIndexCounter;
     };

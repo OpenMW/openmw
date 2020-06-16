@@ -69,16 +69,9 @@
 #include "navmesh.hpp"
 #include "actorspaths.hpp"
 #include "recastmesh.hpp"
+#include "fogmanager.hpp"
+#include "objectpaging.hpp"
 
-namespace
-{
-    float DLLandFogStart;
-    float DLLandFogEnd;
-    float DLUnderwaterFogStart;
-    float DLUnderwaterFogEnd;
-    float DLInteriorFogStart;
-    float DLInteriorFogEnd;
-}
 
 namespace MWRender
 {
@@ -204,19 +197,9 @@ namespace MWRender
         , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mNavigator(navigator)
-        , mLandFogStart(0.f)
-        , mLandFogEnd(std::numeric_limits<float>::max())
-        , mUnderwaterFogStart(0.f)
-        , mUnderwaterFogEnd(std::numeric_limits<float>::max())
-        , mUnderwaterColor(Fallback::Map::getColour("Water_UnderwaterColor"))
-        , mUnderwaterWeight(Fallback::Map::getFloat("Water_UnderwaterColorWeight"))
-        , mUnderwaterIndoorFog(Fallback::Map::getFloat("Water_UnderwaterIndoorFog"))
         , mNightEyeFactor(0.f)
-        , mDistantFog(false)
-        , mDistantTerrain(false)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
-        , mBorders(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -277,22 +260,11 @@ namespace MWRender
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
         }
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
 
         mEffectManager.reset(new EffectManager(sceneRoot, mResourceSystem));
-
-        DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
-        DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
-        DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
-        DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
-        DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
-        DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
-
-        mDistantFog = Settings::Manager::getBool("use distant fog", "Fog");
-        mDistantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
 
         const std::string normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
         const std::string heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
@@ -302,7 +274,7 @@ namespace MWRender
 
         mTerrainStorage = new TerrainStorage(mResourceSystem, normalMapPattern, heightMapPattern, useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
 
-        if (mDistantTerrain)
+        if (Settings::Manager::getBool("distant terrain", "Terrain"))
         {
             const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
             int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
@@ -315,6 +287,12 @@ namespace MWRender
             mTerrain.reset(new Terrain::QuadTreeWorld(
                 sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug,
                 compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+            if (Settings::Manager::getBool("object paging", "Terrain"))
+            {
+                mObjectPaging.reset(new ObjectPaging(mResourceSystem->getSceneManager()));
+                static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mObjectPaging.get());
+                mResourceSystem->addResourceManager(mObjectPaging.get());
+            }
         }
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
@@ -349,8 +327,9 @@ namespace MWRender
         defaultMat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
         sceneRoot->getOrCreateStateSet()->setAttribute(defaultMat);
 
-        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
+        mFog.reset(new FogManager());
 
+        mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
         mSky->setCamera(mViewer->getCamera());
         mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());
 
@@ -376,6 +355,7 @@ namespace MWRender
 
         mViewer->getCamera()->setCullMask(~(Mask_UpdateVisitor|Mask_SimpleWater));
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
+        NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
 
         mNearClip = Settings::Manager::getFloat("near clip", "Camera");
         mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
@@ -557,9 +537,9 @@ namespace MWRender
 
     bool RenderingManager::toggleBorders()
     {
-        mBorders = !mBorders;
-        mTerrain->setBordersVisible(mBorders);
-        return mBorders;
+        bool borders = !mTerrain->getBordersVisible();
+        mTerrain->setBordersVisible(borders);
+        return borders;
     }
 
     bool RenderingManager::toggleRenderMode(RenderMode mode)
@@ -605,46 +585,12 @@ namespace MWRender
 
     void RenderingManager::configureFog(const ESM::Cell *cell)
     {
-        osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
-
-        if(mDistantFog)
-        {
-            float density = std::max(0.2f, cell->mAmbi.mFogDensity);
-            mLandFogStart = (DLInteriorFogEnd*(1.0f-density) + DLInteriorFogStart*density);
-            mLandFogEnd = DLInteriorFogEnd;
-            mUnderwaterFogStart = DLUnderwaterFogStart;
-            mUnderwaterFogEnd = DLUnderwaterFogEnd;
-            mFogColor = color;
-        }
-        else
-            configureFog(cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
+        mFog->configure(mViewDistance, cell);
     }
 
     void RenderingManager::configureFog(float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f &color)
     {
-        if(mDistantFog)
-        {
-            mLandFogStart = dlFactor * (DLLandFogStart - dlOffset*DLLandFogEnd);
-            mLandFogEnd = dlFactor * (1.0f-dlOffset) * DLLandFogEnd;
-            mUnderwaterFogStart = DLUnderwaterFogStart;
-            mUnderwaterFogEnd = DLUnderwaterFogEnd;
-        }
-        else
-        {
-            if(fogDepth == 0.0)
-            {
-                mLandFogStart = 0.0f;
-                mLandFogEnd = std::numeric_limits<float>::max();
-            }
-            else
-            {
-                mLandFogStart = mViewDistance * (1 - fogDepth);
-                mLandFogEnd = mViewDistance;
-            }
-            mUnderwaterFogStart = std::min(mViewDistance, 6666.f) * (1 - underwaterFog);
-            mUnderwaterFogEnd = std::min(mViewDistance, 6666.f);
-        }
-        mFogColor = color;
+        mFog->configure(mViewDistance, fogDepth, underwaterFog, dlFactor, dlOffset, color);
     }
 
     SkyManager* RenderingManager::getSkyManager()
@@ -673,19 +619,11 @@ namespace MWRender
         osg::Vec3f focal, cameraPos;
         mCamera->getPosition(focal, cameraPos);
         mCurrentCameraPos = cameraPos;
-        if (mWater->isUnderwater(cameraPos))
-        {
-            setFogColor(mUnderwaterColor * mUnderwaterWeight + mFogColor * (1.f-mUnderwaterWeight));
-            mStateUpdater->setFogStart(mUnderwaterFogStart);
-            mStateUpdater->setFogEnd(mUnderwaterFogEnd);
-        }
-        else
-        {
-            setFogColor(mFogColor);
 
-            mStateUpdater->setFogStart(mLandFogStart);
-            mStateUpdater->setFogEnd(mLandFogEnd);
-        }
+        bool isUnderwater = mWater->isUnderwater(cameraPos);
+        mStateUpdater->setFogStart(mFog->getFogStart(isUnderwater));
+        mStateUpdater->setFogEnd(mFog->getFogEnd(isUnderwater));
+        setFogColor(mFog->getFogColor(isUnderwater));
     }
 
     void RenderingManager::updatePlayerPtr(const MWWorld::Ptr &ptr)
@@ -1039,20 +977,14 @@ namespace MWRender
         renderCameraToImage(rttCamera.get(),image,w,h);
     }
 
-    osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
+    osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox &worldbb)
     {
-        if (!ptr.getRefData().getBaseNode())
-            return osg::Vec4f();
-
-        osg::ComputeBoundsVisitor computeBoundsVisitor;
-        computeBoundsVisitor.setTraversalMask(~(Mask_ParticleSystem|Mask_Effect));
-        ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
-
+        if (!worldbb.valid()) return osg::Vec4f();
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
         float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
         for (int i=0; i<8; ++i)
         {
-            osg::Vec3f corner = computeBoundsVisitor.getBoundingBox().corner(i);
+            osg::Vec3f corner = worldbb.corner(i);
             corner = corner * viewProj;
 
             float x = (corner.x() + 1.f) * 0.5f;
@@ -1078,6 +1010,7 @@ namespace MWRender
     {
         RenderingManager::RayResult result;
         result.mHit = false;
+        result.mHitRefnum.mContentFile = -1;
         result.mRatio = 0;
         if (intersector->containsIntersections())
         {
@@ -1089,6 +1022,7 @@ namespace MWRender
             result.mRatio = intersection.ratio;
 
             PtrHolder* ptrHolder = nullptr;
+            std::vector<RefnumMarker*> refnumMarkers;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -1098,11 +1032,25 @@ namespace MWRender
                 {
                     if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
                         ptrHolder = p;
+                    if (RefnumMarker* r = dynamic_cast<RefnumMarker*>(userDataContainer->getUserObject(i)))
+                        refnumMarkers.push_back(r);
                 }
             }
 
             if (ptrHolder)
                 result.mHitObject = ptrHolder->mPtr;
+
+            unsigned int vertexCounter = 0;
+            for (unsigned int i=0; i<refnumMarkers.size(); ++i)
+            {
+                unsigned int intersectionIndex = intersection.indexList.empty() ? 0 : intersection.indexList[0];
+                if (!refnumMarkers[i]->mNumVertices || (intersectionIndex >= vertexCounter && intersectionIndex < vertexCounter + refnumMarkers[i]->mNumVertices))
+                {
+                    result.mHitRefnum = refnumMarkers[i]->mRefnum;
+                    break;
+                }
+                vertexCounter += refnumMarkers[i]->mNumVertices;
+            }
         }
 
         return result;
@@ -1115,6 +1063,7 @@ namespace MWRender
             mIntersectionVisitor = new osgUtil::IntersectionVisitor;
 
         mIntersectionVisitor->setTraversalNumber(mViewer->getFrameStamp()->getFrameNumber());
+        mIntersectionVisitor->setFrameStamp(mViewer->getFrameStamp());
         mIntersectionVisitor->setIntersector(intersector);
 
         int mask = ~0;
@@ -1180,6 +1129,8 @@ namespace MWRender
         mSky->setMoonColour(false);
 
         notifyWorldSpaceChanged();
+        if (mObjectPaging)
+            mObjectPaging->clear();
     }
 
     MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
@@ -1334,7 +1285,7 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 mViewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
-                if(!mDistantFog)
+                if(!Settings::Manager::getBool("use distant fog", "Fog"))
                     mStateUpdater->setFogEnd(mViewDistance);
                 updateProjectionMatrix();
             }
@@ -1535,5 +1486,44 @@ namespace MWRender
             return;
 
         mRecastMesh->update(mNavigator.getRecastMeshTiles(), mNavigator.getSettings());
+    }
+
+    void RenderingManager::setActiveGrid(const osg::Vec4i &grid)
+    {
+        mTerrain->setActiveGrid(grid);
+    }
+    bool RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
+    {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
+            return false;
+        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), enabled))
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
+    }
+    void RenderingManager::pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr)
+    {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
+            return;
+        const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
+        if (!refnum.hasContentFile()) return;
+        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
+            mTerrain->rebuildViews();
+    }
+    bool RenderingManager::pagingUnlockCache()
+    {
+        if (mObjectPaging && mObjectPaging->unlockCache())
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
+    }
+    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    {
+        if (mObjectPaging)
+            mObjectPaging->getPagedRefnums(activeGrid, out);
     }
 }

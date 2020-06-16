@@ -14,7 +14,6 @@
 #include "../mwworld/cellstore.hpp"
 
 #include "npcstats.hpp"
-#include "spellcasting.hpp"
 #include "combat.hpp"
 #include "weaponpriority.hpp"
 #include "spellpriority.hpp"

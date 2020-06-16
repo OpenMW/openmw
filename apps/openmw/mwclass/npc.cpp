@@ -127,8 +127,8 @@ namespace
         }
 
         // initial health
-        int strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
-        int endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
+        float strength = creatureStats.getAttribute(ESM::Attribute::Strength).getBase();
+        float endurance = creatureStats.getAttribute(ESM::Attribute::Endurance).getBase();
 
         int multiplier = 3;
 
@@ -947,16 +947,6 @@ namespace MWClass
         bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
         running = running && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
 
-        float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat() + 0.01f*npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()*
-                                                      (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
-        walkSpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat()*normalizedEncumbrance;
-        walkSpeed = std::max(0.0f, walkSpeed);
-        if(sneaking)
-            walkSpeed *= gmst.fSneakSpeedMultiplier->mValue.getFloat();
-
-        float runSpeed = walkSpeed*(0.01f * getSkill(ptr, ESM::Skill::Athletics) *
-                                    gmst.fAthleticsRunBonus->mValue.getFloat() + gmst.fBaseRunMultiplier->mValue.getFloat());
-
         float moveSpeed;
         if(getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
@@ -971,19 +961,11 @@ namespace MWClass
             moveSpeed = flySpeed;
         }
         else if (swimming)
-        {
-            float swimSpeed = walkSpeed;
-            if(running)
-                swimSpeed = runSpeed;
-            swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
-            swimSpeed *= gmst.fSwimRunBase->mValue.getFloat() + 0.01f*getSkill(ptr, ESM::Skill::Athletics)*
-                                                    gmst.fSwimRunAthleticsMult->mValue.getFloat();
-            moveSpeed = swimSpeed;
-        }
+            moveSpeed = getSwimSpeed(ptr);
         else if (running && !sneaking)
-            moveSpeed = runSpeed;
+            moveSpeed = getRunSpeed(ptr);
         else
-            moveSpeed = walkSpeed;
+            moveSpeed = getWalkSpeed(ptr);
         if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
             moveSpeed *= 0.75f;
 
@@ -1011,7 +993,7 @@ namespace MWClass
                                           gmst.fJumpEncumbranceMultiplier->mValue.getFloat() *
                                           (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = static_cast<float>(getSkill(ptr, ESM::Skill::Acrobatics));
+        float a = getSkill(ptr, ESM::Skill::Acrobatics);
         float b = 0.0f;
         if(a > 50.0f)
         {
@@ -1136,7 +1118,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        int unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
+        float unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for(int i = 0;i < MWWorld::InventoryStore::Slots;i++)
@@ -1283,7 +1265,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    int Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
     {
         return getNpcStats(ptr).getSkill(skill).getModified();
     }
@@ -1322,6 +1304,12 @@ namespace MWClass
         const
     {
         if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
+        if (ptr.getRefData().getCount() <= 0)
         {
             state.mHasCustomState = false;
             return;
@@ -1436,5 +1424,62 @@ namespace MWClass
         // Use base NPC record as a fallback
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
         return ref->mBase->getFactionRank();
+    }
+
+    void Npc::setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const
+    {
+        MWMechanics::setBaseAISetting<ESM::NPC>(id, setting, value);
+    }
+
+    float Npc::getWalkSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const GMST& gmst = getGmst();
+        const NpcCustomData* npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
+        const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
+        const bool sneaking = MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr);
+
+        float walkSpeed = gmst.fMinWalkSpeed->mValue.getFloat()
+                + 0.01f * npcdata->mNpcStats.getAttribute(ESM::Attribute::Speed).getModified()
+                * (gmst.fMaxWalkSpeed->mValue.getFloat() - gmst.fMinWalkSpeed->mValue.getFloat());
+        walkSpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat()*normalizedEncumbrance;
+        walkSpeed = std::max(0.0f, walkSpeed);
+        if(sneaking)
+            walkSpeed *= gmst.fSneakSpeedMultiplier->mValue.getFloat();
+
+        return walkSpeed;
+    }
+
+    float Npc::getRunSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const GMST& gmst = getGmst();
+        return getWalkSpeed(ptr)
+                * (0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fAthleticsRunBonus->mValue.getFloat()
+                   + gmst.fBaseRunMultiplier->mValue.getFloat());
+    }
+
+    float Npc::getSwimSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const GMST& gmst = getGmst();
+        const MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const NpcCustomData* npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());
+        const MWMechanics::MagicEffects& mageffects = npcdata->mNpcStats.getMagicEffects();
+        const bool swimming = world->isSwimming(ptr);
+        const bool inair = !world->isOnGround(ptr) && !swimming && !world->isFlying(ptr);
+        const bool running = stats.getStance(MWMechanics::CreatureStats::Stance_Run)
+                && (inair || MWBase::Environment::get().getMechanicsManager()->isRunning(ptr));
+
+        float swimSpeed;
+
+        if (running)
+            swimSpeed = getRunSpeed(ptr);
+        else
+            swimSpeed = getWalkSpeed(ptr);
+
+        swimSpeed *= 1.0f + 0.01f * mageffects.get(ESM::MagicEffect::SwiftSwim).getMagnitude();
+        swimSpeed *= gmst.fSwimRunBase->mValue.getFloat()
+                + 0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fSwimRunAthleticsMult->mValue.getFloat();
+
+        return swimSpeed;
     }
 }

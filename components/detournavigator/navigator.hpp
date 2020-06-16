@@ -9,6 +9,12 @@
 #include "recastmesh.hpp"
 #include "recastmeshtiles.hpp"
 
+namespace ESM
+{
+    struct Cell;
+    struct Pathgrid;
+}
+
 namespace DetourNavigator
 {
     struct ObjectShapes
@@ -139,11 +145,20 @@ namespace DetourNavigator
          */
         virtual bool removeWater(const osg::Vec2i& cellPosition) = 0;
 
+        virtual void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) = 0;
+
+        virtual void removePathgrid(const ESM::Pathgrid& pathgrid) = 0;
+
         /**
          * @brief update start background navmesh update using current scene state.
          * @param playerPosition setup initial point to order build tiles of navmesh.
          */
         virtual void update(const osg::Vec3f& playerPosition) = 0;
+
+        /**
+         * @brief disable navigator updates
+         */
+        virtual void setUpdatesEnabled(bool enabled) = 0;
 
         /**
          * @brief wait locks thread until all tiles are updated from last update call.
@@ -162,7 +177,8 @@ namespace DetourNavigator
          */
         template <class OutputIterator>
         Status findPath(const osg::Vec3f& agentHalfExtents, const float stepSize, const osg::Vec3f& start,
-            const osg::Vec3f& end, const Flags includeFlags, OutputIterator& out) const
+            const osg::Vec3f& end, const Flags includeFlags, const DetourNavigator::AreaCosts& areaCosts,
+            OutputIterator& out) const
         {
             static_assert(
                 std::is_same<
@@ -177,7 +193,7 @@ namespace DetourNavigator
             const auto settings = getSettings();
             return findSmoothPath(navMesh->lockConst()->getImpl(), toNavMeshCoordinates(settings, agentHalfExtents),
                 toNavMeshCoordinates(settings, stepSize), toNavMeshCoordinates(settings, start),
-                toNavMeshCoordinates(settings, end), includeFlags, settings, out);
+                toNavMeshCoordinates(settings, end), includeFlags, areaCosts, settings, out);
         }
 
         /**

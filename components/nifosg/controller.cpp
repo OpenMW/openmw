@@ -352,8 +352,9 @@ void RollController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     }
 }
 
-AlphaController::AlphaController(const Nif::NiFloatData *data)
+AlphaController::AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial)
     : mData(data->mKeyList, 1.f)
+    , mBaseMaterial(baseMaterial)
 {
 
 }
@@ -365,14 +366,13 @@ AlphaController::AlphaController()
 AlphaController::AlphaController(const AlphaController &copy, const osg::CopyOp &copyop)
     : StateSetUpdater(copy, copyop), Controller(copy)
     , mData(copy.mData)
+    , mBaseMaterial(copy.mBaseMaterial)
 {
 }
 
 void AlphaController::setDefaults(osg::StateSet *stateset)
 {
-    // need to create a deep copy of StateAttributes we will modify
-    osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-    stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+    stateset->setAttribute(static_cast<osg::Material*>(mBaseMaterial->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::StateAttribute::ON);
 }
 
 void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -387,9 +387,10 @@ void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     }
 }
 
-MaterialColorController::MaterialColorController(const Nif::NiPosData *data, TargetColor color)
+MaterialColorController::MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial)
     : mData(data->mKeyList, osg::Vec3f(1,1,1))
     , mTargetColor(color)
+    , mBaseMaterial(baseMaterial)
 {
 }
 
@@ -401,14 +402,13 @@ MaterialColorController::MaterialColorController(const MaterialColorController &
     : StateSetUpdater(copy, copyop), Controller(copy)
     , mData(copy.mData)
     , mTargetColor(copy.mTargetColor)
+    , mBaseMaterial(copy.mBaseMaterial)
 {
 }
 
 void MaterialColorController::setDefaults(osg::StateSet *stateset)
 {
-    // need to create a deep copy of StateAttributes we will modify
-    osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-    stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
+    stateset->setAttribute(static_cast<osg::Material*>(mBaseMaterial->clone(osg::CopyOp::DEEP_COPY_ALL)), osg::StateAttribute::ON);
 }
 
 void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
@@ -518,6 +518,52 @@ void ParticleSystemController::operator() (osg::Node* node, osg::NodeVisitor* nv
     }
     else
         emitter->getParticleSystem()->setFrozen(true);
+    traverse(node, nv);
+}
+
+PathController::PathController(const PathController &copy, const osg::CopyOp &copyop)
+    : osg::NodeCallback(copy, copyop)
+    , Controller(copy)
+    , mPath(copy.mPath)
+    , mPercent(copy.mPercent)
+    , mFlags(copy.mFlags)
+{
+}
+
+PathController::PathController(const Nif::NiPathController* ctrl)
+    : mPath(ctrl->posData->mKeyList, osg::Vec3f())
+    , mPercent(ctrl->floatData->mKeyList, 1.f)
+    , mFlags(ctrl->flags)
+{
+}
+
+float PathController::getPercent(float time) const
+{
+    float percent = mPercent.interpKey(time);
+    if (percent < 0.f)
+        percent = std::fmod(percent, 1.f) + 1.f;
+    else if (percent > 1.f)
+        percent = std::fmod(percent, 1.f);
+    return percent;
+}
+
+void PathController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+{
+    if (mPath.empty() || mPercent.empty() || !hasInput())
+    {
+        traverse(node, nv);
+        return;
+    }
+
+    osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
+    osg::Matrix mat = trans->getMatrix();
+
+    float time = getInputValue(nv);
+    float percent = getPercent(time);
+    osg::Vec3f pos(mPath.interpKey(percent));
+    mat.setTrans(pos);
+    trans->setMatrix(mat);
+
     traverse(node, nv);
 }
 

@@ -1,6 +1,11 @@
 #ifndef GAME_BASE_ENVIRONMENT_H
 #define GAME_BASE_ENVIRONMENT_H
 
+namespace osg
+{
+    class Stats;
+}
+
 namespace MWBase
 {
     class World;
@@ -97,6 +102,8 @@ namespace MWBase
 
             static const Environment& get();
             ///< Return instance of this class.
+
+            void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
     };
 }
 

@@ -128,7 +128,12 @@ struct NiNode : Node
     }
 };
 
-struct NiTriShape : Node
+struct NiGeometry : Node
+{
+    NiSkinInstancePtr skin;
+};
+
+struct NiTriShape : NiGeometry
 {
     /* Possible flags:
         0x40 - mesh has no vertex normals ?
@@ -138,7 +143,6 @@ struct NiTriShape : Node
     */
 
     NiTriShapeDataPtr data;
-    NiSkinInstancePtr skin;
 
     void read(NIFStream *nif)
     {
@@ -157,10 +161,9 @@ struct NiTriShape : Node
     }
 };
 
-struct NiTriStrips : Node
+struct NiTriStrips : NiGeometry
 {
     NiTriStripsDataPtr data;
-    NiSkinInstancePtr skin;
 
     void read(NIFStream *nif)
     {
@@ -179,6 +182,26 @@ struct NiTriStrips : Node
     }
 };
 
+struct NiLines : NiGeometry
+{
+    NiLinesDataPtr data;
+
+    void read(NIFStream *nif)
+    {
+        Node::read(nif);
+        data.read(nif);
+        skin.read(nif);
+    }
+
+    void post(NIFFile *nif)
+    {
+        Node::post(nif);
+        data.post(nif);
+        skin.post(nif);
+        if (!skin.empty())
+            nif->setUseSkinning(true);
+    }
+};
 
 struct NiCamera : Node
 {
@@ -285,7 +308,7 @@ struct NiLODNode : public NiSwitchNode
     void read(NIFStream *nif)
     {
         NiSwitchNode::read(nif);
-        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFFile::NIFVersion::VER_ZT2)
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
             lodCenter = nif->getVector3();
         unsigned int numLodLevels = nif->getUInt();
         for (unsigned int i=0; i<numLodLevels; ++i)

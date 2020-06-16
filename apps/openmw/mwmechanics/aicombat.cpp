@@ -1,6 +1,7 @@
 #include "aicombat.hpp"
 
 #include <components/misc/rng.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include <components/esm/aisequence.hpp>
 
@@ -21,7 +22,6 @@
 #include "movement.hpp"
 #include "character.hpp"
 #include "aicombataction.hpp"
-#include "coordinateconverter.hpp"
 #include "actorutil.hpp"
 
 namespace
@@ -302,7 +302,7 @@ namespace MWMechanics
                         if (pathgrid && !actor.getClass().isPureWaterCreature(actor))
                         {
                             ESM::Pathgrid::PointList points;
-                            CoordinateConverter coords(storage.mCell->getCell());
+                            Misc::CoordinateConverter coords(storage.mCell->getCell());
 
                             osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                             coords.toLocal(localPos);
@@ -406,24 +406,9 @@ namespace MWMechanics
         }
     }
 
-    int AiCombat::getTypeId() const
-    {
-        return TypeIdCombat;
-    }
-
-    unsigned int AiCombat::getPriority() const
-    {
-        return 1;
-    }
-
     MWWorld::Ptr AiCombat::getTarget() const
     {
         return MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
-    }
-
-    AiCombat *MWMechanics::AiCombat::clone() const
-    {
-        return new AiCombat(*this);
     }
 
     void AiCombat::writeState(ESM::AiSequence::AiSequence &sequence) const

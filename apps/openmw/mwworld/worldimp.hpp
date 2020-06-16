@@ -20,6 +20,7 @@
 namespace osg
 {
     class Group;
+    class Stats;
 }
 
 namespace osgViewer
@@ -68,6 +69,7 @@ namespace MWPhysics
 
 namespace MWWorld
 {
+    class DateTimeManager;
     class WeatherManager;
     class Player;
     class ProjectileManager;
@@ -76,20 +78,13 @@ namespace MWWorld
 
     class World final: public MWBase::World
     {
+        private:
             Resource::ResourceSystem* mResourceSystem;
 
             std::vector<ESM::ESMReader> mEsm;
             MWWorld::ESMStore mStore;
             LocalScripts mLocalScripts;
             MWWorld::Globals mGlobalVariables;
-            bool mSky;
-
-            ESM::Variant* mGameHour;
-            ESM::Variant* mDaysPassed;
-            ESM::Variant* mDay;
-            ESM::Variant* mMonth;
-            ESM::Variant* mYear;
-            ESM::Variant* mTimeScale;
 
             Cells mCells;
 
@@ -101,8 +96,10 @@ namespace MWWorld
             std::unique_ptr<MWRender::RenderingManager> mRendering;
             std::unique_ptr<MWWorld::Scene> mWorldScene;
             std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
+            std::unique_ptr<MWWorld::DateTimeManager> mCurrentDate;
             std::shared_ptr<ProjectileManager> mProjectileManager;
 
+            bool mSky;
             bool mGodMode;
             bool mScriptsEnabled;
             std::vector<std::string> mContentFiles;
@@ -110,21 +107,33 @@ namespace MWWorld
             std::string mUserDataPath;
 
             osg::Vec3f mDefaultHalfExtents;
-            bool mShouldUpdateNavigator = false;
+            bool mShouldUpdateNavigator;
+
+            int mActivationDistanceOverride;
+
+            std::string mStartCell;
+
+            float mSwimHeightScale;
+
+            float mDistanceToFacedObject;
+
+            bool mTeleportEnabled;
+            bool mLevitationEnabled;
+            bool mGoToJail;
+            int mDaysInPrison;
+            bool mPlayerTraveling;
+            bool mPlayerInJail;
+
+            float mSpellPreloadTimer;
+
+            std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
+            ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
             // not implemented
             World (const World&);
             World& operator= (const World&);
 
-            int mActivationDistanceOverride;
-
-            std::map<MWWorld::Ptr, MWWorld::DoorState> mDoorStates;
-            ///< only holds doors that are currently moving. 1 = opening, 2 = closing
-
-            std::string mStartCell;
-
             void updateWeather(float duration, bool paused = false);
-            int getDaysPerMonth (int month) const;
 
             void rotateObjectImp (const Ptr& ptr, const osg::Vec3f& rot, MWBase::RotationFlags flags);
 
@@ -140,10 +149,6 @@ namespace MWWorld
 
             MWWorld::Ptr getFacedObject(float maxDistance, bool ignorePlayer=true);
 
-    public: // FIXME
-            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
-            void removeContainerScripts(const Ptr& reference) override;
-    private:
             void PCDropped (const Ptr& item);
 
             bool rotateDoor(const Ptr door, DoorState state, float duration);
@@ -162,6 +167,8 @@ namespace MWWorld
 
             void fillGlobalVariables();
 
+            void updateSkyDate();
+
             /**
              * @brief loadContentFiles - Loads content files (esm,esp,omwgame,omwaddon)
              * @param fileCollections- Container which holds content file names and their paths
@@ -171,19 +178,6 @@ namespace MWWorld
             void loadContentFiles(const Files::Collections& fileCollections,
                 const std::vector<std::string>& content, ContentLoader& contentLoader);
 
-            float mSwimHeightScale;
-
-            float mDistanceToFacedObject;
-
-            bool mTeleportEnabled;
-            bool mLevitationEnabled;
-            bool mGoToJail;
-            int mDaysInPrison;
-            bool mPlayerTraveling;
-            bool mPlayerInJail;
-
-            float mSpellPreloadTimer;
-
             float feetToGameUnits(float feet);
             float getActivationDistancePlusTelekinesis();
 
@@ -191,6 +185,9 @@ namespace MWWorld
             MWWorld::ConstPtr getClosestMarkerFromExteriorPosition( const osg::Vec3f& worldPos, const std::string &id );
 
         public:
+            // FIXME
+            void addContainerScripts(const Ptr& reference, CellStore* cell) override;
+            void removeContainerScripts(const Ptr& reference) override;
 
             World (
                 osgViewer::Viewer* viewer,
@@ -297,6 +294,8 @@ namespace MWWorld
             Ptr searchPtrViaActorId (int actorId) override;
             ///< Search is limited to the active cells.
 
+            Ptr searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum) override;
+
             MWWorld::Ptr findContainer (const MWWorld::ConstPtr& ptr) override;
             ///< Return a pointer to a liveCellRef which contains \a ptr.
             /// \note Search is limited to the active cells.
@@ -315,24 +314,14 @@ namespace MWWorld
             void advanceTime (double hours, bool incremental = false) override;
             ///< Advance in-game time.
 
-            void setHour (double hour) override;
-            ///< Set in-game time hour.
-
-            void setMonth (int month) override;
-            ///< Set in-game time month.
-
-            void setDay (int day) override;
-            ///< Set in-game time day.
-
-            int getDay() const override;
-            int getMonth() const override;
-            int getYear() const override;
-
             std::string getMonthName (int month = -1) const override;
             ///< Return name of month (-1: current month)
 
             TimeStamp getTimeStamp() const override;
-            ///< Return current in-game time stamp.
+            ///< Return current in-game time and number of day since new game start.
+
+            ESM::EpochTimeStamp getEpochTimeStamp() const override;
+            ///< Return current in-game date and time.
 
             bool toggleSky() override;
             ///< \return Resulting mode
@@ -485,6 +474,14 @@ namespace MWWorld
             /// \return pointer to created record
 
             const ESM::ItemLevList *createOverrideRecord (const ESM::ItemLevList& record) override;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            const ESM::Creature *createOverrideRecord (const ESM::Creature& record) override;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            const ESM::NPC *createOverrideRecord (const ESM::NPC& record) override;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
@@ -730,6 +727,8 @@ namespace MWWorld
             bool hasCollisionWithDoor(const MWWorld::ConstPtr& door, const osg::Vec3f& position, const osg::Vec3f& destination) const override;
 
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
+
+            void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
     };
 }
 

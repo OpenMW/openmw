@@ -55,7 +55,7 @@ namespace MWScript
                 Compiler::Context& compilerContext, int warningsMode,
                 const std::vector<std::string>& scriptBlacklist);
 
-            virtual void run (const std::string& name, Interpreter::Context& interpreterContext);
+            virtual bool run (const std::string& name, Interpreter::Context& interpreterContext);
             ///< Run the script with the given name (compile first, if not compiled yet)
 
             virtual bool compile (const std::string& name);

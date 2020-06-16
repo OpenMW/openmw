@@ -79,9 +79,6 @@ public:
     /** @remarks The window's visibility changed */
     virtual void windowVisibilityChange( bool visible ) {}
 
-    /** @remarks The window got / lost input focus */
-    virtual void windowFocusChange( bool have_focus ) {}
-
     virtual void windowClosed () {}
 
     virtual void windowResized (int x, int y) {}

@@ -1,8 +1,10 @@
 #include "shadervisitor.hpp"
 
-#include <osg/Texture>
-#include <osg/Material>
+#include <osg/AlphaFunc>
+#include <osg/BlendFunc>
 #include <osg/Geometry>
+#include <osg/Material>
+#include <osg/Texture>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -23,6 +25,7 @@ namespace Shader
         : mShaderRequired(false)
         , mColorMode(0)
         , mMaterialOverridden(false)
+        , mBlendFuncOverridden(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mNode(nullptr)
@@ -229,15 +232,21 @@ namespace Shader
             {
                 if (!writableStateSet)
                     writableStateSet = getWritableStateSet(node);
+                // We probably shouldn't construct a new version of this each time as Uniforms use pointer comparison for early-out.
+                // Also it should probably belong to the shader manager
                 writableStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
             }
         }
+
+        bool alphaSettingsChanged = false;
+        bool alphaTestShadows = false;
 
         const osg::StateSet::AttributeList& attributes = stateset->getAttributeList();
         for (osg::StateSet::AttributeList::const_iterator it = attributes.begin(); it != attributes.end(); ++it)
         {
             if (it->first.first == osg::StateAttribute::MATERIAL)
             {
+                // This should probably be moved out of ShaderRequirements and be applied directly now it's a uniform instead of a define
                 if (!mRequirements.back().mMaterialOverridden || it->second.second & osg::StateAttribute::PROTECTED)
                 {
                     if (it->second.second & osg::StateAttribute::OVERRIDE)
@@ -254,21 +263,48 @@ namespace Shader
                     case osg::Material::OFF:
                         colorMode = 0;
                         break;
-                    case GL_AMBIENT:
-                        colorMode = 3;
+                    case osg::Material::EMISSION:
+                        colorMode = 1;
                         break;
                     default:
-                    case GL_AMBIENT_AND_DIFFUSE:
+                    case osg::Material::AMBIENT_AND_DIFFUSE:
                         colorMode = 2;
                         break;
-                    case GL_EMISSION:
-                        colorMode = 1;
+                    case osg::Material::AMBIENT:
+                        colorMode = 3;
+                        break;
+                    case osg::Material::DIFFUSE:
+                        colorMode = 4;
+                        break;
+                    case osg::Material::SPECULAR:
+                        colorMode = 5;
                         break;
                     }
 
                     mRequirements.back().mColorMode = colorMode;
                 }
             }
+            else if (it->first.first == osg::StateAttribute::BLENDFUNC)
+            {
+                if (!mRequirements.back().mBlendFuncOverridden || it->second.second & osg::StateAttribute::PROTECTED)
+                {
+                    if (it->second.second & osg::StateAttribute::OVERRIDE)
+                        mRequirements.back().mBlendFuncOverridden = true;
+
+                    const osg::BlendFunc* blend = static_cast<const osg::BlendFunc*>(it->second.first.get());
+                    if (blend->getSource() == osg::BlendFunc::SRC_ALPHA || blend->getSource() == osg::BlendFunc::SRC_COLOR)
+                        alphaTestShadows = true;
+                    alphaSettingsChanged = true;
+                }
+            }
+            // Eventually, move alpha testing to discard in shader adn remove deprecated state here
+        }
+        // we don't need to check for glEnable/glDisable of blending as we always set it at the same time
+        if (alphaSettingsChanged)
+        {
+            if (!writableStateSet)
+                writableStateSet = getWritableStateSet(node);
+            writableStateSet->addUniform(alphaTestShadows ? mShaderManager.getShadowMapAlphaTestEnableUniform() : mShaderManager.getShadowMapAlphaTestDisableUniform());
         }
     }
 

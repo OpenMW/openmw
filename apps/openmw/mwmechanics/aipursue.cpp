@@ -3,6 +3,7 @@
 #include <components/esm/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -26,10 +27,6 @@ AiPursue::AiPursue(const ESM::AiSequence::AiPursue *pursue)
     mTargetActorId = pursue->mTargetActorId;
 }
 
-AiPursue *MWMechanics::AiPursue::clone() const
-{
-    return new AiPursue(*this);
-}
 bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
 {
     if(actor.getClass().getCreatureStats(actor).isDead())
@@ -42,8 +39,9 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (target == MWWorld::Ptr() || !target.getRefData().getCount() || !target.getRefData().isEnabled())
         return true;
 
-    if (isTargetMagicallyHidden(target))
-        return true;
+    if (!MWBase::Environment::get().getWorld()->getLOS(target, actor)
+     || !MWBase::Environment::get().getMechanicsManager()->awarenessCheck(target, actor))
+        return false;
 
     if (target.getClass().getCreatureStats(target).isDead())
         return true;
@@ -66,11 +64,6 @@ bool AiPursue::execute (const MWWorld::Ptr& actor, CharacterController& characte
     actor.getClass().getCreatureStats(actor).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, true); //Make NPC run
 
     return false;
-}
-
-int AiPursue::getTypeId() const
-{
-    return TypeIdPursue;
 }
 
 MWWorld::Ptr AiPursue::getTarget() const

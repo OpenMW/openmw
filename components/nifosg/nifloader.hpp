@@ -7,6 +7,7 @@
 #include <osg/Referenced>
 
 #include "controller.hpp"
+#include "textkeymap.hpp"
 
 namespace osg
 {
@@ -20,8 +21,6 @@ namespace Resource
 
 namespace NifOsg
 {
-    typedef std::multimap<float,std::string> TextKeyMap;
-
     struct TextKeyMapHolder : public osg::Object
     {
     public:
@@ -79,8 +78,14 @@ namespace NifOsg
         static void setHiddenNodeMask(unsigned int mask);
         static unsigned int getHiddenNodeMask();
 
+        // Set the mask to use for nodes that ignore the crosshair intersection. The default is the default node mask.
+        // This is used for NiCollisionSwitch nodes with NiCollisionSwitch state set to disabled.
+        static void setIntersectionDisabledNodeMask(unsigned int mask);
+        static unsigned int getIntersectionDisabledNodeMask();
+
     private:
         static unsigned int sHiddenNodeMask;
+        static unsigned int sIntersectionDisabledNodeMask;
         static bool sShowMarkers;
     };
 

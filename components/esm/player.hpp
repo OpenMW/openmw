@@ -25,14 +25,13 @@ namespace ESM
         unsigned char mHasMark;
         ESM::Position mMarkedPosition;
         CellId mMarkedCell;
-        unsigned char mAutoMove;
         std::string mBirthsign;
-        
+
         int mCurrentCrimeId;
         int mPaidCrimeId;
 
-        StatState<int> mSaveAttributes[ESM::Attribute::Length];
-        StatState<int> mSaveSkills[ESM::Skill::Length];
+        StatState<float> mSaveAttributes[ESM::Attribute::Length];
+        StatState<float> mSaveSkills[ESM::Skill::Length];
 
         typedef std::map<std::string, std::string> PreviousItems; // previous equipped items, needed for bound spells
         PreviousItems mPreviousItems;

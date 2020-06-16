@@ -168,11 +168,10 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
 osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, float width, float height, const osg::Vec3d& upVector, float zmin, float zmax)
 {
     osg::ref_ptr<osg::Camera> camera (new osg::Camera);
-
     camera->setProjectionMatrixAsOrtho(-width/2, width/2, -height/2, height/2, 5, (zmax-zmin) + 10);
     camera->setComputeNearFarMode(osg::Camera::DO_NOT_COMPUTE_NEAR_FAR);
     camera->setViewMatrixAsLookAt(osg::Vec3d(x, y, zmax + 5), osg::Vec3d(x, y, zmin), upVector);
-    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+    camera->setReferenceFrame(osg::Camera::ABSOLUTE_RF_INHERIT_VIEWPOINT);
     camera->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT, osg::Camera::PIXEL_BUFFER_RTT);
     camera->setClearColor(osg::Vec4(0.f, 0.f, 0.f, 1.f));
     camera->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -180,6 +179,10 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
 
     camera->setCullMask(Mask_Scene | Mask_SimpleWater | Mask_Terrain | Mask_Object | Mask_Static);
     camera->setNodeMask(Mask_RenderToTexture);
+
+    // Disable small feature culling, it's not going to be reliable for this camera
+    osg::Camera::CullingMode cullingMode = (osg::Camera::DEFAULT_CULLING|osg::Camera::FAR_PLANE_CULLING) & ~(osg::CullStack::SMALL_FEATURE_CULLING);
+    camera->setCullingMode(cullingMode);
 
     osg::ref_ptr<osg::StateSet> stateset = new osg::StateSet;
     stateset->setAttribute(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL), osg::StateAttribute::OVERRIDE);
@@ -356,11 +359,6 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
 
     osg::ref_ptr<osg::Camera> camera = createOrthographicCamera(x*mMapWorldSize + mMapWorldSize/2.f, y*mMapWorldSize + mMapWorldSize/2.f, mMapWorldSize, mMapWorldSize,
                                                                 osg::Vec3d(0,1,0), zmin, zmax);
-    camera->getOrCreateUserDataContainer()->addDescription("NoTerrainLod");
-    std::ostringstream stream;
-    stream << x << " " << y;
-    camera->getOrCreateUserDataContainer()->addDescription(stream.str());
-
     setupRenderToTexture(camera, cell->getCell()->getGridX(), cell->getCell()->getGridY());
 
     MapSegment& segment = mSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
@@ -693,12 +691,10 @@ void LocalMap::MapSegment::loadFogOfWar(const ESM::FogTexture &esm)
         return;
     }
 
-    // TODO: deprecate tga and use raw data instead
-
-    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!readerwriter)
     {
-        Log(Debug::Error) << "Error: Unable to load fog, can't find a tga ReaderWriter" ;
+        Log(Debug::Error) << "Error: Unable to load fog, can't find a png ReaderWriter" ;
         return;
     }
 
@@ -727,10 +723,10 @@ void LocalMap::MapSegment::saveFogOfWar(ESM::FogTexture &fog) const
 
     std::ostringstream ostream;
 
-    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("tga");
+    osgDB::ReaderWriter* readerwriter = osgDB::Registry::instance()->getReaderWriterForExtension("png");
     if (!readerwriter)
     {
-        Log(Debug::Error) << "Error: Unable to write fog, can't find a tga ReaderWriter";
+        Log(Debug::Error) << "Error: Unable to write fog, can't find a png ReaderWriter";
         return;
     }
 

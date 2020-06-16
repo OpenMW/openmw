@@ -11,6 +11,7 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/esm/cellid.hpp>
+#include <components/esm/cellref.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -41,6 +42,7 @@
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
+#include "../mwmechanics/summoning.hpp"
 
 #include "../mwrender/animation.hpp"
 #include "../mwrender/npcanimation.hpp"
@@ -58,6 +60,7 @@
 #include "../mwphysics/object.hpp"
 #include "../mwphysics/constants.hpp"
 
+#include "datetimemanager.hpp"
 #include "player.hpp"
 #include "manualref.hpp"
 #include "cellstore.hpp"
@@ -119,33 +122,11 @@ namespace MWWorld
           LoadersContainer mLoaders;
     };
 
-    int World::getDaysPerMonth (int month) const
-    {
-        switch (month)
-        {
-            case 0: return 31;
-            case 1: return 28;
-            case 2: return 31;
-            case 3: return 30;
-            case 4: return 31;
-            case 5: return 30;
-            case 6: return 31;
-            case 7: return 31;
-            case 8: return 30;
-            case 9: return 31;
-            case 10: return 30;
-            case 11: return 31;
-        }
-
-        throw std::runtime_error ("month out of range");
-    }
-
     void World::adjustSky()
     {
         if (mSky && (isCellExterior() || isCellQuasiExterior()))
         {
-            mRendering->skySetDate (mDay->getInteger(), mMonth->getInteger());
-
+            updateSkyDate();
             mRendering->setSkyEnabled(true);
         }
         else
@@ -162,10 +143,11 @@ namespace MWWorld
         const std::string& startCell, const std::string& startupScript,
         const std::string& resourcePath, const std::string& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts (mStore),
-      mSky (true), mCells (mStore, mEsm),
-      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles), mUserDataPath(userDataPath),
+      mCells (mStore, mEsm), mSky (true),
+      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mUserDataPath(userDataPath), mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
-      mStartCell (startCell), mDistanceToFacedObject(-1), mTeleportEnabled(true),
+      mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
       mLevitationEnabled(true), mGoToJail(false), mDaysInPrison(0),
       mPlayerTraveling(false), mPlayerInJail(false), mSpellPreloadTimer(0.f)
     {
@@ -189,6 +171,8 @@ namespace MWWorld
         // insert records that may not be present in all versions of MW
         if (mEsm[0].getFormat() == 0)
             ensureNeededRecords();
+
+        mCurrentDate.reset(new DateTimeManager());
 
         fillGlobalVariables();
 
@@ -224,13 +208,7 @@ namespace MWWorld
     void World::fillGlobalVariables()
     {
         mGlobalVariables.fill (mStore);
-
-        mGameHour = &mGlobalVariables["gamehour"];
-        mDaysPassed = &mGlobalVariables["dayspassed"];
-        mDay = &mGlobalVariables["day"];
-        mMonth = &mGlobalVariables["month"];
-        mYear = &mGlobalVariables["year"];
-        mTimeScale = &mGlobalVariables["timescale"];
+        mCurrentDate->setup(mGlobalVariables);
     }
 
     void World::startNewGame (bool bypass)
@@ -265,7 +243,6 @@ namespace MWWorld
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
-
             if (findExteriorPosition (mStartCell, pos))
             {
                 changeToExteriorCell (pos, true);
@@ -307,6 +284,7 @@ namespace MWWorld
             mPhysics->toggleCollisionMode();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
+        mCurrentDate->setup(mGlobalVariables);
     }
 
     void World::clear()
@@ -401,12 +379,13 @@ namespace MWWorld
                 reader.getHNT(mLevitationEnabled, "LEVT");
                 return;
             case ESM::REC_PLAY:
+                mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
                 if (getPlayerPtr().isInCell())
                 {
-                    mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
                     if (getPlayerPtr().getCell()->isExterior())
                         mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
+                    mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
                 }
                 break;
             default:
@@ -635,26 +614,20 @@ namespace MWWorld
 
     void World::setGlobalInt (const std::string& name, int value)
     {
-        if (name=="gamehour")
-            setHour (value);
-        else if (name=="day")
-            setDay (value);
-        else if (name=="month")
-            setMonth (value);
-        else
-            mGlobalVariables[name].setInteger (value);
+        bool dateUpdated = mCurrentDate->updateGlobalInt(name, value);
+        if (dateUpdated)
+            updateSkyDate();
+
+        mGlobalVariables[name].setInteger (value);
     }
 
     void World::setGlobalFloat (const std::string& name, float value)
     {
-        if (name=="gamehour")
-            setHour (value);
-        else if (name=="day")
-            setDay(static_cast<int>(value));
-        else if (name=="month")
-            setMonth(static_cast<int>(value));
-        else
-            mGlobalVariables[name].setFloat (value);
+        bool dateUpdated = mCurrentDate->updateGlobalFloat(name, value);
+        if (dateUpdated)
+            updateSkyDate();
+
+        mGlobalVariables[name].setFloat(value);
     }
 
     int World::getGlobalInt (const std::string& name) const
@@ -670,6 +643,11 @@ namespace MWWorld
     char World::getGlobalVariableType (const std::string& name) const
     {
         return mGlobalVariables.getType (name);
+    }
+
+    std::string World::getMonthName (int month) const
+    {
+        return mCurrentDate->getMonthName(month);
     }
 
     std::string World::getCellName (const MWWorld::CellStore *cell) const
@@ -739,7 +717,10 @@ namespace MWWorld
         Ptr ret = searchPtr(name, activeOnly);
         if (!ret.isEmpty())
             return ret;
-        throw std::runtime_error ("unknown ID: " + name);
+        std::string error = "failed to find an instance of object '" + name + "'";
+        if (activeOnly)
+            error += " in active cells";
+        throw std::runtime_error(error);
     }
 
     Ptr World::searchPtrViaActorId (int actorId)
@@ -749,6 +730,11 @@ namespace MWWorld
             return getPlayerPtr();
         // Now search cells
         return mWorldScene->searchPtrViaActorId (actorId);
+    }
+
+    Ptr World::searchPtrViaRefNum (const std::string& id, const ESM::RefNum& refNum)
+    {
+        return mCells.getPtr (id, refNum);
     }
 
     struct FindContainerVisitor
@@ -827,6 +813,13 @@ namespace MWWorld
 
             if(mWorldScene->getActiveCells().find (reference.getCell()) != mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
                 mWorldScene->addObjectToScene (reference);
+
+            if (reference.getCellRef().getRefNum().hasContentFile())
+            {
+                int type = mStore.find(Misc::StringUtils::lowerCase(reference.getCellRef().getRefId()));
+                if (mRendering->pagingEnableObject(type, reference, true))
+                    mWorldScene->reloadTerrain();
+            }
         }
     }
 
@@ -851,20 +844,27 @@ namespace MWWorld
 
     void World::disable (const Ptr& reference)
     {
+        if (!reference.getRefData().isEnabled())
+            return;
+
         // disable is a no-op for items in containers
         if (!reference.isInCell())
             return;
 
-        if (reference.getRefData().isEnabled())
+        if (reference == getPlayerPtr())
+            throw std::runtime_error("can not disable player object");
+
+        reference.getRefData().disable();
+
+        if (reference.getCellRef().getRefNum().hasContentFile())
         {
-            if (reference == getPlayerPtr())
-                throw std::runtime_error("can not disable player object");
-
-            reference.getRefData().disable();
-
-            if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
-                mWorldScene->removeObjectFromScene (reference);
+            int type = mStore.find(Misc::StringUtils::lowerCase(reference.getCellRef().getRefId()));
+            if (mRendering->pagingEnableObject(type, reference, false))
+                mWorldScene->reloadTerrain();
         }
+
+        if(mWorldScene->getActiveCells().find (reference.getCell())!=mWorldScene->getActiveCells().end() && reference.getRefData().getCount())
+            mWorldScene->removeObjectFromScene (reference);
     }
 
     void World::advanceTime (double hours, bool incremental)
@@ -882,130 +882,29 @@ namespace MWWorld
         }
 
         mWeatherManager->advanceTime (hours, incremental);
+        mCurrentDate->advanceTime(hours, mGlobalVariables);
+        updateSkyDate();
 
         if (!incremental)
         {
             mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
         }
-
-        hours += mGameHour->getFloat();
-
-        setHour (hours);
-
-        int days = static_cast<int>(hours / 24);
-
-        if (days>0)
-            mDaysPassed->setInteger (
-                days + mDaysPassed->getInteger());
     }
 
-    void World::setHour (double hour)
+    float World::getTimeScaleFactor() const
     {
-        if (hour<0)
-            hour = 0;
-
-        int days = static_cast<int>(hour / 24);
-
-        hour = std::fmod (hour, 24);
-
-        mGameHour->setFloat(static_cast<float>(hour));
-
-        if (days>0)
-            setDay (days + mDay->getInteger());
-    }
-
-    void World::setDay (int day)
-    {
-        if (day<1)
-            day = 1;
-
-        int month = mMonth->getInteger();
-
-        while (true)
-        {
-            int days = getDaysPerMonth (month);
-            if (day<=days)
-                break;
-
-            if (month<11)
-            {
-                ++month;
-            }
-            else
-            {
-                month = 0;
-                mYear->setInteger(mYear->getInteger()+1);
-            }
-
-            day -= days;
-        }
-
-        mDay->setInteger(day);
-        mMonth->setInteger(month);
-
-        mRendering->skySetDate(day, month);
-    }
-
-    void World::setMonth (int month)
-    {
-        if (month<0)
-            month = 0;
-
-        int years = month / 12;
-        month = month % 12;
-
-        int days = getDaysPerMonth (month);
-
-        if (mDay->getInteger()>days)
-            mDay->setInteger (days);
-
-        mMonth->setInteger (month);
-
-        if (years>0)
-            mYear->setInteger (years+mYear->getInteger());
-
-        mRendering->skySetDate (mDay->getInteger(), month);
-    }
-
-    int World::getDay() const
-    {
-        return mDay->getInteger();
-    }
-
-    int World::getMonth() const
-    {
-        return mMonth->getInteger();
-    }
-
-    int World::getYear() const
-    {
-        return mYear->getInteger();
-    }
-
-    std::string World::getMonthName (int month) const
-    {
-        if (month==-1)
-            month = getMonth();
-
-        const int months = 12;
-
-        if (month<0 || month>=months)
-            return "";
-
-        static const char *monthNames[months] =
-        {
-            "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed", "sMonthRainshand",
-            "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
-            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar"
-        };
-
-        return mStore.get<ESM::GameSetting>().find (monthNames[month])->mValue.getString();
+        return mCurrentDate->getTimeScaleFactor();
     }
 
     TimeStamp World::getTimeStamp() const
     {
-        return TimeStamp (mGameHour->getFloat(), mDaysPassed->getInteger());
+        return mCurrentDate->getTimeStamp();
+    }
+
+    ESM::EpochTimeStamp World::getEpochTimeStamp() const
+    {
+        return mCurrentDate->getEpochTimeStamp();
     }
 
     bool World::toggleSky()
@@ -1028,11 +927,6 @@ namespace MWWorld
     void World::setMoonColour (bool red)
     {
         mRendering->skySetMoonColour (red);
-    }
-
-    float World::getTimeScaleFactor() const
-    {
-        return mTimeScale->getFloat();
     }
 
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
@@ -1077,6 +971,8 @@ namespace MWWorld
             changeToExteriorCell (position, adjustPlayerPos, changeEvent);
         else
             changeToInteriorCell (cellId.mWorldspace, position, adjustPlayerPos, changeEvent);
+
+        mCurrentDate->setup(mGlobalVariables);
     }
 
     void World::markCellAsUnchanged()
@@ -1289,6 +1185,7 @@ namespace MWWorld
                     mRendering->updatePtr(ptr, newPtr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);
@@ -1307,20 +1204,22 @@ namespace MWWorld
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
-            mRendering->moveObject(newPtr, vec);
+            mWorldScene->updateObjectPosition(newPtr, vec, movePhysics);
             if (movePhysics)
             {
-                mPhysics->updatePosition(newPtr);
-                mPhysics->updatePtr(ptr, newPtr);
-
-                if (const auto object = mPhysics->getObject(newPtr))
+                if (const auto object = mPhysics->getObject(ptr))
                     updateNavigatorObject(object);
             }
         }
+
         if (isPlayer)
-        {
             mWorldScene->playerMoved(vec);
+        else
+        {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(newPtr);
         }
+
         return newPtr;
     }
 
@@ -1349,9 +1248,15 @@ namespace MWWorld
         if (mPhysics->getActor(ptr))
             mNavigator->removeAgent(getPathfindingHalfExtents(ptr));
 
-        ptr.getCellRef().setScale(scale);
+        if (scale != ptr.getCellRef().getScale())
+        {
+            ptr.getCellRef().setScale(scale);
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+        }
 
-        mWorldScene->updateObjectScale(ptr);
+        if(ptr.getRefData().getBaseNode() != 0)
+            mWorldScene->updateObjectScale(ptr);
 
         if (mPhysics->getActor(ptr))
             mNavigator->addAgent(getPathfindingHalfExtents(ptr));
@@ -1394,6 +1299,9 @@ namespace MWWorld
         }
 
         ptr.getRefData().setPosition(pos);
+
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
 
         if(ptr.getRefData().getBaseNode() != 0)
         {
@@ -1804,6 +1712,16 @@ namespace MWWorld
         return mStore.overrideRecord(record);
     }
 
+    const ESM::Creature *World::createOverrideRecord(const ESM::Creature &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
+    const ESM::NPC *World::createOverrideRecord(const ESM::NPC &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
@@ -2016,8 +1934,15 @@ namespace MWWorld
             // retrieve object dimensions so we know where to place the floating label
             if (!object.isEmpty ())
             {
-                osg::Vec4f screenBounds = mRendering->getScreenBounds(object);
-
+                osg::BoundingBox bb = mPhysics->getBoundingBox(object);
+                if (!bb.valid() && object.getRefData().getBaseNode())
+                {
+                    osg::ComputeBoundsVisitor computeBoundsVisitor;
+                    computeBoundsVisitor.setTraversalMask(~(MWRender::Mask_ParticleSystem|MWRender::Mask_Effect));
+                    object.getRefData().getBaseNode()->accept(computeBoundsVisitor);
+                    bb = computeBoundsVisitor.getBoundingBox();
+                }
+                osg::Vec4f screenBounds = mRendering->getScreenBounds(bb);
                 MWBase::Environment::get().getWindowManager()->setFocusObjectScreenCoords(
                     screenBounds.x(), screenBounds.y(), screenBounds.z(), screenBounds.w());
             }
@@ -2047,6 +1972,14 @@ namespace MWWorld
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
         facedObject = rayToObject.mHitObject;
+        if (facedObject.isEmpty() && rayToObject.mHitRefnum.hasContentFile())
+        {
+            for (CellStore* cellstore : mWorldScene->getActiveCells())
+            {
+                facedObject = cellstore->searchViaRefNum(rayToObject.mHitRefnum);
+                if (!facedObject.isEmpty()) break;
+            }
+        }
         if (rayToObject.mHit)
             mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
@@ -3052,7 +2985,7 @@ namespace MWWorld
             {
                 if (actor != MWMechanics::getPlayer())
                 {
-                    for (const MWMechanics::AiPackage* package : stats.getAiSequence())
+                    for (const auto& package : stats.getAiSequence())
                     {
                         if (package->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
                         {
@@ -3160,12 +3093,42 @@ namespace MWWorld
         mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection);
     }
 
+    class ApplyLoopingParticlesVisitor : public MWMechanics::EffectSourceVisitor
+    {
+    private:
+        MWWorld::Ptr mActor;
+
+    public:
+        ApplyLoopingParticlesVisitor(const MWWorld::Ptr& actor)
+            : mActor(actor)
+        {
+        }
+
+        virtual void visit (MWMechanics::EffectKey key,
+                            const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
+                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1)
+        {
+            const ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const auto magicEffect = store.get<ESM::MagicEffect>().find(key.mId);
+            if ((magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx) == 0)
+                return;
+            const ESM::Static* castStatic;
+            if (!magicEffect->mHit.empty())
+                castStatic = store.get<ESM::Static>().find (magicEffect->mHit);
+            else
+                castStatic = store.get<ESM::Static>().find ("VFX_DefaultHit");
+            MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mActor);
+            if (anim && !castStatic->mModel.empty())
+                anim->addEffect("meshes\\" + castStatic->mModel, magicEffect->mIndex, /*loop*/true, "", magicEffect->mParticle);
+        }
+    };
+
     void World::applyLoopingParticles(const MWWorld::Ptr& ptr)
     {
         const MWWorld::Class &cls = ptr.getClass();
         if (cls.isActor())
         {
-            MWMechanics::ApplyLoopingParticlesVisitor visitor(ptr);
+            ApplyLoopingParticlesVisitor visitor(ptr);
             cls.getCreatureStats(ptr).getActiveSpells().visitEffectSources(visitor);
             cls.getCreatureStats(ptr).getSpells().visitEffectSources(visitor);
             if (cls.hasInventoryStore(ptr))
@@ -3628,6 +3591,8 @@ namespace MWWorld
     std::string World::exportSceneGraph(const Ptr &ptr)
     {
         std::string file = mUserDataPath + "/openmw.osgt";
+        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+        mWorldScene->removeFromPagedRefs(ptr);
         mRendering->exportSceneGraph(ptr, file, "Ascii");
         return file;
     }
@@ -3908,5 +3873,17 @@ namespace MWWorld
     bool World::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const
     {
         return mPhysics->isAreaOccupiedByOtherActor(position, radius, ignore);
+    }
+
+    void World::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    {
+        mNavigator->reportStats(frameNumber, stats);
+        mPhysics->reportStats(frameNumber, stats);
+    }
+
+    void World::updateSkyDate()
+    {
+        ESM::EpochTimeStamp currentDate = mCurrentDate->getEpochTimeStamp();
+        mRendering->skySetDate(currentDate.mDay, currentDate.mMonth);
     }
 }

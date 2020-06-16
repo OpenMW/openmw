@@ -277,7 +277,7 @@ Emitter::Emitter(const Emitter &copy, const osg::CopyOp &copyop)
     , mPlacer(copy.mPlacer)
     , mShooter(copy.mShooter)
     // need a deep copy because the remainder is stored in the object
-    , mCounter(osg::clone(copy.mCounter.get(), osg::CopyOp::DEEP_COPY_ALL))
+    , mCounter(static_cast<osgParticle::Counter*>(copy.mCounter->clone(osg::CopyOp::DEEP_COPY_ALL)))
 {
 }
 

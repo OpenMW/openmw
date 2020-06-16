@@ -1,7 +1,6 @@
 #include "world.hpp"
 
 #include <osg/Group>
-#include <osg/Material>
 #include <osg/Camera>
 
 #include <components/resource/resourcesystem.hpp>
@@ -23,11 +22,6 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 {
     mTerrainRoot = new osg::Group;
     mTerrainRoot->setNodeMask(nodeMask);
-    mTerrainRoot->getOrCreateStateSet()->setRenderingHint(osg::StateSet::OPAQUE_BIN);
-    osg::ref_ptr<osg::Material> material (new osg::Material);
-    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-    mTerrainRoot->getOrCreateStateSet()->setAttributeAndModes(material, osg::StateAttribute::ON);
-
     mTerrainRoot->setName("Terrain Root");
 
     osg::ref_ptr<osg::Camera> compositeCam = new osg::Camera;
@@ -48,6 +42,7 @@ World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSyst
 
     mTextureManager.reset(new TextureManager(mResourceSystem->getSceneManager()));
     mChunkManager.reset(new ChunkManager(mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer));
+    mChunkManager->setNodeMask(nodeMask);
     mCellBorder.reset(new CellBorder(this,mTerrainRoot.get(),borderMask));
 
     mResourceSystem->addResourceManager(mChunkManager.get());
