@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_MISC_CONVERT_H
 #define OPENMW_COMPONENTS_MISC_CONVERT_H
 
+#include <components/esm/loadpgrd.hpp>
+
 #include <LinearMath/btTransform.h>
 #include <LinearMath/btVector3.h>
 #include <LinearMath/btQuaternion.h>
@@ -19,6 +21,11 @@ namespace Convert
     inline osg::Vec3f makeOsgVec3f(const btVector3& value)
     {
         return osg::Vec3f(value.x(), value.y(), value.z());
+    }
+
+    inline osg::Vec3f makeOsgVec3f(const ESM::Pathgrid::Point& value)
+    {
+        return osg::Vec3f(value.mX, value.mY, value.mZ);
     }
 
     inline btVector3 toBullet(const osg::Vec3f& vec)

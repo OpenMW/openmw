@@ -5,9 +5,10 @@
 #include <osg/Group>
 #include <osg/ComputeBoundsVisitor>
 
+#include <components/sceneutil/positionattitudetransform.hpp>
 #include "chunkmanager.hpp"
 #include "compositemaprenderer.hpp"
-
+#include "storage.hpp"
 namespace Terrain
 {
 
@@ -57,12 +58,17 @@ osg::ref_ptr<osg::Node> TerrainGrid::buildTerrain (osg::Group* parent, float chu
     }
     else
     {
-        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0);
+        osg::ref_ptr<osg::Node> node = mChunkManager->getChunk(chunkSize, chunkCenter, 0, 0, false, osg::Vec3f(), true);
         if (!node)
             return nullptr;
+
+        const float cellWorldSize = mStorage->getCellWorldSize();
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
+        pat->setPosition(osg::Vec3f(chunkCenter.x()*cellWorldSize, chunkCenter.y()*cellWorldSize, 0.f));
+        pat->addChild(node);
         if (parent)
-            parent->addChild(node);
-        return node;
+            parent->addChild(pat);
+        return pat;
     }
 }
 

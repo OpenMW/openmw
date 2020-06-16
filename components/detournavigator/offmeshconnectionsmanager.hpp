@@ -11,14 +11,11 @@
 
 #include <osg/Vec3f>
 
-#include <boost/optional.hpp>
-
 #include <algorithm>
 #include <map>
-#include <mutex>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <set>
 
 namespace DetourNavigator
 {
@@ -29,12 +26,11 @@ namespace DetourNavigator
             : mSettings(settings)
         {}
 
-        bool add(const ObjectId id, const OffMeshConnection& value)
+        void add(const ObjectId id, const OffMeshConnection& value)
         {
             const auto values = mValues.lock();
 
-            if (!values->mById.insert(std::make_pair(id, value)).second)
-                return false;
+            values->mById.insert(std::make_pair(id, value));
 
             const auto startTilePosition = getTilePosition(mSettings, value.mStart);
             const auto endTilePosition = getTilePosition(mSettings, value.mEnd);
@@ -43,32 +39,32 @@ namespace DetourNavigator
 
             if (startTilePosition != endTilePosition)
                 values->mByTilePosition[endTilePosition].insert(id);
-
-            return true;
         }
 
-        boost::optional<OffMeshConnection> remove(const ObjectId id)
+        std::set<TilePosition> remove(const ObjectId id)
         {
             const auto values = mValues.lock();
 
-            const auto itById = values->mById.find(id);
+            const auto byId = values->mById.equal_range(id);
 
-            if (itById == values->mById.end())
-                return boost::none;
+            if (byId.first == byId.second) {
+                return {};
+            }
 
-            const auto result = itById->second;
+            std::set<TilePosition> removed;
 
-            values->mById.erase(itById);
+            std::for_each(byId.first, byId.second, [&] (const auto& v) {
+                const auto startTilePosition = getTilePosition(mSettings, v.second.mStart);
+                const auto endTilePosition = getTilePosition(mSettings, v.second.mEnd);
 
-            const auto startTilePosition = getTilePosition(mSettings, result.mStart);
-            const auto endTilePosition = getTilePosition(mSettings, result.mEnd);
+                removed.emplace(startTilePosition);
+                if (startTilePosition != endTilePosition)
+                    removed.emplace(endTilePosition);
+            });
 
-            removeByTilePosition(values->mByTilePosition, startTilePosition, id);
+            values->mById.erase(byId.first, byId.second);
 
-            if (startTilePosition != endTilePosition)
-                removeByTilePosition(values->mByTilePosition, endTilePosition, id);
-
-            return result;
+            return removed;
         }
 
         std::vector<OffMeshConnection> get(const TilePosition& tilePosition)
@@ -85,9 +81,8 @@ namespace DetourNavigator
             std::for_each(itByTilePosition->second.begin(), itByTilePosition->second.end(),
                 [&] (const ObjectId v)
                 {
-                    const auto itById = values->mById.find(v);
-                    if (itById != values->mById.end())
-                        result.push_back(itById->second);
+                    const auto byId = values->mById.equal_range(v);
+                    std::for_each(byId.first, byId.second, [&] (const auto& v) { result.push_back(v.second); });
                 });
 
             return result;
@@ -96,7 +91,7 @@ namespace DetourNavigator
     private:
         struct Values
         {
-            std::unordered_map<ObjectId, OffMeshConnection> mById;
+            std::multimap<ObjectId, OffMeshConnection> mById;
             std::map<TilePosition, std::unordered_set<ObjectId>> mByTilePosition;
         };
 

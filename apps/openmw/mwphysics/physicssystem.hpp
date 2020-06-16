@@ -7,6 +7,7 @@
 #include <algorithm>
 
 #include <osg/Quat>
+#include <osg/BoundingBox>
 #include <osg/ref_ptr>
 
 #include "../mwworld/ptr.hpp"
@@ -143,6 +144,9 @@ namespace MWPhysics
             /// Get the position of the collision shape for the actor. Use together with getHalfExtents() to get the collision bounds in world space.
             /// @note The collision shape's origin is in its center, so the position returned can be described as center of the actor collision box in world space.
             osg::Vec3f getCollisionObjectPosition(const MWWorld::ConstPtr& actor) const;
+
+            /// Get bounding box in world space of the given object.
+            osg::BoundingBox getBoundingBox(const MWWorld::ConstPtr &object) const;
 
             /// Queues velocity movement for a Ptr. If a Ptr is already queued, its velocity will
             /// be overwritten. Valid until the next call to applyQueuedMovement.

@@ -6,6 +6,7 @@
 #include <components/misc/rng.hpp>
 #include <components/esm/aisequence.hpp>
 #include <components/detournavigator/navigator.hpp>
+#include <components/misc/coordinateconverter.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -21,7 +22,6 @@
 #include "pathgrid.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
-#include "coordinateconverter.hpp"
 #include "actorutil.hpp"
 
 namespace MWMechanics
@@ -202,7 +202,7 @@ namespace MWMechanics
             {
                 const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
                 mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor));
+                    getPathGridGraph(actor.getCell()), halfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
             }
 
             if (mPathFinder.isPathConstructed())
@@ -337,6 +337,7 @@ namespace MWMechanics
         const auto halfExtents = world->getPathfindingHalfExtents(actor);
         const auto navigator = world->getNavigator();
         const auto navigatorFlags = getNavigatorFlags(actor);
+        const auto areaCosts = getAreaCosts(actor);
 
         do {
             // Determine a random location within radius of original position
@@ -365,7 +366,8 @@ namespace MWMechanics
             if (isWaterCreature || isFlyingCreature)
                 mPathFinder.buildStraightPath(mDestination);
             else
-                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents, navigatorFlags);
+                mPathFinder.buildPathByNavMesh(actor, currentPosition, mDestination, halfExtents, navigatorFlags,
+                                               areaCosts);
 
             if (mPathFinder.isPathConstructed())
             {
@@ -496,7 +498,8 @@ namespace MWMechanics
         if (mUsePathgrid)
         {
             const auto halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor));
+            mPathFinder.buildPathByNavMeshToNextPoint(actor, halfExtents, getNavigatorFlags(actor),
+                                                      getAreaCosts(actor));
         }
 
         if (mObstacleCheck.isEvading())
@@ -566,7 +569,7 @@ namespace MWMechanics
 
     void AiWander::ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell * cell)
     {
-        CoordinateConverter(cell).toWorld(point);
+        Misc::CoordinateConverter(cell).toWorld(point);
     }
 
     void AiWander::trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes,
@@ -767,7 +770,7 @@ namespace MWMechanics
         {
             // get NPC's position in local (i.e. cell) coordinates
             osg::Vec3f npcPos(mInitialActorPosition);
-            CoordinateConverter(cell).toLocal(npcPos);
+            Misc::CoordinateConverter(cell).toLocal(npcPos);
 
             // Find closest pathgrid point
             int closestPointIndex = PathFinder::getClosestPoint(pathgrid, npcPos);

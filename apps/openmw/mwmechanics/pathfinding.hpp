@@ -6,6 +6,7 @@
 #include <iterator>
 
 #include <components/detournavigator/flags.hpp>
+#include <components/detournavigator/areatype.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/loadpgrd.hpp>
 
@@ -90,14 +91,15 @@ namespace MWMechanics
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph);
 
             void buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
-                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags);
+                const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
+                const DetourNavigator::AreaCosts& areaCosts);
 
             void buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
                 const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
-                const DetourNavigator::Flags flags);
+                const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
 
             void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
-                const DetourNavigator::Flags flags);
+                const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
 
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance);
@@ -203,7 +205,7 @@ namespace MWMechanics
 
             bool buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
                 const osg::Vec3f& endPoint, const osg::Vec3f& halfExtents, const DetourNavigator::Flags flags,
-                std::back_insert_iterator<std::deque<osg::Vec3f>> out);
+                const DetourNavigator::AreaCosts& areaCosts, std::back_insert_iterator<std::deque<osg::Vec3f>> out);
     };
 }
 

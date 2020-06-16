@@ -139,18 +139,26 @@ namespace MWWorld
         std::string idLower = Misc::StringUtils::lowerCase(id);
 
         typename Dynamic::const_iterator dit = mDynamic.find(idLower);
-        if (dit != mDynamic.end()) {
+        if (dit != mDynamic.end())
             return &dit->second;
-        }
 
         typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
-
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end())
             return &(it->second);
-        }
 
         return 0;
     }
+    template<typename T>
+    const T *Store<T>::searchStatic(const std::string &id) const
+    {
+        std::string idLower = Misc::StringUtils::lowerCase(id);
+        typename std::map<std::string, T>::const_iterator it = mStatic.find(idLower);
+        if (it != mStatic.end())
+            return &(it->second);
+
+        return 0;
+    }
+
     template<typename T>
     bool Store<T>::isDynamic(const std::string &id) const
     {
@@ -276,7 +284,7 @@ namespace MWWorld
 
         typename std::map<std::string, T>::iterator it = mStatic.find(idLower);
 
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end()) {
             // delete from the static part of mShared
             typename std::vector<T *>::iterator sharedIter = mShared.begin();
             typename std::vector<T *>::iterator end = sharedIter + mStatic.size();
@@ -553,7 +561,7 @@ namespace MWWorld
 
         std::map<std::string, ESM::Cell>::const_iterator it = mInt.find(cell.mName);
 
-        if (it != mInt.end() && Misc::StringUtils::ciEqual(it->second.mName, id)) {
+        if (it != mInt.end()) {
             return &(it->second);
         }
 
@@ -580,6 +588,18 @@ namespace MWWorld
             return &dit->second;
         }
 
+        return 0;
+    }
+    const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
+    {
+        ESM::Cell cell;
+        cell.mData.mX = x, cell.mData.mY = y;
+
+        std::pair<int, int> key(x, y);
+        DynamicExt::const_iterator it = mExt.find(key);
+        if (it != mExt.end()) {
+            return &(it->second);
+        }
         return 0;
     }
     const ESM::Cell *Store<ESM::Cell>::searchOrCreate(int x, int y)
@@ -1104,9 +1124,8 @@ namespace MWWorld
     {
         auto it = mStatic.find(Misc::StringUtils::lowerCase(id));
 
-        if (it != mStatic.end() && Misc::StringUtils::ciEqual(it->second.mId, id)) {
+        if (it != mStatic.end())
             mStatic.erase(it);
-        }
 
         return true;
     }

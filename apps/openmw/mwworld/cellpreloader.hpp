@@ -4,6 +4,7 @@
 #include <map>
 #include <osg/ref_ptr>
 #include <osg/Vec3f>
+#include <osg/Vec4i>
 #include <components/sceneutil/workqueue.hpp>
 
 namespace Resource
@@ -68,7 +69,11 @@ namespace MWWorld
 
         void setUnrefQueue(SceneUtil::UnrefQueue* unrefQueue);
 
-        void setTerrainPreloadPositions(const std::vector<osg::Vec3f>& positions);
+        typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
+        void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
+
+        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid> &positions, int& progress, int& progressRange, double timestamp);
+        void abortTerrainPreloadExcept(const PositionCellGrid *exceptPos);
 
     private:
         Resource::ResourceSystem* mResourceSystem;
@@ -83,6 +88,7 @@ namespace MWWorld
         bool mPreloadInstances;
 
         double mLastResourceCacheUpdate;
+        int mStoreViewsFailCount;
 
         struct PreloadEntry
         {
@@ -105,7 +111,7 @@ namespace MWWorld
         PreloadMap mPreloadCells;
 
         std::vector<osg::ref_ptr<Terrain::View> > mTerrainViews;
-        std::vector<osg::Vec3f> mTerrainPreloadPositions;
+        std::vector<PositionCellGrid> mTerrainPreloadPositions;
         osg::ref_ptr<TerrainPreloadItem> mTerrainPreloadItem;
         osg::ref_ptr<SceneUtil::WorkItem> mUpdateCacheItem;
     };

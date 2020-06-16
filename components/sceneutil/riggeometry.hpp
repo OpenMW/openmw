@@ -44,7 +44,7 @@ namespace SceneUtil
         /// @note The source geometry will not be modified.
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
-        osg::ref_ptr<osg::Geometry> getSourceGeometry();
+        osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
         virtual void accept(osg::NodeVisitor &nv);
         virtual bool supports(const osg::PrimitiveFunctor&) const { return true; }

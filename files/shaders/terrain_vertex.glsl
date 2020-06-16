@@ -26,8 +26,10 @@ void main(void)
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
     linearDepth = gl_Position.z;
-    
+
+#if (!PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+#endif
 
 #if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
@@ -38,5 +40,7 @@ void main(void)
 
     uv = gl_MultiTexCoord0.xy;
 
+#if (@shadows_enabled)
     setupShadowCoords(viewPos, viewNormal);
+#endif
 }

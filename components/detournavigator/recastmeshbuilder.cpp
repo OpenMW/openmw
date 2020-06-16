@@ -17,10 +17,49 @@
 #include <LinearMath/btAabbUtil2.h>
 
 #include <algorithm>
+#include <tuple>
 
 namespace DetourNavigator
 {
     using BulletHelpers::makeProcessTriangleCallback;
+
+    namespace
+    {
+        void optimizeRecastMesh(std::vector<int>& indices, std::vector<float>& vertices)
+        {
+            std::vector<std::tuple<float, float, float>> uniqueVertices;
+            uniqueVertices.reserve(vertices.size() / 3);
+
+            for (std::size_t i = 0, n = vertices.size() / 3; i < n; ++i)
+                uniqueVertices.emplace_back(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+
+            std::sort(uniqueVertices.begin(), uniqueVertices.end());
+            const auto end = std::unique(uniqueVertices.begin(), uniqueVertices.end());
+            uniqueVertices.erase(end, uniqueVertices.end());
+
+            if (uniqueVertices.size() == vertices.size() / 3)
+                return;
+
+            for (std::size_t i = 0, n = indices.size(); i < n; ++i)
+            {
+                const auto index = indices[i];
+                const auto vertex = std::make_tuple(vertices[index * 3], vertices[index * 3 + 1], vertices[index * 3 + 2]);
+                const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), vertex);
+                assert(it != uniqueVertices.end());
+                assert(*it == vertex);
+                indices[i] = std::distance(uniqueVertices.begin(), it);
+            }
+
+            vertices.resize(uniqueVertices.size() * 3);
+
+            for (std::size_t i = 0, n = uniqueVertices.size(); i < n; ++i)
+            {
+                vertices[i * 3] = std::get<0>(uniqueVertices[i]);
+                vertices[i * 3 + 1] = std::get<1>(uniqueVertices[i]);
+                vertices[i * 3 + 2] = std::get<2>(uniqueVertices[i]);
+            }
+        }
+    }
 
     RecastMeshBuilder::RecastMeshBuilder(const Settings& settings, const TileBounds& bounds)
         : mSettings(settings)
@@ -112,8 +151,9 @@ namespace DetourNavigator
         mWater.push_back(RecastMesh::Water {cellSize, transform});
     }
 
-    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision) const
+    std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision)
     {
+        optimizeRecastMesh(mIndices, mVertices);
         return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes,
             mWater, mSettings.get().mTrianglesPerChunk);
     }

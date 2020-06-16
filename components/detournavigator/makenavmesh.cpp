@@ -98,6 +98,42 @@ namespace
         return result;
     }
 
+    Flag getFlag(AreaType areaType)
+    {
+        switch (areaType)
+        {
+            case AreaType_null:
+                return Flag_none;
+            case AreaType_ground:
+                return Flag_walk;
+            case AreaType_water:
+                return Flag_swim;
+            case AreaType_door:
+                return Flag_openDoor;
+            case AreaType_pathgrid:
+                return Flag_usePathgrid;
+        }
+        return Flag_none;
+    }
+
+    std::vector<unsigned char> getOffMeshConAreas(const std::vector<OffMeshConnection>& connections)
+    {
+        std::vector<unsigned char> result;
+        result.reserve(connections.size());
+        std::transform(connections.begin(), connections.end(), std::back_inserter(result),
+                       [] (const OffMeshConnection& v) { return v.mAreaType; });
+        return result;
+    }
+
+    std::vector<unsigned short> getOffMeshFlags(const std::vector<OffMeshConnection>& connections)
+    {
+        std::vector<unsigned short> result;
+        result.reserve(connections.size());
+        std::transform(connections.begin(), connections.end(), std::back_inserter(result),
+                       [] (const OffMeshConnection& v) { return getFlag(v.mAreaType); });
+        return result;
+    }
+
     rcConfig makeConfig(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax,
         const Settings& settings)
     {
@@ -334,12 +370,7 @@ namespace
     void setPolyMeshFlags(rcPolyMesh& polyMesh)
     {
         for (int i = 0; i < polyMesh.npolys; ++i)
-        {
-            if (polyMesh.areas[i] == AreaType_ground)
-                polyMesh.flags[i] = Flag_walk;
-            else if (polyMesh.areas[i] == AreaType_water)
-                polyMesh.flags[i] = Flag_swim;
-        }
+            polyMesh.flags[i] = getFlag(static_cast<AreaType>(polyMesh.areas[i]));
     }
 
     bool fillPolyMesh(rcContext& context, const rcConfig& config, rcHeightfield& solid, rcPolyMesh& polyMesh,
@@ -395,8 +426,8 @@ namespace
         const auto offMeshConVerts = getOffMeshVerts(offMeshConnections);
         const std::vector<float> offMeshConRad(offMeshConnections.size(), getRadius(settings, agentHalfExtents));
         const std::vector<unsigned char> offMeshConDir(offMeshConnections.size(), DT_OFFMESH_CON_BIDIR);
-        const std::vector<unsigned char> offMeshConAreas(offMeshConnections.size(), AreaType_ground);
-        const std::vector<unsigned short> offMeshConFlags(offMeshConnections.size(), Flag_openDoor);
+        const std::vector<unsigned char> offMeshConAreas = getOffMeshConAreas(offMeshConnections);
+        const std::vector<unsigned short> offMeshConFlags = getOffMeshFlags(offMeshConnections);
 
         dtNavMeshCreateParams params;
         params.verts = polyMesh.verts;

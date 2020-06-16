@@ -42,6 +42,7 @@ namespace osgViewer
 namespace ESM
 {
     struct Cell;
+    struct RefNum;
 }
 
 namespace Terrain
@@ -84,6 +85,7 @@ namespace MWRender
     class NavMesh;
     class ActorsPaths;
     class RecastMesh;
+    class ObjectPaging;
 
     class RenderingManager : public MWRender::RenderingInterface
     {
@@ -155,6 +157,7 @@ namespace MWRender
             osg::Vec3f mHitNormalWorld;
             osg::Vec3f mHitPointWorld;
             MWWorld::Ptr mHitObject;
+            ESM::RefNum mHitRefnum;
             float mRatio;
         };
 
@@ -165,7 +168,7 @@ namespace MWRender
         RayResult castCameraToViewportRay(const float nX, const float nY, float maxDistance, bool ignorePlayer, bool ignoreActors=false);
 
         /// Get the bounding box of the given object in screen coordinates as (minX, minY, maxX, maxY), with (0,0) being the top left corner.
-        osg::Vec4f getScreenBounds(const MWWorld::Ptr& ptr);
+        osg::Vec4f getScreenBounds(const osg::BoundingBox &worldbb);
 
         void setSkyEnabled(bool enabled);
 
@@ -237,6 +240,13 @@ namespace MWRender
 
         void setNavMeshNumber(const std::size_t value);
 
+        void setActiveGrid(const osg::Vec4i &grid);
+
+        bool pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled);
+        void pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr);
+        bool pagingUnlockCache();
+        void getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out);
+
     private:
         void updateProjectionMatrix();
         void updateTextureFiltering();
@@ -275,6 +285,7 @@ namespace MWRender
         std::unique_ptr<Water> mWater;
         std::unique_ptr<Terrain::World> mTerrain;
         TerrainStorage* mTerrainStorage;
+        std::unique_ptr<ObjectPaging> mObjectPaging;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<EffectManager> mEffectManager;

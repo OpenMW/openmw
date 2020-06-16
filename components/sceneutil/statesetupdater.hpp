@@ -13,7 +13,7 @@ namespace SceneUtil
     ///     traversals run in parallel can yield up to 200% framerates.
     /// @par Race conditions are prevented using a "double buffering" scheme - we have two StateSets that take turns,
     ///     one StateSet we can write to, the second one is currently in use by the draw traversal of the last frame.
-    /// @par Must be set as UpdateCallback on a Node.
+    /// @par Must be set as UpdateCallback or CullCallback on a Node. If set as a CullCallback, the StateSetUpdater operates on an empty StateSet, otherwise it operates on a clone of the node's existing StateSet.
     /// @note Do not add the same StateSetUpdater to multiple nodes.
     /// @note Do not add multiple StateSetControllers on the same Node as they will conflict - instead use the CompositeStateSetUpdater.
     class StateSetUpdater : public osg::NodeCallback

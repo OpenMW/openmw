@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <components/esm/defs.hpp>
+#include <components/detournavigator/areatype.hpp>
 
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
@@ -147,6 +148,8 @@ namespace MWMechanics
             const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
 
             DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
+
+            DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor) const;
 
             const AiPackageTypeId mTypeId;
             const Options mOptions;

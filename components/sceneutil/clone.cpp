@@ -22,20 +22,11 @@ namespace SceneUtil
                      | osg::CopyOp::DEEP_COPY_USERDATA);
     }
 
-    osg::StateSet* CopyOp::operator ()(const osg::StateSet* stateset) const
-    {
-        if (!stateset)
-            return nullptr;
-        if (stateset->getDataVariance() == osg::StateSet::DYNAMIC)
-            return osg::clone(stateset, *this);
-        return const_cast<osg::StateSet*>(stateset);
-    }
-
     osg::Object* CopyOp::operator ()(const osg::Object* node) const
     {
         // We should copy node transformations when we copy node
-        if (const NifOsg::NodeUserData* data = dynamic_cast<const NifOsg::NodeUserData*>(node))
-            return osg::clone(data, *this);
+        if (dynamic_cast<const NifOsg::NodeUserData*>(node))
+            return static_cast<NifOsg::NodeUserData*>(node->clone(*this));
 
         return osg::CopyOp::operator()(node);
     }
@@ -60,7 +51,7 @@ namespace SceneUtil
 
         if (dynamic_cast<const SceneUtil::RigGeometry*>(drawable) || dynamic_cast<const SceneUtil::MorphGeometry*>(drawable))
         {
-            return osg::clone(drawable, *this);
+            return static_cast<osg::Drawable*>(drawable->clone(*this));
         }
 
         return osg::CopyOp::operator()(drawable);
@@ -68,7 +59,7 @@ namespace SceneUtil
 
     osgParticle::ParticleProcessor* CopyOp::operator() (const osgParticle::ParticleProcessor* processor) const
     {
-        osgParticle::ParticleProcessor* cloned = osg::clone(processor, osg::CopyOp::DEEP_COPY_CALLBACKS);
+        osgParticle::ParticleProcessor* cloned = static_cast<osgParticle::ParticleProcessor*>(processor->clone(osg::CopyOp::DEEP_COPY_CALLBACKS));
         for (const auto& oldPsNewPsPair : mOldPsToNewPs)
         {
             if (processor->getParticleSystem() == oldPsNewPsPair.first)
@@ -84,7 +75,7 @@ namespace SceneUtil
 
     osgParticle::ParticleSystem* CopyOp::operator ()(const osgParticle::ParticleSystem* partsys) const
     {
-        osgParticle::ParticleSystem* cloned = osg::clone(partsys, *this);
+        osgParticle::ParticleSystem* cloned = static_cast<osgParticle::ParticleSystem*>(partsys->clone(*this));
 
         for (const auto& processorPsPair : mProcessorToOldPs)
         {

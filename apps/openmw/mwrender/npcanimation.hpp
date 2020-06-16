@@ -88,7 +88,7 @@ private:
     void addPartGroup(int group, int priority, const std::vector<ESM::PartReference> &parts,
                                     bool enchantedGlow=false, osg::Vec4f* glowColor=nullptr);
 
-    virtual void setRenderBin();
+    void setRenderBin();
 
     osg::ref_ptr<NeckController> mFirstPersonNeckController;
 

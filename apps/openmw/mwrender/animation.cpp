@@ -513,6 +513,9 @@ namespace MWRender
             if (mShadowUniform)
                 stateset->addUniform(mShadowUniform);
 
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+
             // FIXME: overriding diffuse/ambient/emissive colors
             osg::Material* material = new osg::Material;
             material->setColorMode(osg::Material::OFF);
@@ -1369,7 +1372,7 @@ namespace MWRender
             osg::Group* sheathParent = findVisitor.mFoundNode;
             if (sheathParent)
             {
-                osg::Node* copy = osg::clone(nodePair.first, osg::CopyOp::DEEP_COPY_NODES);
+                osg::Node* copy = static_cast<osg::Node*>(nodePair.first->clone(osg::CopyOp::DEEP_COPY_NODES));
                 sheathParent->addChild(copy);
             }
         }
@@ -1741,31 +1744,16 @@ namespace MWRender
             if (mTransparencyUpdater == nullptr)
             {
                 mTransparencyUpdater = new TransparencyUpdater(alpha, mResourceSystem->getSceneManager()->getShaderManager().getShadowMapAlphaTestEnableUniform());
-                mObjectRoot->addUpdateCallback(mTransparencyUpdater);
+                mObjectRoot->addCullCallback(mTransparencyUpdater);
             }
             else
                 mTransparencyUpdater->setAlpha(alpha);
         }
         else
         {
-            mObjectRoot->removeUpdateCallback(mTransparencyUpdater);
+            mObjectRoot->removeCullCallback(mTransparencyUpdater);
             mTransparencyUpdater = nullptr;
-            mObjectRoot->setStateSet(nullptr);
         }
-
-        setRenderBin();
-    }
-
-    void Animation::setRenderBin()
-    {
-        if (mAlpha != 1.f)
-        {
-            osg::StateSet* stateset = mObjectRoot->getOrCreateStateSet();
-            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
-        }
-        else if (osg::StateSet* stateset = mObjectRoot->getStateSet())
-            stateset->setRenderBinToInherit();
     }
 
     void Animation::setLightEffect(float effect)

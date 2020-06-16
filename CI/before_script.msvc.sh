@@ -213,8 +213,8 @@ run_cmd() {
 	shift
 
 	if [ -z $VERBOSE ]; then
-		eval $CMD $@ > output.log 2>&1
-		RET=$?
+		RET=0
+		eval $CMD $@ > output.log 2>&1 || RET=$?
 
 		if [ $RET -ne 0 ]; then
 			if [ -z $APPVEYOR ]; then
@@ -230,8 +230,9 @@ run_cmd() {
 
 		return $RET
 	else
-		eval $CMD $@
-		return $?
+		RET=0
+		eval $CMD $@ || RET=$?
+		return $RET
 	fi
 }
 
@@ -256,15 +257,16 @@ download() {
 			printf "  Downloading $FILE... "
 
 			if [ -z $VERBOSE ]; then
-				curl --silent --retry 10 -kLy 5 -o $FILE $URL
-				RET=$?
+				RET=0
+				curl --silent --retry 10 -kLy 5 -o $FILE $URL || RET=$?
 			else
-				curl --retry 10 -kLy 5 -o $FILE $URL
-				RET=$?
+				RET=0
+				curl --retry 10 -kLy 5 -o $FILE $URL || RET=$?
 			fi
 
 			if [ $RET -ne 0 ]; then
 				echo "Failed!"
+				wrappedExit $RET
 			else
 				echo "Done."
 			fi
@@ -957,11 +959,11 @@ fi
 	echo
 #fi
 
-if ! [ -z $ACTIVATE_MSVC ]; then
+if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
-	MSVC_INSTALLATION_PATH=$(vswhere -legacy -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	MSVC_INSTALLATION_PATH=$(vswhere -legacy -products '*' -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
 	if [ $MSVC_REAL_VER -ge 15 ]; then
 		echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
 	else
@@ -997,8 +999,8 @@ if [ -z $VERBOSE ]; then
 else
 	echo "- cmake .. $CMAKE_OPTS"
 fi
-run_cmd cmake .. $CMAKE_OPTS
-RET=$?
+RET=0
+run_cmd cmake .. $CMAKE_OPTS || RET=$?
 if [ -z $VERBOSE ]; then
 	if [ $RET -eq 0 ]; then
 		echo Done.
@@ -1006,8 +1008,14 @@ if [ -z $VERBOSE ]; then
 		echo Failed.
 	fi
 fi
+if [ $RET -ne 0 ]; then
+	wrappedExit $RET
+fi
 
-if [ -n $ACTIVATE_MSVC ]; then
+echo "Script completed successfully."
+echo "You now have an OpenMW build system at $(unixPathAsWindows "$(pwd)")"
+
+if [ -n "$ACTIVATE_MSVC" ]; then
 	echo
 	echo "Note: you must manually activate MSVC for the shell in which you want to do the build."
 	echo

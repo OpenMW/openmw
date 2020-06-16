@@ -63,7 +63,9 @@ void main(void)
     euclideanDepth = length(viewPos.xyz);
     linearDepth = gl_Position.z;
 
+#if (@envMap || !PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+#endif
 
 #if @envMap
     vec3 viewVec = normalize(viewPos.xyz);
@@ -112,5 +114,7 @@ void main(void)
     passViewPos = viewPos.xyz;
     passNormal = gl_Normal.xyz;
 
+#if (@shadows_enabled)
     setupShadowCoords(viewPos, viewNormal);
+#endif
 }
