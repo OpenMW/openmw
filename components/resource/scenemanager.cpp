@@ -360,6 +360,7 @@ namespace Resource
             // Note, for some formats (.obj/.mtl) that reference other (non-image) files a findFileCallback would be necessary.
             // but findFileCallback does not support virtual files, so we can't implement it.
             options->setReadFileCallback(new ImageReadCallback(imageManager));
+            if (ext == "dae") options->setOptionString("daeUseSequencedTextureUnits");
 
             osgDB::ReaderWriter::ReadResult result = reader->readNode(*file, options);
             if (!result.success())
