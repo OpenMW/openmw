@@ -104,11 +104,9 @@ namespace
             -0.5, 0, -0.5,
             -0.5, 0, 0.5,
             0.5, 0, -0.5,
-            0.5, 0, -0.5,
-            -0.5, 0, 0.5,
             0.5, 0, 0.5,
         }));
-        EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2, 3, 4, 5}));
+        EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({0, 1, 2, 2, 1, 3}));
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_ground}));
     }
 
@@ -127,7 +125,7 @@ namespace
             -1, -2, 1,
             1, -2, -1,
             -1, -2, -1,
-        }));
+        })) << recastMesh->getVertices();
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({
             0, 2, 3,
             3, 1, 0,
@@ -141,7 +139,7 @@ namespace
             2, 6, 7,
             7, 6, 4,
             4, 5, 7,
-        }));
+        })) << recastMesh->getIndices();
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>(12, AreaType_ground));
     }
 
@@ -166,37 +164,35 @@ namespace
         );
         const auto recastMesh = builder.create(mGeneration, mRevision);
         EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
-            1, 0, -1,
-            -1, 0, 1,
-            -1, 0, -1,
-            1, 2, 1,
-            -1, 2, 1,
-            1, 2, -1,
-            -1, 2, -1,
-            1, -2, 1,
-            -1, -2, 1,
-            1, -2, -1,
             -1, -2, -1,
-            1, 0, -1,
+            -1, -2, 1,
+            -1, 0, -1,
             -1, 0, 1,
+            -1, 2, -1,
+            -1, 2, 1,
+            1, -2, -1,
+            1, -2, 1,
+            1, 0, -1,
             1, 0, 1,
-        }));
+            1, 2, -1,
+            1, 2, 1,
+        })) << recastMesh->getVertices();
         EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({
-            0, 1, 2,
-            3, 5, 6,
-            6, 4, 3,
-            3, 7, 9,
-            9, 5, 3,
-            3, 4, 8,
-            8, 7, 3,
-            10, 8, 4,
-            4, 6, 10,
-            10, 6, 5,
-            5, 9, 10,
-            10, 9, 7,
-            7, 8, 10,
-            11, 12, 13,
-        }));
+            8, 3, 2,
+            11, 10, 4,
+            4, 5, 11,
+            11, 7, 6,
+            6, 10, 11,
+            11, 5, 1,
+            1, 7, 11,
+            0, 1, 5,
+            5, 4, 0,
+            0, 4, 10,
+            10, 6, 0,
+            0, 6, 7,
+            7, 1, 0,
+            8, 3, 9,
+        })) << recastMesh->getIndices();
         EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>(14, AreaType_ground));
     }
 
@@ -412,5 +408,25 @@ namespace
         EXPECT_EQ(recastMesh->getWater(), std::vector<RecastMesh::Water>({
             RecastMesh::Water {1000, btTransform(btMatrix3x3::getIdentity(), btVector3(100, 200, 300))}
         }));
+    }
+
+    TEST_F(DetourNavigatorRecastMeshBuilderTest, add_bhv_triangle_mesh_shape_with_duplicated_vertices)
+    {
+        btTriangleMesh mesh;
+        mesh.addTriangle(btVector3(-1, -1, 0), btVector3(-1, 1, 0), btVector3(1, -1, 0));
+        mesh.addTriangle(btVector3(1, 1, 0), btVector3(-1, 1, 0), btVector3(1, -1, 0));
+        btBvhTriangleMeshShape shape(&mesh, true);
+
+        RecastMeshBuilder builder(mSettings, mBounds);
+        builder.addObject(static_cast<const btCollisionShape&>(shape), btTransform::getIdentity(), AreaType_ground);
+        const auto recastMesh = builder.create(mGeneration, mRevision);
+        EXPECT_EQ(recastMesh->getVertices(), std::vector<float>({
+            -1, 0, -1,
+            -1, 0, 1,
+            1, 0, -1,
+            1, 0, 1,
+        })) << recastMesh->getVertices();
+        EXPECT_EQ(recastMesh->getIndices(), std::vector<int>({2, 1, 0, 2, 1, 3}));
+        EXPECT_EQ(recastMesh->getAreaTypes(), std::vector<AreaType>({AreaType_ground, AreaType_ground}));
     }
 }
