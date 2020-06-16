@@ -71,7 +71,7 @@ Enable or disable the debug hud to see what the shadow map(s) contain.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
 enable debug overlay
-----------------
+--------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -80,15 +80,15 @@ enable debug overlay
 Enable or disable the debug overlay to see the area covered by each shadow map.
 This setting is only recommended for developers, bug reporting and advanced users performing fine-tuning of shadow settings.
 
-compute tight scene bounds
---------------------------
+compute scene bounds
+--------------------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	True
+:Type:		string
+:Range:		primitives|bounds|none
+:Default:	bounding volumes
 
-With this setting enabled, attempt to better use the shadow map(s) by making them cover a smaller area.
-May have a minor to major performance impact.
+Two different ways to make better use of shadow map(s) by making them cover a smaller area.
+While primitives give better shadows at expense of more CPU, bounds gives better performance overall but with lower quality shadows. There is also the ability to disable this computation with none.
 
 shadow map resolution
 ---------------------

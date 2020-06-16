@@ -201,49 +201,97 @@
           </sizepolicy>
          </property>
          <layout class="QGridLayout" name="shadowsLayout" columnstretch="0,0">
-          <item row="6" column="0">
-           <widget class="QCheckBox" name="shadowDistanceCheckBox">
+
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="playerShadowsCheckBox">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Shadow Distance Limit:</string>
+             <string>Enable Player Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="actorShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Actor Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="objectShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for primarily inanimate objects. May have a significant performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Object Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QCheckBox" name="terrainShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Terrain Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="indoorShadowsCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Enable Indoor Shadows</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="shadowComputeSceneBoundsLabel">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Type of "compute scene bounds" computation method to be used. Bounds (default) for good balance between performance and shadow quality, primitives for better looking shadows or none for no computation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Shadow Near Far Computation Method:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">compute scene bounds
+           <widget class="QComboBox" name="shadowComputeSceneBoundsComboBox">
+            <item>
+             <property name="text">
+              <string>bounds</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>primitives</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>none</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLabel" name="shadowResolutionLabel">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Shadow Map Resolution:</string>
             </property>
            </widget>
           </item>
           <item row="6" column="1">
-           <widget class="QSpinBox" name="shadowDistanceSpinBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 game units is 1 real life yard or about 0.9 m&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="suffix">
-             <string> unit(s)</string>
-            </property>
-            <property name="minimum">
-             <number>512</number>
-            </property>
-            <property name="maximum">
-             <number>81920</number>
-            </property>
-            <property name="value">
-             <number>8192</number>
-            </property>
-           </widget>
-          </item>
-          <item row="7" column="0">
-           <widget class="QLabel" name="fadeStartLabel">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the limit above at which shadows begin to gradually fade away.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Fade Start Multiplier:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
            <widget class="QComboBox" name="shadowResolutionComboBox">
             <item>
              <property name="text">
@@ -267,27 +315,49 @@
             </item>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="actorShadowsCheckBox">
+          <item row="7" column="0">
+           <widget class="QCheckBox" name="shadowDistanceCheckBox">
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for NPCs and creatures besides the player character. May have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The distance from the camera at which shadows completely disappear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
-             <string>Enable Actor Shadows</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" alignment="Qt::AlignLeft">
-           <widget class="QCheckBox" name="terrainShadowsCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for the terrain including distant terrain. May have a significant performance and shadow quality impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Enable Terrain Shadows</string>
+             <string>Shadow Distance Limit:</string>
             </property>
            </widget>
           </item>
           <item row="7" column="1">
+           <widget class="QSpinBox" name="shadowDistanceSpinBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;64 game units is 1 real life yard or about 0.9 m&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="suffix">
+             <string> unit(s)</string>
+            </property>
+            <property name="minimum">
+             <number>512</number>
+            </property>
+            <property name="maximum">
+             <number>81920</number>
+            </property>
+            <property name="value">
+             <number>8192</number>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0">
+           <widget class="QLabel" name="fadeStartLabel">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The fraction of the limit above at which shadows begin to gradually fade away.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Fade Start Multiplier:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="1">
            <widget class="QDoubleSpinBox" name="fadeStartSpinBox">
             <property name="enabled">
              <bool>false</bool>
@@ -306,46 +376,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="playerShadowsCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows exclusively for the player character. May have a very minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Enable Player Shadows</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" alignment="Qt::AlignLeft">
-           <widget class="QLabel" name="shadowResolutionLabel">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The resolution of each individual shadow map. Increasing it significantly improves shadow quality but may have a minor performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Shadow Map Resolution:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QCheckBox" name="objectShadowsCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable shadows for primarily inanimate objects. May have a significant performance impact.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Enable Object Shadows</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QCheckBox" name="indoorShadowsCheckBox">
-            <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Due to limitations with Morrowind's data, only actors can cast shadows indoors, which some might feel is distracting.&lt;/p&gt;&lt;p&gt;Has no effect if actor/player shadows are not enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-            </property>
-            <property name="text">
-             <string>Enable Indoor Shadows</string>
-            </property>
-           </widget>
-          </item>
+
          </layout>
         </widget>
        </item>

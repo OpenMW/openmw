@@ -38,8 +38,8 @@ namespace Launcher
         Files::ConfigurationManager &mCfgMgr;
         Settings::Manager &mEngineSettings;
 
-        QStringList getAvailableResolutions(int screen);
-        QRect getMaximumResolution();
+        static QStringList getAvailableResolutions(int screen);
+        static QRect getMaximumResolution();
 
         bool setupSDL();
     };

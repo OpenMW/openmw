@@ -1,6 +1,5 @@
 #include "graphicspage.hpp"
 
-#include <csignal>
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
@@ -145,6 +144,10 @@ bool Launcher::GraphicsPage::loadSettings()
     if (mEngineSettings.getBool("enable indoor shadows", "Shadows"))
         indoorShadowsCheckBox->setCheckState(Qt::Checked);
 
+    shadowComputeSceneBoundsComboBox->setCurrentIndex(
+        shadowComputeSceneBoundsComboBox->findText(
+            QString(tr(mEngineSettings.getString("compute scene bounds", "Shadows").c_str()))));
+
     int shadowDistLimit = mEngineSettings.getInt("maximum shadow map distance", "Shadows");
     if (shadowDistLimit > 0)
     {
@@ -231,7 +234,7 @@ void Launcher::GraphicsPage::saveSettings()
     bool cPlayerShadows = playerShadowsCheckBox->checkState();
     if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
     {
-        if (mEngineSettings.getBool("enable shadows", "Shadows") != true)
+        if (!mEngineSettings.getBool("enable shadows", "Shadows"))
             mEngineSettings.setBool("enable shadows", "Shadows", true);
         if (mEngineSettings.getBool("actor shadows", "Shadows") != cActorShadows)
             mEngineSettings.setBool("actor shadows", "Shadows", cActorShadows);
@@ -263,6 +266,10 @@ void Launcher::GraphicsPage::saveSettings()
     int cShadowRes = shadowResolutionComboBox->currentText().toInt();
     if (cShadowRes != mEngineSettings.getInt("shadow map resolution", "Shadows"))
         mEngineSettings.setInt("shadow map resolution", "Shadows", cShadowRes);
+
+    auto cComputeSceneBounds = shadowComputeSceneBoundsComboBox->currentText().toStdString();
+    if (cComputeSceneBounds != mEngineSettings.getString("compute scene bounds", "Shadows"))
+        mEngineSettings.setString("compute scene bounds", "Shadows", cComputeSceneBounds);
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
