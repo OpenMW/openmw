@@ -2,38 +2,11 @@
 #define OPENMW_COMPONENTS_TERRAIN_QUADTREENODE_H
 
 #include <osg/Group>
-#include <osgUtil/LineSegmentIntersector>
 
 #include "defs.hpp"
 
 namespace Terrain
 {
-
-    class TerrainLineIntersector : public osgUtil::LineSegmentIntersector
-    {
-    public:
-        TerrainLineIntersector(osgUtil::LineSegmentIntersector* intersector, osg::Matrix& matrix) :
-            osgUtil::LineSegmentIntersector(intersector->getStart() * matrix, intersector->getEnd() * matrix)
-        {
-            setPrecisionHint(intersector->getPrecisionHint());
-            _intersectionLimit = intersector->getIntersectionLimit();
-            _parent = intersector;
-        }
-
-        TerrainLineIntersector(osgUtil::LineSegmentIntersector* intersector) :
-            osgUtil::LineSegmentIntersector(intersector->getStart(), intersector->getEnd())
-        {
-            setPrecisionHint(intersector->getPrecisionHint());
-            _intersectionLimit = intersector->getIntersectionLimit();
-            _parent = intersector;
-        }
-
-        bool intersectAndClip(const osg::BoundingBox& bbInput)
-        {
-            osg::Vec3d s(_start), e(_end);
-            return osgUtil::LineSegmentIntersector::intersectAndClip(s, e, bbInput);
-        }
-    };
 
     enum ChildDirection
     {
@@ -50,10 +23,15 @@ namespace Terrain
     public:
         virtual ~LodCallback() {}
 
-        virtual bool isSufficientDetail(QuadTreeNode *node, float dist) = 0;
+        enum ReturnValue
+        {
+            Deeper,
+            StopTraversal,
+            StopTraversalAndUse
+        };
+        virtual ReturnValue isSufficientDetail(QuadTreeNode *node, float dist) = 0;
     };
 
-    class ViewDataMap;
     class ViewData;
 
     class QuadTreeNode : public osg::Group
@@ -91,8 +69,6 @@ namespace Terrain
         const osg::BoundingBox& getBoundingBox() const;
         bool hasValidBounds() const { return mValidBounds; }
 
-        virtual osg::BoundingSphere computeBound() const;
-
         /// size in cell coordinates
         float getSize() const;
 
@@ -100,13 +76,7 @@ namespace Terrain
         const osg::Vec2f& getCenter() const;
 
         /// Traverse nodes according to LOD selection.
-        void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback, float maxDist);
-
-        /// Traverse to a specific node and add only that node.
-        void traverseTo(ViewData* vd, float size, const osg::Vec2f& center);
-
-        /// Adds all leaf nodes which intersect the line from start to end
-        void intersect(ViewData* vd, TerrainLineIntersector& intersector);
+        void traverseNodes(ViewData* vd, const osg::Vec3f& viewPoint, LodCallback* lodCallback);
 
     private:
         QuadTreeNode* mParent;

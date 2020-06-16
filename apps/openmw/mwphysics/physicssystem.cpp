@@ -397,6 +397,15 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
+    osg::BoundingBox PhysicsSystem::getBoundingBox(const MWWorld::ConstPtr &object) const
+    {
+        const Object * physobject = getObject(object);
+        if (!physobject) return osg::BoundingBox();
+        btVector3 min, max;
+        physobject->getCollisionObject()->getCollisionShape()->getAabb(physobject->getCollisionObject()->getWorldTransform(), min, max);
+        return osg::BoundingBox(Misc::Convert::toOsg(min), Misc::Convert::toOsg(max));
+    }
+
     osg::Vec3f PhysicsSystem::getCollisionObjectPosition(const MWWorld::ConstPtr &actor) const
     {
         const Actor* physactor = getActor(actor);

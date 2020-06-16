@@ -70,6 +70,8 @@
 #include "actorspaths.hpp"
 #include "recastmesh.hpp"
 #include "fogmanager.hpp"
+#include "objectpaging.hpp"
+
 
 namespace MWRender
 {
@@ -258,7 +260,6 @@ namespace MWRender
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
             mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
-            mViewer->getIncrementalCompileOperation()->setMaximumNumOfObjectsToCompilePerFrame(100);
         }
 
         mResourceSystem->getSceneManager()->setIncrementalCompileOperation(mViewer->getIncrementalCompileOperation());
@@ -286,6 +287,12 @@ namespace MWRender
             mTerrain.reset(new Terrain::QuadTreeWorld(
                 sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug,
                 compMapResolution, compMapLevel, lodFactor, vertexLodMod, maxCompGeometrySize));
+            if (Settings::Manager::getBool("object paging", "Terrain"))
+            {
+                mObjectPaging.reset(new ObjectPaging(mResourceSystem->getSceneManager()));
+                static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mObjectPaging.get());
+                mResourceSystem->addResourceManager(mObjectPaging.get());
+            }
         }
         else
             mTerrain.reset(new Terrain::TerrainGrid(sceneRoot, mRootNode, mResourceSystem, mTerrainStorage, Mask_Terrain, Mask_PreCompile, Mask_Debug));
@@ -970,20 +977,14 @@ namespace MWRender
         renderCameraToImage(rttCamera.get(),image,w,h);
     }
 
-    osg::Vec4f RenderingManager::getScreenBounds(const MWWorld::Ptr& ptr)
+    osg::Vec4f RenderingManager::getScreenBounds(const osg::BoundingBox &worldbb)
     {
-        if (!ptr.getRefData().getBaseNode())
-            return osg::Vec4f();
-
-        osg::ComputeBoundsVisitor computeBoundsVisitor;
-        computeBoundsVisitor.setTraversalMask(~(Mask_ParticleSystem|Mask_Effect));
-        ptr.getRefData().getBaseNode()->accept(computeBoundsVisitor);
-
+        if (!worldbb.valid()) return osg::Vec4f();
         osg::Matrix viewProj = mViewer->getCamera()->getViewMatrix() * mViewer->getCamera()->getProjectionMatrix();
         float min_x = 1.0f, max_x = 0.0f, min_y = 1.0f, max_y = 0.0f;
         for (int i=0; i<8; ++i)
         {
-            osg::Vec3f corner = computeBoundsVisitor.getBoundingBox().corner(i);
+            osg::Vec3f corner = worldbb.corner(i);
             corner = corner * viewProj;
 
             float x = (corner.x() + 1.f) * 0.5f;
@@ -1009,6 +1010,7 @@ namespace MWRender
     {
         RenderingManager::RayResult result;
         result.mHit = false;
+        result.mHitRefnum.mContentFile = -1;
         result.mRatio = 0;
         if (intersector->containsIntersections())
         {
@@ -1020,6 +1022,7 @@ namespace MWRender
             result.mRatio = intersection.ratio;
 
             PtrHolder* ptrHolder = nullptr;
+            std::vector<RefnumMarker*> refnumMarkers;
             for (osg::NodePath::const_iterator it = intersection.nodePath.begin(); it != intersection.nodePath.end(); ++it)
             {
                 osg::UserDataContainer* userDataContainer = (*it)->getUserDataContainer();
@@ -1029,11 +1032,25 @@ namespace MWRender
                 {
                     if (PtrHolder* p = dynamic_cast<PtrHolder*>(userDataContainer->getUserObject(i)))
                         ptrHolder = p;
+                    if (RefnumMarker* r = dynamic_cast<RefnumMarker*>(userDataContainer->getUserObject(i)))
+                        refnumMarkers.push_back(r);
                 }
             }
 
             if (ptrHolder)
                 result.mHitObject = ptrHolder->mPtr;
+
+            unsigned int vertexCounter = 0;
+            for (unsigned int i=0; i<refnumMarkers.size(); ++i)
+            {
+                unsigned int intersectionIndex = intersection.indexList.empty() ? 0 : intersection.indexList[0];
+                if (!refnumMarkers[i]->mNumVertices || (intersectionIndex >= vertexCounter && intersectionIndex < vertexCounter + refnumMarkers[i]->mNumVertices))
+                {
+                    result.mHitRefnum = refnumMarkers[i]->mRefnum;
+                    break;
+                }
+                vertexCounter += refnumMarkers[i]->mNumVertices;
+            }
         }
 
         return result;
@@ -1046,6 +1063,7 @@ namespace MWRender
             mIntersectionVisitor = new osgUtil::IntersectionVisitor;
 
         mIntersectionVisitor->setTraversalNumber(mViewer->getFrameStamp()->getFrameNumber());
+        mIntersectionVisitor->setFrameStamp(mViewer->getFrameStamp());
         mIntersectionVisitor->setIntersector(intersector);
 
         int mask = ~0;
@@ -1111,6 +1129,8 @@ namespace MWRender
         mSky->setMoonColour(false);
 
         notifyWorldSpaceChanged();
+        if (mObjectPaging)
+            mObjectPaging->clear();
     }
 
     MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr &ptr)
@@ -1466,5 +1486,44 @@ namespace MWRender
             return;
 
         mRecastMesh->update(mNavigator.getRecastMeshTiles(), mNavigator.getSettings());
+    }
+
+    void RenderingManager::setActiveGrid(const osg::Vec4i &grid)
+    {
+        mTerrain->setActiveGrid(grid);
+    }
+    bool RenderingManager::pagingEnableObject(int type, const MWWorld::ConstPtr& ptr, bool enabled)
+    {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
+            return false;
+        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), enabled))
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
+    }
+    void RenderingManager::pagingBlacklistObject(int type, const MWWorld::ConstPtr &ptr)
+    {
+        if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
+            return;
+        const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
+        if (!refnum.hasContentFile()) return;
+        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
+            mTerrain->rebuildViews();
+    }
+    bool RenderingManager::pagingUnlockCache()
+    {
+        if (mObjectPaging && mObjectPaging->unlockCache())
+        {
+            mTerrain->rebuildViews();
+            return true;
+        }
+        return false;
+    }
+    void RenderingManager::getPagedRefnums(const osg::Vec4i &activeGrid, std::set<ESM::RefNum> &out)
+    {
+        if (mObjectPaging)
+            mObjectPaging->getPagedRefnums(activeGrid, out);
     }
 }

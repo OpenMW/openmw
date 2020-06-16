@@ -161,13 +161,13 @@ class GenericObjectCache : public osg::Referenced
             }
         }
 
-        /** call operator()(osg::Object*) for each object in the cache. */
+        /** call operator()(KeyType, osg::Object*) for each object in the cache. */
         template <class Functor>
         void call(Functor& f)
         {
             OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_objectCacheMutex);
             for (typename ObjectCacheMap::iterator it = _objectCache.begin(); it != _objectCache.end(); ++it)
-                f(it->second.first.get());
+                f(it->first, it->second.first.get());
         }
 
         /** Get the number of objects in the cache. */

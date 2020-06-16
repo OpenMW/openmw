@@ -77,7 +77,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
         vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
 
-        osg::ref_ptr<osg::Array> vertexArray = osg::clone(from.getVertexArray(), osg::CopyOp::DEEP_COPY_ALL);
+        osg::ref_ptr<osg::Array> vertexArray = static_cast<osg::Array*>(from.getVertexArray()->clone(osg::CopyOp::DEEP_COPY_ALL));
         if (vertexArray)
         {
             vertexArray->setVertexBufferObject(vbo);
@@ -86,7 +86,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
 
         if (const osg::Array* normals = from.getNormalArray())
         {
-            osg::ref_ptr<osg::Array> normalArray = osg::clone(normals, osg::CopyOp::DEEP_COPY_ALL);
+            osg::ref_ptr<osg::Array> normalArray = static_cast<osg::Array*>(normals->clone(osg::CopyOp::DEEP_COPY_ALL));
             if (normalArray)
             {
                 normalArray->setVertexBufferObject(vbo);
@@ -97,7 +97,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
         if (const osg::Vec4Array* tangents = dynamic_cast<const osg::Vec4Array*>(from.getTexCoordArray(7)))
         {
             mSourceTangents = tangents;
-            osg::ref_ptr<osg::Array> tangentArray = osg::clone(tangents, osg::CopyOp::DEEP_COPY_ALL);
+            osg::ref_ptr<osg::Array> tangentArray = static_cast<osg::Array*>(tangents->clone(osg::CopyOp::DEEP_COPY_ALL));
             tangentArray->setVertexBufferObject(vbo);
             to.setTexCoordArray(7, tangentArray, osg::Array::BIND_PER_VERTEX);
         }
@@ -106,7 +106,7 @@ void RigGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeometry)
     }
 }
 
-osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry()
+osg::ref_ptr<osg::Geometry> RigGeometry::getSourceGeometry() const
 {
     return mSourceGeometry;
 }

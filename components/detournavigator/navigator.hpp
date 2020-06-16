@@ -156,6 +156,11 @@ namespace DetourNavigator
         virtual void update(const osg::Vec3f& playerPosition) = 0;
 
         /**
+         * @brief disable navigator updates
+         */
+        virtual void setUpdatesEnabled(bool enabled) = 0;
+
+        /**
          * @brief wait locks thread until all tiles are updated from last update call.
          */
         virtual void wait() = 0;

@@ -639,7 +639,15 @@ namespace NifOsg
                 handleParticleSystem(nifNode, node, composite, animflags, rootNode);
 
             if (composite->getNumControllers() > 0)
-                node->addUpdateCallback(composite);
+            {
+                osg::Callback *cb = composite;
+                if (composite->getNumControllers() == 1)
+                    cb = composite->getController(0);
+                if (animflags & Nif::NiNode::AnimFlag_AutoPlay)
+                    node->addCullCallback(cb);
+                else
+                    node->addUpdateCallback(cb); // have to remain as UpdateCallback so AssignControllerSourcesVisitor can find it.
+            }
 
             bool isAnimated = false;
             handleNodeControllers(nifNode, node, animflags, isAnimated);
@@ -778,7 +786,7 @@ namespace NifOsg
             }
         }
 
-        void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
+        void handleMaterialControllers(const Nif::Property *materialProperty, SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial)
         {
             for (Nif::ControllerPtr ctrl = materialProperty->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -789,7 +797,7 @@ namespace NifOsg
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
                     if (alphactrl->data.empty())
                         continue;
-                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr()));
+                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr(), baseMaterial));
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -799,7 +807,7 @@ namespace NifOsg
                     if (matctrl->data.empty())
                         continue;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
-                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr(), targetColor));
+                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial));
                     setupController(matctrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -1767,7 +1775,7 @@ namespace NifOsg
                     if (!matprop->controller.empty())
                     {
                         hasMatCtrl = true;
-                        handleMaterialControllers(matprop, composite, animflags);
+                        handleMaterialControllers(matprop, composite, animflags, mat);
                     }
 
                     break;

@@ -102,6 +102,10 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
 
     bool pushedLight = mLightListCallback && mLightListCallback->pushLightState(this, cv);
 
+    osg::StateSet* stateset = getStateSet();
+    if (stateset)
+        cv->pushStateSet(stateset);
+
     for (PassVector::const_iterator it = mPasses.begin(); it != mPasses.end(); ++it)
     {
         cv->pushStateSet(*it);
@@ -109,6 +113,8 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
         cv->popStateSet();
     }
 
+    if (stateset)
+        cv->popStateSet();
     if (pushedLight)
         cv->popStateSet();
 }

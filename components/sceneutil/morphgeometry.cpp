@@ -44,7 +44,7 @@ void MorphGeometry::setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom)
         osg::ref_ptr<osg::VertexBufferObject> vbo (new osg::VertexBufferObject);
         vbo->setUsage(GL_DYNAMIC_DRAW_ARB);
 
-        osg::ref_ptr<osg::Array> vertexArray = osg::clone(from.getVertexArray(), osg::CopyOp::DEEP_COPY_ALL);
+        osg::ref_ptr<osg::Array> vertexArray = static_cast<osg::Array*>(from.getVertexArray()->clone(osg::CopyOp::DEEP_COPY_ALL));
         if (vertexArray)
         {
             vertexArray->setVertexBufferObject(vbo);

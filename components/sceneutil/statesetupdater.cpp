@@ -2,30 +2,38 @@
 
 #include <osg/Node>
 #include <osg/NodeVisitor>
+#include <osgUtil/CullVisitor>
 
 namespace SceneUtil
 {
 
     void StateSetUpdater::operator()(osg::Node* node, osg::NodeVisitor* nv)
     {
+        bool isCullVisitor = nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR;
         if (!mStateSets[0])
         {
-            // first time setup
-            osg::StateSet* src = node->getOrCreateStateSet();
-            for (int i=0; i<2; ++i) // Using SHALLOW_COPY for StateAttributes, if users want to modify it is their responsibility to set a non-shared one first
-                                    // This can be done conveniently in user implementations of the setDefaults() method
+            for (int i=0; i<2; ++i)
             {
-                mStateSets[i] = new osg::StateSet(*src, osg::CopyOp::SHALLOW_COPY);
+                if (!isCullVisitor)
+                    mStateSets[i] = new osg::StateSet(*node->getOrCreateStateSet(), osg::CopyOp::SHALLOW_COPY); // Using SHALLOW_COPY for StateAttributes, if users want to modify it is their responsibility to set a non-shared one first in setDefaults
+                else
+                    mStateSets[i] = new osg::StateSet;
                 setDefaults(mStateSets[i]);
             }
         }
 
         osg::StateSet* stateset = mStateSets[nv->getTraversalNumber()%2];
-        node->setStateSet(stateset);
-
         apply(stateset, nv);
 
+        if (!isCullVisitor)
+            node->setStateSet(stateset);
+        else
+            static_cast<osgUtil::CullVisitor*>(nv)->pushStateSet(stateset);
+
         traverse(node, nv);
+
+        if (isCullVisitor)
+            static_cast<osgUtil::CullVisitor*>(nv)->popStateSet();
     }
 
     void StateSetUpdater::reset()
