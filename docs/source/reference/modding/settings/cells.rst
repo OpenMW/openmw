@@ -1,30 +1,6 @@
 Cells Settings
 ##############
 
-exterior cell load distance
----------------------------
-
-:Type:		integer
-:Range:		>= 1
-:Default:	1
-
-This setting determines the number of exterior cells adjacent to the character that will be loaded for rendering.
-
-.. Warning::
-	Values greater than 1 will significantly affect the frame rate and loading times. 
-	This setting is mainly intended for making screenshots of scenic vistas and not for real-time gameplay. 
-	Loading more cells can break certain scripts or quests in the game that expect cells to not be loaded until the player is there. 
-	These limitations will be addressed in a future version with a separate technique for rendering distant cells.
-
-This setting interacts with viewing distance and field of view settings.
-
-It is generally very wasteful for this value to load geometry than will almost never be visible
-due to viewing distance and fog. For low frame rate screen shots of scenic vistas,
-this setting should be set high, and viewing distances adjusted accordingly.
-
-This setting can only be configured by editing the settings configuration file.
-
-
 preload enabled
 ---------------
 
@@ -60,7 +36,7 @@ consider increasing the number of preloading threads to 2 or 3 for a boost in pr
 Faster preloading will reduce the chance that a cell could not be completely loaded before the player moves into it,
 and hence reduce the chance of seeing loading screens or frame drops.
 This may be especially relevant when the player moves at high speed
-and/or a large number of cells are loaded in via 'exterior cell load distance'.
+and/or a large number of objects are preloaded due to large viewing distance.
 
 A value of 4 or higher is not recommended.
 With 4 or more threads, improvements will start to diminish due to file reading and synchronization bottlenecks.

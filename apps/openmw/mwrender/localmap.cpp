@@ -74,7 +74,7 @@ LocalMap::LocalMap(osg::Group* root)
     : mRoot(root)
     , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
     , mMapWorldSize(Constants::CellSizeInUnits)
-    , mCellDistance(Settings::Manager::getInt("local map cell distance", "Map"))
+    , mCellDistance(Constants::CellGridRadius)
     , mAngle(0.f)
     , mInterior(false)
 {

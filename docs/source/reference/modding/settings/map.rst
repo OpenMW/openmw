@@ -103,14 +103,3 @@ and typically require more panning to see all available portions of the map.
 This larger size also enables an overall greater level of detail if the local map resolution setting is also increased.
 
 This setting can not be configured except by editing the settings configuration file.
-
-local map cell distance
------------------------
-
-:Type:		integer
-:Range:		>= 1
-:Default:	1
-
-Similar to "exterior cell load distance" in the Cells section, controls how many cells are rendered on the local map. 
-Please note that only loaded cells can be rendered,
-so this setting must be lower or equal to "exterior cell load distance" to work properly.
