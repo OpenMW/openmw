@@ -304,7 +304,10 @@ endif()
 
 set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
-    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale zlib)
+    set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
+    if(MSVC)
+        set(BOOST_COMPONENTS ${BOOST_COMPONENTS} zlib)
+    endif(MSVC)
 endif(WIN32)
 
 IF(BOOST_STATIC)
