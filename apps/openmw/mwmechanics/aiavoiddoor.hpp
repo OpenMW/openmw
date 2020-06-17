@@ -24,7 +24,7 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            static constexpr TypeId getTypeId() { return TypeIdAvoidDoor; }
+            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::AvoidDoor; }
 
             static constexpr Options makeDefaultOptions()
             {

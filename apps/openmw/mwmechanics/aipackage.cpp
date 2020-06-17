@@ -24,7 +24,7 @@
 
 #include <osg/Quat>
 
-MWMechanics::AiPackage::AiPackage(TypeId typeId, const Options& options) :
+MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
     mTypeId(typeId),
     mOptions(options),
     mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
@@ -216,7 +216,7 @@ namespace
 void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 {
     // note: AiWander currently does not open doors
-    if (getTypeId() == TypeIdWander)
+    if (getTypeId() == AiPackageTypeId::Wander)
         return;
 
     if (mPathFinder.getPathSize() == 0)
@@ -391,13 +391,13 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
     const MWWorld::Class& actorClass = actor.getClass();
     DetourNavigator::Flags result = DetourNavigator::Flag_none;
 
-    if (actorClass.isPureWaterCreature(actor) || (getTypeId() != TypeIdWander && actorClass.canSwim(actor)))
+    if (actorClass.isPureWaterCreature(actor) || (getTypeId() != AiPackageTypeId::Wander && actorClass.canSwim(actor)))
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor))
         result |= DetourNavigator::Flag_walk;
 
-    if (actorClass.isBipedal(actor) && getTypeId() != TypeIdWander)
+    if (actorClass.isBipedal(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;
 
     return result;
@@ -415,7 +415,7 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     if (flags & DetourNavigator::Flag_walk)
     {
         float walkCost;
-        if (getTypeId() == TypeIdWander)
+        if (getTypeId() == AiPackageTypeId::Wander)
             walkCost = 1.0 / actorClass.getWalkSpeed(actor);
         else
             walkCost = 1.0 / actorClass.getRunSpeed(actor);

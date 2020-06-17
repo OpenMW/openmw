@@ -34,7 +34,7 @@ namespace MWMechanics
 
             bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
 
-            static constexpr TypeId getTypeId() { return TypeIdTravel; }
+            static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Travel; }
 
             static constexpr Options makeDefaultOptions()
             {
@@ -60,7 +60,7 @@ namespace MWMechanics
 
         explicit AiInternalTravel(const ESM::AiSequence::AiTravel* travel);
 
-        static constexpr TypeId getTypeId() { return TypeIdInternalTravel; }
+        static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::InternalTravel; }
 
         std::unique_ptr<AiPackage> clone() const final;
     };

@@ -9,6 +9,7 @@
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"
+#include "aipackagetypeid.hpp"
 
 namespace MWWorld
 {
@@ -36,26 +37,6 @@ namespace MWMechanics
     class AiPackage
     {
         public:
-            ///Enumerates the various AITypes available
-            enum TypeId {
-                TypeIdNone = -1,
-                TypeIdWander = 0,
-                TypeIdTravel = 1,
-                TypeIdEscort = 2,
-                TypeIdFollow = 3,
-                TypeIdActivate = 4,
-
-                // These 5 are not really handled as Ai Packages in the MW engine
-                // For compatibility do *not* return these in the getCurrentAiPackage script function..
-                TypeIdCombat = 5,
-                TypeIdPursue = 6,
-                TypeIdAvoidDoor = 7,
-                TypeIdFace = 8,
-                TypeIdBreathe = 9,
-                TypeIdInternalTravel = 10,
-                TypeIdCast = 11
-            };
-
             struct Options
             {
                 unsigned int mPriority = 0;
@@ -80,7 +61,7 @@ namespace MWMechanics
                 }
             };
 
-            AiPackage(TypeId typeId, const Options& options);
+            AiPackage(AiPackageTypeId typeId, const Options& options);
 
             virtual ~AiPackage() = default;
 
@@ -98,7 +79,7 @@ namespace MWMechanics
 
             /// Returns the TypeID of the AiPackage
             /// \see enum TypeId
-            TypeId getTypeId() const { return mTypeId; }
+            AiPackageTypeId getTypeId() const { return mTypeId; }
 
             /// Higher number is higher priority (0 being the lowest)
             unsigned int getPriority() const { return mOptions.mPriority; }
@@ -170,7 +151,7 @@ namespace MWMechanics
 
             DetourNavigator::AreaCosts getAreaCosts(const MWWorld::Ptr& actor) const;
 
-            const TypeId mTypeId;
+            const AiPackageTypeId mTypeId;
             const Options mOptions;
 
             // TODO: all this does not belong here, move into temporary storage

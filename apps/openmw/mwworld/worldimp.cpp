@@ -1583,7 +1583,7 @@ namespace MWWorld
                 if(ptr != getPlayerPtr() )
                 {
                     MWMechanics::AiSequence& seq = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-                    if(seq.getTypeId() != MWMechanics::AiPackage::TypeIdAvoidDoor) //Only add it once
+                    if(seq.getTypeId() != MWMechanics::AiPackageTypeId::AvoidDoor) //Only add it once
                         seq.stack(MWMechanics::AiAvoidDoor(door),ptr);
                 }
 
@@ -2987,7 +2987,7 @@ namespace MWWorld
                 {
                     for (const auto& package : stats.getAiSequence())
                     {
-                        if (package->getTypeId() == MWMechanics::AiPackage::TypeIdCast)
+                        if (package->getTypeId() == MWMechanics::AiPackageTypeId::Cast)
                         {
                             target = package->getTarget();
                             break;
