@@ -415,7 +415,7 @@ DetourNavigator::AreaCosts MWMechanics::AiPackage::getAreaCosts(const MWWorld::P
     if (flags & DetourNavigator::Flag_walk)
     {
         float walkCost;
-        if (getTypeId() == TypeIdWander)
+        if (getTypeId() == AiPackageTypeId::Wander)
             walkCost = 1.0 / actorClass.getWalkSpeed(actor);
         else
             walkCost = 1.0 / actorClass.getRunSpeed(actor);
