@@ -24,6 +24,9 @@ const float GravityConst = 8.96f;
 // Size of one exterior cell in game units
 const int CellSizeInUnits = 8192;
 
+// Size of active cell grid in cells (it is a square with the (2 * CellGridRadius + 1) cells side)
+const int CellGridRadius = 1;
+
 // A label to mark night/day visual switches
 const std::string NightDayLabel = "NightDaySwitch";
 

@@ -11,6 +11,8 @@
 #include <memory>
 #include <unordered_map>
 
+#include <components/misc/constants.hpp>
+
 namespace osg
 {
     class Vec3f;
@@ -75,7 +77,6 @@ namespace MWWorld
             MWRender::RenderingManager& mRendering;
             DetourNavigator::Navigator& mNavigator;
             std::unique_ptr<CellPreloader> mPreloader;
-            int mHalfGridSize;
             float mCellLoadingThreshold;
             float mPreloadDistance;
             bool mPreloadEnabled;
@@ -84,6 +85,8 @@ namespace MWWorld
             bool mPreloadDoors;
             bool mPreloadFastTravel;
             float mPredictionTime;
+
+            static const int mHalfGridSize = Constants::CellGridRadius;
 
             osg::Vec3f mLastPlayerPos;
 

@@ -344,7 +344,6 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
         Misc::CoordinateConverter(playerCell).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
-        // ToDo: (Maybe) use "exterior cell load distance" setting to get count of actual active cells
         // AI shuts down actors before they reach edges of 3 x 3 grid.
         const float distanceFromEdge = 200.0;
         float minThreshold = (-1.0f * ESM::Land::REAL_SIZE) + distanceFromEdge;
