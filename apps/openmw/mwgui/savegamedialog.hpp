@@ -20,6 +20,7 @@ namespace MWGui
         SaveGameDialog();
 
         virtual void onOpen();
+        virtual void onClose();
 
         void setLoadOrSave(bool load);
 
