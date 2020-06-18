@@ -571,6 +571,7 @@ namespace MWRender
                 copyop.mSqrDistance = (viewPoint - pos).length2();
                 copyop.mViewVector = (viewPoint - worldCenter);
                 copyop.copy(cnode, trans);
+                copyop.mNodePath.pop_back();
 
                 if (activeGrid)
                 {
