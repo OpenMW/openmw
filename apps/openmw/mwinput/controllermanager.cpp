@@ -36,6 +36,7 @@ namespace MWInput
         , mSneakToggleShortcutTimer(0.f)
         , mGamepadZoom(0)
         , mGamepadGuiCursorEnabled(true)
+        , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
         , mSneakGamepadShortcut(false)
         , mGamepadPreviewMode(false)

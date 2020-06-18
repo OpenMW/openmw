@@ -28,6 +28,7 @@ ChunkManager::ChunkManager(Storage *storage, Resource::SceneManager *sceneMgr, T
     , mSceneManager(sceneMgr)
     , mTextureManager(textureManager)
     , mCompositeMapRenderer(renderer)
+    , mNodeMask(0)
     , mCompositeMapSize(512)
     , mCompositeMapLevel(1.f)
     , mMaxCompGeometrySize(1.f)

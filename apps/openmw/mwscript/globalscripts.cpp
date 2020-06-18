@@ -24,6 +24,7 @@ namespace
         {
             ESM::GlobalScript script;
             script.mTargetRef.unset();
+            script.mRunning = false;
             if (!ptr.isEmpty())
             {
                 if (ptr.getCellRef().hasContentFile())
@@ -42,6 +43,7 @@ namespace
             ESM::GlobalScript script;
             script.mTargetId = pair.second;
             script.mTargetRef = pair.first;
+            script.mRunning = false;
             return script;
         }
     };
