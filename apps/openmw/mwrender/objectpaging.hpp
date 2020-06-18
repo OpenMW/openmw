@@ -80,7 +80,7 @@ namespace MWRender
     class RefnumMarker : public osg::Object
     {
     public:
-        RefnumMarker() : mNumVertices(0) {}
+        RefnumMarker() : mNumVertices(0) { mRefnum.unset(); }
         RefnumMarker(const RefnumMarker &copy, osg::CopyOp co) : mRefnum(copy.mRefnum), mNumVertices(copy.mNumVertices) {}
         META_Object(MWRender, RefnumMarker)
 
