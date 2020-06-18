@@ -1,5 +1,6 @@
 #include "cellborder.hpp"
 
+#include <osg/Material>
 #include <osg/PolygonMode>
 #include <osg/Geometry>
 #include <osg/Geode>
@@ -64,6 +65,9 @@ void CellBorder::createCellBorderGeometry(int x, int y)
     borderGeode->addDrawable(border.get());
 
     osg::StateSet *stateSet = borderGeode->getOrCreateStateSet();
+    osg::ref_ptr<osg::Material> material (new osg::Material);
+    material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    stateSet->setAttribute(material);
 
     osg::PolygonMode* polygonmode = new osg::PolygonMode;
     polygonmode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
