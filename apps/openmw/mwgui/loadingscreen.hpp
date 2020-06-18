@@ -66,6 +66,7 @@ namespace MWGui
         bool mImportantLabel;
 
         bool mVisible;
+        int mNestedLoadingCount;
 
         size_t mProgress;
 

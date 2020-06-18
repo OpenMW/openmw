@@ -40,6 +40,7 @@ namespace MWGui
         , mLoadingOnTime(0.0)
         , mImportantLabel(false)
         , mVisible(false)
+        , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
     {
@@ -163,10 +164,11 @@ namespace MWGui
 
     void LoadingScreen::loadingOn(bool visible)
     {
-        mLoadingOnTime = mTimer.time_m();
         // Early-out if already on
-        if (mMainWidget->getVisible())
+        if (mNestedLoadingCount++ > 0 && mMainWidget->getVisible())
             return;
+
+        mLoadingOnTime = mTimer.time_m();
 
         // Assign dummy bounding sphere callback to avoid the bounding sphere of the entire scene being recomputed after each frame of loading
         // We are already using node masks to avoid the scene from being updated/rendered, but node masks don't work for computeBound()
@@ -200,6 +202,8 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
+        if (--mNestedLoadingCount > 0)
+            return;
         mLoadingBox->setVisible(true);   // restore
 
         if (mLastRenderTime < mLoadingOnTime)
