@@ -161,7 +161,7 @@ Options:
 		Build unit tests / Google test
 	-u
 		Configure for unity builds.
-	-v <2013/2015/2017/2019>
+	-v <2017/2019>
 		Choose the Visual Studio version to use.
 	-n
 		Produce NMake makefiles instead of a Visual Studio solution. Cannout be used with -N.
@@ -348,21 +348,13 @@ case $VS_VERSION in
 		;;
 
 	14|14.0|2015 )
-		GENERATOR="Visual Studio 14 2015"
-		TOOLSET="vc140"
-		MSVC_REAL_VER="14"
-		MSVC_VER="14.0"
-		MSVC_YEAR="2015"
-		MSVC_REAL_YEAR="2015"
-		MSVC_DISPLAY_YEAR="2015"
-		BOOST_VER="1.67.0"
-		BOOST_VER_URL="1_67_0"
-		BOOST_VER_SDK="106700"
+		echo "Visual Studio 2015 is no longer supported"
+		wrappedExit 1
 		;;
 
 	12|12.0|2013 )
 		echo "Visual Studio 2013 is no longer supported"
-		exit 1
+		wrappedExit 1
 		;;
 esac
 
@@ -507,11 +499,6 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Qt
 	if [ -z $APPVEYOR ]; then
-		if [ "${MSVC_REAL_YEAR}" = "2015" ] && [ "${BITS}" = "32" ]; then
-			echo "Qt no longer provides MSVC2015 Win32 packages, switch to 64-bit or a newer Visual Studio. Sorry."
-			exit 1
-		fi
-
 		download "AQt installer" \
 			"https://files.pythonhosted.org/packages/f3/bb/aee972f08deecca31bfc46b5aedfad1ce6c7f3aaf1288d685e4a914b53ac/aqtinstall-0.8-py2.py3-none-any.whl" \
 			"aqtinstall-0.8-py2.py3-none-any.whl"
@@ -606,14 +593,8 @@ fi
 		# Appveyor has all the boost we need already
 		BOOST_SDK="c:/Libraries/boost_${BOOST_VER_URL}"
 
-		if [ $MSVC_REAL_VER -ge 15 ]; then
-			LIB_SUFFIX="1"
-		else
-			LIB_SUFFIX="0"
-		fi
-
 		add_cmake_opts -DBOOST_ROOT="$BOOST_SDK" \
-			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.${LIB_SUFFIX}"
+			-DBOOST_LIBRARYDIR="${BOOST_SDK}/lib${BITS}-msvc-${MSVC_VER}.1"
 		add_cmake_opts -DBoost_COMPILER="-${TOOLSET}"
 
 		echo Done.
@@ -964,24 +945,12 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
 	MSVC_INSTALLATION_PATH=$(vswhere -legacy -products '*' -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
-	if [ $MSVC_REAL_VER -ge 15 ]; then
-		echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
-	else
-		if [ $(uname -m) == 'x86_64' ]; then
-			if [ $BITS -eq 64 ]; then
-				compiler=amd64
-			else
-				compiler=amd64_x86
-			fi
-		else
-			if [ $BITS -eq 64 ]; then
-				compiler=x86_amd64
-			else
-				compiler=x86
-			fi
-		fi
-		echo "@\"${MSVC_INSTALLATION_PATH}\VC\vcvarsall.bat\" $compiler" > ActivateMSVC.bat
+	if [ -z "$MSVC_INSTALLATION_PATH" ]; then
+		echo "vswhere was unable to find MSVC $MSVC_DISPLAY_YEAR"
+		wrappedExit 1
 	fi
+	
+	echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
 	
 	cp "../CI/activate_msvc.sh" .
 	sed -i "s/\$MSVC_DISPLAY_YEAR/$MSVC_DISPLAY_YEAR/g" activate_msvc.sh
