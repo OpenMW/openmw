@@ -165,7 +165,14 @@ namespace Gui
 
     FontLoader::~FontLoader()
     {
-        MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
+        try
+        {
+            MyGUI::ResourceManager::getInstance().unregisterLoadXmlDelegate("Resource");
+        }
+        catch(const MyGUI::Exception& e)
+        {
+            Log(Debug::Error) << "Error in the FontLoader destructor: " << e.what();
+        }
 
         for (std::vector<MyGUI::ITexture*>::iterator it = mTextures.begin(); it != mTextures.end(); ++it)
             delete *it;
