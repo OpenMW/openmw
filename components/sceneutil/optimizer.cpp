@@ -358,6 +358,21 @@ void CollectLowestTransformsVisitor::doTransform(osg::Object* obj,osg::Matrix& m
     {
         osgUtil::TransformAttributeFunctor tf(matrix);
         drawable->accept(tf);
+
+        osg::Geometry *geom = drawable->asGeometry();
+        osg::Vec4Array* tangents = geom ? dynamic_cast<osg::Vec4Array*>(geom->getTexCoordArray(7)) : nullptr;
+        if (tangents)
+        {
+            for (unsigned int i=0; i<tangents->size(); ++i)
+            {
+                osg::Vec4f& itr = (*tangents)[i];
+                osg::Vec3f vec3 (itr.x(), itr.y(), itr.z());
+                vec3 = osg::Matrix::transform3x3(tf._im, vec3);
+                vec3.normalize();
+                itr = osg::Vec4f(vec3.x(), vec3.y(), vec3.z(), itr.w());
+            }
+        }
+
         drawable->dirtyBound();
         drawable->dirtyDisplayList();
 
@@ -614,12 +629,12 @@ void Optimizer::FlattenStaticTransformsVisitor::apply(osg::Drawable& drawable)
     if((geometry) && (isOperationPermissibleForObject(&drawable)))
     {
         osg::VertexBufferObject* vbo = nullptr;
-        if(geometry->getVertexArray() && geometry->getVertexArray()->referenceCount() > 1) {
+        if(geometry->getVertexArray() && geometry->getVertexArray()->referenceCount() > 1)
             geometry->setVertexArray(cloneArray(geometry->getVertexArray(), vbo, geometry));
-        }
-        if(geometry->getNormalArray() && geometry->getNormalArray()->referenceCount() > 1) {
+        if(geometry->getNormalArray() && geometry->getNormalArray()->referenceCount() > 1)
             geometry->setNormalArray(cloneArray(geometry->getNormalArray(), vbo, geometry));
-        }
+        if(geometry->getTexCoordArray(7) && geometry->getTexCoordArray(7)->referenceCount() > 1) // tangents
+            geometry->setTexCoordArray(7, cloneArray(geometry->getTexCoordArray(7), vbo, geometry));
     }
     _drawableSet.insert(&drawable);
 }
