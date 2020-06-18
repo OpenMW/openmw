@@ -945,6 +945,11 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
 	MSVC_INSTALLATION_PATH=$(vswhere -legacy -products '*' -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	if [ -z "$MSVC_INSTALLATION_PATH" ]; then
+		echo "vswhere was unable to find MSVC $MSVC_DISPLAY_YEAR"
+		wrappedExit 1
+	fi
+	
 	echo "@\"${MSVC_INSTALLATION_PATH}\Common7\Tools\VsDevCmd.bat\" -no_logo -arch=$([ $BITS -eq 64 ] && echo "amd64" || echo "x86") -host_arch=$([ $(uname -m) == 'x86_64' ] && echo "amd64" || echo "x86")" > ActivateMSVC.bat
 	
 	cp "../CI/activate_msvc.sh" .
