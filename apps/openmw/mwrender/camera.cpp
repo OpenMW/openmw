@@ -7,6 +7,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -64,7 +65,10 @@ namespace MWRender
       mCameraDistance(0.f),
       mThirdPersonMode(ThirdPersonViewMode::Standard),
       mOverShoulderOffset(osg::Vec2f(30.0f, -10.0f)),
-      mSmoothTransitionToCombatMode(0.f)
+      mDefaultShoulderIsRight(true),
+      mThirdPersionOffsetType(ThirdPersonOffsetType::RightShoulder),
+      mFocalPointCurrentOffset(osg::Vec2d()),
+      mFocalPointTransitionSpeed(1.f)
     {
         mVanity.enabled = false;
         mVanity.allowed = true;
@@ -121,12 +125,9 @@ namespace MWRender
         osg::Vec3d offset(0, 0, 10.f);
         if (mThirdPersonMode == ThirdPersonViewMode::OverShoulder && !mPreviewMode && !mVanity.enabled)
         {
-            float horizontalOffset = mOverShoulderOffset.x() * (1.f - mSmoothTransitionToCombatMode);
-            float verticalOffset = mSmoothTransitionToCombatMode * 15.f + (1.f - mSmoothTransitionToCombatMode) * mOverShoulderOffset.y();
-
-            offset.x() += horizontalOffset * cos(getYaw());
-            offset.y() += horizontalOffset * sin(getYaw());
-            offset.z() += verticalOffset;
+            offset.x() += mFocalPointCurrentOffset.x() * cos(getYaw());
+            offset.y() += mFocalPointCurrentOffset.x() * sin(getYaw());
+            offset.z() += mFocalPointCurrentOffset.y();
         }
         return offset;
     }
@@ -214,28 +215,78 @@ namespace MWRender
             rotateCamera(0.f, osg::DegreesToRadians(3.f * duration), true);
         }
 
-        updateSmoothTransitionToCombatMode(duration);
+        updateFocalPointOffset(duration);
     }
 
     void Camera::setOverShoulderOffset(float horizontal, float vertical)
     {
-        mOverShoulderOffset = osg::Vec2f(horizontal, vertical);
+        mOverShoulderOffset = osg::Vec2f(std::abs(horizontal), vertical);
+        mDefaultShoulderIsRight = horizontal >= 0;
     }
 
-    void Camera::updateSmoothTransitionToCombatMode(float duration)
+    void Camera::switchToLeftShoulder()
     {
-        bool combatMode = true;
-        if (mTrackingPtr.getClass().isActor())
-            combatMode = mTrackingPtr.getClass().getCreatureStats(mTrackingPtr).getDrawState() != MWMechanics::DrawState_Nothing;
-        float speed = ((combatMode ? 1.f : 0.f) - mSmoothTransitionToCombatMode) * 5;
-        if (speed != 0)
-            speed += speed > 0 ? 1 : -1;
+        if (mThirdPersionOffsetType == ThirdPersonOffsetType::RightShoulder)
+            mThirdPersionOffsetType = ThirdPersonOffsetType::LeftShoulder;
+    }
 
-        mSmoothTransitionToCombatMode += speed * duration;
-        if (mSmoothTransitionToCombatMode > 1)
-            mSmoothTransitionToCombatMode = 1;
-        if (mSmoothTransitionToCombatMode < 0)
-            mSmoothTransitionToCombatMode = 0;
+    void Camera::switchToRightShoulder()
+    {
+        if (mThirdPersionOffsetType == ThirdPersonOffsetType::LeftShoulder)
+            mThirdPersionOffsetType = ThirdPersonOffsetType::RightShoulder;
+    }
+
+    void Camera::switchToDefaultShoulder()
+    {
+        if (mThirdPersionOffsetType == ThirdPersonOffsetType::LeftShoulder || mThirdPersionOffsetType == ThirdPersonOffsetType::RightShoulder)
+            mThirdPersionOffsetType = mDefaultShoulderIsRight ? ThirdPersonOffsetType::RightShoulder : ThirdPersonOffsetType::LeftShoulder;
+    }
+
+    void Camera::updateFocalPointOffset(float duration)
+    {
+        if (mThirdPersonMode == ThirdPersonViewMode::Standard)
+            return; // In Standard mode there is no focal point offset.
+
+        ThirdPersonOffsetType newOffsetType = mThirdPersionOffsetType;
+        if (mTrackingPtr.getClass().isActor() && mTrackingPtr.getClass().getCreatureStats(mTrackingPtr).getDrawState() != MWMechanics::DrawState_Nothing)
+            newOffsetType = ThirdPersonOffsetType::Combat;
+        else if (MWBase::Environment::get().getWorld()->isSwimming(mTrackingPtr))
+            newOffsetType = ThirdPersonOffsetType::Swimming;
+        else if (mThirdPersionOffsetType == ThirdPersonOffsetType::Combat || mThirdPersionOffsetType == ThirdPersonOffsetType::Swimming)
+            newOffsetType = mDefaultShoulderIsRight ? ThirdPersonOffsetType::RightShoulder : ThirdPersonOffsetType::LeftShoulder;
+        if (newOffsetType != mThirdPersionOffsetType)
+        {
+            if (newOffsetType == ThirdPersonOffsetType::Combat || mThirdPersionOffsetType == ThirdPersonOffsetType::Combat)
+                mFocalPointTransitionSpeed = 5;
+            else
+                mFocalPointTransitionSpeed = 1;
+            mThirdPersionOffsetType = newOffsetType;
+        }
+
+        osg::Vec2d focalPointTargetOffset;
+        switch (mThirdPersionOffsetType)
+        {
+        case ThirdPersonOffsetType::RightShoulder:
+            focalPointTargetOffset = mOverShoulderOffset;
+            break;
+        case ThirdPersonOffsetType::LeftShoulder:
+            focalPointTargetOffset = mOverShoulderOffset
+            focalPointTargetOffset.x() *= -1;
+            break;
+        case ThirdPersonOffsetType::Combat:
+        case ThirdPersonOffsetType::Swimming:
+        default:
+            focalPointTargetOffset = osg::Vec2d(0, 15);
+        }
+
+        osg::Vec2d delta = focalPointTargetOffset - mFocalPointCurrentOffset;
+        if (delta.length2() > 0)
+        {
+            float coef = duration * (1.0 + 5.0 / delta.length()) * mFocalPointTransitionSpeed;
+            mFocalPointCurrentOffset += delta * std::min(coef, 1.0f);
+        }
+        else
+            mFocalPointTransitionSpeed = 1.f;
     }
 
     void Camera::toggleViewMode(bool force)

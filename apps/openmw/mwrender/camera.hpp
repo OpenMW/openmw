@@ -27,6 +27,8 @@ namespace MWRender
         enum class ThirdPersonViewMode {Standard, OverShoulder};
 
     private:
+        enum class ThirdPersonOffsetType { RightShoulder, LeftShoulder, Combat, Swimming };
+
         struct CamData {
             float pitch, yaw, offset;
         };
@@ -60,12 +62,15 @@ namespace MWRender
 
         ThirdPersonViewMode mThirdPersonMode;
         osg::Vec2f mOverShoulderOffset;
+        bool mDefaultShoulderIsRight;
         osg::Vec3d mFocalPointAdjustment;
 
-        // Makes sense only if mThirdPersonMode is OverShoulder. Can be in range [0, 1].
-        // Used for smooth transition from non-combat camera position (0) to combat camera position (1).
-        float mSmoothTransitionToCombatMode;
-        void updateSmoothTransitionToCombatMode(float duration);
+        // Makes sense only if mThirdPersonMode is OverShoulder.
+        ThirdPersonOffsetType mThirdPersionOffsetType;
+        osg::Vec2d mFocalPointCurrentOffset;
+        float mFocalPointTransitionSpeed;
+
+        void updateFocalPointOffset(float duration);
         float getCameraDistanceCorrection() const;
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
@@ -78,6 +83,10 @@ namespace MWRender
 
         void setThirdPersonViewMode(ThirdPersonViewMode mode) { mThirdPersonMode = mode; }
         void setOverShoulderOffset(float horizontal, float vertical);
+
+        void switchToLeftShoulder();
+        void switchToRightShoulder();
+        void switchToDefaultShoulder();
 
         /// Update the view matrix of \a cam
         void updateCamera(osg::Camera* cam);
