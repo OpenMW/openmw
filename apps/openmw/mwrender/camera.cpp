@@ -270,7 +270,7 @@ namespace MWRender
             focalPointTargetOffset = mOverShoulderOffset;
             break;
         case ThirdPersonOffsetType::LeftShoulder:
-            focalPointTargetOffset = mOverShoulderOffset
+            focalPointTargetOffset = mOverShoulderOffset;
             focalPointTargetOffset.x() *= -1;
             break;
         case ThirdPersonOffsetType::Combat:
