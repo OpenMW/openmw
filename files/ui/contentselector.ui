@@ -67,6 +67,9 @@
           </widget>
          </item>
          <item>
+          <widget class="QLineEdit" name="searchFilter"/>
+         </item>
+         <item>
           <widget class="QToolButton" name="refreshButton">
            <property name="enabled">
             <bool>true</bool>
