@@ -40,15 +40,36 @@ void ContentSelectorView::ContentSelector::buildGameFileView()
     ui.gameFileView->setCurrentIndex(0);
 }
 
+class AddOnProxyModel : public QSortFilterProxyModel
+{
+public:
+    explicit AddOnProxyModel(QObject* parent = nullptr) :
+        QSortFilterProxyModel(parent)
+    {}
+
+    bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const override
+    {
+        static const QString ContentTypeAddon = QString::number((int)ContentSelectorModel::ContentType_Addon);
+
+        QModelIndex nameIndex = sourceModel()->index(sourceRow, 0, sourceParent);
+        const QString userRole = sourceModel()->data(nameIndex, Qt::UserRole).toString();
+
+        return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent) && userRole == ContentTypeAddon;
+    }
+};
+
 void ContentSelectorView::ContentSelector::buildAddonView()
 {
     ui.addonView->setVisible (true);
 
-    mAddonProxyModel = new QSortFilterProxyModel(this);
-    mAddonProxyModel->setFilterRegExp (QString::number((int)ContentSelectorModel::ContentType_Addon));
-    mAddonProxyModel->setFilterRole (Qt::UserRole);
+    mAddonProxyModel = new AddOnProxyModel(this);
+    mAddonProxyModel->setFilterRegExp(searchFilter()->text());
+    mAddonProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mAddonProxyModel->setDynamicSortFilter (true);
     mAddonProxyModel->setSourceModel (mContentModel);
+
+    connect(ui.searchFilter, SIGNAL(textEdited(QString)), mAddonProxyModel, SLOT(setFilterWildcard(QString)));
+    connect(ui.searchFilter, SIGNAL(textEdited(QString)), this, SLOT(slotSearchFilterTextChanged(QString)));
 
     ui.addonView->setModel(mAddonProxyModel);
 
@@ -260,4 +281,9 @@ void ContentSelectorView::ContentSelector::slotCopySelectedItemsPaths()
     {
         clipboard->setText(filepaths);
     }
+}
+
+void ContentSelectorView::ContentSelector::slotSearchFilterTextChanged(const QString& newText)
+{
+    ui.addonView->setDragEnabled(newText.isEmpty());
 }
