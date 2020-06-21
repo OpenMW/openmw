@@ -245,6 +245,7 @@
     Bug #5350: An attempt to launch magic bolt causes "AL error invalid value" error
     Bug #5352: Light source items' duration is decremented while they aren't visible
     Feature #1724: Handle AvoidNode
+    Feature #2159: "Graying out" exhausted dialogue topics
     Feature #2229: Improve pathfinding AI
     Feature #3025: Analogue gamepad movement controls
     Feature #3442: Default values for fallbacks from ini file

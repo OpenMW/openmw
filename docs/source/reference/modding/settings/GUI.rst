@@ -140,3 +140,29 @@ The alpha value is currently ignored.
 This setting can only be configured by editing the settings configuration file.
 This setting has no effect if the crosshair setting in the HUD Settings Section is false.
 This setting has no effect if the show owned setting in the Game Settings Section is false.
+
+color topic specific
+--------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0
+:Default:	empty
+
+This setting overrides the color of keywords in the dialogue topic window.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+The color is overriden if the actor is about to give an answer that is unique to him (that is, dialogue with their object ID in the Actor field) that wasn't seen yet.
+
+color topic exhausted
+---------------------
+
+:Type:		RGBA floating point
+:Range:		0.0 to 1.0
+:Default:	empty
+
+This setting overrides the color of keywords in the dialogue topic window.
+The value is composed of four floating point values representing the red, green, blue and alpha channels.
+The alpha value is currently ignored.
+
+The color is overridden if the next actor responses to the topic keyword has already been seen by the player.

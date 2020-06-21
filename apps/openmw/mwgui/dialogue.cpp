@@ -339,6 +339,7 @@ namespace MWGui
 
         mTopicsList->adjustSize();
         updateHistory();
+        updateTopicFormat();
         mCurrentWindowSize = _sender->getSize();
     }
 
@@ -448,7 +449,6 @@ namespace MWGui
         setTitle(mPtr.getClass().getName(mPtr));
 
         updateTopics();
-        updateTopicsPane(); // force update for new services
 
         updateDisposition();
         restock();
@@ -491,8 +491,6 @@ namespace MWGui
             return;
         mIsCompanion = isCompanion();
         mKeywords = keyWords;
-
-        updateTopicsPane();
     }
 
     void DialogueWindow::updateTopicsPane()
@@ -542,15 +540,16 @@ namespace MWGui
             mTopicsList->addSeparator();
 
 
-        for(std::string& keyword : mKeywords)
+        for(const auto& keyword : mKeywords)
         {
+            std::string topicId = Misc::StringUtils::lowerCase(keyword);
             mTopicsList->addItem(keyword);
 
             Topic* t = new Topic(keyword);
             t->eventTopicActivated += MyGUI::newDelegate(this, &DialogueWindow::onTopicActivated);
-            mTopicLinks[Misc::StringUtils::lowerCase(keyword)] = t;
+            mTopicLinks[topicId] = t;
 
-            mKeywordSearch.seed(Misc::StringUtils::lowerCase(keyword), intptr_t(t));
+            mKeywordSearch.seed(topicId, intptr_t(t));
         }
         mTopicsList->adjustSize();
 
@@ -736,9 +735,28 @@ namespace MWGui
             updateHistory();
     }
 
+    void DialogueWindow::updateTopicFormat()
+    {
+        std::string specialColour = Settings::Manager::getString("color topic specific", "GUI");
+        std::string oldColour = Settings::Manager::getString("color topic exhausted", "GUI");
+
+        for (const std::string& keyword : mKeywords)
+        {
+            int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(keyword);
+            MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
+
+            if (!specialColour.empty() && flag & MWBase::DialogueManager::TopicType::Specific)
+                button->getSubWidgetText()->setTextColour(MyGUI::Colour::parse(specialColour));
+            else if (!oldColour.empty() && flag & MWBase::DialogueManager::TopicType::Exhausted)
+                button->getSubWidgetText()->setTextColour(MyGUI::Colour::parse(oldColour));
+        }
+    }
+
     void DialogueWindow::updateTopics()
     {
         setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics());
+        updateTopicsPane();
+        updateTopicFormat();
     }
 
     bool DialogueWindow::isCompanion()

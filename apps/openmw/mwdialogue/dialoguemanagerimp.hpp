@@ -5,6 +5,7 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/translation/translation.hpp>
@@ -30,6 +31,7 @@ namespace MWDialogue
             ModFactionReactionMap mChangedFactionReaction;
 
             std::set<std::string, Misc::StringUtils::CiComp> mActorKnownTopics;
+            std::unordered_map<std::string, int> mActorKnownTopicsFlag;
 
             Translation::Storage& mTranslationDataStorage;
             MWScript::CompilerContext mCompilerContext;
@@ -71,6 +73,9 @@ namespace MWDialogue
             virtual bool startDialogue (const MWWorld::Ptr& actor, ResponseCallback* callback);
 
             std::list<std::string> getAvailableTopics();
+            int getTopicFlag(const std::string& topicId) final;
+
+            bool inJournal (const std::string& topicId, const std::string& infoId) final;
 
             virtual void addTopic (const std::string& topic);
 

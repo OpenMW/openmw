@@ -66,9 +66,6 @@ namespace MWDialogue
             const ESM::DialInfo* search (const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
             ///< Get a matching response for the requested dialogue.
             ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
-
-            bool responseAvailable (const ESM::Dialogue& dialogue) const;
-            ///< Does a matching response exist? (disposition is ignored for this check)
     };
 }
 
