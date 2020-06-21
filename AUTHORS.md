@@ -155,6 +155,7 @@ Programmers
     Paul McElroy (Greendogo)
     pchan3
     Perry Hugh
+    Petr Mikheev (ptmikheev)
     Phillip Andrews (PhillipAnd)
     Pi03k
     Pieter van der Kloet (pvdk)
