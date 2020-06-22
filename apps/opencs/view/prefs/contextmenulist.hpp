@@ -14,7 +14,7 @@ namespace CSVPrefs
     
         public:
     
-            ContextMenuList(QWidget* parent = 0);
+            ContextMenuList(QWidget* parent = nullptr);
     
         protected:
     

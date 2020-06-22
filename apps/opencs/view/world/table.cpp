@@ -671,7 +671,7 @@ void CSVWorld::Table::settingChanged (const CSMPrefs::Setting *setting)
     {
         std::string modifierString = setting->getKey().substr (6);
 
-        Qt::KeyboardModifiers modifiers = 0;
+        Qt::KeyboardModifiers modifiers;
 
         if (modifierString=="-s")
             modifiers = Qt::ShiftModifier;

@@ -21,7 +21,7 @@ namespace CSVRender
         public:
 
             OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
-                QWidget* parent = 0);
+                QWidget* parent = nullptr);
             ~OrbitCameraMode();
 
             virtual void activate(CSVWidget::SceneToolbar* toolbar);

@@ -33,7 +33,7 @@
 #include "cameracontroller.hpp"
 
 CSVRender::WorldspaceWidget::WorldspaceWidget (CSMDoc::Document& document, QWidget* parent)
-    : SceneWidget (document.getData().getResourceSystem(), parent, 0, false)
+    : SceneWidget (document.getData().getResourceSystem(), parent, Qt::WindowFlags(), false)
     , mSceneElements(0)
     , mRun(0)
     , mDocument(document)
