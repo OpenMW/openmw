@@ -776,7 +776,7 @@ fi
 		fi
 
 		cd $QT_SDK
-		add_cmake_opts -DDESIRED_QT_VERSION=5 \
+		add_cmake_opts \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 		if [ $CONFIGURATION == "Debug" ]; then
@@ -789,7 +789,7 @@ fi
 		echo Done.
 	else
 		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
-		add_cmake_opts -DDESIRED_QT_VERSION=5 \
+		add_cmake_opts \
 			-DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
 		if [ $CONFIGURATION == "Debug" ]; then
