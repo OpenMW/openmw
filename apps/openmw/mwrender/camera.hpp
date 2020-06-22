@@ -70,6 +70,8 @@ namespace MWRender
         osg::Vec2d mFocalPointCurrentOffset;
         float mFocalPointTransitionSpeed;
 
+        float mSmoothedSpeed;
+
         void updateFocalPointOffset(float duration);
         float getCameraDistanceCorrection() const;
 
