@@ -144,11 +144,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id)),
   mRefreshAction (0), mRefreshState (refreshState)
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
-#else
-    horizontalHeader()->setResizeMode (QHeaderView::Interactive);
-#endif
     horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
     setSortingEnabled (true);

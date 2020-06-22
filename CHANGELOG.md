@@ -31,6 +31,7 @@
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
+    Task #5480: Drop Qt4 support
 
 0.46.0
 ------

@@ -3,10 +3,7 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 #include <QDir>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
-#endif
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -54,13 +51,11 @@ Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings:
 
 bool Launcher::GraphicsPage::setupSDL()
 {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     bool sdlConnectSuccessful = initSDL();
     if (!sdlConnectSuccessful)
     {
         return false;
     }
-#endif
 
     int displays = SDL_GetNumVideoDisplays();
 
@@ -81,10 +76,8 @@ bool Launcher::GraphicsPage::setupSDL()
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     // Disconnect from SDL processes
     quitSDL();
-#endif
 
     return true;
 }
@@ -323,7 +316,6 @@ QRect Launcher::GraphicsPage::getMaximumResolution()
 {
     QRect max;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     for (QScreen* screen : QGuiApplication::screens())
     {
         QRect res = screen->geometry();
@@ -332,17 +324,6 @@ QRect Launcher::GraphicsPage::getMaximumResolution()
         if (res.height() > max.height())
             max.setHeight(res.height());
     }
-#else
-    int screens = QApplication::desktop()->screenCount();
-    for (int i = 0; i < screens; ++i)
-    {
-        QRect res = QApplication::desktop()->screenGeometry(i);
-        if (res.width() > max.width())
-            max.setWidth(res.width());
-        if (res.height() > max.height())
-            max.setHeight(res.height());
-    }
-#endif
     return max;
 }
 

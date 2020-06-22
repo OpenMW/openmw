@@ -79,16 +79,9 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-if (DESIRED_QT_VERSION MATCHES 4)
-    include(${QT_USE_FILE})
-    QT4_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-    QT4_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
-    QT4_WRAP_UI(UI_HDRS ${WIZARD_UI})
-else()
-    QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-    QT5_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
-    QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
-endif()
+QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+QT5_WRAP_CPP(MOC_SRCS ${WIZARD_HEADER_MOC})
+QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -109,22 +102,11 @@ target_link_libraries(openmw-wizard
     components
 )
 
-if (DESIRED_QT_VERSION MATCHES 4)
-    target_link_libraries(openmw-wizard
-    ${QT_QTGUI_LIBRARY}
-    ${QT_QTCORE_LIBRARY})
-
-    if (WIN32)
-        target_link_libraries(openmw-wizard ${QT_QTMAIN_LIBRARY})
-    endif()
-else()
-    target_link_libraries(openmw-wizard Qt5::Widgets Qt5::Core)
-endif()
+target_link_libraries(openmw-wizard Qt5::Widgets Qt5::Core)
 
 if (OPENMW_USE_UNSHIELD)
     target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARIES})
 endif()
-
 
 if(DPKG_PROGRAM)
     INSTALL(TARGETS openmw-wizard RUNTIME DESTINATION games COMPONENT openmw-wizard)

@@ -13,18 +13,11 @@
 #endif // MAC_OS_X_VERSION_MIN_REQUIRED
 
 #include "maindialog.hpp"
-#include "sdlinit.hpp"
 
 int main(int argc, char *argv[])
 {
     try
     {
-// Note: we should init SDL2 before Qt4 to avoid crashes on Linux,
-// but we should init SDL2 after Qt5 to avoid input issues on MacOS X.
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
-        initSDL();
-#endif
-
         QApplication app(argc, argv);
 
         // Internationalization 
@@ -49,11 +42,6 @@ int main(int argc, char *argv[])
             mainWin.show();
 
         int exitCode = app.exec();
-
-#if QT_VERSION < QT_VERSION_CHECK(5,0,0)
-        // Disconnect from SDL processes
-        quitSDL();
-#endif
 
         return exitCode;
     }
