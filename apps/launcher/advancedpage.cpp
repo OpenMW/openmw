@@ -104,6 +104,7 @@ bool Launcher::AdvancedPage::loadSettings()
     loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    loadSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
     int showOwnedIndex = mEngineSettings.getInt("show owned", "Game");
     // Match the index with the option (only 0, 1, 2, or 3 are valid). Will default to 0 if invalid.
     if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
@@ -171,6 +172,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
     saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
     saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
+    saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
     int showOwnedCurrentIndex = showOwnedComboBox->currentIndex();
     if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
         mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
