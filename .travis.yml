@@ -14,10 +14,10 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
-      - ubuntu-toolchain-r-test
+      # - ubuntu-toolchain-r-test  # for GCC-10
     packages: [
       # Dev
-      cmake, clang-tools, gcc-9, g++-9, ccache,
+      build-essential, cmake, clang-tools, ccache,
       # Boost
       libboost-filesystem-dev, libboost-iostreams-dev, libboost-program-options-dev, libboost-system-dev,
       # FFmpeg
@@ -41,21 +41,14 @@ matrix:
       os: osx
       osx_image: xcode10.2
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Bionic GCC-7
+    - name: OpenMW (all) on Ubuntu Focal GCC-9
       os: linux
-      dist: bionic
+      dist: focal
       sudo: required
       if: branch != coverity_scan
-    - name: OpenMW (all) on Ubuntu Bionic GCC-9
+    - name: OpenMW (openmw) on Ubuntu Focal Clang-10 with Static Analysis
       os: linux
-      dist: bionic
-      sudo: required
-      env:
-        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
-      if: branch != coverity_scan
-    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
-      os: linux
-      dist: bionic
+      dist: focal
       sudo: required
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
@@ -63,9 +56,9 @@ matrix:
         - BUILD_OPENMW_CS="OFF"
       if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW (openmw-cs) on Ubuntu Bionic Clang-6 with Static Analysis
+    - name: OpenMW (openmw-cs and tools) on Ubuntu Focal Clang-10 with Static Analysis
       os: linux
-      dist: bionic
+      dist: focal
       sudo: required
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
@@ -75,11 +68,13 @@ matrix:
       compiler: clang
     - name: OpenMW Components Coverity Scan
       os: linux
-      dist: bionic
+      dist: focal
       sudo: required
       if: branch = coverity_scan
 #   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Bionic Clang-6 with Static Analysis
+#    - name: OpenMW (openmw) on Ubuntu Focal with GCC-10
+#      env:
+#        - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
