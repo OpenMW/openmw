@@ -17,10 +17,7 @@
 #include <osgViewer/ViewerBase>
 #include <QInputEvent>
 #include <QPointer>
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
 #include <QWindow>
-#endif
 
 using namespace osgQt;
 
@@ -209,11 +206,7 @@ bool GraphicsWindowQt::init( QWidget* parent, const QGLWidget* shareWidget, Qt::
         // WindowFlags
         Qt::WindowFlags flags = f | Qt::Window | Qt::CustomizeWindowHint;
         if ( _traits->windowDecoration )
-            flags |= Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowSystemMenuHint
-#if (QT_VERSION_CHECK(4, 5, 0) <= QT_VERSION)
-                | Qt::WindowCloseButtonHint
-#endif
-                ;
+            flags |= Qt::WindowTitleHint | Qt::WindowMinMaxButtonsHint | Qt::WindowSystemMenuHint;
 
         // create widget
         _widget = new GLWidget( traits2qglFormat( _traits.get() ), parent, shareWidget, flags );
@@ -527,11 +520,11 @@ bool GraphicsWindowQt::releaseContextImplementation()
 
 void GraphicsWindowQt::swapBuffersImplementation()
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-    // QOpenGLContext complains if we swap on an non-exposed QWindow
+    // FIXME: QOpenGLContext complains if we swap on an non-exposed QWindow on Qt5.
+    // Probably we can upgrade our osgQt to avoid it.
     if (!_widget || !_widget->windowHandle()->isExposed())
         return;
-#endif
+
     // FIXME: the processDeferredEvents should really be executed in a GUI (main) thread context but
     // I couln't find any reliable way to do this. For now, lets hope non of *GUI thread only operations* will
     // be executed in a QGLWidget::event handler. On the other hand, calling GUI only operations in the

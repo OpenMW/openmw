@@ -33,11 +33,7 @@ CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document,
     setSelectionBehavior (QAbstractItemView::SelectRows);
     setSelectionMode (QAbstractItemView::ExtendedSelection);
 
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
-#else
-    horizontalHeader()->setResizeMode (QHeaderView::Interactive);
-#endif
     verticalHeader()->hide();
 
     int columns = model->columnCount(QModelIndex());

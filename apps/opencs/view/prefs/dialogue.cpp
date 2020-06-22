@@ -7,10 +7,7 @@
 #include <QListWidget>
 #include <QStackedWidget>
 #include <QListWidgetItem>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
 #include <QScreen>
-#endif
 
 #include <components/debug/debuglog.hpp>
 
@@ -116,15 +113,9 @@ void CSVPrefs::Dialogue::show()
     }
     else
     {
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
-        QRect scr = QGuiApplication::primaryScreen()->geometry();
-#else
-        QRect scr = QApplication::desktop()->screenGeometry();
-#endif
-
         // otherwise place at the centre of the screen
+        QRect scr = QGuiApplication::primaryScreen()->geometry();
         QPoint screenCenter = scr.center();
-
         move (screenCenter - QPoint(frameGeometry().width()/2, frameGeometry().height()/2));
     }
 

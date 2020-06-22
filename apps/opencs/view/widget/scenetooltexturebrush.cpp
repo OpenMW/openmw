@@ -243,13 +243,8 @@ CSVWidget::SceneToolTextureBrush::SceneToolTextureBrush (SceneToolbar *parent, c
     mTable->setShowGrid (true);
     mTable->verticalHeader()->hide();
     mTable->horizontalHeader()->hide();
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     mTable->horizontalHeader()->setSectionResizeMode (0, QHeaderView::Stretch);
     mTable->horizontalHeader()->setSectionResizeMode (1, QHeaderView::Stretch);
-#else
-    mTable->horizontalHeader()->setResizeMode (0, QHeaderView::Stretch);
-    mTable->horizontalHeader()->setResizeMode (1, QHeaderView::Stretch);
-#endif
     mTable->setSelectionMode (QAbstractItemView::NoSelection);
 
     layout->addWidget (mTable);
