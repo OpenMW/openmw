@@ -120,9 +120,10 @@ void Wizard::MainWizard::addLogText(const QString &text)
     QTextStream out(&file);
 
     if (!text.isEmpty())
-        out << text << endl;
-
-//    file.close();
+    {
+        out << text << "\n";
+        out.flush();
+    }
 }
 
 void Wizard::MainWizard::setupGameSettings()
