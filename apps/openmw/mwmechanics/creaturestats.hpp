@@ -80,6 +80,9 @@ namespace MWMechanics
 
         MWWorld::TimeStamp mTimeOfDeath;
 
+        // The difference between view direction and lower body direction.
+        float mSideMovementAngle;
+
     public:
         typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
     private:
@@ -298,6 +301,9 @@ namespace MWMechanics
         void addCorprusSpell(const std::string& sourceId, CorprusStats& stats);
 
         void removeCorprusSpell(const std::string& sourceId);
+
+        float getSideMovementAngle() const { return mSideMovementAngle; }
+        void setSideMovementAngle(float angle) { mSideMovementAngle = angle; }
     };
 }
 

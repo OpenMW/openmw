@@ -364,6 +364,7 @@ namespace MWRender
         float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
         mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
+        updateThirdPersonViewMode();
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
@@ -377,6 +378,15 @@ namespace MWRender
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
+    }
+
+    void RenderingManager::updateThirdPersonViewMode()
+    {
+        if (Settings::Manager::getBool("view over shoulder", "Camera"))
+            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::OverShoulder);
+        else
+            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::Standard);
+        mCamera->setOverShoulderHorizontalOffset(Settings::Manager::getFloat("view over shoulder horizontal offset", "Camera"));
     }
 
     osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
@@ -616,7 +626,7 @@ namespace MWRender
 
         mCamera->update(dt, paused);
 
-        osg::Vec3f focal, cameraPos;
+        osg::Vec3d focal, cameraPos;
         mCamera->getPosition(focal, cameraPos);
         mCurrentCameraPos = cameraPos;
 
@@ -1323,13 +1333,18 @@ namespace MWRender
         {
             if(mCamera->isNearest() && dist > 0.f)
                 mCamera->toggleViewMode();
+            else if (override)
+                mCamera->setBaseCameraDistance(-dist / 120.f * 10, adjust);
             else
-                mCamera->setCameraDistance(-dist / 120.f * 10, adjust, override);
+                mCamera->setCameraDistance(-dist / 120.f * 10, adjust);
         }
         else if(mCamera->isFirstPerson() && dist < 0.f)
         {
             mCamera->toggleViewMode();
-            mCamera->setCameraDistance(0.f, false, override);
+            if (override)
+                mCamera->setBaseCameraDistance(0.f, false);
+            else
+                mCamera->setCameraDistance(0.f, false);
         }
     }
 
@@ -1376,7 +1391,7 @@ namespace MWRender
     void RenderingManager::changeVanityModeScale(float factor)
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->setCameraDistance(-factor/120.f*10, true, true);
+            mCamera->setBaseCameraDistance(-factor/120.f*10, true);
     }
 
     void RenderingManager::overrideFieldOfView(float val)

@@ -315,3 +315,30 @@ Setting the value of this setting to true will remove the 0 lower cap from the v
 allowing Damage Fatigue to reduce Fatigue to a value below zero.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+turn to movement direction
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Affects side and diagonal movement. Enabling this setting makes movement more realistic.
+
+If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.
+
+If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.
+
+This setting can only be configured by editing the settings configuration file.
+
+turn to movement direction speed coef
+-------------------------------------
+
+:Type:		floating point
+:Range:		>0
+:Default:	1.0
+
+Makes difference only if 'turn to movement direction' is enabled. Modifies turning speed.
+
+This setting can only be configured by editing the settings configuration file.
+

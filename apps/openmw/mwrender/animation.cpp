@@ -621,6 +621,8 @@ namespace MWRender
         , mTextKeyListener(nullptr)
         , mHeadYawRadians(0.f)
         , mHeadPitchRadians(0.f)
+        , mUpperBodyYawRadians(0.f)
+        , mLegsYawRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
     {
@@ -1334,13 +1336,36 @@ namespace MWRender
 
         updateEffects();
 
+        const float epsilon = 0.001f;
+        float yawOffset = 0;
+        if (mRootController)
+        {
+            bool enable = std::abs(mLegsYawRadians) > epsilon;
+            mRootController->setEnabled(enable);
+            if (enable)
+            {
+                mRootController->setRotate(osg::Quat(mLegsYawRadians, osg::Vec3f(0,0,1)));
+                yawOffset = mLegsYawRadians;
+            }
+        }
+        if (mSpineController)
+        {
+            float yaw = mUpperBodyYawRadians - yawOffset;
+            bool enable = std::abs(yaw) > epsilon;
+            mSpineController->setEnabled(enable);
+            if (enable)
+            {
+                mSpineController->setRotate(osg::Quat(yaw, osg::Vec3f(0,0,1)));
+                yawOffset = mUpperBodyYawRadians;
+            }
+        }
         if (mHeadController)
         {
-            const float epsilon = 0.001f;
-            bool enable = (std::abs(mHeadPitchRadians) > epsilon || std::abs(mHeadYawRadians) > epsilon);
+            float yaw = mHeadYawRadians - yawOffset;
+            bool enable = (std::abs(mHeadPitchRadians) > epsilon || std::abs(yaw) > epsilon);
             mHeadController->setEnabled(enable);
             if (enable)
-                mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(mHeadYawRadians, osg::Vec3f(0,0,1)));
+                mHeadController->setRotate(osg::Quat(mHeadPitchRadians, osg::Vec3f(1,0,0)) * osg::Quat(yaw, osg::Vec3f(0,0,1)));
         }
 
         // Scripted animations should not cause movement
@@ -1801,13 +1826,17 @@ namespace MWRender
 
     void Animation::addControllers()
     {
-        mHeadController = nullptr;
+        mHeadController = addRotateController("bip01 head");
+        mSpineController = addRotateController("bip01 spine1");
+        mRootController = addRotateController("bip01");
+    }
 
-        NodeMap::const_iterator found = getNodeMap().find("bip01 head");
-        if (found == getNodeMap().end())
-            return;
-
-        osg::MatrixTransform* node = found->second;
+    RotateController* Animation::addRotateController(std::string bone)
+    {
+        auto iter = getNodeMap().find(bone);
+        if (iter == getNodeMap().end())
+            return nullptr;
+        osg::MatrixTransform* node = iter->second;
 
         bool foundKeyframeCtrl = false;
         osg::Callback* cb = node->getUpdateCallback();
@@ -1820,13 +1849,15 @@ namespace MWRender
             }
             cb = cb->getNestedCallback();
         }
-
+        // Without KeyframeController the orientation will not be reseted each frame, so
+        // RotateController shouldn't be used for such nodes.
         if (!foundKeyframeCtrl)
-            return;
+            return nullptr;
 
-        mHeadController = new RotateController(mObjectRoot.get());
-        node->addUpdateCallback(mHeadController);
-        mActiveControllers.emplace_back(node, mHeadController);
+        RotateController* controller = new RotateController(mObjectRoot.get());
+        node->addUpdateCallback(controller);
+        mActiveControllers.emplace_back(node, controller);
+        return controller;
     }
 
     void Animation::setHeadPitch(float pitchRadians)

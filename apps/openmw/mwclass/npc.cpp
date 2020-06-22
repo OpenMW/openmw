@@ -966,13 +966,14 @@ namespace MWClass
             moveSpeed = getRunSpeed(ptr);
         else
             moveSpeed = getWalkSpeed(ptr);
-        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
-            moveSpeed *= 0.75f;
 
         if(npcdata->mNpcStats.isWerewolf() && running && npcdata->mNpcStats.getDrawState() == MWMechanics::DrawState_Nothing)
             moveSpeed *= gmst.fWereWolfRunMult->mValue.getFloat();
 
-        moveSpeed *= ptr.getClass().getMovementSettings(ptr).mSpeedFactor;
+        const MWMechanics::Movement& movementSettings = ptr.getClass().getMovementSettings(ptr);
+        if (movementSettings.mIsStrafing)
+            moveSpeed *= 0.75f;
+        moveSpeed *= movementSettings.mSpeedFactor;
 
         return moveSpeed;
     }

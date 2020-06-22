@@ -23,6 +23,10 @@ namespace MWRender
     /// \brief Camera control
     class Camera
     {
+    public:
+        enum class ThirdPersonViewMode {Standard, OverShoulder};
+
+    private:
         struct CamData {
             float pitch, yaw, offset;
         };
@@ -45,7 +49,7 @@ namespace MWRender
             bool enabled, allowed;
         } mVanity;
 
-        float mHeight, mMaxCameraDistance;
+        float mHeight, mBaseCameraDistance;
         CamData mMainCam, mPreviewCam;
 
         bool mVanityToggleQueued;
@@ -54,6 +58,16 @@ namespace MWRender
 
         float mCameraDistance;
 
+        ThirdPersonViewMode mThirdPersonMode;
+        float mOverShoulderHorizontalOffset;
+        osg::Vec3d mFocalPointAdjustment;
+
+        // Makes sense only if mThirdPersonMode is OverShoulder. Can be in range [0, 1].
+        // Used for smooth transition from non-combat camera position (0) to combat camera position (1).
+        float mSmoothTransitionToCombatMode;
+        void updateSmoothTransitionToCombatMode(float duration);
+        float getCameraDistanceCorrection() const;
+
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
     public:
@@ -61,6 +75,9 @@ namespace MWRender
         ~Camera();
 
         MWWorld::Ptr getTrackingPtr() const;
+
+        void setThirdPersonViewMode(ThirdPersonViewMode mode) { mThirdPersonMode = mode; }
+        void setOverShoulderHorizontalOffset(float v) { mOverShoulderHorizontalOffset = v; }
 
         /// Update the view matrix of \a cam
         void updateCamera(osg::Camera* cam);
@@ -72,10 +89,10 @@ namespace MWRender
         /// \param rot Rotation angles in radians
         void rotateCamera(float pitch, float yaw, bool adjust);
 
-        float getYaw();
+        float getYaw() const;
         void setYaw(float angle);
 
-        float getPitch();
+        float getPitch() const;
         void setPitch(float angle);
 
         /// Attach camera to object
@@ -100,27 +117,32 @@ namespace MWRender
 
         void update(float duration, bool paused=false);
 
+        /// Set base camera distance for current mode. Don't work on 1st person view.
+        /// \param adjust Indicates should distance be adjusted or set.
+        void setBaseCameraDistance(float dist, bool adjust = false);
+
         /// Set camera distance for current mode. Don't work on 1st person view.
         /// \param adjust Indicates should distance be adjusted or set.
-        /// \param override If true new distance will be used as default.
-        /// If false, default distance can be restored with setCameraDistance().
-        void setCameraDistance(float dist, bool adjust = false, bool override = true);
+        /// Default distance can be restored with setCameraDistance().
+        void setCameraDistance(float dist, bool adjust = false);
 
-        /// Restore default camera distance for current mode.
+        /// Restore default camera distance and offset for current mode.
         void setCameraDistance();
 
         float getCameraDistance() const;
 
         void setAnimation(NpcAnimation *anim);
 
-        osg::Vec3d getFocalPoint();
+        osg::Vec3d getFocalPoint() const;
+        osg::Vec3d getFocalPointOffset() const;
+        void adjustFocalPoint(osg::Vec3d adjustment) { mFocalPointAdjustment = adjustment; }
 
         /// Stores focal and camera world positions in passed arguments
-        void getPosition(osg::Vec3f &focal, osg::Vec3f &camera);
+        void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
 
-        bool isVanityOrPreviewModeEnabled();
+        bool isVanityOrPreviewModeEnabled() const;
 
-        bool isNearest();
+        bool isNearest() const;
     };
 }
 

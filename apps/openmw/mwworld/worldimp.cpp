@@ -1857,15 +1857,35 @@ namespace MWWorld
         int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
 
-        mRendering->getCamera()->setCameraDistance();
+        auto* camera = mRendering->getCamera();
+        camera->setCameraDistance();
         if(!mRendering->getCamera()->isFirstPerson())
         {
-            osg::Vec3f focal, camera;
-            mRendering->getCamera()->getPosition(focal, camera);
-            float radius = mRendering->getNearClipDistance()*2.5f;
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal, camera, radius);
+            float cameraObstacleLimit = mRendering->getNearClipDistance() * 2.5f;
+            float focalObstacleLimit = std::max(cameraObstacleLimit, 10.0f);
+
+            // Adjust focal point.
+            osg::Vec3d focal = camera->getFocalPoint();
+            osg::Vec3d focalOffset = camera->getFocalPointOffset();
+            float offsetLen = focalOffset.length();
+            if (offsetLen > 0)
+            {
+                MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal - focalOffset, focal, focalObstacleLimit);
+                if (result.mHit)
+                {
+                    double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
+                    if (adjustmentCoef < -1)
+                        adjustmentCoef = -1;
+                    camera->adjustFocalPoint(focalOffset * adjustmentCoef);
+                }
+            }
+
+            // Adjust camera position.
+            osg::Vec3d cameraPos;
+            camera->getPosition(focal, cameraPos);
+            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal, cameraPos, cameraObstacleLimit);
             if (result.mHit)
-                mRendering->getCamera()->setCameraDistance((result.mHitPos - focal).length() - radius, false, false);
+                mRendering->getCamera()->setCameraDistance((result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length(), false);
         }
     }
 

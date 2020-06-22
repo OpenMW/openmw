@@ -536,10 +536,11 @@ namespace MWClass
             moveSpeed = getSwimSpeed(ptr);
         else
             moveSpeed = getWalkSpeed(ptr);
-        if(getMovementSettings(ptr).mPosition[0] != 0 && getMovementSettings(ptr).mPosition[1] == 0)
-            moveSpeed *= 0.75f;
 
-        moveSpeed *= ptr.getClass().getMovementSettings(ptr).mSpeedFactor;
+        const MWMechanics::Movement& movementSettings = ptr.getClass().getMovementSettings(ptr);
+        if (movementSettings.mIsStrafing)
+            moveSpeed *= 0.75f;
+        moveSpeed *= movementSettings.mSpeedFactor;
 
         return moveSpeed;
     }
