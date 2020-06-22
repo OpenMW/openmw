@@ -143,14 +143,9 @@ void RenderWidget::toggleRenderStats()
 CompositeViewer::CompositeViewer()
     : mSimulationTime(0.0)
 {
-#if QT_VERSION >= 0x050000
-    // Qt5 is currently crashing and reporting "Cannot make QOpenGLContext current in a different thread" when the viewer is run multi-threaded, this is regression from Qt4
-    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::SingleThreaded;
-#else
-    osgViewer::ViewerBase::ThreadingModel threadingModel = osgViewer::ViewerBase::DrawThreadPerContext;
-#endif
-
-    setThreadingModel(threadingModel);
+    // TODO: Upgrade osgQt to support osgViewer::ViewerBase::DrawThreadPerContext
+    // https://gitlab.com/OpenMW/openmw/-/issues/5481
+    setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
 
 #if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
     setUseConfigureAffinity(false);

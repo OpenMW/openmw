@@ -19,11 +19,6 @@ else()
    set(USE_QT TRUE)
 endif()
 
-if (USE_QT)
-    set(DESIRED_QT_VERSION 4 CACHE STRING "The QT version OpenMW should use (4 or 5)")
-    set_property(CACHE DESIRED_QT_VERSION PROPERTY STRINGS 4 5)
-endif()
-
 # set the minimum required version across the board
 cmake_minimum_required(VERSION 3.1.0)
 
@@ -153,18 +148,12 @@ endif()
 find_package(OpenGL REQUIRED)
 
 if (USE_QT)
-    message(STATUS "Using Qt${DESIRED_QT_VERSION}")
-
-    if (DESIRED_QT_VERSION MATCHES 4)
-        find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui QtNetwork QtOpenGL)
-    else()
-        find_package(Qt5Widgets REQUIRED)
-        find_package(Qt5Core REQUIRED)
-        find_package(Qt5Network REQUIRED)
-        find_package(Qt5OpenGL REQUIRED)
+    find_package(Qt5Core 5.12 REQUIRED)
+    find_package(Qt5Widgets REQUIRED)
+    find_package(Qt5Network REQUIRED)
+    find_package(Qt5OpenGL REQUIRED)
     # Instruct CMake to run moc automatically when needed.
     #set(CMAKE_AUTOMOC ON)
-    endif()
 endif()
 
 # Sound setup
@@ -290,17 +279,6 @@ if(OSG_STATIC)
     find_package(OSGPlugins REQUIRED COMPONENTS ${USED_OSG_PLUGINS})
     list(APPEND OPENSCENEGRAPH_LIBRARIES ${OSGPlugins_LIBRARIES})
 endif()
-
-if(QT_STATIC)
-   if(WIN32)
-      if(DESIRED_QT_VERSION MATCHES 4)
-         # QtCore needs WSAAsyncSelect from Ws2_32.lib
-         set(QT_QTCORE_LIBRARY ${QT_QTCORE_LIBRARY} Ws2_32.lib)
-         message("QT_QTCORE_LIBRARY: ${QT_QTCORE_LIBRARY}")
-      endif()
-   endif()
-endif()
-
 
 set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
@@ -516,11 +494,6 @@ if(WIN32)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/settings-default.cfg" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/gamecontrollerdb.txt" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-
-    IF(DESIRED_QT_VERSION MATCHES 5)
-        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/platforms" DESTINATION "." CONFIGURATIONS Debug)
-        INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/platforms" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
-    ENDIF()
 
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Debug/resources" DESTINATION "." CONFIGURATIONS Debug)
     INSTALL(DIRECTORY "${OpenMW_BINARY_DIR}/Release/resources" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
@@ -785,7 +758,7 @@ if (WIN32)
 endif()
 
 # Apple bundling
-if (OPENMW_OSX_DEPLOYMENT AND APPLE AND DESIRED_QT_VERSION MATCHES 5)
+if (OPENMW_OSX_DEPLOYMENT AND APPLE)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.13 AND CMAKE_VERSION VERSION_LESS 3.13.4)
         message(FATAL_ERROR "macOS packaging is broken in early CMake 3.13 releases, see https://gitlab.com/OpenMW/openmw/issues/4767. Please use at least 3.13.4 or an older version like 3.12.4")
     endif ()

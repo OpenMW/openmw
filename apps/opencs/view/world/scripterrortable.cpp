@@ -83,13 +83,8 @@ CSVWorld::ScriptErrorTable::ScriptErrorTable (const CSMDoc::Document& document, 
     QStringList headers;
     headers << "Severity" << "Line" << "Description";
     setHorizontalHeaderLabels (headers);
-#if QT_VERSION >= QT_VERSION_CHECK(5,0,0)
     horizontalHeader()->setSectionResizeMode (0, QHeaderView::ResizeToContents);
     horizontalHeader()->setSectionResizeMode (1, QHeaderView::ResizeToContents);
-#else
-    horizontalHeader()->setResizeMode (0, QHeaderView::ResizeToContents);
-    horizontalHeader()->setResizeMode (1, QHeaderView::ResizeToContents);
-#endif
     horizontalHeader()->setStretchLastSection (true);
     verticalHeader()->hide();
     setColumnHidden (3, true);

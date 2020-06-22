@@ -108,13 +108,8 @@ void CSVWorld::EnumDelegate::paint (QPainter *painter, const QStyleOptionViewIte
     const QModelIndex& index) const
 {
     int valueIndex = getValueIndex(index);
-    if (valueIndex != -1)
-    {
-#if QT_VERSION >= QT_VERSION_CHECK(5,7,0)
+    if (valueIndex != -
         QStyleOptionViewItem itemOption(option);
-#else
-        QStyleOptionViewItemV4 itemOption(option);
-#endif
         itemOption.text = mValues.at(valueIndex).second;
         QApplication::style()->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter);
     }
@@ -134,13 +129,7 @@ QSize CSVWorld::EnumDelegate::sizeHint(const QStyleOptionViewItem &option, const
         itemOption.state = option.state;
 
         const QString &valueText = mValues.at(valueIndex).second;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5,11,0)
         QSize valueSize = QSize(itemOption.fontMetrics.horizontalAdvance(valueText), itemOption.fontMetrics.height());
-#else
-        QSize valueSize = QSize(itemOption.fontMetrics.width(valueText), itemOption.fontMetrics.height());
-#endif
-
         itemOption.currentText = valueText;
         return QApplication::style()->sizeFromContents(QStyle::CT_ComboBox, &itemOption, valueSize);
     }

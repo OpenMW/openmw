@@ -685,7 +685,6 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_ContrastAdjust         , "ContrastAdjust"),
         std::make_pair((int)Qt::Key_LaunchG                , "LaunchG"),
         std::make_pair((int)Qt::Key_LaunchH                , "LaunchH"),
-#if QT_VERSION >= QT_VERSION_CHECK(5,7,0)
         std::make_pair((int)Qt::Key_TouchpadToggle         , "TouchpadToggle"),
         std::make_pair((int)Qt::Key_TouchpadOn             , "TouchpadOn"),
         std::make_pair((int)Qt::Key_TouchpadOff            , "TouchpadOff"),
@@ -706,7 +705,6 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_Find                   , "Find"),
         std::make_pair((int)Qt::Key_Undo                   , "Undo"),
         std::make_pair((int)Qt::Key_Redo                   , "Redo"),
-#endif
         std::make_pair((int)Qt::Key_AltGr                  , "AltGr"),
         std::make_pair((int)Qt::Key_Multi_key              , "Multi_key"),
         std::make_pair((int)Qt::Key_Kanji                  , "Kanji"),
@@ -770,9 +768,7 @@ namespace CSMPrefs
         std::make_pair((int)Qt::Key_Sleep                  , "Sleep"),
         std::make_pair((int)Qt::Key_Play                   , "Play"),
         std::make_pair((int)Qt::Key_Zoom                   , "Zoom"),
-#if QT_VERSION >= QT_VERSION_CHECK(5,7,0)
         std::make_pair((int)Qt::Key_Exit                   , "Exit"),
-#endif
         std::make_pair((int)Qt::Key_Context1               , "Context1"),
         std::make_pair((int)Qt::Key_Context2               , "Context2"),
         std::make_pair((int)Qt::Key_Context3               , "Context3"),
