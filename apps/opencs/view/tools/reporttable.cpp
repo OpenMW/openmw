@@ -273,7 +273,7 @@ void CSVTools::ReportTable::settingChanged (const CSMPrefs::Setting *setting)
         if (key.startsWith (base))
         {
             QString modifierString = key.mid (base.size());
-            Qt::KeyboardModifiers modifiers = 0;
+            Qt::KeyboardModifiers modifiers;
 
             if (modifierString=="-s")
                 modifiers = Qt::ShiftModifier;

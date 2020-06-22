@@ -332,7 +332,7 @@ void SceneWidget::mouseMoveEvent (QMouseEvent *event)
 
 void SceneWidget::wheelEvent(QWheelEvent *event)
 {
-    mCurrentCamControl->handleMouseScrollEvent(event->delta());
+    mCurrentCamControl->handleMouseScrollEvent(event->angleDelta().y());
 }
 
 void SceneWidget::update(double dt)

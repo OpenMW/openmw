@@ -677,8 +677,7 @@ void CSVRender::WorldspaceWidget::wheelEvent (QWheelEvent *event)
             factor *= mDragShiftFactor;
 
         EditMode& editMode = dynamic_cast<CSVRender::EditMode&> (*mEditMode->getCurrent());
-
-        editMode.dragWheel (event->delta(), factor);
+        editMode.dragWheel (event->angleDelta().y(), factor);
     }
     else
         SceneWidget::wheelEvent(event);
