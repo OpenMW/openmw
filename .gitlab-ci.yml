@@ -5,7 +5,7 @@ Debian:
   tags:
     - docker
     - linux
-  image: gcc
+  image: debian:bullseye
   cache:
     key: apt-cache
     paths:
