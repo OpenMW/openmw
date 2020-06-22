@@ -737,6 +737,9 @@ namespace MWGui
 
     void DialogueWindow::updateTopicFormat()
     {
+        if (!Settings::Manager::getBool("color topic enable", "GUI"))
+            return;
+
         std::string specialColour = Settings::Manager::getString("color topic specific", "GUI");
         std::string oldColour = Settings::Manager::getString("color topic exhausted", "GUI");
 
