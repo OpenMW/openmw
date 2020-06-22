@@ -267,8 +267,15 @@ protected:
     TextKeyListener* mTextKeyListener;
 
     osg::ref_ptr<RotateController> mHeadController;
+    osg::ref_ptr<RotateController> mSpineController;
+    osg::ref_ptr<RotateController> mRootController;
     float mHeadYawRadians;
     float mHeadPitchRadians;
+    float mUpperBodyYawRadians;
+    float mLegsYawRadians;
+
+    RotateController* addRotateController(std::string bone);
+
     bool mHasMagicEffects;
 
     osg::ref_ptr<SceneUtil::LightSource> mGlowLight;
@@ -477,6 +484,12 @@ public:
     virtual void setHeadYaw(float yawRadians);
     virtual float getHeadPitch() const;
     virtual float getHeadYaw() const;
+
+    virtual void setUpperBodyYawRadians(float v) { mUpperBodyYawRadians = v; }
+    virtual void setLegsYawRadians(float v) { mLegsYawRadians = v; }
+    virtual float getUpperBodyYawRadians() const { return mUpperBodyYawRadians; }
+    virtual float getLegsYawRadians() const { return mLegsYawRadians; }
+
     virtual void setAccurateAiming(bool enabled) {}
     virtual bool canBeHarvested() const { return false; }
 

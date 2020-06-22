@@ -244,6 +244,9 @@ namespace MWRender
         else
             mViewModeToggleQueued = false;
 
+        if (mTrackingPtr.getClass().isActor())
+            mTrackingPtr.getClass().getCreatureStats(mTrackingPtr).setSideMovementAngle(0);
+
         mFirstPersonView = !mFirstPersonView;
         processViewChange();
     }

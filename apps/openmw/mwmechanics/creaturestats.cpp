@@ -23,7 +23,7 @@ namespace MWMechanics
           mKnockdown(false), mKnockdownOneFrame(false), mKnockdownOverOneFrame(false),
           mHitRecovery(false), mBlock(false), mMovementFlags(0),
           mFallHeight(0), mRecalcMagicka(false), mLastRestock(0,0), mGoldPool(0), mActorId(-1), mHitAttemptActorId(-1),
-          mDeathAnimation(-1), mTimeOfDeath(), mLevel (0)
+          mDeathAnimation(-1), mTimeOfDeath(), mSideMovementAngle(0), mLevel (0)
     {
         for (int i=0; i<4; ++i)
             mAiSettings[i] = 0;
