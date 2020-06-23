@@ -116,7 +116,7 @@ bool CSMWorld::IdTree::setData (const QModelIndex &index, const QVariant &value,
 Qt::ItemFlags CSMWorld::IdTree::flags (const QModelIndex & index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::ItemFlags();
 
     if (index.internalId() != 0)
     {
