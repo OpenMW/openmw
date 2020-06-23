@@ -127,25 +127,24 @@ bool Wizard::IniSettings::writeFile(const QString &path, QTextStream &stream)
         QString key(fullKey.at(1));
 
         int index = buffer.lastIndexOf(section);
-        if (index != -1) {
-            // Look for the next section
-            index = buffer.indexOf(QLatin1Char('['), index + 1);
-
-            if (index == -1 ) {
-                // We are at the last section, append it to the bottom of the file
-                buffer.append(QString("\n%1=%2").arg(key, i.value().toString()));
-                mSettings.remove(i.key());
-                continue;
-            } else {
-                // Not at last section, add the key at the index
-                buffer.insert(index - 1, QString("\n%1=%2").arg(key, i.value().toString()));
-                mSettings.remove(i.key());
-            }
-
-        } else {
+        if (index == -1) {
             // Add the section to the end of the file, because it's not found
             buffer.append(QString("\n%1\n").arg(section));
-            i.previous();
+            index = buffer.lastIndexOf(section);
+        }
+
+        // Look for the next section
+        index = buffer.indexOf(QLatin1Char('['), index + 1);
+
+        if (index == -1 ) {
+            // We are at the last section, append it to the bottom of the file
+            buffer.append(QString("\n%1=%2").arg(key, i.value().toString()));
+            mSettings.remove(i.key());
+            continue;
+        } else {
+            // Not at last section, add the key at the index
+            buffer.insert(index - 1, QString("\n%1=%2").arg(key, i.value().toString()));
+            mSettings.remove(i.key());
         }
     }
 
