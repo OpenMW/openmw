@@ -44,12 +44,10 @@ matrix:
     - name: OpenMW (all) on Ubuntu Focal GCC-9
       os: linux
       dist: focal
-      sudo: required
       if: branch != coverity_scan
     - name: OpenMW (openmw) on Ubuntu Focal Clang-10 with Static Analysis
       os: linux
       dist: focal
-      sudo: required
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
         - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
@@ -59,7 +57,6 @@ matrix:
     - name: OpenMW (openmw-cs and tools) on Ubuntu Focal Clang-10 with Static Analysis
       os: linux
       dist: focal
-      sudo: required
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
         - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
@@ -69,7 +66,6 @@ matrix:
     - name: OpenMW Components Coverity Scan
       os: linux
       dist: focal
-      sudo: required
       if: branch = coverity_scan
 #   allow_failures:
 #    - name: OpenMW (openmw) on Ubuntu Focal with GCC-10
