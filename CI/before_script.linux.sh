@@ -17,7 +17,7 @@ ${ANALYZE} cmake \
     -DUSE_SYSTEM_TINYXML=TRUE \
     -DCMAKE_INSTALL_PREFIX="/usr" \
     -DBINDIR="/usr/games" \
-    -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
+    -DCMAKE_BUILD_TYPE="DEBUG" \
     -DGTEST_ROOT="${GOOGLETEST_DIR}" \
     -DGMOCK_ROOT="${GOOGLETEST_DIR}" \
     ..
