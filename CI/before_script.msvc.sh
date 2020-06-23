@@ -752,8 +752,8 @@ fi
 			elif [ -d 'aqt-venv/Scripts' ]; then
 				VENV_BIN_DIR='Scripts'
 			else
-				echo "Error: Failed to create virtualenv."
-				exit 1
+				echo "Error: Failed to create virtualenv in expected location."
+				wrappedExit 1
 			fi
 
 			if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
