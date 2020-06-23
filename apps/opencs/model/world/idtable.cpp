@@ -116,7 +116,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
 Qt::ItemFlags CSMWorld::IdTable::flags (const QModelIndex & index) const
 {
     if (!index.isValid())
-        return 0;
+        return Qt::ItemFlags();
 
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 

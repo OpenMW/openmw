@@ -41,9 +41,9 @@ class GLWidget : public QGLWidget
 
 public:
 
-    GLWidget( QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
-    GLWidget( QGLContext* context, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
-    GLWidget( const QGLFormat& format, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0);
+    GLWidget( QWidget* parent = nullptr, const QGLWidget* shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    GLWidget( QGLContext* context, QWidget* parent = nullptr, const QGLWidget* shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+    GLWidget( const QGLFormat& format, QWidget* parent = nullptr, const QGLWidget* shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
     virtual ~GLWidget();
 
     inline void setGraphicsWindow( GraphicsWindowQt* gw ) { _gw = gw; }
@@ -93,7 +93,7 @@ protected:
 class GraphicsWindowQt : public osgViewer::GraphicsWindow
 {
 public:
-    GraphicsWindowQt( osg::GraphicsContext::Traits* traits, QWidget* parent = NULL, const QGLWidget* shareWidget = NULL, Qt::WindowFlags f = 0 );
+    GraphicsWindowQt( osg::GraphicsContext::Traits* traits, QWidget* parent = nullptr, const QGLWidget* shareWidget = nullptr, Qt::WindowFlags f = Qt::WindowFlags() );
     GraphicsWindowQt( GLWidget* widget );
     virtual ~GraphicsWindowQt();
 
@@ -107,7 +107,7 @@ public:
 
     struct WindowData : public osg::Referenced
     {
-        WindowData( GLWidget* widget = NULL, QWidget* parent = NULL ): _widget(widget), _parent(parent) {}
+        WindowData( GLWidget* widget = nullptr, QWidget* parent = nullptr ): _widget(widget), _parent(parent) {}
         GLWidget* _widget;
         QWidget* _parent;
     };

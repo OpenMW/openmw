@@ -24,19 +24,19 @@ using namespace osgQt;
 #define GETDEVICEPIXELRATIO() devicePixelRatio()
 
 GLWidget::GLWidget( QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(parent, shareWidget, f), _gw( NULL )
+: QGLWidget(parent, shareWidget, f), _gw( nullptr )
 {
     _devicePixelRatio = GETDEVICEPIXELRATIO();
 }
 
 GLWidget::GLWidget( QGLContext* context, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(context, parent, shareWidget, f), _gw( NULL )
+: QGLWidget(context, parent, shareWidget, f), _gw( nullptr )
 {
     _devicePixelRatio = GETDEVICEPIXELRATIO();
 }
 
 GLWidget::GLWidget( const QGLFormat& format, QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f)
-: QGLWidget(format, parent, shareWidget, f), _gw( NULL )
+: QGLWidget(format, parent, shareWidget, f), _gw( nullptr )
 {
     _devicePixelRatio = GETDEVICEPIXELRATIO();
 }
@@ -47,8 +47,8 @@ GLWidget::~GLWidget()
     if( _gw )
     {
         _gw->close();
-        _gw->_widget = NULL;
-        _gw = NULL;
+        _gw->_widget = nullptr;
+        _gw = nullptr;
     }
 }
 
@@ -155,7 +155,7 @@ GraphicsWindowQt::GraphicsWindowQt( osg::GraphicsContext::Traits* traits, QWidge
 :   _realized(false)
 {
 
-    _widget = NULL;
+    _widget = nullptr;
     _traits = traits;
     init( parent, shareWidget, f );
 }
@@ -165,7 +165,7 @@ GraphicsWindowQt::GraphicsWindowQt( GLWidget* widget )
 {
     _widget = widget;
     _traits = _widget ? createTraits( _widget ) : new osg::GraphicsContext::Traits;
-    init( NULL, NULL, 0 );
+    init( nullptr, nullptr, Qt::WindowFlags() );
 }
 
 GraphicsWindowQt::~GraphicsWindowQt()
@@ -174,20 +174,20 @@ GraphicsWindowQt::~GraphicsWindowQt()
 
     // remove reference from GLWidget
     if ( _widget )
-        _widget->_gw = NULL;
+        _widget->_gw = nullptr;
 }
 
 bool GraphicsWindowQt::init( QWidget* parent, const QGLWidget* shareWidget, Qt::WindowFlags f )
 {
     // update _widget and parent by WindowData
-    WindowData* windowData = _traits.get() ? dynamic_cast<WindowData*>(_traits->inheritedWindowData.get()) : 0;
+    WindowData* windowData = _traits.get() ? dynamic_cast<WindowData*>(_traits->inheritedWindowData.get()) : nullptr;
     if ( !_widget )
-        _widget = windowData ? windowData->_widget : NULL;
+        _widget = windowData ? windowData->_widget : nullptr;
     if ( !parent )
-        parent = windowData ? windowData->_parent : NULL;
+        parent = windowData ? windowData->_parent : nullptr;
 
     // create widget if it does not exist
-    _ownsWidget = _widget == NULL;
+    _ownsWidget = _widget == nullptr;
     if ( !_widget )
     {
         // shareWidget
@@ -310,7 +310,7 @@ osg::GraphicsContext::Traits* GraphicsWindowQt::createTraits( const QGLWidget* w
 
 bool GraphicsWindowQt::setWindowRectangleImplementation( int x, int y, int width, int height )
 {
-    if ( _widget == NULL )
+    if ( _widget == nullptr )
         return false;
 
     _widget->setGeometry( x, y, width, height );
@@ -596,13 +596,13 @@ public:
         if (traits->pbuffer)
         {
             OSG_WARN << "osgQt: createGraphicsContext - pbuffer not implemented yet." << std::endl;
-            return NULL;
+            return nullptr;
         }
         else
         {
             osg::ref_ptr< GraphicsWindowQt > window = new GraphicsWindowQt( traits );
             if (window->valid()) return window.release();
-            else return NULL;
+            else return nullptr;
         }
     }
 
