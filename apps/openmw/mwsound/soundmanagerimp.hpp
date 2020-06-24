@@ -6,10 +6,13 @@
 #include <utility>
 #include <map>
 #include <unordered_map>
+#include <chrono>
 
 #include <components/settings/settings.hpp>
 #include <components/misc/objectpool.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/sceneutil/workqueue.hpp>
+#include <components/misc/guarded.hpp>
 
 #include "../mwbase/soundmanager.hpp"
 
@@ -97,15 +100,40 @@ namespace MWSound
 
         Sound* mCurrentRegionSound;
 
+        osg::ref_ptr<SceneUtil::WorkQueue> mWorkQueue;
+
+        struct Voice
+        {
+            MWWorld::ConstPtr mPtr;
+            std::string mFileName;
+            StreamPtr mStream;
+            osg::ref_ptr<SceneUtil::WorkItem> mWorkItem;
+            std::chrono::steady_clock::time_point mDeadline;
+        };
+
+        std::vector<Voice> mWaitingVoice;
+        std::vector<Voice> mActiveWaitingVoice;
+        Misc::ScopeGuarded<std::map<std::string, DecoderPtr>> mVoiceDecoders;
+
+        struct Music
+        {
+            std::string mFileName;
+            osg::ref_ptr<SceneUtil::WorkItem> mWorkItem;
+            std::chrono::steady_clock::time_point mDeadline;
+        };
+
+        std::vector<Music> mWaitingMusic;
+        Misc::ScopeGuarded<std::map<std::string, DecoderPtr>> mMusicDecoders;
+
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
         // returns a decoder to start streaming, or nullptr if the sound was not found
-        DecoderPtr loadVoice(const std::string &voicefile);
+        DecoderPtr loadVoice(const std::string &voicefile) const;
 
         SoundPtr getSoundRef();
         StreamPtr getStreamRef();
 
-        StreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
+        bool playVoice(DecoderPtr decoder, bool playlocal, Stream* stream);
 
         void streamMusicFull(const std::string& filename);
         void advanceMusic(const std::string& filename);
@@ -128,6 +156,16 @@ namespace MWSound
 
         std::pair<WaterSoundAction, Sound_Buffer*> getWaterSoundAction(const WaterSoundUpdate& update,
                                                                        const ESM::Cell* cell) const;
+
+        void sayAsync(const MWWorld::ConstPtr &ptr, const std::string &filename, std::vector<Voice>& waiting);
+
+        void createVoiceDecoder(const std::string& voicefile);
+
+        void playAllVoicesFromCreatedDecoders();
+
+        void createMusicDecoder(const std::string& fileName);
+
+        void playMusicFromCreatedDecoder();
 
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);

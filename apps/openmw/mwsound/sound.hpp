@@ -38,6 +38,15 @@ namespace MWSound
 
         SoundParams mParams;
 
+        enum class State
+        {
+            Loading,
+            Playing,
+            LoadCancelled,
+        };
+
+        State mState = State::Loading;
+
     protected:
         Sound_Instance mHandle = nullptr;
 
@@ -58,6 +67,8 @@ namespace MWSound
                 mParams.mFadeOutTime -= soundDuration;
             }
         }
+        void setPlaying() { mState = State::Playing; }
+        void cancelLoading() { mState = State::LoadCancelled; }
 
         const osg::Vec3f &getPosition() const { return mParams.mPos; }
         float getRealVolume() const { return mParams.mVolumeFactor * mParams.mSfxVolume * mParams.mBaseVolume; }
@@ -75,6 +86,7 @@ namespace MWSound
         void init(const SoundParams& params)
         {
             mParams = params;
+            mState = State::Loading;
             mHandle = nullptr;
         }
 
