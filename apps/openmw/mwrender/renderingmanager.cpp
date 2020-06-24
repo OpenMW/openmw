@@ -386,7 +386,11 @@ namespace MWRender
             mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::OverShoulder);
         else
             mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::Standard);
-        mCamera->setOverShoulderHorizontalOffset(Settings::Manager::getFloat("view over shoulder horizontal offset", "Camera"));
+
+        std::stringstream offset(Settings::Manager::getString("view over shoulder offset", "Camera"));
+        float horizontal = 30.f, vertical = -10.f;
+        offset >> horizontal >> vertical;
+        mCamera->setOverShoulderOffset(horizontal, vertical);
     }
 
     osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()

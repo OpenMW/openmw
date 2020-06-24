@@ -62,7 +62,7 @@ namespace MWRender
       mViewModeToggleQueued(false),
       mCameraDistance(0.f),
       mThirdPersonMode(ThirdPersonViewMode::Standard),
-      mOverShoulderHorizontalOffset(30.0f),
+      mOverShoulderOffset(osg::Vec2f(30.0f, -10.0f)),
       mSmoothTransitionToCombatMode(0.f)
     {
         mVanity.enabled = false;
@@ -120,8 +120,8 @@ namespace MWRender
         osg::Vec3d offset(0, 0, 10.f);
         if (mThirdPersonMode == ThirdPersonViewMode::OverShoulder && !mPreviewMode && !mVanity.enabled)
         {
-            float horizontalOffset = mOverShoulderHorizontalOffset * (1.f - mSmoothTransitionToCombatMode);
-            float verticalOffset = mSmoothTransitionToCombatMode * 15.f + (1.f - mSmoothTransitionToCombatMode) * -10.f;
+            float horizontalOffset = mOverShoulderOffset.x() * (1.f - mSmoothTransitionToCombatMode);
+            float verticalOffset = mSmoothTransitionToCombatMode * 15.f + (1.f - mSmoothTransitionToCombatMode) * mOverShoulderOffset.y();
 
             offset.x() += horizontalOffset * cos(getYaw());
             offset.y() += horizontalOffset * sin(getYaw());
@@ -214,6 +214,11 @@ namespace MWRender
         }
 
         updateSmoothTransitionToCombatMode(duration);
+    }
+
+    void Camera::setOverShoulderOffset(float horizontal, float vertical)
+    {
+        mOverShoulderOffset = osg::Vec2f(horizontal, vertical);
     }
 
     void Camera::updateSmoothTransitionToCombatMode(float duration)

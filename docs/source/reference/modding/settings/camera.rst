@@ -127,15 +127,15 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
 
 This setting can only be configured by editing the settings configuration file.
 
-view over shoulder horizontal offset
-------------------------------------
+view over shoulder offset
+-------------------------
 
-:Type:		floating point
+:Type:		2D vector floating point
 :Range:		Any
-:Default:	30
+:Default:	30 -10
 
-This setting makes sense only if 'view over shoulder' is enabled. Controls horizontal offset of the camera in third person mode. Negative value means offset to the left, positive - to the right.
-Recommened values: 30 for the right shoulder, -30 for the left shoulder.
+This setting makes sense only if 'view over shoulder' is enabled. Controls horizontal (first number) and vertical (second number) offset of the camera in third person mode.
+Recommened values: 30 -10 for the right shoulder, -30 -10 for the left shoulder.
 
 This setting can only be configured by editing the settings configuration file.
 

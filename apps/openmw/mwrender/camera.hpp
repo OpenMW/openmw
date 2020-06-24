@@ -59,7 +59,7 @@ namespace MWRender
         float mCameraDistance;
 
         ThirdPersonViewMode mThirdPersonMode;
-        float mOverShoulderHorizontalOffset;
+        osg::Vec2f mOverShoulderOffset;
         osg::Vec3d mFocalPointAdjustment;
 
         // Makes sense only if mThirdPersonMode is OverShoulder. Can be in range [0, 1].
@@ -77,7 +77,7 @@ namespace MWRender
         MWWorld::Ptr getTrackingPtr() const;
 
         void setThirdPersonViewMode(ThirdPersonViewMode mode) { mThirdPersonMode = mode; }
-        void setOverShoulderHorizontalOffset(float v) { mOverShoulderHorizontalOffset = v; }
+        void setOverShoulderOffset(float horizontal, float vertical);
 
         /// Update the view matrix of \a cam
         void updateCamera(osg::Camera* cam);
