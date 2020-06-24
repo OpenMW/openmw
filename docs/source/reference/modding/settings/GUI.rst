@@ -141,6 +141,15 @@ This setting can only be configured by editing the settings configuration file.
 This setting has no effect if the crosshair setting in the HUD Settings Section is false.
 This setting has no effect if the show owned setting in the Game Settings Section is false.
 
+color topic enable
+------------------
+
+:Type:      boolean
+:Range:		True/False
+:Default:	False
+
+Control wether additionnal formatting will be applied to dialogs topic. See 'color topic specific' and 'color topic exhausted' for details.
+
 color topic specific
 --------------------
 
