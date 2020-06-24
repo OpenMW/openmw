@@ -2,11 +2,8 @@
 #include "launchersettings.hpp"
 
 #include <QTextCodec>
-#include <QTextStream>
 #include <QDir>
-#include <QString>
 #include <QRegExp>
-#include <QMap>
 
 #include <components/files/configurationmanager.hpp>
 
@@ -105,9 +102,9 @@ bool Config::GameSettings::readUserFile(QTextStream &stream)
     return readFile(stream, mUserSettings);
 }
 
-bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> &settings)
+bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QString> &settings)
 {
-    QMap<QString, QString> cache;
+    QMultiMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
     while (!stream.atEnd()) {
@@ -151,7 +148,7 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> 
             values.append(settings.values(key));
 
             if (!values.contains(value)) {
-                cache.insertMulti(key, value);
+                cache.insert(key, value);
             }
         }
     }
@@ -368,7 +365,7 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             *iter = QString(); // assume no match
             QString key = settingRegex.cap(1);
             QString keyVal = settingRegex.cap(1)+"="+settingRegex.cap(2);
-            QMap<QString, QString>::const_iterator i = mUserSettings.find(key);
+            QMultiMap<QString, QString>::const_iterator i = mUserSettings.find(key);
             while (i != mUserSettings.end() && i.key() == key)
             {
                 QString settingLine = i.key() + "=" + i.value();
