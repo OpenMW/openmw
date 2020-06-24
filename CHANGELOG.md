@@ -30,6 +30,7 @@
     Bug #5451: Magic projectiles don't disappear with the caster
     Bug #5452: Autowalk is being included in savegames
     Feature #390: 3rd person look "over the shoulder"
+    Feature #2386: Distant Statics in the form of Object Paging
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
