@@ -1,16 +1,14 @@
 #ifndef OPENMW_COMPONENTS_SCENEUTIL_WORKQUEUE_H
 #define OPENMW_COMPONENTS_SCENEUTIL_WORKQUEUE_H
 
-#include <OpenThreads/Atomic>
-#include <OpenThreads/Mutex>
-#include <OpenThreads/Condition>
-#include <OpenThreads/Thread>
-
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
 #include <atomic>
 #include <queue>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 
 namespace SceneUtil
 {
@@ -18,9 +16,6 @@ namespace SceneUtil
     class WorkItem : public osg::Referenced
     {
     public:
-        WorkItem();
-        virtual ~WorkItem();
-
         /// Override in a derived WorkItem to perform actual work.
         virtual void doWork() {}
 
@@ -35,10 +30,10 @@ namespace SceneUtil
         /// Set abort flag in order to return from doWork() as soon as possible. May not be respected by all WorkItems.
         virtual void abort() {}
 
-    protected:
-        OpenThreads::Atomic mDone;
-        OpenThreads::Mutex mMutex;
-        OpenThreads::Condition mCondition;
+    private:
+        std::atomic_bool mDone {false};
+        std::mutex mMutex;
+        std::condition_variable mCondition;
     };
 
     class WorkThread;
@@ -70,25 +65,28 @@ namespace SceneUtil
         bool mIsReleased;
         std::deque<osg::ref_ptr<WorkItem> > mQueue;
 
-        mutable OpenThreads::Mutex mMutex;
-        OpenThreads::Condition mCondition;
+        mutable std::mutex mMutex;
+        std::condition_variable mCondition;
 
-        std::vector<WorkThread*> mThreads;
+        std::vector<std::unique_ptr<WorkThread>> mThreads;
     };
 
     /// Internally used by WorkQueue.
-    class WorkThread : public OpenThreads::Thread
+    class WorkThread
     {
     public:
-        WorkThread(WorkQueue* workQueue);
+        WorkThread(WorkQueue& workQueue);
 
-        virtual void run();
+        ~WorkThread();
 
         bool isActive() const;
 
     private:
         WorkQueue* mWorkQueue;
         std::atomic<bool> mActive;
+        std::thread mThread;
+
+        void run();
     };
 
 
