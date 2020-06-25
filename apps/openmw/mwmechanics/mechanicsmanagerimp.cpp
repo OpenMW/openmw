@@ -679,7 +679,9 @@ namespace MWMechanics
 
     int MechanicsManager::getBarterOffer(const MWWorld::Ptr& ptr,int basePrice, bool buying)
     {
-        if (ptr.getTypeName() == typeid(ESM::Creature).name())
+        // Make sure zero base price items/services can't be bought/sold for 1 gold
+        // and return the intended base price for creature merchants
+        if (basePrice == 0 || ptr.getTypeName() == typeid(ESM::Creature).name())
             return basePrice;
 
         const MWMechanics::NpcStats &sellerStats = ptr.getClass().getNpcStats(ptr);
