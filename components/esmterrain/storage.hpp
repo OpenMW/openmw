@@ -2,8 +2,7 @@
 #define COMPONENTS_ESM_TERRAIN_STORAGE_H
 
 #include <cassert>
-
-#include <OpenThreads/Mutex>
+#include <mutex>
 
 #include <components/terrain/storage.hpp>
 
@@ -138,7 +137,7 @@ namespace ESMTerrain
         std::string getTextureName (UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
-        OpenThreads::Mutex mLayerInfoMutex;
+        std::mutex mLayerInfoMutex;
 
         std::string mNormalMapPattern;
         std::string mNormalHeightMapPattern;

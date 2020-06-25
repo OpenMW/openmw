@@ -126,7 +126,7 @@ namespace Resource
 
         void clearCache()
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(_listMutex);
+            std::lock_guard<OpenThreads::Mutex> lock(_listMutex);
             _sharedTextureList.clear();
             _sharedStateSetList.clear();
         }
@@ -625,7 +625,7 @@ namespace Resource
 
         mShaderManager->releaseGLObjects(state);
 
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        std::lock_guard<std::mutex> lock(mSharedStateMutex);
         mSharedStateManager->releaseGLObjects(state);
     }
 
@@ -717,7 +717,7 @@ namespace Resource
 
         if (mIncrementalCompileOperation)
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
+            std::lock_guard<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             osgUtil::IncrementalCompileOperation::CompileSets& sets = mIncrementalCompileOperation->getToCompile();
             for(osgUtil::IncrementalCompileOperation::CompileSets::iterator it = sets.begin(); it != sets.end();)
             {
@@ -738,7 +738,7 @@ namespace Resource
     {
         ResourceManager::clearCache();
 
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+        std::lock_guard<std::mutex> lock(mSharedStateMutex);
         mSharedStateManager->clearCache();
         mInstanceCache->clear();
     }
@@ -747,12 +747,12 @@ namespace Resource
     {
         if (mIncrementalCompileOperation)
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
+            std::lock_guard<OpenThreads::Mutex> lock(*mIncrementalCompileOperation->getToCompiledMutex());
             stats->setAttribute(frameNumber, "Compiling", mIncrementalCompileOperation->getToCompile().size());
         }
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSharedStateMutex);
+            std::lock_guard<std::mutex> lock(mSharedStateMutex);
             stats->setAttribute(frameNumber, "Texture", mSharedStateManager->getNumSharedTextures());
             stats->setAttribute(frameNumber, "StateSet", mSharedStateManager->getNumSharedStateSets());
         }

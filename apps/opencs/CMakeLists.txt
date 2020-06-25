@@ -216,7 +216,6 @@ endif(APPLE)
 
 target_link_libraries(openmw-cs
     ${OSG_LIBRARIES}
-    ${OPENTHREADS_LIBRARIES}
     ${OSGTEXT_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSGVIEWER_LIBRARIES}

@@ -1,6 +1,8 @@
 #include "windowmanagerimp.hpp"
 
 #include <cassert>
+#include <chrono>
+#include <thread>
 
 #include <osgViewer/Viewer>
 
@@ -751,7 +753,7 @@ namespace MWGui
                 MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
                 if (!mWindowVisible)
-                    OpenThreads::Thread::microSleep(5000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
                 else
                 {
                     mViewer->eventTraversal();
@@ -1788,7 +1790,7 @@ namespace MWGui
             if (!mWindowVisible)
             {
                 mVideoWidget->pause();
-                OpenThreads::Thread::microSleep(5000);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             else
             {

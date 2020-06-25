@@ -1,5 +1,7 @@
 #include "nifloader.hpp"
 
+#include <mutex>
+
 #include <osg/Matrixf>
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
@@ -1725,8 +1727,8 @@ namespace NifOsg
         {
             typedef std::set<osg::ref_ptr<Attribute>, CompareStateAttribute> Cache;
             static Cache sCache;
-            static OpenThreads::Mutex sMutex;
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(sMutex);
+            static std::mutex sMutex;
+            std::lock_guard<std::mutex> lock(sMutex);
             typename Cache::iterator found = sCache.find(attr);
             if (found == sCache.end())
                 found = sCache.insert(attr).first;

@@ -273,7 +273,7 @@ namespace Shader
 
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &templateName, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
@@ -323,7 +323,7 @@ namespace Shader
 
     osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         ProgramMap::iterator found = mPrograms.find(std::make_pair(vertexShader, fragmentShader));
         if (found == mPrograms.end())
         {
@@ -362,7 +362,7 @@ namespace Shader
 
     void ShaderManager::releaseGLObjects(osg::State *state)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         for (auto shader : mShaders)
         {
             if (shader.second != nullptr)

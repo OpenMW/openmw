@@ -4,17 +4,16 @@
 #include <memory>
 #include <array>
 #include <atomic>
+#include <condition_variable>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 #include <stdint.h>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
 #include <components/vfs/manager.hpp>
-
-#include <OpenThreads/Thread>
-#include <OpenThreads/Condition>
-#include <OpenThreads/Mutex>
-#include <OpenThreads/ScopedLock>
 
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
@@ -309,31 +308,33 @@ const ALfloat OpenAL_SoundStream::sBufferLength = 0.125f;
 //
 // A background streaming thread (keeps active streams processed)
 //
-struct OpenAL_Output::StreamThread : public OpenThreads::Thread {
+struct OpenAL_Output::StreamThread
+{
     typedef std::vector<OpenAL_SoundStream*> StreamVec;
     StreamVec mStreams;
 
     std::atomic<bool> mQuitNow;
-    OpenThreads::Mutex mMutex;
-    OpenThreads::Condition mCondVar;
+    std::mutex mMutex;
+    std::condition_variable mCondVar;
+    std::thread mThread;
 
     StreamThread()
       : mQuitNow(false)
+      , mThread([this] { run(); })
     {
-        start();
     }
     ~StreamThread()
     {
         mQuitNow = true;
         mMutex.lock(); mMutex.unlock();
-        mCondVar.broadcast();
-        join();
+        mCondVar.notify_all();
+        mThread.join();
     }
 
     // thread entry point
-    virtual void run()
+    void run()
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::unique_lock<std::mutex> lock(mMutex);
         while(!mQuitNow)
         {
             StreamVec::iterator iter = mStreams.begin();
@@ -345,30 +346,30 @@ struct OpenAL_Output::StreamThread : public OpenThreads::Thread {
                     ++iter;
             }
 
-            mCondVar.wait(&mMutex, 50);
+            mCondVar.wait_for(lock, std::chrono::milliseconds(50));
         }
     }
 
     void add(OpenAL_SoundStream *stream)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         if(std::find(mStreams.begin(), mStreams.end(), stream) == mStreams.end())
         {
             mStreams.push_back(stream);
-            mCondVar.broadcast();
+            mCondVar.notify_all();
         }
     }
 
     void remove(OpenAL_SoundStream *stream)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         StreamVec::iterator iter = std::find(mStreams.begin(), mStreams.end(), stream);
         if(iter != mStreams.end()) mStreams.erase(iter);
     }
 
     void removeAll()
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         mStreams.clear();
     }
 
@@ -1341,7 +1342,7 @@ double OpenAL_Output::getStreamOffset(Stream *sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
+    std::lock_guard<std::mutex> lock(mStreamThread->mMutex);
     return stream->getStreamOffset();
 }
 
@@ -1349,7 +1350,7 @@ float OpenAL_Output::getStreamLoudness(Stream *sound)
 {
     if(!sound->mHandle) return 0.0;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
+    std::lock_guard<std::mutex> lock(mStreamThread->mMutex);
     return stream->getCurrentLoudness();
 }
 
@@ -1357,7 +1358,7 @@ bool OpenAL_Output::isStreamPlaying(Stream *sound)
 {
     if(!sound->mHandle) return false;
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mStreamThread->mMutex);
+    std::lock_guard<std::mutex> lock(mStreamThread->mMutex);
     return stream->isPlaying();
 }
 
