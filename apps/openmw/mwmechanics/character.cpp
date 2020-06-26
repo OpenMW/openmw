@@ -853,6 +853,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAttackingOrSpell(false)
     , mCastingManualSpell(false)
     , mTimeUntilWake(0.f)
+    , mIsMovingBackward(false)
 {
     if(!mAnimation)
         return;
@@ -1976,7 +1977,6 @@ void CharacterController::update(float duration, bool animationOnly)
 
         float effectiveRotation = rot.z();
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
-        static const float turnToMovementDirectionSpeedCoef = Settings::Manager::getFloat("turn to movement direction speed coef", "Game");
         if (turnToMovementDirection && !(isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson()))
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
@@ -1986,10 +1986,14 @@ void CharacterController::update(float duration, bool animationOnly)
                 targetMovementAngle = 0;
             float delta = targetMovementAngle - stats.getSideMovementAngle();
             float cosDelta = cosf(delta);
-            movementSettings.mSpeedFactor *= std::min(std::max(cosDelta, 0.f) + 0.3f, 1.f); // slow down when turn
-            float maxDelta = turnToMovementDirectionSpeedCoef * osg::PI * duration * (2.5f - cosDelta);
-            delta = std::min(delta, maxDelta);
-            delta = std::max(delta, -maxDelta);
+
+            if ((vec.y() < 0) == mIsMovingBackward)
+                movementSettings.mSpeedFactor *= std::min(std::max(cosDelta, 0.f) + 0.3f, 1.f); // slow down when turn
+            if (std::abs(delta) < osg::DegreesToRadians(20.0f))
+                mIsMovingBackward = vec.y() < 0;
+
+            float maxDelta = osg::PI * duration * (2.5f - cosDelta);
+            delta = osg::clampBetween(delta, -maxDelta, maxDelta);
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
@@ -2364,20 +2368,8 @@ void CharacterController::update(float duration, bool animationOnly)
     moved.y() *= scale;
 
     // Ensure we're moving in generally the right direction...
-    if(speed > 0.f)
-    {
-        float l = moved.length();
-        if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2)
-            moved.x() = movement.x();
-        if (std::abs(movement.y() - moved.y()) > std::abs(moved.y()) / 2)
-            moved.y() = movement.y();
-        if (std::abs(movement.z() - moved.z()) > std::abs(moved.z()) / 2)
-            moved.z() = movement.z();
-        // but keep the original speed
-        float newLength = moved.length();
-        if (newLength > 0)
-            moved *= (l / newLength);
-    }
+    if(speed > 0.f && (movement - moved).length2() * 4 > moved.length2())
+        moved = movement;
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
