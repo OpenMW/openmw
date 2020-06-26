@@ -84,12 +84,12 @@ namespace MWPhysics
         assert (mShapeInstance->getCollisionShape()->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
-        for (std::map<int, int>::const_iterator it = mShapeInstance->mAnimatedShapes.begin(); it != mShapeInstance->mAnimatedShapes.end(); ++it)
+        for (const auto& shape : mShapeInstance->mAnimatedShapes)
         {
-            int recIndex = it->first;
-            int shapeIndex = it->second;
+            int recIndex = shape.first;
+            int shapeIndex = shape.second;
 
-            std::map<int, osg::NodePath>::iterator nodePathFound = mRecIndexToNodePath.find(recIndex);
+            auto nodePathFound = mRecIndexToNodePath.find(recIndex);
             if (nodePathFound == mRecIndexToNodePath.end())
             {
                 NifOsg::FindGroupByRecIndex visitor(recIndex);
@@ -104,7 +104,7 @@ namespace MWPhysics
                 }
                 osg::NodePath nodePath = visitor.mFoundPath;
                 nodePath.erase(nodePath.begin());
-                nodePathFound = mRecIndexToNodePath.insert(std::make_pair(recIndex, nodePath)).first;
+                nodePathFound = mRecIndexToNodePath.emplace(recIndex, nodePath).first;
             }
 
             osg::NodePath& nodePath = nodePathFound->second;
