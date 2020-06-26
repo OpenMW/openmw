@@ -36,7 +36,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
-const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be supressed for reflections and refractions (prevents artifacts at shores)
+const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;

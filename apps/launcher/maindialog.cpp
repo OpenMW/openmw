@@ -403,7 +403,7 @@ bool Launcher::MainDialog::setupGameData()
         QAbstractButton *skipButton =
                 msgBox.addButton(tr("Skip"), QMessageBox::RejectRole);
 
-        Q_UNUSED(skipButton); // Supress compiler unused warning
+        Q_UNUSED(skipButton); // Suppress compiler unused warning
 
         msgBox.exec();
 

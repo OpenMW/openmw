@@ -87,7 +87,7 @@ bool parseOptions (int argc, char** argv, Arguments &info)
         ("plain,p", "Print contents of dialogs, books and scripts. "
          "(skipped by default)"
          "Only affects dump mode.")
-        ("quiet,q", "Supress all record information. Useful for speed tests.")
+        ("quiet,q", "Suppress all record information. Useful for speed tests.")
         ("loadcells,C", "Browse through contents of all cells.")
 
         ( "encoding,e", bpo::value<std::string>(&(info.encoding))->
