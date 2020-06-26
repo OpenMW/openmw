@@ -175,6 +175,7 @@ namespace MWPhysics
         int numTimesSlid = 0;
         osg::Vec3f lastSlideNormal(0,0,1);
         osg::Vec3f lastSlideNormalFallback(0,0,1);
+        bool forceGroundTest = false;
         
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
         {
@@ -219,18 +220,20 @@ namespace MWPhysics
             // We hit something. Check if we can step up.
             float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
             osg::Vec3f oldPosition = newPosition;
-            bool result = false;
+            bool usedStepLogic = false;
             if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
             {
                 // Try to step up onto it.
                 // NOTE: this modifies newPosition and velocity on its own if successful
-                result = stepper.step(newPosition, velocity, remainingTime, seenGround, iterations == 0);
+                usedStepLogic = stepper.step(newPosition, velocity, remainingTime, seenGround, iterations == 0);
             }
-            if (result)
+            if (usedStepLogic)
             {
                 // don't let pure water creatures move out of water after stepMove
                 if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > waterlevel)
                     newPosition = oldPosition;
+                else if(!isFlying && position.z() >= swimlevel)
+                    forceGroundTest = true;
             }
             else
             {
@@ -325,7 +328,7 @@ namespace MWPhysics
 
         bool isOnGround = false;
         bool isOnSlope = false;
-        if (!(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
+        if (forceGroundTest || !(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
         {
             osg::Vec3f from = newPosition;
             osg::Vec3f to = newPosition - (physicActor->getOnGround() ? osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
