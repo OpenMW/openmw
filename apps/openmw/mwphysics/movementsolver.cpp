@@ -27,6 +27,32 @@
 
 namespace MWPhysics
 {
+    
+    class DeepestContactResultCallback : public btCollisionWorld::ContactResultCallback
+    {
+    public:
+        DeepestContactResultCallback(const btCollisionObject * me) : mMe(me)
+        {
+            m_collisionFilterGroup = me->getBroadphaseHandle()->m_collisionFilterGroup;
+            m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask;
+        }
+        virtual btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1)
+        {
+            if(contact.m_distance1 < mDistance)
+            {
+                mDistance = contact.m_distance1;
+                mNormal = contact.m_normalWorldOnB;
+                return mDistance;
+            }
+            return 0.0;
+        }
+        btVector3 mNormal{0.0, 0.0, 0.0};
+        btScalar mDistance = 0.0;
+    protected:
+        const btCollisionObject * mMe;
+    };
+    
+    
     static bool isActor(const btCollisionObject *obj)
     {
         assert(obj);
@@ -159,6 +185,50 @@ namespace MWPhysics
             float angleDegrees = osg::RadiansToDegrees(std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
             static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fStromWalkMult")->mValue.getFloat();
             velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
+        }
+        
+        // try to pop outside of the world before doing anything else if we're inside of it
+        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject()};
+        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
+        if(contactCallback.mDistance < 0.0)
+        {
+            bool giveup = false;
+            auto tempPosition = physicActor->getPosition();
+            printf("%f\n", contactCallback.mDistance);
+            auto delta = contactCallback.mNormal*contactCallback.mDistance;
+            auto positionDelta = Misc::Convert::toOsg(contactCallback.mNormal*contactCallback.mDistance);
+            physicActor->setPosition(position - positionDelta);
+            
+            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
+            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
+            // resulting position has more penetration than we started with. try moving straight up instead
+            if(contactCallback2.mDistance < contactCallback.mDistance)
+            {
+                physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, delta.z()));
+                
+                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
+                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
+                // try again but with a fixed distance
+                if(contactCallback3.mDistance < contactCallback.mDistance)
+                {
+                    if(contactCallback3.mDistance < -10)
+                    {
+                        physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
+                        
+                        DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
+                        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
+                        // resulting position STILL has more penetration, give up
+                        if(contactCallback4.mDistance < contactCallback.mDistance)
+                            giveup = true;
+                    }
+                    else
+                        giveup = true;
+                }
+            }
+            if(!giveup)
+                position = physicActor->getPosition();
+            physicActor->setPosition(tempPosition);
+            
         }
 
         Stepper stepper(collisionWorld, colobj);
@@ -314,10 +384,7 @@ namespace MWPhysics
                     newVelocity.z() = std::min(newVelocity.z(), velocity.z());
 
                 if (newVelocity * origVelocity <= 0.0f)
-                {
-                    puts("breaking because velocity went backwards");
                     break;
-                }
 
                 numTimesSlid += 1;
                 lastSlideNormalFallback = lastSlideNormal;
