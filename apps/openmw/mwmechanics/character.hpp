@@ -195,6 +195,8 @@ class CharacterController : public MWRender::Animation::TextKeyListener
 
     float mTimeUntilWake;
 
+    bool mIsMovingBackward;
+
     void setAttackTypeBasedOnMovement();
 
     void refreshCurrentAnims(CharacterState idle, CharacterState movement, JumpingState jump, bool force=false);

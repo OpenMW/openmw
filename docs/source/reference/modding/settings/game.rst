@@ -330,15 +330,3 @@ If disabled then the whole character's body is pointed to the direction of view.
 If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.
 
 This setting can only be configured by editing the settings configuration file.
-
-turn to movement direction speed coef
--------------------------------------
-
-:Type:		floating point
-:Range:		>0
-:Default:	1.0
-
-Makes difference only if 'turn to movement direction' is enabled. Modifies turning speed.
-
-This setting can only be configured by editing the settings configuration file.
-
