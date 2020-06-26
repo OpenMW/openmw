@@ -409,21 +409,21 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
 
     const ESM::RankData& rankData = faction.mData.mRankData[rank];
 
-    if (*iter<rankData.mSkill1)
+    if (*iter<rankData.mPrimarySkill)
         return false;
 
     if (skills.size() < 2)
         return true;
 
     iter++;
-    if (*iter<rankData.mSkill2)
+    if (*iter<rankData.mFavouredSkill)
         return false;
 
     if (skills.size() < 3)
         return true;
 
     iter++;
-    if (*iter<rankData.mSkill2)
+    if (*iter<rankData.mFavouredSkill)
         return false;
 
     return true;

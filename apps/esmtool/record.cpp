@@ -740,9 +740,9 @@ void Record<ESM::Faction>::print()
             std::cout << "    Attribute2 Requirement: "
                       << mData.mData.mRankData[i].mAttribute2 << std::endl;
             std::cout << "    One Skill at Level: "
-                      << mData.mData.mRankData[i].mSkill1 << std::endl;
+                      << mData.mData.mRankData[i].mPrimarySkill << std::endl;
             std::cout << "    Two Skills at Level: "
-                      << mData.mData.mRankData[i].mSkill2 << std::endl;
+                      << mData.mData.mRankData[i].mFavouredSkill << std::endl;
             std::cout << "    Faction Reaction: "
                       << mData.mData.mRankData[i].mFactReaction << std::endl;
         }
