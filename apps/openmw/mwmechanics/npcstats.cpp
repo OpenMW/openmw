@@ -415,7 +415,18 @@ bool MWMechanics::NpcStats::hasSkillsForRank (const std::string& factionId, int 
     if (skills.size() < 2)
         return true;
 
-    return *++iter>=rankData.mSkill2;
+    iter++;
+    if (*iter<rankData.mSkill2)
+        return false;
+
+    if (skills.size() < 3)
+        return true;
+
+    iter++;
+    if (*iter<rankData.mSkill2)
+        return false;
+
+    return true;
 }
 
 bool MWMechanics::NpcStats::isWerewolf() const

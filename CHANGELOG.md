@@ -32,6 +32,7 @@
     Bug #5479: NPCs who should be walking around town are standing around without walking
     Bug #5484: Zero value items shouldn't be able to be bought or sold for 1 gold
     Bug #5490: Hits to carried left slot aren't redistributed if there's no shield equipped
+    Bug #5499: Faction advance is available when requirements not met
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
