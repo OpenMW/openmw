@@ -240,6 +240,8 @@ namespace MWPhysics
             }
             else
             {
+                remainingTime *= (1.0f-tracer.mFraction);
+                
                 // Can't step up, so slide against what we ran into
                 osg::Vec3f newVelocity = reject(velocity, tracer.mPlaneNormal);
                 // Move against it too (with a bit of a collision margin)
@@ -249,6 +251,17 @@ namespace MWPhysics
                 	direction.normalize();
                 	newPosition = tracer.mEndPos;
                 	newPosition -= direction*0.01;
+                }
+
+                // if this isn't the first iteration, or if the first iteration is also the last iteration,
+                // move away from the collision plane slightly, if possible
+		        // this reduces getting stuck in some concave geometry, like the gaps above the railings in some ald'ruhn buildings
+		        // this is different from the normal collision margin, because the normal collision margin is along the movement path,
+		        // but this is along the collision normal
+		        if(iterations > 0 || remainingTime < 0.01f)
+                {
+                	tracer.doTrace(colobj, newPosition, newPosition + tracer.mPlaneNormal*0.02, collisionWorld);
+                	newPosition = (newPosition + tracer.mEndPos)/2.0;
                 }
 
                 // Do not allow sliding upward if there is gravity.
@@ -262,7 +275,6 @@ namespace MWPhysics
                     break; // ^ dot product
 
                 velocity = newVelocity;
-                remainingTime *= (1.0f-tracer.mFraction);
             }
         }
 
