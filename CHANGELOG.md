@@ -31,6 +31,7 @@
     Bug #5452: Autowalk is being included in savegames
     Bug #5479: NPCs who should be walking around town are standing around without walking
     Bug #5484: Zero value items shouldn't be able to be bought or sold for 1 gold
+    Bug #5485: Intimidate doesn't increase disposition on marginal wins
     Bug #5490: Hits to carried left slot aren't redistributed if there's no shield equipped
     Bug #5499: Faction advance is available when requirements not met
     Feature #390: 3rd person look "over the shoulder"
