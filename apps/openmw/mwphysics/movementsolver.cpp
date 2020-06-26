@@ -185,7 +185,7 @@ namespace MWPhysics
             if(!isFlying && nextpos.z() > swimlevel && newPosition.z() < swimlevel)
             {
                 const osg::Vec3f down(0,0,-1);
-                velocity = slide(velocity, down);
+                velocity = reject(velocity, down);
                 // NOTE: remainingTime is unchanged before the loop continues
                 continue; // velocity updated, calculate nextpos again
             }
@@ -214,7 +214,7 @@ namespace MWPhysics
                 break;
             }
 
-            // We are touching something.
+            // We are touching/inside of something.
             if (tracer.mFraction < 1E-9f)
             {
                 // Try to separate by backing off slighly to unstuck the solver
@@ -240,8 +240,8 @@ namespace MWPhysics
             }
             else
             {
-                // Can't move this way, try to find another spot along the plane
-                osg::Vec3f newVelocity = slide(velocity, tracer.mPlaneNormal);
+                // Can't step up, so slide against what we ran into
+                osg::Vec3f newVelocity = reject(velocity, tracer.mPlaneNormal);
 
                 // Do not allow sliding upward if there is gravity.
                 // Stepping will have taken care of that.

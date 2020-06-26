@@ -24,7 +24,7 @@ namespace MWPhysics
         }
 
         ///Helper for computing the character sliding
-        static inline osg::Vec3f slide(const osg::Vec3f& direction, const osg::Vec3f &planeNormal)
+        static inline osg::Vec3f reject(const osg::Vec3f& direction, const osg::Vec3f &planeNormal)
         {
             return direction - project(direction, planeNormal);
         }
