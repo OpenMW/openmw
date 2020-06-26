@@ -242,10 +242,18 @@ namespace MWPhysics
             {
                 // Can't step up, so slide against what we ran into
                 osg::Vec3f newVelocity = reject(velocity, tracer.mPlaneNormal);
+                // Move against it too (with a bit of a collision margin)
+                if ((newPosition-tracer.mEndPos).length2() > 0.0001)
+                {
+                	auto direction = (tracer.mEndPos-newPosition);
+                	direction.normalize();
+                	newPosition = tracer.mEndPos;
+                	newPosition -= direction*0.01;
+                }
 
                 // Do not allow sliding upward if there is gravity.
-                // Stepping will have taken care of that.
-                if(newPosition.z() >= swimlevel && !isFlying)
+                // Stepping will have taken care of it for walkable ground.
+                if (newPosition.z() >= swimlevel && !isFlying)
                     newVelocity.z() = std::min(newVelocity.z(), velocity.z());
 
                 if ((newVelocity-velocity).length2() < 0.01)
