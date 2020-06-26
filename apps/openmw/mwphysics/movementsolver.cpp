@@ -245,8 +245,8 @@ namespace MWPhysics
 
                 // Do not allow sliding upward if there is gravity.
                 // Stepping will have taken care of that.
-                if(!(newPosition.z() < swimlevel || isFlying))
-                    newVelocity.z() = std::min(newVelocity.z(), 0.0f);
+                if(newPosition.z() >= swimlevel && !isFlying)
+                    newVelocity.z() = std::min(newVelocity.z(), velocity.z());
 
                 if ((newVelocity-velocity).length2() < 0.01)
                     break;
