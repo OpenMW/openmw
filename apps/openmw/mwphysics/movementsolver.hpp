@@ -5,6 +5,7 @@
 
 #include <osg/Vec3f>
 
+#include "constants.hpp"
 #include "../mwworld/ptr.hpp"
 
 class btCollisionWorld;
