@@ -194,8 +194,8 @@ namespace MWRender
             if (!matrixTransform) return;
 
             osg::Matrix worldToLocal = osg::Matrix::identity();
-            for (auto node : mNodePath)
-                if (const osg::Transform* t = node->asTransform())
+            for (auto pathNode : mNodePath)
+                if (const osg::Transform* t = pathNode->asTransform())
                     t->computeWorldToLocalMatrix(worldToLocal, nullptr);
             worldToLocal = osg::Matrix::orthoNormal(worldToLocal);
 
