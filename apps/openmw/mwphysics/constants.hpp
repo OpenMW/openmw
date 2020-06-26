@@ -5,7 +5,12 @@ namespace MWPhysics
 {
     static const float sStepSizeUp = 34.0f;
     static const float sStepSizeDown = 62.0f;
-    static const float sMinStep = 10.f;
+    
+    static const float sMinStep = 10.0f; // hack to skip over tiny unwalkable slopes
+    static const float sMinStep2 = 17.5f; // hack to skip over shorter but longer/wider/further unwalkable slopes
+    // do extra stairstepping logic hacks to work around bad morrowind assets - disabling causes problems but improves performance
+    static const bool sDoExtraStairHacks = true;
+    
     static const float sGroundOffset = 1.0f;
     static const float sMaxSlope = 49.0f;
 

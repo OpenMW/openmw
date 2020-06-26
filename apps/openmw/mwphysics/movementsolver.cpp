@@ -33,13 +33,6 @@ namespace MWPhysics
         return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
     }
 
-    template <class Vec3>
-    static bool isWalkableSlope(const Vec3 &normal)
-    {
-        static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
-        return (normal.z() > sMaxSlopeCos);
-    }
-
     osg::Vec3f MovementSolver::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
     {
         osg::Vec3f offset = actor->getCollisionObjectPosition() - ptr.getRefData().getPosition().asVec3();
@@ -178,6 +171,11 @@ namespace MWPhysics
         */
         float remainingTime = time;
         bool seenGround = physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying;
+        
+        int numTimesSlid = 0;
+        osg::Vec3f lastSlideNormal(0,0,1);
+        osg::Vec3f lastSlideNormalFallback(0,0,1);
+        
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
         {
             osg::Vec3f nextpos = newPosition + velocity * remainingTime;
@@ -218,14 +216,6 @@ namespace MWPhysics
             if (isWalkableSlope(tracer.mPlaneNormal) && !isFlying && newPosition.z() >= swimlevel)
                 seenGround = true;
 
-            // We are touching/inside of something.
-            if (tracer.mFraction < 1E-9f)
-            {
-                // Try to separate by backing off slighly to unstuck the solver
-                osg::Vec3f backOff = (newPosition - tracer.mHitPoint) * 1E-2f;
-                newPosition += backOff;
-            }
-
             // We hit something. Check if we can step up.
             float hitHeight = tracer.mHitPoint.z() - tracer.mEndPos.z() + halfExtents.z();
             osg::Vec3f oldPosition = newPosition;
@@ -233,12 +223,11 @@ namespace MWPhysics
             if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
             {
                 // Try to step up onto it.
-                // NOTE: this modifies newPosition on its own if successful
-                result = stepper.step(newPosition, velocity*remainingTime, remainingTime);
+                // NOTE: this modifies newPosition and velocity on its own if successful
+                result = stepper.step(newPosition, velocity, remainingTime, seenGround, iterations == 0);
             }
             if (result)
             {
-                puts("yay stairstepping");
                 // don't let pure water creatures move out of water after stepMove
                 if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > waterlevel)
                     newPosition = oldPosition;
@@ -259,9 +248,7 @@ namespace MWPhysics
                     planeNormal.normalize();
                 }
 
-                osg::Vec3f newVelocity = reject(velocity, planeNormal);
-
-                // Move against what we ran into (with a bit of a collision margin)
+                // Move up to what we ran into (with a bit of a collision margin)
                 if ((newPosition-tracer.mEndPos).length2() > sCollisionMargin*sCollisionMargin)
                 {
                     auto direction = velocity;
@@ -270,27 +257,68 @@ namespace MWPhysics
                     newPosition -= direction*sCollisionMargin;
                 }
 
+                osg::Vec3f newVelocity = (velocity * planeNormal <= 0.0) ? reject(velocity, planeNormal) : velocity;
+                bool usedSeamLogic = false;
+
+                // check for the current and previous collision planes forming an acute angle; slide along the seam if they do
+                if(numTimesSlid > 0)
+                {
+                    auto dotA = lastSlideNormal * planeNormal;
+                    auto dotB = lastSlideNormalFallback * planeNormal;
+                    if(numTimesSlid <= 1) // ignore fallback normal if this is only the first or second slide
+                        dotB = 1.0;
+                    if(dotA <= 0.0 || dotB <= 0.0)
+                    {
+                        osg::Vec3f bestNormal = lastSlideNormal;
+                        // use previous-to-previous collision plane if it's acute with current plane but actual previous plane isn't
+                        if(dotB < dotA)
+                        {
+                            bestNormal = lastSlideNormalFallback;
+                            lastSlideNormal = lastSlideNormalFallback;
+                        }
+                        
+                        auto constraintVector = bestNormal ^ planeNormal; // cross product
+                        if(constraintVector.length2() > 0) // only if it's not zero length
+                        {
+                            constraintVector.normalize();
+                            newVelocity = project(velocity, constraintVector);
+                            
+                            // version of surface rejection for acute crevices/seams
+                            auto averageNormal = bestNormal + planeNormal;
+                            averageNormal.normalize();
+                            tracer.doTrace(colobj, newPosition, newPosition + averageNormal*(sCollisionMargin*2.0), collisionWorld);
+                            newPosition = (newPosition + tracer.mEndPos)/2.0;
+                            
+                            usedSeamLogic = true;
+                        }
+                    }
+                }
+                // otherwise just keep the normal vector rejection
+
                 // if this isn't the first iteration, or if the first iteration is also the last iteration,
                 // move away from the collision plane slightly, if possible
                 // this reduces getting stuck in some concave geometry, like the gaps above the railings in some ald'ruhn buildings
                 // this is different from the normal collision margin, because the normal collision margin is along the movement path,
                 // but this is along the collision normal
-                if(iterations > 0 || remainingTime < 0.01f)
+                if(!usedSeamLogic && (iterations > 0 || remainingTime < 0.01f))
                 {
-                    tracer.doTrace(colobj, newPosition, newPosition + tracer.mPlaneNormal*(sCollisionMargin*2.0), collisionWorld);
+                    tracer.doTrace(colobj, newPosition, newPosition + planeNormal*(sCollisionMargin*2.0), collisionWorld);
                     newPosition = (newPosition + tracer.mEndPos)/2.0;
                 }
 
-                // Do not allow sliding upward if there is gravity.
-                // Stepping will have taken care of it for walkable ground.
-                if (newPosition.z() >= swimlevel && !isFlying)
-                    newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
+                // Do not allow sliding up steep slopes if there is gravity.
+                if (newPosition.z() >= swimlevel && !isFlying && !isWalkableSlope(planeNormal))
+                    newVelocity.z() = std::min(newVelocity.z(), velocity.z());
 
-                if ((newVelocity-velocity).length2() < 0.0001)
+                if (newVelocity * origVelocity <= 0.0f)
+                {
+                    puts("breaking because velocity went backwards");
                     break;
-                if ((newVelocity * origVelocity) <= 0.f)
-                    break; // ^ dot product
+                }
 
+                numTimesSlid += 1;
+                lastSlideNormalFallback = lastSlideNormal;
+                lastSlideNormal = planeNormal;
                 velocity = newVelocity;
             }
         }
@@ -304,6 +332,9 @@ namespace MWPhysics
             tracer.doTrace(colobj, from, to, collisionWorld);
             if(tracer.mFraction < 1.0f && !isActor(tracer.mHitObject))
             {
+                isOnGround = true;
+                isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
+                
                 const btCollisionObject* standingOn = tracer.mHitObject;
                 PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
                 if (ptrHolder)
@@ -311,12 +342,17 @@ namespace MWPhysics
 
                 if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                     physicActor->setWalkingOnWater(true);
-                if (!isFlying && isWalkableSlope(tracer.mPlaneNormal) && tracer.mEndPos.z()+sGroundOffset < newPosition.z())
-                    newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
-
-                isOnGround = true;
-
-                isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
+                if (!isFlying && !isOnSlope)
+                {
+                    if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
+                    else
+                    {
+                        newPosition.z() = tracer.mEndPos.z();
+                        tracer.doTrace(colobj, newPosition, newPosition - osg::Vec3f(0, 0, 2*sGroundOffset), collisionWorld);
+                        newPosition = (newPosition+tracer.mEndPos)/2.0;
+                    }
+                }
             }
             else
             {

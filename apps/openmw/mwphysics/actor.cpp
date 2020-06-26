@@ -1,6 +1,5 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -54,17 +53,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
             Log(Debug::Error) << "Error: Failed to calculate bounding box for actor \"" << ptr.getCellRef().getRefId() << "\".";
     }
 
-    // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
-    if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
-    {
-        mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
-        mRotationallyInvariant = true;
-    }
-    else
-    {
-        mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
-        mRotationallyInvariant = false;
-    }
+    mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
+    mRotationallyInvariant = true;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -74,7 +64,6 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
-    updateRotation();
     updateScale();
     updatePosition();
 
