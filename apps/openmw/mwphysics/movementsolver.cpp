@@ -177,6 +177,7 @@ namespace MWPhysics
          * The initial velocity was set earlier (see above).
         */
         float remainingTime = time;
+        bool seenGround = physicActor->getOnGround() && !physicActor->getOnSlope() && !isFlying;
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
         {
             osg::Vec3f nextpos = newPosition + velocity * remainingTime;
@@ -214,6 +215,9 @@ namespace MWPhysics
                 break;
             }
 
+            if (isWalkableSlope(tracer.mPlaneNormal) && !isFlying && newPosition.z() >= swimlevel)
+                seenGround = true;
+
             // We are touching/inside of something.
             if (tracer.mFraction < 1E-9f)
             {
@@ -229,47 +233,60 @@ namespace MWPhysics
             if (hitHeight < sStepSizeUp && !isActor(tracer.mHitObject))
             {
                 // Try to step up onto it.
-                // NOTE: stepMove does not allow stepping over, modifies newPosition if successful
+                // NOTE: this modifies newPosition on its own if successful
                 result = stepper.step(newPosition, velocity*remainingTime, remainingTime);
             }
             if (result)
             {
+                puts("yay stairstepping");
                 // don't let pure water creatures move out of water after stepMove
                 if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > waterlevel)
                     newPosition = oldPosition;
             }
             else
             {
-                remainingTime *= (1.0f-tracer.mFraction);
-                
                 // Can't step up, so slide against what we ran into
-                osg::Vec3f newVelocity = reject(velocity, tracer.mPlaneNormal);
-                // Move against it too (with a bit of a collision margin)
-                if ((newPosition-tracer.mEndPos).length2() > 0.0001)
+                remainingTime *= (1.0f-tracer.mFraction);
+
+                auto planeNormal = tracer.mPlaneNormal;
+
+                // If we touched the ground this frame, and whatever we ran into is a wall of some sort,
+                // pretend that its collision normal is pointing horizontally
+                // (fixes snagging on slightly downward-facing walls, and crawling up the bases of very steep walls because of the collision margin)
+                if (seenGround && !isWalkableSlope(planeNormal) && planeNormal.z() != 0)
                 {
-                	auto direction = (tracer.mEndPos-newPosition);
-                	direction.normalize();
-                	newPosition = tracer.mEndPos;
-                	newPosition -= direction*0.01;
+                    planeNormal.z() = 0;
+                    planeNormal.normalize();
+                }
+
+                osg::Vec3f newVelocity = reject(velocity, planeNormal);
+
+                // Move against what we ran into (with a bit of a collision margin)
+                if ((newPosition-tracer.mEndPos).length2() > sCollisionMargin*sCollisionMargin)
+                {
+                    auto direction = velocity;
+                    direction.normalize();
+                    newPosition = tracer.mEndPos;
+                    newPosition -= direction*sCollisionMargin;
                 }
 
                 // if this isn't the first iteration, or if the first iteration is also the last iteration,
                 // move away from the collision plane slightly, if possible
-		        // this reduces getting stuck in some concave geometry, like the gaps above the railings in some ald'ruhn buildings
-		        // this is different from the normal collision margin, because the normal collision margin is along the movement path,
-		        // but this is along the collision normal
-		        if(iterations > 0 || remainingTime < 0.01f)
+                // this reduces getting stuck in some concave geometry, like the gaps above the railings in some ald'ruhn buildings
+                // this is different from the normal collision margin, because the normal collision margin is along the movement path,
+                // but this is along the collision normal
+                if(iterations > 0 || remainingTime < 0.01f)
                 {
-                	tracer.doTrace(colobj, newPosition, newPosition + tracer.mPlaneNormal*0.02, collisionWorld);
-                	newPosition = (newPosition + tracer.mEndPos)/2.0;
+                    tracer.doTrace(colobj, newPosition, newPosition + tracer.mPlaneNormal*(sCollisionMargin*2.0), collisionWorld);
+                    newPosition = (newPosition + tracer.mEndPos)/2.0;
                 }
 
                 // Do not allow sliding upward if there is gravity.
                 // Stepping will have taken care of it for walkable ground.
                 if (newPosition.z() >= swimlevel && !isFlying)
-                    newVelocity.z() = std::min(newVelocity.z(), velocity.z());
+                    newVelocity.z() = std::min(newVelocity.z(), std::max(velocity.z(), 0.0f));
 
-                if ((newVelocity-velocity).length2() < 0.01)
+                if ((newVelocity-velocity).length2() < 0.0001)
                     break;
                 if ((newVelocity * origVelocity) <= 0.f)
                     break; // ^ dot product
@@ -294,7 +311,7 @@ namespace MWPhysics
 
                 if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
                     physicActor->setWalkingOnWater(true);
-                if (!isFlying)
+                if (!isFlying && isWalkableSlope(tracer.mPlaneNormal) && tracer.mEndPos.z()+sGroundOffset < newPosition.z())
                     newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                 isOnGround = true;

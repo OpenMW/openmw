@@ -11,6 +11,8 @@ namespace MWPhysics
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
+    // Allows for mode precise movement solving without getting stuck too easily.
+    static const float sCollisionMargin = 0.01;
 }
 
 #endif
