@@ -20,7 +20,6 @@ namespace MWPhysics
         const btCollisionObject *mColObj;
 
         ActorTracer mTracer, mUpStepper, mDownStepper;
-        bool mHaveMoved;
 
     public:
         Stepper(const btCollisionWorld *colWorld, const btCollisionObject *colObj);

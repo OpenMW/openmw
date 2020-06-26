@@ -25,7 +25,6 @@ namespace MWPhysics
     Stepper::Stepper(const btCollisionWorld *colWorld, const btCollisionObject *colObj)
         : mColWorld(colWorld)
         , mColObj(colObj)
-        , mHaveMoved(true)
     {
     }
 

@@ -398,7 +398,7 @@ namespace MWPhysics
 
         bool isOnGround = false;
         bool isOnSlope = false;
-        if (forceGroundTest || !(inertia.z() > 0.f) && !(newPosition.z() < swimlevel))
+        if (forceGroundTest || (inertia.z() <= 0.f && newPosition.z() >= swimlevel))
         {
             osg::Vec3f from = newPosition;
             osg::Vec3f to = newPosition - (physicActor->getOnGround() ? osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
