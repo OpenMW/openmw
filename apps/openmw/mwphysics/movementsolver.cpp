@@ -38,7 +38,10 @@ namespace MWPhysics
         }
         virtual btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1)
         {
-            if(contact.m_distance1 < mDistance)
+            if (colObj0Wrap->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor &&
+                colObj1Wrap->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
+                return 0.0;
+            if (contact.m_distance1 < mDistance)
             {
                 mDistance = contact.m_distance1;
                 mNormal = contact.m_normalWorldOnB;
