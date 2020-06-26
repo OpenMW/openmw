@@ -1143,8 +1143,8 @@ namespace CSMWorld
             case 0: return QString(faction.mRanks[subRowIndex].c_str());
             case 1: return rankData.mAttribute1;
             case 2: return rankData.mAttribute2;
-            case 3: return rankData.mSkill1;
-            case 4: return rankData.mSkill2;
+            case 3: return rankData.mPrimarySkill;
+            case 4: return rankData.mFavouredSkill;
             case 5: return rankData.mFactReaction;
             default: throw std::runtime_error("Rank subcolumn index out of range");
         }
@@ -1165,8 +1165,8 @@ namespace CSMWorld
             case 0: faction.mRanks[subRowIndex] = value.toString().toUtf8().constData(); break;
             case 1: rankData.mAttribute1 = value.toInt(); break;
             case 2: rankData.mAttribute2 = value.toInt(); break;
-            case 3: rankData.mSkill1 = value.toInt(); break;
-            case 4: rankData.mSkill2 = value.toInt(); break;
+            case 3: rankData.mPrimarySkill = value.toInt(); break;
+            case 4: rankData.mFavouredSkill = value.toInt(); break;
             case 5: rankData.mFactReaction = value.toInt(); break;
             default: throw std::runtime_error("Rank index out of range");
         }

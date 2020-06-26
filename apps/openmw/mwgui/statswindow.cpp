@@ -620,10 +620,10 @@ namespace MWGui
 
                         text += "\n";
 
-                        if (rankData.mSkill1 > 0)
-                            text += "\n#{sNeedOneSkill} " + MyGUI::utility::toString(rankData.mSkill1);
-                        if (rankData.mSkill2 > 0)
-                            text += " #{sand} #{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mSkill2);
+                        if (rankData.mPrimarySkill > 0)
+                            text += "\n#{sNeedOneSkill} " + MyGUI::utility::toString(rankData.mPrimarySkill);
+                        if (rankData.mFavouredSkill > 0)
+                            text += " #{sand} #{sNeedTwoSkills} " + MyGUI::utility::toString(rankData.mFavouredSkill);
                     }
                 }
 
