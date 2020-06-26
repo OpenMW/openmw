@@ -108,6 +108,8 @@ namespace MWInput
                 player.yaw(x);
                 player.pitch(y);
             }
+            else if (!input->getControlSwitch("playerlooking"))
+                MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
             if (arg.zrel && input->getControlSwitch("playerviewswitch") && input->getControlSwitch("playercontrols")) //Check to make sure you are allowed to zoomout and there is a change
             {
@@ -212,12 +214,15 @@ namespace MWInput
         rot[2] = xAxis * dt * 1000.0f * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
 
         // Only actually turn player when we're not in vanity mode
-        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
+        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");
+        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && controls)
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
             player.yaw(rot[2]);
             player.pitch(rot[0]);
         }
+        else if (!controls)
+            MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
         MWBase::Environment::get().getInputManager()->resetIdleTime();
     }

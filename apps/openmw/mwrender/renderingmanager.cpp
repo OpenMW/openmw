@@ -58,6 +58,7 @@
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -203,6 +204,8 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
+        , mDeferredRotation(osg::Vec3f())
+        , mDeferredRotationDisabled(false)
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -653,7 +656,8 @@ namespace MWRender
         if(ptr == mCamera->getTrackingPtr() &&
            !mCamera->isVanityOrPreviewModeEnabled())
         {
-            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
+            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0] - mDeferredRotation.x(),
+                                  -ptr.getRefData().getPosition().rot[2] - mDeferredRotation.z(), false);
         }
 
         ptr.getRefData().getBaseNode()->setAttitude(rot);
@@ -1324,6 +1328,50 @@ namespace MWRender
         return true;
     }
 
+    void RenderingManager::applyDeferredPreviewRotationToPlayer(float dt)
+    {
+        MWWorld::Ptr ptr = mCamera->getTrackingPtr();
+        if (mCamera->isVanityOrPreviewModeEnabled() || ptr.isEmpty())
+            return;
+
+        osg::Vec3f rot = mDeferredRotation;
+        float delta = rot.normalize();
+        delta = std::min(delta, (delta + 1.f) * 3 * dt);
+        rot *= delta;
+        mDeferredRotation -= rot;
+
+        auto& movement = ptr.getClass().getMovementSettings(ptr);
+        movement.mRotation[0] += rot.x();
+        movement.mRotation[1] += rot.y();
+        movement.mRotation[2] += rot.z();
+    }
+
+    void RenderingManager::calculateDeferredRotation()
+    {
+        MWWorld::Ptr ptr = mCamera->getTrackingPtr();
+        if (mCamera->isVanityOrPreviewModeEnabled() || mCamera->isUsingSeparatePreviewCamera() || ptr.isEmpty())
+            return;
+        if (mCamera->isFirstPerson() || mDeferredRotationDisabled)
+        {
+            mDeferredRotationDisabled = false;
+            mDeferredRotation = osg::Vec3f();
+            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0],
+                                  -ptr.getRefData().getPosition().rot[2], false);
+            return;
+        }
+
+        mDeferredRotation.x() = -ptr.getRefData().getPosition().rot[0] - mCamera->getPitch();
+        mDeferredRotation.z() = -ptr.getRefData().getPosition().rot[2] - mCamera->getYaw();
+        if (mDeferredRotation.x() > osg::PI)
+            mDeferredRotation.x() -= 2 * osg::PI;
+        if (mDeferredRotation.x() < -osg::PI)
+            mDeferredRotation.x() += 2 * osg::PI;
+        if (mDeferredRotation.z() > osg::PI)
+            mDeferredRotation.z() -= 2 * osg::PI;
+        if (mDeferredRotation.z() < -osg::PI)
+            mDeferredRotation.z() += 2 * osg::PI;
+    }
+
     void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
     {
         if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
@@ -1373,11 +1421,14 @@ namespace MWRender
     void RenderingManager::togglePreviewMode(bool enable)
     {
         mCamera->togglePreviewMode(enable);
+        calculateDeferredRotation();
     }
 
     bool RenderingManager::toggleVanityMode(bool enable)
     {
-        return mCamera->toggleVanityMode(enable);
+        bool res = mCamera->toggleVanityMode(enable);
+        calculateDeferredRotation();
+        return res;
     }
 
     void RenderingManager::allowVanityMode(bool allow)

@@ -48,6 +48,7 @@ namespace MWRender
 
         float mHeight, mBaseCameraDistance;
         CamData mMainCam, mPreviewCam;
+        bool mUseSeparatePreviewCam;
 
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
@@ -115,6 +116,9 @@ namespace MWRender
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
 
+        void useSeparatePreviewCamera(bool v) { mUseSeparatePreviewCam = v; }
+        bool isUsingSeparatePreviewCamera() const { return mUseSeparatePreviewCam; }
+
         /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
 
@@ -152,6 +156,7 @@ namespace MWRender
         void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
 
         bool isVanityOrPreviewModeEnabled() const;
+        bool isVanityModeEnabled() const { return mVanity.enabled; }
 
         bool isNearest() const;
     };

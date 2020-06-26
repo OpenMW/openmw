@@ -2405,6 +2405,16 @@ namespace MWWorld
         return mRendering->toggleVanityMode(enable);
     }
 
+    void World::disableDeferredPreviewRotation()
+    {
+        mRendering->disableDeferredPreviewRotation();
+    }
+
+    void World::applyDeferredPreviewRotationToPlayer(float dt)
+    {
+        mRendering->applyDeferredPreviewRotationToPlayer(dt);
+    }
+
     void World::allowVanityMode(bool allow)
     {
         mRendering->allowVanityMode(allow);

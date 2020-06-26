@@ -221,6 +221,9 @@ namespace MWRender
         void allowVanityMode(bool allow);
         void changeVanityModeScale(float factor);
 
+        void applyDeferredPreviewRotationToPlayer(float dt);
+        void disableDeferredPreviewRotation() { mDeferredRotationDisabled = true; }
+
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);
         /// reset a previous overrideFieldOfView() call, i.e. revert to field of view specified in the settings file.
@@ -309,6 +312,11 @@ namespace MWRender
         float mFieldOfViewOverride;
         float mFieldOfView;
         float mFirstPersonFieldOfView;
+
+        // Used to rotate player to the direction of view after exiting preview or vanity mode.
+        osg::Vec3f mDeferredRotation;
+        bool mDeferredRotationDisabled;
+        void calculateDeferredRotation();
 
         void operator = (const RenderingManager&);
         RenderingManager(const RenderingManager&);

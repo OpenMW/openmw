@@ -33,12 +33,13 @@ namespace MWRender
 
     void ViewOverShoulderController::update()
     {
-        if (mCamera->isVanityOrPreviewModeEnabled() || mCamera->isFirstPerson())
+        if (mCamera->isFirstPerson())
             return;
 
         Mode oldMode = mMode;
         auto ptr = mCamera->getTrackingPtr();
-        if (ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getDrawState() != MWMechanics::DrawState_Nothing)
+        bool combat = ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getDrawState() != MWMechanics::DrawState_Nothing;
+        if (combat && !mCamera->isVanityOrPreviewModeEnabled())
             mMode = Mode::Combat;
         else if (MWBase::Environment::get().getWorld()->isSwimming(ptr))
             mMode = Mode::Swimming;
@@ -46,9 +47,13 @@ namespace MWRender
             mMode = mDefaultShoulderIsRight ? Mode::RightShoulder : Mode::LeftShoulder;
         if (mAutoSwitchShoulder && (mMode == Mode::LeftShoulder || mMode == Mode::RightShoulder))
             trySwitchShoulder();
-        if (oldMode == mMode) return;
 
-        if (oldMode == Mode::Combat || mMode == Mode::Combat)
+        if (oldMode == mMode)
+            return;
+
+        if (mCamera->isVanityOrPreviewModeEnabled())
+            mCamera->setFocalPointTransitionSpeed(mCamera->isVanityModeEnabled() ? 0.2 : 1);
+        else if (oldMode == Mode::Combat || mMode == Mode::Combat)
             mCamera->setFocalPointTransitionSpeed(5.f);
         else
             mCamera->setFocalPointTransitionSpeed(1.f);
