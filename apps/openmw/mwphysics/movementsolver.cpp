@@ -262,6 +262,7 @@ namespace MWPhysics
                     break; // ^ dot product
 
                 velocity = newVelocity;
+                remainingTime *= (1.0f-tracer.mFraction);
             }
         }
 
