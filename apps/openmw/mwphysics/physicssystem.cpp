@@ -95,21 +95,21 @@ namespace MWPhysics
         if (mWaterCollisionObject.get())
             mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
 
-        for (HeightFieldMap::iterator it = mHeightFields.begin(); it != mHeightFields.end(); ++it)
+        for (auto& heightField : mHeightFields)
         {
-            mCollisionWorld->removeCollisionObject(it->second->getCollisionObject());
-            delete it->second;
+            mCollisionWorld->removeCollisionObject(heightField.second->getCollisionObject());
+            delete heightField.second;
         }
 
-        for (ObjectMap::iterator it = mObjects.begin(); it != mObjects.end(); ++it)
+        for (auto& object : mObjects)
         {
-            mCollisionWorld->removeCollisionObject(it->second->getCollisionObject());
-            delete it->second;
+            mCollisionWorld->removeCollisionObject(object.second->getCollisionObject());
+            delete object.second;
         }
 
-        for (ActorMap::iterator it = mActors.begin(); it != mActors.end(); ++it)
+        for (auto& actor : mActors)
         {
-            delete it->second;
+            delete actor.second;
         }
 
         delete mCollisionWorld;
@@ -476,7 +476,7 @@ namespace MWPhysics
             return;
 
         Object *obj = new Object(ptr, shapeInstance);
-        mObjects.insert(std::make_pair(ptr, obj));
+        mObjects.emplace(ptr, obj);
 
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj);
@@ -518,10 +518,10 @@ namespace MWPhysics
             map.erase(found);
         }
 
-        for (CollisionMap::iterator it = map.begin(); it != map.end(); ++it)
+        for (auto& collision : map)
         {
-            if (it->second == old)
-                it->second = updated;
+            if (collision.second == old)
+                collision.second = updated;
         }
     }
 
@@ -533,7 +533,7 @@ namespace MWPhysics
             Object* obj = found->second;
             obj->updatePtr(updated);
             mObjects.erase(found);
-            mObjects.insert(std::make_pair(updated, obj));
+            mObjects.emplace(updated, obj);
         }
 
         ActorMap::iterator foundActor = mActors.find(old);
@@ -542,7 +542,7 @@ namespace MWPhysics
             Actor* actor = foundActor->second;
             actor->updatePtr(updated);
             mActors.erase(foundActor);
-            mActors.insert(std::make_pair(updated, actor));
+            mActors.emplace(updated, actor);
         }
 
         updateCollisionMapPtr(mStandingCollisions, old, updated);
@@ -630,7 +630,8 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh) {
+    void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh)
+    {
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
         if (!shape)
             return;
@@ -646,7 +647,7 @@ namespace MWPhysics
         }
 
         Actor* actor = new Actor(ptr, shape, mCollisionWorld);
-        mActors.insert(std::make_pair(ptr, actor));
+        mActors.emplace(ptr, actor);
     }
 
     bool PhysicsSystem::toggleCollisionMode()
@@ -666,17 +667,16 @@ namespace MWPhysics
 
     void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &movement)
     {
-        PtrVelocityList::iterator iter = mMovementQueue.begin();
-        for(;iter != mMovementQueue.end();++iter)
+        for(auto& movementItem : mMovementQueue)
         {
-            if(iter->first == ptr)
+            if (movementItem.first == ptr)
             {
-                iter->second = movement;
+                movementItem.second = movement;
                 return;
             }
         }
 
-        mMovementQueue.push_back(std::make_pair(ptr, movement));
+        mMovementQueue.emplace_back(ptr, movement);
     }
 
     void PhysicsSystem::clearQueuedMovement()
@@ -705,27 +705,26 @@ namespace MWPhysics
 
         const MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        PtrVelocityList::iterator iter = mMovementQueue.begin();
-        for(;iter != mMovementQueue.end();++iter)
+        for(auto& movementItem : mMovementQueue)
         {
-            ActorMap::iterator foundActor = mActors.find(iter->first);
+            ActorMap::iterator foundActor = mActors.find(movementItem.first);
             if (foundActor == mActors.end()) // actor was already removed from the scene
                 continue;
             Actor* physicActor = foundActor->second;
 
             float waterlevel = -std::numeric_limits<float>::max();
-            const MWWorld::CellStore *cell = iter->first.getCell();
+            const MWWorld::CellStore *cell = movementItem.first.getCell();
             if(cell->getCell()->hasWater())
                 waterlevel = cell->getWaterLevel();
 
-            const MWMechanics::MagicEffects& effects = iter->first.getClass().getCreatureStats(iter->first).getMagicEffects();
+            const MWMechanics::MagicEffects& effects = movementItem.first.getClass().getCreatureStats(movementItem.first).getMagicEffects();
 
             bool waterCollision = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
-                if (!world->isUnderwater(iter->first.getCell(), osg::Vec3f(iter->first.getRefData().getPosition().asVec3())))
+                if (!world->isUnderwater(movementItem.first.getCell(), osg::Vec3f(movementItem.first.getRefData().getPosition().asVec3())))
                     waterCollision = true;
-                else if (physicActor->getCollisionMode() && canMoveToWaterSurface(iter->first, waterlevel))
+                else if (physicActor->getCollisionMode() && canMoveToWaterSurface(movementItem.first, waterlevel))
                 {
                     const osg::Vec3f actorPosition = physicActor->getPosition();
                     physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));
@@ -737,8 +736,8 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
-            bool flying = world->isFlying(iter->first);
-            bool swimming = world->isSwimming(iter->first);
+            bool flying = world->isFlying(movementItem.first);
+            bool swimming = world->isSwimming(movementItem.first);
 
             bool wasOnGround = physicActor->getOnGround();
             osg::Vec3f position = physicActor->getPosition();
@@ -746,7 +745,7 @@ namespace MWPhysics
             bool positionChanged = false;
             for (int i=0; i<numSteps; ++i)
             {
-                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, iter->second, mPhysicsDt,
+                position = MovementSolver::move(position, physicActor->getPtr(), physicActor, movementItem.second, mPhysicsDt,
                                                 flying, waterlevel, slowFall, mCollisionWorld, mStandingCollisions);
                 if (position != physicActor->getPosition())
                     positionChanged = true;
@@ -760,14 +759,14 @@ namespace MWPhysics
 
             float heightDiff = position.z() - oldHeight;
 
-            MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+            MWMechanics::CreatureStats& stats = movementItem.first.getClass().getCreatureStats(movementItem.first);
             bool isStillOnGround = (numSteps > 0 && wasOnGround && physicActor->getOnGround());
             if (isStillOnGround || flying || swimming || slowFall < 1)
-                stats.land(iter->first == player && (flying || swimming));
+                stats.land(movementItem.first == player && (flying || swimming));
             else if (heightDiff < 0)
                 stats.addToFallHeight(-heightDiff);
 
-            mMovementResults.push_back(std::make_pair(iter->first, interpolated));
+            mMovementResults.emplace_back(movementItem.first, interpolated);
         }
 
         mMovementQueue.clear();
@@ -801,9 +800,9 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
     {
-        for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
+        for (const auto& standingActor : mStandingCollisions)
         {
-            if (it->first == actor && it->second == object)
+            if (standingActor.first == actor && standingActor.second == object)
                 return true;
         }
         return false;
@@ -811,10 +810,10 @@ namespace MWPhysics
 
     void PhysicsSystem::getActorsStandingOn(const MWWorld::ConstPtr &object, std::vector<MWWorld::Ptr> &out) const
     {
-        for (CollisionMap::const_iterator it = mStandingCollisions.begin(); it != mStandingCollisions.end(); ++it)
+        for (const auto& standingActor : mStandingCollisions)
         {
-            if (it->second == object)
-                out.push_back(it->first);
+            if (standingActor.second == object)
+                out.push_back(standingActor.first);
         }
     }
 
