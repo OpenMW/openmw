@@ -80,7 +80,6 @@ Windows_Ninja_RelWithDebInfo:
     paths:
     - "*.zip"
     - "*.log"
-    - MSVC2019_64_Ninja/*
     - MSVC2019_64_Ninja/*.log
     - MSVC2019_64_Ninja/*/*.log
     - MSVC2019_64_Ninja/*/*/*.log
@@ -128,7 +127,6 @@ Windows_MSBuild_RelWithDebInfo:
     paths:
     - "*.zip"
     - "*.log"
-    - MSVC2019_64/*
     - MSVC2019_64/*.log
     - MSVC2019_64/*/*.log
     - MSVC2019_64/*/*/*.log
