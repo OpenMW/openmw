@@ -27,7 +27,12 @@
 
 namespace MWPhysics
 {
-    
+    static bool isActor(const btCollisionObject *obj)
+    {
+        assert(obj);
+        return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
+    }
+
     class DeepestContactResultCallback : public btCollisionWorld::ContactResultCallback
     {
     public:
@@ -38,8 +43,7 @@ namespace MWPhysics
         }
         virtual btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1)
         {
-            if (colObj0Wrap->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor &&
-                colObj1Wrap->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
+            if (isActor(colObj0Wrap->getCollisionObject()) && isActor(colObj1Wrap->getCollisionObject()))
                 return 0.0;
             if (contact.m_distance1 < mDistance)
             {
@@ -54,13 +58,6 @@ namespace MWPhysics
     protected:
         const btCollisionObject * mMe;
     };
-    
-    
-    static bool isActor(const btCollisionObject *obj)
-    {
-        assert(obj);
-        return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
-    }
 
     osg::Vec3f MovementSolver::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, Actor* actor, btCollisionWorld* collisionWorld, float maxHeight)
     {
@@ -429,21 +426,9 @@ namespace MWPhysics
             }
             else
             {
-                // standing on actors is not allowed (see above).
-                // in addition to that, apply a sliding effect away from the center of the actor,
-                // so that we do not stay suspended in air indefinitely.
-                if (tracer.mFraction < 1.0f && isActor(tracer.mHitObject))
-                {
-                    if (osg::Vec3f(velocity.x(), velocity.y(), 0).length2() < 100.f*100.f)
-                    {
-                        btVector3 aabbMin, aabbMax;
-                        tracer.mHitObject->getCollisionShape()->getAabb(tracer.mHitObject->getWorldTransform(), aabbMin, aabbMax);
-                        btVector3 center = (aabbMin + aabbMax) / 2.f;
-                        inertia = osg::Vec3f(position.x() - center.x(), position.y() - center.y(), 0);
-                        inertia.normalize();
-                        inertia *= 100;
-                    }
-                }
+                // Vanilla allows actors to over on top of other actors.
+                if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                    newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                 isOnGround = false;
             }
