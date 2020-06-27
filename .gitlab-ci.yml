@@ -60,7 +60,6 @@ Windows_Ninja_RelWithDebInfo:
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
-    - exit 0
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config
@@ -108,7 +107,6 @@ Windows_MSBuild_RelWithDebInfo:
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
-    - exit 0
     - cd MSVC2019_64
     - cmake --build . --config $config
     - cd $config
