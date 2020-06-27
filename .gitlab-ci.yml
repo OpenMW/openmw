@@ -54,7 +54,6 @@ Windows_Ninja_RelWithDebInfo:
   - choco install python -y
   - refreshenv
   stage: build
-  allow_failure: true
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - $config = "RelWithDebInfo"
@@ -102,7 +101,6 @@ Windows_MSBuild_RelWithDebInfo:
   - choco install python -y
   - refreshenv
   stage: build
-  allow_failure: true
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
     - $config = "RelWithDebInfo"
