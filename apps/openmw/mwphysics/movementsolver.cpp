@@ -194,34 +194,27 @@ namespace MWPhysics
         {
             bool giveup = false;
             auto tempPosition = physicActor->getPosition();
-            printf("%f\n", contactCallback.mDistance);
-            auto delta = contactCallback.mNormal*contactCallback.mDistance;
             auto positionDelta = Misc::Convert::toOsg(contactCallback.mNormal*contactCallback.mDistance);
             physicActor->setPosition(position - positionDelta);
-            
+
             DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
             const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
-            // resulting position has more penetration than we started with. try moving straight up instead
+            // try again but only upwards (fixes coc ebonheart)
             if(contactCallback2.mDistance < contactCallback.mDistance)
             {
-                physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, delta.z()));
-                
+                physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
+
                 DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
                 const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                // try again but with a fixed distance
+                // try again but fixed distance
                 if(contactCallback3.mDistance < contactCallback.mDistance)
                 {
-                    if(contactCallback3.mDistance < -10)
-                    {
-                        physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
-                        
-                        DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
-                        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
-                        // resulting position STILL has more penetration, give up
-                        if(contactCallback4.mDistance < contactCallback.mDistance)
-                            giveup = true;
-                    }
-                    else
+                    physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
+
+                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
+                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
+                    // give up
+                    if(contactCallback4.mDistance < contactCallback.mDistance)
                         giveup = true;
                 }
             }
