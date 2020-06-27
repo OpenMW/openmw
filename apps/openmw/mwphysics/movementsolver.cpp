@@ -393,37 +393,40 @@ namespace MWPhysics
             osg::Vec3f from = newPosition;
             osg::Vec3f to = newPosition - (physicActor->getOnGround() ? osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
             tracer.doTrace(colobj, from, to, collisionWorld);
-            if(tracer.mFraction < 1.0f && !isActor(tracer.mHitObject))
+            if(tracer.mFraction < 1.0f)
             {
-                isOnGround = true;
-                isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                
-                const btCollisionObject* standingOn = tracer.mHitObject;
-                PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
-                if (ptrHolder)
-                    standingCollisionTracker[ptr] = ptrHolder->getPtr();
-
-                if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
-                    physicActor->setWalkingOnWater(true);
-                if (!isFlying && !isOnSlope)
+                if (!isActor(tracer.mHitObject))
                 {
-                    if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
-                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
-                    else
+                    isOnGround = true;
+                    isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
+                    
+                    const btCollisionObject* standingOn = tracer.mHitObject;
+                    PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
+                    if (ptrHolder)
+                        standingCollisionTracker[ptr] = ptrHolder->getPtr();
+
+                    if (standingOn->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Water)
+                        physicActor->setWalkingOnWater(true);
+                    if (!isFlying && !isOnSlope)
                     {
-                        newPosition.z() = tracer.mEndPos.z();
-                        tracer.doTrace(colobj, newPosition, newPosition - osg::Vec3f(0, 0, 2*sGroundOffset), collisionWorld);
-                        newPosition = (newPosition+tracer.mEndPos)/2.0;
+                        if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                            newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
+                        else
+                        {
+                            newPosition.z() = tracer.mEndPos.z();
+                            tracer.doTrace(colobj, newPosition, newPosition - osg::Vec3f(0, 0, 2*sGroundOffset), collisionWorld);
+                            newPosition = (newPosition+tracer.mEndPos)/2.0;
+                        }
                     }
                 }
-            }
-            else
-            {
-                // Vanilla allows actors to over on top of other actors.
-                if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
-                    newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
+                else
+                {
+                    // Vanilla allows actors to over on top of other actors.
+                    if (!isFlying && !isOnSlope && tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                        newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
-                isOnGround = false;
+                    isOnGround = false;
+                }
             }
         }
 
