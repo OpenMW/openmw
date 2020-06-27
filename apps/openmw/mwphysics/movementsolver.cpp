@@ -194,28 +194,37 @@ namespace MWPhysics
         {
             bool giveup = false;
             auto tempPosition = physicActor->getPosition();
-            auto positionDelta = Misc::Convert::toOsg(contactCallback.mNormal*contactCallback.mDistance);
-            physicActor->setPosition(position - positionDelta);
+            // try with a tiny upwards distance (fixes scamps etc on slopes)
+            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*1.5));
 
-            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
-            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
-            // try again but only upwards (fixes coc ebonheart)
-            if(contactCallback2.mDistance < contactCallback.mDistance)
+            DeepestContactResultCallback contactCallbackTiny{physicActor->getCollisionObject()};
+            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallbackTiny);
+            // try again but with actual rejection if that didn't completely fix it
+            if(contactCallbackTiny.mDistance < 0.0)
             {
-                physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
+                auto positionDelta = Misc::Convert::toOsg(contactCallback.mNormal*contactCallback.mDistance);
+                physicActor->setPosition(position - positionDelta);
 
-                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
-                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                // try again but fixed distance
-                if(contactCallback3.mDistance < contactCallback.mDistance)
+                DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
+                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
+                // try again but only upwards (fixes coc ebonheart)
+                if(contactCallback2.mDistance < contactCallback.mDistance)
                 {
-                    physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
+                    physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
 
-                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
-                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
-                    // give up
-                    if(contactCallback4.mDistance < contactCallback.mDistance)
-                        giveup = true;
+                    DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
+                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
+                    // try again but fixed distance
+                    if(contactCallback3.mDistance < contactCallback.mDistance)
+                    {
+                        physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
+
+                        DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
+                        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
+                        // give up
+                        if(contactCallback4.mDistance < contactCallback.mDistance)
+                            giveup = true;
+                    }
                 }
             }
             if(!giveup)
@@ -422,7 +431,7 @@ namespace MWPhysics
                 else
                 {
                     // Vanilla allows actors to over on top of other actors.
-                    if (!isFlying && !isOnSlope && tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                    if (!isFlying && isWalkableSlope(tracer.mPlaneNormal) && tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
                         newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
                     isOnGround = false;
