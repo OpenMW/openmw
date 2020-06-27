@@ -78,7 +78,8 @@ Windows_Ninja_RelWithDebInfo:
   artifacts:
     when: always
     paths:
-    - "*.zip"    - "*.log"
+    - "*.zip"
+    - "*.log"
     - MSVC2019_64_Ninja/*
     - MSVC2019_64_Ninja/*.log
     - MSVC2019_64_Ninja/*/*.log
@@ -126,7 +127,8 @@ Windows_MSBuild_RelWithDebInfo:
   artifacts:
     when: always
     paths:
-    - "*.zip"    - "*.log"
+    - "*.zip"
+    - "*.log"
     - MSVC2019_64/*
     - MSVC2019_64/*.log
     - MSVC2019_64/*/*.log
