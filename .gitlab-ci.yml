@@ -111,7 +111,6 @@ Windows_MSBuild_RelWithDebInfo:
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
     - cd MSVC2019_64
-    - .\ActivateMSVC.ps1
     - cmake --build . --config $config
     - cd $config
     - |
