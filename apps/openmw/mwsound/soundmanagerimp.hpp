@@ -143,6 +143,17 @@ namespace MWSound
 
         float volumeFromType(Type type) const;
 
+        enum class WaterSoundAction
+        {
+            DoNothing,
+            SetVolume,
+            FinishSound,
+            PlaySound,
+        };
+
+        std::pair<WaterSoundAction, Sound_Buffer*> getWaterSoundAction(const WaterSoundUpdate& update,
+                                                                       const ESM::Cell* cell) const;
+
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);
 

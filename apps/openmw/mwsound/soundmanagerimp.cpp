@@ -892,48 +892,67 @@ namespace MWSound
         const ESM::Cell *curcell = player.getCell()->getCell();
         const auto update = mWaterSoundUpdater.update(player, *world);
 
+        WaterSoundAction action;
+        Sound_Buffer* sfx;
+        std::tie(action, sfx) = getWaterSoundAction(update, curcell);
+
+        switch (action)
+        {
+            case WaterSoundAction::DoNothing:
+                break;
+            case WaterSoundAction::SetVolume:
+                mNearWaterSound->setVolume(update.mVolume * sfx->mVolume);
+                break;
+            case WaterSoundAction::FinishSound:
+                mOutput->finishSound(mNearWaterSound);
+                mNearWaterSound = nullptr;
+                break;
+            case WaterSoundAction::PlaySound:
+                if (mNearWaterSound)
+                    mOutput->finishSound(mNearWaterSound);
+                mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
+                break;
+        }
+
+        mLastCell = curcell;
+    }
+
+    std::pair<SoundManager::WaterSoundAction, Sound_Buffer*> SoundManager::getWaterSoundAction(
+            const WaterSoundUpdate& update, const ESM::Cell* cell) const
+    {
         if (mNearWaterSound)
         {
             if (update.mVolume == 0.0f)
-            {
-                mOutput->finishSound(mNearWaterSound);
-                mNearWaterSound = nullptr;
-            }
-            else
-            {
-                bool soundIdChanged = false;
+                return {WaterSoundAction::FinishSound, nullptr};
 
-                Sound_Buffer *sfx = lookupSound(update.mId);
-                if (mLastCell != curcell)
-                {
-                    mLastCell = curcell;
-                    SoundMap::const_iterator snditer = mActiveSounds.find(MWWorld::Ptr());
-                    if(snditer != mActiveSounds.end())
-                    {
-                        SoundBufferRefPairList::const_iterator pairiter = std::find_if(
-                            snditer->second.begin(), snditer->second.end(),
-                            [this](const SoundBufferRefPairList::value_type &item) -> bool
-                            { return mNearWaterSound == item.first; }
-                        );
-                        if (pairiter != snditer->second.end() && pairiter->second != sfx)
-                            soundIdChanged = true;
-                    }
-                }
+            bool soundIdChanged = false;
 
-                if(soundIdChanged)
+            Sound_Buffer* sfx = lookupSound(update.mId);
+            if (mLastCell != cell)
+            {
+                const auto snditer = mActiveSounds.find(MWWorld::ConstPtr());
+                if (snditer != mActiveSounds.end())
                 {
-                    mOutput->finishSound(mNearWaterSound);
-                    mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
+                    const auto pairiter = std::find_if(
+                        snditer->second.begin(), snditer->second.end(),
+                        [this](const SoundBufferRefPairList::value_type &item) -> bool
+                        { return mNearWaterSound == item.first; }
+                    );
+                    if (pairiter != snditer->second.end() && pairiter->second != sfx)
+                        soundIdChanged = true;
                 }
-                else if (sfx)
-                    mNearWaterSound->setVolume(update.mVolume * sfx->mVolume);
             }
+
+            if (soundIdChanged)
+                return {WaterSoundAction::PlaySound, nullptr};
+
+            if (sfx)
+                return {WaterSoundAction::SetVolume, sfx};
         }
         else if (update.mVolume > 0.0f)
-        {
-            mLastCell = curcell;
-            mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
-        }
+            return {WaterSoundAction::PlaySound, nullptr};
+
+        return {WaterSoundAction::DoNothing, nullptr};
     }
 
     void SoundManager::updateSounds(float duration)
