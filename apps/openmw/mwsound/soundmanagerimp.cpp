@@ -885,7 +885,7 @@ namespace MWSound
             playSound(*next, 1.0f, 1.0f);
     }
 
-    void SoundManager::updateWaterSound(float /*duration*/)
+    void SoundManager::updateWaterSound()
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
@@ -1115,7 +1115,7 @@ namespace MWSound
             MWBase::StateManager::State_NoGame)
         {
             updateRegionSound(duration);
-            updateWaterSound(duration);
+            updateWaterSound();
         }
     }
 

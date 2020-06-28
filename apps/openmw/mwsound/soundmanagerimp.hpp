@@ -138,7 +138,7 @@ namespace MWSound
 
         void updateSounds(float duration);
         void updateRegionSound(float duration);
-        void updateWaterSound(float duration);
+        void updateWaterSound();
         void updateMusic(float duration);
 
         float volumeFromType(Type type) const;
