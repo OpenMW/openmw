@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include <components/settings/settings.hpp>
-
+#include <components/misc/objectpool.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/soundmanager.hpp"
@@ -79,11 +79,9 @@ namespace MWSound
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
-        std::unique_ptr<std::deque<Sound>> mSounds;
-        std::vector<Sound*> mUnusedSounds;
+        Misc::ObjectPool<Sound> mSounds;
 
-        std::unique_ptr<std::deque<Stream>> mStreams;
-        std::vector<Stream*> mUnusedStreams;
+        Misc::ObjectPool<Stream> mStreams;
 
         typedef std::pair<MWBase::Sound*,Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;

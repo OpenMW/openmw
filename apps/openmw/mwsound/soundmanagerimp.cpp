@@ -58,8 +58,6 @@ namespace MWSound
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(new SoundBufferList::element_type())
         , mBufferCacheSize(0)
-        , mSounds(new std::deque<Sound>())
-        , mStreams(new std::deque<Stream>())
         , mMusic(nullptr)
         , mListenerUnderwater(false)
         , mListenerPos(0,0,0)
@@ -270,34 +268,12 @@ namespace MWSound
 
     Sound *SoundManager::getSoundRef()
     {
-        Sound *ret;
-        if(!mUnusedSounds.empty())
-        {
-            ret = mUnusedSounds.back();
-            mUnusedSounds.pop_back();
-        }
-        else
-        {
-            mSounds->emplace_back();
-            ret = &mSounds->back();
-        }
-        return ret;
+        return mSounds.get();
     }
 
     Stream *SoundManager::getStreamRef()
     {
-        Stream *ret;
-        if(!mUnusedStreams.empty())
-        {
-            ret = mUnusedStreams.back();
-            mUnusedStreams.pop_back();
-        }
-        else
-        {
-            mStreams->emplace_back();
-            ret = &mStreams->back();
-        }
-        return ret;
+        return mStreams.get();
     }
 
     Stream *SoundManager::playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal)
@@ -326,7 +302,7 @@ namespace MWSound
         }
         if(!played)
         {
-            mUnusedStreams.push_back(sound);
+            mStreams.recycle(sound);
             return nullptr;
         }
         return sound;
@@ -343,7 +319,7 @@ namespace MWSound
         if(mMusic)
         {
             mOutput->finishStream(mMusic);
-            mUnusedStreams.push_back(mMusic);
+            mStreams.recycle(mMusic);
             mMusic = nullptr;
         }
     }
@@ -572,7 +548,7 @@ namespace MWSound
         if(snditer != mSaySoundsQueue.end())
         {
             mOutput->finishStream(snditer->second);
-            mUnusedStreams.push_back(snditer->second);
+            mStreams.recycle(snditer->second);
             mSaySoundsQueue.erase(snditer);
         }
 
@@ -580,7 +556,7 @@ namespace MWSound
         if(snditer != mActiveSaySounds.end())
         {
             mOutput->finishStream(snditer->second);
-            mUnusedStreams.push_back(snditer->second);
+            mStreams.recycle(snditer->second);
             mActiveSaySounds.erase(snditer);
         }
     }
@@ -595,7 +571,7 @@ namespace MWSound
         track->init(1.0f, volumeFromType(type), 1.0f, PlayMode::NoEnv|type|Play_2D);
         if(!mOutput->streamSound(decoder, track))
         {
-            mUnusedStreams.push_back(track);
+            mStreams.recycle(track);
             return nullptr;
         }
 
@@ -611,7 +587,7 @@ namespace MWSound
         TrackList::iterator iter = std::lower_bound(mActiveTracks.begin(), mActiveTracks.end(), stream);
         if(iter != mActiveTracks.end() && *iter == stream)
             mActiveTracks.erase(iter);
-        mUnusedStreams.push_back(stream);
+        mStreams.recycle(stream);
     }
 
     double SoundManager::getTrackTimeDelay(Stream *stream)
@@ -635,7 +611,7 @@ namespace MWSound
         sound->init(volume * sfx->mVolume, volumeFromType(type), pitch, mode|type|Play_2D);
         if(!mOutput->playSound(sound, sfx->mHandle, offset))
         {
-            mUnusedSounds.push_back(sound);
+            mSounds.recycle(sound);
             return nullptr;
         }
 
@@ -682,7 +658,7 @@ namespace MWSound
         }
         if(!played)
         {
-            mUnusedSounds.push_back(sound);
+            mSounds.recycle(sound);
             return nullptr;
         }
 
@@ -712,7 +688,7 @@ namespace MWSound
                     sfx->mMinDist, sfx->mMaxDist, mode|type|Play_3D);
         if(!mOutput->playSound3D(sound, sfx->mHandle, offset))
         {
-            mUnusedSounds.push_back(sound);
+            mSounds.recycle(sound);
             return nullptr;
         }
 
@@ -1023,7 +999,7 @@ namespace MWSound
                 if(!mOutput->isSoundPlaying(sound))
                 {
                     mOutput->finishSound(sound);
-                    mUnusedSounds.push_back(sound);
+                    mSounds.recycle(sound);
                     if(sound == mUnderwaterSound)
                         mUnderwaterSound = nullptr;
                     if(sound == mNearWaterSound)
@@ -1067,7 +1043,7 @@ namespace MWSound
             if(!mOutput->isStreamPlaying(sound))
             {
                 mOutput->finishStream(sound);
-                mUnusedStreams.push_back(sound);
+                mStreams.recycle(sound);
                 mActiveSaySounds.erase(sayiter++);
             }
             else
@@ -1292,7 +1268,7 @@ namespace MWSound
             for(SoundBufferRefPair &sndbuf : snd.second)
             {
                 mOutput->finishSound(sndbuf.first);
-                mUnusedSounds.push_back(sndbuf.first);
+                mSounds.recycle(sndbuf.first);
                 Sound_Buffer *sfx = sndbuf.second;
                 if(sfx->mUses-- == 1)
                     mUnusedBuffers.push_front(sfx);
@@ -1305,21 +1281,21 @@ namespace MWSound
         for(SaySoundMap::value_type &snd : mSaySoundsQueue)
         {
             mOutput->finishStream(snd.second);
-            mUnusedStreams.push_back(snd.second);
+            mStreams.recycle(snd.second);
         }
         mSaySoundsQueue.clear();
 
         for(SaySoundMap::value_type &snd : mActiveSaySounds)
         {
             mOutput->finishStream(snd.second);
-            mUnusedStreams.push_back(snd.second);
+            mStreams.recycle(snd.second);
         }
         mActiveSaySounds.clear();
 
         for(Stream *sound : mActiveTracks)
         {
             mOutput->finishStream(sound);
-            mUnusedStreams.push_back(sound);
+            mStreams.recycle(sound);
         }
         mActiveTracks.clear();
         mPlaybackPaused = false;
