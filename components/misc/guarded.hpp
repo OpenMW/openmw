@@ -75,20 +75,20 @@ namespace Misc
                 return Locked<T>(mMutex, mValue);
             }
 
-            Locked<const T> lockConst()
+            Locked<const T> lockConst() const
             {
                 return Locked<const T>(mMutex, mValue);
             }
 
             template <class Predicate>
-            void wait(std::condition_variable& cv, Predicate&& predicate)
+            void wait(std::condition_variable& cv, Predicate&& predicate) const
             {
                 std::unique_lock<std::mutex> lock(mMutex);
                 cv.wait(lock, [&] { return predicate(mValue); });
             }
 
         private:
-            std::mutex mMutex;
+            mutable std::mutex mMutex;
             T mValue;
     };
 }

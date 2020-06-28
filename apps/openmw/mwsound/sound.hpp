@@ -57,6 +57,8 @@ namespace MWSound
         void setVolumeFactor(float volume) { mParams.mVolumeFactor = volume; }
         void setSfxVolume(float volume) { mParams.mSfxVolume = volume; }
         void setBaseVolume(float volume) { mParams.mBaseVolume = volume; }
+        void setMinDistance(float value) { mParams.mMinDistance = value; }
+        void setMaxDistance(float value) { mParams.mMaxDistance = value; }
         void setFadeout(float duration) { mParams.mFadeOutTime = duration; }
         void updateFade(float duration)
         {
@@ -82,6 +84,8 @@ namespace MWSound
         bool getIsLooping() const { return mParams.mFlags & MWSound::PlayMode::Loop; }
         bool getDistanceCull() const { return mParams.mFlags & MWSound::PlayMode::RemoveAtDistance; }
         bool getIs3D() const { return mParams.mFlags & Play_3D; }
+        bool isPlaying() const { return mState == State::Playing; }
+        bool isLoadCancelled() const { return mState == State::LoadCancelled; }
 
         void init(const SoundParams& params)
         {
