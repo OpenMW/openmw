@@ -36,10 +36,11 @@ namespace MWPhysics
     class DeepestContactResultCallback : public btCollisionWorld::ContactResultCallback
     {
     public:
-        DeepestContactResultCallback(const btCollisionObject * me) : mMe(me)
+        DeepestContactResultCallback(const btCollisionObject * me, osg::Vec3f velocity) : mMe(me)
         {
             m_collisionFilterGroup = me->getBroadphaseHandle()->m_collisionFilterGroup;
             m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask;
+            mVelocity = Misc::Convert::toBullet(velocity);
         }
         virtual btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1)
         {
@@ -47,6 +48,9 @@ namespace MWPhysics
                 return 0.0;
             if (contact.m_distance1 < mDistance)
             {
+                // ignore overlap if we're moving in the same direction as it would push us out (don't change this to >=, that would break detection when not moving)
+                if (contact.m_normalWorldOnB.dot(mVelocity) > 0.0)
+                    return 0.0;
                 mDistance = contact.m_distance1;
                 mNormal = contact.m_normalWorldOnB;
                 mDelta = mNormal*-mDistance;
@@ -58,6 +62,7 @@ namespace MWPhysics
         btVector3 mDelta{0.0, 0.0, 0.0}; // points towards "me"
         btScalar mDistance = 0.0; // negative or zero
     protected:
+        btVector3 mVelocity;
         const btCollisionObject * mMe;
     };
 
@@ -193,7 +198,7 @@ namespace MWPhysics
         auto refPosition = position - osg::Vec3f(0.0, 0.0, halfExtents.z());
         physicActor->setPosition(refPosition);
         // try to pop outside of the world before doing anything else if we're inside of it
-        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject()};
+        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject(), velocity};
         const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
@@ -201,21 +206,21 @@ namespace MWPhysics
             auto positionDelta = contactCallback.mDelta;
             physicActor->setPosition(refPosition + Misc::Convert::toOsg(positionDelta));
 
-            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
+            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject(), velocity};
             const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
             // try again but only upwards (fixes some bad coc floors)
             if(contactCallback2.mDistance < contactCallback.mDistance)
             {
                 physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
 
-                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
+                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject(), velocity};
                 const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
                 // try again but fixed distance
                 if(contactCallback3.mDistance < contactCallback.mDistance)
                 {
                     physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 10));
 
-                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
+                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject(), velocity};
                     const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
                     // give up
                     if(contactCallback4.mDistance < contactCallback.mDistance)
