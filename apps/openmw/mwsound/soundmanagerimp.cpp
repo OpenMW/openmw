@@ -887,7 +887,6 @@ namespace MWSound
 
     void SoundManager::updateWaterSound(float /*duration*/)
     {
-        static const ESM::Cell *LastCell;
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
         const ESM::Cell *curcell = player.getCell()->getCell();
@@ -905,9 +904,9 @@ namespace MWSound
                 bool soundIdChanged = false;
 
                 Sound_Buffer *sfx = lookupSound(update.mId);
-                if(LastCell != curcell)
+                if (mLastCell != curcell)
                 {
-                    LastCell = curcell;
+                    mLastCell = curcell;
                     SoundMap::const_iterator snditer = mActiveSounds.find(MWWorld::Ptr());
                     if(snditer != mActiveSounds.end())
                     {
@@ -932,7 +931,7 @@ namespace MWSound
         }
         else if (update.mVolume > 0.0f)
         {
-            LastCell = curcell;
+            mLastCell = curcell;
             mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
         }
     }
