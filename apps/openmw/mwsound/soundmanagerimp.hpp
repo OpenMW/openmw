@@ -114,6 +114,8 @@ namespace MWSound
 
         RegionSoundSelector mRegionSoundSelector;
 
+        float mTimePassed = 0;
+
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
         Sound_Buffer *lookupSound(const std::string &soundId) const;

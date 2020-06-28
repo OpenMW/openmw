@@ -32,6 +32,8 @@ namespace MWSound
 {
     namespace
     {
+        constexpr float sMinUpdateInterval = 1.0f / 30.0f;
+
         WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
         {
             WaterSoundUpdaterSettings settings;
@@ -946,13 +948,11 @@ namespace MWSound
             mSaySoundsQueue.erase(queuesayiter++);
         }
 
-        static float timePassed = 0.0;
-
-        timePassed += duration;
-        if(timePassed < (1.0f/30.0f))
+        mTimePassed += duration;
+        if (mTimePassed < sMinUpdateInterval)
             return;
-        duration = timePassed;
-        timePassed = 0.0f;
+        duration = mTimePassed;
+        mTimePassed = 0.0f;
 
         // Make sure music is still playing
         if(!isMusicPlaying() && !mCurrentPlaylist.empty())
