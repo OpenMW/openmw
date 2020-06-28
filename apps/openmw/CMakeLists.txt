@@ -57,7 +57,7 @@ add_openmw_dir (mwscript
 
 add_openmw_dir (mwsound
     soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
-    loudness movieaudiofactory alext efx efx-presets regionsoundselector
+    loudness movieaudiofactory alext efx efx-presets regionsoundselector watersoundupdater
     )
 
 add_openmw_dir (mwworld

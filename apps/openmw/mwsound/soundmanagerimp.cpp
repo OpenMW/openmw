@@ -30,6 +30,23 @@
 
 namespace MWSound
 {
+    namespace
+    {
+        WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
+        {
+            WaterSoundUpdaterSettings settings;
+
+            settings.mNearWaterRadius = Fallback::Map::getInt("Water_NearWaterRadius");
+            settings.mNearWaterPoints = Fallback::Map::getInt("Water_NearWaterPoints");
+            settings.mNearWaterIndoorTolerance = Fallback::Map::getFloat("Water_NearWaterIndoorTolerance");
+            settings.mNearWaterOutdoorTolerance = Fallback::Map::getFloat("Water_NearWaterOutdoorTolerance");
+            settings.mNearWaterIndoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterIndoorID"));
+            settings.mNearWaterOutdoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterOutdoorID"));
+
+            return settings;
+        }
+    }
+
     // For combining PlayMode and Type flags
     inline int operator|(PlayMode a, Type b) { return static_cast<int>(a) | static_cast<int>(b); }
 
@@ -41,6 +58,7 @@ namespace MWSound
         , mMusicVolume(1.0f)
         , mVoiceVolume(1.0f)
         , mFootstepsVolume(1.0f)
+        , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(new SoundBufferList::element_type())
         , mBufferCacheSize(0)
         , mSounds(new std::deque<Sound>())
@@ -64,13 +82,6 @@ namespace MWSound
         mVoiceVolume = std::min(std::max(mVoiceVolume, 0.0f), 1.0f);
         mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
         mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
-
-        mNearWaterRadius = Fallback::Map::getInt("Water_NearWaterRadius");
-        mNearWaterPoints = Fallback::Map::getInt("Water_NearWaterPoints");
-        mNearWaterIndoorTolerance = Fallback::Map::getFloat("Water_NearWaterIndoorTolerance");
-        mNearWaterOutdoorTolerance = Fallback::Map::getFloat("Water_NearWaterOutdoorTolerance");
-        mNearWaterIndoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterIndoorID"));
-        mNearWaterOutdoorID = Misc::StringUtils::lowerCase(Fallback::Map::getString("Water_NearWaterOutdoorID"));
 
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
@@ -912,57 +923,12 @@ namespace MWSound
         static const ESM::Cell *LastCell;
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        osg::Vec3f pos = player.getRefData().getPosition().asVec3();
         const ESM::Cell *curcell = player.getCell()->getCell();
-
-        float volume = 0.0f;
-        const std::string& soundId = player.getCell()->isExterior() ? mNearWaterOutdoorID : mNearWaterIndoorID;
-
-        if (!mListenerUnderwater)
-        {
-            if (curcell->hasWater())
-            {
-                float dist = std::abs(player.getCell()->getWaterLevel() - pos.z());
-
-                if (player.getCell()->isExterior() && dist < mNearWaterOutdoorTolerance)
-                {
-                    volume = (mNearWaterOutdoorTolerance - dist) / mNearWaterOutdoorTolerance;
-
-                    if (mNearWaterPoints > 1)
-                    {
-                        int underwaterPoints = 0;
-
-                        float step = mNearWaterRadius * 2.0f / (mNearWaterPoints - 1);
-
-                        for (int x = 0; x < mNearWaterPoints; x++)
-                        {
-                            for (int y = 0; y < mNearWaterPoints; y++)
-                            {
-                                float height = world->getTerrainHeightAt(
-                                            osg::Vec3f(pos.x() - mNearWaterRadius + x*step, pos.y() - mNearWaterRadius + y*step, 0.0f));
-
-                                if (height < 0)
-                                    underwaterPoints++;
-                            }
-                        }
-
-                        volume *= underwaterPoints * 2.0f / (mNearWaterPoints*mNearWaterPoints);
-                    }
-                }
-                else if (!player.getCell()->isExterior() && dist < mNearWaterIndoorTolerance)
-                {
-                    volume = (mNearWaterIndoorTolerance - dist) / mNearWaterIndoorTolerance;
-                }
-            }
-        }
-        else
-            volume = 1.0f;
-
-        volume = std::min(volume, 1.0f);
+        const auto update = mWaterSoundUpdater.update(player, *world);
 
         if (mNearWaterSound)
         {
-            if (volume == 0.0f)
+            if (update.mVolume == 0.0f)
             {
                 mOutput->finishSound(mNearWaterSound);
                 mNearWaterSound = nullptr;
@@ -971,7 +937,7 @@ namespace MWSound
             {
                 bool soundIdChanged = false;
 
-                Sound_Buffer *sfx = lookupSound(soundId);
+                Sound_Buffer *sfx = lookupSound(update.mId);
                 if(LastCell != curcell)
                 {
                     LastCell = curcell;
@@ -991,16 +957,16 @@ namespace MWSound
                 if(soundIdChanged)
                 {
                     mOutput->finishSound(mNearWaterSound);
-                    mNearWaterSound = playSound(soundId, volume, 1.0f, Type::Sfx, PlayMode::Loop);
+                    mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
                 }
                 else if (sfx)
-                    mNearWaterSound->setVolume(volume * sfx->mVolume);
+                    mNearWaterSound->setVolume(update.mVolume * sfx->mVolume);
             }
         }
-        else if (volume > 0.0f)
+        else if (update.mVolume > 0.0f)
         {
             LastCell = curcell;
-            mNearWaterSound = playSound(soundId, volume, 1.0f, Type::Sfx, PlayMode::Loop);
+            mNearWaterSound = playSound(update.mId, update.mVolume, 1.0f, Type::Sfx, PlayMode::Loop);
         }
     }
 
@@ -1165,7 +1131,7 @@ namespace MWSound
             mMusic->updateFade(duration);
 
             mOutput->updateStream(mMusic);
-            
+
             if (mMusic->getRealVolume() <= 0.f)
             {
                 streamMusicFull(mNextMusic);
@@ -1242,6 +1208,8 @@ namespace MWSound
         mListenerUp  = up;
 
         mListenerUnderwater = underwater;
+
+        mWaterSoundUpdater.setUnderwater(underwater);
     }
 
     void SoundManager::updatePtr(const MWWorld::ConstPtr &old, const MWWorld::ConstPtr &updated)
