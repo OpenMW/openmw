@@ -210,10 +210,10 @@ namespace MWPhysics
 
                 DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
                 const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                // try again but fixed distance (fixes coc ebonheart)
+                // try again but fixed distance
                 if(contactCallback3.mDistance < contactCallback.mDistance)
                 {
-                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 20));
+                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 10));
 
                     DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
                     const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
