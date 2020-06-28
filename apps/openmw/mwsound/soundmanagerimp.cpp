@@ -767,17 +767,6 @@ namespace MWSound
         }
     }
 
-    void SoundManager::stopSound(const std::string& soundId)
-    {
-        if(!mOutput->isInitialized())
-            return;
-
-        Sound_Buffer *sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
-        if (!sfx) return;
-
-        stopSound(sfx, MWWorld::ConstPtr());
-    }
-
     void SoundManager::stopSound3D(const MWWorld::ConstPtr &ptr, const std::string& soundId)
     {
         if(!mOutput->isInitialized())
