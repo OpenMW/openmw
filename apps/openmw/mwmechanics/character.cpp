@@ -2368,8 +2368,21 @@ void CharacterController::update(float duration, bool animationOnly)
     moved.y() *= scale;
 
     // Ensure we're moving in generally the right direction...
-    if(speed > 0.f && (movement - moved).length2() * 4 > moved.length2())
-        moved = movement;
+    if(speed > 0.f)
+    {
+        float l = moved.length();
+        if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2 ||
+            std::abs(movement.y() - moved.y()) > std::abs(moved.y()) / 2 ||
+            std::abs(movement.z() - moved.z()) > std::abs(moved.z()) / 2)
+        {
+            moved = movement;
+            // For some creatures getSpeed doesn't work, so we adjust speed to the animation.
+            // TODO: Fix Creature::getSpeed.
+            float newLength = moved.length();
+            if (newLength > 0 && !cls.isNpc())
+                moved *= (l / newLength);
+        }
+    }
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
         moved.z() = 1.0;
