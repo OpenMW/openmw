@@ -14,6 +14,8 @@
 
 #include "../mwbase/soundmanager.hpp"
 
+#include "regionsoundselector.hpp"
+
 namespace VFS
 {
     class Manager;
@@ -114,6 +116,8 @@ namespace MWSound
 
         std::string mNextMusic;
         bool mPlaybackPaused;
+
+        RegionSoundSelector mRegionSoundSelector;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 

@@ -907,54 +907,15 @@ namespace MWSound
 
     void SoundManager::updateRegionSound(float duration)
     {
-        static float sTimeToNextEnvSound = 0.0f;
-        static int total = 0;
-        static std::string regionName = "";
-        static float sTimePassed = 0.0;
         MWBase::World *world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
         const ESM::Cell *cell = player.getCell()->getCell();
 
-        sTimePassed += duration;
-        if(!cell->isExterior() || sTimePassed < sTimeToNextEnvSound)
+        if (!cell->isExterior())
             return;
 
-        float a = Misc::Rng::rollClosedProbability();
-        // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
-        // "Maximum Time Between Environmental Sounds" fallback settings here.
-        sTimeToNextEnvSound = 5.0f*a + 15.0f*(1.0f-a);
-        sTimePassed = 0;
-
-        if(regionName != cell->mRegion)
-        {
-            regionName = cell->mRegion;
-            total = 0;
-        }
-
-        const ESM::Region *regn = world->getStore().get<ESM::Region>().search(regionName);
-        if(regn == nullptr)
-            return;
-
-        if(total == 0)
-        {
-            for(const ESM::Region::SoundRef &sndref : regn->mSoundList)
-                total += (int)sndref.mChance;
-            if(total == 0)
-                return;
-        }
-
-        int r = Misc::Rng::rollDice(total);
-        int pos = 0;
-
-        for(const ESM::Region::SoundRef &sndref : regn->mSoundList)
-        {
-            if(r - pos < sndref.mChance)
-            {
-                playSound(sndref.mSound, 1.0f, 1.0f);
-                break;
-            }
-            pos += sndref.mChance;
-        }
+        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->mRegion, *world))
+            playSound(*next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound(float /*duration*/)
