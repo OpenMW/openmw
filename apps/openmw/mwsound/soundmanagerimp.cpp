@@ -762,7 +762,9 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
-            Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+            Sound_Buffer *sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
+            if (sfx == nullptr)
+                return;
             for(SoundBufferRefPair &sndbuf : snditer->second)
             {
                 if(sndbuf.second == sfx)
