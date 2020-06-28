@@ -195,7 +195,7 @@ namespace MWPhysics
             bool giveup = false;
             auto tempPosition = physicActor->getPosition();
             // try with a tiny upwards distance (fixes scamps etc on slopes)
-            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*1.5));
+            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*0.72));
 
             DeepestContactResultCallback contactCallbackTiny{physicActor->getCollisionObject()};
             const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallbackTiny);
