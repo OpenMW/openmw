@@ -49,12 +49,14 @@ namespace MWPhysics
             {
                 mDistance = contact.m_distance1;
                 mNormal = contact.m_normalWorldOnB;
+                mDelta = mNormal*-mDistance;
                 return mDistance;
             }
             return 0.0;
         }
-        btVector3 mNormal{0.0, 0.0, 0.0};
-        btScalar mDistance = 0.0;
+        btVector3 mNormal{0.0, 0.0, 0.0}; // points towards "me"
+        btVector3 mDelta{0.0, 0.0, 0.0}; // points towards "me"
+        btScalar mDistance = 0.0; // negative or zero
     protected:
         const btCollisionObject * mMe;
     };
@@ -187,53 +189,44 @@ namespace MWPhysics
             velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
         }
         
+        auto tempPosition = physicActor->getPosition();
+        auto refPosition = position - osg::Vec3f(0.0, 0.0, halfExtents.z());
+        physicActor->setPosition(refPosition);
         // try to pop outside of the world before doing anything else if we're inside of it
         DeepestContactResultCallback contactCallback{physicActor->getCollisionObject()};
         const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
-        if(contactCallback.mDistance < 0.0)
+        if(contactCallback.mDistance < -sAllowedPenetration)
         {
             bool giveup = false;
-            auto tempPosition = physicActor->getPosition();
-            // try with a tiny upwards distance (fixes scamps etc on slopes)
-            // if this is more than 1x sGroundOffset it causes jittering on some surfaces; if it's too small it stops working
-            // I expect values between the max slope normal z value and 1.0 to work, but I haven't tested what's ideal
-            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*0.8));
+            auto positionDelta = contactCallback.mDelta;
+            physicActor->setPosition(refPosition + Misc::Convert::toOsg(positionDelta));
 
-            DeepestContactResultCallback contactCallbackTiny{physicActor->getCollisionObject()};
-            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallbackTiny);
-            // try again but with actual rejection if that didn't completely fix it
-            if(contactCallbackTiny.mDistance < 0.0)
+            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
+            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
+            // try again but only upwards (fixes some bad coc floors)
+            if(contactCallback2.mDistance < contactCallback.mDistance)
             {
-                auto positionDelta = Misc::Convert::toOsg(contactCallback.mNormal*contactCallback.mDistance);
-                physicActor->setPosition(position - positionDelta);
+                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
 
-                DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject()};
-                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
-                // try again but only upwards (fixes coc ebonheart)
-                if(contactCallback2.mDistance < contactCallback.mDistance)
+                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
+                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
+                // try again but fixed distance (fixes coc ebonheart)
+                if(contactCallback3.mDistance < contactCallback.mDistance)
                 {
-                    physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
+                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 20));
 
-                    DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject()};
-                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                    // try again but fixed distance
-                    if(contactCallback3.mDistance < contactCallback.mDistance)
-                    {
-                        physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, 10));
-
-                        DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
-                        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
-                        // give up
-                        if(contactCallback4.mDistance < contactCallback.mDistance)
-                            giveup = true;
-                    }
+                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject()};
+                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
+                    // give up
+                    if(contactCallback4.mDistance < contactCallback.mDistance)
+                        giveup = true;
                 }
             }
             if(!giveup)
-                position = physicActor->getPosition();
-            physicActor->setPosition(tempPosition);
+                position = physicActor->getPosition() + osg::Vec3f(0.0, 0.0, halfExtents.z());
             
         }
+        physicActor->setPosition(tempPosition);
 
         Stepper stepper(collisionWorld, colobj);
         osg::Vec3f origVelocity = velocity;
@@ -402,7 +395,8 @@ namespace MWPhysics
         if (forceGroundTest || (inertia.z() <= 0.f && newPosition.z() >= swimlevel))
         {
             osg::Vec3f from = newPosition;
-            osg::Vec3f to = newPosition - (physicActor->getOnGround() ? osg::Vec3f(0,0,sStepSizeDown + 2*sGroundOffset) : osg::Vec3f(0,0,2*sGroundOffset));
+            auto dropDistance = physicActor->getOnGround() ? 2*sGroundOffset + sStepSizeDown : 2*sGroundOffset;
+            osg::Vec3f to = newPosition - osg::Vec3f(0,0,dropDistance);
             tracer.doTrace(colobj, from, to, collisionWorld);
             if(tracer.mFraction < 1.0f)
             {
@@ -420,12 +414,12 @@ namespace MWPhysics
                         physicActor->setWalkingOnWater(true);
                     if (!isFlying && !isOnSlope)
                     {
-                        if (tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
+                        if (tracer.mFraction*dropDistance > sGroundOffset)
                             newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
                         else
                         {
                             newPosition.z() = tracer.mEndPos.z();
-                            tracer.doTrace(colobj, newPosition, newPosition - osg::Vec3f(0, 0, 2*sGroundOffset), collisionWorld);
+                            tracer.doTrace(colobj, newPosition, newPosition + osg::Vec3f(0, 0, 2*sGroundOffset), collisionWorld);
                             newPosition = (newPosition+tracer.mEndPos)/2.0;
                         }
                     }

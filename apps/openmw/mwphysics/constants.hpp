@@ -18,6 +18,8 @@ namespace MWPhysics
     static const int sMaxIterations = 8;
     // Allows for mode precise movement solving without getting stuck too easily.
     static const float sCollisionMargin = 0.01;
+    // Allow for a small amount of penetration so that bullet glitching out with strangely-shaped collision boxes (e.g. scramps) doesn't cause issues
+    static const float sAllowedPenetration = 4.0;
 }
 
 #endif
