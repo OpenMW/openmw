@@ -72,6 +72,10 @@ namespace MWInput
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
             mInvUiScalingFactor = 1.f / uiScale;
+
+        float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
+        deadZoneRadius = std::min(std::max(deadZoneRadius, 0.0f), 0.5f);
+        mBindingsManager->setJoystickDeadZone(deadZoneRadius);
     }
 
     void ControllerManager::processChangedSettings(const Settings::CategorySettingVector& changed)

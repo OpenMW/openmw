@@ -135,6 +135,18 @@ camera sensitivity setting.
 
 This setting can only be configured by editing the settings configuration file.
 
+joystick dead zone
+------------------
+
+:Type:		floating point
+:Range:		0.0 to 0.5
+:Default:	0.1
+
+This setting controls the radius of dead zone (where an input is discarded) for joystick axes.
+Note that third-party software can provide its own dead zones. In this case OpenmW-specific setting dead zone can be disabled (0.0).
+
+This setting can only be configured by editing the settings configuration file.
+
 enable gyroscope
 ----------------
 

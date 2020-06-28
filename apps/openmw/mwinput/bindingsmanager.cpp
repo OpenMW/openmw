@@ -226,6 +226,11 @@ namespace MWInput
         }
     }
 
+    void BindingsManager::setJoystickDeadZone(float deadZone)
+    {
+        mInputBinder->setJoystickDeadZone(deadZone);
+    }
+
     float BindingsManager::getActionValue (int id) const
     {
         return mInputBinder->getChannel(id)->getValue();
