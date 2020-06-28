@@ -195,7 +195,9 @@ namespace MWPhysics
             bool giveup = false;
             auto tempPosition = physicActor->getPosition();
             // try with a tiny upwards distance (fixes scamps etc on slopes)
-            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*0.72));
+            // if this is more than 1x sGroundOffset it causes jittering on some surfaces; if it's too small it stops working
+            // I expect values between the max slope normal z value and 1.0 to work, but I haven't tested what's ideal
+            physicActor->setPosition(position + osg::Vec3f(0.0, 0.0, sGroundOffset*0.8));
 
             DeepestContactResultCallback contactCallbackTiny{physicActor->getCollisionObject()};
             const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallbackTiny);
