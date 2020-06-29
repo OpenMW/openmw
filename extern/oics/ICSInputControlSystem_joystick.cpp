@@ -28,7 +28,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define SDL_JOY_AXIS_MIN -32768
 #define SDL_JOY_AXIS_MAX 32767
-#define DEADZONE 0.1f
 
 namespace ICS
 {
@@ -263,13 +262,13 @@ namespace ICS
 
                         float axisRange = SDL_JOY_AXIS_MAX - SDL_JOY_AXIS_MIN;
                         float valDisplaced = (float)(evt.value - SDL_JOY_AXIS_MIN);
-                        float percent = valDisplaced / axisRange * (1+DEADZONE*2) - DEADZONE; //Assures all values, 0 through 1, are seen
-                        if(percent > .5-DEADZONE && percent < .5+DEADZONE) //close enough to center
+                        float percent = valDisplaced / axisRange * (1+mDeadZone*2) - mDeadZone; //Assures all values, 0 through 1, are seen
+                        if(percent > .5-mDeadZone && percent < .5+mDeadZone) //close enough to center
                             percent = .5;
                         else if(percent > .5)
-                            percent -= DEADZONE;
+                            percent -= mDeadZone;
                         else
-                            percent += DEADZONE;
+                            percent += mDeadZone;
 
                         if(joystickBinderItem.direction == Control::INCREASE)
                         {
