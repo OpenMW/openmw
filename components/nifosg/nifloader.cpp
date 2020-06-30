@@ -170,31 +170,6 @@ namespace
 
 namespace NifOsg
 {
-    class CollisionSwitch : public osg::MatrixTransform
-    {
-    public:
-        CollisionSwitch() : osg::MatrixTransform()
-        {
-        }
-
-        CollisionSwitch(const CollisionSwitch& copy, const osg::CopyOp& copyop)
-            : osg::MatrixTransform(copy, copyop)
-        {
-        }
-
-        META_Node(NifOsg, CollisionSwitch)
-
-        CollisionSwitch(const osg::Matrixf& transformations, bool enabled) : osg::MatrixTransform(transformations)
-        {
-            setEnabled(enabled);
-        }
-
-        void setEnabled(bool enabled)
-        {
-            setNodeMask(enabled ? ~0 : Loader::getIntersectionDisabledNodeMask());
-        }
-    };
-
     bool Loader::sShowMarkers = false;
 
     void Loader::setShowMarkers(bool show)
@@ -501,14 +476,6 @@ namespace NifOsg
             case Nif::RC_NiBillboardNode:
                 dataVariance = osg::Object::DYNAMIC;
                 break;
-            case Nif::RC_NiCollisionSwitch:
-            {
-                bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
-                node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
-                // This matrix transform must not be combined with another matrix transform.
-                dataVariance = osg::Object::DYNAMIC;
-                break;
-            }
             default:
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
@@ -522,6 +489,13 @@ namespace NifOsg
             }
             if (!node)
                 node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+
+            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
+            {
+                node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // This node must not be combined with another node.
+                dataVariance = osg::Object::DYNAMIC;
+            }
 
             node->setDataVariance(dataVariance);
 
