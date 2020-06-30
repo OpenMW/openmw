@@ -11,7 +11,7 @@
 #include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
 
-#include "userdata.hpp"
+#include "matrixtransform.hpp"
 
 namespace NifOsg
 {
@@ -381,16 +381,11 @@ void FindGroupByRecIndex::apply(osg::Geometry &node)
 
 void FindGroupByRecIndex::applyNode(osg::Node &searchNode)
 {
-    if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
+    if (NifOsg::MatrixTransform* trans = dynamic_cast<NifOsg::MatrixTransform*>(&searchNode))
     {
-        NodeUserData* holder = dynamic_cast<NodeUserData*>(searchNode.getUserDataContainer()->getUserObject(0));
-        if (holder && holder->mIndex == mRecIndex)
+        if (trans->mIndex == mRecIndex)
         {
-            osg::Group* group = searchNode.asGroup();
-            if (!group)
-                group = searchNode.getParent(0);
-
-            mFound = group;
+            mFound = trans;
             mFoundPath = getNodePath();
             return;
         }

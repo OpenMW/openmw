@@ -3,7 +3,6 @@
 #include <mutex>
 
 #include <osg/Matrixf>
-#include <osg/MatrixTransform>
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
@@ -43,8 +42,8 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
+#include "matrixtransform.hpp"
 #include "particle.hpp"
-#include "userdata.hpp"
 
 namespace
 {
@@ -488,7 +487,7 @@ namespace NifOsg
                 break;
             }
             if (!node)
-                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+                node = new NifOsg::MatrixTransform(nifNode->recIndex, nifNode->trafo);
 
             if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
             {
@@ -522,15 +521,6 @@ namespace NifOsg
 
             if (!rootNode)
                 rootNode = node;
-
-            // UserData used for a variety of features:
-            // - finding the correct emitter node for a particle system
-            // - establishing connections to the animated collision shapes, which are handled in a separate loader
-            // - finding a random child NiNode in NiBspArrayController
-            // - storing the previous 3x3 rotation and scale values for when a KeyframeController wants to
-            //   change only certain elements of the 4x4 transform
-            node->getOrCreateUserDataContainer()->addUserObject(
-                new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {

@@ -1,5 +1,6 @@
 #include "serialize.hpp"
 
+#include <osg/MatrixTransform>
 #include <osgDB/ObjectWrapper>
 #include <osgDB/Registry>
 
@@ -74,6 +75,15 @@ public:
     }
 };
 
+class MatrixTransformSerializer : public osgDB::ObjectWrapper
+{
+public:
+    MatrixTransformSerializer()
+        : osgDB::ObjectWrapper(createInstanceFunc<osg::MatrixTransform>, "NifOsg::MatrixTransform", "osg::Object osg::Node osg::Transform osg::MatrixTransform NifOsg::MatrixTransform")
+    {
+    }
+};
+
 osgDB::ObjectWrapper* makeDummySerializer(const std::string& classname)
 {
     return new osgDB::ObjectWrapper(createInstanceFunc<osg::DummyObject>, classname, "osg::Object");
@@ -100,6 +110,7 @@ void registerSerializers()
         mgr->addWrapper(new MorphGeometrySerializer);
         mgr->addWrapper(new LightManagerSerializer);
         mgr->addWrapper(new CameraRelativeTransformSerializer);
+        mgr->addWrapper(new MatrixTransformSerializer);
 
         // Don't serialize Geometry data as we are more interested in the overall structure rather than tons of vertex data that would make the file large and hard to read.
         mgr->removeWrapper(mgr->findWrapper("osg::Geometry"));
@@ -118,7 +129,6 @@ void registerSerializers()
             "SceneUtil::StateSetUpdater",
             "SceneUtil::DisableLight",
             "SceneUtil::MWShadowTechnique",
-            "NifOsg::NodeUserData",
             "NifOsg::FlipController",
             "NifOsg::KeyframeController",
             "NifOsg::TextKeyMapHolder",

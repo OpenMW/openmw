@@ -4,14 +4,13 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
-#include <osg/UserDataContainer>
 
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
-#include "userdata.hpp"
+#include "matrixtransform.hpp"
 
 namespace NifOsg
 {
@@ -119,13 +118,12 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
+        NifOsg::MatrixTransform* trans = static_cast<NifOsg::MatrixTransform*>(node);
         osg::Matrix mat = trans->getMatrix();
 
         float time = getInputValue(nv);
 
-        NodeUserData* userdata = static_cast<NodeUserData*>(trans->getUserDataContainer()->getUserObject(0));
-        Nif::Matrix3& rot = userdata->mRotationScale;
+        Nif::Matrix3& rot = trans->mRotationScale;
 
         bool setRot = false;
         if(!mRotations.empty())
@@ -140,18 +138,18 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
         }
         else
         {
-            // no rotation specified, use the previous value from the UserData
+            // no rotation specified, use the previous value
             for (int i=0;i<3;++i)
                 for (int j=0;j<3;++j)
                     mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
         }
 
-        if (setRot) // copy the new values back to the UserData
+        if (setRot) // copy the new values back
             for (int i=0;i<3;++i)
                 for (int j=0;j<3;++j)
                     rot.mValues[i][j] = mat(j,i); // NB column/row major difference
 
-        float& scale = userdata->mScale;
+        float& scale = trans->mScale;
         if(!mScales.empty())
             scale = mScales.interpKey(time);
 
