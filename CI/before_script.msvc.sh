@@ -460,8 +460,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Bullet
 	download "Bullet 2.89 (${BULLET_DBL_DISPLAY})" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" \
-		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z"
+		"https://rgw.ctrl-c.liu.se/openmw/Deps/Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}.7z" \
+		"Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}.7z"
 
 	# FFmpeg
 	download "FFmpeg 4.2.2" \
@@ -603,8 +603,8 @@ printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
-		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
+		mv "Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}" Bullet
 	fi
 	export BULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
