@@ -229,7 +229,7 @@ namespace MWInput
 
     bool MouseManager::injectMouseButtonRelease(Uint8 button)
     {
-        return MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
+        return MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
     }
 
     void MouseManager::injectMouseMove(float xMove, float yMove, float mouseWheelMove)
