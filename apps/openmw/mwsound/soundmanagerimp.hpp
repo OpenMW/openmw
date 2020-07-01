@@ -15,6 +15,7 @@
 #include "../mwbase/soundmanager.hpp"
 
 #include "regionsoundselector.hpp"
+#include "watersoundupdater.hpp"
 
 namespace VFS
 {
@@ -61,12 +62,8 @@ namespace MWSound
         float mVoiceVolume;
         float mFootstepsVolume;
 
-        int mNearWaterRadius;
-        int mNearWaterPoints;
-        float mNearWaterIndoorTolerance;
-        float mNearWaterOutdoorTolerance;
-        std::string mNearWaterIndoorID;
-        std::string mNearWaterOutdoorID;
+        WaterSoundUpdater mWaterSoundUpdater;
+
         typedef std::unique_ptr<std::deque<Sound_Buffer> > SoundBufferList;
         // List of sound buffers, grown as needed. New enties are added to the
         // back, allowing existing Sound_Buffer references/pointers to remain
