@@ -104,10 +104,9 @@ namespace MWInput
             // game mode does not move the position of the GUI cursor
             float xMove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
             float yMove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            if (xMove != 0 || yMove != 0 || zAxis != 0)
+            float mouseWheelMove = -zAxis * dt * 1500.0f;
+            if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
             {
-                int mouseWheelMove = static_cast<int>(-zAxis * dt * 1500.0f);
-
                 mMouseManager->injectMouseMove(xMove, yMove, mouseWheelMove);
                 mMouseManager->warpMouse();
                 MWBase::Environment::get().getWindowManager()->setCursorActive(true);
