@@ -237,9 +237,6 @@ namespace MWSound
         virtual void stopSound(const MWWorld::CellStore *cell);
         ///< Stop all sounds for the given cell.
 
-        virtual void stopSound(const std::string& soundId);
-        ///< Stop a non-3d looping sound
-
         virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration);
         ///< Fade out given sound (that is already playing) of given object
         ///< @param reference Reference to object, whose sound is faded out
