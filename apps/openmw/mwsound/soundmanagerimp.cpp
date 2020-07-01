@@ -53,11 +53,6 @@ namespace MWSound
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
         , mOutput(new DEFAULT_OUTPUT(*this))
-        , mMasterVolume(1.0f)
-        , mSFXVolume(1.0f)
-        , mMusicVolume(1.0f)
-        , mVoiceVolume(1.0f)
-        , mFootstepsVolume(1.0f)
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(new SoundBufferList::element_type())
         , mBufferCacheSize(0)
@@ -72,17 +67,6 @@ namespace MWSound
         , mNearWaterSound(nullptr)
         , mPlaybackPaused(false)
     {
-        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
-        mMasterVolume = std::min(std::max(mMasterVolume, 0.0f), 1.0f);
-        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
-        mSFXVolume = std::min(std::max(mSFXVolume, 0.0f), 1.0f);
-        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
-        mMusicVolume = std::min(std::max(mMusicVolume, 0.0f), 1.0f);
-        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
-        mVoiceVolume = std::min(std::max(mVoiceVolume, 0.0f), 1.0f);
-        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
-        mFootstepsVolume = std::min(std::max(mFootstepsVolume, 0.0f), 1.0f);
-
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
         mBufferCacheMax *= 1024*1024;
@@ -349,26 +333,7 @@ namespace MWSound
     // Gets the combined volume settings for the given sound type
     float SoundManager::volumeFromType(Type type) const
     {
-        float volume = mMasterVolume;
-        switch(type)
-        {
-            case Type::Sfx:
-                volume *= mSFXVolume;
-                break;
-            case Type::Voice:
-                volume *= mVoiceVolume;
-                break;
-            case Type::Foot:
-                volume *= mFootstepsVolume;
-                break;
-            case Type::Music:
-                volume *= mMusicVolume;
-                break;
-            case Type::Movie:
-            case Type::Mask:
-                break;
-        }
-        return volume;
+        return mVolumeSettings.getVolumeFromType(type);
     }
 
     void SoundManager::stopMusic()
@@ -1158,11 +1123,7 @@ namespace MWSound
 
     void SoundManager::processChangedSettings(const Settings::CategorySettingVector& settings)
     {
-        mMasterVolume = Settings::Manager::getFloat("master volume", "Sound");
-        mMusicVolume = Settings::Manager::getFloat("music volume", "Sound");
-        mSFXVolume = Settings::Manager::getFloat("sfx volume", "Sound");
-        mFootstepsVolume = Settings::Manager::getFloat("footsteps volume", "Sound");
-        mVoiceVolume = Settings::Manager::getFloat("voice volume", "Sound");
+        mVolumeSettings.update();
 
         if(!mOutput->isInitialized())
             return;

@@ -16,6 +16,8 @@
 
 #include "regionsoundselector.hpp"
 #include "watersoundupdater.hpp"
+#include "type.hpp"
+#include "volumesettings.hpp"
 
 namespace VFS
 {
@@ -56,11 +58,7 @@ namespace MWSound
         std::unordered_map<std::string, std::vector<int>> mMusicToPlay; // A list with music files not yet played
         std::string mLastPlayedMusic; // The music file that was last played
 
-        float mMasterVolume;
-        float mSFXVolume;
-        float mMusicVolume;
-        float mVoiceVolume;
-        float mFootstepsVolume;
+        VolumeSettings mVolumeSettings;
 
         WaterSoundUpdater mWaterSoundUpdater;
 
