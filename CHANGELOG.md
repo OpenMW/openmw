@@ -29,6 +29,7 @@
     Bug #5441: Enemies can't push a player character when in critical strike stance
     Bug #5451: Magic projectiles don't disappear with the caster
     Bug #5452: Autowalk is being included in savegames
+    Bug #5472: Mistify mod causes CTD in 0.46 on Mac
     Bug #5479: NPCs who should be walking around town are standing around without walking
     Bug #5484: Zero value items shouldn't be able to be bought or sold for 1 gold
     Bug #5485: Intimidate doesn't increase disposition on marginal wins
