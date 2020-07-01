@@ -2,8 +2,7 @@
 #define OPENMW_GAME_MWGUI_HUD_H
 
 #include "mapwindow.hpp"
-
-#include "../mwmechanics/stat.hpp"
+#include "statswatcher.hpp"
 
 namespace MWWorld
 {
@@ -17,12 +16,12 @@ namespace MWGui
     class ItemWidget;
     class SpellWidget;
 
-    class HUD : public WindowBase, public LocalMapBase
+    class HUD : public WindowBase, public LocalMapBase, public StatsListener
     {
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
+        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning

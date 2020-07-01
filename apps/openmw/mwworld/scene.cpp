@@ -741,15 +741,12 @@ namespace MWWorld
             player.getClass().adjustPosition(player, true);
         }
 
-        MWBase::MechanicsManager *mechMgr =
-            MWBase::Environment::get().getMechanicsManager();
-
-        mechMgr->updateCell(old, player);
-        mechMgr->watchActor(player);
+        MWBase::Environment::get().getMechanicsManager()->updateCell(old, player);
+        MWBase::Environment::get().getWindowManager()->watchActor(player);
 
         mPhysics->updatePtr(old, player);
 
-        MWBase::Environment::get().getWorld()->adjustSky();
+        world->adjustSky();
 
         mLastPlayerPos = player.getRefData().getPosition().asVec3();
     }

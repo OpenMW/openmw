@@ -154,26 +154,10 @@ namespace MWBase
 
             virtual void setConsoleSelectedObject(const MWWorld::Ptr& object) = 0;
 
-            /// Set value for the given ID.
-            virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value) = 0;
-            virtual void setValue (int parSkill, const MWMechanics::SkillValue& value) = 0;
-            virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) = 0;
-            virtual void setValue (const std::string& id, const std::string& value) = 0;
-            virtual void setValue (const std::string& id, int value) = 0;
-
             /// Set time left for the player to start drowning (update the drowning bar)
             /// @param time time left to start drowning
             /// @param maxTime how long we can be underwater (in total) until drowning starts
             virtual void setDrowningTimeLeft (float time, float maxTime) = 0;
-
-            virtual void setPlayerClass (const ESM::Class &class_) = 0;
-            ///< set current class of player
-
-            virtual void configureSkills (const SkillList& major, const SkillList& minor) = 0;
-            ///< configure skill groups, each set contains the skill ID for that group.
-
-            virtual void updateSkillArea() = 0;
-            ///< update display of skills, factions, birth sign, reputation and bounty
 
             virtual void changeCell(const MWWorld::CellStore* cell) = 0;
             ///< change the active cell
@@ -359,6 +343,9 @@ namespace MWBase
             virtual void windowResized(int x, int y) = 0;
             virtual void windowClosed() = 0;
             virtual bool isWindowVisible() = 0;
+
+            virtual void watchActor(const MWWorld::Ptr& ptr) = 0;
+            virtual MWWorld::Ptr getWatchedActor() const = 0;
     };
 }
 

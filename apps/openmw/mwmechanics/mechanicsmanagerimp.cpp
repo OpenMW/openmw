@@ -236,10 +236,8 @@ namespace MWMechanics
         invStore.autoEquip(ptr);
     }
 
-    // mWatchedTimeToStartDrowning = -1 for correct drowning state check,
-    // if stats.getTimeToStartDrowning() == 0 already on game start
     MechanicsManager::MechanicsManager()
-    : mWatchedLevel(-1), mWatchedTimeToStartDrowning(-1), mWatchedStatsEmpty (true), mUpdatePlayer (true), mClassSelected (false),
+    : mUpdatePlayer (true), mClassSelected (false),
       mRaceSelected (false), mAI(true)
     {
         //buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
@@ -261,16 +259,16 @@ namespace MWMechanics
 
     void MechanicsManager::remove(const MWWorld::Ptr& ptr)
     {
-        if(ptr == mWatched)
-            mWatched = MWWorld::Ptr();
+        if(ptr == MWBase::Environment::get().getWindowManager()->getWatchedActor())
+            MWBase::Environment::get().getWindowManager()->watchActor(MWWorld::Ptr());
         mActors.removeActor(ptr);
         mObjects.removeObject(ptr);
     }
 
     void MechanicsManager::updateCell(const MWWorld::Ptr &old, const MWWorld::Ptr &ptr)
     {
-        if(old == mWatched)
-            mWatched = ptr;
+        if(old == MWBase::Environment::get().getWindowManager()->getWatchedActor())
+            MWBase::Environment::get().getWindowManager()->watchActor(ptr);
 
         if(ptr.getClass().isActor())
             mActors.updateActor(old, ptr);
@@ -278,17 +276,10 @@ namespace MWMechanics
             mObjects.updateObject(old, ptr);
     }
 
-
     void MechanicsManager::drop(const MWWorld::CellStore *cellStore)
     {
-        mActors.dropActors(cellStore, mWatched);
+        mActors.dropActors(cellStore, getPlayer());
         mObjects.dropObjects(cellStore);
-    }
-
-
-    void MechanicsManager::watchActor(const MWWorld::Ptr& ptr)
-    {
-        mWatched = ptr;
     }
 
     void MechanicsManager::restoreStatsAfterCorprus(const MWWorld::Ptr& actor, const std::string& sourceId)
@@ -311,132 +302,9 @@ namespace MWMechanics
 
     void MechanicsManager::update(float duration, bool paused)
     {
-        if(!mWatched.isEmpty())
-        {
-            MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
-            const MWMechanics::NpcStats &stats = mWatched.getClass().getNpcStats(mWatched);
-            for(int i = 0;i < ESM::Attribute::Length;++i)
-            {
-                if(stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
-                {
-                    std::stringstream attrname;
-                    attrname << "AttribVal"<<(i+1);
-
-                    mWatchedAttributes[i] = stats.getAttribute(i);
-                    winMgr->setValue(attrname.str(), stats.getAttribute(i));
-                }
-            }
-
-            if(stats.getHealth() != mWatchedHealth || mWatchedStatsEmpty)
-            {
-                static const std::string hbar("HBar");
-                mWatchedHealth = stats.getHealth();
-                winMgr->setValue(hbar, stats.getHealth());
-            }
-            if(stats.getMagicka() != mWatchedMagicka || mWatchedStatsEmpty)
-            {
-                static const std::string mbar("MBar");
-                mWatchedMagicka = stats.getMagicka();
-                winMgr->setValue(mbar, stats.getMagicka());
-            }
-            if(stats.getFatigue() != mWatchedFatigue || mWatchedStatsEmpty)
-            {
-                static const std::string fbar("FBar");
-                mWatchedFatigue = stats.getFatigue();
-                winMgr->setValue(fbar, stats.getFatigue());
-            }
-
-            float timeToDrown = stats.getTimeToStartDrowning();
-
-            if(timeToDrown != mWatchedTimeToStartDrowning)
-            {
-                static const float fHoldBreathTime = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>()
-                        .find("fHoldBreathTime")->mValue.getFloat();
-
-                mWatchedTimeToStartDrowning = timeToDrown;
-
-                if(timeToDrown >= fHoldBreathTime || timeToDrown == -1.0) // -1.0 is a special value during initialization
-                    winMgr->setDrowningBarVisibility(false);
-                else
-                {
-                    winMgr->setDrowningBarVisibility(true);
-                    winMgr->setDrowningTimeLeft(stats.getTimeToStartDrowning(), fHoldBreathTime);
-                }
-            }
-
-            //Loop over ESM::Skill::SkillEnum
-            for(int i = 0; i < ESM::Skill::Length; ++i)
-            {
-                if(stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
-                {
-                    mWatchedSkills[i] = stats.getSkill(i);
-                    winMgr->setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
-                }
-            }
-
-            if(stats.getLevel() != mWatchedLevel)
-            {
-                mWatchedLevel = stats.getLevel();
-                winMgr->setValue("level", mWatchedLevel);
-            }
-
-            mWatchedStatsEmpty = false;
-
-            // Update the equipped weapon icon
-            MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
-            MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-            if (weapon == inv.end())
-                winMgr->unsetSelectedWeapon();
-            else
-                winMgr->setSelectedWeapon(*weapon);
-
-            // Update the selected spell icon
-            MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
-            if (enchantItem != inv.end())
-                winMgr->setSelectedEnchantItem(*enchantItem);
-            else
-            {
-                const std::string& spell = winMgr->getSelectedSpell();
-                if (!spell.empty())
-                    winMgr->setSelectedSpell(spell, int(getSpellSuccessChance(spell, mWatched)));
-                else
-                    winMgr->unsetSelectedSpell();
-            }
-
-        }
-
         if (mUpdatePlayer)
         {
-            MWBase::World *world = MWBase::Environment::get().getWorld();
-
-            // basic player profile; should not change anymore after the creation phase is finished.
-            MWBase::WindowManager *winMgr =
-                MWBase::Environment::get().getWindowManager();
-
-            const ESM::NPC *player =
-                world->getPlayerPtr().get<ESM::NPC>()->mBase;
-
-            const ESM::Race *race =
-                world->getStore().get<ESM::Race>().find(player->mRace);
-            const ESM::Class *cls =
-                world->getStore().get<ESM::Class>().find(player->mClass);
-
-            winMgr->setValue ("name", player->mName);
-            winMgr->setValue ("race", race->mName);
-            winMgr->setValue ("class", cls->mName);
-
             mUpdatePlayer = false;
-
-            MWBase::WindowManager::SkillList majorSkills (5);
-            MWBase::WindowManager::SkillList minorSkills (5);
-
-            for (int i=0; i<5; ++i)
-            {
-                minorSkills[i] = cls->mData.mSkills[i][0];
-                majorSkills[i] = cls->mData.mSkills[i][1];
-            }
-
-            winMgr->configureSkills (majorSkills, minorSkills);
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
@@ -517,7 +385,7 @@ namespace MWMechanics
 
     int MechanicsManager::getHoursToRest() const
     {
-        return mActors.getHoursToRest(mWatched);
+        return mActors.getHoursToRest(getPlayer());
     }
 
     void MechanicsManager::setPlayerName (const std::string& name)
