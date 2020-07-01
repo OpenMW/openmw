@@ -229,10 +229,10 @@ namespace MWInput
 
     bool MouseManager::injectMouseButtonRelease(Uint8 button)
     {
-        return MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
+        return MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
     }
 
-    void MouseManager::injectMouseMove(int xMove, int yMove, int mouseWheelMove)
+    void MouseManager::injectMouseMove(float xMove, float yMove, float mouseWheelMove)
     {
         mGuiCursorX += xMove;
         mGuiCursorY += yMove;
@@ -242,7 +242,7 @@ namespace MWInput
         mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width - 1)));
         mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height - 1)));
 
-        MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+        MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
     }
 
     void MouseManager::warpMouse()
