@@ -1481,10 +1481,10 @@ namespace MWRender
     void Animation::setObjectRoot(const std::string &model, bool forceskeleton, bool baseonly, bool isCreature)
     {
         osg::ref_ptr<osg::StateSet> previousStateset;
+        osg::ref_ptr<osg::Callback> previousCullCallback;
         if (mObjectRoot)
         {
-            if (mLightListCallback)
-                mObjectRoot->removeCullCallback(mLightListCallback);
+            previousCullCallback = mObjectRoot->getCullCallback();
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
@@ -1573,9 +1573,9 @@ namespace MWRender
             removeTriBipVisitor.remove();
         }
 
-        if (!mLightListCallback)
-            mLightListCallback = new SceneUtil::LightListCallback;
-        mObjectRoot->addCullCallback(mLightListCallback);
+        if (!previousCullCallback)
+            previousCullCallback = mLightListCallback;
+        mObjectRoot->setCullCallback(previousCullCallback);
     }
 
     osg::Group* Animation::getObjectRoot()
