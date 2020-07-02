@@ -27,6 +27,7 @@ namespace VFS
 namespace ESM
 {
     struct Sound;
+    struct Cell;
 }
 
 namespace MWSound
@@ -113,6 +114,10 @@ namespace MWSound
         bool mPlaybackPaused;
 
         RegionSoundSelector mRegionSoundSelector;
+
+        float mTimePassed = 0;
+
+        const ESM::Cell *mLastCell = nullptr;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
