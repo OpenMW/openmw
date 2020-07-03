@@ -138,10 +138,21 @@ namespace MWSound
 
         void updateSounds(float duration);
         void updateRegionSound(float duration);
-        void updateWaterSound(float duration);
+        void updateWaterSound();
         void updateMusic(float duration);
 
         float volumeFromType(Type type) const;
+
+        enum class WaterSoundAction
+        {
+            DoNothing,
+            SetVolume,
+            FinishSound,
+            PlaySound,
+        };
+
+        std::pair<WaterSoundAction, Sound_Buffer*> getWaterSoundAction(const WaterSoundUpdate& update,
+                                                                       const ESM::Cell* cell) const;
 
         SoundManager(const SoundManager &rhs);
         SoundManager& operator=(const SoundManager &rhs);
