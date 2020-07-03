@@ -25,7 +25,7 @@ StatsHandler::StatsHandler():
     _statsWidth(1280.0f),
     _statsHeight(1024.0f),
     _font(""),
-    _characterSize(20.0f)
+    _characterSize(18.0f)
 {
     _camera = new osg::Camera;
     _camera->getOrCreateStateSet()->setGlobalDefaults();
@@ -44,6 +44,8 @@ Profiler::Profiler()
         _font = osgMyGUI::DataManager::getInstance().getDataPath("DejaVuLGCSansMono.ttf");
     else
         _font = "";
+
+    _characterSize = 18;
 
     setKeyEventTogglesOnScreenStats(osgGA::GUIEventAdapter::KEY_F3);
 }
