@@ -1,7 +1,5 @@
 #!/bin/sh -e
 
-brew update
-brew outdated pkgconfig || brew upgrade pkgconfig
 brew install ccache
 
 curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-ef2462c.zip -o ~/openmw-deps.zip
