@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QString>
 #include <QRegExp>
-#include <QMap>
+#include <QMultiMap>
 
 namespace Config
 {
@@ -33,7 +33,7 @@ namespace Config
         {
             QStringList values = mSettings.values(key);
             if (!values.contains(value))
-                mSettings.insertMulti(key, value);
+                mSettings.insert(key, value);
         }
 
         inline void setMultiValueEnabled(bool enable)
@@ -83,8 +83,9 @@ namespace Config
 
                     if (!values.contains(value)) {
                         if (mMultiValue) {
-                            cache.insertMulti(key, value);
+                            cache.insert(key, value);
                         } else {
+                            cache.remove(key);
                             cache.insert(key, value);
                         }
                     }
