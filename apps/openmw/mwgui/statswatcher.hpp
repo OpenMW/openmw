@@ -62,7 +62,7 @@ namespace MWGui
         void removeListener(StatsListener* listener);
 
         void watchActor(const MWWorld::Ptr& ptr);
-        virtual MWWorld::Ptr getWatchedActor() const { return mWatched; }
+        MWWorld::Ptr getWatchedActor() const { return mWatched; }
     };
 }
 
