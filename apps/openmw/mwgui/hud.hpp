@@ -47,7 +47,7 @@ namespace MWGui
         void setCrosshairVisible(bool visible);
         void setCrosshairOwned(bool owned);
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
         void setCellName(const std::string& cellName);
 
@@ -58,7 +58,7 @@ namespace MWGui
         void setEnemy(const MWWorld::Ptr& enemy);
         void resetEnemy();
 
-        void clear();
+        void clear() override;
 
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
@@ -112,8 +112,8 @@ namespace MWGui
         void onMapClicked(MyGUI::Widget* _sender);
 
         // LocalMapBase
-        virtual void customMarkerCreated(MyGUI::Widget* marker);
-        virtual void doorMarkerCreated(MyGUI::Widget* marker);
+        virtual void customMarkerCreated(MyGUI::Widget* marker) override;
+        virtual void doorMarkerCreated(MyGUI::Widget* marker) override;
 
         void updateEnemyHealthBar();
 

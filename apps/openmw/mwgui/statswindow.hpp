@@ -18,7 +18,7 @@ namespace MWGui
             StatsWindow(DragAndDrop* drag);
 
             /// automatically updates all the data in the stats window, but only if it has changed.
-            void onFrame(float dt);
+            void onFrame(float dt) override;
 
             void setBar(const std::string& name, const std::string& tname, int val, int max);
             void setPlayerName(const std::string& playerName);
@@ -35,7 +35,7 @@ namespace MWGui
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
-            virtual void onOpen() { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
+            virtual void onOpen() override { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
         private:
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
@@ -70,8 +70,8 @@ namespace MWGui
             const int mMinFullWidth;
 
         protected:
-            virtual void onPinToggled();
-            virtual void onTitleDoubleClicked();
+            virtual void onPinToggled() override;
+            virtual void onTitleDoubleClicked() override;
     };
 }
 #endif
