@@ -3,14 +3,13 @@
 
 #include <string>
 #include <map>
+#include <mutex>
 
 #include <osg/ref_ptr>
 
 #include <osg/Shader>
 
 #include <osgViewer/Viewer>
-
-#include <OpenThreads/Mutex>
 
 namespace Shader
 {
@@ -63,7 +62,7 @@ namespace Shader
         typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
         ProgramMap mPrograms;
 
-        OpenThreads::Mutex mMutex;
+        std::mutex mMutex;
 
         const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestEnableUniform = new osg::Uniform();
         const osg::ref_ptr<osg::Uniform> mShadowMapAlphaTestDisableUniform = new osg::Uniform();

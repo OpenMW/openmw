@@ -2,6 +2,8 @@
 
 #include <iomanip>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -886,7 +888,7 @@ void OMW::Engine::go()
 
         if (!frame(dt))
         {
-            OpenThreads::Thread::microSleep(5000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
         else

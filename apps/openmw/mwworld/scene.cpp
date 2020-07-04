@@ -1,6 +1,8 @@
 #include "scene.hpp"
 
 #include <limits>
+#include <chrono>
+#include <thread>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -1140,7 +1142,7 @@ namespace MWWorld
             }
             else
                 loadingListener->setProgress(0);
-            OpenThreads::Thread::microSleep(5000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     }
 

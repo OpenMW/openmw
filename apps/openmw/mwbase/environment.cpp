@@ -1,8 +1,8 @@
 #include "environment.hpp"
 
 #include <cassert>
-
-#include <OpenThreads/Thread>
+#include <chrono>
+#include <thread>
 
 #include "world.hpp"
 #include "scriptmanager.hpp"
@@ -99,7 +99,7 @@ void MWBase::Environment::limitFrameRate(double dt) const
         double minFrameTime = 1.0 / static_cast<double>(mFrameRateLimit);
         if (thisFrameTime < minFrameTime)
         {
-            OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-thisFrameTime));
+            std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - thisFrameTime));
         }
     }
 }

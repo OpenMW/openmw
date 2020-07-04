@@ -4,7 +4,7 @@
 #include "world.hpp"
 #include "terraingrid.hpp"
 
-#include <OpenThreads/Mutex>
+#include <mutex>
 
 namespace osg
 {
@@ -61,7 +61,7 @@ namespace Terrain
 
         std::vector<ChunkManager*> mChunkManagers;
 
-        OpenThreads::Mutex mQuadTreeMutex;
+        std::mutex mQuadTreeMutex;
         bool mQuadTreeBuilt;
         float mLodFactor;
         int mVertexLodMod;

@@ -6,6 +6,7 @@
 #include <osg/PrimitiveSet>
 
 #include <map>
+#include <mutex>
 
 namespace Terrain
 {
@@ -30,10 +31,10 @@ namespace Terrain
         // Index buffers are shared across terrain batches where possible. There is one index buffer for each
         // combination of LOD deltas and index buffer LOD we may need.
         std::map<std::pair<int, int>, osg::ref_ptr<osg::DrawElements> > mIndexBufferMap;
-        OpenThreads::Mutex mIndexBufferMutex;
+        std::mutex mIndexBufferMutex;
 
         std::map<int, osg::ref_ptr<osg::Vec2Array> > mUvBufferMap;
-        OpenThreads::Mutex mUvBufferMutex;
+        std::mutex mUvBufferMutex;
     };
 
 }

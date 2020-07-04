@@ -6,10 +6,8 @@
 #include <vector>
 #include <memory>
 #include <string>
-
-#include <OpenThreads/Thread>
-#include <OpenThreads/Mutex>
-#include <OpenThreads/Condition>
+#include <mutex>
+#include <condition_variable>
 
 #include <osg/ref_ptr>
 namespace osg
@@ -64,7 +62,7 @@ struct ExternalClock
     uint64_t mPausedAt;
     bool mPaused;
 
-    OpenThreads::Mutex mMutex;
+    std::mutex mMutex;
 
     void setPaused(bool paused);
     uint64_t get();
@@ -83,8 +81,8 @@ struct PacketQueue {
     std::atomic<int> nb_packets;
     std::atomic<int> size;
 
-    OpenThreads::Mutex mutex;
-    OpenThreads::Condition cond;
+    std::mutex mutex;
+    std::condition_variable cond;
 
     void put(AVPacket *pkt);
     int get(AVPacket *pkt, VideoState *is);
@@ -164,8 +162,8 @@ struct VideoState {
     VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
     AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
-    OpenThreads::Mutex pictq_mutex;
-    OpenThreads::Condition pictq_cond;
+    std::mutex pictq_mutex;
+    std::condition_variable pictq_cond;
 
     std::unique_ptr<ParseThread> parse_thread;
     std::unique_ptr<VideoThread> video_thread;

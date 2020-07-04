@@ -428,7 +428,7 @@ namespace MWRender
 
         if (activeGrid)
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             for (auto ref : getRefTracker().mBlacklist)
                 refs.erase(ref);
         }
@@ -464,7 +464,7 @@ namespace MWRender
             float dSqr = (viewPoint - pos).length2();
             if (!activeGrid)
             {
-                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
+                std::lock_guard<std::mutex> lock(mSizeCacheMutex);
                 SizeCache::iterator found = mSizeCache.find(pair.first);
                 if (found != mSizeCache.end() && found->second < dSqr*minSize*minSize)
                     continue;
@@ -501,7 +501,7 @@ namespace MWRender
             }
 
             {
-                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+                std::lock_guard<std::mutex> lock(mRefTrackerMutex);
                 if (getRefTracker().mDisabled.count(pair.first))
                     continue;
             }
@@ -509,7 +509,7 @@ namespace MWRender
             float radius2 = cnode->getBound().radius2() * ref.mScale*ref.mScale;
             if (radius2 < dSqr*minSize*minSize && !activeGrid)
             {
-                OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mSizeCacheMutex);
+                std::lock_guard<std::mutex> lock(mSizeCacheMutex);
                 mSizeCache[pair.first] = radius2;
                 continue;
             }
@@ -685,7 +685,7 @@ namespace MWRender
             return false;
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             if (enabled && !getWritableRefTracker().mDisabled.erase(refnum)) return false;
             if (!enabled && !getWritableRefTracker().mDisabled.insert(refnum).second) return false;
             if (mRefTrackerLocked) return false;
@@ -706,7 +706,7 @@ namespace MWRender
             return false;
 
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             if (!getWritableRefTracker().mBlacklist.insert(refnum).second) return false;
             if (mRefTrackerLocked) return false;
         }
@@ -724,7 +724,7 @@ namespace MWRender
 
     void ObjectPaging::clear()
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+        std::lock_guard<std::mutex> lock(mRefTrackerMutex);
         mRefTrackerNew.mDisabled.clear();
         mRefTrackerNew.mBlacklist.clear();
         mRefTrackerLocked = true;
@@ -734,7 +734,7 @@ namespace MWRender
     {
         if (!mRefTrackerLocked) return false;
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mRefTrackerMutex);
+            std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             mRefTrackerLocked = false;
             if (mRefTracker == mRefTrackerNew)
                 return false;

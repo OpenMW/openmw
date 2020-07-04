@@ -2,8 +2,6 @@
 
 #include <cassert>
 
-#include <OpenThreads/ScopedLock>
-
 #include <osg/PrimitiveSet>
 
 #include "defs.hpp"
@@ -180,7 +178,7 @@ namespace Terrain
 
     osg::ref_ptr<osg::Vec2Array> BufferCache::getUVBuffer(unsigned int numVerts)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+        std::lock_guard<std::mutex> lock(mUvBufferMutex);
         if (mUvBufferMap.find(numVerts) != mUvBufferMap.end())
         {
             return mUvBufferMap[numVerts];
@@ -210,7 +208,7 @@ namespace Terrain
     osg::ref_ptr<osg::DrawElements> BufferCache::getIndexBuffer(unsigned int numVerts, unsigned int flags)
     {
         std::pair<int, int> id = std::make_pair(numVerts, flags);
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+        std::lock_guard<std::mutex> lock(mIndexBufferMutex);
 
         if (mIndexBufferMap.find(id) != mIndexBufferMap.end())
         {
@@ -234,11 +232,11 @@ namespace Terrain
     void BufferCache::clearCache()
     {
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            std::lock_guard<std::mutex> lock(mIndexBufferMutex);
             mIndexBufferMap.clear();
         }
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            std::lock_guard<std::mutex> lock(mUvBufferMutex);
             mUvBufferMap.clear();
         }
     }
@@ -246,12 +244,12 @@ namespace Terrain
     void BufferCache::releaseGLObjects(osg::State *state)
     {
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mIndexBufferMutex);
+            std::lock_guard<std::mutex> lock(mIndexBufferMutex);
             for (auto indexbuffer : mIndexBufferMap)
                 indexbuffer.second->releaseGLObjects(state);
         }
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mUvBufferMutex);
+            std::lock_guard<std::mutex> lock(mUvBufferMutex);
             for (auto uvbuffer : mUvBufferMap)
                 uvbuffer.second->releaseGLObjects(state);
         }

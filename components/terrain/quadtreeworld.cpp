@@ -453,7 +453,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
 
 void QuadTreeWorld::ensureQuadTreeBuilt()
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mQuadTreeMutex);
+    std::lock_guard<std::mutex> lock(mQuadTreeMutex);
     if (mQuadTreeBuilt)
         return;
 

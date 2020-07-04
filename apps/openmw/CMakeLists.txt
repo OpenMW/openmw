@@ -123,7 +123,6 @@ include_directories(
 
 target_link_libraries(openmw
     ${OSG_LIBRARIES}
-    ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}
