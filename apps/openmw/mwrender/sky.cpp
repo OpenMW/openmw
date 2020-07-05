@@ -1296,22 +1296,6 @@ public:
     {
         mAlpha = alpha;
     }
-    class FindParticleSystemVisitor : public osg::NodeVisitor
-    {
-    public:
-        osg::ref_ptr<osgParticle::ParticleSystem> mFound;
-        FindParticleSystemVisitor()
-            : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-        {
-        }
-
-        virtual void apply(osg::Drawable &node)
-        {
-           osgParticle::ParticleSystem* test;
-           if((test = dynamic_cast<osgParticle::ParticleSystem*>(&node)))
-               mFound = test;
-        }
-    };
 
     virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
     {
@@ -1333,32 +1317,30 @@ public:
 
         virtual void apply(osg::Node &node)
         {
-            if (osg::StateSet* stateset = node.getStateSet())
+            SceneUtil::CompositeStateSetUpdater* composite = nullptr;
+            osg::Callback* callback = node.getUpdateCallback();
+
+            while (callback)
             {
-                if (stateset->getAttribute(osg::StateAttribute::MATERIAL))
-                {
-                    SceneUtil::CompositeStateSetUpdater* composite = nullptr;
-                    osg::Callback* callback = node.getUpdateCallback();
+                if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
+                    break;
 
-                    while (callback)
-                    {
-                        if ((composite = dynamic_cast<SceneUtil::CompositeStateSetUpdater*>(callback)))
-                            break;
+                callback = callback->getNestedCallback();
+            }
 
-                        callback = callback->getNestedCallback();
-                    }
+            // setup weather partsys alpha fader
+            SceneUtil::FindByClassVisitor findPSVisitor("ParticleSystem");
+            node.accept(findPSVisitor);
+            for(auto found : findPSVisitor.mFoundNodes)
+            {
+                osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, static_cast<osgParticle::ParticleSystem *>(found)));
 
-                    FindParticleSystemVisitor fpart;
-                    node.accept(fpart);
-                    osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, fpart.mFound));
+                if (composite)
+                    composite->addController(alphaFader);
+                else
+                    node.addUpdateCallback(alphaFader);
 
-                    if (composite)
-                        composite->addController(alphaFader);
-                    else
-                        node.addUpdateCallback(alphaFader);
-
-                    mAlphaFaders.push_back(alphaFader);
-                }
+                mAlphaFaders.push_back(alphaFader);
             }
 
             traverse(node);
@@ -1652,7 +1634,7 @@ void SkyManager::setEnabled(bool enabled)
     if (enabled && !mCreated)
         create();
 
-    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);    
+    mRootNode->setNodeMask(enabled ? Mask_Sky : 0);
     mSceneRootNode->setNodeMask(enabled ? Mask_Sky : 0);
 
     mEnabled = enabled;
@@ -1771,10 +1753,11 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
-                    osgParticle::ParticleSystem *partsys = static_cast<osgParticle::ParticleSystem *>(findPSVisitor.mFoundNodes[i]);
+                    osgParticle::ParticleSystem *ps = static_cast<osgParticle::ParticleSystem *>(findPSVisitor.mFoundNodes[i]);
+
                     osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
                     program->addOperator(new WrapAroundOperator(mCamera,osg::Vec3(1024,1024,800)));
-                    program->setParticleSystem(partsys);
+                    program->setParticleSystem(ps);
                     mParticleNode->addChild(program);
                 }
             }
