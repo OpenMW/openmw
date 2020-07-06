@@ -14,6 +14,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include "tooltips.hpp"
 
 namespace
@@ -32,6 +34,17 @@ bool sortSkills (const std::pair<int, int>& left, const std::pair<int, int>& rig
 
     return left.first < right.first;
 }
+
+// Retrieve the base skill value if the setting 'training skills based on base skill' is set;
+// otherwise returns the modified skill
+float getSkillForTraining(const MWMechanics::NpcStats& stats, int i)
+{
+    static const bool trainersTrainingSkillsBasedOnBaseSkill = Settings::Manager::getBool("trainers training skills based on base skill", "Game");
+    if (trainersTrainingSkillsBasedOnBaseSkill)
+        return stats.getSkill(i).getBase();
+    return stats.getSkill(i).getModified();
+}
+
 }
 
 namespace MWGui
@@ -76,9 +89,10 @@ namespace MWGui
         // NPC can train you in his best 3 skills
         std::vector< std::pair<int, float> > skills;
 
+        MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            float value = actor.getClass().getSkill(actor, i);
+            float value = getSkillForTraining(actorStats, i);
 
             skills.push_back(std::make_pair(i, value));
         }
