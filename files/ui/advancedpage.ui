@@ -236,6 +236,16 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="trainersTrainingSkillsBasedOnBaseSkillCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Trainers now only choose which skills to train using their base skill points, allowing mercantile improving effects to be used without making mercantile an offered skill.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Trainers choose their training skills based on their base skill points</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
