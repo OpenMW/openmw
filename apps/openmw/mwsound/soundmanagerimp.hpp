@@ -9,7 +9,7 @@
 #include <unordered_map>
 
 #include <components/settings/settings.hpp>
-
+#include <components/misc/objectpool.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/soundmanager.hpp"
@@ -48,6 +48,9 @@ namespace MWSound
         Play_3D = 1<<31
     };
 
+    using SoundPtr = Misc::ObjectPtr<Sound>;
+    using StreamPtr = Misc::ObjectPtr<Stream>;
+
     class SoundManager : public MWBase::SoundManager
     {
         const VFS::Manager* mVFS;
@@ -79,25 +82,23 @@ namespace MWSound
         typedef std::deque<Sound_Buffer*> SoundList;
         SoundList mUnusedBuffers;
 
-        std::unique_ptr<std::deque<Sound>> mSounds;
-        std::vector<Sound*> mUnusedSounds;
+        Misc::ObjectPool<Sound> mSounds;
 
-        std::unique_ptr<std::deque<Stream>> mStreams;
-        std::vector<Stream*> mUnusedStreams;
+        Misc::ObjectPool<Stream> mStreams;
 
-        typedef std::pair<MWBase::Sound*,Sound_Buffer*> SoundBufferRefPair;
+        typedef std::pair<SoundPtr, Sound_Buffer*> SoundBufferRefPair;
         typedef std::vector<SoundBufferRefPair> SoundBufferRefPairList;
         typedef std::map<MWWorld::ConstPtr,SoundBufferRefPairList> SoundMap;
         SoundMap mActiveSounds;
 
-        typedef std::map<MWWorld::ConstPtr,Stream*> SaySoundMap;
+        typedef std::map<MWWorld::ConstPtr, StreamPtr> SaySoundMap;
         SaySoundMap mSaySoundsQueue;
         SaySoundMap mActiveSaySounds;
 
-        typedef std::vector<Stream*> TrackList;
+        typedef std::vector<StreamPtr> TrackList;
         TrackList mActiveTracks;
 
-        Stream *mMusic;
+        StreamPtr mMusic;
         std::string mCurrentPlaylist;
 
         bool mListenerUnderwater;
@@ -127,10 +128,10 @@ namespace MWSound
         // returns a decoder to start streaming, or nullptr if the sound was not found
         DecoderPtr loadVoice(const std::string &voicefile);
 
-        Sound *getSoundRef();
-        Stream *getStreamRef();
+        SoundPtr getSoundRef();
+        StreamPtr getStreamRef();
 
-        Stream *playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
+        StreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f &pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
         void advanceMusic(const std::string& filename);
