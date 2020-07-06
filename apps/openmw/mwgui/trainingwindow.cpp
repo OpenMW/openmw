@@ -154,7 +154,7 @@ namespace MWGui
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
-        if (mPtr.getClass().getSkill(mPtr, skillId) <= pcStats.getSkill (skillId).getBase ())
+        if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skillId) <= pcStats.getSkill(skillId).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;
