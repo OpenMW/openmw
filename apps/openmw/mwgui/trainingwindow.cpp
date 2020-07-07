@@ -34,17 +34,6 @@ bool sortSkills (const std::pair<int, int>& left, const std::pair<int, int>& rig
 
     return left.first < right.first;
 }
-
-// Retrieve the base skill value if the setting 'training skills based on base skill' is set;
-// otherwise returns the modified skill
-float getSkillForTraining(const MWMechanics::NpcStats& stats, int i)
-{
-    static const bool trainersTrainingSkillsBasedOnBaseSkill = Settings::Manager::getBool("trainers training skills based on base skill", "Game");
-    if (trainersTrainingSkillsBasedOnBaseSkill)
-        return stats.getSkill(i).getBase();
-    return stats.getSkill(i).getModified();
-}
-
 }
 
 namespace MWGui
@@ -53,6 +42,7 @@ namespace MWGui
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
         , mTimeAdvancer(0.05f)
+        , mTrainingSkillBasedOnBaseSkill(Settings::Manager::getBool("trainers training skills based on base skill", "Game"))
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");
@@ -207,6 +197,13 @@ namespace MWGui
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+    }
+
+    float TrainingWindow::getSkillForTraining(const MWMechanics::NpcStats& stats, int skillId) const
+    {
+        if (mTrainingSkillBasedOnBaseSkill)
+            return stats.getSkill(skillId).getBase();
+        return stats.getSkill(skillId).getModified();
     }
 
     void TrainingWindow::onFrame(float dt)
