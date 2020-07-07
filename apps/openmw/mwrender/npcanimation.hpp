@@ -8,10 +8,17 @@
 #include "actoranimation.hpp"
 #include "weaponanimation.hpp"
 
+#include <array>
+
 namespace ESM
 {
     struct NPC;
     struct BodyPart;
+}
+
+namespace MWSound
+{
+    class Sound;
 }
 
 namespace MWRender
@@ -40,7 +47,7 @@ private:
 
     // Bounded Parts
     PartHolderPtr mObjectParts[ESM::PRT_Count];
-    std::string mSoundIds[ESM::PRT_Count];
+    std::array<MWSound::Sound*, ESM::PRT_Count> mSounds;
 
     const ESM::NPC *mNpc;
     std::string    mHeadModel;
