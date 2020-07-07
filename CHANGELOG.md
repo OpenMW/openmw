@@ -43,6 +43,7 @@
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
     Feature #5457: Realistic diagonal movement
+    Feature #5486: Fixes trainers to choose their training skills based on their base skill points
     Task #5480: Drop Qt4 support
 
 0.46.0
