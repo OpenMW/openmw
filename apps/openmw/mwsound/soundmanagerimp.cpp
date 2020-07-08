@@ -620,13 +620,13 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return nullptr;
 
+        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
+        if ((mode & PlayMode::RemoveAtDistance) && (mListenerPos - objpos).length2() > 2000 * 2000)
+            return nullptr;
+
         // Look up the sound in the ESM data
         Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
-
-        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
-        if((mode&PlayMode::RemoveAtDistance) && (mListenerPos-objpos).length2() > 2000*2000)
-            return nullptr;
 
         // Only one copy of given sound can be played at time on ptr, so stop previous copy
         stopSound(sfx, ptr);
