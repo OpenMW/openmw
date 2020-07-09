@@ -747,7 +747,7 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
 
-    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0] + getBodyPitchRadians());
 
     return ret;
 }

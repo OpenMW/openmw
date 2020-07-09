@@ -331,8 +331,19 @@ If enabled then the character turns lower body to the direction of movement. Upp
 
 This setting can only be configured by editing the settings configuration file.
 
+swim upward coef
+----------------
+
+:Type:		floating point
+:Range:		-1.0 to 1.0
+:Default:	0.0
+
+Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Intended to make simpler swimming without diving. Recommened range of values is from 0.0 to 0.2.
+
+This setting can only be configured by editing the settings configuration file.
+
 trainers training skills based on base skill
------------------------
+--------------------------------------------
 
 :Type:		boolean
 :Range:		True/False

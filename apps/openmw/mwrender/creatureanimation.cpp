@@ -273,7 +273,7 @@ osg::Vec3f CreatureWeaponAnimation::runAnimation(float duration)
 {
     osg::Vec3f ret = Animation::runAnimation(duration);
 
-    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0] + getBodyPitchRadians());
 
     return ret;
 }

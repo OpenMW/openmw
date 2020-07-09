@@ -273,6 +273,7 @@ protected:
     float mHeadPitchRadians;
     float mUpperBodyYawRadians;
     float mLegsYawRadians;
+    float mBodyPitchRadians;
 
     RotateController* addRotateController(std::string bone);
 
@@ -489,6 +490,8 @@ public:
     virtual void setLegsYawRadians(float v) { mLegsYawRadians = v; }
     virtual float getUpperBodyYawRadians() const { return mUpperBodyYawRadians; }
     virtual float getLegsYawRadians() const { return mLegsYawRadians; }
+    virtual void setBodyPitchRadians(float v) { mBodyPitchRadians = v; }
+    virtual float getBodyPitchRadians() const { return mBodyPitchRadians; }
 
     virtual void setAccurateAiming(bool enabled) {}
     virtual bool canBeHarvested() const { return false; }
