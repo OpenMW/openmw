@@ -670,16 +670,27 @@ namespace MWRender
         {
             if (mActiveGridOnly && !std::get<2>(id)) return false;
             pos /= ESM::Land::REAL_SIZE;
+            clampToCell(pos);
             osg::Vec2f center = std::get<0>(id);
             float halfSize = std::get<1>(id)/2;
             return pos.x() >= center.x()-halfSize && pos.y() >= center.y()-halfSize && pos.x() <= center.x()+halfSize && pos.y() <= center.y()+halfSize;
         }
+        void clampToCell(osg::Vec3f& cellPos)
+        {
+            osg::Vec2i min (mCell.x(), mCell.y());
+            osg::Vec2i max (mCell.x()+1, mCell.y()+1);
+            if (cellPos.x() < min.x()) cellPos.x() = min.x();
+            if (cellPos.x() > max.x()) cellPos.x() = max.x();
+            if (cellPos.y() < min.y()) cellPos.y() = min.y();
+            if (cellPos.y() > max.y()) cellPos.y() = max.y();
+        }
         osg::Vec3f mPosition;
+        osg::Vec2i mCell;
         std::set<MWRender::ChunkId> mToClear;
         bool mActiveGridOnly = false;
     };
 
-    bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled)
+    bool ObjectPaging::enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
     {
         if (!typeFilter(type, false))
             return false;
@@ -693,6 +704,7 @@ namespace MWRender
 
         ClearCacheFunctor ccf;
         ccf.mPosition = pos;
+        ccf.mCell = cell;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
         for (auto chunk : ccf.mToClear)
@@ -700,7 +712,7 @@ namespace MWRender
         return true;
     }
 
-    bool ObjectPaging::blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos)
+    bool ObjectPaging::blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell)
     {
         if (!typeFilter(type, false))
             return false;
@@ -713,6 +725,7 @@ namespace MWRender
 
         ClearCacheFunctor ccf;
         ccf.mPosition = pos;
+        ccf.mCell = cell;
         ccf.mActiveGridOnly = true;
         mCache->call(ccf);
         if (ccf.mToClear.empty()) return false;
