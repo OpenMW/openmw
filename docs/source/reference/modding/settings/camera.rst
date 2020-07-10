@@ -114,6 +114,17 @@ while small values can result in the hands not being visible.
 
 This setting can only be configured by editing the settings configuration file.
 
+third person camera distance
+----------------------------
+
+:Type:		floating point
+:Range:		30-800
+:Default:	192.0
+
+Distance from the camera to the character in third person mode.
+
+This setting can be changed in game using "Zoom In" / "Zoom Out" controls.
+
 view over shoulder
 ------------------
 

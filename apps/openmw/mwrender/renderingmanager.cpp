@@ -1340,7 +1340,7 @@ namespace MWRender
             if(mCamera->isNearest() && dist > 0.f)
                 mCamera->toggleViewMode();
             else if (override)
-                mCamera->setBaseCameraDistance(-dist / 120.f * 10, adjust);
+                mCamera->updateBaseCameraDistance(-dist / 120.f * 10, adjust);
             else
                 mCamera->setCameraDistance(-dist / 120.f * 10, adjust);
         }
@@ -1348,7 +1348,7 @@ namespace MWRender
         {
             mCamera->toggleViewMode();
             if (override)
-                mCamera->setBaseCameraDistance(0.f, false);
+                mCamera->updateBaseCameraDistance(0.f, false);
             else
                 mCamera->setCameraDistance(0.f, false);
         }
@@ -1397,7 +1397,7 @@ namespace MWRender
     void RenderingManager::changeVanityModeScale(float factor)
     {
         if(mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->setBaseCameraDistance(-factor/120.f*10, true);
+            mCamera->updateBaseCameraDistance(-factor/120.f*10, true);
     }
 
     void RenderingManager::overrideFieldOfView(float val)
