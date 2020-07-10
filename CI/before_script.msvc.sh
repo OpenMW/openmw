@@ -606,7 +606,7 @@ printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
 		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
 	fi
-	export BULLET_ROOT="$(real_pwd)/Bullet"
+	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
 }
 cd $DEPS
