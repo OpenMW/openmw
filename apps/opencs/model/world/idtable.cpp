@@ -94,7 +94,7 @@ bool CSMWorld::IdTable::setData (const QModelIndex &index, const QVariant &value
                 // views that the whole row has changed.
 
                 emit dataChanged(this->index(index.row(), 0),
-                                 this->index(index.row(), columnCount(index.parent())));
+                                 this->index(index.row(), columnCount(index.parent()) - 1));
 
             } else
             {
