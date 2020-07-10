@@ -1966,13 +1966,17 @@ namespace MWMechanics
             }
             else if (killResult == CharacterController::Result_DeathAnimJustFinished)
             {
+                bool isPlayer = iter->first == getPlayer();
                 notifyDied(iter->first);
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
                 stats.modifyMagicEffects(MWMechanics::MagicEffects());
                 stats.getActiveSpells().clear();
-                stats.getSpells().clear();
+
+                if (!isPlayer)
+                    stats.getSpells().clear();
+
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 
@@ -1981,7 +1985,7 @@ namespace MWMechanics
                 if (iter->first.getClass().isNpc())
                     calculateNpcStatModifiers(iter->first, 0);
 
-                if( iter->first == getPlayer())
+                if (isPlayer)
                 {
                     //player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
