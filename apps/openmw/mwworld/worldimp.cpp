@@ -1390,6 +1390,9 @@ namespace MWWorld
     {
         if(ptr.getRefData().getBaseNode() != 0)
         {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
 
