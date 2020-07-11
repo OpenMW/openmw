@@ -229,9 +229,16 @@ void MWMechanics::NpcStats::increaseSkill(int skillIndex, const ESM::Class &clas
     float base = getSkill (skillIndex).getBase();
 
     if (base >= 100.f)
-        return;
-
-    base += 1;
+    {
+        // In Morrowind, skill books have a bu- uh, special behavior where they pretend to increase a skill beyond 100
+        // but while level progression does handle it the skill isn't actually increased (reflected in the message).
+        if (!readBook)
+            return;
+    }
+    else
+    {
+        base += 1;
+    }
 
     const MWWorld::Store<ESM::GameSetting> &gmst =
         MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
