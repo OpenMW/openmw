@@ -908,7 +908,14 @@ void OMW::Engine::go()
         if (stats)
         {
             const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-            mViewer->getViewerStats()->report(stats, frameNumber);
+            if (frameNumber >= 2)
+            {
+                mViewer->getViewerStats()->report(stats, frameNumber - 2);
+                osgViewer::Viewer::Cameras cameras;
+                mViewer->getCameras(cameras);
+                for (auto camera : cameras)
+                    camera->getStats()->report(stats, frameNumber - 2);
+            }
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());
