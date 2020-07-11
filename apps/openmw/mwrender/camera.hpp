@@ -23,12 +23,7 @@ namespace MWRender
     /// \brief Camera control
     class Camera
     {
-    public:
-        enum class ThirdPersonViewMode {Standard, OverShoulder};
-
     private:
-        enum class ThirdPersonOffsetType { RightShoulder, LeftShoulder, Combat, Swimming };
-
         struct CamData {
             float pitch, yaw, offset;
         };
@@ -60,17 +55,14 @@ namespace MWRender
 
         float mCameraDistance;
 
-        ThirdPersonViewMode mThirdPersonMode;
-        osg::Vec2f mOverShoulderOffset;
-        bool mDefaultShoulderIsRight;
         osg::Vec3d mFocalPointAdjustment;
-
-        // Makes sense only if mThirdPersonMode is OverShoulder.
-        ThirdPersonOffsetType mThirdPersionOffsetType;
         osg::Vec2d mFocalPointCurrentOffset;
+        osg::Vec2d mFocalPointTargetOffset;
         float mFocalPointTransitionSpeed;
 
         float mSmoothedSpeed;
+        bool mDynamicCameraDistanceEnabled;
+        bool mShowCrosshairInThirdPersonMode;
 
         void updateFocalPointOffset(float duration);
         float getCameraDistanceCorrection() const;
@@ -83,13 +75,10 @@ namespace MWRender
 
         MWWorld::Ptr getTrackingPtr() const;
 
-        void setThirdPersonViewMode(ThirdPersonViewMode mode) { mThirdPersonMode = mode; }
-        ThirdPersonViewMode getThirdPersonViewMode() const { return mThirdPersonMode; }
-
-        void setOverShoulderOffset(float horizontal, float vertical);
-        void switchToLeftShoulder();
-        void switchToRightShoulder();
-        void switchToDefaultShoulder();
+        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeed = v; }
+        void setFocalPointTargetOffset(osg::Vec2d v) { mFocalPointTargetOffset = v; }
+        void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
+        void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 
         /// Update the view matrix of \a cam
         void updateCamera(osg::Camera* cam);

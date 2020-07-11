@@ -65,6 +65,7 @@
 #include "vismask.hpp"
 #include "pathgrid.hpp"
 #include "camera.hpp"
+#include "viewovershoulder.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
@@ -306,6 +307,8 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
+        if (Settings::Manager::getBool("view over shoulder", "Camera"))
+            mViewOverShoulderController.reset(new ViewOverShoulderController(mCamera.get()));
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -366,7 +369,6 @@ namespace MWRender
         float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
         mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
-        updateThirdPersonViewMode();
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
@@ -380,19 +382,6 @@ namespace MWRender
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
-    }
-
-    void RenderingManager::updateThirdPersonViewMode()
-    {
-        if (Settings::Manager::getBool("view over shoulder", "Camera"))
-            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::OverShoulder);
-        else
-            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::Standard);
-
-        std::stringstream offset(Settings::Manager::getString("view over shoulder offset", "Camera"));
-        float horizontal = 30.f, vertical = -10.f;
-        offset >> horizontal >> vertical;
-        mCamera->setOverShoulderOffset(horizontal, vertical);
     }
 
     osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
@@ -630,6 +619,8 @@ namespace MWRender
         updateNavMesh();
         updateRecastMesh();
 
+        if (mViewOverShoulderController)
+            mViewOverShoulderController->update();
         mCamera->update(dt, paused);
 
         osg::Vec3d focal, cameraPos;

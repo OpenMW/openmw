@@ -1869,44 +1869,13 @@ namespace MWWorld
             float cameraObstacleLimit = mRendering->getNearClipDistance() * 2.5f;
             float focalObstacleLimit = std::max(cameraObstacleLimit, 10.0f);
 
+            // Adjust focal point.
             osg::Vec3d focal = camera->getFocalPoint();
             osg::Vec3d focalOffset = camera->getFocalPointOffset();
-            osg::Vec3d playerPos = focal - focalOffset;
-
-            static const bool autoSwitchShoulder = Settings::Manager::getBool("auto switch shoulder", "Camera");
-            if (camera->getThirdPersonViewMode() == MWRender::Camera::ThirdPersonViewMode::OverShoulder
-                && autoSwitchShoulder && !camera->isVanityOrPreviewModeEnabled())
-            {
-                const float limitToSwitch = 120; // switch to other shoulder if wall is closer than this limit
-                const float limitToSwitchBack = 300; // switch back to default shoulder if there is no walls at this distance
-                auto orient = osg::Quat(camera->getYaw(), osg::Vec3d(0,0,1));
-                int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door | MWPhysics::CollisionType_HeightMap;
-                MWPhysics::PhysicsSystem::RayResult rayRight = mPhysics->castRay(
-                    playerPos + orient * osg::Vec3d(28, 0, 0),
-                    playerPos + orient * osg::Vec3d(limitToSwitchBack, limitToSwitchBack, 0),
-                    {}, {}, mask);
-                MWPhysics::PhysicsSystem::RayResult rayLeft = mPhysics->castRay(
-                    playerPos + orient * osg::Vec3d(-28, 0, 0),
-                    playerPos + orient * osg::Vec3d(-limitToSwitchBack, limitToSwitchBack, 0),
-                    {}, {}, mask);
-                MWPhysics::PhysicsSystem::RayResult rayForward = mPhysics->castRay(
-                    playerPos, playerPos + orient * osg::Vec3d(0, limitToSwitchBack, 0),
-                    {}, {}, mask);
-                bool rightTooClose = rayRight.mHit && (rayRight.mHitPos - playerPos).length2() < limitToSwitch * limitToSwitch;
-                bool leftTooClose = rayLeft.mHit && (rayLeft.mHitPos - playerPos).length2() < limitToSwitch * limitToSwitch;
-                if (!rayRight.mHit && leftTooClose)
-                    camera->switchToRightShoulder();
-                else if (!rayLeft.mHit && rightTooClose)
-                    camera->switchToLeftShoulder();
-                else if (!rayRight.mHit && !rayLeft.mHit && !rayForward.mHit)
-                    camera->switchToDefaultShoulder();
-            }
-
-            // Adjust focal point.
             float offsetLen = focalOffset.length();
             if (offsetLen > 0)
             {
-                MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(playerPos, focal, focalObstacleLimit);
+                MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal - focalOffset, focal, focalObstacleLimit);
                 if (result.mHit)
                 {
                     double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
