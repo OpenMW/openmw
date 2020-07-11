@@ -46,7 +46,7 @@ MacOS:
     paths:
       - build/OpenMW-*.dmg
 
-Windows_Ninja_RelWithDebInfo:
+.Windows_Ninja_Base:
   tags:
     - windows
   before_script:
@@ -61,7 +61,6 @@ Windows_Ninja_RelWithDebInfo:
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
-    - $config = "RelWithDebInfo"
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
@@ -71,10 +70,10 @@ Windows_Ninja_RelWithDebInfo:
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${CIBuildRefName}_${CIBuildID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}.zip '*'
   cache:
     paths:
     - deps
@@ -93,8 +92,25 @@ Windows_Ninja_RelWithDebInfo:
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
 
+Windows_Ninja_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    - config: "Release"
 
-Windows_MSBuild_RelWithDebInfo:
+Windows_Ninja_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    - config: "Debug"
+
+Windows_Ninja_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    - config: "RelWithDebInfo"
+
+.Windows_MSBuild_Base:
   tags:
     - windows
   before_script:
@@ -108,7 +124,6 @@ Windows_MSBuild_RelWithDebInfo:
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
-    - $config = "RelWithDebInfo"
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
@@ -117,10 +132,10 @@ Windows_MSBuild_RelWithDebInfo:
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${CIBuildRefName}_${CIBuildID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}.zip '*'
   cache:
     paths:
     - deps
@@ -138,3 +153,21 @@ Windows_MSBuild_RelWithDebInfo:
     - MSVC2019_64/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*/*.log
+
+Windows_MSBuild_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    - config: "Release"
+
+Windows_MSBuild_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    - config: "Debug"
+
+Windows_MSBuild_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    - config: "RelWithDebInfo"
