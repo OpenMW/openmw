@@ -11,7 +11,7 @@ namespace NifOsg
     class MatrixTransform : public osg::MatrixTransform
     {
     public:
-        using osg::MatrixTransform::MatrixTransform;
+        MatrixTransform();
         MatrixTransform(int recordIndex, const Nif::Transformation &trafo);
         MatrixTransform(const MatrixTransform &copy, const osg::CopyOp &copyop);
 

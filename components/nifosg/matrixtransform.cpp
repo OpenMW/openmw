@@ -2,6 +2,11 @@
 
 namespace NifOsg
 {
+    MatrixTransform::MatrixTransform()
+        : osg::MatrixTransform()
+    {
+    }
+
     MatrixTransform::MatrixTransform(int recordIndex, const Nif::Transformation &trafo)
         : osg::MatrixTransform(trafo.toMatrix())
         , mIndex(recordIndex)
