@@ -70,10 +70,10 @@ MacOS:
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
     paths:
     - deps
@@ -132,10 +132,10 @@ Windows_Ninja_RelWithDebInfo:
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CIBuildRefName}_${CIBuildID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
     paths:
     - deps
