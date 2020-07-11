@@ -67,7 +67,7 @@ Windows_Ninja_RelWithDebInfo:
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target openwm openmw-launcher openmw-wizard openmw-iniimporter
+    - cmake --build . --config $config --target openmw openmw-launcher openmw-wizard openmw-iniimporter
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
@@ -113,7 +113,7 @@ Windows_MSBuild_RelWithDebInfo:
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
     - cd MSVC2019_64
-    - cmake --build . --config $config --target openwm openmw-launcher openmw-wizard openmw-iniimporter
+    - cmake --build . --config $config --target openmw openmw-launcher openmw-wizard openmw-iniimporter
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
