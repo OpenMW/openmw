@@ -1517,7 +1517,7 @@ namespace MWRender
     {
         if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
             return false;
-        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), enabled))
+        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), osg::Vec2i(ptr.getCell()->getCell()->getGridX(), ptr.getCell()->getCell()->getGridY()), enabled))
         {
             mTerrain->rebuildViews();
             return true;
@@ -1530,7 +1530,7 @@ namespace MWRender
             return;
         const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile()) return;
-        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
+        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3(), osg::Vec2i(ptr.getCell()->getCell()->getGridX(), ptr.getCell()->getCell()->getGridY())))
             mTerrain->rebuildViews();
     }
     bool RenderingManager::pagingUnlockCache()
