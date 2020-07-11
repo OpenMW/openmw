@@ -96,19 +96,19 @@ Windows_Ninja_Release:
   extends:
     - .Windows_Ninja_Base
   variables:
-    - config: "Release"
+    config: "Release"
 
 Windows_Ninja_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
-    - config: "Debug"
+    config: "Debug"
 
 Windows_Ninja_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
-    - config: "RelWithDebInfo"
+    config: "RelWithDebInfo"
 
 .Windows_MSBuild_Base:
   tags:
@@ -158,16 +158,16 @@ Windows_MSBuild_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    - config: "Release"
+    config: "Release"
 
 Windows_MSBuild_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    - config: "Debug"
+    config: "Debug"
 
 Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
-    - config: "RelWithDebInfo"
+    config: "RelWithDebInfo"
