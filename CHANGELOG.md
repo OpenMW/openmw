@@ -8,6 +8,7 @@
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #4021: Attributes and skills are not stored as floats
     Bug #4623: Corprus implementation is incorrect
+    Bug #4764: Data race in osg ParticleSystem
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
     Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5165: Active spells should use real time intead of timestamps
