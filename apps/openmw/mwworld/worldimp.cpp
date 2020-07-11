@@ -1390,6 +1390,9 @@ namespace MWWorld
     {
         if(ptr.getRefData().getBaseNode() != 0)
         {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
 
@@ -2453,7 +2456,7 @@ namespace MWWorld
         rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
-        MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
+        MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
         model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());

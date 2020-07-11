@@ -72,6 +72,10 @@ namespace MWInput
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
             mInvUiScalingFactor = 1.f / uiScale;
+
+        float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
+        deadZoneRadius = std::min(std::max(deadZoneRadius, 0.0f), 0.5f);
+        mBindingsManager->setJoystickDeadZone(deadZoneRadius);
     }
 
     void ControllerManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -100,10 +104,9 @@ namespace MWInput
             // game mode does not move the position of the GUI cursor
             float xMove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
             float yMove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            if (xMove != 0 || yMove != 0 || zAxis != 0)
+            float mouseWheelMove = -zAxis * dt * 1500.0f;
+            if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
             {
-                int mouseWheelMove = static_cast<int>(-zAxis * dt * 1500.0f);
-
                 mMouseManager->injectMouseMove(xMove, yMove, mouseWheelMove);
                 mMouseManager->warpMouse();
                 MWBase::Environment::get().getWindowManager()->setCursorActive(true);

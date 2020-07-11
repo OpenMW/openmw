@@ -37,9 +37,9 @@ addons:
     build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
-    - name: OpenMW (all) on macOS Xcode 10.2
+    - name: OpenMW (all) on MacOS 10.15 with Xcode 12
       os: osx
-      osx_image: xcode10.2
+      osx_image: xcode12
       if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Focal with GCC
       os: linux
@@ -71,8 +71,8 @@ before_script:
 script:
  - cd ./build
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ${ANALYZE} make -j3; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
+# - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
+# - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
  - cd "${TRAVIS_BUILD_DIR}"

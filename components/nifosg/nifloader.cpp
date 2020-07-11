@@ -1,5 +1,7 @@
 #include "nifloader.hpp"
 
+#include <mutex>
+
 #include <osg/Matrixf>
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
@@ -923,15 +925,18 @@ namespace NifOsg
             osg::BoundingBox box;
 
             int i=0;
-            for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
-                 i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
+            for (const auto& particle : partctrl->particles)
             {
-                const Nif::NiParticleSystemController::Particle& particle = *it;
+                if (i++ >= particledata->activeCount)
+                    break;
+
+                if (particle.lifespan <= 0)
+                    continue;
 
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
-                created->setLifeTime(std::max(0.f, particle.lifespan));
+                created->setLifeTime(particle.lifespan);
 
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
@@ -970,6 +975,8 @@ namespace NifOsg
             osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
             if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
                 counter->setNumberOfParticlesPerSecondToCreate(partctrl->emitRate);
+            else if (partctrl->lifetime == 0 && partctrl->lifetimeRandom == 0)
+                counter->setNumberOfParticlesPerSecondToCreate(0);
             else
                 counter->setNumberOfParticlesPerSecondToCreate(partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom/2));
 
@@ -1725,8 +1732,8 @@ namespace NifOsg
         {
             typedef std::set<osg::ref_ptr<Attribute>, CompareStateAttribute> Cache;
             static Cache sCache;
-            static OpenThreads::Mutex sMutex;
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(sMutex);
+            static std::mutex sMutex;
+            std::lock_guard<std::mutex> lock(sMutex);
             typename Cache::iterator found = sCache.find(attr);
             if (found == sCache.end())
                 found = sCache.insert(attr).first;

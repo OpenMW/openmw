@@ -3,9 +3,8 @@
 
 #include <osg/Drawable>
 
-#include <OpenThreads/Mutex>
-
 #include <set>
+#include <mutex>
 
 namespace osg
 {
@@ -76,7 +75,7 @@ namespace Terrain
         mutable CompileSet mCompileSet;
         mutable CompileSet mImmediateCompileSet;
 
-        mutable OpenThreads::Mutex mMutex;
+        mutable std::mutex mMutex;
 
         osg::ref_ptr<osg::FrameBufferObject> mFBO;
     };

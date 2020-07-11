@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
 
 #include <osg/ref_ptr>
 #include <osg/Node>
@@ -159,7 +160,7 @@ namespace Resource
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        mutable OpenThreads::Mutex mSharedStateMutex;
+        mutable std::mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;

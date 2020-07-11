@@ -6,6 +6,7 @@
 #include <set>
 
 #include "../mwworld/ptr.hpp"
+#include "../mwsound/type.hpp"
 
 namespace MWWorld
 {
@@ -44,14 +45,7 @@ namespace MWSound
         LoopNoEnv = Loop | NoEnv,
         LoopRemoveAtDistance = Loop | RemoveAtDistance
     };
-    enum class Type {
-        Sfx   = 1<<4, /* Normal SFX sound */
-        Voice = 1<<5, /* Voice sound */
-        Foot  = 1<<6, /* Footstep sound */
-        Music = 1<<7, /* Music track */
-        Movie = 1<<8, /* Movie audio track */
-        Mask  = Sfx | Voice | Foot | Music | Movie
-    };
+
     // Used for creating a type mask for SoundManager::pauseSounds and resumeSounds
     inline int operator~(Type a) { return ~static_cast<int>(a); }
     inline int operator&(Type a, Type b) { return static_cast<int>(a) & static_cast<int>(b); }
@@ -162,9 +156,6 @@ namespace MWBase
 
             virtual void stopSound(const MWWorld::CellStore *cell) = 0;
             ///< Stop all sounds for the given cell.
-
-            virtual void stopSound(const std::string& soundId) = 0;
-            ///< Stop a non-3d looping sound
 
             virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration) = 0;
             ///< Fade out given sound (that is already playing) of given object

@@ -330,3 +330,29 @@ If disabled then the whole character's body is pointed to the direction of view.
 If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.
 
 This setting can only be configured by editing the settings configuration file.
+
+swim upward coef
+----------------
+
+:Type:		floating point
+:Range:		-1.0 to 1.0
+:Default:	0.0
+
+Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Intended to make simpler swimming without diving. Recommened range of values is from 0.0 to 0.2.
+
+This setting can only be configured by editing the settings configuration file.
+
+trainers training skills based on base skill
+--------------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+The trainers in Morrowind choose their proposed training skills based on their 3 best attributes.
+
+If disabled then the 3 best skills of trainers and the training limits take into account fortified/drained trainer skill.
+
+If enabled then the 3 best skills of trainers and the training limits are based on the trainer base skills.
+
+This setting can be controlled in Advanced tab of the launcher.

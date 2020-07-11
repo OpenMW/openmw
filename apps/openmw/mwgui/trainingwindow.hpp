@@ -6,6 +6,11 @@
 #include "timeadvancer.hpp"
 #include "waitdialog.hpp"
 
+namespace MWMechanics
+{
+    class NpcStats;
+}
+
 namespace MWGui
 {
 
@@ -35,12 +40,17 @@ namespace MWGui
         void onTrainingProgressChanged(int cur, int total);
         void onTrainingFinished();
 
+        // Retrieve the base skill value if the setting 'training skills based on base skill' is set;
+        // otherwise returns the modified skill
+        float getSkillForTraining(const MWMechanics::NpcStats& stats, int skillId) const;
+
         MyGUI::Widget* mTrainingOptions;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
 
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;
+        bool mTrainingSkillBasedOnBaseSkill;    //corresponds to the setting 'training skills based on base skill'
     };
 
 }

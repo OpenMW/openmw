@@ -311,7 +311,7 @@ include_directories("."
     ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
-    ${Bullet_INCLUDE_DIRS}
+    ${BULLET_INCLUDE_DIRS}
 )
 
 link_directories(${SDL2_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})

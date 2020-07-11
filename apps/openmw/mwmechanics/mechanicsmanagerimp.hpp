@@ -21,20 +21,6 @@ namespace MWMechanics
 {
     class MechanicsManager : public MWBase::MechanicsManager
     {
-            MWWorld::Ptr mWatched;
-
-            AttributeValue mWatchedAttributes[8];
-            SkillValue mWatchedSkills[27];
-
-            DynamicStat<float> mWatchedHealth;
-            DynamicStat<float> mWatchedMagicka;
-            DynamicStat<float> mWatchedFatigue;
-
-            int mWatchedLevel;
-
-            float mWatchedTimeToStartDrowning;
-
-            bool mWatchedStatsEmpty;
             bool mUpdatePlayer;
             bool mClassSelected;
             bool mRaceSelected;
@@ -67,10 +53,6 @@ namespace MWMechanics
 
             virtual void drop(const MWWorld::CellStore *cellStore) override;
             ///< Deregister all objects in the given cell.
-
-            virtual void watchActor(const MWWorld::Ptr& ptr) override;
-            ///< On each update look for changes in a previously registered actor and update the
-            /// GUI accordingly.
 
             virtual void update (float duration, bool paused) override;
             ///< Update objects

@@ -1,6 +1,8 @@
 #include "scene.hpp"
 
 #include <limits>
+#include <chrono>
+#include <thread>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -741,15 +743,12 @@ namespace MWWorld
             player.getClass().adjustPosition(player, true);
         }
 
-        MWBase::MechanicsManager *mechMgr =
-            MWBase::Environment::get().getMechanicsManager();
-
-        mechMgr->updateCell(old, player);
-        mechMgr->watchActor(player);
+        MWBase::Environment::get().getMechanicsManager()->updateCell(old, player);
+        MWBase::Environment::get().getWindowManager()->watchActor(player);
 
         mPhysics->updatePtr(old, player);
 
-        MWBase::Environment::get().getWorld()->adjustSky();
+        world->adjustSky();
 
         mLastPlayerPos = player.getRefData().getPosition().asVec3();
     }
@@ -1143,7 +1142,7 @@ namespace MWWorld
             }
             else
                 loadingListener->setProgress(0);
-            OpenThreads::Thread::microSleep(5000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     }
 

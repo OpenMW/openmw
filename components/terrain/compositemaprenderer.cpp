@@ -1,7 +1,5 @@
 #include "compositemaprenderer.hpp"
 
-#include <OpenThreads/ScopedLock>
-
 #include <osg/FrameBufferObject>
 #include <osg/Texture2D>
 #include <osg/RenderInfo>
@@ -50,7 +48,7 @@ void CompositeMapRenderer::drawImplementation(osg::RenderInfo &renderInfo) const
     if (mWorkQueue)
         mUnrefQueue->flush(mWorkQueue.get());
 
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
 
     if (mImmediateCompileSet.empty() && mCompileSet.empty())
         return;
@@ -177,7 +175,7 @@ void CompositeMapRenderer::setTargetFrameRate(float framerate)
 
 void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool immediate)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     if (immediate)
         mImmediateCompileSet.insert(compositeMap);
     else
@@ -186,7 +184,7 @@ void CompositeMapRenderer::addCompositeMap(CompositeMap* compositeMap, bool imme
 
 void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     CompileSet::iterator found = mCompileSet.find(compositeMap);
     if (found == mCompileSet.end())
         return;
@@ -199,7 +197,7 @@ void CompositeMapRenderer::setImmediate(CompositeMap* compositeMap)
 
 unsigned int CompositeMapRenderer::getCompileSetSize() const
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     return mCompileSet.size();
 }
 

@@ -34,6 +34,7 @@ namespace ICS
 		, DetectingBindingListener* detectingBindingListener
 		, InputControlSystemLog* log, size_t channelCount)
 		: mFileName(file)
+		, mDeadZone(0.1f)
 		, mLog(log)
 		, mDetectingBindingListener(detectingBindingListener)
 		, mDetectingBindingControl(NULL)

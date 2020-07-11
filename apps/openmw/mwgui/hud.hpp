@@ -2,8 +2,7 @@
 #define OPENMW_GAME_MWGUI_HUD_H
 
 #include "mapwindow.hpp"
-
-#include "../mwmechanics/stat.hpp"
+#include "statswatcher.hpp"
 
 namespace MWWorld
 {
@@ -17,12 +16,12 @@ namespace MWGui
     class ItemWidget;
     class SpellWidget;
 
-    class HUD : public WindowBase, public LocalMapBase
+    class HUD : public WindowBase, public LocalMapBase, public StatsListener
     {
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
-        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
+        void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
@@ -48,7 +47,7 @@ namespace MWGui
         void setCrosshairVisible(bool visible);
         void setCrosshairOwned(bool owned);
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
         void setCellName(const std::string& cellName);
 
@@ -59,7 +58,7 @@ namespace MWGui
         void setEnemy(const MWWorld::Ptr& enemy);
         void resetEnemy();
 
-        void clear();
+        void clear() override;
 
     private:
         MyGUI::ProgressBar *mHealth, *mMagicka, *mStamina, *mEnemyHealth, *mDrowning;
@@ -113,8 +112,8 @@ namespace MWGui
         void onMapClicked(MyGUI::Widget* _sender);
 
         // LocalMapBase
-        virtual void customMarkerCreated(MyGUI::Widget* marker);
-        virtual void doorMarkerCreated(MyGUI::Widget* marker);
+        virtual void customMarkerCreated(MyGUI::Widget* marker) override;
+        virtual void doorMarkerCreated(MyGUI::Widget* marker) override;
 
         void updateEnemyHealthBar();
 

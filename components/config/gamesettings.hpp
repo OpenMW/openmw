@@ -5,7 +5,7 @@
 #include <QStringList>
 #include <QString>
 #include <QFile>
-#include <QMap>
+#include <QMultiMap>
 
 #include <boost/filesystem/path.hpp>
 
@@ -31,7 +31,9 @@ namespace Config
 
         inline void setValue(const QString &key, const QString &value)
         {
+            mSettings.remove(key);
             mSettings.insert(key, value);
+            mUserSettings.remove(key);
             mUserSettings.insert(key, value);
         }
 
@@ -39,11 +41,11 @@ namespace Config
         {
             QStringList values = mSettings.values(key);
             if (!values.contains(value))
-                mSettings.insertMulti(key, value);
+                mSettings.insert(key, value);
 
             values = mUserSettings.values(key);
             if (!values.contains(value))
-                mUserSettings.insertMulti(key, value);
+                mUserSettings.insert(key, value);
         }
 
         inline void remove(const QString &key)
@@ -63,7 +65,7 @@ namespace Config
         QStringList values(const QString &key, const QStringList &defaultValues = QStringList()) const;
 
         bool readFile(QTextStream &stream);
-        bool readFile(QTextStream &stream, QMap<QString, QString> &settings);
+        bool readFile(QTextStream &stream, QMultiMap<QString, QString> &settings);
         bool readUserFile(QTextStream &stream);
 
         bool writeFile(QTextStream &stream);
@@ -78,8 +80,8 @@ namespace Config
         Files::ConfigurationManager &mCfgMgr;
 
         void validatePaths();
-        QMap<QString, QString> mSettings;
-        QMap<QString, QString> mUserSettings;
+        QMultiMap<QString, QString> mSettings;
+        QMultiMap<QString, QString> mUserSettings;
 
         QStringList mDataDirs;
         QString mDataLocal;

@@ -504,11 +504,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
-		echo "Google test 1.8.1..."
+		echo "Google test 1.10.0..."
 		if [ -d googletest ]; then
 			printf "  Google test exists, skipping."
 		else
-			git clone -b release-1.8.1 https://github.com/google/googletest.git
+			git clone -b release-1.10.0 https://github.com/google/googletest.git
 		fi
 	fi
 fi
@@ -606,7 +606,7 @@ printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
 		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
 	fi
-	export BULLET_ROOT="$(real_pwd)/Bullet"
+	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
 }
 cd $DEPS
@@ -820,7 +820,7 @@ cd $DEPS
 echo
 # Google Test and Google Mock
 if [ ! -z $TEST_FRAMEWORK ]; then
-	printf "Google test 1.8.1 ..."
+	printf "Google test 1.10.0 ..."
 
 	cd googletest
 	if [ ! -d build ]; then

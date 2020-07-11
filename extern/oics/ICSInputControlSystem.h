@@ -79,6 +79,8 @@ namespace ICS
 		void setDetectingBindingListener(DetectingBindingListener* detectingBindingListener){ mDetectingBindingListener = detectingBindingListener; };
 		DetectingBindingListener* getDetectingBindingListener(){ return mDetectingBindingListener; };
 
+		void setJoystickDeadZone(float deadZone){ mDeadZone = deadZone; };
+
 		// in seconds
 		void update(float timeSinceLastFrame);
 
@@ -179,6 +181,8 @@ namespace ICS
 		std::list<PendingActionItem> mPendingActions;
 
 		std::string mFileName;
+
+		float mDeadZone;
 
         typedef std::map<SDL_Scancode, ControlKeyBinderItem> ControlsKeyBinderMapType;	// <Scancode, [direction, control]>
 		typedef std::map<int, ControlAxisBinderItem> ControlsAxisBinderMapType;			// <axis, [direction, control]>

@@ -125,7 +125,7 @@ void ParticleShooter::shoot(osgParticle::Particle *particle) const
     particle->setVelocity(dir * vel);
 
     // Not supposed to set this here, but there doesn't seem to be a better way of doing it
-    particle->setLifeTime(mLifetime + mLifetimeRandom * Misc::Rng::rollClosedProbability());
+    particle->setLifeTime(std::max(std::numeric_limits<float>::epsilon(), mLifetime + mLifetimeRandom * Misc::Rng::rollClosedProbability()));
 }
 
 GrowFadeAffector::GrowFadeAffector(float growTime, float fadeTime)
@@ -184,6 +184,7 @@ ParticleColorAffector::ParticleColorAffector(const ParticleColorAffector &copy, 
 
 void ParticleColorAffector::operate(osgParticle::Particle* particle, double /* dt */)
 {
+    assert(particle->getLifeTime() > 0);
     float time = static_cast<float>(particle->getAge()/particle->getLifeTime());
     osg::Vec4f color = mData.interpKey(time);
     float alpha = color.a();

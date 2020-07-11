@@ -349,6 +349,8 @@ NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> par
         mPartPriorities[i] = 0;
     }
 
+    std::fill(mSounds.begin(), mSounds.end(), nullptr);
+
     updateNpcBase();
 }
 
@@ -745,7 +747,7 @@ osg::Vec3f NpcAnimation::runAnimation(float timepassed)
         mFirstPersonNeckController->setOffset(mFirstPersonOffset);
     }
 
-    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0]);
+    WeaponAnimation::configureControllers(mPtr.getRefData().getPosition().rot[0] + getBodyPitchRadians());
 
     return ret;
 }
@@ -756,10 +758,10 @@ void NpcAnimation::removeIndividualPart(ESM::PartReferenceType type)
     mPartslots[type] = -1;
 
     mObjectParts[type].reset();
-    if (!mSoundIds[type].empty() && !mSoundsDisabled)
+    if (mSounds[type] != nullptr && !mSoundsDisabled)
     {
-        MWBase::Environment::get().getSoundManager()->stopSound3D(mPtr, mSoundIds[type]);
-        mSoundIds[type].clear();
+        MWBase::Environment::get().getSoundManager()->stopSound(mSounds[type]);
+        mSounds[type] = nullptr;
     }
 }
 
@@ -838,10 +840,10 @@ bool NpcAnimation::addOrReplaceIndividualPart(ESM::PartReferenceType type, int g
         MWWorld::ConstContainerStoreIterator csi = inv.getSlot(group < 0 ? MWWorld::InventoryStore::Slot_Helmet : group);
         if (csi != inv.end())
         {
-            mSoundIds[type] = csi->getClass().getSound(*csi);
-            if (!mSoundIds[type].empty())
+            const auto soundId = csi->getClass().getSound(*csi);
+            if (!soundId.empty())
             {
-                MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, mSoundIds[type],
+                mSounds[type] = MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId,
                     1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop
                 );
             }

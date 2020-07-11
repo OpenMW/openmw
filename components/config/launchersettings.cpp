@@ -3,7 +3,7 @@
 #include <QTextStream>
 #include <QString>
 #include <QRegExp>
-#include <QMap>
+#include <QMultiMap>
 
 #include <QDebug>
 
@@ -22,7 +22,7 @@ Config::LauncherSettings::~LauncherSettings()
 
 QStringList Config::LauncherSettings::subKeys(const QString &key)
 {
-    QMap<QString, QString> settings = SettingsBase::getSettings();
+    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
 
     QRegExp keyRe("(.+)/");
@@ -54,7 +54,7 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
 {
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");
-    QMap<QString, QString> settings = SettingsBase::getSettings();
+    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
 
     QMapIterator<QString, QString> i(settings);
     i.toBack();

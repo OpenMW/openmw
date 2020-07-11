@@ -13,13 +13,12 @@
 
 #include "../mwbase/windowmanager.hpp"
 
-#include "../mwworld/ptr.hpp"
-
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "mapwindow.hpp"
+#include "statswatcher.hpp"
 #include "textcolours.hpp"
 
 #include <MyGUI_KeyCode.h>
@@ -195,21 +194,10 @@ namespace MWGui
 
     virtual void setConsoleSelectedObject(const MWWorld::Ptr& object);
 
-    ///< Set value for the given ID.
-    virtual void setValue (const std::string& id, const MWMechanics::AttributeValue& value);
-    virtual void setValue (int parSkill, const MWMechanics::SkillValue& value);
-    virtual void setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value);
-    virtual void setValue (const std::string& id, const std::string& value);
-    virtual void setValue (const std::string& id, int value);
-
     /// Set time left for the player to start drowning (update the drowning bar)
     /// @param time time left to start drowning
     /// @param maxTime how long we can be underwater (in total) until drowning starts
     virtual void setDrowningTimeLeft (float time, float maxTime);
-
-    virtual void setPlayerClass (const ESM::Class &class_);                        ///< set current class of player
-    virtual void configureSkills (const SkillList& major, const SkillList& minor); ///< configure skill groups, each set contains the skill ID for that group.
-    virtual void updateSkillArea();                                                ///< update display of skills, factions, birth sign, reputation and bounty
 
     virtual void changeCell(const MWWorld::CellStore* cell); ///< change the active cell
 
@@ -297,6 +285,9 @@ namespace MWGui
     virtual void windowResized(int x, int y);
     virtual void windowClosed();
     virtual bool isWindowVisible();
+
+    virtual void watchActor(const MWWorld::Ptr& ptr);
+    virtual MWWorld::Ptr getWatchedActor() const;
 
     virtual void executeInConsole (const std::string& path);
 
@@ -400,6 +391,7 @@ namespace MWGui
     osgViewer::Viewer* mViewer;
 
     std::unique_ptr<Gui::FontLoader> mFontLoader;
+    std::unique_ptr<StatsWatcher> mStatsWatcher;
 
     bool mConsoleOnlyScripts;
 

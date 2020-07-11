@@ -3,6 +3,7 @@
 #include <osg/Camera>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -56,7 +57,7 @@ namespace MWRender
       mFurthest(800.f),
       mIsNearest(false),
       mHeight(124.f),
-      mBaseCameraDistance(192.f),
+      mBaseCameraDistance(Settings::Manager::getFloat("third person camera distance", "Camera")),
       mVanityToggleQueued(false),
       mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
@@ -380,7 +381,7 @@ namespace MWRender
         return mCameraDistance;
     }
 
-    void Camera::setBaseCameraDistance(float dist, bool adjust)
+    void Camera::updateBaseCameraDistance(float dist, bool adjust)
     {
         if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
             return;
@@ -407,7 +408,10 @@ namespace MWRender
         if (mVanity.enabled || mPreviewMode)
             mPreviewCam.offset = dist;
         else if (!mFirstPersonView)
+        {
             mBaseCameraDistance = dist;
+            Settings::Manager::setFloat("third person camera distance", "Camera", dist);
+        }
         setCameraDistance();
     }
 

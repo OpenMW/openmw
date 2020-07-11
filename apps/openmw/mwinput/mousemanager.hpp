@@ -32,7 +32,7 @@ namespace MWInput
 
         bool injectMouseButtonPress(Uint8 button);
         bool injectMouseButtonRelease(Uint8 button);
-        void injectMouseMove(int xMove, int yMove, int mouseWheelMove);
+        void injectMouseMove(float xMove, float yMove, float mouseWheelMove);
         void warpMouse();
 
         void setMouseLookEnabled(bool enabled) { mMouseLookEnabled = enabled; }

@@ -22,7 +22,7 @@ namespace SceneUtil
             }
         }
 
-        osg::StateSet* stateset = mStateSets[nv->getTraversalNumber()%2];
+        osg::ref_ptr<osg::StateSet> stateset = mStateSets[nv->getTraversalNumber()%2];
         apply(stateset, nv);
 
         if (!isCullVisitor)

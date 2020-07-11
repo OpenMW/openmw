@@ -90,6 +90,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
     }
     loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
+    loadSettingBool(trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
 
     // Input Settings
     loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
@@ -155,6 +156,7 @@ void Launcher::AdvancedPage::saveSettings()
     saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
     saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
     saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
+    saveSettingBool(trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
 
     // Input Settings
     saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");

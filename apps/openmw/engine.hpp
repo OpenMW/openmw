@@ -111,8 +111,6 @@ namespace OMW
             bool mScriptBlacklistUse;
             bool mNewGame;
 
-            osg::Timer_t mStartTick;
-
             // not implemented
             Engine (const Engine&);
             Engine& operator= (const Engine&);

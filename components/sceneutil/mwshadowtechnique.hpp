@@ -19,6 +19,8 @@
 #ifndef COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H
 #define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
+#include <mutex>
+
 #include <osg/Camera>
 #include <osg/Material>
 #include <osg/MatrixTransform>
@@ -234,7 +236,7 @@ namespace SceneUtil {
         virtual ~MWShadowTechnique();
 
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
-        mutable OpenThreads::Mutex              _viewDependentDataMapMutex;
+        mutable std::mutex                      _viewDependentDataMapMutex;
         ViewDependentDataMap                    _viewDependentDataMap;
 
         osg::ref_ptr<osg::StateSet>             _shadowRecievingPlaceholderStateSet;
@@ -245,7 +247,7 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
         typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
-        mutable OpenThreads::Mutex              _accessUniformsAndProgramMutex;
+        mutable std::mutex                      _accessUniformsAndProgramMutex;
         Uniforms                                _uniforms;
         osg::ref_ptr<osg::Program>              _program;
 

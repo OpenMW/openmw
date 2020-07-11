@@ -2,8 +2,6 @@
 
 #include <set>
 
-#include <OpenThreads/ScopedLock>
-
 #include <osg/Image>
 #include <osg/Plane>
 
@@ -548,7 +546,7 @@ namespace ESMTerrain
 
     Terrain::LayerInfo Storage::getLayerInfo(const std::string& texture)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mLayerInfoMutex);
+        std::lock_guard<std::mutex> lock(mLayerInfoMutex);
 
         // Already have this cached?
         std::map<std::string, Terrain::LayerInfo>::iterator found = mLayerInfoMap.find(texture);

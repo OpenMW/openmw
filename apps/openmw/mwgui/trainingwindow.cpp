@@ -14,6 +14,8 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/actorutil.hpp"
 
+#include <components/settings/settings.hpp>
+
 #include "tooltips.hpp"
 
 namespace
@@ -40,6 +42,7 @@ namespace MWGui
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
         , mTimeAdvancer(0.05f)
+        , mTrainingSkillBasedOnBaseSkill(Settings::Manager::getBool("trainers training skills based on base skill", "Game"))
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");
@@ -76,9 +79,10 @@ namespace MWGui
         // NPC can train you in his best 3 skills
         std::vector< std::pair<int, float> > skills;
 
+        MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
         for (int i=0; i<ESM::Skill::Length; ++i)
         {
-            float value = actor.getClass().getSkill(actor, i);
+            float value = getSkillForTraining(actorStats, i);
 
             skills.push_back(std::make_pair(i, value));
         }
@@ -140,7 +144,7 @@ namespace MWGui
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
-        if (mPtr.getClass().getSkill(mPtr, skillId) <= pcStats.getSkill (skillId).getBase ())
+        if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skillId) <= pcStats.getSkill(skillId).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sServiceTrainingWords}");
             return;
@@ -193,6 +197,13 @@ namespace MWGui
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode (GM_Training);
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
+    }
+
+    float TrainingWindow::getSkillForTraining(const MWMechanics::NpcStats& stats, int skillId) const
+    {
+        if (mTrainingSkillBasedOnBaseSkill)
+            return stats.getSkill(skillId).getBase();
+        return stats.getSkill(skillId).getModified();
     }
 
     void TrainingWindow::onFrame(float dt)

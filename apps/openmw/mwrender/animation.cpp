@@ -623,6 +623,7 @@ namespace MWRender
         , mHeadPitchRadians(0.f)
         , mUpperBodyYawRadians(0.f)
         , mLegsYawRadians(0.f)
+        , mBodyPitchRadians(0.f)
         , mHasMagicEffects(false)
         , mAlpha(1.f)
     {
@@ -1340,11 +1341,11 @@ namespace MWRender
         float yawOffset = 0;
         if (mRootController)
         {
-            bool enable = std::abs(mLegsYawRadians) > epsilon;
+            bool enable = std::abs(mLegsYawRadians) > epsilon || std::abs(mBodyPitchRadians) > epsilon;
             mRootController->setEnabled(enable);
             if (enable)
             {
-                mRootController->setRotate(osg::Quat(mLegsYawRadians, osg::Vec3f(0,0,1)));
+                mRootController->setRotate(osg::Quat(mLegsYawRadians, osg::Vec3f(0,0,1)) * osg::Quat(mBodyPitchRadians, osg::Vec3f(1,0,0)));
                 yawOffset = mLegsYawRadians;
             }
         }
@@ -1485,6 +1486,8 @@ namespace MWRender
         {
             if (mLightListCallback)
                 mObjectRoot->removeCullCallback(mLightListCallback);
+            if (mTransparencyUpdater)
+                mObjectRoot->removeCullCallback(mTransparencyUpdater);
             previousStateset = mObjectRoot->getStateSet();
             mObjectRoot->getParent(0)->removeChild(mObjectRoot);
         }
@@ -1576,6 +1579,8 @@ namespace MWRender
         if (!mLightListCallback)
             mLightListCallback = new SceneUtil::LightListCallback;
         mObjectRoot->addCullCallback(mLightListCallback);
+        if (mTransparencyUpdater)
+            mObjectRoot->addCullCallback(mTransparencyUpdater);
     }
 
     osg::Group* Animation::getObjectRoot()
