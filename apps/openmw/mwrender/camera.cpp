@@ -64,7 +64,8 @@ namespace MWRender
       mCameraDistance(0.f),
       mFocalPointCurrentOffset(osg::Vec2d()),
       mFocalPointTargetOffset(osg::Vec2d()),
-      mFocalPointTransitionSpeed(1.f),
+      mFocalPointTransitionSpeedCoef(1.f),
+      mPreviousTransitionInfluence(0.f),
       mSmoothedSpeed(0.f),
       mDynamicCameraDistanceEnabled(false),
       mShowCrosshairInThirdPersonMode(false)
@@ -221,16 +222,44 @@ namespace MWRender
         mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);
     }
 
+    void Camera::setFocalPointTargetOffset(osg::Vec2d v)
+    {
+        mFocalPointTargetOffset = v;
+        mPreviousTransitionSpeed = mFocalPointTransitionSpeed;
+        mPreviousTransitionInfluence = 1.0f;
+    }
+
     void Camera::updateFocalPointOffset(float duration)
     {
+        if (duration <= 0)
+            return;
+
+        osg::Vec2d oldOffset = mFocalPointCurrentOffset;
+
+        if (mPreviousTransitionInfluence > 0)
+        {
+            mFocalPointCurrentOffset -= mPreviousExtraOffset;
+            mPreviousExtraOffset = mPreviousExtraOffset / mPreviousTransitionInfluence + mPreviousTransitionSpeed * duration;
+            mPreviousTransitionInfluence =
+                std::max(0.f, mPreviousTransitionInfluence - duration * mFocalPointTransitionSpeedCoef);
+            mPreviousExtraOffset *= mPreviousTransitionInfluence;
+            mFocalPointCurrentOffset += mPreviousExtraOffset;
+        }
+
         osg::Vec2d delta = mFocalPointTargetOffset - mFocalPointCurrentOffset;
         if (delta.length2() > 0)
         {
-            float coef = duration * (1.0 + 5.0 / delta.length()) * mFocalPointTransitionSpeed;
+            float coef = duration * (1.0 + 5.0 / delta.length()) *
+                         mFocalPointTransitionSpeedCoef * (1.0f - mPreviousTransitionInfluence);
             mFocalPointCurrentOffset += delta * std::min(coef, 1.0f);
         }
         else
-            mFocalPointTransitionSpeed = 1.f;
+        {
+            mPreviousExtraOffset = osg::Vec2d();
+            mPreviousTransitionInfluence = 0.f;
+        }
+
+        mFocalPointTransitionSpeed = (mFocalPointCurrentOffset - oldOffset) / duration;
     }
 
     void Camera::toggleViewMode(bool force)

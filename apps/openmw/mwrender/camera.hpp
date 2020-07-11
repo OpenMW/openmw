@@ -58,7 +58,13 @@ namespace MWRender
         osg::Vec3d mFocalPointAdjustment;
         osg::Vec2d mFocalPointCurrentOffset;
         osg::Vec2d mFocalPointTargetOffset;
-        float mFocalPointTransitionSpeed;
+        float mFocalPointTransitionSpeedCoef;
+
+        // This fields are used to make focal point transition smooth if previous transition was not finished.
+        float mPreviousTransitionInfluence;
+        osg::Vec2d mFocalPointTransitionSpeed;
+        osg::Vec2d mPreviousTransitionSpeed;
+        osg::Vec2d mPreviousExtraOffset;
 
         float mSmoothedSpeed;
         bool mDynamicCameraDistanceEnabled;
@@ -75,8 +81,8 @@ namespace MWRender
 
         MWWorld::Ptr getTrackingPtr() const;
 
-        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeed = v; }
-        void setFocalPointTargetOffset(osg::Vec2d v) { mFocalPointTargetOffset = v; }
+        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
+        void setFocalPointTargetOffset(osg::Vec2d v);
         void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
         void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 

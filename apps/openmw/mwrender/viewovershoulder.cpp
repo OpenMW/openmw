@@ -28,6 +28,7 @@ namespace MWRender
 
         mCamera->enableDynamicCameraDistance(true);
         mCamera->enableCrosshairInThirdPersonMode(true);
+        mCamera->setFocalPointTargetOffset({mOverShoulderHorizontalOffset, mOverShoulderVerticalOffset});
     }
 
     void ViewOverShoulderController::update()
@@ -35,27 +36,23 @@ namespace MWRender
         if (mCamera->isVanityOrPreviewModeEnabled() || mCamera->isFirstPerson())
             return;
 
-        Mode newMode = mMode;
+        Mode oldMode = mMode;
         auto ptr = mCamera->getTrackingPtr();
         if (ptr.getClass().isActor() && ptr.getClass().getCreatureStats(ptr).getDrawState() != MWMechanics::DrawState_Nothing)
-            newMode = Mode::Combat;
+            mMode = Mode::Combat;
         else if (MWBase::Environment::get().getWorld()->isSwimming(ptr))
-            newMode = Mode::Swimming;
-        else if (mMode == Mode::Combat || mMode == Mode::Swimming)
-            newMode = mDefaultShoulderIsRight ? Mode::RightShoulder : Mode::LeftShoulder;
-        if (newMode != mMode)
-        {
-            if (newMode == Mode::Combat || mMode == Mode::Combat)
-                mCamera->setFocalPointTransitionSpeed(5.f);
-            else
-                mCamera->setFocalPointTransitionSpeed(1.f);
-            mMode = newMode;
-        }
-
+            mMode = Mode::Swimming;
+        else if (oldMode == Mode::Combat || oldMode == Mode::Swimming)
+            mMode = mDefaultShoulderIsRight ? Mode::RightShoulder : Mode::LeftShoulder;
         if (mAutoSwitchShoulder && (mMode == Mode::LeftShoulder || mMode == Mode::RightShoulder))
             trySwitchShoulder();
+        if (oldMode == mMode) return;
 
-        osg::Vec2d focalPointTargetOffset;
+        if (oldMode == Mode::Combat || mMode == Mode::Combat)
+            mCamera->setFocalPointTransitionSpeed(5.f);
+        else
+            mCamera->setFocalPointTransitionSpeed(1.f);
+
         switch (mMode)
         {
         case Mode::RightShoulder:
