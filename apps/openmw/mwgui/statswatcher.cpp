@@ -136,27 +136,6 @@ namespace MWGui
         }
 
         mWatchedStatsEmpty = false;
-
-        // Update the equipped weapon icon
-        MWWorld::InventoryStore& inv = mWatched.getClass().getInventoryStore(mWatched);
-        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-        if (weapon == inv.end())
-            winMgr->unsetSelectedWeapon();
-        else
-            winMgr->setSelectedWeapon(*weapon);
-
-        // Update the selected spell icon
-        MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
-        if (enchantItem != inv.end())
-            winMgr->setSelectedEnchantItem(*enchantItem);
-        else
-        {
-            const std::string& spell = winMgr->getSelectedSpell();
-            if (!spell.empty())
-                winMgr->setSelectedSpell(spell, int(MWMechanics::getSpellSuccessChance(spell, mWatched)));
-            else
-                winMgr->unsetSelectedSpell();
-        }
     }
 
     void StatsWatcher::addListener(StatsListener* listener)
