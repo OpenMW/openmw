@@ -302,13 +302,37 @@ namespace MWMechanics
 
     void MechanicsManager::update(float duration, bool paused)
     {
+        // Note: we should do it here since game mechanics and world updates use these values
+        MWWorld::Ptr ptr = getPlayer();
+        MWBase::WindowManager *winMgr = MWBase::Environment::get().getWindowManager();
+
+        // Update the equipped weapon icon
+        MWWorld::InventoryStore& inv = ptr.getClass().getInventoryStore(ptr);
+        MWWorld::ContainerStoreIterator weapon = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
+        if (weapon == inv.end())
+            winMgr->unsetSelectedWeapon();
+        else
+            winMgr->setSelectedWeapon(*weapon);
+
+        // Update the selected spell icon
+        MWWorld::ContainerStoreIterator enchantItem = inv.getSelectedEnchantItem();
+        if (enchantItem != inv.end())
+            winMgr->setSelectedEnchantItem(*enchantItem);
+        else
+        {
+            const std::string& spell = winMgr->getSelectedSpell();
+            if (!spell.empty())
+                winMgr->setSelectedSpell(spell, int(MWMechanics::getSpellSuccessChance(spell, ptr)));
+            else
+                winMgr->unsetSelectedSpell();
+        }
+
         if (mUpdatePlayer)
         {
             mUpdatePlayer = false;
 
             // HACK? The player has been changed, so a new Animation object may
             // have been made for them. Make sure they're properly updated.
-            MWWorld::Ptr ptr = getPlayer();
             mActors.removeActor(ptr);
             mActors.addActor(ptr, true);
         }
