@@ -237,6 +237,8 @@ namespace MWBase
 
             virtual void update (float duration) = 0;
 
+            virtual void updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr) = 0;
+
             /**
              * Fetches a GMST string from the store, if there is no setting with the given
              * ID or it is not a string the default string is returned.

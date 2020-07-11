@@ -242,6 +242,8 @@ namespace MWGui
     virtual void unsetSelectedSpell();
     virtual void unsetSelectedWeapon();
 
+    virtual void updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr);
+
     virtual void showCrosshair(bool show);
     virtual bool getSubtitlesEnabled();
 
