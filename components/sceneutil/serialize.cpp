@@ -1,8 +1,9 @@
 #include "serialize.hpp"
 
-#include <osg/MatrixTransform>
 #include <osgDB/ObjectWrapper>
 #include <osgDB/Registry>
+
+#include <components/nifosg/matrixtransform.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -79,7 +80,7 @@ class MatrixTransformSerializer : public osgDB::ObjectWrapper
 {
 public:
     MatrixTransformSerializer()
-        : osgDB::ObjectWrapper(createInstanceFunc<osg::MatrixTransform>, "NifOsg::MatrixTransform", "osg::Object osg::Node osg::Transform osg::MatrixTransform NifOsg::MatrixTransform")
+        : osgDB::ObjectWrapper(createInstanceFunc<NifOsg::MatrixTransform>, "NifOsg::MatrixTransform", "osg::Object osg::Node osg::Transform osg::MatrixTransform NifOsg::MatrixTransform")
     {
     }
 };
@@ -141,6 +142,7 @@ void registerSerializers()
             "NifOsg::StaticBoundingBoxCallback",
             "NifOsg::GeomMorpherController",
             "NifOsg::UpdateMorphGeometry",
+            "NifOsg::UVController",
             "osgMyGUI::Drawable",
             "osg::DrawCallback",
             "osgOQ::ClearQueriesCallback",
