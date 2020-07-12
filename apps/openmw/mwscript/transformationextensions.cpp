@@ -725,7 +725,8 @@ namespace MWScript
                     // We should move actors, standing on moving object, too.
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z());
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z()));
                 }
         };
 
@@ -761,7 +762,8 @@ namespace MWScript
                     // We should move actors, standing on moving object, too.
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
-                    MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+diff.x(), objPos[1]+diff.y(), objPos[2]+diff.z());
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
+                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+diff.x(), objPos[1]+diff.y(), objPos[2]+diff.z()));
                 }
         };
 

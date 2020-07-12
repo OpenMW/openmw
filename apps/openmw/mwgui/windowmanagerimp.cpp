@@ -574,6 +574,11 @@ namespace MWGui
         }
     }
 
+    void WindowManager::updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
+    {
+        mConsole->updateSelectedObjectPtr(currentPtr, newPtr);
+    }
+
     void WindowManager::updateVisible()
     {
         bool loading = (getMode() == GM_Loading || getMode() == GM_LoadingWallpaper);

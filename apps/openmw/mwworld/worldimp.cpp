@@ -1201,6 +1201,8 @@ namespace MWWorld
                     }
                 }
             }
+
+            MWBase::Environment::get().getWindowManager()->updateConsoleObjectPtr(ptr, newPtr);
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {

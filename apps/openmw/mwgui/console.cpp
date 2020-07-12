@@ -472,6 +472,12 @@ namespace MWGui
         setCoord(10,10, width-10, height/2);
     }
 
+    void Console::updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
+    {
+        if (mPtr == currentPtr)
+            mPtr = newPtr;
+    }
+
     void Console::setSelectedObject(const MWWorld::Ptr& object)
     {
         if (!object.isEmpty())
