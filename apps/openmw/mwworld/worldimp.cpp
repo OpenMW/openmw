@@ -1185,7 +1185,6 @@ namespace MWWorld
                     mRendering->updatePtr(ptr, newPtr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);
@@ -1203,6 +1202,7 @@ namespace MWWorld
             }
 
             MWBase::Environment::get().getWindowManager()->updateConsoleObjectPtr(ptr, newPtr);
+            MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
