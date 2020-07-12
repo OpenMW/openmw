@@ -75,7 +75,7 @@ MacOS:
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
-    key: ninja
+    key: ninja-v2
     paths:
     - deps
     - MSVC2019_64_Ninja/deps/Qt
@@ -138,7 +138,7 @@ Windows_Ninja_RelWithDebInfo:
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
-    key: msbuild
+    key: msbuild-v2
     paths:
     - deps
     - MSVC2019_64/deps/Qt
