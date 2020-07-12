@@ -43,6 +43,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"
+#include "nodeindexholder.hpp"
 #include "particle.hpp"
 
 namespace
@@ -487,7 +488,7 @@ namespace NifOsg
                 break;
             }
             if (!node)
-                node = new NifOsg::MatrixTransform(nifNode->recIndex, nifNode->trafo);
+                node = new NifOsg::MatrixTransform(nifNode->trafo);
 
             if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
             {
@@ -521,6 +522,12 @@ namespace NifOsg
 
             if (!rootNode)
                 rootNode = node;
+
+            // The original NIF record index is used for a variety of features:
+            // - finding the correct emitter node for a particle system
+            // - establishing connections to the animated collision shapes, which are handled in a separate loader
+            // - finding a random child NiNode in NiBspArrayController
+            node->getOrCreateUserDataContainer()->addUserObject(new NodeIndexHolder(nifNode->recIndex));
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {

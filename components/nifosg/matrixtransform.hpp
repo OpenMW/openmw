@@ -12,7 +12,7 @@ namespace NifOsg
     {
     public:
         MatrixTransform();
-        MatrixTransform(int recordIndex, const Nif::Transformation &trafo);
+        MatrixTransform(const Nif::Transformation &trafo);
         MatrixTransform(const MatrixTransform &copy, const osg::CopyOp &copyop);
 
         META_Node(NifOsg, MatrixTransform)
@@ -28,9 +28,6 @@ namespace NifOsg
 
         // Apply the given translation to OSG matrix.
         void setTranslation(const osg::Vec3f& translation);
-
-        // NIF record index
-        int mIndex{0};
 
     private:
         // Hack: account for Transform differences between OSG and NIFs.
