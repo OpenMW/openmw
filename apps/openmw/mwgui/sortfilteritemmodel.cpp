@@ -69,8 +69,8 @@ namespace
                 return compareType(leftName, rightName);
 
             // compare items by name
-            leftName = Misc::StringUtils::lowerCase(left.mBase.getClass().getName(left.mBase));
-            rightName = Misc::StringUtils::lowerCase(right.mBase.getClass().getName(right.mBase));
+            leftName = Misc::StringUtils::lowerCaseUtf8(left.mBase.getClass().getName(left.mBase));
+            rightName = Misc::StringUtils::lowerCaseUtf8(right.mBase.getClass().getName(right.mBase));
 
             result = leftName.compare(rightName);
             if (result != 0)
@@ -213,7 +213,7 @@ namespace MWGui
 
             if (!mNameFilter.empty())
             {
-                const auto itemName = Misc::StringUtils::lowerCase(base.getClass().getName(base));
+                const auto itemName = Misc::StringUtils::lowerCaseUtf8(base.getClass().getName(base));
                 return itemName.find(mNameFilter) != std::string::npos;
             }
 
@@ -226,7 +226,7 @@ namespace MWGui
 
                 for (const auto& effect : effects)
                 {
-                    const auto ciEffect = Misc::StringUtils::lowerCase(effect);
+                    const auto ciEffect = Misc::StringUtils::lowerCaseUtf8(effect);
 
                     if (ciEffect.find(mEffectFilter) != std::string::npos)
                         return true;
@@ -285,7 +285,7 @@ namespace MWGui
                 return false;
         }
 
-        std::string compare = Misc::StringUtils::lowerCase(item.mBase.getClass().getName(item.mBase));
+        std::string compare = Misc::StringUtils::lowerCaseUtf8(item.mBase.getClass().getName(item.mBase));
         if(compare.find(mNameFilter) == std::string::npos)
             return false;
 
@@ -318,12 +318,12 @@ namespace MWGui
 
     void SortFilterItemModel::setNameFilter (const std::string& filter)
     {
-        mNameFilter = Misc::StringUtils::lowerCase(filter);
+        mNameFilter = Misc::StringUtils::lowerCaseUtf8(filter);
     }
 
     void SortFilterItemModel::setEffectFilter (const std::string& filter)
     {
-        mEffectFilter = Misc::StringUtils::lowerCase(filter);
+        mEffectFilter = Misc::StringUtils::lowerCaseUtf8(filter);
     }
 
     void SortFilterItemModel::update()
