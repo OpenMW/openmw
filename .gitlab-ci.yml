@@ -85,7 +85,13 @@ MacOS:
     - "*.zip"
     - "*.log"
     - MSVC2019_64_Ninja/*.log
-    - MSVC2019_64_Ninja/**/*.log
+    - MSVC2019_64_Ninja/*/*.log
+    - MSVC2019_64_Ninja/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
 
 Windows_Ninja_Release:
   extends:
@@ -142,7 +148,13 @@ Windows_Ninja_RelWithDebInfo:
     - "*.zip"
     - "*.log"
     - MSVC2019_64/*.log
-    - MSVC2019_64/**/*.log
+    - MSVC2019_64/*/*.log
+    - MSVC2019_64/*/*/*.log
+    - MSVC2019_64/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*/*.log
 
 Windows_MSBuild_Release:
   extends:
