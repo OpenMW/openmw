@@ -78,7 +78,7 @@ MacOS:
     key: ninja
     paths:
     - deps
-    - MSVC2019_64_Ninja/deps
+    - MSVC2019_64_Ninja/deps/Qt
   artifacts:
     when: always
     paths:
@@ -141,7 +141,7 @@ Windows_Ninja_RelWithDebInfo:
     key: msbuild
     paths:
     - deps
-    - MSVC2019_64/deps
+    - MSVC2019_64/deps/Qt
   artifacts:
     when: always
     paths:
