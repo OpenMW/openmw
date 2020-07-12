@@ -21,7 +21,8 @@ namespace MWSound
     struct SoundParams
     {
         osg::Vec3f mPos;
-        float mVolume = 1;
+        float mVolumeFactor = 1;
+        float mSfxVolume = 1;
         float mBaseVolume = 1;
         float mPitch = 1;
         float mMinDistance = 1;
@@ -44,7 +45,8 @@ namespace MWSound
 
     public:
         void setPosition(const osg::Vec3f &pos) { mParams.mPos = pos; }
-        void setVolume(float volume) { mParams.mVolume = volume; }
+        void setVolumeFactor(float volume) { mParams.mVolumeFactor = volume; }
+        void setSfxVolume(float volume) { mParams.mSfxVolume = volume; }
         void setBaseVolume(float volume) { mParams.mBaseVolume = volume; }
         void setFadeout(float duration) { mParams.mFadeOutTime = duration; }
         void updateFade(float duration)
@@ -52,13 +54,13 @@ namespace MWSound
             if (mParams.mFadeOutTime > 0.0f)
             {
                 float soundDuration = std::min(duration, mParams.mFadeOutTime);
-                mParams.mVolume *= (mParams.mFadeOutTime - soundDuration) / mParams.mFadeOutTime;
+                mParams.mVolumeFactor *= (mParams.mFadeOutTime - soundDuration) / mParams.mFadeOutTime;
                 mParams.mFadeOutTime -= soundDuration;
             }
         }
 
         const osg::Vec3f &getPosition() const { return mParams.mPos; }
-        float getRealVolume() const { return mParams.mVolume * mParams.mBaseVolume; }
+        float getRealVolume() const { return mParams.mVolumeFactor * mParams.mSfxVolume * mParams.mBaseVolume; }
         float getPitch() const { return mParams.mPitch; }
         float getMinDistance() const { return mParams.mMinDistance; }
         float getMaxDistance() const { return mParams.mMaxDistance; }

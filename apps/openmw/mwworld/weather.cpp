@@ -816,7 +816,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
         mPlayingSoundID = mResult.mAmbientLoopSoundID;
     }
     else if (mAmbientSound)
-        mAmbientSound->setVolume(mResult.mAmbientSoundVolume);
+        mAmbientSound->setVolumeFactor(mResult.mAmbientSoundVolume);
 }
 
 void WeatherManager::stopSounds()

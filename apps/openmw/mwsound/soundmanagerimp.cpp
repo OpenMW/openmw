@@ -504,7 +504,8 @@ namespace MWSound
         SoundPtr sound = getSoundRef();
         sound->init([&] {
             SoundParams params;
-            params.mVolume = volume * sfx->getVolume();
+            params.mVolumeFactor = volume;
+            params.mSfxVolume = sfx->getVolume();
             params.mBaseVolume = volumeFromType(type);
             params.mPitch = pitch;
             params.mFlags = mode | type | Play_2D;
@@ -543,7 +544,8 @@ namespace MWSound
         {
             sound->init([&] {
                 SoundParams params;
-                params.mVolume = volume * sfx->getVolume();
+                params.mVolumeFactor = volume;
+                params.mSfxVolume = sfx->getVolume();
                 params.mBaseVolume = volumeFromType(type);
                 params.mPitch = pitch;
                 params.mFlags = mode | type | Play_2D;
@@ -556,7 +558,8 @@ namespace MWSound
             sound->init([&] {
                 SoundParams params;
                 params.mPos = objpos;
-                params.mVolume = volume * sfx->getVolume();
+                params.mVolumeFactor = volume;
+                params.mSfxVolume = sfx->getVolume();
                 params.mBaseVolume = volumeFromType(type);
                 params.mPitch = pitch;
                 params.mMinDistance = sfx->getMinDist();
@@ -590,7 +593,8 @@ namespace MWSound
         sound->init([&] {
             SoundParams params;
             params.mPos = initialPos;
-            params.mVolume = volume * sfx->getVolume();
+            params.mVolumeFactor = volume;
+            params.mSfxVolume = sfx->getVolume();
             params.mBaseVolume = volumeFromType(type);
             params.mPitch = pitch;
             params.mMinDistance = sfx->getMinDist();
@@ -786,7 +790,8 @@ namespace MWSound
             case WaterSoundAction::DoNothing:
                 break;
             case WaterSoundAction::SetVolume:
-                mNearWaterSound->setVolume(update.mVolume * sfx->getVolume());
+                mNearWaterSound->setVolumeFactor(update.mVolume);
+                mNearWaterSound->setSfxVolume(sfx->getVolume());
                 break;
             case WaterSoundAction::FinishSound:
                 mOutput->finishSound(mNearWaterSound);
