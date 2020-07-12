@@ -67,6 +67,7 @@ namespace MWRender
       mFocalPointTransitionSpeedCoef(1.f),
       mPreviousTransitionInfluence(0.f),
       mSmoothedSpeed(0.f),
+      mZoomOutWhenMoveCoef(Settings::Manager::getFloat("zoom out when move coef", "Camera")),
       mDynamicCameraDistanceEnabled(false),
       mShowCrosshairInThirdPersonMode(false)
     {
@@ -461,7 +462,7 @@ namespace MWRender
         float pitchCorrection = std::max(-getPitch(), 0.f) * 50.f;
 
         float smoothedSpeedSqr = mSmoothedSpeed * mSmoothedSpeed;
-        float speedCorrection = smoothedSpeedSqr / (smoothedSpeedSqr + 300.f*300.f) * 20.0f;
+        float speedCorrection = smoothedSpeedSqr / (smoothedSpeedSqr + 300.f*300.f) * mZoomOutWhenMoveCoef;
 
         return pitchCorrection + speedCorrection;
     }

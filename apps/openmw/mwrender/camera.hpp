@@ -67,6 +67,7 @@ namespace MWRender
         osg::Vec2d mPreviousExtraOffset;
 
         float mSmoothedSpeed;
+        float mZoomOutWhenMoveCoef;
         bool mDynamicCameraDistanceEnabled;
         bool mShowCrosshairInThirdPersonMode;
 
