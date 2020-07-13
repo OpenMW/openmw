@@ -50,34 +50,30 @@ MacOS:
   tags:
     - windows
   before_script:
-  - Get-Date -Format "HH:mm:ss"
-  - Measure-Command -Expression { Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1" | Out-Default }
-  - Measure-Command -Expression { choco install git --force --params "/GitAndUnixToolsOnPath" -y | Out-Default }
-  - Measure-Command -Expression { choco install 7zip -y | Out-Default }
-  - Measure-Command -Expression { choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y | Out-Default }
-  - Measure-Command -Expression { choco install vswhere -y | Out-Default }
-  - Measure-Command -Expression { choco install ninja -y | Out-Default }
-  - Measure-Command -Expression { choco install python -y | Out-Default }
-  - Measure-Command -Expression { refreshenv | Out-Default }
-  - Get-Date -Format "HH:mm:ss"
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install ninja -y
+  - choco install python -y
+  - refreshenv
   stage: build
   script:
-    - Get-Date -Format "HH:mm:ss"
-    - Measure-Command -Expression { $time = (Get-Date -Format "HH:mm:ss") | Out-Default }
-    - Measure-Command -Expression { echo ${time} | Out-Default }
-    - Measure-Command -Expression { echo "started by ${GITLAB_USER_NAME}" | Out-Default }
-    - Measure-Command -Expression { sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N | Out-Default }
-    - Measure-Command -Expression { cd MSVC2019_64_Ninja | Out-Default }
-    - Measure-Command -Expression { .\ActivateMSVC.ps1 | Out-Default }
-    - Measure-Command -Expression { cmake --build . --config $config | Out-Default }
-    - Measure-Command -Expression { cd $config | Out-Default }
+    - $time = (Get-Date -Format "HH:mm:ss")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
+    - cd MSVC2019_64_Ninja
+    - .\ActivateMSVC.ps1
+    - cmake --build . --config $config
+    - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        Measure-Command -Expression { 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' | Out-Default }
-        Measure-Command -Expression { Get-ChildItem -Recurse *.pdb | Remove-Item | Out-Default }
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - Measure-Command -Expression { 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*' | Out-Default }
-    - Get-Date -Format "HH:mm:ss"
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
     key: ninja-v2
     paths:
@@ -119,32 +115,28 @@ Windows_Ninja_RelWithDebInfo:
   tags:
     - windows
   before_script:
-  - Get-Date -Format "HH:mm:ss"
-  - Measure-Command -Expression { Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1" | Out-Default }
-  - Measure-Command -Expression { choco install git --force --params "/GitAndUnixToolsOnPath" -y | Out-Default }
-  - Measure-Command -Expression { choco install 7zip -y | Out-Default }
-  - Measure-Command -Expression { choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y | Out-Default }
-  - Measure-Command -Expression { choco install vswhere -y | Out-Default }
-  - Measure-Command -Expression { choco install python -y | Out-Default }
-  - Measure-Command -Expression { refreshenv | Out-Default }
-  - Get-Date -Format "HH:mm:ss"
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install python -y
+  - refreshenv
   stage: build
   script:
-    - Get-Date -Format "HH:mm:ss"
-    - Measure-Command -Expression { $time = (Get-Date -Format "HH:mm:ss") | Out-Default }
-    - Measure-Command -Expression { echo ${time} | Out-Default }
-    - Measure-Command -Expression { echo "started by ${GITLAB_USER_NAME}" | Out-Default }
-    - Measure-Command -Expression { sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V | Out-Default }
-    - Measure-Command -Expression { cd MSVC2019_64 | Out-Default }
-    - Measure-Command -Expression { cmake --build . --config $config | Out-Default }
-    - Measure-Command -Expression { cd $config | Out-Default }
+    - $time = (Get-Date -Format "HH:mm:ss")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
+    - cd MSVC2019_64
+    - cmake --build . --config $config
+    - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        Measure-Command -Expression { 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' | Out-Default }
-        Measure-Command -Expression { Get-ChildItem -Recurse *.pdb | Remove-Item | Out-Default }
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - Measure-Command -Expression { 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*' | Out-Default }
-    - Get-Date -Format "HH:mm:ss"
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
     key: msbuild-v2
     paths:
