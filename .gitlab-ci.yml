@@ -47,10 +47,10 @@ MacOS:
       - build/OpenMW-*.dmg
 
 variables: &engine-targets
-  targets: "'openmw', 'openmw-essimporter', 'openmw-iniimporter', 'openmw-launcher', 'openmw-wizard'"
+  targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
 
 variables: &cs-targets
-  targets: "'openmw-cs', 'bsatool', 'esmtool', 'niftest'"
+  targets: "openmw-cs,bsatool,esmtool,niftest"
 
 .Windows_Ninja_Base:
   tags:
@@ -72,7 +72,7 @@ variables: &cs-targets
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config --target $targets
+    - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
@@ -159,7 +159,7 @@ Windows_Ninja_CS_RelWithDebInfo:
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
     - cd MSVC2019_64
-    - cmake --build . --config $config --target $targets
+    - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
