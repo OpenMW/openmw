@@ -46,6 +46,12 @@ MacOS:
     paths:
       - build/OpenMW-*.dmg
 
+variables: &engine-targets
+  targets: openmw openmw-essimporter openmw-iniimporter openmw-launcher openmw-wizard
+
+variables: &cs-targets
+  targets: openmw-cs bsatool esmtool niftest
+
 .Windows_Ninja_Base:
   tags:
     - windows
@@ -66,7 +72,7 @@ MacOS:
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
-    - cmake --build . --config $config
+    - cmake --build . --config $config --target $targets
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
@@ -93,22 +99,46 @@ MacOS:
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
     - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
 
-Windows_Ninja_Release:
+Windows_Ninja_Engine_Release:
   extends:
     - .Windows_Ninja_Base
   variables:
+    <<: *engine-targets
     config: "Release"
 
-Windows_Ninja_Debug:
+Windows_Ninja_Engine_Debug:
   extends:
     - .Windows_Ninja_Base
   variables:
+    <<: *engine-targets
     config: "Debug"
 
-Windows_Ninja_RelWithDebInfo:
+Windows_Ninja_Engine_RelWithDebInfo:
   extends:
     - .Windows_Ninja_Base
   variables:
+    <<: *engine-targets
+    config: "RelWithDebInfo"
+
+Windows_Ninja_CS_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+
+Windows_Ninja_CS_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+Windows_Ninja_CS_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
     config: "RelWithDebInfo"
 
 .Windows_MSBuild_Base:
@@ -129,7 +159,7 @@ Windows_Ninja_RelWithDebInfo:
     - echo "started by ${GITLAB_USER_NAME}"
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
     - cd MSVC2019_64
-    - cmake --build . --config $config
+    - cmake --build . --config $config --target $targets
     - cd $config
     - |
       if (Get-ChildItem -Recurse *.pdb) {
@@ -156,20 +186,44 @@ Windows_Ninja_RelWithDebInfo:
     - MSVC2019_64/*/*/*/*/*/*/*.log
     - MSVC2019_64/*/*/*/*/*/*/*/*.log
 
-Windows_MSBuild_Release:
+Windows_MSBuild_Engine_Release:
   extends:
     - .Windows_MSBuild_Base
   variables:
+    <<: *engine-targets
     config: "Release"
 
-Windows_MSBuild_Debug:
+Windows_MSBuild_Engine_Debug:
   extends:
     - .Windows_MSBuild_Base
   variables:
+    <<: *engine-targets
     config: "Debug"
 
-Windows_MSBuild_RelWithDebInfo:
+Windows_MSBuild_Engine_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
+    <<: *engine-targets
+    config: "RelWithDebInfo"
+
+Windows_MSBuild_CS_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+
+Windows_MSBuild_CS_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+Windows_MSBuild_CS_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
     config: "RelWithDebInfo"
