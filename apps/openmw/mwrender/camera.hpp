@@ -23,9 +23,6 @@ namespace MWRender
     /// \brief Camera control
     class Camera
     {
-    public:
-        enum class ThirdPersonViewMode {Standard, OverShoulder};
-
     private:
         struct CamData {
             float pitch, yaw, offset;
@@ -58,14 +55,23 @@ namespace MWRender
 
         float mCameraDistance;
 
-        ThirdPersonViewMode mThirdPersonMode;
-        osg::Vec2f mOverShoulderOffset;
         osg::Vec3d mFocalPointAdjustment;
+        osg::Vec2d mFocalPointCurrentOffset;
+        osg::Vec2d mFocalPointTargetOffset;
+        float mFocalPointTransitionSpeedCoef;
 
-        // Makes sense only if mThirdPersonMode is OverShoulder. Can be in range [0, 1].
-        // Used for smooth transition from non-combat camera position (0) to combat camera position (1).
-        float mSmoothTransitionToCombatMode;
-        void updateSmoothTransitionToCombatMode(float duration);
+        // This fields are used to make focal point transition smooth if previous transition was not finished.
+        float mPreviousTransitionInfluence;
+        osg::Vec2d mFocalPointTransitionSpeed;
+        osg::Vec2d mPreviousTransitionSpeed;
+        osg::Vec2d mPreviousExtraOffset;
+
+        float mSmoothedSpeed;
+        float mZoomOutWhenMoveCoef;
+        bool mDynamicCameraDistanceEnabled;
+        bool mShowCrosshairInThirdPersonMode;
+
+        void updateFocalPointOffset(float duration);
         float getCameraDistanceCorrection() const;
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
@@ -76,8 +82,10 @@ namespace MWRender
 
         MWWorld::Ptr getTrackingPtr() const;
 
-        void setThirdPersonViewMode(ThirdPersonViewMode mode) { mThirdPersonMode = mode; }
-        void setOverShoulderOffset(float horizontal, float vertical);
+        void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
+        void setFocalPointTargetOffset(osg::Vec2d v);
+        void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
+        void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 
         /// Update the view matrix of \a cam
         void updateCamera(osg::Camera* cam);
