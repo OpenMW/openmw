@@ -46,26 +46,184 @@ MacOS:
     paths:
       - build/OpenMW-*.dmg
 
-Windows:
+variables: &engine-targets
+  targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
+
+variables: &cs-targets
+  targets: "openmw-cs,bsatool,esmtool,niftest"
+
+.Windows_Ninja_Base:
   tags:
     - windows
+  before_script:
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install ninja -y
+  - choco install python -y
+  - refreshenv
   stage: build
-  allow_failure: true
   script:
-    - Set-Variable -Name "time" -Value (date -Format "%H:%m")
+    - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
-#   TODO: to anyone wanting to do further work here, we need to figure out how to get the below working
-#   TODO: on gitlab's new shared windows runners. They currently don't have bash or anything else installed
-#   TODO: it is currently just a bare windows 10 with powershell.
-#    - env  # turn on for debugging
-#    - sh %CI_PROJECT_DIR%/CI/before_script.msvc.sh -c Release -p x64 -v 2017 -V
-#    - SET msBuildLocation="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\msbuild.exe"
-#    - call %msBuildLocation% MSVC2017_64\OpenMW.sln /t:Build /p:Configuration=Release /m:%NUMBER_OF_PROCESSORS%
-#    - 7z a OpenMW_MSVC2017_64_%CI_BUILD_REF_NAME%_%CI_BUILD_ID%.zip %CI_PROJECT_DIR%\MSVC2017_64\Release\
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N
+    - cd MSVC2019_64_Ninja
+    - .\ActivateMSVC.ps1
+    - cmake --build . --config $config --target ($targets.Split(','))
+    - cd $config
+    - |
+      if (Get-ChildItem -Recurse *.pdb) {
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        Get-ChildItem -Recurse *.pdb | Remove-Item
+      }
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
   cache:
+    key: ninja-v2
     paths:
     - deps
+    - MSVC2019_64_Ninja/deps/Qt
   artifacts:
+    when: always
     paths:
     - "*.zip"
+    - "*.log"
+    - MSVC2019_64_Ninja/*.log
+    - MSVC2019_64_Ninja/*/*.log
+    - MSVC2019_64_Ninja/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
+
+Windows_Ninja_Engine_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "Release"
+
+Windows_Ninja_Engine_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "Debug"
+
+Windows_Ninja_Engine_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *engine-targets
+    config: "RelWithDebInfo"
+
+Windows_Ninja_CS_Release:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+
+Windows_Ninja_CS_Debug:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+Windows_Ninja_CS_RelWithDebInfo:
+  extends:
+    - .Windows_Ninja_Base
+  variables:
+    <<: *cs-targets
+    config: "RelWithDebInfo"
+
+.Windows_MSBuild_Base:
+  tags:
+    - windows
+  before_script:
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install python -y
+  - refreshenv
+  stage: build
+  script:
+    - $time = (Get-Date -Format "HH:mm:ss")
+    - echo ${time}
+    - echo "started by ${GITLAB_USER_NAME}"
+    - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V
+    - cd MSVC2019_64
+    - cmake --build . --config $config --target ($targets.Split(','))
+    - cd $config
+    - |
+      if (Get-ChildItem -Recurse *.pdb) {
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        Get-ChildItem -Recurse *.pdb | Remove-Item
+      }
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
+  cache:
+    key: msbuild-v2
+    paths:
+    - deps
+    - MSVC2019_64/deps/Qt
+  artifacts:
+    when: always
+    paths:
+    - "*.zip"
+    - "*.log"
+    - MSVC2019_64/*.log
+    - MSVC2019_64/*/*.log
+    - MSVC2019_64/*/*/*.log
+    - MSVC2019_64/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*/*.log
+
+Windows_MSBuild_Engine_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "Release"
+
+Windows_MSBuild_Engine_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "Debug"
+
+Windows_MSBuild_Engine_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *engine-targets
+    config: "RelWithDebInfo"
+
+Windows_MSBuild_CS_Release:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Release"
+
+Windows_MSBuild_CS_Debug:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "Debug"
+
+Windows_MSBuild_CS_RelWithDebInfo:
+  extends:
+    - .Windows_MSBuild_Base
+  variables:
+    <<: *cs-targets
+    config: "RelWithDebInfo"

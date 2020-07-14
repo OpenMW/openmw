@@ -39,6 +39,10 @@ originalIFS="$IFS"
 IFS=$'\n\r'
 for pair in $(cmd //c "set"); do
     IFS='=' read -r -a separatedPair <<< "${pair}"
+    if [ ${#separatedPair[@]} -ne 2 ]; then
+        echo "Parsed '$pair' as ${#separatedPair[@]} parts, expected 2."
+        continue
+    fi
     originalCmdEnv["${separatedPair[0]}"]="${separatedPair[1]}"
 done
 
@@ -49,6 +53,10 @@ declare -A cmdEnvChanges
 for pair in $cmdEnv; do
     if [ -n "$pair" ]; then
         IFS='=' read -r -a separatedPair <<< "${pair}"
+        if [ ${#separatedPair[@]} -ne 2 ]; then
+            echo "Parsed '$pair' as ${#separatedPair[@]} parts, expected 2."
+            continue
+        fi
         key="${separatedPair[0]}"
         value="${separatedPair[1]}"
         if ! [ ${originalCmdEnv[$key]+_} ] || [ "${originalCmdEnv[$key]}" != "$value" ]; then
