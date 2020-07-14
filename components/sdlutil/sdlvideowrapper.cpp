@@ -88,6 +88,14 @@ namespace SDLUtil
         {
             SDL_SetWindowSize(mWindow, width, height);
             SDL_SetWindowBordered(mWindow, windowBorder ? SDL_TRUE : SDL_FALSE);
+
+            // Some display managers will automatically maximize windows whose resolution matches its current display.
+            // This breaks the SDL window if we don't move the window to the corner of that display.
+            auto index = SDL_GetWindowDisplayIndex(mWindow);
+            SDL_Rect rect{};
+            SDL_GetDisplayBounds(index, &rect);
+            if (width == rect.w && height == rect.h)
+                SDL_SetWindowPosition(mWindow, rect.x, rect.y);
         }
     }
 
