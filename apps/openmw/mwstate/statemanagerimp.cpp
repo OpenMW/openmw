@@ -47,7 +47,7 @@ void MWState::StateManager::cleanup (bool force)
         MWBase::Environment::get().getSoundManager()->clear();
         MWBase::Environment::get().getDialogueManager()->clear();
         MWBase::Environment::get().getJournal()->clear();
-        MWBase::Environment::get().getScriptManager()->getGlobalScripts().clear();
+        MWBase::Environment::get().getScriptManager()->clear();
         MWBase::Environment::get().getWorld()->clear();
         MWBase::Environment::get().getWindowManager()->clear();
         MWBase::Environment::get().getInputManager()->clear();

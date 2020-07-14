@@ -41,7 +41,20 @@ namespace MWScript
             Interpreter::Interpreter mInterpreter;
             bool mOpcodesInstalled;
 
-            typedef std::pair<std::vector<Interpreter::Type_Code>, Compiler::Locals> CompiledScript;
+            struct CompiledScript
+            {
+                std::vector<Interpreter::Type_Code> mByteCode;
+                Compiler::Locals mLocals;
+                bool mActive;
+
+                CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
+                {
+                    mByteCode = code;
+                    mLocals = locals;
+                    mActive = true;
+                }
+            };
+
             typedef std::map<std::string, CompiledScript> ScriptCollection;
 
             ScriptCollection mScripts;
@@ -54,6 +67,8 @@ namespace MWScript
             ScriptManager (const MWWorld::ESMStore& store,
                 Compiler::Context& compilerContext, int warningsMode,
                 const std::vector<std::string>& scriptBlacklist);
+
+            virtual void clear();
 
             virtual bool run (const std::string& name, Interpreter::Context& interpreterContext);
             ///< Run the script with the given name (compile first, if not compiled yet)

@@ -79,8 +79,8 @@ namespace MWScript
             if (Success)
             {
                 std::vector<Interpreter::Type_Code> code;
-                mParser.getCode (code);
-                mScripts.insert (std::make_pair (name, std::make_pair (code, mParser.getLocals())));
+                mParser.getCode(code);
+                mScripts.emplace(name, CompiledScript(code, mParser.getLocals()));
 
                 return true;
             }
@@ -100,7 +100,7 @@ namespace MWScript
             {
                 // failed -> ignore script from now on.
                 std::vector<Interpreter::Type_Code> empty;
-                mScripts.insert (std::make_pair (name, std::make_pair (empty, Compiler::Locals())));
+                mScripts.emplace(name, CompiledScript(empty, Compiler::Locals()));
                 return false;
             }
 
@@ -109,7 +109,7 @@ namespace MWScript
         }
 
         // execute script
-        if (!iter->second.first.empty())
+        if (!iter->second.mByteCode.empty() && iter->second.mActive)
             try
             {
                 if (!mOpcodesInstalled)
@@ -118,7 +118,7 @@ namespace MWScript
                     mOpcodesInstalled = true;
                 }
 
-                mInterpreter.run (&iter->second.first[0], iter->second.first.size(), interpreterContext);
+                mInterpreter.run (&iter->second.mByteCode[0], iter->second.mByteCode.size(), interpreterContext);
                 return true;
             }
             catch (const MissingImplicitRefError& e)
@@ -129,9 +129,19 @@ namespace MWScript
             {
                 Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
 
-                iter->second.first.clear(); // don't execute again.
+                iter->second.mActive = false; // don't execute again.
             }
         return false;
+    }
+
+    void ScriptManager::clear()
+    {
+        for (auto& script : mScripts)
+        {
+            script.second.mActive = true;
+        }
+
+        mGlobalScripts.clear();
     }
 
     std::pair<int, int> ScriptManager::compileAll()
@@ -163,7 +173,7 @@ namespace MWScript
             ScriptCollection::iterator iter = mScripts.find (name2);
 
             if (iter!=mScripts.end())
-                return iter->second.second;
+                return iter->second.mLocals;
         }
 
         {

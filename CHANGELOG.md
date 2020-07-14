@@ -47,6 +47,7 @@
     Feature #5445: Handle NiLines
     Feature #5457: Realistic diagonal movement
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
+    Feature #5524: Resume failed script execution after reload
     Task #5480: Drop Qt4 support
 
 0.46.0
