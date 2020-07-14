@@ -89,14 +89,37 @@ namespace SDLUtil
             SDL_SetWindowSize(mWindow, width, height);
             SDL_SetWindowBordered(mWindow, windowBorder ? SDL_TRUE : SDL_FALSE);
 
-            // Some display managers will automatically maximize windows whose resolution matches its current display.
-            // This breaks the SDL window if we don't move the window to the corner of that display.
-            auto index = SDL_GetWindowDisplayIndex(mWindow);
-            SDL_Rect rect{};
-            SDL_GetDisplayBounds(index, &rect);
-            if (width == rect.w && height == rect.h)
-                SDL_SetWindowPosition(mWindow, rect.x, rect.y);
+            centerWindow();
         }
+    }
+
+    void VideoWrapper::centerWindow()
+    {
+
+        SDL_Rect rect{};
+        int x = 0;
+        int y = 0;
+        int w = 0;
+        int h = 0;
+        auto index = SDL_GetWindowDisplayIndex(mWindow);
+        bool reposition = false;
+        SDL_GetDisplayBounds(index, &rect);
+        SDL_GetWindowSize(mWindow, &w, &h);
+
+        x = rect.x;
+        y = rect.y;
+
+        // Center dimensions that do not fill the screen
+        if (w < rect.w)
+        {
+            x = rect.x + rect.w / 2 - w / 2;
+        }
+        if (h < rect.h)
+        {
+            y = rect.y + rect.h / 2 - h / 2;
+        }
+
+        SDL_SetWindowPosition(mWindow, x, y);
     }
 
 }
