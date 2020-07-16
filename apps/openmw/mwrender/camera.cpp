@@ -62,6 +62,7 @@ namespace MWRender
       mVanityToggleQueuedValue(false),
       mViewModeToggleQueued(false),
       mCameraDistance(0.f),
+      mMaxNextCameraDistance(800.f),
       mFocalPointCurrentOffset(osg::Vec2d()),
       mFocalPointTargetOffset(osg::Vec2d()),
       mFocalPointTransitionSpeedCoef(1.f),
@@ -221,6 +222,8 @@ namespace MWRender
         float speed = mTrackingPtr.getClass().getSpeed(mTrackingPtr);
         float maxDelta = 300.f * duration;
         mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);
+
+        mMaxNextCameraDistance = mCameraDistance + duration * (100.f + mBaseCameraDistance);
     }
 
     void Camera::setFocalPointTargetOffset(osg::Vec2d v)
@@ -472,7 +475,11 @@ namespace MWRender
         if (mVanity.enabled || mPreviewMode)
             mCameraDistance = mPreviewCam.offset;
         else if (!mFirstPersonView)
+        {
             mCameraDistance = mBaseCameraDistance + getCameraDistanceCorrection();
+            if (mDynamicCameraDistanceEnabled)
+                mCameraDistance = std::min(mCameraDistance, mMaxNextCameraDistance);
+        }
         mFocalPointAdjustment = osg::Vec3d();
     }
 
