@@ -65,6 +65,7 @@ namespace MWRender
       mFocalPointCurrentOffset(osg::Vec2d()),
       mFocalPointTargetOffset(osg::Vec2d()),
       mFocalPointTransitionSpeedCoef(1.f),
+      mSkipFocalPointTransition(true),
       mPreviousTransitionInfluence(0.f),
       mSmoothedSpeed(0.f),
       mZoomOutWhenMoveCoef(Settings::Manager::getFloat("zoom out when move coef", "Camera")),
@@ -219,6 +220,7 @@ namespace MWRender
         updateFocalPointOffset(duration);
 
         float speed = mTrackingPtr.getClass().getSpeed(mTrackingPtr);
+        speed /= (1.f + speed / 500.f);
         float maxDelta = 300.f * duration;
         mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);
     }
@@ -234,6 +236,14 @@ namespace MWRender
     {
         if (duration <= 0)
             return;
+
+        if (mSkipFocalPointTransition)
+        {
+            mSkipFocalPointTransition = false;
+            mPreviousExtraOffset = osg::Vec2d();
+            mPreviousTransitionInfluence = 0.f;
+            mFocalPointCurrentOffset = mFocalPointTargetOffset;
+        }
 
         osg::Vec2d oldOffset = mFocalPointCurrentOffset;
 
