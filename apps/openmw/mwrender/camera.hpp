@@ -24,10 +24,6 @@ namespace MWRender
     class Camera
     {
     private:
-        struct CamData {
-            float pitch, yaw, offset;
-        };
-
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
         float mHeightScale;
@@ -47,8 +43,7 @@ namespace MWRender
         } mVanity;
 
         float mHeight, mBaseCameraDistance;
-        CamData mMainCam, mPreviewCam;
-        bool mUseSeparatePreviewCam;
+        float mPitch, mYaw;
 
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
@@ -83,7 +78,7 @@ namespace MWRender
         Camera(osg::Camera* camera);
         ~Camera();
 
-        MWWorld::Ptr getTrackingPtr() const;
+        MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
         void setFocalPointTargetOffset(osg::Vec2d v);
@@ -101,10 +96,10 @@ namespace MWRender
         /// \param rot Rotation angles in radians
         void rotateCamera(float pitch, float yaw, bool adjust);
 
-        float getYaw() const;
+        float getYaw() const { return mYaw; }
         void setYaw(float angle);
 
-        float getPitch() const;
+        float getPitch() const { return mPitch; }
         void setPitch(float angle);
 
         /// Attach camera to object
@@ -115,9 +110,6 @@ namespace MWRender
 
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
-
-        void useSeparatePreviewCamera(bool v) { mUseSeparatePreviewCam = v; }
-        bool isUsingSeparatePreviewCamera() const { return mUseSeparatePreviewCam; }
 
         /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
@@ -155,10 +147,10 @@ namespace MWRender
         /// Stores focal and camera world positions in passed arguments
         void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
 
-        bool isVanityOrPreviewModeEnabled() const;
+        bool isVanityOrPreviewModeEnabled() const { return mPreviewMode || mVanity.enabled; }
         bool isVanityModeEnabled() const { return mVanity.enabled; }
 
-        bool isNearest() const;
+        bool isNearest() const { return mIsNearest; }
     };
 }
 

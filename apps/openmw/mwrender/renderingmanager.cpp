@@ -1349,7 +1349,7 @@ namespace MWRender
     void RenderingManager::calculateDeferredRotation()
     {
         MWWorld::Ptr ptr = mCamera->getTrackingPtr();
-        if (mCamera->isVanityOrPreviewModeEnabled() || mCamera->isUsingSeparatePreviewCamera() || ptr.isEmpty())
+        if (mCamera->isVanityOrPreviewModeEnabled() || ptr.isEmpty())
             return;
         if (mCamera->isFirstPerson() || mDeferredRotationDisabled)
         {

@@ -110,30 +110,18 @@ namespace MWInput
 
             if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
             {
-                static const bool separatePreviewCamera = Settings::Manager::getBool("separate preview camera", "Camera");
                 if (mBindingsManager->actionIsActive(A_TogglePOV))
                 {
-                    if (separatePreviewCamera)
-                    {
-                        if (mPreviewPOVDelay <= 0.5 && (mPreviewPOVDelay += dt) > 0.5)
-                        {
-                            mPreviewPOVDelay = 1.f;
-                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                        }
-                    }
-                    else
-                    {
-                        if (mPreviewPOVDelay == 0)
-                            MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                        mPreviewPOVDelay += dt;
-                    }
+                    if (mPreviewPOVDelay == 0)
+                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
+                    mPreviewPOVDelay += dt;
                 }
                 else
                 {
                     //disable preview mode
-                    if (mPreviewPOVDelay > 0 || separatePreviewCamera)
+                    if (mPreviewPOVDelay > 0)
                         MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= (separatePreviewCamera ? 0.5 : 0.25))
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.25)
                         MWBase::Environment::get().getWorld()->togglePOV();
                     mPreviewPOVDelay = 0.f;
                 }
