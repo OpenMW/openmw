@@ -37,9 +37,9 @@ addons:
     build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
-    - name: OpenMW (all) on MacOS 10.15 with Xcode 12
+    - name: OpenMW (all) on MacOS 10.15 with Xcode 11.6
       os: osx
-      osx_image: xcode12
+      osx_image: xcode11.6
       if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Focal with GCC
       os: linux
