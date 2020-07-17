@@ -60,6 +60,7 @@ namespace MWRender
         osg::Vec2d mFocalPointCurrentOffset;
         osg::Vec2d mFocalPointTargetOffset;
         float mFocalPointTransitionSpeedCoef;
+        bool mSkipFocalPointTransition;
 
         // This fields are used to make focal point transition smooth if previous transition was not finished.
         float mPreviousTransitionInfluence;
@@ -85,6 +86,7 @@ namespace MWRender
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
         void setFocalPointTargetOffset(osg::Vec2d v);
+        void skipFocalPointTransition() { mSkipFocalPointTransition = true; }
         void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
         void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 
