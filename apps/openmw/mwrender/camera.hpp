@@ -54,6 +54,7 @@ namespace MWRender
         bool mViewModeToggleQueued;
 
         float mCameraDistance;
+        float mMaxNextCameraDistance;
 
         osg::Vec3d mFocalPointAdjustment;
         osg::Vec2d mFocalPointCurrentOffset;
