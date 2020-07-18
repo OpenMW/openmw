@@ -51,12 +51,14 @@ namespace MWRender
         if (oldMode == mMode)
             return;
 
-        if (mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->setFocalPointTransitionSpeed(mCamera->isVanityModeEnabled() ? 0.2 : 1);
-        else if (oldMode == Mode::Combat || mMode == Mode::Combat)
+        if (mCamera->getMode() == Camera::Mode::Vanity)
+            // Player doesn't touch controls for a long time. Transition should be very slow.
+            mCamera->setFocalPointTransitionSpeed(0.2f);
+        else if ((oldMode == Mode::Combat || mMode == Mode::Combat) && mCamera->getMode() == Camera::Mode::Normal)
+            // Transition to/from combat mode and we are not it preview mode. Should be fast.
             mCamera->setFocalPointTransitionSpeed(5.f);
         else
-            mCamera->setFocalPointTransitionSpeed(1.f);
+            mCamera->setFocalPointTransitionSpeed(1.f);  // Default transition speed.
 
         switch (mMode)
         {

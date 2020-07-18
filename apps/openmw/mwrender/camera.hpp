@@ -23,6 +23,9 @@ namespace MWRender
     /// \brief Camera control
     class Camera
     {
+    public:
+        enum class Mode { Normal, Vanity, Preview };
+
     private:
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
@@ -33,14 +36,12 @@ namespace MWRender
         NpcAnimation *mAnimation;
 
         bool mFirstPersonView;
-        bool mPreviewMode;
+        Mode mMode;
+        bool mVanityAllowed;
+
         float mNearest;
         float mFurthest;
         bool mIsNearest;
-
-        struct {
-            bool enabled, allowed;
-        } mVanity;
 
         float mHeight, mBaseCameraDistance;
         float mPitch, mYaw;
@@ -78,6 +79,8 @@ namespace MWRender
         Camera(osg::Camera* camera);
         ~Camera();
 
+        /// Attach camera to object
+        void attachTo(const MWWorld::Ptr &ptr) { mTrackingPtr = ptr; }
         MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
@@ -102,9 +105,6 @@ namespace MWRender
         float getPitch() const { return mPitch; }
         void setPitch(float angle);
 
-        /// Attach camera to object
-        void attachTo(const MWWorld::Ptr &);
-
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
 
@@ -117,8 +117,7 @@ namespace MWRender
         /// \brief Lowers the camera for sneak.
         void setSneakOffset(float offset);
 
-        bool isFirstPerson() const
-        { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
+        bool isFirstPerson() const { return mFirstPersonView && mMode == Mode::Normal; }
 
         void processViewChange();
 
@@ -147,8 +146,8 @@ namespace MWRender
         /// Stores focal and camera world positions in passed arguments
         void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
 
-        bool isVanityOrPreviewModeEnabled() const { return mPreviewMode || mVanity.enabled; }
-        bool isVanityModeEnabled() const { return mVanity.enabled; }
+        bool isVanityOrPreviewModeEnabled() const { return mMode != Mode::Normal; }
+        Mode getMode() const { return mMode; }
 
         bool isNearest() const { return mIsNearest; }
     };

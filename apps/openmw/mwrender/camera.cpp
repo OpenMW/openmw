@@ -52,7 +52,8 @@ namespace MWRender
       mCamera(camera),
       mAnimation(nullptr),
       mFirstPersonView(true),
-      mPreviewMode(false),
+      mMode(Mode::Normal),
+      mVanityAllowed(true),
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
@@ -73,9 +74,6 @@ namespace MWRender
       mDynamicCameraDistanceEnabled(false),
       mShowCrosshairInThirdPersonMode(false)
     {
-        mVanity.enabled = false;
-        mVanity.allowed = true;
-
         mCameraDistance = mBaseCameraDistance;
 
         mUpdateCallback = new UpdateRenderCameraCallback(this);
@@ -133,9 +131,6 @@ namespace MWRender
 
     void Camera::updateCamera(osg::Camera *cam)
     {
-        if (mTrackingPtr.isEmpty())
-            return;
-
         osg::Vec3d focal, position;
         getPosition(focal, position);
 
@@ -165,11 +160,6 @@ namespace MWRender
         setPitch(pitch);
     }
 
-    void Camera::attachTo(const MWWorld::Ptr &ptr)
-    {
-        mTrackingPtr = ptr;
-    }
-
     void Camera::update(float duration, bool paused)
     {
         if (mAnimation->upperBodyReady())
@@ -193,13 +183,11 @@ namespace MWRender
 
         // only show the crosshair in game mode
         MWBase::WindowManager *wm = MWBase::Environment::get().getWindowManager();
-        wm->showCrosshair(!wm->isGuiMode() && !mVanity.enabled && !mPreviewMode
+        wm->showCrosshair(!wm->isGuiMode() && mMode != Mode::Preview && mMode != Mode::Vanity
                           && (mFirstPersonView || mShowCrosshairInThirdPersonMode));
 
-        if(mVanity.enabled)
-        {
+        if(mMode == Mode::Vanity)
             rotateCamera(0.f, osg::DegreesToRadians(3.f * duration), true);
-        }
 
         updateFocalPointOffset(duration);
 
@@ -280,9 +268,9 @@ namespace MWRender
 
     void Camera::allowVanityMode(bool allow)
     {
-        if (!allow && mVanity.enabled)
+        if (!allow && mMode == Mode::Vanity)
             toggleVanityMode(false);
-        mVanity.allowed = allow;
+        mVanityAllowed = allow;
     }
 
     bool Camera::toggleVanityMode(bool enable)
@@ -296,12 +284,12 @@ namespace MWRender
             return false;
         }
 
-        if(!mVanity.allowed && enable)
+        if (!mVanityAllowed && enable)
             return false;
 
-        if(mVanity.enabled == enable)
+        if ((mMode == Mode::Vanity) == enable)
             return true;
-        mVanity.enabled = enable;
+        mMode = enable ? Mode::Vanity : Mode::Normal;
 
         processViewChange();
         return true;
@@ -312,10 +300,10 @@ namespace MWRender
         if (mFirstPersonView && !mAnimation->upperBodyReady())
             return;
 
-        if(mPreviewMode == enable)
+        if((mMode == Mode::Preview) == enable)
             return;
 
-        mPreviewMode = enable;
+        mMode = enable ? Mode::Preview : Mode::Normal;
         processViewChange();
     }
 
@@ -350,26 +338,21 @@ namespace MWRender
 
     void Camera::updateBaseCameraDistance(float dist, bool adjust)
     {
-        if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
+        if (isFirstPerson())
             return;
 
         if (adjust)
             dist += std::min(mCameraDistance - getCameraDistanceCorrection(), mBaseCameraDistance);
 
         mIsNearest = dist <= mNearest;
-        dist = osg::clampBetween(dist, mNearest, mFurthest);
-
-        if (!mFirstPersonView)
-        {
-            mBaseCameraDistance = dist;
-            Settings::Manager::setFloat("third person camera distance", "Camera", dist);
-        }
+        mBaseCameraDistance = osg::clampBetween(dist, mNearest, mFurthest);
+        Settings::Manager::setFloat("third person camera distance", "Camera", mBaseCameraDistance);
         setCameraDistance();
     }
 
     void Camera::setCameraDistance(float dist, bool adjust)
     {
-        if(mFirstPersonView && !mPreviewMode && !mVanity.enabled)
+        if (isFirstPerson())
             return;
         if (adjust)
             dist += mCameraDistance;
@@ -392,7 +375,7 @@ namespace MWRender
     void Camera::setCameraDistance()
     {
         mFocalPointAdjustment = osg::Vec3d();
-        if (mFirstPersonView)
+        if (isFirstPerson())
             return;
         mCameraDistance = mBaseCameraDistance + getCameraDistanceCorrection();
         if (mDynamicCameraDistanceEnabled)
