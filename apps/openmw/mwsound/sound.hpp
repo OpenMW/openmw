@@ -7,6 +7,13 @@
 
 namespace MWSound
 {
+    // Extra play flags, not intended for caller use
+    enum PlayModeEx
+    {
+        Play_2D = 0,
+        Play_3D = 1 << 31,
+    };
+
     // For testing individual PlayMode flags
     inline int operator&(int a, PlayMode b) { return a & static_cast<int>(b); }
     inline int operator&(PlayMode a, PlayMode b) { return static_cast<int>(a) & static_cast<int>(b); }

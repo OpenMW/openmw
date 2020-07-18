@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "soundmanagerimp.hpp"
+#include "../mwbase/soundmanager.hpp"
 
 namespace MWSound
 {
@@ -23,6 +23,12 @@ namespace MWSound
         Disable,
         Enable,
         Auto
+    };
+
+    enum Environment
+    {
+        Env_Normal,
+        Env_Underwater
     };
 
     class Sound_Output
@@ -81,6 +87,7 @@ namespace MWSound
 
         friend class OpenAL_Output;
         friend class SoundManager;
+        friend class SoundBufferPool;
     };
 }
 
