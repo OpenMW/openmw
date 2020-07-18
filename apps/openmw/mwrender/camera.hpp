@@ -75,6 +75,11 @@ namespace MWRender
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
+        // Used to rotate player to the direction of view after exiting preview or vanity mode.
+        osg::Vec3f mDeferredRotation;
+        bool mDeferredRotationDisabled;
+        void calculateDeferredRotation();
+
     public:
         Camera(osg::Camera* camera);
         ~Camera();
@@ -98,6 +103,7 @@ namespace MWRender
         /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
         void rotateCamera(float pitch, float yaw, bool adjust);
+        void rotateCameraToTrackingPtr();
 
         float getYaw() const { return mYaw; }
         void setYaw(float angle);
@@ -113,6 +119,9 @@ namespace MWRender
 
         /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
+
+        void applyDeferredPreviewRotationToPlayer(float dt);
+        void disableDeferredPreviewRotation() { mDeferredRotationDisabled = true; }
 
         /// \brief Lowers the camera for sneak.
         void setSneakOffset(float offset);

@@ -2407,12 +2407,12 @@ namespace MWWorld
 
     void World::disableDeferredPreviewRotation()
     {
-        mRendering->disableDeferredPreviewRotation();
+        mRendering->getCamera()->disableDeferredPreviewRotation();
     }
 
     void World::applyDeferredPreviewRotationToPlayer(float dt)
     {
-        mRendering->applyDeferredPreviewRotationToPlayer(dt);
+        mRendering->getCamera()->applyDeferredPreviewRotationToPlayer(dt);
     }
 
     void World::allowVanityMode(bool allow)

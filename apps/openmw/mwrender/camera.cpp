@@ -13,6 +13,7 @@
 #include "../mwworld/refdata.hpp"
 
 #include "../mwmechanics/drawstate.hpp"
+#include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 #include "npcanimation.hpp"
@@ -72,7 +73,9 @@ namespace MWRender
       mSmoothedSpeed(0.f),
       mZoomOutWhenMoveCoef(Settings::Manager::getFloat("zoom out when move coef", "Camera")),
       mDynamicCameraDistanceEnabled(false),
-      mShowCrosshairInThirdPersonMode(false)
+      mShowCrosshairInThirdPersonMode(false),
+      mDeferredRotation(osg::Vec3f()),
+      mDeferredRotationDisabled(false)
     {
         mCameraDistance = mBaseCameraDistance;
 
@@ -269,7 +272,10 @@ namespace MWRender
     void Camera::allowVanityMode(bool allow)
     {
         if (!allow && mMode == Mode::Vanity)
+        {
+            disableDeferredPreviewRotation();
             toggleVanityMode(false);
+        }
         mVanityAllowed = allow;
     }
 
@@ -290,6 +296,8 @@ namespace MWRender
         if ((mMode == Mode::Vanity) == enable)
             return true;
         mMode = enable ? Mode::Vanity : Mode::Normal;
+        if (!enable)
+            calculateDeferredRotation();
 
         processViewChange();
         return true;
@@ -304,6 +312,8 @@ namespace MWRender
             return;
 
         mMode = enable ? Mode::Preview : Mode::Normal;
+        if (!enable)
+            calculateDeferredRotation();
         processViewChange();
     }
 
@@ -409,6 +419,63 @@ namespace MWRender
                 mHeightScale = 1.f;
         }
         rotateCamera(getPitch(), getYaw(), false);
+    }
+
+    void Camera::applyDeferredPreviewRotationToPlayer(float dt)
+    {
+        if (isVanityOrPreviewModeEnabled() || mTrackingPtr.isEmpty())
+            return;
+
+        osg::Vec3f rot = mDeferredRotation;
+        float delta = rot.normalize();
+        delta = std::min(delta, (delta + 1.f) * 3 * dt);
+        rot *= delta;
+        mDeferredRotation -= rot;
+
+        auto& movement = mTrackingPtr.getClass().getMovementSettings(mTrackingPtr);
+        movement.mRotation[0] += rot.x();
+        movement.mRotation[1] += rot.y();
+        movement.mRotation[2] += rot.z();
+        if (std::abs(mDeferredRotation.z()) > 0.0001)
+        {
+            float s = std::sin(mDeferredRotation.z());
+            float c = std::cos(mDeferredRotation.z());
+            float x = movement.mPosition[0];
+            float y = movement.mPosition[1];
+            movement.mPosition[0] = x *  c + y * s;
+            movement.mPosition[1] = x * -s + y * c;
+        }
+    }
+
+    void Camera::rotateCameraToTrackingPtr()
+    {
+        setPitch(-mTrackingPtr.getRefData().getPosition().rot[0] - mDeferredRotation.x());
+        setYaw(-mTrackingPtr.getRefData().getPosition().rot[2] - mDeferredRotation.z());
+    }
+
+    void Camera::calculateDeferredRotation()
+    {
+        MWWorld::Ptr ptr = mTrackingPtr;
+        if (isVanityOrPreviewModeEnabled() || ptr.isEmpty())
+            return;
+        if (isFirstPerson() || mDeferredRotationDisabled)
+        {
+            mDeferredRotationDisabled = false;
+            mDeferredRotation = osg::Vec3f();
+            rotateCameraToTrackingPtr();
+            return;
+        }
+
+        mDeferredRotation.x() = -ptr.getRefData().getPosition().rot[0] - mPitch;
+        mDeferredRotation.z() = -ptr.getRefData().getPosition().rot[2] - mYaw;
+        if (mDeferredRotation.x() > osg::PI)
+            mDeferredRotation.x() -= 2 * osg::PI;
+        if (mDeferredRotation.x() < -osg::PI)
+            mDeferredRotation.x() += 2 * osg::PI;
+        if (mDeferredRotation.z() > osg::PI)
+            mDeferredRotation.z() -= 2 * osg::PI;
+        if (mDeferredRotation.z() < -osg::PI)
+            mDeferredRotation.z() += 2 * osg::PI;
     }
 
 }
