@@ -945,7 +945,7 @@ namespace MWWorld
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToInteriorCell(cellName, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
-        mRendering->getCamera()->skipFocalPointTransition();
+        mRendering->getCamera()->instantTransition();
     }
 
     void World::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
@@ -961,7 +961,7 @@ namespace MWWorld
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
-        mRendering->getCamera()->skipFocalPointTransition();
+        mRendering->getCamera()->instantTransition();
     }
 
     void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)

@@ -55,6 +55,8 @@ namespace MWRender
       mFirstPersonView(true),
       mMode(Mode::Normal),
       mVanityAllowed(true),
+      mStandingPreviewAllowed(Settings::Manager::getBool("preview if stand still", "Camera")),
+      mDeferredRotationAllowed(Settings::Manager::getBool("deferred preview rotation", "Camera")),
       mNearest(30.f),
       mFurthest(800.f),
       mIsNearest(false),
@@ -200,6 +202,24 @@ namespace MWRender
         mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);
 
         mMaxNextCameraDistance = mCameraDistance + duration * (100.f + mBaseCameraDistance);
+        updateStandingPreviewMode();
+    }
+
+    void Camera::updateStandingPreviewMode()
+    {
+        if (!mStandingPreviewAllowed)
+            return;
+        float speed = mTrackingPtr.getClass().getSpeed(mTrackingPtr);
+        bool combat = mTrackingPtr.getClass().isActor() &&
+                      mTrackingPtr.getClass().getCreatureStats(mTrackingPtr).getDrawState() != MWMechanics::DrawState_Nothing;
+        bool standingStill = speed == 0 && !combat && !mFirstPersonView;
+        if (!standingStill && mMode == Mode::StandingPreview)
+        {
+            mMode = Mode::Normal;
+            calculateDeferredRotation();
+        }
+        else if (standingStill && mMode == Mode::Normal)
+            mMode = Mode::StandingPreview;
     }
 
     void Camera::setFocalPointTargetOffset(osg::Vec2d v)
@@ -266,6 +286,7 @@ namespace MWRender
             mTrackingPtr.getClass().getCreatureStats(mTrackingPtr).setSideMovementAngle(0);
 
         mFirstPersonView = !mFirstPersonView;
+        updateStandingPreviewMode();
         processViewChange();
     }
 
@@ -296,6 +317,8 @@ namespace MWRender
         if ((mMode == Mode::Vanity) == enable)
             return true;
         mMode = enable ? Mode::Vanity : Mode::Normal;
+        if (!mDeferredRotationAllowed)
+            disableDeferredPreviewRotation();
         if (!enable)
             calculateDeferredRotation();
 
@@ -312,8 +335,14 @@ namespace MWRender
             return;
 
         mMode = enable ? Mode::Preview : Mode::Normal;
-        if (!enable)
+        if (mMode == Mode::Normal)
+            updateStandingPreviewMode();
+        if (mMode == Mode::Normal)
+        {
+            if (!mDeferredRotationAllowed)
+                disableDeferredPreviewRotation();
             calculateDeferredRotation();
+        }
         processViewChange();
     }
 
@@ -432,6 +461,13 @@ namespace MWRender
         rot *= delta;
         mDeferredRotation -= rot;
 
+        if (mDeferredRotationDisabled)
+        {
+            mDeferredRotationDisabled = delta > 0.0001;
+            rotateCameraToTrackingPtr();
+            return;
+        }
+
         auto& movement = mTrackingPtr.getClass().getMovementSettings(mTrackingPtr);
         movement.mRotation[0] += rot.x();
         movement.mRotation[1] += rot.y();
@@ -453,16 +489,22 @@ namespace MWRender
         setYaw(-mTrackingPtr.getRefData().getPosition().rot[2] - mDeferredRotation.z());
     }
 
+    void Camera::instantTransition()
+    {
+        mSkipFocalPointTransition = true;
+        mDeferredRotationDisabled = false;
+        mDeferredRotation = osg::Vec3f();
+        rotateCameraToTrackingPtr();
+    }
+
     void Camera::calculateDeferredRotation()
     {
         MWWorld::Ptr ptr = mTrackingPtr;
         if (isVanityOrPreviewModeEnabled() || ptr.isEmpty())
             return;
-        if (isFirstPerson() || mDeferredRotationDisabled)
+        if (mFirstPersonView)
         {
-            mDeferredRotationDisabled = false;
-            mDeferredRotation = osg::Vec3f();
-            rotateCameraToTrackingPtr();
+            instantTransition();
             return;
         }
 

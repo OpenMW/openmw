@@ -24,7 +24,7 @@ namespace MWRender
     class Camera
     {
     public:
-        enum class Mode { Normal, Vanity, Preview };
+        enum class Mode { Normal, Vanity, Preview, StandingPreview };
 
     private:
         MWWorld::Ptr mTrackingPtr;
@@ -38,6 +38,8 @@ namespace MWRender
         bool mFirstPersonView;
         Mode mMode;
         bool mVanityAllowed;
+        bool mStandingPreviewAllowed;
+        bool mDeferredRotationAllowed;
 
         float mNearest;
         float mFurthest;
@@ -79,6 +81,7 @@ namespace MWRender
         osg::Vec3f mDeferredRotation;
         bool mDeferredRotationDisabled;
         void calculateDeferredRotation();
+        void updateStandingPreviewMode();
 
     public:
         Camera(osg::Camera* camera);
@@ -90,7 +93,7 @@ namespace MWRender
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
         void setFocalPointTargetOffset(osg::Vec2d v);
-        void skipFocalPointTransition() { mSkipFocalPointTransition = true; }
+        void instantTransition();
         void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
         void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 

@@ -77,6 +77,9 @@ namespace MWRender
 
     void ViewOverShoulderController::trySwitchShoulder()
     {
+        if (mCamera->getMode() != Camera::Mode::Normal)
+            return;
+
         const float limitToSwitch = 120; // switch to other shoulder if wall is closer than this limit
         const float limitToSwitchBack = 300; // switch back to default shoulder if there is no walls at this distance
 
