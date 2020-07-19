@@ -9,8 +9,6 @@
 
 namespace MWSound
 {
-    class SoundManager;
-    struct Sound_Decoder;
     class Sound;
     class Stream;
 
@@ -31,10 +29,13 @@ namespace MWSound
         Env_Underwater
     };
 
+    struct DecoderProvider
+    {
+        virtual DecoderPtr getDecoder() const = 0;
+    };
+
     class Sound_Output
     {
-        SoundManager &mManager;
-
         virtual std::vector<std::string> enumerate() = 0;
         virtual bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode) = 0;
         virtual void deinit() = 0;
@@ -75,11 +76,10 @@ namespace MWSound
         Sound_Output(const Sound_Output &rhs);
 
     protected:
-        bool mInitialized;
+        bool mInitialized = false;
 
-        Sound_Output(SoundManager &mgr)
-          : mManager(mgr), mInitialized(false)
-        { }
+        Sound_Output() = default;
+
     public:
         virtual ~Sound_Output() { }
 

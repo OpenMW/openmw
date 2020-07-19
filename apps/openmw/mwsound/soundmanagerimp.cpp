@@ -115,7 +115,7 @@ namespace MWSound
     }
 
     // Return a new decoder instance, used as needed by the output implementations
-    DecoderPtr SoundManager::getDecoder()
+    DecoderPtr SoundManager::getDecoder() const
     {
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }

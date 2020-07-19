@@ -69,11 +69,10 @@ namespace MWSound
         FFmpeg_Decoder& operator=(const FFmpeg_Decoder &rhs);
         FFmpeg_Decoder(const FFmpeg_Decoder &rhs);
 
-        FFmpeg_Decoder(const VFS::Manager* vfs);
     public:
-        virtual ~FFmpeg_Decoder();
+        explicit FFmpeg_Decoder(const VFS::Manager* vfs);
 
-        friend class SoundManager;
+        virtual ~FFmpeg_Decoder();
     };
 #ifndef DEFAULT_DECODER
 #define DEFAULT_DECODER (::MWSound::FFmpeg_Decoder)

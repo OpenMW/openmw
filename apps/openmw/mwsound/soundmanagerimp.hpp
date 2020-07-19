@@ -40,7 +40,7 @@ namespace MWSound
     using SoundPtr = Misc::ObjectPtr<Sound>;
     using StreamPtr = Misc::ObjectPtr<Stream>;
 
-    class SoundManager : public MWBase::SoundManager
+    class SoundManager : public MWBase::SoundManager, DecoderProvider
     {
         const VFS::Manager* mVFS;
 
@@ -133,7 +133,7 @@ namespace MWSound
         SoundManager& operator=(const SoundManager &rhs);
 
     protected:
-        DecoderPtr getDecoder();
+        DecoderPtr getDecoder() const final;
         friend class OpenAL_Output;
 
         void stopSound(Sound_Buffer *sfx, const MWWorld::ConstPtr &ptr);

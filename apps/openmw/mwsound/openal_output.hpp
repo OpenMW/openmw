@@ -14,12 +14,13 @@
 
 namespace MWSound
 {
-    class SoundManager;
     class Sound;
     class Stream;
 
     class OpenAL_Output : public Sound_Output
     {
+        const DecoderProvider* mDecoderProvider;
+
         ALCdevice *mDevice;
         ALCcontext *mContext;
 
@@ -95,7 +96,7 @@ namespace MWSound
         void pauseActiveDevice() override;
         void resumeActiveDevice() override;
 
-        OpenAL_Output(SoundManager &mgr);
+        OpenAL_Output(const DecoderProvider& decoderBuilder);
         virtual ~OpenAL_Output();
     };
 #ifndef DEFAULT_OUTPUT

@@ -18,7 +18,6 @@
 #include "openal_output.hpp"
 #include "sound_decoder.hpp"
 #include "sound.hpp"
-#include "soundmanagerimp.hpp"
 #include "loudness.hpp"
 
 #include "efx-presets.h"
@@ -953,7 +952,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
 
     try
     {
-        DecoderPtr decoder = mManager.getDecoder();
+        DecoderPtr decoder = mDecoderProvider->getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
         if(decoder->mResourceMgr->exists(fname))
             decoder->open(fname);
@@ -1511,8 +1510,8 @@ void OpenAL_Output::resumeSounds(int types)
 }
 
 
-OpenAL_Output::OpenAL_Output(SoundManager &mgr)
-  : Sound_Output(mgr)
+OpenAL_Output::OpenAL_Output(const DecoderProvider& decoderBuilder)
+  : mDecoderProvider(&decoderBuilder)
   , mDevice(nullptr), mContext(nullptr)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
