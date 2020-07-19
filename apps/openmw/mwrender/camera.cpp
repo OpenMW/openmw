@@ -287,6 +287,7 @@ namespace MWRender
 
         mFirstPersonView = !mFirstPersonView;
         updateStandingPreviewMode();
+        instantTransition();
         processViewChange();
     }
 
@@ -337,6 +338,8 @@ namespace MWRender
         mMode = enable ? Mode::Preview : Mode::Normal;
         if (mMode == Mode::Normal)
             updateStandingPreviewMode();
+        else if (mFirstPersonView)
+            instantTransition();
         if (mMode == Mode::Normal)
         {
             if (!mDeferredRotationAllowed)
