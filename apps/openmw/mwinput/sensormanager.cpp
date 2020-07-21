@@ -249,17 +249,20 @@ namespace MWInput
         if (!mGuiCursorEnabled)
         {
             float rot[3];
-            rot[0] = mGyroYSpeed * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
+            rot[0] = -mGyroYSpeed * dt * mGyroVSensitivity * 4 * (mInvertY ? -1 : 1);
             rot[1] = 0.0f;
-            rot[2] = mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
+            rot[2] = -mGyroXSpeed * dt * mGyroHSensitivity * 4 * (mInvertX ? -1 : 1);
 
             // Only actually turn player when we're not in vanity mode
-            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking"))
+            bool playerLooking = MWBase::Environment::get().getInputManager()->getControlSwitch("playerlooking");
+            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && playerLooking)
             {
                 MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-                player.yaw(rot[2]);
-                player.pitch(rot[0]);
+                player.yaw(-rot[2]);
+                player.pitch(-rot[0]);
             }
+            else if (!playerLooking)
+                MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
             MWBase::Environment::get().getInputManager()->resetIdleTime();
         }

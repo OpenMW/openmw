@@ -110,23 +110,21 @@ namespace MWInput
 
             if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
             {
+                const float switchLimit = 0.25;
+                MWBase::World* world = MWBase::Environment::get().getWorld();
                 if (mBindingsManager->actionIsActive(A_TogglePOV))
                 {
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                    }
+                    if (world->isFirstPerson() ? mPreviewPOVDelay > switchLimit : mPreviewPOVDelay == 0)
+                        world->togglePreviewMode(true);
+                    mPreviewPOVDelay += dt;
                 }
                 else
                 {
                     //disable preview mode
-                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5)
-                    {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
+                    if (mPreviewPOVDelay > 0)
+                        world->togglePreviewMode(false);
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= switchLimit)
+                        world->togglePOV();
                     mPreviewPOVDelay = 0.f;
                 }
             }
