@@ -95,7 +95,7 @@ namespace SDLUtil
 
     void VideoWrapper::centerWindow()
     {
-
+        // Resize breaks the sdl window in some cases; see issue: #5539
         SDL_Rect rect{};
         int x = 0;
         int y = 0;
