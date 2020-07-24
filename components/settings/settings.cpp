@@ -76,6 +76,28 @@ bool Manager::getBool (const std::string& setting, const std::string& category)
     return Misc::StringUtils::ciEqual(string, "true");
 }
 
+osg::Vec2f Manager::getVector2 (const std::string& setting, const std::string& category)
+{
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    float x, y;
+    stream >> x >> y;
+    if (stream.fail())
+        throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
+    return osg::Vec2f(x, y);
+}
+
+osg::Vec3f Manager::getVector3 (const std::string& setting, const std::string& category)
+{
+    const std::string& value = getString(setting, category);
+    std::stringstream stream(value);
+    float x, y, z;
+    stream >> x >> y >> z;
+    if (stream.fail())
+        throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
+    return osg::Vec3f(x, y, z);
+}
+
 void Manager::setString(const std::string &setting, const std::string &category, const std::string &value)
 {
     CategorySettingValueMap::key_type key = std::make_pair(category, setting);
@@ -109,6 +131,20 @@ void Manager::setFloat (const std::string &setting, const std::string &category,
 void Manager::setBool(const std::string &setting, const std::string &category, const bool value)
 {
     setString(setting, category, value ? "true" : "false");
+}
+
+void Manager::setVector2 (const std::string &setting, const std::string &category, const osg::Vec2f value)
+{
+    std::ostringstream stream;
+    stream << value.x() << " " << value.y();
+    setString(setting, category, stream.str());
+}
+
+void Manager::setVector3 (const std::string &setting, const std::string &category, const osg::Vec3f value)
+{
+    std::ostringstream stream;
+    stream << value.x() << ' ' << value.y() << ' ' << value.z();
+    setString(setting, category, stream.str());
 }
 
 void Manager::resetPendingChange(const std::string &setting, const std::string &category)
