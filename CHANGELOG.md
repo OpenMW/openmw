@@ -51,6 +51,7 @@
     Feature #5524: Resume failed script execution after reload
     Feature #5525: Search fields tweaks (utf-8)
     Task #5480: Drop Qt4 support
+    Task #5520: Improve cell name autocompleter implementation
 
 0.46.0
 ------

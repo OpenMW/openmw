@@ -2,6 +2,8 @@
 #define ADVANCEDPAGE_H
 
 #include <QWidget>
+#include <QCompleter>
+#include <QStringListModel>
 
 #include "ui_advancedpage.h"
 
@@ -35,6 +37,8 @@ namespace Launcher
         Files::ConfigurationManager &mCfgMgr;
         Config::GameSettings &mGameSettings;
         Settings::Manager &mEngineSettings;
+        QCompleter mCellNameCompleter;
+        QStringListModel mCellNameCompleterModel;
 
         /**
          * Load the cells associated with the given content files for use in autocomplete
