@@ -210,7 +210,6 @@ namespace MWRender
 
         // camera stuff
         bool vanityRotateCamera(const float *rot);
-        void setCameraDistance(float dist, bool adjust, bool override);
         void resetCamera();
         float getCameraDistance() const;
         Camera* getCamera();
@@ -219,7 +218,6 @@ namespace MWRender
         void togglePreviewMode(bool enable);
         bool toggleVanityMode(bool enable);
         void allowVanityMode(bool allow);
-        void changeVanityModeScale(float factor);
 
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);

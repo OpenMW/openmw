@@ -1325,27 +1325,6 @@ namespace MWRender
         return true;
     }
 
-    void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
-    {
-        if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
-        {
-            if(mCamera->isNearest() && dist > 0.f)
-                mCamera->toggleViewMode();
-            else if (override)
-                mCamera->updateBaseCameraDistance(-dist / 120.f * 10, adjust);
-            else
-                mCamera->setCameraDistance(-dist / 120.f * 10, adjust);
-        }
-        else if(mCamera->isFirstPerson() && dist < 0.f)
-        {
-            mCamera->toggleViewMode();
-            if (override)
-                mCamera->updateBaseCameraDistance(0.f, false);
-            else
-                mCamera->setCameraDistance(0.f, false);
-        }
-    }
-
     void RenderingManager::resetCamera()
     {
         mCamera->reset();
@@ -1384,12 +1363,6 @@ namespace MWRender
     void RenderingManager::allowVanityMode(bool allow)
     {
         mCamera->allowVanityMode(allow);
-    }
-
-    void RenderingManager::changeVanityModeScale(float factor)
-    {
-        if(mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->updateBaseCameraDistance(-factor/120.f*10, true);
     }
 
     void RenderingManager::overrideFieldOfView(float val)

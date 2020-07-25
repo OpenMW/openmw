@@ -2394,19 +2394,14 @@ namespace MWWorld
         mRendering->allowVanityMode(allow);
     }
 
-    void World::changeVanityModeScale(float factor)
-    {
-        mRendering->changeVanityModeScale(factor);
-    }
-
     bool World::vanityRotateCamera(float * rot)
     {
         return mRendering->vanityRotateCamera(rot);
     }
 
-    void World::setCameraDistance(float dist, bool adjust, bool override_)
+    void World::adjustCameraDistance(float dist)
     {
-        mRendering->setCameraDistance(dist, adjust, override_);
+        mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
     void World::setupPlayer()

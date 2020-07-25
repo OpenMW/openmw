@@ -418,26 +418,24 @@ namespace MWRender
         return mCameraDistance;
     }
 
-    void Camera::updateBaseCameraDistance(float dist, bool adjust)
+    void Camera::adjustCameraDistance(float delta)
     {
-        if (isFirstPerson())
-            return;
+        if (!isFirstPerson())
+        {
+            if(isNearest() && delta < 0.f && getMode() != Mode::Preview && getMode() != Mode::Vanity)
+                toggleViewMode();
+            else
+                mBaseCameraDistance = std::min(mCameraDistance - getCameraDistanceCorrection(), mBaseCameraDistance) + delta;
+        }
+        else if (delta > 0.f)
+        {
+            toggleViewMode();
+            mBaseCameraDistance = 0;
+        }
 
-        if (adjust)
-            dist += std::min(mCameraDistance - getCameraDistanceCorrection(), mBaseCameraDistance);
-
-        mIsNearest = dist <= mNearest;
-        mBaseCameraDistance = osg::clampBetween(dist, mNearest, mFurthest);
+        mIsNearest = mBaseCameraDistance <= mNearest;
+        mBaseCameraDistance = osg::clampBetween(mBaseCameraDistance, mNearest, mFurthest);
         Settings::Manager::setFloat("third person camera distance", "Camera", mBaseCameraDistance);
-    }
-
-    void Camera::setCameraDistance(float dist, bool adjust)
-    {
-        if (isFirstPerson())
-            return;
-        if (adjust)
-            dist += mCameraDistance;
-        mCameraDistance = osg::clampBetween(dist, 10.f, mFurthest);
     }
 
     float Camera::getCameraDistanceCorrection() const

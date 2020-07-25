@@ -136,14 +136,8 @@ namespace MWRender
 
         void update(float duration, bool paused=false);
 
-        /// Set base camera distance for current mode. Don't work on 1st person view.
-        /// \param adjust Indicates should distance be adjusted or set.
-        void updateBaseCameraDistance(float dist, bool adjust = false);
-
-        /// Set camera distance for current mode. Don't work on 1st person view.
-        /// \param adjust Indicates should distance be adjusted or set.
-        /// Default distance can be restored with setCameraDistance().
-        void setCameraDistance(float dist, bool adjust = false);
+        /// Adds distDelta to the camera distance. Switches 3rd/1st person view if distance is less than limit.
+        void adjustCameraDistance(float distDelta);
 
         float getCameraDistance() const;
 
