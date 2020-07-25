@@ -31,10 +31,10 @@ namespace MWMechanics
 
         std::vector<std::string> candidates;
         int highestLevel = 0;
-        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (const auto& levelledItem : items)
         {
-            if (it->mLevel > highestLevel && it->mLevel <= playerLevel)
-                highestLevel = it->mLevel;
+            if (levelledItem.mLevel > highestLevel && levelledItem.mLevel <= playerLevel)
+                highestLevel = levelledItem.mLevel;
         }
 
         // For levelled creatures, the flags are swapped. This file format just makes so much sense.
@@ -43,14 +43,14 @@ namespace MWMechanics
             allLevels = levItem->mFlags & ESM::CreatureLevList::AllLevels;
 
         std::pair<int, std::string> highest = std::make_pair(-1, "");
-        for (std::vector<ESM::LevelledListBase::LevelItem>::const_iterator it = items.begin(); it != items.end(); ++it)
+        for (const auto& levelledItem : items)
         {
-            if (playerLevel >= it->mLevel
-                    && (allLevels || it->mLevel == highestLevel))
+            if (playerLevel >= levelledItem.mLevel
+                    && (allLevels || levelledItem.mLevel == highestLevel))
             {
-                candidates.push_back(it->mId);
-                if (it->mLevel >= highest.first)
-                    highest = std::make_pair(it->mLevel, it->mId);
+                candidates.push_back(levelledItem.mId);
+                if (levelledItem.mLevel >= highest.first)
+                    highest = std::make_pair(levelledItem.mLevel, levelledItem.mId);
             }
         }
         if (candidates.empty())
