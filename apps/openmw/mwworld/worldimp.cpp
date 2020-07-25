@@ -225,7 +225,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
-        mRendering->resetCamera();
+        mRendering->getCamera()->reset();
 
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
@@ -1953,7 +1953,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
-        const float camDist = mRendering->getCameraDistance();
+        const float camDist = mRendering->getCamera()->getCameraDistance();
         maxDistance += camDist;
         MWWorld::Ptr facedObject;
         MWRender::RenderingManager::RayResult rayToObject;
@@ -2356,7 +2356,7 @@ namespace MWWorld
 
     void World::togglePOV(bool force)
     {
-        mRendering->togglePOV(force);
+        mRendering->getCamera()->toggleViewMode(force);
     }
 
     bool World::isFirstPerson() const
@@ -2371,12 +2371,12 @@ namespace MWWorld
 
     void World::togglePreviewMode(bool enable)
     {
-        mRendering->togglePreviewMode(enable);
+        mRendering->getCamera()->togglePreviewMode(enable);
     }
 
     bool World::toggleVanityMode(bool enable)
     {
-        return mRendering->toggleVanityMode(enable);
+        return mRendering->getCamera()->toggleVanityMode(enable);
     }
 
     void World::disableDeferredPreviewRotation()
@@ -2391,12 +2391,16 @@ namespace MWWorld
 
     void World::allowVanityMode(bool allow)
     {
-        mRendering->allowVanityMode(allow);
+        mRendering->getCamera()->allowVanityMode(allow);
     }
 
     bool World::vanityRotateCamera(float * rot)
     {
-        return mRendering->vanityRotateCamera(rot);
+        if(!mRendering->getCamera()->isVanityOrPreviewModeEnabled())
+            return false;
+
+        mRendering->getCamera()->rotateCamera(rot[0], rot[2], true);
+        return true;
     }
 
     void World::adjustCameraDistance(float dist)

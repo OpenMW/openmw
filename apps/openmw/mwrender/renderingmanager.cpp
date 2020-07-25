@@ -1316,55 +1316,6 @@ namespace MWRender
         return mTerrain->getHeightAt(pos);
     }
 
-    bool RenderingManager::vanityRotateCamera(const float *rot)
-    {
-        if(!mCamera->isVanityOrPreviewModeEnabled())
-            return false;
-
-        mCamera->rotateCamera(rot[0], rot[2], true);
-        return true;
-    }
-
-    void RenderingManager::resetCamera()
-    {
-        mCamera->reset();
-    }
-
-    float RenderingManager::getCameraDistance() const
-    {
-        return mCamera->getCameraDistance();
-    }
-
-    Camera* RenderingManager::getCamera()
-    {
-        return mCamera.get();
-    }
-
-    const osg::Vec3f &RenderingManager::getCameraPosition() const
-    {
-        return mCurrentCameraPos;
-    }
-
-    void RenderingManager::togglePOV(bool force)
-    {
-        mCamera->toggleViewMode(force);
-    }
-
-    void RenderingManager::togglePreviewMode(bool enable)
-    {
-        mCamera->togglePreviewMode(enable);
-    }
-
-    bool RenderingManager::toggleVanityMode(bool enable)
-    {
-        return mCamera->toggleVanityMode(enable);
-    }
-
-    void RenderingManager::allowVanityMode(bool allow)
-    {
-        mCamera->allowVanityMode(allow);
-    }
-
     void RenderingManager::overrideFieldOfView(float val)
     {
         if (mFieldOfViewOverridden != true || mFieldOfViewOverride != val)
