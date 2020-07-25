@@ -123,7 +123,7 @@ namespace MWPhysics
                     std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>(),
                     int mask = CollisionType_World|CollisionType_HeightMap|CollisionType_Actor|CollisionType_Door, int group=0xff) const;
 
-            RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius);
+            RayResult castSphere(const osg::Vec3f& from, const osg::Vec3f& to, float radius) const;
 
             /// Return true if actor1 can see actor2.
             bool getLineOfSight(const MWWorld::ConstPtr& actor1, const MWWorld::ConstPtr& actor2) const;

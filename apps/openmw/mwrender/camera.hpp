@@ -73,6 +73,7 @@ namespace MWRender
         bool mShowCrosshairInThirdPersonMode;
 
         void updateFocalPointOffset(float duration);
+        void updatePosition();
         float getCameraDistanceCorrection() const;
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
@@ -144,16 +145,12 @@ namespace MWRender
         /// Default distance can be restored with setCameraDistance().
         void setCameraDistance(float dist, bool adjust = false);
 
-        /// Restore default camera distance and offset for current mode.
-        void setCameraDistance();
-
         float getCameraDistance() const;
 
         void setAnimation(NpcAnimation *anim);
 
         osg::Vec3d getFocalPoint() const;
         osg::Vec3d getFocalPointOffset() const;
-        void adjustFocalPoint(osg::Vec3d adjustment) { mFocalPointAdjustment = adjustment; }
 
         /// Stores focal and camera world positions in passed arguments
         void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;

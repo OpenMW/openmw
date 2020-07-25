@@ -51,6 +51,11 @@ namespace ESM
     struct TimeStamp;
 }
 
+namespace MWPhysics
+{
+    class PhysicsSystem;
+}
+
 namespace MWRender
 {
     class Animation;
@@ -114,6 +119,8 @@ namespace MWBase
 
             virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
+
+            virtual const MWPhysics::PhysicsSystem* getPhysics() const = 0;
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 

@@ -214,6 +214,8 @@ namespace MWWorld
             void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) override;
 
+            const MWPhysics::PhysicsSystem* getPhysics() const override { return mPhysics.get(); }
+
             CellStore *getExterior (int x, int y) override;
 
             CellStore *getInterior (const std::string& name) override;
