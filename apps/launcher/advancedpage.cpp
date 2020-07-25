@@ -19,15 +19,15 @@ Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
     setupUi(this);
 
     loadSettings();
+    mCellNameCompleter.setModel(&mCellNameCompleterModel);
+    startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
 }
 
 void Launcher::AdvancedPage::loadCellsForAutocomplete(QStringList cellNames) {
-    // Set up an auto-completer for the "Start default character at" field
-    auto *completer = new QCompleter(cellNames);
-    completer->setCompletionMode(QCompleter::PopupCompletion);
-    completer->setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
-    startDefaultCharacterAtField->setCompleter(completer);
-
+    // Update the list of suggestions for the "Start default character at" field
+    mCellNameCompleterModel.setStringList(cellNames);
+    mCellNameCompleter.setCompletionMode(QCompleter::PopupCompletion);
+    mCellNameCompleter.setCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 }
 
 void Launcher::AdvancedPage::on_skipMenuCheckBox_stateChanged(int state) {
