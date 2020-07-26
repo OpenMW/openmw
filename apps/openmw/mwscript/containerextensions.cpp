@@ -60,6 +60,13 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
+                    // Explicit calls to non-unique actors affect the base record
+                    if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                    {
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        return;
+                    }
+
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
                     // Create a Ptr for the first added item to recover the item name later
                     MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
@@ -146,6 +153,13 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_025")
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
+
+                    // Explicit calls to non-unique actors affect the base record
+                    if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                    {
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        return;
+                    }
 
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 

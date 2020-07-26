@@ -167,6 +167,8 @@ namespace MWClass
 
             virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
 
+            virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
+
             float getWalkSpeed(const MWWorld::Ptr& ptr) const final;
 
             float getRunSpeed(const MWWorld::Ptr& ptr) const final;

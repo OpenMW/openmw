@@ -363,6 +363,8 @@ namespace MWWorld
 
             virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
 
+            virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
+
             virtual float getWalkSpeed(const Ptr& ptr) const;
 
             virtual float getRunSpeed(const Ptr& ptr) const;

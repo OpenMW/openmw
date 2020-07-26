@@ -70,6 +70,8 @@ namespace MWWorld
         std::map<std::string, int> mIds;
         std::map<std::string, int> mStaticIds;
 
+        std::map<std::string, int> mRefCount;
+
         std::map<int, StoreBase *> mStores;
 
         ESM::NPC mPlayerTemplate;
@@ -79,6 +81,7 @@ namespace MWWorld
         /// Validate entries in store after setup
         void validate();
 
+        void countRecords();
     public:
         /// \todo replace with SharedIterator<StoreBase>
         typedef std::map<int, StoreBase *>::const_iterator iterator;
@@ -252,6 +255,8 @@ namespace MWWorld
 
         // To be called when we are done with dynamic record loading
         void checkPlayer();
+
+        int getRefCount(const std::string& id) const;
     };
 
     template <>
