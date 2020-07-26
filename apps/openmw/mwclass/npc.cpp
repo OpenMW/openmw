@@ -911,6 +911,12 @@ namespace MWClass
             if (!getNpcStats(ptr).isWerewolf())
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionTalk(ptr));
         }
+        else // In combat
+        {
+            const bool stealingInCombat = Settings::Manager::getBool ("always allow stealing from knocked out actors", "Game");
+            if (stealingInCombat && stats.getKnockedDown())
+                return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
+        }
 
         // Tribunal and some mod companions oddly enough must use open action as fallback
         if (!getScript(ptr).empty() && ptr.getRefData().getLocals().getIntVar(getScript(ptr), "companion"))
@@ -1062,7 +1068,14 @@ namespace MWClass
         if (customData.mNpcStats.isDead() && customData.mNpcStats.isDeathAnimationFinished())
             return true;
 
-        return !customData.mNpcStats.getAiSequence().isInCombat();
+        if (!customData.mNpcStats.getAiSequence().isInCombat())
+            return true;
+
+        const bool stealingInCombat = Settings::Manager::getBool ("always allow stealing from knocked out actors", "Game");
+        if (stealingInCombat && customData.mNpcStats.getKnockedDown())
+            return true;
+
+        return false;
     }
 
     MWGui::ToolTipInfo Npc::getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const
