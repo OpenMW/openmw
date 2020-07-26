@@ -904,7 +904,7 @@ namespace MWClass
         }
         else if (!stats.getAiSequence().isInCombat())
         {
-            if(getCreatureStats(actor).getStance(MWMechanics::CreatureStats::Stance_Sneak) || stats.getKnockedDown())
+            if (stats.getKnockedDown() || MWBase::Environment::get().getMechanicsManager()->isSneaking(actor))
                 return std::shared_ptr<MWWorld::Action>(new MWWorld::ActionOpen(ptr)); // stealing
 
             // Can't talk to werewolves
