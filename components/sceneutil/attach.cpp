@@ -64,7 +64,7 @@ namespace SceneUtil
             for (const osg::ref_ptr<osg::Node>& node : mToCopy)
             {
                 if (node->getNumParents() > 1)
-                    Log(Debug::Error) << "Error CopyRigVisitor: node has multiple parents";
+                    Log(Debug::Error) << "Error CopyRigVisitor: node has " << node->getNumParents() << " parents";
                 while (node->getNumParents())
                     node->getParent(0)->removeChild(node);
 

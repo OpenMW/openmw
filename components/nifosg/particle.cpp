@@ -11,7 +11,7 @@
 #include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
 
-#include "userdata.hpp"
+#include "nodeindexholder.hpp"
 
 namespace NifOsg
 {
@@ -383,8 +383,8 @@ void FindGroupByRecIndex::applyNode(osg::Node &searchNode)
 {
     if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
     {
-        NodeUserData* holder = dynamic_cast<NodeUserData*>(searchNode.getUserDataContainer()->getUserObject(0));
-        if (holder && holder->mIndex == mRecIndex)
+        NodeIndexHolder* holder = dynamic_cast<NodeIndexHolder*>(searchNode.getUserDataContainer()->getUserObject(0));
+        if (holder && holder->getIndex() == mRecIndex)
         {
             osg::Group* group = searchNode.asGroup();
             if (!group)

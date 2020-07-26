@@ -4,14 +4,13 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
-#include <osg/UserDataContainer>
 
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
-#include "userdata.hpp"
+#include "matrixtransform.hpp"
 
 namespace NifOsg
 {
@@ -119,50 +118,24 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
-        osg::Matrix mat = trans->getMatrix();
+        NifOsg::MatrixTransform* trans = static_cast<NifOsg::MatrixTransform*>(node);
 
         float time = getInputValue(nv);
 
-        NodeUserData* userdata = static_cast<NodeUserData*>(trans->getUserDataContainer()->getUserObject(0));
-        Nif::Matrix3& rot = userdata->mRotationScale;
-
-        bool setRot = false;
-        if(!mRotations.empty())
-        {
-            mat.setRotate(mRotations.interpKey(time));
-            setRot = true;
-        }
+        if (!mRotations.empty())
+            trans->updateRotation(mRotations.interpKey(time));
         else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-        {
-            mat.setRotate(getXYZRotation(time));
-            setRot = true;
-        }
-        else
-        {
-            // no rotation specified, use the previous value from the UserData
-            for (int i=0;i<3;++i)
-                for (int j=0;j<3;++j)
-                    mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
-        }
+            trans->updateRotation(getXYZRotation(time));
+        else // no rotation specified, use the previous value
+            trans->applyCurrentRotation();
 
-        if (setRot) // copy the new values back to the UserData
-            for (int i=0;i<3;++i)
-                for (int j=0;j<3;++j)
-                    rot.mValues[i][j] = mat(j,i); // NB column/row major difference
+        if (!mScales.empty())
+            trans->updateScale(mScales.interpKey(time));
+        else // no scale specified, use the previous value
+            trans->applyCurrentScale();
 
-        float& scale = userdata->mScale;
-        if(!mScales.empty())
-            scale = mScales.interpKey(time);
-
-        for (int i=0;i<3;++i)
-            for (int j=0;j<3;++j)
-                mat(i,j) *= scale;
-
-        if(!mTranslations.empty())
-            mat.setTrans(mTranslations.interpKey(time));
-
-        trans->setMatrix(mat);
+        if (!mTranslations.empty())
+            trans->setTranslation(mTranslations.interpKey(time));
     }
 
     traverse(node, nv);
