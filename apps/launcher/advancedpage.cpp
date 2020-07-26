@@ -122,6 +122,7 @@ bool Launcher::AdvancedPage::loadSettings()
         int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
         if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
             unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
+        loadSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
     }
 
     // Visuals
@@ -215,6 +216,7 @@ void Launcher::AdvancedPage::saveSettings()
         int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
         if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
             mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
+        saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
     }
 
     // Visuals
