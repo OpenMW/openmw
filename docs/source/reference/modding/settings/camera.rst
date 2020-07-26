@@ -136,7 +136,7 @@ This setting controls third person view mode.
 False: View is centered on the character's head. Crosshair is hidden.
 True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be controlled in Advanced tab of the launcher.
 
 view over shoulder offset
 -------------------------

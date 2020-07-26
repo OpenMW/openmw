@@ -21,14 +21,14 @@ namespace MWRender
         mAutoSwitchShoulder(Settings::Manager::getBool("auto switch shoulder", "Camera")),
         mOverShoulderHorizontalOffset(30.f), mOverShoulderVerticalOffset(-10.f)
     {
-        std::stringstream offset(Settings::Manager::getString("view over shoulder offset", "Camera"));
-        offset >> mOverShoulderHorizontalOffset >> mOverShoulderVerticalOffset;
-        mDefaultShoulderIsRight = mOverShoulderHorizontalOffset >= 0;
-        mOverShoulderHorizontalOffset = std::abs(mOverShoulderHorizontalOffset);
+        osg::Vec2f offset = Settings::Manager::getVector2("view over shoulder offset", "Camera");
+        mOverShoulderHorizontalOffset = std::abs(offset.x());
+        mOverShoulderVerticalOffset = offset.y();
+        mDefaultShoulderIsRight = offset.x() >= 0;
 
         mCamera->enableDynamicCameraDistance(true);
         mCamera->enableCrosshairInThirdPersonMode(true);
-        mCamera->setFocalPointTargetOffset({mOverShoulderHorizontalOffset, mOverShoulderVerticalOffset});
+        mCamera->setFocalPointTargetOffset(offset);
     }
 
     void ViewOverShoulderController::update()

@@ -19,11 +19,10 @@ Objects::Objects()
 
 Objects::~Objects()
 {
-  PtrControllerMap::iterator it(mObjects.begin());
-  for (; it != mObjects.end();++it)
+  for(auto& object : mObjects)
   {
-    delete it->second;
-    it->second = nullptr;
+    delete object.second;
+    object.second = nullptr;
   }
 }
 
@@ -77,8 +76,8 @@ void Objects::update(float duration, bool paused)
 {
     if(!paused)
     {
-        for(PtrControllerMap::iterator iter(mObjects.begin());iter != mObjects.end();++iter)
-            iter->second->update(duration);
+        for(auto& object : mObjects)
+            object.second->update(duration);
     }
     else
     {
@@ -87,15 +86,15 @@ void Objects::update(float duration, bool paused)
         if(mode != MWGui::GM_Container)
             return;
 
-        for(PtrControllerMap::iterator iter(mObjects.begin());iter != mObjects.end();++iter)
+        for(auto& object : mObjects)
         {
-            if (iter->first.getTypeName() != typeid(ESM::Container).name())
+            if (object.first.getTypeName() != typeid(ESM::Container).name())
                 continue;
 
-            if (iter->second->isAnimPlaying("containeropen"))
+            if (object.second->isAnimPlaying("containeropen"))
             {
-                iter->second->update(duration);
-                MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(iter->first);
+                object.second->update(duration);
+                MWBase::Environment::get().getWorld()->updateAnimatedCollisionShape(object.first);
             }
         }
     }

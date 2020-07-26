@@ -48,9 +48,11 @@
     Feature #5445: Handle NiLines
     Feature #5457: Realistic diagonal movement
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
+    Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
     Feature #5525: Search fields tweaks (utf-8)
     Task #5480: Drop Qt4 support
+    Task #5520: Improve cell name autocompleter implementation
 
 0.46.0
 ------
