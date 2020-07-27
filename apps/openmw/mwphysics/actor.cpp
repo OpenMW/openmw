@@ -12,6 +12,8 @@
 
 #include "collisiontype.hpp"
 
+#include <cmath>
+
 namespace MWPhysics
 {
 
@@ -54,7 +56,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     }
 
     mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
-    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabsf(mHalfExtents.x() - mHalfExtents.y()) < 2.2;
+    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mHalfExtents.x() - mHalfExtents.y()) < 2.2;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 

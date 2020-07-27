@@ -25,6 +25,8 @@
 #include "stepper.hpp"
 #include "trace.h"
 
+#include <cmath>
+
 namespace MWPhysics
 {
     static bool isActor(const btCollisionObject *obj)
@@ -211,7 +213,7 @@ namespace MWPhysics
             // try again but only upwards (fixes some bad coc floors)
             if(contactCallback2.mDistance < contactCallback.mDistance)
             {
-                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, fabsf(positionDelta.z())));
+                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, std::fabs(positionDelta.z())));
 
                 DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject(), velocity};
                 const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
