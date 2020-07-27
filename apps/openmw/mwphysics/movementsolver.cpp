@@ -126,12 +126,11 @@ namespace MWPhysics
 
         const btCollisionObject *colobj = physicActor->getCollisionObject();
         osg::Vec3f halfExtents = physicActor->getHalfExtents();
+        osg::Vec3f meshTranslation = physicActor->getScaledMeshTranslation();
 
-        // NOTE: here we don't account for the collision box translation (i.e. physicActor->getPosition() - refpos.pos).
-        // That means the collision shape used for moving this actor is in a different spot than the collision shape
-        // other actors are using to collide against this actor.
-        // While this is strictly speaking wrong, it's needed for MW compatibility.
-        position.z() += halfExtents.z();
+        // Adjust for collision mesh offset relative to actor's "location"
+        // (doTrace doesn't take local/interior collision shape translation into account)
+        position += meshTranslation;
 
         static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
         float swimlevel = waterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
@@ -195,7 +194,8 @@ namespace MWPhysics
         }
         
         auto tempPosition = physicActor->getPosition();
-        auto refPosition = position - osg::Vec3f(0.0, 0.0, halfExtents.z());
+        // the way we're using contactTest takes into account local collision shape position
+        auto refPosition = position - meshTranslation;
         physicActor->setPosition(refPosition);
         // try to pop outside of the world before doing anything else if we're inside of it
         DeepestContactResultCallback contactCallback{physicActor->getCollisionObject(), velocity};
@@ -228,7 +228,7 @@ namespace MWPhysics
                 }
             }
             if(!giveup)
-                position = physicActor->getPosition() + osg::Vec3f(0.0, 0.0, halfExtents.z());
+                position = physicActor->getPosition() + meshTranslation;
             
         }
         physicActor->setPosition(tempPosition);
@@ -400,7 +400,7 @@ namespace MWPhysics
         if (forceGroundTest || (inertia.z() <= 0.f && newPosition.z() >= swimlevel))
         {
             osg::Vec3f from = newPosition;
-            auto dropDistance = physicActor->getOnGround() ? 2*sGroundOffset + sStepSizeDown : 2*sGroundOffset;
+            auto dropDistance = 2*sGroundOffset + (physicActor->getOnGround() ? sStepSizeDown : 0);
             osg::Vec3f to = newPosition - osg::Vec3f(0,0,dropDistance);
             tracer.doTrace(colobj, from, to, collisionWorld);
             if(tracer.mFraction < 1.0f)
@@ -431,7 +431,7 @@ namespace MWPhysics
                 }
                 else
                 {
-                    // Vanilla allows actors to over on top of other actors.
+                    // Vanilla allows actors to float on top of other actors.
                     if (!isFlying && isWalkableSlope(tracer.mPlaneNormal) && tracer.mEndPos.z()+sGroundOffset <= newPosition.z())
                         newPosition.z() = tracer.mEndPos.z() + sGroundOffset;
 
@@ -456,7 +456,7 @@ namespace MWPhysics
         physicActor->setOnGround(isOnGround);
         physicActor->setOnSlope(isOnSlope);
 
-        newPosition.z() -= halfExtents.z(); // remove what was added at the beginning
+        newPosition -= meshTranslation; // remove what was added at the beginning
         return newPosition;
     }
 }

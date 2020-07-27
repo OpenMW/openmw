@@ -54,7 +54,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
     }
 
     mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
-    mRotationallyInvariant = true;
+    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabsf(mHalfExtents.x() - mHalfExtents.y()) < 2.2;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -66,6 +66,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
 
     updateScale();
     updatePosition();
+    if(!mRotationallyInvariant)
+        updateRotation();
 
     addCollisionMask(getCollisionMask());
 }
@@ -122,11 +124,15 @@ void Actor::updatePosition()
     updateCollisionObjectPosition();
 }
 
+osg::Vec3f Actor::getScaledMeshTranslation() const
+{
+    return mRotation * osg::componentMultiply(mMeshTranslation, mScale);
+}
+
 void Actor::updateCollisionObjectPosition()
 {
     btTransform tr = mCollisionObject->getWorldTransform();
-    osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
-    osg::Vec3f newPosition = scaledTranslation + mPosition;
+    osg::Vec3f newPosition = mPosition + getScaledMeshTranslation();
     tr.setOrigin(Misc::Convert::toBullet(newPosition));
     mCollisionObject->setWorldTransform(tr);
 }
