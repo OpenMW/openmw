@@ -9,6 +9,8 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
+#include "../mwmechanics/spelllist.hpp"
+
 namespace
 {
     void readRefs(const ESM::Cell& cell, std::map<ESM::RefNum, std::string>& refs, std::vector<ESM::ESMReader>& readers)
@@ -409,4 +411,23 @@ void ESMStore::validate()
             throw std::runtime_error ("Invalid player record (race or class unavailable");
     }
 
+    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& originalId) const
+    {
+        const std::string id = Misc::StringUtils::lowerCase(originalId);
+        auto result = mSpellListCache.find(id);
+        std::shared_ptr<MWMechanics::SpellList> ptr;
+        if (result != mSpellListCache.end())
+            ptr = result->second.lock();
+        if (!ptr)
+        {
+            int type = find(id);
+            ptr = std::make_shared<MWMechanics::SpellList>(id, type);
+            if (result != mSpellListCache.end())
+                result->second = ptr;
+            else
+                mSpellListCache.insert({id, ptr});
+            return {ptr, false};
+        }
+        return {ptr, true};
+    }
 } // end namespace

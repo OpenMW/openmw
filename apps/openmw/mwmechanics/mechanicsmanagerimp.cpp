@@ -83,7 +83,7 @@ namespace MWMechanics
 
         // reset
         creatureStats.setLevel(player->mNpdt.mLevel);
-        creatureStats.getSpells().clear();
+        creatureStats.getSpells().clear(true);
         creatureStats.modifyMagicEffects(MagicEffects());
 
         for (int i=0; i<27; ++i)

@@ -141,14 +141,9 @@ namespace MWClass
                 data->mCreatureStats.setDeathAnimationFinished(isPersistent(ptr));
 
             // spells
-            for (std::vector<std::string>::const_iterator iter (ref->mBase->mSpells.mList.begin());
-                iter!=ref->mBase->mSpells.mList.end(); ++iter)
-            {
-                if (const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(*iter))
-                    data->mCreatureStats.getSpells().add (spell);
-                else /// \todo add option to make this a fatal error message pop-up, but default to warning for vanilla compatibility
-                    Log(Debug::Warning) << "Warning: ignoring nonexistent spell '" << *iter << "' on creature '" << ref->mBase->mId << "'";
-            }
+            bool spellsInitialised = data->mCreatureStats.getSpells().setSpells(ref->mBase->mId);
+            if (!spellsInitialised)
+                data->mCreatureStats.getSpells().addAllToInstance(ref->mBase->mSpells.mList);
 
             // inventory
             bool hasInventory = hasInventoryStore(ptr);
@@ -781,6 +776,9 @@ namespace MWClass
         CreatureCustomData& customData = ptr.getRefData().getCustomData()->asCreatureCustomData();
         const ESM::CreatureState& creatureState = state.asCreatureState();
         customData.mContainerStore->readState (creatureState.mInventory);
+        bool spellsInitialised = customData.mCreatureStats.getSpells().setSpells(ptr.get<ESM::Creature>()->mBase->mId);
+        if(spellsInitialised)
+            customData.mCreatureStats.getSpells().clear();
         customData.mCreatureStats.readState (creatureState.mCreatureStats);
     }
 

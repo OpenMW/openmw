@@ -1973,10 +1973,6 @@ namespace MWMechanics
                 // One case where we need this is to make sure bound items are removed upon death
                 stats.modifyMagicEffects(MWMechanics::MagicEffects());
                 stats.getActiveSpells().clear();
-
-                if (!isPlayer)
-                    stats.getSpells().clear();
-
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
 

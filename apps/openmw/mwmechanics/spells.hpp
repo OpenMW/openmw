@@ -1,22 +1,19 @@
 #ifndef GAME_MWMECHANICS_SPELLS_H
 #define GAME_MWMECHANICS_SPELLS_H
 
+#include <memory>
 #include <map>
 #include <string>
 #include <set>
+#include <vector>
 
-#include <components/misc/stringops.hpp>
-
-#include "../mwworld/ptr.hpp"
 #include "../mwworld/timestamp.hpp"
 
 #include "magiceffects.hpp"
-
+#include "spelllist.hpp"
 
 namespace ESM
 {
-    struct Spell;
-
     struct SpellState;
 }
 
@@ -32,36 +29,35 @@ namespace MWMechanics
     /// diseases. It also keeps track of used powers (which can only be used every 24h).
     class Spells
     {
-        public:
-
-            typedef const ESM::Spell* SpellKey;
-            struct SpellParams
-            {
-                std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
-                std::set<int> mPurgedEffects; // indices of purged effects
-            };
-
-            typedef std::map<SpellKey, SpellParams> TContainer;
-            typedef TContainer::const_iterator TIterator;
-
-        private:
-            TContainer mSpells;
+            std::shared_ptr<SpellList> mSpellList;
+            std::map<const ESM::Spell*, SpellParams> mSpells;
 
             // Note: this is the spell that's about to be cast, *not* the spell selected in the GUI (which may be different)
             std::string mSelectedSpell;
 
-            std::map<SpellKey, MWWorld::TimeStamp> mUsedPowers;
+            std::map<const ESM::Spell*, MWWorld::TimeStamp> mUsedPowers;
 
             mutable bool mSpellsChanged;
             mutable MagicEffects mEffects;
-            mutable std::map<SpellKey, MagicEffects> mSourcedEffects;
+            mutable std::map<const ESM::Spell*, MagicEffects> mSourcedEffects;
             void rebuildEffects() const;
 
-            /// Get spell from ID, throws exception if not found
-            const ESM::Spell* getSpell(const std::string& id) const;
+            bool hasDisease(const ESM::Spell::SpellType type) const;
 
+            using SpellFilter = bool (*)(const ESM::Spell*);
+            void purge(const SpellFilter& filter);
+
+            void addSpell(const ESM::Spell* spell);
+            void removeSpell(const ESM::Spell* spell);
+            void removeAllSpells();
+
+            friend class SpellList;
         public:
+            using TIterator = std::map<const ESM::Spell*, SpellParams>::const_iterator;
+
             Spells();
+
+            ~Spells();
 
             static bool hasCorprusEffect(const ESM::Spell *spell);
 
@@ -96,7 +92,7 @@ namespace MWMechanics
             MagicEffects getMagicEffects() const;
             ///< Return sum of magic effects resulting from abilities, blights, deseases and curses.
 
-            void clear();
+            void clear(bool modifyBase = false);
             ///< Remove all spells of al types.
 
             void setSelectedSpell (const std::string& spellId);
@@ -118,6 +114,10 @@ namespace MWMechanics
 
             void readState (const ESM::SpellState& state, CreatureStats* creatureStats);
             void writeState (ESM::SpellState& state) const;
+
+            bool setSpells(const std::string& id);
+
+            void addAllToInstance(const std::vector<std::string>& spells);
     };
 }
 

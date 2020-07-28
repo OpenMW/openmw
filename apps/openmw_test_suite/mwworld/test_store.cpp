@@ -8,6 +8,12 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
+#include "apps/openmw/mwmechanics/spelllist.hpp"
+
+namespace MWMechanics
+{
+    SpellList::SpellList(const std::string& id, int type) : mId(id), mType(type) {}
+}
 
 static Loading::Listener dummyListener;
 

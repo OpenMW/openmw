@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWWORLD_ESMSTORE_H
 #define OPENMW_MWWORLD_ESMSTORE_H
 
+#include <memory>
 #include <sstream>
 #include <stdexcept>
 
@@ -10,6 +11,11 @@
 namespace Loading
 {
     class Listener;
+}
+
+namespace MWMechanics
+{
+    class SpellList;
 }
 
 namespace MWWorld
@@ -77,6 +83,8 @@ namespace MWWorld
         ESM::NPC mPlayerTemplate;
 
         unsigned int mDynamicCount;
+
+        mutable std::map<std::string, std::weak_ptr<MWMechanics::SpellList> > mSpellListCache;
 
         /// Validate entries in store after setup
         void validate();
@@ -257,6 +265,8 @@ namespace MWWorld
         void checkPlayer();
 
         int getRefCount(const std::string& id) const;
+
+        std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
 
     template <>
