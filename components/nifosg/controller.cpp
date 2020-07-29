@@ -119,23 +119,48 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     if (hasInput())
     {
         NifOsg::MatrixTransform* trans = static_cast<NifOsg::MatrixTransform*>(node);
+        osg::Matrix mat = trans->getMatrix();
 
         float time = getInputValue(nv);
 
-        if (!mRotations.empty())
-            trans->updateRotation(mRotations.interpKey(time));
+        Nif::Matrix3& rot = trans->mRotationScale;
+
+        bool setRot = false;
+        if(!mRotations.empty())
+        {
+            mat.setRotate(mRotations.interpKey(time));
+            setRot = true;
+        }
         else if (!mXRotations.empty() || !mYRotations.empty() || !mZRotations.empty())
-            trans->updateRotation(getXYZRotation(time));
-        else // no rotation specified, use the previous value
-            trans->applyCurrentRotation();
+        {
+            mat.setRotate(getXYZRotation(time));
+            setRot = true;
+        }
+        else
+        {
+            // no rotation specified, use the previous value
+            for (int i=0;i<3;++i)
+                for (int j=0;j<3;++j)
+                    mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
+        }
 
-        if (!mScales.empty())
-            trans->updateScale(mScales.interpKey(time));
-        else // no scale specified, use the previous value
-            trans->applyCurrentScale();
+        if (setRot) // copy the new values back
+            for (int i=0;i<3;++i)
+                for (int j=0;j<3;++j)
+                    rot.mValues[i][j] = mat(j,i); // NB column/row major difference
 
-        if (!mTranslations.empty())
-            trans->setTranslation(mTranslations.interpKey(time));
+        float& scale = trans->mScale;
+        if(!mScales.empty())
+            scale = mScales.interpKey(time);
+
+        for (int i=0;i<3;++i)
+            for (int j=0;j<3;++j)
+                mat(i,j) *= scale;
+
+        if(!mTranslations.empty())
+            mat.setTrans(mTranslations.interpKey(time));
+
+        trans->setMatrix(mat);
     }
 
     traverse(node, nv);
