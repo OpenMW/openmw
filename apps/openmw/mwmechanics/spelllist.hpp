@@ -26,6 +26,14 @@ namespace MWMechanics
 
     class Spells;
 
+    /// Multiple instances of the same actor share the same spell list in Morrowind.
+    /// The most obvious result of this is that adding a spell or ability to one instance adds it to all instances.
+    /// @note The original game will only update visual effects associated with any added abilities for the originally targeted actor,
+    ///       changing cells applies the update to all actors.
+    /// Aside from sharing the same active spell list, changes made to this list are also written to the actor's base record.
+    /// Interestingly, it is not just scripted changes that are persisted to the base record. Curing one instance's disease will cure all instances.
+    /// @note The original game is inconsistent in persisting this example;
+    ///       saving and loading the game might reapply the cured disease depending on which instance was cured.
     class SpellList
     {
             const std::string mId;

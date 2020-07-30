@@ -264,8 +264,11 @@ namespace MWWorld
         // To be called when we are done with dynamic record loading
         void checkPlayer();
 
+        /// @return The number of instances defined in the base files. Excludes changes from the save file.
         int getRefCount(const std::string& id) const;
 
+        /// Actors with the same ID share spells, abilities, etc.
+        /// @return The shared spell list to use for this actor and whether or not it has already been initialized.
         std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> getSpellList(const std::string& id) const;
     };
 
