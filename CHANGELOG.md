@@ -7,6 +7,7 @@
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #4021: Attributes and skills are not stored as floats
+    Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4623: Corprus implementation is incorrect
     Bug #4764: Data race in osg ParticleSystem
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
