@@ -53,7 +53,7 @@ namespace ESM
 
 namespace MWPhysics
 {
-    class PhysicsSystem;
+    class RayCastingInterface;
 }
 
 namespace MWRender
@@ -119,8 +119,6 @@ namespace MWBase
 
             virtual void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) = 0;
-
-            virtual const MWPhysics::PhysicsSystem* getPhysics() const = 0;
 
             virtual MWWorld::CellStore *getExterior (int x, int y) = 0;
 
@@ -309,6 +307,8 @@ namespace MWBase
             /// doPhysics.
 
             virtual void updateAnimatedCollisionShape(const MWWorld::Ptr &ptr) = 0;
+
+            virtual const MWPhysics::RayCastingInterface* getRayCasting() const = 0;
 
             virtual bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) = 0;
             ///< cast a Ray and return true if there is an object in the ray path.

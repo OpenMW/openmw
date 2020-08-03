@@ -214,8 +214,6 @@ namespace MWWorld
             void readRecord (ESM::ESMReader& reader, uint32_t type,
                 const std::map<int, int>& contentFileMap) override;
 
-            const MWPhysics::PhysicsSystem* getPhysics() const override { return mPhysics.get(); }
-
             CellStore *getExterior (int x, int y) override;
 
             CellStore *getInterior (const std::string& name) override;
@@ -411,6 +409,8 @@ namespace MWWorld
             /// doPhysics.
 
             void updateAnimatedCollisionShape(const Ptr &ptr) override;
+
+            const MWPhysics::RayCastingInterface* getRayCasting() const override;
 
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.

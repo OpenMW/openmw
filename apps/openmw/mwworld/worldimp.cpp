@@ -1542,6 +1542,11 @@ namespace MWWorld
         return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getCollisionObject()->getWorldTransform());
     }
 
+    const MWPhysics::RayCastingInterface* World::getRayCasting() const
+    {
+        return mPhysics.get();
+    }
+
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
         int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door;
@@ -1554,7 +1559,7 @@ namespace MWWorld
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
     }
 
@@ -2728,7 +2733,7 @@ namespace MWWorld
         if (includeWater) {
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -3091,7 +3096,7 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else

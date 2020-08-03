@@ -17,7 +17,7 @@
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
-#include "../mwphysics/physicssystem.hpp"
+#include "../mwphysics/raycasting.hpp"
 
 #include "npcanimation.hpp"
 
@@ -218,7 +218,7 @@ namespace MWRender
         const float cameraObstacleLimit = 5.0f;
         const float focalObstacleLimit = 10.f;
 
-        const MWPhysics::PhysicsSystem* physics = MWBase::Environment::get().getWorld()->getPhysics();
+        const auto* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
 
         // Adjust focal point to prevent clipping.
         osg::Vec3d focal = getFocalPoint();
@@ -226,7 +226,7 @@ namespace MWRender
         float offsetLen = focalOffset.length();
         if (offsetLen > 0)
         {
-            MWPhysics::PhysicsSystem::RayResult result = physics->castSphere(focal - focalOffset, focal, focalObstacleLimit);
+            MWPhysics::RayCastingResult result = rayCasting->castSphere(focal - focalOffset, focal, focalObstacleLimit);
             if (result.mHit)
             {
                 double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
@@ -240,7 +240,7 @@ namespace MWRender
             mCameraDistance = std::min(mCameraDistance, mMaxNextCameraDistance);
         osg::Vec3d cameraPos;
         getPosition(focal, cameraPos);
-        MWPhysics::PhysicsSystem::RayResult result = physics->castSphere(focal, cameraPos, cameraObstacleLimit);
+        MWPhysics::RayCastingResult result = rayCasting->castSphere(focal, cameraPos, cameraObstacleLimit);
         if (result.mHit)
             mCameraDistance = (result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length();
     }
