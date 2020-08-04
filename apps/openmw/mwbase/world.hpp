@@ -416,6 +416,7 @@ namespace MWBase
 
             virtual void togglePOV(bool force = false) = 0;
             virtual bool isFirstPerson() const = 0;
+            virtual bool isPreviewModeEnabled() const = 0;
             virtual void togglePreviewMode(bool enable) = 0;
             virtual bool toggleVanityMode(bool enable) = 0;
             virtual void allowVanityMode(bool allow) = 0;
