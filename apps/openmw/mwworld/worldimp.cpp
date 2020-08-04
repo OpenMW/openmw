@@ -2394,6 +2394,11 @@ namespace MWWorld
     {
         return mRendering->getCamera()->isFirstPerson();
     }
+    
+    bool World::isPreviewModeEnabled() const
+    {
+        return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::Preview;
+    }
 
     void World::togglePreviewMode(bool enable)
     {

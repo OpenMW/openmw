@@ -524,6 +524,7 @@ namespace MWWorld
             void togglePOV(bool force = false) override;
 
             bool isFirstPerson() const override;
+            bool isPreviewModeEnabled() const override;
 
             void togglePreviewMode(bool enable) override;
 

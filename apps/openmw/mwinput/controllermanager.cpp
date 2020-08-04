@@ -89,7 +89,7 @@ namespace MWInput
 
     bool ControllerManager::update(float dt)
     {
-        mGamepadPreviewMode = mActionManager->getPreviewDelay() == 1.f;
+        mGamepadPreviewMode = mActionManager->isPreviewModeEnabled();
 
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
@@ -287,7 +287,7 @@ namespace MWInput
         }
         else
         {
-            if (mGamepadPreviewMode && arg.value) // Preview Mode Gamepad Zooming
+            if (mGamepadPreviewMode) // Preview Mode Gamepad Zooming
             {
                 if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
