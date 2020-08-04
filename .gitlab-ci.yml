@@ -59,7 +59,7 @@ variables: &cs-targets
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
-  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' --version=3.18.0 -y
   - choco install vswhere -y
   - choco install ninja -y
   - choco install python -y
