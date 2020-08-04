@@ -34,6 +34,9 @@ namespace Shader
             foundPos = source.find_first_of("\n\r", foundPos);
             foundPos = source.find_first_not_of("\n\r", foundPos);
 
+            if (foundPos == std::string::npos)
+                break;
+
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
             int lineNumber;
             if (lineDirectivePosition != std::string::npos)
