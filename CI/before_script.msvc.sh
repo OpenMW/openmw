@@ -258,10 +258,10 @@ download() {
 
 			if [ -z $VERBOSE ]; then
 				RET=0
-				curl --silent --retry 10 -kLy 5 -o $FILE $URL || RET=$?
+				curl --silent --retry 10 -Ly 5 -o $FILE $URL || RET=$?
 			else
 				RET=0
-				curl --retry 10 -kLy 5 -o $FILE $URL || RET=$?
+				curl --retry 10 -Ly 5 -o $FILE $URL || RET=$?
 			fi
 
 			if [ $RET -ne 0 ]; then
