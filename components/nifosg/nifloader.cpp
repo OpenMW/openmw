@@ -625,8 +625,8 @@ namespace NifOsg
             bool isAnimated = false;
             handleNodeControllers(nifNode, node, animflags, isAnimated);
             hasAnimatedParents |= isAnimated;
-            // Make sure empty nodes are not optimized away so the physics system can find them.
-            if (isAnimated || (hasAnimatedParents && (skipMeshes || hasMarkers)))
+            // Make sure empty nodes and animated shapes are not optimized away so the physics system can find them.
+            if (isAnimated || (hasAnimatedParents && ((skipMeshes || hasMarkers) || isGeometry)))
                 node->setDataVariance(osg::Object::DYNAMIC);
 
             // LOD and Switch nodes must be wrapped by a transform (the current node) to support transformations properly
