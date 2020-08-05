@@ -89,17 +89,21 @@ namespace MWRender
         MWBase::World* world = MWBase::Environment::get().getWorld();
         osg::Vec3d sideOffset = orient * osg::Vec3d(world->getHalfExtents(mCamera->getTrackingPtr()).x() - 1, 0, 0);
         float rayRight = world->getDistToNearestRayHit(
-            playerPos + sideOffset, orient * osg::Vec3d(1, 1, 0), limitToSwitchBack + 1);
+            playerPos + sideOffset, orient * osg::Vec3d(1, 0, 0), limitToSwitchBack + 1);
         float rayLeft = world->getDistToNearestRayHit(
-            playerPos - sideOffset, orient * osg::Vec3d(-1, 1, 0), limitToSwitchBack + 1);
-        float rayForward = world->getDistToNearestRayHit(
-            playerPos, orient * osg::Vec3d(0, 1, 0), limitToSwitchBack + 1);
+            playerPos - sideOffset, orient * osg::Vec3d(-1, 0, 0), limitToSwitchBack + 1);
+        float rayRightForward = world->getDistToNearestRayHit(
+            playerPos + sideOffset, orient * osg::Vec3d(1, 3, 0), limitToSwitchBack + 1);
+        float rayLeftForward = world->getDistToNearestRayHit(
+            playerPos - sideOffset, orient * osg::Vec3d(-1, 3, 0), limitToSwitchBack + 1);
+        float distRight = std::min(rayRight, rayRightForward);
+        float distLeft = std::min(rayLeft, rayLeftForward);
 
-        if (rayLeft < limitToSwitch && rayRight > limitToSwitchBack)
+        if (distLeft < limitToSwitch && distRight > limitToSwitchBack)
             mMode = Mode::RightShoulder;
-        else if (rayRight < limitToSwitch && rayLeft > limitToSwitchBack)
+        else if (distRight < limitToSwitch && distLeft > limitToSwitchBack)
             mMode = Mode::LeftShoulder;
-        else if (rayLeft > limitToSwitchBack && rayRight > limitToSwitchBack && rayForward > limitToSwitchBack)
+        else if (distRight > limitToSwitchBack && distLeft > limitToSwitchBack)
             mMode = mDefaultShoulderIsRight ? Mode::RightShoulder : Mode::LeftShoulder;
     }
 
