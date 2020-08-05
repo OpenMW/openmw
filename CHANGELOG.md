@@ -42,6 +42,7 @@
     Bug #5502: Dead zone for analogue stick movement is too small
     Bug #5507: Sound volume is not clamped on ingame settings update
     Bug #5531: Actors flee using current rotation by axis x
+    Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
     Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
