@@ -809,11 +809,11 @@ namespace MWMechanics
     void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage)
     {
         storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(npcPos));
-        for (std::vector<ESM::Pathgrid::Edge>::const_iterator it = pathGrid->mEdges.begin(); it != pathGrid->mEdges.end(); ++it)
+        for (auto& edge : pathGrid->mEdges)
         {
-            if (it->mV0 == pointIndex)
+            if (edge.mV0 == pointIndex)
             {
-                AddPointBetweenPathGridPoints(pathGrid->mPoints[it->mV0], pathGrid->mPoints[it->mV1], storage);
+                AddPointBetweenPathGridPoints(pathGrid->mPoints[edge.mV0], pathGrid->mPoints[edge.mV1], storage);
             }
         }
     }

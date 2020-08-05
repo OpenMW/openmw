@@ -329,7 +329,7 @@ If disabled then the whole character's body is pointed to the direction of view.
 
 If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be controlled in Advanced tab of the launcher.
 
 swim upward coef
 ----------------
@@ -354,5 +354,19 @@ The trainers in Morrowind choose their proposed training skills based on their 3
 If disabled then the 3 best skills of trainers and the training limits take into account fortified/drained trainer skill.
 
 If enabled then the 3 best skills of trainers and the training limits are based on the trainer base skills.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+always allow stealing from knocked out actors
+---------------------------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+By Bethesda's design, in the latest released version of Morrowind pickpocketing is impossible during combat,
+even if the fighting NPC is knocked out.
+
+This setting allows the player to steal items from fighting NPCs that were knocked out if enabled.
 
 This setting can be controlled in Advanced tab of the launcher.

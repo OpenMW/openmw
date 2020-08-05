@@ -9,11 +9,9 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <set> //UVController
+#include <set>
 
-// FlipController
 #include <osg/Texture2D>
-#include <osg/ref_ptr>
 
 #include <osg/StateSet>
 #include <osg/NodeCallback>
@@ -22,8 +20,6 @@
 
 namespace osg
 {
-    class Node;
-    class StateSet;
     class Material;
 }
 

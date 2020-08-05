@@ -2653,11 +2653,11 @@ void CharacterController::updateContinuousVfx()
     std::vector<int> effects;
     mAnimation->getLoopingEffects(effects);
 
-    for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
+    for (int effectId : effects)
     {
         if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
-            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).getMagnitude() <= 0)
-            mAnimation->removeEffect(*it);
+            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(effectId)).getMagnitude() <= 0)
+            mAnimation->removeEffect(effectId);
     }
 }
 

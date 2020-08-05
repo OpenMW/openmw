@@ -23,11 +23,10 @@ namespace MWRender
     /// \brief Camera control
     class Camera
     {
-    private:
-        struct CamData {
-            float pitch, yaw, offset;
-        };
+    public:
+        enum class Mode { Normal, Vanity, Preview, StandingPreview };
 
+    private:
         MWWorld::Ptr mTrackingPtr;
         osg::ref_ptr<const osg::Node> mTrackingNode;
         float mHeightScale;
@@ -37,28 +36,30 @@ namespace MWRender
         NpcAnimation *mAnimation;
 
         bool mFirstPersonView;
-        bool mPreviewMode;
+        Mode mMode;
+        bool mVanityAllowed;
+        bool mStandingPreviewAllowed;
+        bool mDeferredRotationAllowed;
+
         float mNearest;
         float mFurthest;
         bool mIsNearest;
 
-        struct {
-            bool enabled, allowed;
-        } mVanity;
-
         float mHeight, mBaseCameraDistance;
-        CamData mMainCam, mPreviewCam;
+        float mPitch, mYaw;
 
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
         bool mViewModeToggleQueued;
 
         float mCameraDistance;
+        float mMaxNextCameraDistance;
 
         osg::Vec3d mFocalPointAdjustment;
         osg::Vec2d mFocalPointCurrentOffset;
         osg::Vec2d mFocalPointTargetOffset;
         float mFocalPointTransitionSpeedCoef;
+        bool mSkipFocalPointTransition;
 
         // This fields are used to make focal point transition smooth if previous transition was not finished.
         float mPreviousTransitionInfluence;
@@ -76,14 +77,23 @@ namespace MWRender
 
         osg::ref_ptr<osg::NodeCallback> mUpdateCallback;
 
+        // Used to rotate player to the direction of view after exiting preview or vanity mode.
+        osg::Vec3f mDeferredRotation;
+        bool mDeferredRotationDisabled;
+        void calculateDeferredRotation();
+        void updateStandingPreviewMode();
+
     public:
         Camera(osg::Camera* camera);
         ~Camera();
 
-        MWWorld::Ptr getTrackingPtr() const;
+        /// Attach camera to object
+        void attachTo(const MWWorld::Ptr &ptr) { mTrackingPtr = ptr; }
+        MWWorld::Ptr getTrackingPtr() const { return mTrackingPtr; }
 
         void setFocalPointTransitionSpeed(float v) { mFocalPointTransitionSpeedCoef = v; }
         void setFocalPointTargetOffset(osg::Vec2d v);
+        void instantTransition();
         void enableDynamicCameraDistance(bool v) { mDynamicCameraDistanceEnabled = v; }
         void enableCrosshairInThirdPersonMode(bool v) { mShowCrosshairInThirdPersonMode = v; }
 
@@ -96,15 +106,13 @@ namespace MWRender
         /// Set where the camera is looking at. Uses Morrowind (euler) angles
         /// \param rot Rotation angles in radians
         void rotateCamera(float pitch, float yaw, bool adjust);
+        void rotateCameraToTrackingPtr();
 
-        float getYaw() const;
+        float getYaw() const { return mYaw; }
         void setYaw(float angle);
 
-        float getPitch() const;
+        float getPitch() const { return mPitch; }
         void setPitch(float angle);
-
-        /// Attach camera to object
-        void attachTo(const MWWorld::Ptr &);
 
         /// @param Force view mode switch, even if currently not allowed by the animation.
         void toggleViewMode(bool force=false);
@@ -115,11 +123,13 @@ namespace MWRender
         /// @note this may be ignored if an important animation is currently playing
         void togglePreviewMode(bool enable);
 
+        void applyDeferredPreviewRotationToPlayer(float dt);
+        void disableDeferredPreviewRotation() { mDeferredRotationDisabled = true; }
+
         /// \brief Lowers the camera for sneak.
         void setSneakOffset(float offset);
 
-        bool isFirstPerson() const
-        { return !(mVanity.enabled || mPreviewMode || !mFirstPersonView); }
+        bool isFirstPerson() const { return mFirstPersonView && mMode == Mode::Normal; }
 
         void processViewChange();
 
@@ -148,9 +158,10 @@ namespace MWRender
         /// Stores focal and camera world positions in passed arguments
         void getPosition(osg::Vec3d &focal, osg::Vec3d &camera) const;
 
-        bool isVanityOrPreviewModeEnabled() const;
+        bool isVanityOrPreviewModeEnabled() const { return mMode != Mode::Normal; }
+        Mode getMode() const { return mMode; }
 
-        bool isNearest() const;
+        bool isNearest() const { return mIsNearest; }
     };
 }
 

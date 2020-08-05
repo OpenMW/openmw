@@ -136,7 +136,7 @@ This setting controls third person view mode.
 False: View is centered on the character's head. Crosshair is hidden.
 True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be controlled in Advanced tab of the launcher.
 
 view over shoulder offset
 -------------------------
@@ -171,6 +171,30 @@ zoom out when move coef
 
 This setting makes difference only in third person mode if 'view over shoulder' is enabled.
 Slightly pulls camera away (or closer in case of negative value) when the character moves. To disable set it to zero.
+
+This setting can only be configured by editing the settings configuration file.
+
+preview if stand still
+----------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If enabled then the character rotation is not synchonized with the camera rotation while the character doesn't move and not in combat mode.
+
+This setting can only be configured by editing the settings configuration file.
+
+deferred preview rotation
+-------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Makes difference only in third person mode.
+If enabled then the character smoothly rotates to the view direction after exiting preview or vanity mode.
+If disabled then the camera rotates rather than the character.
 
 This setting can only be configured by editing the settings configuration file.
 

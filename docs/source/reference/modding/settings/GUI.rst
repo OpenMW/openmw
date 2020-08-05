@@ -148,7 +148,8 @@ color topic enable
 :Range:		True/False
 :Default:	False
 
-Control wether additionnal formatting will be applied to dialogs topic. See 'color topic specific' and 'color topic exhausted' for details.
+This setting controls whether the topics available in the dialogue topic list are coloured according to their state.
+See 'color topic specific' and 'color topic exhausted' for details.
 
 color topic specific
 --------------------
@@ -157,11 +158,11 @@ color topic specific
 :Range:		0.0 to 1.0
 :Default:	empty
 
-This setting overrides the color of keywords in the dialogue topic window.
+This setting overrides the colour of dialogue topics that have a response unique to the actors speaking.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
 The alpha value is currently ignored.
 
-The color is overriden if the actor is about to give an answer that is unique to him (that is, dialogue with their object ID in the Actor field) that wasn't seen yet.
+A topic response is considered unique if its Actor filter field contains the speaking actor's object ID and hasn't yet been read.
 
 color topic exhausted
 ---------------------
@@ -170,8 +171,8 @@ color topic exhausted
 :Range:		0.0 to 1.0
 :Default:	empty
 
-This setting overrides the color of keywords in the dialogue topic window.
+This setting overrides the colour of dialogue topics which have been "exhausted" by the player.
 The value is composed of four floating point values representing the red, green, blue and alpha channels.
 The alpha value is currently ignored.
 
-The color is overridden if the next actor responses to the topic keyword has already been seen by the player.
+A topic is considered "exhausted" if the response the player is about to see has already been seen.

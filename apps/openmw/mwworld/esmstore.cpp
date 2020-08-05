@@ -9,6 +9,47 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
+#include "../mwmechanics/spelllist.hpp"
+
+namespace
+{
+    void readRefs(const ESM::Cell& cell, std::map<ESM::RefNum, std::string>& refs, std::vector<ESM::ESMReader>& readers)
+    {
+        for (size_t i = 0; i < cell.mContextList.size(); i++)
+        {
+            size_t index = cell.mContextList[i].index;
+            if (readers.size() <= index)
+                readers.resize(index + 1);
+            cell.restore(readers[index], i);
+            ESM::CellRef ref;
+            ref.mRefNum.mContentFile = ESM::RefNum::RefNum_NoContentFile;
+            bool deleted = false;
+            while(cell.getNextRef(readers[index], ref, deleted))
+            {
+                if(deleted)
+                    refs.erase(ref.mRefNum);
+                else if (std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum) == cell.mMovedRefs.end())
+                {
+                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
+                    refs[ref.mRefNum] = ref.mRefID;
+                }
+            }
+        }
+        for(const auto& it : cell.mLeasedRefs)
+        {
+            bool deleted = it.second;
+            if(deleted)
+                refs.erase(it.first.mRefNum);
+            else
+            {
+                ESM::CellRef ref = it.first;
+                Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
+                refs[ref.mRefNum] = ref.mRefID;
+            }
+        }
+    }
+}
+
 namespace MWWorld
 {
 
@@ -146,7 +187,33 @@ void ESMStore::setUp(bool validateRecords)
     mDialogs.setUp();
 
     if (validateRecords)
+    {
         validate();
+        countRecords();
+    }
+}
+
+void ESMStore::countRecords()
+{
+    if(!mRefCount.empty())
+        return;
+    std::map<ESM::RefNum, std::string> refs;
+    std::vector<ESM::ESMReader> readers;
+    for(auto it = mCells.intBegin(); it != mCells.intEnd(); it++)
+        readRefs(*it, refs, readers);
+    for(auto it = mCells.extBegin(); it != mCells.extEnd(); it++)
+        readRefs(*it, refs, readers);
+    for(const auto& pair : refs)
+        mRefCount[pair.second]++;
+}
+
+int ESMStore::getRefCount(const std::string& id) const
+{
+    const std::string lowerId = Misc::StringUtils::lowerCase(id);
+    auto it = mRefCount.find(lowerId);
+    if(it == mRefCount.end())
+        return 0;
+    return it->second;
 }
 
 void ESMStore::validate()
@@ -344,4 +411,23 @@ void ESMStore::validate()
             throw std::runtime_error ("Invalid player record (race or class unavailable");
     }
 
+    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& originalId) const
+    {
+        const std::string id = Misc::StringUtils::lowerCase(originalId);
+        auto result = mSpellListCache.find(id);
+        std::shared_ptr<MWMechanics::SpellList> ptr;
+        if (result != mSpellListCache.end())
+            ptr = result->second.lock();
+        if (!ptr)
+        {
+            int type = find(id);
+            ptr = std::make_shared<MWMechanics::SpellList>(id, type);
+            if (result != mSpellListCache.end())
+                result->second = ptr;
+            else
+                mSpellListCache.insert({id, ptr});
+            return {ptr, false};
+        }
+        return {ptr, true};
+    }
 } // end namespace

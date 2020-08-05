@@ -54,7 +54,7 @@ namespace MWInput
 
         void setAttemptJump(bool enabled) { mAttemptJump = enabled; }
 
-        float getPreviewDelay() const { return mPreviewPOVDelay; };
+        bool isPreviewModeEnabled();
 
     private:
         void handleGuiArrowKey(int action);

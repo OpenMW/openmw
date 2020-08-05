@@ -7,6 +7,7 @@
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #4021: Attributes and skills are not stored as floats
+    Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4623: Corprus implementation is incorrect
     Bug #4764: Data race in osg ParticleSystem
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
@@ -40,7 +41,9 @@
     Bug #5499: Faction advance is available when requirements not met
     Bug #5502: Dead zone for analogue stick movement is too small
     Bug #5507: Sound volume is not clamped on ingame settings update
+    Bug #5531: Actors flee using current rotation by axis x
     Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
+    Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
@@ -48,8 +51,12 @@
     Feature #5445: Handle NiLines
     Feature #5457: Realistic diagonal movement
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
+    Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
+    Feature #5525: Search fields tweaks (utf-8)
+    Feature #5545: Option to allow stealing from an unconscious NPC during combat
     Task #5480: Drop Qt4 support
+    Task #5520: Improve cell name autocompleter implementation
 
 0.46.0
 ------

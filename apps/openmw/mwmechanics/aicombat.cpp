@@ -344,6 +344,7 @@ namespace MWMechanics
                     {
                         storage.mFleeBlindRunTimer += duration;
 
+                        storage.mMovement.mRotation[0] = -actor.getRefData().getPosition().rot[0];
                         storage.mMovement.mRotation[2] = osg::PI + getZAngleToDir(target.getRefData().getPosition().asVec3()-actor.getRefData().getPosition().asVec3());
                         storage.mMovement.mPosition[1] = 1;
                         updateActorsMovement(actor, duration, storage);

@@ -45,9 +45,9 @@ namespace
 
     void addToLevList(ESM::LevelledListBase* list, const std::string& itemId, int level)
     {
-        for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end(); ++it)
+        for (auto& levelItem : list->mList)
         {
-            if (it->mLevel == level && itemId == it->mId)
+            if (levelItem.mLevel == level && itemId == levelItem.mId)
                 return;
         }
 
@@ -563,9 +563,9 @@ namespace MWScript
                         effects += store.getMagicEffects();
                     }
 
-                    for (MWMechanics::MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
+                    for (const auto& effect : effects)
                     {
-                        if (it->first.mId == key && it->second.getModifier() > 0)
+                        if (effect.first.mId == key && effect.second.getModifier() > 0)
                         {
                             runtime.push(1);
                             return;

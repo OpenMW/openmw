@@ -372,6 +372,7 @@ namespace MWRender
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
@@ -653,7 +654,7 @@ namespace MWRender
         if(ptr == mCamera->getTrackingPtr() &&
            !mCamera->isVanityOrPreviewModeEnabled())
         {
-            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
+            mCamera->rotateCameraToTrackingPtr();
         }
 
         ptr.getRefData().getBaseNode()->setAttitude(rot);

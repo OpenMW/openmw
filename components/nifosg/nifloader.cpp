@@ -3,7 +3,6 @@
 #include <mutex>
 
 #include <osg/Matrixf>
-#include <osg/MatrixTransform>
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
@@ -43,8 +42,9 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
+#include "matrixtransform.hpp"
+#include "nodeindexholder.hpp"
 #include "particle.hpp"
-#include "userdata.hpp"
 
 namespace
 {
@@ -170,31 +170,6 @@ namespace
 
 namespace NifOsg
 {
-    class CollisionSwitch : public osg::MatrixTransform
-    {
-    public:
-        CollisionSwitch() : osg::MatrixTransform()
-        {
-        }
-
-        CollisionSwitch(const CollisionSwitch& copy, const osg::CopyOp& copyop)
-            : osg::MatrixTransform(copy, copyop)
-        {
-        }
-
-        META_Node(NifOsg, CollisionSwitch)
-
-        CollisionSwitch(const osg::Matrixf& transformations, bool enabled) : osg::MatrixTransform(transformations)
-        {
-            setEnabled(enabled);
-        }
-
-        void setEnabled(bool enabled)
-        {
-            setNodeMask(enabled ? ~0 : Loader::getIntersectionDisabledNodeMask());
-        }
-    };
-
     bool Loader::sShowMarkers = false;
 
     void Loader::setShowMarkers(bool show)
@@ -501,14 +476,6 @@ namespace NifOsg
             case Nif::RC_NiBillboardNode:
                 dataVariance = osg::Object::DYNAMIC;
                 break;
-            case Nif::RC_NiCollisionSwitch:
-            {
-                bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
-                node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
-                // This matrix transform must not be combined with another matrix transform.
-                dataVariance = osg::Object::DYNAMIC;
-                break;
-            }
             default:
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
@@ -521,7 +488,14 @@ namespace NifOsg
                 break;
             }
             if (!node)
-                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+                node = new NifOsg::MatrixTransform(nifNode->trafo);
+
+            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
+            {
+                node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // This node must not be combined with another node.
+                dataVariance = osg::Object::DYNAMIC;
+            }
 
             node->setDataVariance(dataVariance);
 
@@ -549,14 +523,11 @@ namespace NifOsg
             if (!rootNode)
                 rootNode = node;
 
-            // UserData used for a variety of features:
+            // The original NIF record index is used for a variety of features:
             // - finding the correct emitter node for a particle system
             // - establishing connections to the animated collision shapes, which are handled in a separate loader
             // - finding a random child NiNode in NiBspArrayController
-            // - storing the previous 3x3 rotation and scale values for when a KeyframeController wants to
-            //   change only certain elements of the 4x4 transform
-            node->getOrCreateUserDataContainer()->addUserObject(
-                new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
+            node->getOrCreateUserDataContainer()->addUserObject(new NodeIndexHolder(nifNode->recIndex));
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {
