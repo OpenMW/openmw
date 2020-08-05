@@ -455,8 +455,7 @@ namespace MWMechanics
         bool result;
         std::tie(mSpellList, result) = MWBase::Environment::get().getWorld()->getStore().getSpellList(actorId);
         mSpellList->addListener(this);
-        for(const auto& id : mSpellList->getSpells())
-            addSpell(SpellList::getSpell(id));
+        addAllToInstance(mSpellList->getSpells());
         return result;
     }
 
