@@ -434,8 +434,9 @@ namespace MWMechanics
         const auto& baseSpells = mSpellList->getSpells();
         for (const auto& it : mSpells)
         {
-            //Don't save spells stored in the base record
-            if(std::find(baseSpells.begin(), baseSpells.end(), it.first->mId) == baseSpells.end())
+            // Don't save spells and powers stored in the base record
+            if((it.first->mData.mType != ESM::Spell::ST_Spell && it.first->mData.mType != ESM::Spell::ST_Power) ||
+                std::find(baseSpells.begin(), baseSpells.end(), it.first->mId) == baseSpells.end())
             {
                 ESM::SpellState::SpellParams params;
                 params.mEffectRands = it.second.mEffectRands;
