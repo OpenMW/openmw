@@ -110,6 +110,24 @@ namespace NifOsg
             {
                 case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
+                case Nif::InterpolationType_Quadratic:
+                {
+                    // Using a cubic Hermite spline.
+                    // b1(t) = 2t^3  - 3t^2 + 1
+                    // b2(t) = -2t^3 + 3t^2
+                    // b3(t) = t^3 - 2t^2 + t
+                    // b4(t) = t^3 - t^2
+                    // f(t) = a.mValue * b1(t) + b.mValue * b2(t) + a.mOutTan * b3(t) + b.mInTan * b4(t)
+                    const float t = fraction;
+                    const float t2 = t * t;
+                    const float t3 = t2 * t;
+                    const float b1 = 2.f * t3 - 3.f * t2 + 1;
+                    const float b2 = -2.f * t3 + 3.f * t2;
+                    const float b3 = t3 - 2.f * t2 + t;
+                    const float b4 = t3 - t2;
+                    return a.mValue * b1 + b.mValue * b2 + a.mOutTan * b3 + b.mInTan * b4;
+                }
+                // TODO: Implement TBC interpolation
                 default:
                     return a.mValue + ((b.mValue - a.mValue) * fraction);
             }
@@ -120,6 +138,7 @@ namespace NifOsg
             {
                 case Nif::InterpolationType_Constant:
                     return fraction > 0.5f ? b.mValue : a.mValue;
+                // TODO: Implement Quadratic and TBC interpolation
                 default:
                 {
                     osg::Quat result;
