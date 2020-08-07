@@ -149,8 +149,6 @@ namespace MWScript
         int count = 0;
         int success = 0;
 
-        const MWWorld::Store<ESM::Script>& scripts = mStore.get<ESM::Script>();
-
         for (auto& script : mStore.get<ESM::Script>())
         {
             if (!std::binary_search (mScriptBlacklist.begin(), mScriptBlacklist.end(),

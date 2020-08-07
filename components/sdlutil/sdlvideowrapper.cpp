@@ -102,7 +102,6 @@ namespace SDLUtil
         int w = 0;
         int h = 0;
         auto index = SDL_GetWindowDisplayIndex(mWindow);
-        bool reposition = false;
         SDL_GetDisplayBounds(index, &rect);
         SDL_GetWindowSize(mWindow, &w, &h);
 
