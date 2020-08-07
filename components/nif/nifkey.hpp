@@ -26,11 +26,11 @@ enum InterpolationType
 template<typename T>
 struct KeyT {
     T mValue;
+    T mInTan; // Only for Quadratic interpolation, and never for QuaternionKeyList
+    T mOutTan; // Only for Quadratic interpolation, and never for QuaternionKeyList
 
-    // FIXME: Implement Quadratic and TBC interpolation
+    // FIXME: Implement TBC interpolation
     /*
-    T mForwardValue;  // Only for Quadratic interpolation, and never for QuaternionKeyList
-    T mBackwardValue; // Only for Quadratic interpolation, and never for QuaternionKeyList
     float mTension;    // Only for TBC interpolation
     float mBias;       // Only for TBC interpolation
     float mContinuity; // Only for TBC interpolation
@@ -136,8 +136,8 @@ private:
     static void readQuadratic(NIFStream &nif, KeyT<U> &key)
     {
         readValue(nif, key);
-        /*key.mForwardValue = */(nif.*getValue)();
-        /*key.mBackwardValue = */(nif.*getValue)();
+        key.mInTan = (nif.*getValue)();
+        key.mOutTan = (nif.*getValue)();
     }
 
     static void readQuadratic(NIFStream &nif, KeyT<osg::Quat> &key)
