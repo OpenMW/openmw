@@ -327,7 +327,18 @@ Affects side and diagonal movement. Enabling this setting makes movement more re
 
 If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.
 
-If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.
+If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+swim upward correction
+----------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Makes player swim a bit upward from the line of sight. Applies only in third person mode. Intended to make simpler swimming without diving.
 
 This setting can be controlled in Advanced tab of the launcher.
 
@@ -336,9 +347,10 @@ swim upward coef
 
 :Type:		floating point
 :Range:		-1.0 to 1.0
-:Default:	0.0
+:Default:	0.2
 
-Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Intended to make simpler swimming without diving. Recommened range of values is from 0.0 to 0.2.
+Regulates strength of the "swim upward correction" effect (if enabled).
+Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Recommened range of values is from 0.0 to 0.25.
 
 This setting can only be configured by editing the settings configuration file.
 

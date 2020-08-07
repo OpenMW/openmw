@@ -2243,7 +2243,8 @@ void CharacterController::update(float duration, bool animationOnly)
             swimmingPitch += osg::clampBetween(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
             mAnimation->setBodyPitchRadians(swimmingPitch);
         }
-        if (inwater && isPlayer && !isFirstPersonPlayer)
+        static const bool swimUpwardCorrection = Settings::Manager::getBool("swim upward correction", "Game");
+        if (inwater && isPlayer && !isFirstPersonPlayer && swimUpwardCorrection)
         {
             static const float swimUpwardCoef = Settings::Manager::getFloat("swim upward coef", "Game");
             static const float swimForwardCoef = sqrtf(1.0f - swimUpwardCoef * swimUpwardCoef);
