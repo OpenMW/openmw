@@ -197,7 +197,6 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
             float val = 0;
             if (!(*it).empty())
                 val = it->interpKey(input);
-            val = std::max(0.f, std::min(1.f, val));
 
             SceneUtil::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
             if (target.getWeight() != val)
