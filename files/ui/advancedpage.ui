@@ -116,6 +116,16 @@
          </property>
         </widget>
        </item>
+       <item>
+        <widget class="QCheckBox" name="swimUpwardCorrectionCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes player swim a bit upward from the line of sight. Applies only in third person mode. Intended to make simpler swimming without diving.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Swim upward correction</string>
+         </property>
+        </widget>
+       </item>
        <item alignment="Qt::AlignLeft">
         <widget class="QWidget" name="unarmedFactorsStrengthGroup">
          <property name="toolTip">
@@ -165,6 +175,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="enableNavigatorCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enable navigator. When enabled background threads are started to build nav mesh for world geometry. Pathfinding system uses nav mesh to build paths. When disabled only pathgrid is used to build paths. Single-core CPU systems may have big performance impact on exiting interior location and moving across exterior world. May slightly affect performance on multi-core CPU systems. Multi-core CPU systems may have different latency for nav mesh update depending on other settings and system performance. Moving across external world, entering/exiting location produce nav mesh update. NPC and creatures may not be able to find path before nav mesh is built around them. Try to disable this if you want to have old fashioned AI which doesn’t know where to go when you stand behind that stone and casting a firebolt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Build nav mesh for world geometry</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -179,6 +199,52 @@
       </attribute>
       <layout class="QVBoxLayout">
        <item>
+        <widget class="QCheckBox" name="autoUseObjectNormalMapsCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this option is enabled, normal maps are automatically recognized and used if they are named appropriately
+(see 'normal map pattern', e.g. for a base texture foo.dds, the normal map texture would have to be named foo_n.dds).
+If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file (.nif or .osg file). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Auto use object normal maps</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="autoUseObjectSpecularMapsCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If this option is enabled, specular maps are automatically recognized and used if they are named appropriately
+(see 'specular map pattern', e.g. for a base texture foo.dds,
+the specular map texture would have to be named foo_spec.dds).
+If this option is disabled, normal maps are only used if they are explicitly listed within the mesh file
+(.osg file, not supported in .nif files). Affects objects.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Auto use object specular maps</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="autoUseTerrainNormalMapsCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;See 'auto use object normal maps'. Affects terrain.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Auto use terrain normal maps</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="autoUseTerrainSpecularMapsCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a file with pattern 'terrain specular map pattern' exists, use that file as a 'diffuse specular' map. The texture must contain the layer colour in the RGB channel (as usual), and a specular multiplier in the alpha channel.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Auto use terrain specular maps</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QCheckBox" name="bumpMapLocalLightingCheckBox">
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Normally environment map reflections aren't affected by lighting, which makes environment-mapped (and thus bump-mapped objects) glow in the dark.
@@ -188,6 +254,17 @@ Affected objects will use shaders.
          </property>
          <property name="text">
           <string>Bump/reflect map local lighting</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="radialFogCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;By default, the fog becomes thicker proportionally to your distance from the clipping plane set at the clipping distance, which causes distortion at the edges of the screen.
+This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Radial fog</string>
          </property>
         </widget>
        </item>
@@ -247,21 +324,9 @@ Affected objects will use shaders.
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="viewOverShoulderCheckBox">
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls third person view mode.&lt;/p&gt;&lt;p&gt;False: View is centered on the character's head. Crosshair is hidden.
-True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
-&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>View over the shoulder</string>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QCheckBox" name="turnToMovementDirectionCheckBox">
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it also changes straight right and straight left movement.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Affects side and diagonal movement. Enabling this setting makes movement more realistic.&lt;/p&gt;&lt;p&gt;If disabled then the whole character's body is pointed to the direction of view. Diagonal movement has no special animation and causes sliding.&lt;/p&gt;&lt;p&gt;If enabled then the character turns lower body to the direction of movement. Upper body is turned partially. Head is always pointed to the direction of view. In combat mode it works only for diagonal movement. In non-combat mode it changes straight right and straight left movement as well. Also turns the whole body up or down when swimming according to the movement direction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Turn to movement direction</string>
@@ -317,6 +382,122 @@ but also increase the amount of rendered geometry and significantly reduce the f
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="cameraSettings">
+      <attribute name="title">
+       <string>Camera</string>
+      </attribute>
+      <layout class="QVBoxLayout">
+       <item>
+        <widget class="QCheckBox" name="viewOverShoulderCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;This setting controls third person view mode.&lt;/p&gt;&lt;p&gt;False: View is centered on the character's head. Crosshair is hidden.
+True: In non-combat mode camera is positioned behind the character's shoulder. Crosshair is visible in third person mode as well.
+&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>View over the shoulder</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="viewOverShoulderGroup">
+         <layout class="QVBoxLayout" name="viewOverShoulderVerticalLayout">
+          <property name="leftMargin">
+           <number>20</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QWidget" name="defaultShoulderGroup">
+            <layout class="QHBoxLayout" name="defaultShoulderHorizontalLayout">
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="defaultShoulderLabel">
+               <property name="text">
+                <string>Default shoulder:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="defaultShoulderComboBox">
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Right</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Left</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="autoSwitchShoulderCheckBox">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When player is close to an obstacle, automatically switches camera to the shoulder that is farther away from the obstacle.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Auto switch shoulder</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="previewIfStandStillCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled then the character rotation is not synchonized with the camera rotation while the character doesn't move and not in combat mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Preview if stand still</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="deferredPreviewRotationCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled then the character smoothly rotates to the view direction after exiting preview or vanity mode. If disabled then the camera rotates rather than the character.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Deferred preview rotation</string>
+         </property>
         </widget>
        </item>
        <item>
