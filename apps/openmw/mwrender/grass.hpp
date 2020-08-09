@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <osg/BlendFunc>
 #include <osg/Group>
 #include <osg/Material>
 
@@ -26,12 +27,26 @@ namespace MWRender
         }
 
     protected:
+        virtual void setDefaults(osg::StateSet* stateset)
+        {
+            osg::BlendFunc* blendfunc (new osg::BlendFunc);
+            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+
+            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+
+            osg::Material* material = new osg::Material;
+            material->setColorMode(osg::Material::OFF);
+            material->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,mAlpha));
+            //material->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+            stateset->setAttributeAndModes(material, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+            stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+        }
+
         virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
         {
-            osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
-            osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
-            diffuse.a() = mAlpha;
-            mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
+            osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);
         }
 
     private:

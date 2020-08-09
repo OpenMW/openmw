@@ -170,17 +170,20 @@ namespace MWRender
         }
         else
         {
+            if (mNode->getStateSet())
+            {
+                // FIXME: probably there is a better way to reset stateset
+                mNode->setStateSet(nullptr);
+                osg::StateSet* stateset = mNode->getOrCreateStateSet();
+                // @grass preprocessor define would be great
+                stateset->addUniform(new osg::Uniform("isGrass", true));
+                // for some reason this uniform is added to other objects too? not only for grass
+                mStormDirectionUniform = new osg::Uniform("WindDirection", (osg::Vec3f) osg::Vec3f(0.0, 0.0, 0.0));
+                stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
+                stateset->addUniform(mStormDirectionUniform.get());
+            }
             mNode->removeUpdateCallback(mAlphaUpdater);
             mAlphaUpdater = nullptr;
         }
-
-        if (alpha != 1.f)
-        {
-            osg::StateSet* stateset = mNode->getOrCreateStateSet();
-            stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
-            stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
-        }
-        else if (osg::StateSet* stateset = mNode->getStateSet())
-            stateset->setRenderBinToInherit();
     }
 }
