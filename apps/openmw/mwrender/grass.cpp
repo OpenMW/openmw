@@ -102,9 +102,9 @@ namespace MWRender
             // @grass preprocessor define would be great
             stateset->addUniform(new osg::Uniform("isGrass", true));
             // for some reason this uniform is added to other objects too? not only for grass
-            mStormDirectionUniform = new osg::Uniform("WindDirection", (osg::Vec3f) osg::Vec3f(0.0, 0.0, 0.0));
+            mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
             stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
-            stateset->addUniform(mStormDirectionUniform.get());
+            stateset->addUniform(mWindSpeedUniform.get());
         }
 
         mNode = insert;
@@ -142,9 +142,9 @@ namespace MWRender
         const static bool useGrass = Settings::Manager::getBool("animation", "Grass");
         if (useGrass)
         {
-            // TODO: actually support storm
             float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
-            mStormDirectionUniform->set((osg::Vec3f) osg::Vec3f(0, 0, windSpeed));
+            windSpeed *= 4.f; // Note: actual wind speed is usually larger than base one from config
+            mWindSpeedUniform->set(windSpeed);
         }
 
         visibilityRatio = std::min(1.f, visibilityRatio);
@@ -178,9 +178,9 @@ namespace MWRender
                 // @grass preprocessor define would be great
                 stateset->addUniform(new osg::Uniform("isGrass", true));
                 // for some reason this uniform is added to other objects too? not only for grass
-                mStormDirectionUniform = new osg::Uniform("WindDirection", (osg::Vec3f) osg::Vec3f(0.0, 0.0, 0.0));
+                mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
                 stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
-                stateset->addUniform(mStormDirectionUniform.get());
+                stateset->addUniform(mWindSpeedUniform.get());
             }
             mNode->removeUpdateCallback(mAlphaUpdater);
             mAlphaUpdater = nullptr;
