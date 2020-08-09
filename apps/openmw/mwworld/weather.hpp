@@ -293,6 +293,7 @@ namespace MWWorld
 
         void stopSounds();
 
+        float getBaseWindSpeed() const;
         float getWindSpeed() const;
         NightDayMode getNightDayMode() const;
 
@@ -337,6 +338,7 @@ namespace MWWorld
         MoonModel mMasser;
         MoonModel mSecunda;
 
+        float mBaseWindSpeed;
         float mWindSpeed;
         float mCurrentWindSpeed;
         float mNextWindSpeed;

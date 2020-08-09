@@ -2653,7 +2653,15 @@ namespace MWWorld
         }
     }
 
-    float World::getWindSpeed()
+    float World::getBaseWindSpeed() const
+    {
+        if (isCellExterior() || isCellQuasiExterior())
+            return mWeatherManager->getBaseWindSpeed();
+        else
+            return 0.f;
+    }
+
+    float World::getWindSpeed() const
     {
         if (isCellExterior() || isCellQuasiExterior())
             return mWeatherManager->getWindSpeed();

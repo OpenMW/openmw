@@ -54,11 +54,73 @@ varying vec3 passNormal;
 
 #include "lighting.glsl"
 
+
+#if @grassAnimation
+uniform float osg_SimulationTime;
+uniform mat4 osg_ViewMatrixInverse;
+uniform bool isGrass;
+uniform vec3 WindDirection;
+uniform float Rotz;
+
+vec2 rotate(vec2 v, float a)
+{
+    float s = sin(a);
+    float c = cos(a);
+    mat2 m = mat2(c, -s, s, c);
+    return m * v;
+}
+
+vec2 grassDisplacement(vec4 worldpos, float h)
+{
+    float windSpeed = WindDirection.z * 2.0;
+    vec2 windDirection = (WindDirection.xy == vec2(0.0)) ? vec2(1.0) : WindDirection.xy;
+
+    vec3 FootPos = osg_ViewMatrixInverse[3].xyz;
+    vec3 WindVec = vec3(windSpeed * windDirection, 1.0);
+
+    float v = length(WindVec);
+    vec2 displace = vec2(2.0 * WindVec + 0.1);
+    vec2 harmonics = vec2(0.0);
+
+    harmonics += vec2((1.0 - 0.10*v) * sin(1.0*osg_SimulationTime + (h*WindDirection.xy) + worldpos.xy / 1100.0));
+    harmonics += vec2((1.0 - 0.04*v) * cos(2.0*osg_SimulationTime + (h*WindDirection.xy) + worldpos.xy / 750.0));
+    harmonics += vec2((1.0 + 0.14*v) * sin(3.0*osg_SimulationTime + (h*WindDirection.xy) + worldpos.xy / 500.0));
+    harmonics += vec2((1.0 + 0.28*v) * sin(5.0*osg_SimulationTime + (h*WindDirection.xy) + worldpos.xy / 200.0));
+
+    float d = length(worldpos.xy - FootPos.xy);
+    vec2 stomp = vec2(0.0);
+    if(d < 150.0) stomp = (60.0 / d - 0.4) * (worldpos.xy - FootPos.xy);
+    return clamp(0.004 * h, 0.0, 1.0) * (harmonics * displace + stomp);
+}
+#endif
+
 void main(void)
 {
+    vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
+
+#if @grassAnimation
+if(isGrass)
+{
+    vec4 displacedVertex = gl_Vertex;
+    vec4 worldPos = osg_ViewMatrixInverse * vec4(viewPos.xyz, 1.0);
+    float height = 1.0-(gl_ModelViewMatrix[0].z-gl_Vertex.z);
+    vec2 displ = grassDisplacement(worldPos, height);
+    vec2 grassVertex = min(vec2(10.0), displ);
+
+    if(WindDirection.xy != vec2(0.0))
+    {
+        grassVertex.xy += height*(WindDirection.xy);
+        displacedVertex.z -= 0.3 * length(displ.xy);
+    }
+
+    displacedVertex.xy += rotate(grassVertex.xy, -1.0*Rotz);
+    gl_Position = (gl_ModelViewProjectionMatrix * displacedVertex);
+}
+else
+#endif
+
     gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 
-    vec4 viewPos = (gl_ModelViewMatrix * gl_Vertex);
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);
     linearDepth = gl_Position.z;

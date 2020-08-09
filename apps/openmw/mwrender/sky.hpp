@@ -69,6 +69,7 @@ namespace MWRender
         float mDLFogFactor;
         float mDLFogOffset;
 
+        float mBaseWindSpeed;
         float mWindSpeed;
         float mCurrentWindSpeed;
         float mNextWindSpeed;

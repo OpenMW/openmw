@@ -45,6 +45,8 @@ namespace MWRender
         float mScale;
         osg::ref_ptr<osg::Group> mNode;
 
+        osg::ref_ptr<osg::Uniform> mStormDirectionUniform;
+
         void updateVisibility(osg::Vec3f& playerPos);
         void attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs);
 

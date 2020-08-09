@@ -96,6 +96,17 @@ namespace MWRender
         stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         stateset->setAttributeAndModes(defaultMat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
 
+        const static bool useGrass = Settings::Manager::getBool("animation", "Grass");
+        if(useGrass)
+        {
+            // @grass preprocessor define would be great
+            stateset->addUniform(new osg::Uniform("isGrass", true));
+            // for some reason this uniform is added to other objects too? not only for grass
+            mStormDirectionUniform = new osg::Uniform("WindDirection", (osg::Vec3f) osg::Vec3f(0.0, 0.0, 0.0));
+            stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
+            stateset->addUniform(mStormDirectionUniform.get());
+        }
+
         mNode = insert;
     }
 
@@ -126,6 +137,15 @@ namespace MWRender
         float fadeRatio = (dist - fadeStartDistance)/(fadeEndDistance - fadeStartDistance);
         if (fadeRatio > 0)
             visibilityRatio -= std::max(0.f, fadeRatio);
+
+        // having its own updateUniform function would be better, need to update it even for non visible grass
+        const static bool useGrass = Settings::Manager::getBool("animation", "Grass");
+        if (useGrass)
+        {
+            // TODO: actually support storm
+            float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
+            mStormDirectionUniform->set((osg::Vec3f) osg::Vec3f(0, 0, windSpeed));
+        }
 
         visibilityRatio = std::min(1.f, visibilityRatio);
 

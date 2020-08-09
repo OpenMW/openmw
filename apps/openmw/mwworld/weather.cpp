@@ -533,6 +533,7 @@ WeatherManager::WeatherManager(MWRender::RenderingManager& rendering, MWWorld::E
     , mWeatherSettings()
     , mMasser("Masser")
     , mSecunda("Secunda")
+    , mBaseWindSpeed(0.f)
     , mWindSpeed(0.f)
     , mCurrentWindSpeed(0.f)
     , mNextWindSpeed(0.f)
@@ -708,6 +709,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
     {
         mRendering.setSkyEnabled(false);
         stopSounds();
+        mBaseWindSpeed = 0.f;
         mWindSpeed = 0.f;
         mCurrentWindSpeed = 0.f;
         mNextWindSpeed = 0.f;
@@ -718,6 +720,7 @@ void WeatherManager::update(float duration, bool paused, const TimeStamp& time, 
 
     if (!paused)
     {
+        mBaseWindSpeed = mResult.mBaseWindSpeed;
         mWindSpeed = mResult.mWindSpeed;
         mCurrentWindSpeed = mResult.mCurrentWindSpeed;
         mNextWindSpeed = mResult.mNextWindSpeed;
@@ -827,6 +830,11 @@ void WeatherManager::stopSounds()
         MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
     mAmbientSound = nullptr;
     mPlayingSoundID.clear();
+}
+
+float WeatherManager::getBaseWindSpeed() const
+{
+    return mBaseWindSpeed;
 }
 
 float WeatherManager::getWindSpeed() const
@@ -1125,6 +1133,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mCloudBlendFactor = 0;
     mResult.mNextWindSpeed = 0;
     mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(weatherID, mWindSpeed);
+    mResult.mBaseWindSpeed = mWeatherSettings[weatherID].mWindSpeed;
 
     mResult.mCloudSpeed = current.mCloudSpeed;
     mResult.mGlareView = current.mGlareView;
@@ -1216,6 +1225,7 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
 
     mResult.mCurrentWindSpeed = calculateWindSpeed(mCurrentWeather, mCurrentWindSpeed);
     mResult.mNextWindSpeed = calculateWindSpeed(mNextWeather, mNextWindSpeed);
+    mResult.mBaseWindSpeed = lerp(current.mBaseWindSpeed, other.mBaseWindSpeed, factor);
 
     mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
     mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
