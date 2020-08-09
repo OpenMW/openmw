@@ -72,7 +72,7 @@ vec2 rotate(vec2 v, float a)
 
 vec2 grassDisplacement(vec4 worldpos, float h)
 {
-    float windSpeed = WindDirection.z * 2.0;
+    float windSpeed = WindDirection.z * 4.0;
     vec2 windDirection = (WindDirection.xy == vec2(0.0)) ? vec2(1.0) : WindDirection.xy;
 
     vec3 FootPos = osg_ViewMatrixInverse[3].xyz;
