@@ -5,15 +5,12 @@
   <layout class="QVBoxLayout" name="pageVerticalLayout">
    <item>
     <widget class="QTabWidget" name="AdvancedTabWidget">
-     <property name="tabPosition">
-      <enum>QTabWidget::West</enum>
-     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
      <widget class="QWidget" name="GameMechanics">
       <attribute name="title">
-       <string>Game mechanics</string>
+       <string>Game Mechanics</string>
       </attribute>
       <layout class="QVBoxLayout">
        <item>
@@ -509,9 +506,9 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="InterfaceChanges">
+     <widget class="QWidget" name="Interface">
       <attribute name="title">
-       <string>Interface changes</string>
+       <string>Interface</string>
       </attribute>
       <layout class="QVBoxLayout">
        <item>
@@ -618,7 +615,7 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
      </widget>
      <widget class="QWidget" name="BugFixes">
       <attribute name="title">
-       <string>Bug fixes</string>
+       <string>Bug Fixes</string>
       </attribute>
       <layout class="QVBoxLayout">
        <item>
