@@ -739,9 +739,9 @@ namespace MWWorld
         refNumToID[ref.mRefNum] = ref.mRefID;
     }
 
-    void CellStore::updateGrassVisibility()
+    void CellStore::updateGrass()
     {
-        mGrass.updateGrassVisibility();
+        mGrass.update();
     }
 
     void CellStore::insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs)

@@ -51,6 +51,10 @@ uniform mat2 bumpMapMatrix;
 
 uniform bool simpleWater;
 
+#if @grassAnimation
+uniform bool isGrass;
+#endif
+
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -206,4 +210,10 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
     applyShadowDebugOverlay();
+
+    if (isGrass)
+    {
+        if (euclideanDepth > @grassFadeStart)
+            gl_FragData[0].a *= 1.0-smoothstep(@grassFadeStart, @grassFadeEnd, euclideanDepth);
+    }
 }

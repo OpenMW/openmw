@@ -256,7 +256,7 @@ namespace MWWorld
 
             void setWaterLevel (float level);
 
-            void updateGrassVisibility();
+            void updateGrass();
 
             void insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs);
 

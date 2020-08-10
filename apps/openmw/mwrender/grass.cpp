@@ -13,12 +13,21 @@
 
 namespace MWRender
 {
-    void Grass::updateGrassVisibility()
+    void Grass::update()
     {
         osg::Vec3f playerPos(MWMechanics::getPlayer().getRefData().getPosition().asVec3());
         for (MWRender::GrassItem& item : mItems)
         {
             item.updateVisibility(playerPos);
+        }
+
+        const static bool useAnimation = Settings::Manager::getBool("animation", "Grass");
+        if (!useAnimation)
+            return;
+
+        for (MWRender::GrassItem& item : mItems)
+        {
+            item.update();
         }
     }
 
@@ -70,44 +79,12 @@ namespace MWRender
         return false;
     }
 
-    void GrassItem::attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs)
+    void GrassItem::update()
     {
-        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert (new SceneUtil::PositionAttitudeTransform);
-        cellnode->addChild(insert);
-
-        insert->setPosition(mPos.asVec3());
-        insert->setScale(osg::Vec3f(mScale, mScale, mScale));
-        insert->setAttitude(
-            osg::Quat(mPos.rot[2], osg::Vec3(0, 0, -1)) *
-            osg::Quat(mPos.rot[1], osg::Vec3(0, -1, 0)) *
-            osg::Quat(mPos.rot[0], osg::Vec3(-1, 0, 0)));
-
-        insert->setNodeMask(Mask_Grass);
-        osg::ref_ptr<SceneUtil::LightListCallback> lightListCallback = new SceneUtil::LightListCallback;
-        insert->addCullCallback(lightListCallback);
-
-        rs->getSceneManager()->getInstance("meshes\\" + mModel, insert);
-
-        osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
-        defaultMat->setColorMode(osg::Material::OFF);
-        defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-        osg::StateSet* stateset = insert->getOrCreateStateSet();
-        stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-        stateset->setAttributeAndModes(defaultMat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
-        const static bool useGrass = Settings::Manager::getBool("animation", "Grass");
-        if(useGrass)
-        {
-            // @grass preprocessor define would be great
-            stateset->addUniform(new osg::Uniform("isGrass", true));
-            // for some reason this uniform is added to other objects too? not only for grass
-            mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
-            stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
-            stateset->addUniform(mWindSpeedUniform.get());
-        }
-
-        mNode = insert;
+        // having its own updateUniform function would be better, need to update it even for non visible grass
+        float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
+        windSpeed *= 4.f; // Note: actual wind speed is usually larger than base one from config
+        mWindSpeedUniform->set(windSpeed);
     }
 
     void GrassItem::updateVisibility(osg::Vec3f& playerPos)
@@ -126,70 +103,38 @@ namespace MWRender
         }
         else
             mNode->setNodeMask(Mask_Grass);
-
-        static const float fadeStart = std::max(0.f, Settings::Manager::getFloat("fade start", "Grass"));
-        if (fadeStart >= 1.f)
-            return;
-
-        float visibilityRatio = 1.0;
-        float fadeStartDistance = grassDistance*fadeStart;
-        float fadeEndDistance = grassDistance;
-        float fadeRatio = (dist - fadeStartDistance)/(fadeEndDistance - fadeStartDistance);
-        if (fadeRatio > 0)
-            visibilityRatio -= std::max(0.f, fadeRatio);
-
-        // having its own updateUniform function would be better, need to update it even for non visible grass
-        const static bool useGrass = Settings::Manager::getBool("animation", "Grass");
-        if (useGrass)
-        {
-            float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
-            windSpeed *= 4.f; // Note: actual wind speed is usually larger than base one from config
-            mWindSpeedUniform->set(windSpeed);
-        }
-
-        visibilityRatio = std::min(1.f, visibilityRatio);
-
-        setAlpha(visibilityRatio);
     }
 
-    void GrassItem::setAlpha(float alpha)
+    void GrassItem::attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs)
     {
-        if (mVisibility == alpha)
-            return;
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> insert (new SceneUtil::PositionAttitudeTransform);
+        cellnode->addChild(insert);
 
-        mVisibility = alpha;
-        if (alpha != 1.f)
+        insert->setPosition(mPos.asVec3());
+        insert->setScale(osg::Vec3f(mScale, mScale, mScale));
+        insert->setAttitude(
+            osg::Quat(mPos.rot[2], osg::Vec3(0, 0, -1)) *
+            osg::Quat(mPos.rot[1], osg::Vec3(0, -1, 0)) *
+            osg::Quat(mPos.rot[0], osg::Vec3(-1, 0, 0)));
+
+        insert->setNodeMask(Mask_Grass);
+        osg::ref_ptr<SceneUtil::LightListCallback> lightListCallback = new SceneUtil::LightListCallback;
+        insert->addCullCallback(lightListCallback);
+
+        rs->getSceneManager()->getInstance("meshes\\" + mModel, insert);
+
+        const static bool useAnimation = Settings::Manager::getBool("animation", "Grass");
+        if(useAnimation)
         {
-            if (mAlphaUpdater == nullptr)
-            {
-                mAlphaUpdater = new MWRender::GrassUpdater(alpha);
-                mNode->addUpdateCallback(mAlphaUpdater);
-            }
-            else
-                mAlphaUpdater->setAlpha(alpha);
+            osg::StateSet* stateset = insert->getOrCreateStateSet();
+            // @grass preprocessor define would be great
+            stateset->addUniform(new osg::Uniform("isGrass", true));
+            // for some reason this uniform is added to other objects too? not only for grass
+            mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
+            stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
+            stateset->addUniform(mWindSpeedUniform.get());
         }
-        else
-        {
-            if (mNode->getStateSet())
-            {
-                // FIXME: probably there is a better way to reset stateset
-                mNode->setStateSet(nullptr);
-                osg::StateSet* stateset = mNode->getOrCreateStateSet();
-                // @grass preprocessor define would be great
-                stateset->addUniform(new osg::Uniform("isGrass", true));
-                // for some reason this uniform is added to other objects too? not only for grass
-                mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
-                stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
-                stateset->addUniform(mWindSpeedUniform.get());
-                osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
-                defaultMat->setColorMode(osg::Material::OFF);
-                defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-                defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
-                stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-                stateset->setAttributeAndModes(defaultMat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-            }
-            mNode->removeUpdateCallback(mAlphaUpdater);
-            mAlphaUpdater = nullptr;
-        }
+
+        mNode = insert;
     }
 }
