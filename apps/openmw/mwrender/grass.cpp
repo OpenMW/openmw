@@ -181,6 +181,12 @@ namespace MWRender
                 mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
                 stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
                 stateset->addUniform(mWindSpeedUniform.get());
+                osg::ref_ptr<osg::Material> defaultMat (new osg::Material);
+                defaultMat->setColorMode(osg::Material::OFF);
+                defaultMat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                defaultMat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
+                stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
+                stateset->setAttributeAndModes(defaultMat, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
             }
             mNode->removeUpdateCallback(mAlphaUpdater);
             mAlphaUpdater = nullptr;
