@@ -29,9 +29,6 @@ namespace MWRender
     protected:
         virtual void setDefaults(osg::StateSet* stateset)
         {
-            osg::BlendFunc* blendfunc (new osg::BlendFunc);
-            stateset->setAttributeAndModes(blendfunc, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-
             stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
             stateset->setRenderBinMode(osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
 
