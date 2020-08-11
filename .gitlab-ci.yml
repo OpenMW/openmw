@@ -57,6 +57,7 @@ variables: &cs-targets
     - windows
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolately/" --priority=1
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
   - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' --version=3.18.0 -y
@@ -146,6 +147,7 @@ Windows_Ninja_CS_RelWithDebInfo:
     - windows
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolately/" --priority=1
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
   - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
