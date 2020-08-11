@@ -19,11 +19,9 @@ namespace MWRender
         ESM::Position mPos;
         float mScale;
         osg::ref_ptr<osg::Group> mNode;
-        osg::ref_ptr<osg::Uniform> mWindSpeedUniform;
 
         void updateVisibility(osg::Vec3f& playerPos);
-        void attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs);
-        void update();
+        void attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs, osg::Uniform* windUniform, osg::Uniform* isGrassUniform);
     };
 
     struct Grass
@@ -35,6 +33,15 @@ namespace MWRender
         void insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs);
         bool isEnabled(const std::string& model);
         static bool isGrassItem(const std::string& model);
+        osg::ref_ptr<osg::Uniform> mWindSpeedUniform;
+        osg::ref_ptr<osg::Uniform> mIsGrassUniform;
+
+        Grass()
+        {
+            blank();
+            mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
+            mIsGrassUniform = new osg::Uniform("isGrass", true);
+        }
 
         void blank()
         {
