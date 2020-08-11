@@ -163,7 +163,7 @@ void main()
 #endif
 
 #else
-    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
+    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing, isGrass);
 #endif
 
 #if @envMap && !@preLightEnv

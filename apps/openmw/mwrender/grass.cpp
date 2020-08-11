@@ -118,8 +118,6 @@ namespace MWRender
             osg::Quat(mPos.rot[0], osg::Vec3(-1, 0, 0)));
 
         insert->setNodeMask(Mask_Grass);
-        osg::ref_ptr<SceneUtil::LightListCallback> lightListCallback = new SceneUtil::LightListCallback;
-        insert->addCullCallback(lightListCallback);
 
         rs->getSceneManager()->getInstance("meshes\\" + mModel, insert);
 

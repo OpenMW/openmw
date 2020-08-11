@@ -54,10 +54,11 @@ varying vec3 passNormal;
 
 #include "lighting.glsl"
 
+uniform bool isGrass;
+
 #if @grassAnimation
 uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;
-uniform bool isGrass;
 uniform float windSpeed;
 uniform float Rotz;
 
@@ -161,7 +162,7 @@ else
 #endif
 
 #if !PER_PIXEL_LIGHTING
-    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting);
+    lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting, isGrass);
 #endif
     passColor = gl_Color;
     passViewPos = viewPos.xyz;
