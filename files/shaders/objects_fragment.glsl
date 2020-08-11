@@ -51,9 +51,7 @@ uniform mat2 bumpMapMatrix;
 
 uniform bool simpleWater;
 
-#if @grassAnimation
 uniform bool isGrass;
-#endif
 
 varying float euclideanDepth;
 varying float linearDepth;

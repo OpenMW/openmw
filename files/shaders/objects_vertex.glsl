@@ -54,7 +54,6 @@ varying vec3 passNormal;
 
 #include "lighting.glsl"
 
-
 #if @grassAnimation
 uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;

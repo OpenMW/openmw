@@ -123,12 +123,13 @@ namespace MWRender
 
         rs->getSceneManager()->getInstance("meshes\\" + mModel, insert);
 
+        osg::StateSet* stateset = insert->getOrCreateStateSet();
+        // @grass preprocessor define would be great
+        stateset->addUniform(new osg::Uniform("isGrass", true));
+
         const static bool useAnimation = Settings::Manager::getBool("animation", "Grass");
         if(useAnimation)
         {
-            osg::StateSet* stateset = insert->getOrCreateStateSet();
-            // @grass preprocessor define would be great
-            stateset->addUniform(new osg::Uniform("isGrass", true));
             // for some reason this uniform is added to other objects too? not only for grass
             mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
             stateset->addUniform(new osg::Uniform("Rotz", (float) mPos.rot[2]));
