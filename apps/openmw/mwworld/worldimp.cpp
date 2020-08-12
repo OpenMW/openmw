@@ -3633,8 +3633,11 @@ namespace MWWorld
     std::string World::exportSceneGraph(const Ptr &ptr)
     {
         std::string file = mUserDataPath + "/openmw.osgt";
-        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
-        mWorldScene->removeFromPagedRefs(ptr);
+        if (!ptr.isEmpty())
+        {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+        }
         mRendering->exportSceneGraph(ptr, file, "Ascii");
         return file;
     }

@@ -143,6 +143,7 @@ void registerSerializers()
             "NifOsg::GeomMorpherController",
             "NifOsg::UpdateMorphGeometry",
             "NifOsg::UVController",
+            "NifOsg::VisController",
             "NifOsg::NodeIndexHolder",
             "osgMyGUI::Drawable",
             "osg::DrawCallback",
