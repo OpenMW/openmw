@@ -3,13 +3,14 @@
 
 #include <string>
 
-#include <osg/BlendFunc>
 #include <osg/Group>
-#include <osg/Material>
 
-#include <components/resource/scenemanager.hpp>
+#include <components/esm/defs.hpp>
 
-#include "animation.hpp"
+namespace Resource
+{
+    class ResourceSystem;
+}
 
 namespace MWRender
 {
@@ -27,26 +28,15 @@ namespace MWRender
     {
         std::vector<GrassItem> mItems;
         float mCurrentGrass = 0;
+        bool mUseAnimation = false;
+        osg::ref_ptr<osg::Uniform> mWindSpeedUniform;
 
+        Grass();
+        void blank();
         bool loadGrassItem(const std::string& model, ESM::Position& pos, const float scale);
         void insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs);
         bool isEnabled(const std::string& model);
         static bool isGrassItem(const std::string& model);
-        osg::ref_ptr<osg::Uniform> mWindSpeedUniform;
-        osg::ref_ptr<osg::Uniform> mIsGrassUniform;
-
-        Grass()
-        {
-            blank();
-            mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
-            mIsGrassUniform = new osg::Uniform("isGrass", true);
-        }
-
-        void blank()
-        {
-            mItems.clear();
-            mCurrentGrass = 0;
-        }
 
         void attachToNode(MWRender::GrassItem& item, osg::Group* cellnode, Resource::ResourceSystem* rs);
         void update();

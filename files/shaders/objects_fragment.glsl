@@ -51,8 +51,6 @@ uniform mat2 bumpMapMatrix;
 
 uniform bool simpleWater;
 
-uniform bool isGrass;
-
 varying float euclideanDepth;
 varying float linearDepth;
 
@@ -153,11 +151,6 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
-    if (isGrass)
-    {
-        if (euclideanDepth > @grassFadeStart)
-            gl_FragData[0].a *= 1.0-smoothstep(@grassFadeStart, @grassFadeEnd, euclideanDepth);
-    }
 
 #if !PER_PIXEL_LIGHTING
 
@@ -168,8 +161,7 @@ void main()
 #endif
 
 #else
-    if(gl_FragData[0].a != 0.0)
-        gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing, isGrass);
+    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing, false);
 #endif
 
 #if @envMap && !@preLightEnv

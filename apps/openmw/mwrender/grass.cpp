@@ -2,7 +2,9 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/sceneutil/lightmanager.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
+
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include <components/settings/settings.hpp>
@@ -13,6 +15,19 @@
 
 namespace MWRender
 {
+    Grass::Grass()
+    {
+        blank();
+        mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
+        mUseAnimation = Settings::Manager::getBool("animation", "Grass");
+    }
+
+    void Grass::blank()
+    {
+        mItems.clear();
+        mCurrentGrass = 0;
+    }
+
     void Grass::update()
     {
         osg::Vec3f playerPos(MWMechanics::getPlayer().getRefData().getPosition().asVec3());
@@ -21,8 +36,7 @@ namespace MWRender
             item.updateVisibility(playerPos);
         }
 
-        const static bool useAnimation = Settings::Manager::getBool("animation", "Grass");
-        if (!useAnimation)
+        if (!mUseAnimation)
             return;
 
         float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
@@ -32,9 +46,21 @@ namespace MWRender
 
     void Grass::insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs)
     {
+        osg::ref_ptr<osg::Group> grassGroup = new osg::Group();
+        grassGroup->setName("CellGrass");
+        cellnode->addChild(grassGroup);
+
         for (MWRender::GrassItem& item : mItems)
         {
-            attachToNode(item, cellnode, rs);
+            attachToNode(item, grassGroup, rs);
+        }
+
+        rs->getSceneManager()->recreateShaders(grassGroup, "grass");
+
+        if (mUseAnimation)
+        {
+            osg::StateSet* stateset = grassGroup->getOrCreateStateSet();
+            stateset->addUniform(mWindSpeedUniform.get());
         }
     }
 
@@ -54,16 +80,10 @@ namespace MWRender
 
         rs->getSceneManager()->getInstance("meshes\\" + item.mModel, insert);
 
-        osg::StateSet* stateset = insert->getOrCreateStateSet();
-        // @grass preprocessor define would be great
-        stateset->addUniform(mIsGrassUniform);
-
-        const static bool useAnimation = Settings::Manager::getBool("animation", "Grass");
-        if(useAnimation)
+        if (mUseAnimation)
         {
-            // for some reason this uniform is added to other objects too? not only for grass
-            stateset->addUniform(new osg::Uniform("Rotz", (float) item.mPos.rot[2]));
-            stateset->addUniform(mWindSpeedUniform.get());
+            osg::StateSet* stateset = insert->getOrCreateStateSet();
+            stateset->addUniform(new osg::Uniform("Rotz", item.mPos.rot[2]));
         }
 
         item.mNode = insert;
