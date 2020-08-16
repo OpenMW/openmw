@@ -21,7 +21,6 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mNode;
 
         void updateVisibility(osg::Vec3f& playerPos);
-        void attachToNode(osg::Group* cellnode, Resource::ResourceSystem* rs, osg::Uniform* windUniform, osg::Uniform* isGrassUniform);
     };
 
     struct Grass
@@ -49,6 +48,7 @@ namespace MWRender
             mCurrentGrass = 0;
         }
 
+        void attachToNode(MWRender::GrassItem& item, osg::Group* cellnode, Resource::ResourceSystem* rs);
         void update();
     };
 }
