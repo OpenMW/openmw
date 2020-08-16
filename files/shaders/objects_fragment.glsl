@@ -153,6 +153,11 @@ void main()
 #endif
 
     float shadowing = unshadowedLightRatio(linearDepth);
+    if (isGrass)
+    {
+        if (euclideanDepth > @grassFadeStart)
+            gl_FragData[0].a *= 1.0-smoothstep(@grassFadeStart, @grassFadeEnd, euclideanDepth);
+    }
 
 #if !PER_PIXEL_LIGHTING
 
@@ -163,7 +168,8 @@ void main()
 #endif
 
 #else
-    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing, isGrass);
+    if(gl_FragData[0].a != 0.0)
+        gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing, isGrass);
 #endif
 
 #if @envMap && !@preLightEnv
@@ -208,10 +214,4 @@ void main()
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
     applyShadowDebugOverlay();
-
-    if (isGrass)
-    {
-        if (euclideanDepth > @grassFadeStart)
-            gl_FragData[0].a *= 1.0-smoothstep(@grassFadeStart, @grassFadeEnd, euclideanDepth);
-    }
 }
