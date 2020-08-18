@@ -5,6 +5,7 @@
 #include <osg/Geometry>
 
 #include <osgUtil/TangentSpaceGenerator>
+#include <osgParticle/ParticleSystem>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
@@ -305,6 +306,13 @@ namespace Shader
         {
             defineMap[texIt->second] = "1";
             defineMap[texIt->second + std::string("UV")] = std::to_string(texIt->first);
+        }
+
+        if ( dynamic_cast<osgParticle::ParticleSystem*>(&node) )
+        {
+            // disable per-pixel lighting for particle systems
+            // TODO target only weather particle systems
+           defineMap["forcePPL"] = "0";
         }
 
         defineMap["parallax"] = reqs.mNormalHeight ? "1" : "0";
