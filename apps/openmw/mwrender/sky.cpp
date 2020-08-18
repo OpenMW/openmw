@@ -1333,6 +1333,9 @@ public:
             node.accept(findPSVisitor);
             for(auto found : findPSVisitor.mFoundNodes)
             {
+                //shadow artefacts on weather is strippy and can be misleading
+                SceneUtil::ShadowManager::disableShadowsForStateSet(found->getOrCreateStateSet());
+
                 osg::ref_ptr<AlphaFader> alphaFader (new AlphaFader(mAlphaUpdate, static_cast<osgParticle::ParticleSystem *>(found)));
 
                 if (composite)
@@ -1531,6 +1534,7 @@ void SkyManager::createRain()
     mRainNode->addCullCallback(mUnderwaterSwitch);
     mRainNode->setNodeMask(Mask_WeatherParticles);
     mRainNode->addCullCallback(new SceneUtil::LightListCallback);
+    SceneUtil::ShadowManager::disableShadowsForStateSet(mRainParticleSystem->getOrCreateStateSet());
     mSceneManager->recreateShaders(mRainNode);
 
     mSceneRootNode->addChild(mRainNode);
