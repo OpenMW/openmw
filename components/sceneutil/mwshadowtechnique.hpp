@@ -192,7 +192,7 @@ namespace SceneUtil {
 
             ShadowDataList& getShadowDataList() { return _shadowDataList; }
 
-            osg::StateSet* getStateSet() { return _stateset.get(); }
+            osg::StateSet* getStateSet(unsigned int traversalNumber) { return _stateset[traversalNumber % 2].get(); }
 
             virtual void releaseGLObjects(osg::State* = 0) const;
 
@@ -201,7 +201,7 @@ namespace SceneUtil {
 
             MWShadowTechnique*          _viewDependentShadowMap;
 
-            osg::ref_ptr<osg::StateSet> _stateset;
+            std::array<osg::ref_ptr<osg::StateSet>, 2> _stateset;
 
             LightDataList               _lightDataList;
             ShadowDataList              _shadowDataList;
@@ -231,7 +231,7 @@ namespace SceneUtil {
 
         virtual void cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Camera* camera) const;
 
-        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd) const;
+        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const;
 
     protected:
         virtual ~MWShadowTechnique();

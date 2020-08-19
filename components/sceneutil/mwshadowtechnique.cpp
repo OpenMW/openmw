@@ -749,7 +749,8 @@ MWShadowTechnique::ViewDependentData::ViewDependentData(MWShadowTechnique* vdsm)
     _viewDependentShadowMap(vdsm)
 {
     OSG_INFO<<"ViewDependentData::ViewDependentData()"<<this<<std::endl;
-    _stateset = new osg::StateSet;
+    for (auto& perFrameStateset : _stateset)
+        perFrameStateset = new osg::StateSet;
 }
 
 void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) const
@@ -1400,7 +1401,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     if (numValidShadows>0)
     {
-        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd));
+        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd, cv.getTraversalNumber()));
     }
 
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
@@ -2974,17 +2975,17 @@ void MWShadowTechnique::cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Ca
     return;
 }
 
-osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd) const
+osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const
 {
-    OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet()<<std::endl;
+    OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
 
-    osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet();
+    osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
 
     std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
 
-    vdd.getStateSet()->clear();
+    stateset->clear();
 
-    vdd.getStateSet()->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+    stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
 
     for(Uniforms::const_iterator itr=_uniforms.begin();
         itr!=_uniforms.end();
@@ -3047,7 +3048,7 @@ osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependent
         stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_Q,osg::StateAttribute::ON);
     }
 
-    return vdd.getStateSet();
+    return stateset;
 }
 
 void MWShadowTechnique::resizeGLObjectBuffers(unsigned int /*maxSize*/)
