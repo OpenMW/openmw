@@ -1344,9 +1344,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     std::string validRegionUniformName = "validRegionMatrix" + std::to_string(sm_i);
                     osg::ref_ptr<osg::Uniform> validRegionUniform;
 
-                    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
-
-                    for (auto uniform : _uniforms)
+                    for (auto uniform : _uniforms[cv.getTraversalNumber() % 2])
                     {
                         if (uniform->getName() == validRegionUniformName)
                             validRegionUniform = uniform;
@@ -1355,7 +1353,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     if (!validRegionUniform)
                     {
                         validRegionUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, validRegionUniformName);
-                        _uniforms.push_back(validRegionUniform);
+                        _uniforms[cv.getTraversalNumber() % 2].push_back(validRegionUniform);
                     }
 
                     validRegionUniform->set(validRegionMatrix);
@@ -1468,8 +1466,6 @@ void MWShadowTechnique::createShaders()
 
     unsigned int _baseTextureUnit = 0;
 
-    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
-
     _shadowCastingStateSet = new osg::StateSet;
 
     ShadowSettings* settings = getShadowedScene()->getShadowSettings();
@@ -1502,15 +1498,20 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->setMode(GL_POLYGON_OFFSET_FILL, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
 
-    _uniforms.clear();
     osg::ref_ptr<osg::Uniform> baseTextureSampler = new osg::Uniform("baseTexture",(int)_baseTextureUnit);
-    _uniforms.push_back(baseTextureSampler.get());
-
     osg::ref_ptr<osg::Uniform> baseTextureUnit = new osg::Uniform("baseTextureUnit",(int)_baseTextureUnit);
-    _uniforms.push_back(baseTextureUnit.get());
 
-    _uniforms.push_back(new osg::Uniform("maximumShadowMapDistance", (float)settings->getMaximumShadowMapDistance()));
-    _uniforms.push_back(new osg::Uniform("shadowFadeStart", (float)_shadowFadeStart));
+    osg::ref_ptr<osg::Uniform> maxDistance = new osg::Uniform("maximumShadowMapDistance", (float)settings->getMaximumShadowMapDistance());
+    osg::ref_ptr<osg::Uniform> fadeStart = new osg::Uniform("shadowFadeStart", (float)_shadowFadeStart);
+
+    for (auto& perFrameUniformList : _uniforms)
+    {
+        perFrameUniformList.clear();
+        perFrameUniformList.push_back(baseTextureSampler);
+        perFrameUniformList.push_back(baseTextureUnit.get());
+        perFrameUniformList.push_back(maxDistance);
+        perFrameUniformList.push_back(fadeStart);
+    }
 
     for(unsigned int sm_i=0; sm_i<settings->getNumShadowMapsPerLight(); ++sm_i)
     {
@@ -1518,14 +1519,16 @@ void MWShadowTechnique::createShaders()
             std::stringstream sstr;
             sstr<<"shadowTexture"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureSampler = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            _uniforms.push_back(shadowTextureSampler.get());
+            for (auto& perFrameUniformList : _uniforms)
+                perFrameUniformList.push_back(shadowTextureSampler.get());
         }
 
         {
             std::stringstream sstr;
             sstr<<"shadowTextureUnit"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureUnit = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            _uniforms.push_back(shadowTextureUnit.get());
+            for (auto& perFrameUniformList : _uniforms)
+                perFrameUniformList.push_back(shadowTextureUnit.get());
         }
     }
 
@@ -2981,18 +2984,14 @@ osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependent
 
     osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
 
-    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
-
     stateset->clear();
 
     stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
 
-    for(Uniforms::const_iterator itr=_uniforms.begin();
-        itr!=_uniforms.end();
-        ++itr)
+    for(auto uniform : _uniforms[traversalNumber % 2])
     {
-        OSG_INFO<<"addUniform("<<(*itr)->getName()<<")"<<std::endl;
-        stateset->addUniform(itr->get());
+        OSG_INFO<<"addUniform("<<uniform->getName()<<")"<<std::endl;
+        stateset->addUniform(uniform);
     }
 
     if (_program.valid())

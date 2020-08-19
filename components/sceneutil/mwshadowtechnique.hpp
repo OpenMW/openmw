@@ -248,8 +248,7 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
         typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
-        mutable std::mutex                      _accessUniformsAndProgramMutex;
-        Uniforms                                _uniforms;
+        std::array<Uniforms, 2>                 _uniforms;
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
