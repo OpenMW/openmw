@@ -3104,12 +3104,12 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFrustumFragmentShaderSource);
     frustumProgram->addShader(fragmentShader);
 
-    for (int i = 0; i < 2; ++i)
+    for (auto& frustumGeometry : mFrustumGeometries)
     {
-        mFrustumGeometries.emplace_back(new osg::Geometry());
-        mFrustumGeometries[i]->setCullingActive(false);
+        frustumGeometry = new osg::Geometry();
+        frustumGeometry->setCullingActive(false);
 
-        mFrustumGeometries[i]->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
+        frustumGeometry->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
     }
 
     osg::ref_ptr<osg::DrawElementsUShort> frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP);
@@ -3145,11 +3145,13 @@ void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> t
     // It might be possible to change shadow settings at runtime
     if (shadowMapNumber > mDebugCameras.size())
         addAnotherShadowMap();
-
-    mFrustumUniforms[shadowMapNumber]->set(matrix);
     
-    osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
+    osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
     stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
+
+    auto frustumUniform = mFrustumUniforms[cv.getTraversalNumber() % 2][shadowMapNumber];
+    frustumUniform->set(matrix);
+    stateSet->addUniform(frustumUniform);
 
     // Some of these calls may be superfluous.
     unsigned int traversalMask = cv.getTraversalMask();
@@ -3205,6 +3207,6 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     mFrustumTransforms[shadowMapNumber]->setCullingActive(false);
     mDebugCameras[shadowMapNumber]->addChild(mFrustumTransforms[shadowMapNumber]);
 
-    mFrustumUniforms.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
-    mFrustumTransforms[shadowMapNumber]->getOrCreateStateSet()->addUniform(mFrustumUniforms[shadowMapNumber]);
+    for(auto& uniformVector : mFrustumUniforms)
+        uniformVector.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
 }

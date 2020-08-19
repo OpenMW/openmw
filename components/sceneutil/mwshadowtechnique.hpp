@@ -19,6 +19,7 @@
 #ifndef COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H
 #define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
+#include <array>
 #include <mutex>
 
 #include <osg/Camera>
@@ -282,8 +283,8 @@ namespace SceneUtil {
             osg::ref_ptr<osg::Program> mDebugProgram;
             std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
             std::vector<osg::ref_ptr<osg::Group>> mFrustumTransforms;
-            std::vector<osg::ref_ptr<osg::Uniform>> mFrustumUniforms;
-            std::vector<osg::ref_ptr<osg::Geometry>> mFrustumGeometries;
+            std::array<std::vector<osg::ref_ptr<osg::Uniform>>, 2> mFrustumUniforms;
+            std::array<osg::ref_ptr<osg::Geometry>, 2> mFrustumGeometries;
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
