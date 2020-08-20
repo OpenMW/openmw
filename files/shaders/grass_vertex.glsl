@@ -4,12 +4,17 @@
 varying vec2 diffuseMapUV;
 #endif
 
-#define PER_PIXEL_LIGHTING @forcePPL
+#if @normalMap
+varying vec2 normalMapUV;
+varying vec4 passTangent;
+#endif
+
+#define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 varying float euclideanDepth;
 varying float linearDepth;
 
-#if !@forcePPL
+#if !PER_PIXEL_LIGHTING
 centroid varying vec4 lighting;
 centroid varying vec3 shadowDiffuseLighting;
 #endif
@@ -79,7 +84,7 @@ void main(void)
     euclideanDepth = length(viewPos.xyz);
     linearDepth = gl_Position.z;
 
-#if (!@forcePPL || @shadows_enabled)
+#if (!PER_PIXEL_LIGHTING || @shadows_enabled)
     vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
 #endif
 
@@ -87,7 +92,12 @@ void main(void)
     diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
-#if !@forcePPL
+#if @normalMap
+    normalMapUV = (gl_TextureMatrix[@normalMapUV] * gl_MultiTexCoord@normalMapUV).xy;
+    passTangent = gl_MultiTexCoord7.xyzw;
+#endif
+
+#if !PER_PIXEL_LIGHTING
     lighting = doLighting(viewPos.xyz, viewNormal, gl_Color, shadowDiffuseLighting, true);
 #endif
     passColor = gl_Color;
