@@ -7,6 +7,8 @@
 
 #include <components/esm/defs.hpp>
 
+#include <components/sceneutil/statesetupdater.hpp>
+
 namespace Resource
 {
     class ResourceSystem;
@@ -14,6 +16,28 @@ namespace Resource
 
 namespace MWRender
 {
+    class WindSpeedUpdater : public SceneUtil::StateSetUpdater
+    {
+    public:
+        WindSpeedUpdater()
+            : mWindSpeed(0.f)
+        {
+        }
+
+        void setWindSpeed(float windSpeed)
+        {
+            mWindSpeed = windSpeed;
+        }
+
+    protected:
+        virtual void setDefaults(osg::StateSet *stateset);
+
+        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
+
+    private:
+        float mWindSpeed;
+    };
+
     struct GrassItem
     {
         std::string mModel;
@@ -29,7 +53,7 @@ namespace MWRender
         std::vector<GrassItem> mItems;
         float mCurrentGrass = 0;
         bool mUseAnimation = false;
-        osg::ref_ptr<osg::Uniform> mWindSpeedUniform;
+        osg::ref_ptr<WindSpeedUpdater> mWindSpeedUpdater;
 
         Grass();
         void blank();

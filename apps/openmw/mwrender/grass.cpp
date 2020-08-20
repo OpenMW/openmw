@@ -15,10 +15,23 @@
 
 namespace MWRender
 {
+    void WindSpeedUpdater::setDefaults(osg::StateSet *stateset)
+    {
+        osg::ref_ptr<osg::Uniform> windUniform = new osg::Uniform("windSpeed", 0.0f);
+        stateset->addUniform(windUniform.get());
+    }
+
+    void WindSpeedUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    {
+        osg::ref_ptr<osg::Uniform> windUniform = stateset->getUniform("windSpeed");
+        if (windUniform != nullptr)
+            windUniform->set(mWindSpeed);
+    }
+
     Grass::Grass()
     {
         blank();
-        mWindSpeedUniform = new osg::Uniform("windSpeed", 0.0f);
+        mWindSpeedUpdater = new WindSpeedUpdater;
         mUseAnimation = Settings::Manager::getBool("animation", "Grass");
     }
 
@@ -41,7 +54,7 @@ namespace MWRender
 
         float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
         windSpeed *= 4.f; // Note: actual wind speed is usually larger than base one from config
-        mWindSpeedUniform->set(windSpeed);
+        mWindSpeedUpdater->setWindSpeed(windSpeed);
     }
 
     void Grass::insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs)
@@ -59,8 +72,7 @@ namespace MWRender
 
         if (mUseAnimation)
         {
-            osg::StateSet* stateset = grassGroup->getOrCreateStateSet();
-            stateset->addUniform(mWindSpeedUniform.get());
+            grassGroup->addUpdateCallback(mWindSpeedUpdater);
         }
     }
 
