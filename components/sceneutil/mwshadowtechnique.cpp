@@ -2988,7 +2988,7 @@ osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependent
 
     stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
 
-    for(auto uniform : _uniforms[traversalNumber % 2])
+    for(const auto& uniform : _uniforms[traversalNumber % 2])
     {
         OSG_INFO<<"addUniform("<<uniform->getName()<<")"<<std::endl;
         stateset->addUniform(uniform);
