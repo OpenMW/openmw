@@ -53,7 +53,6 @@ namespace MWRender
             return;
 
         float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
-        windSpeed *= 4.f; // Note: actual wind speed is usually larger than base one from config
         mWindSpeedUpdater->setWindSpeed(windSpeed);
     }
 

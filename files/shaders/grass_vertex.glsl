@@ -57,7 +57,7 @@ vec2 grassDisplacement(vec4 worldpos, float h)
     float d = length(worldpos.xy - FootPos.xy);
     vec2 stomp = vec2(0.0);
     if(d < 150.0) stomp = (60.0 / d - 0.4) * (worldpos.xy - FootPos.xy);
-    return clamp(0.004 * h, 0.0, 1.0) * (harmonics * displace + stomp);
+    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp);
 }
 
 void main(void)
@@ -66,8 +66,7 @@ void main(void)
 
     vec4 displacedVertex = gl_Vertex;
     vec4 worldPos = osg_ViewMatrixInverse * vec4(viewPos.xyz, 1.0);
-    float height = 1.0-(gl_ModelViewMatrix[0].z-gl_Vertex.z);
-    vec2 displ = grassDisplacement(worldPos, height);
+    vec2 displ = grassDisplacement(worldPos, gl_Vertex.z);
     vec2 grassVertex = min(vec2(10.0), displ);
 
     displacedVertex.xy += rotate(grassVertex.xy, -1.0*Rotz);

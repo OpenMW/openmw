@@ -206,8 +206,13 @@ namespace MWRender
     {
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
-        // Shadows and radial fog have problems with fixed-function mode
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows");
+        // Shadows and radial fog have problems with fixed-function mode.
+        // Grass fading and animation are implemented via shader too.
+        bool forceShaders =
+            Settings::Manager::getBool("radial fog", "Shaders") ||
+            Settings::Manager::getBool("force shaders", "Shaders") ||
+            Settings::Manager::getBool("enable shadows", "Shadows") ||
+            Settings::Manager::getBool("enabled", "Grass");
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
         resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
