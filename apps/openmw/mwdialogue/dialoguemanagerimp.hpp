@@ -86,7 +86,7 @@ namespace MWDialogue
 
             void goodbye() override;
 
-            bool checkServiceRefused (ResponseCallback* callback) override;
+            bool checkServiceRefused (ResponseCallback* callback, ServiceType service = ServiceType::Any) override;
 
             void say(const MWWorld::Ptr &actor, const std::string &topic) override;
 
