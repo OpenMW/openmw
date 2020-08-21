@@ -19,6 +19,7 @@
 #ifndef COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H
 #define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
+#include <array>
 #include <mutex>
 
 #include <osg/Camera>
@@ -191,7 +192,7 @@ namespace SceneUtil {
 
             ShadowDataList& getShadowDataList() { return _shadowDataList; }
 
-            osg::StateSet* getStateSet() { return _stateset.get(); }
+            osg::StateSet* getStateSet(unsigned int traversalNumber) { return _stateset[traversalNumber % 2].get(); }
 
             virtual void releaseGLObjects(osg::State* = 0) const;
 
@@ -200,7 +201,7 @@ namespace SceneUtil {
 
             MWShadowTechnique*          _viewDependentShadowMap;
 
-            osg::ref_ptr<osg::StateSet> _stateset;
+            std::array<osg::ref_ptr<osg::StateSet>, 2> _stateset;
 
             LightDataList               _lightDataList;
             ShadowDataList              _shadowDataList;
@@ -230,7 +231,7 @@ namespace SceneUtil {
 
         virtual void cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Camera* camera) const;
 
-        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd) const;
+        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const;
 
     protected:
         virtual ~MWShadowTechnique();
@@ -247,8 +248,7 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
         typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
-        mutable std::mutex                      _accessUniformsAndProgramMutex;
-        Uniforms                                _uniforms;
+        std::array<Uniforms, 2>                 _uniforms;
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
@@ -282,8 +282,8 @@ namespace SceneUtil {
             osg::ref_ptr<osg::Program> mDebugProgram;
             std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
             std::vector<osg::ref_ptr<osg::Group>> mFrustumTransforms;
-            std::vector<osg::ref_ptr<osg::Uniform>> mFrustumUniforms;
-            std::vector<osg::ref_ptr<osg::Geometry>> mFrustumGeometries;
+            std::array<std::vector<osg::ref_ptr<osg::Uniform>>, 2> mFrustumUniforms;
+            std::array<osg::ref_ptr<osg::Geometry>, 2> mFrustumGeometries;
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;

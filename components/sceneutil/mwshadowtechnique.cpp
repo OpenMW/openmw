@@ -749,7 +749,8 @@ MWShadowTechnique::ViewDependentData::ViewDependentData(MWShadowTechnique* vdsm)
     _viewDependentShadowMap(vdsm)
 {
     OSG_INFO<<"ViewDependentData::ViewDependentData()"<<this<<std::endl;
-    _stateset = new osg::StateSet;
+    for (auto& perFrameStateset : _stateset)
+        perFrameStateset = new osg::StateSet;
 }
 
 void MWShadowTechnique::ViewDependentData::releaseGLObjects(osg::State* state) const
@@ -1343,9 +1344,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     std::string validRegionUniformName = "validRegionMatrix" + std::to_string(sm_i);
                     osg::ref_ptr<osg::Uniform> validRegionUniform;
 
-                    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
-
-                    for (auto uniform : _uniforms)
+                    for (auto uniform : _uniforms[cv.getTraversalNumber() % 2])
                     {
                         if (uniform->getName() == validRegionUniformName)
                             validRegionUniform = uniform;
@@ -1354,7 +1353,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     if (!validRegionUniform)
                     {
                         validRegionUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, validRegionUniformName);
-                        _uniforms.push_back(validRegionUniform);
+                        _uniforms[cv.getTraversalNumber() % 2].push_back(validRegionUniform);
                     }
 
                     validRegionUniform->set(validRegionMatrix);
@@ -1400,7 +1399,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     if (numValidShadows>0)
     {
-        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd));
+        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd, cv.getTraversalNumber()));
     }
 
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
@@ -1467,8 +1466,6 @@ void MWShadowTechnique::createShaders()
 
     unsigned int _baseTextureUnit = 0;
 
-    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
-
     _shadowCastingStateSet = new osg::StateSet;
 
     ShadowSettings* settings = getShadowedScene()->getShadowSettings();
@@ -1501,15 +1498,20 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->setMode(GL_POLYGON_OFFSET_FILL, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
 
-    _uniforms.clear();
     osg::ref_ptr<osg::Uniform> baseTextureSampler = new osg::Uniform("baseTexture",(int)_baseTextureUnit);
-    _uniforms.push_back(baseTextureSampler.get());
-
     osg::ref_ptr<osg::Uniform> baseTextureUnit = new osg::Uniform("baseTextureUnit",(int)_baseTextureUnit);
-    _uniforms.push_back(baseTextureUnit.get());
 
-    _uniforms.push_back(new osg::Uniform("maximumShadowMapDistance", (float)settings->getMaximumShadowMapDistance()));
-    _uniforms.push_back(new osg::Uniform("shadowFadeStart", (float)_shadowFadeStart));
+    osg::ref_ptr<osg::Uniform> maxDistance = new osg::Uniform("maximumShadowMapDistance", (float)settings->getMaximumShadowMapDistance());
+    osg::ref_ptr<osg::Uniform> fadeStart = new osg::Uniform("shadowFadeStart", (float)_shadowFadeStart);
+
+    for (auto& perFrameUniformList : _uniforms)
+    {
+        perFrameUniformList.clear();
+        perFrameUniformList.push_back(baseTextureSampler);
+        perFrameUniformList.push_back(baseTextureUnit.get());
+        perFrameUniformList.push_back(maxDistance);
+        perFrameUniformList.push_back(fadeStart);
+    }
 
     for(unsigned int sm_i=0; sm_i<settings->getNumShadowMapsPerLight(); ++sm_i)
     {
@@ -1517,14 +1519,16 @@ void MWShadowTechnique::createShaders()
             std::stringstream sstr;
             sstr<<"shadowTexture"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureSampler = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            _uniforms.push_back(shadowTextureSampler.get());
+            for (auto& perFrameUniformList : _uniforms)
+                perFrameUniformList.push_back(shadowTextureSampler.get());
         }
 
         {
             std::stringstream sstr;
             sstr<<"shadowTextureUnit"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureUnit = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
-            _uniforms.push_back(shadowTextureUnit.get());
+            for (auto& perFrameUniformList : _uniforms)
+                perFrameUniformList.push_back(shadowTextureUnit.get());
         }
     }
 
@@ -2974,24 +2978,20 @@ void MWShadowTechnique::cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Ca
     return;
 }
 
-osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd) const
+osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const
 {
-    OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet()<<std::endl;
+    OSG_INFO<<"   selectStateSetForRenderingShadow() "<<vdd.getStateSet(traversalNumber)<<std::endl;
 
-    osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet();
+    osg::ref_ptr<osg::StateSet> stateset = vdd.getStateSet(traversalNumber);
 
-    std::lock_guard<std::mutex> lock(_accessUniformsAndProgramMutex);
+    stateset->clear();
 
-    vdd.getStateSet()->clear();
+    stateset->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
 
-    vdd.getStateSet()->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
-
-    for(Uniforms::const_iterator itr=_uniforms.begin();
-        itr!=_uniforms.end();
-        ++itr)
+    for(const auto& uniform : _uniforms[traversalNumber % 2])
     {
-        OSG_INFO<<"addUniform("<<(*itr)->getName()<<")"<<std::endl;
-        stateset->addUniform(itr->get());
+        OSG_INFO<<"addUniform("<<uniform->getName()<<")"<<std::endl;
+        stateset->addUniform(uniform);
     }
 
     if (_program.valid())
@@ -3047,7 +3047,7 @@ osg::StateSet* MWShadowTechnique::selectStateSetForRenderingShadow(ViewDependent
         stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_Q,osg::StateAttribute::ON);
     }
 
-    return vdd.getStateSet();
+    return stateset;
 }
 
 void MWShadowTechnique::resizeGLObjectBuffers(unsigned int /*maxSize*/)
@@ -3104,12 +3104,12 @@ SceneUtil::MWShadowTechnique::DebugHUD::DebugHUD(int numberOfShadowMapsPerLight)
     fragmentShader = new osg::Shader(osg::Shader::FRAGMENT, debugFrustumFragmentShaderSource);
     frustumProgram->addShader(fragmentShader);
 
-    for (int i = 0; i < 2; ++i)
+    for (auto& frustumGeometry : mFrustumGeometries)
     {
-        mFrustumGeometries.emplace_back(new osg::Geometry());
-        mFrustumGeometries[i]->setCullingActive(false);
+        frustumGeometry = new osg::Geometry();
+        frustumGeometry->setCullingActive(false);
 
-        mFrustumGeometries[i]->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
+        frustumGeometry->getOrCreateStateSet()->setAttributeAndModes(frustumProgram, osg::StateAttribute::ON);
     }
 
     osg::ref_ptr<osg::DrawElementsUShort> frustumDrawElements = new osg::DrawElementsUShort(osg::PrimitiveSet::LINE_STRIP);
@@ -3145,11 +3145,13 @@ void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> t
     // It might be possible to change shadow settings at runtime
     if (shadowMapNumber > mDebugCameras.size())
         addAnotherShadowMap();
-
-    mFrustumUniforms[shadowMapNumber]->set(matrix);
     
-    osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();
+    osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
     stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
+
+    auto frustumUniform = mFrustumUniforms[cv.getTraversalNumber() % 2][shadowMapNumber];
+    frustumUniform->set(matrix);
+    stateSet->addUniform(frustumUniform);
 
     // Some of these calls may be superfluous.
     unsigned int traversalMask = cv.getTraversalMask();
@@ -3205,6 +3207,6 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     mFrustumTransforms[shadowMapNumber]->setCullingActive(false);
     mDebugCameras[shadowMapNumber]->addChild(mFrustumTransforms[shadowMapNumber]);
 
-    mFrustumUniforms.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
-    mFrustumTransforms[shadowMapNumber]->getOrCreateStateSet()->addUniform(mFrustumUniforms[shadowMapNumber]);
+    for(auto& uniformVector : mFrustumUniforms)
+        uniformVector.push_back(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "transform"));
 }
