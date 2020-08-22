@@ -209,17 +209,8 @@ namespace MWRender
         float getTerrainHeightAt(const osg::Vec3f& pos);
 
         // camera stuff
-        bool vanityRotateCamera(const float *rot);
-        void setCameraDistance(float dist, bool adjust, bool override);
-        void resetCamera();
-        float getCameraDistance() const;
-        Camera* getCamera();
-        const osg::Vec3f& getCameraPosition() const;
-        void togglePOV(bool force = false);
-        void togglePreviewMode(bool enable);
-        bool toggleVanityMode(bool enable);
-        void allowVanityMode(bool allow);
-        void changeVanityModeScale(float factor);
+        Camera* getCamera() { return mCamera.get(); }
+        const osg::Vec3f& getCameraPosition() const { return mCurrentCameraPos; }
 
         /// temporarily override the field of view with given value.
         void overrideFieldOfView(float val);

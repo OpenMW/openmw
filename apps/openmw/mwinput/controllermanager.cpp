@@ -190,10 +190,7 @@ namespace MWInput
                 mGamepadZoom = 0;
 
             if (mGamepadZoom)
-            {
-                MWBase::Environment::get().getWorld()->changeVanityModeScale(mGamepadZoom);
-                MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
-            }
+                MWBase::Environment::get().getWorld()->adjustCameraDistance(-mGamepadZoom);
         }
 
         return triedToMove;
@@ -291,12 +288,12 @@ namespace MWInput
             {
                 if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
-                    mGamepadZoom = arg.value * 0.85f / 1000.f;
+                    mGamepadZoom = arg.value * 0.85f / 1000.f / 12.f;
                     return; // Do not propagate event.
                 }
                 else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
                 {
-                    mGamepadZoom = -arg.value * 0.85f / 1000.f;
+                    mGamepadZoom = -arg.value * 0.85f / 1000.f / 12.f;
                     return; // Do not propagate event.
                 }
             }

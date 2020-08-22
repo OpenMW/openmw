@@ -7,6 +7,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -15,6 +16,8 @@
 #include "../mwmechanics/drawstate.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/npcstats.hpp"
+
+#include "../mwphysics/raycasting.hpp"
 
 #include "npcanimation.hpp"
 
@@ -195,6 +198,7 @@ namespace MWRender
             rotateCamera(0.f, osg::DegreesToRadians(3.f * duration), true);
 
         updateFocalPointOffset(duration);
+        updatePosition();
 
         float speed = mTrackingPtr.getClass().getSpeed(mTrackingPtr);
         speed /= (1.f + speed / 500.f);
@@ -203,6 +207,42 @@ namespace MWRender
 
         mMaxNextCameraDistance = mCameraDistance + duration * (100.f + mBaseCameraDistance);
         updateStandingPreviewMode();
+    }
+
+    void Camera::updatePosition()
+    {
+        mFocalPointAdjustment = osg::Vec3d();
+        if (isFirstPerson())
+            return;
+
+        const float cameraObstacleLimit = 5.0f;
+        const float focalObstacleLimit = 10.f;
+
+        const auto* rayCasting = MWBase::Environment::get().getWorld()->getRayCasting();
+
+        // Adjust focal point to prevent clipping.
+        osg::Vec3d focal = getFocalPoint();
+        osg::Vec3d focalOffset = getFocalPointOffset();
+        float offsetLen = focalOffset.length();
+        if (offsetLen > 0)
+        {
+            MWPhysics::RayCastingResult result = rayCasting->castSphere(focal - focalOffset, focal, focalObstacleLimit);
+            if (result.mHit)
+            {
+                double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
+                mFocalPointAdjustment = focalOffset * std::max(-1.0, adjustmentCoef);
+            }
+        }
+
+        // Calculate camera distance.
+        mCameraDistance = mBaseCameraDistance + getCameraDistanceCorrection();
+        if (mDynamicCameraDistanceEnabled)
+            mCameraDistance = std::min(mCameraDistance, mMaxNextCameraDistance);
+        osg::Vec3d cameraPos;
+        getPosition(focal, cameraPos);
+        MWPhysics::RayCastingResult result = rayCasting->castSphere(focal, cameraPos, cameraObstacleLimit);
+        if (result.mHit)
+            mCameraDistance = (result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length();
     }
 
     void Camera::updateStandingPreviewMode()
@@ -378,27 +418,24 @@ namespace MWRender
         return mCameraDistance;
     }
 
-    void Camera::updateBaseCameraDistance(float dist, bool adjust)
+    void Camera::adjustCameraDistance(float delta)
     {
-        if (isFirstPerson())
-            return;
+        if (!isFirstPerson())
+        {
+            if(isNearest() && delta < 0.f && getMode() != Mode::Preview && getMode() != Mode::Vanity)
+                toggleViewMode();
+            else
+                mBaseCameraDistance = std::min(mCameraDistance - getCameraDistanceCorrection(), mBaseCameraDistance) + delta;
+        }
+        else if (delta > 0.f)
+        {
+            toggleViewMode();
+            mBaseCameraDistance = 0;
+        }
 
-        if (adjust)
-            dist += std::min(mCameraDistance - getCameraDistanceCorrection(), mBaseCameraDistance);
-
-        mIsNearest = dist <= mNearest;
-        mBaseCameraDistance = osg::clampBetween(dist, mNearest, mFurthest);
+        mIsNearest = mBaseCameraDistance <= mNearest;
+        mBaseCameraDistance = osg::clampBetween(mBaseCameraDistance, mNearest, mFurthest);
         Settings::Manager::setFloat("third person camera distance", "Camera", mBaseCameraDistance);
-        setCameraDistance();
-    }
-
-    void Camera::setCameraDistance(float dist, bool adjust)
-    {
-        if (isFirstPerson())
-            return;
-        if (adjust)
-            dist += mCameraDistance;
-        mCameraDistance = osg::clampBetween(dist, 10.f, mFurthest);
     }
 
     float Camera::getCameraDistanceCorrection() const
@@ -412,16 +449,6 @@ namespace MWRender
         float speedCorrection = smoothedSpeedSqr / (smoothedSpeedSqr + 300.f*300.f) * mZoomOutWhenMoveCoef;
 
         return pitchCorrection + speedCorrection;
-    }
-
-    void Camera::setCameraDistance()
-    {
-        mFocalPointAdjustment = osg::Vec3d();
-        if (isFirstPerson())
-            return;
-        mCameraDistance = mBaseCameraDistance + getCameraDistanceCorrection();
-        if (mDynamicCameraDistanceEnabled)
-            mCameraDistance = std::min(mCameraDistance, mMaxNextCameraDistance);
     }
 
     void Camera::setAnimation(NpcAnimation *anim)

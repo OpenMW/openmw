@@ -225,7 +225,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
-        mRendering->resetCamera();
+        mRendering->getCamera()->reset();
 
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
@@ -1542,6 +1542,11 @@ namespace MWWorld
         return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getCollisionObject()->getWorldTransform());
     }
 
+    const MWPhysics::RayCastingInterface* World::getRayCasting() const
+    {
+        return mPhysics.get();
+    }
+
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
     {
         int mask = MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door;
@@ -1554,7 +1559,7 @@ namespace MWWorld
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
     }
 
@@ -1863,37 +1868,6 @@ namespace MWWorld
 
         int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
-
-        auto* camera = mRendering->getCamera();
-        camera->setCameraDistance();
-        if(!mRendering->getCamera()->isFirstPerson())
-        {
-            float cameraObstacleLimit = mRendering->getNearClipDistance() * 2.5f;
-            float focalObstacleLimit = std::max(cameraObstacleLimit, 10.0f);
-
-            // Adjust focal point.
-            osg::Vec3d focal = camera->getFocalPoint();
-            osg::Vec3d focalOffset = camera->getFocalPointOffset();
-            float offsetLen = focalOffset.length();
-            if (offsetLen > 0)
-            {
-                MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal - focalOffset, focal, focalObstacleLimit);
-                if (result.mHit)
-                {
-                    double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
-                    if (adjustmentCoef < -1)
-                        adjustmentCoef = -1;
-                    camera->adjustFocalPoint(focalOffset * adjustmentCoef);
-                }
-            }
-
-            // Adjust camera position.
-            osg::Vec3d cameraPos;
-            camera->getPosition(focal, cameraPos);
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal, cameraPos, cameraObstacleLimit);
-            if (result.mHit)
-                mRendering->getCamera()->setCameraDistance((result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length(), false);
-        }
     }
 
     void World::preloadSpells()
@@ -1984,7 +1958,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
-        const float camDist = mRendering->getCameraDistance();
+        const float camDist = mRendering->getCamera()->getCameraDistance();
         maxDistance += camDist;
         MWWorld::Ptr facedObject;
         MWRender::RenderingManager::RayResult rayToObject;
@@ -2387,7 +2361,7 @@ namespace MWWorld
 
     void World::togglePOV(bool force)
     {
-        mRendering->togglePOV(force);
+        mRendering->getCamera()->toggleViewMode(force);
     }
 
     bool World::isFirstPerson() const
@@ -2402,12 +2376,12 @@ namespace MWWorld
 
     void World::togglePreviewMode(bool enable)
     {
-        mRendering->togglePreviewMode(enable);
+        mRendering->getCamera()->togglePreviewMode(enable);
     }
 
     bool World::toggleVanityMode(bool enable)
     {
-        return mRendering->toggleVanityMode(enable);
+        return mRendering->getCamera()->toggleVanityMode(enable);
     }
 
     void World::disableDeferredPreviewRotation()
@@ -2422,22 +2396,21 @@ namespace MWWorld
 
     void World::allowVanityMode(bool allow)
     {
-        mRendering->allowVanityMode(allow);
-    }
-
-    void World::changeVanityModeScale(float factor)
-    {
-        mRendering->changeVanityModeScale(factor);
+        mRendering->getCamera()->allowVanityMode(allow);
     }
 
     bool World::vanityRotateCamera(float * rot)
     {
-        return mRendering->vanityRotateCamera(rot);
+        if(!mRendering->getCamera()->isVanityOrPreviewModeEnabled())
+            return false;
+
+        mRendering->getCamera()->rotateCamera(rot[0], rot[2], true);
+        return true;
     }
 
-    void World::setCameraDistance(float dist, bool adjust, bool override_)
+    void World::adjustCameraDistance(float dist)
     {
-        mRendering->setCameraDistance(dist, adjust, override_);
+        mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
     void World::setupPlayer()
@@ -2760,7 +2733,7 @@ namespace MWWorld
         if (includeWater) {
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -3123,7 +3096,7 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else
