@@ -127,7 +127,7 @@ bool Launcher::AdvancedPage::loadSettings()
     {
         loadSettingBool(viewOverShoulderCheckBox, "view over shoulder", "Camera");
         connect(viewOverShoulderCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotViewOverShoulderToggled(bool)));
-        viewOverShoulderGroup->setEnabled(viewOverShoulderCheckBox->checkState());
+        viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
         loadSettingBool(autoSwitchShoulderCheckBox, "auto switch shoulder", "Camera");
         loadSettingBool(previewIfStandStillCheckBox, "preview if stand still", "Camera");
         loadSettingBool(deferredPreviewRotationCheckBox, "deferred preview rotation", "Camera");
@@ -339,5 +339,5 @@ void Launcher::AdvancedPage::slotAnimSourcesToggled(bool checked)
 
 void Launcher::AdvancedPage::slotViewOverShoulderToggled(bool checked)
 {
-    viewOverShoulderGroup->setEnabled(viewOverShoulderCheckBox->checkState());
+    viewOverShoulderVerticalLayout->setEnabled(viewOverShoulderCheckBox->checkState());
 }
