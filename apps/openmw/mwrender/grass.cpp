@@ -15,23 +15,30 @@
 
 namespace MWRender
 {
-    void WindSpeedUpdater::setDefaults(osg::StateSet *stateset)
+    void GrassUpdater::setDefaults(osg::StateSet *stateset)
     {
         osg::ref_ptr<osg::Uniform> windUniform = new osg::Uniform("windSpeed", 0.0f);
         stateset->addUniform(windUniform.get());
+
+        osg::ref_ptr<osg::Uniform> playerPosUniform = new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f));
+        stateset->addUniform(playerPosUniform.get());
     }
 
-    void WindSpeedUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    void GrassUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     {
         osg::ref_ptr<osg::Uniform> windUniform = stateset->getUniform("windSpeed");
         if (windUniform != nullptr)
             windUniform->set(mWindSpeed);
+
+        osg::ref_ptr<osg::Uniform> playerPosUniform = stateset->getUniform("playerPos");
+        if (playerPosUniform != nullptr)
+            playerPosUniform->set(mPlayerPos);
     }
 
     Grass::Grass()
     {
         blank();
-        mWindSpeedUpdater = new WindSpeedUpdater;
+        mGrassUpdater = new GrassUpdater;
         mUseAnimation = Settings::Manager::getBool("animation", "Grass");
     }
 
@@ -53,7 +60,8 @@ namespace MWRender
             return;
 
         float windSpeed = MWBase::Environment::get().getWorld()->getBaseWindSpeed();
-        mWindSpeedUpdater->setWindSpeed(windSpeed);
+        mGrassUpdater->setWindSpeed(windSpeed);
+        mGrassUpdater->setPlayerPos(playerPos);
     }
 
     void Grass::insertGrass(osg::Group* cellnode, Resource::ResourceSystem* rs)
@@ -71,7 +79,7 @@ namespace MWRender
 
         if (mUseAnimation)
         {
-            grassGroup->addUpdateCallback(mWindSpeedUpdater);
+            grassGroup->addUpdateCallback(mGrassUpdater);
         }
     }
 

@@ -30,6 +30,7 @@ uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;
 uniform float windSpeed;
 uniform float Rotz;
+uniform vec3 playerPos;
 
 vec2 rotate(vec2 v, float a)
 {
@@ -42,7 +43,7 @@ vec2 rotate(vec2 v, float a)
 vec2 grassDisplacement(vec4 worldpos, float h)
 {
     vec2 windDirection = vec2(1.0);
-    vec3 FootPos = osg_ViewMatrixInverse[3].xyz;
+    vec3 FootPos = playerPos;
     vec3 WindVec = vec3(windSpeed * windDirection, 1.0);
 
     float v = length(WindVec);
