@@ -55,12 +55,12 @@ vec2 grassDisplacement(vec4 worldpos, float h)
     harmonics += vec2((1.0 + 0.14*v) * sin(3.0*osg_SimulationTime + worldpos.xy / 500.0));
     harmonics += vec2((1.0 + 0.28*v) * sin(5.0*osg_SimulationTime + worldpos.xy / 200.0));
 
-    float d = length(worldpos.xy - FootPos.xy);
-    vec2 stomp = vec2(0.0);
+    float d = length(worldpos.xyz - FootPos.xyz);
+    vec3 stomp = vec3(0.0);
     if (d < 150.0 && d > 0)
-        stomp = (60.0 / d - 0.4) * (worldpos.xy - FootPos.xy);
+        stomp = (60.0 / d - 0.4) * (worldpos.xyz - FootPos.xyz);
 
-    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp);
+    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp.xy);
 }
 
 void main(void)
