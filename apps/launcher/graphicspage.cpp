@@ -65,7 +65,7 @@ bool Launcher::GraphicsPage::setupSDL()
         msgBox.setWindowTitle(tr("Error receiving number of screens"));
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setStandardButtons(QMessageBox::Ok);
-        msgBox.setText(tr("<br><b>SDL_GetNumDisplayModes failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
+        msgBox.setText(tr("<br><b>SDL_GetNumVideoDisplays failed:</b><br><br>") + QString::fromUtf8(SDL_GetError()) + "<br>");
         msgBox.exec();
         return false;
     }
