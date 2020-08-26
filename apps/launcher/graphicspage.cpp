@@ -71,8 +71,10 @@ bool Launcher::GraphicsPage::setupSDL()
     }
 
     screenComboBox->clear();
+    mResolutionsPerScreen.clear();
     for (int i = 0; i < displays; i++)
     {
+        mResolutionsPerScreen.append(getAvailableResolutions(i));
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
     screenChanged(0);
@@ -332,7 +334,7 @@ void Launcher::GraphicsPage::screenChanged(int screen)
 {
     if (screen >= 0) {
         resolutionComboBox->clear();
-        resolutionComboBox->addItems(getAvailableResolutions(screen));
+        resolutionComboBox->addItems(mResolutionsPerScreen[screen]);
     }
 }
 
