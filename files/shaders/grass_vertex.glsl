@@ -69,8 +69,7 @@ void main(void)
 
     vec4 displacedVertex = gl_Vertex;
     vec4 worldPos = osg_ViewMatrixInverse * vec4(viewPos.xyz, 1.0);
-    vec2 displ = grassDisplacement(worldPos, gl_Vertex.z);
-    vec2 grassVertex = min(vec2(10.0), displ);
+    vec2 grassVertex = grassDisplacement(worldPos, gl_Vertex.z);
 
     displacedVertex.xy += rotate(grassVertex.xy, -1.0*Rotz);
     gl_Position = gl_ModelViewProjectionMatrix * displacedVertex;
