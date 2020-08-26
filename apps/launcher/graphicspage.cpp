@@ -75,6 +75,7 @@ bool Launcher::GraphicsPage::setupSDL()
     {
         screenComboBox->addItem(QString(tr("Screen ")) + QString::number(i + 1));
     }
+    screenChanged(0);
 
     // Disconnect from SDL processes
     quitSDL();
