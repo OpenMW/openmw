@@ -472,9 +472,6 @@ namespace MWMechanics
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
     {
-        float previousSpeedFactor = actor.getClass().getMovementSettings(actor).mSpeedFactor;
-        float newSpeedFactor = 1.f;
-
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         MWMechanics::AiSequence& seq = stats.getAiSequence();
 
@@ -484,10 +481,13 @@ namespace MWMechanics
             osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
             float distance = (targetPos - actorPos).length();
             if (distance < DECELERATE_DISTANCE)
-                newSpeedFactor = std::max(0.7f, 0.1f * previousSpeedFactor * (distance/64.f + 2.f));
+            {
+                float speedCoef = std::max(0.7f, 0.1f * (distance/64.f + 2.f));
+                auto& movement = actor.getClass().getMovementSettings(actor);
+                movement.mPosition[0] *= speedCoef;
+                movement.mPosition[1] *= speedCoef;
+            }
         }
-
-        actor.getClass().getMovementSettings(actor).mSpeedFactor = newSpeedFactor;
     }
 
     void Actors::updateGreetingState(const MWWorld::Ptr& actor, Actor& actorState, bool turnOnly)

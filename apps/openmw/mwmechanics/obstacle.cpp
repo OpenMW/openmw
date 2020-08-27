@@ -122,7 +122,7 @@ namespace MWMechanics
 
         if (mWalkState != WalkState::Evade)
         {
-            const float distSameSpot = DIST_SAME_SPOT * actor.getClass().getSpeed(actor) * duration;
+            const float distSameSpot = DIST_SAME_SPOT * actor.getClass().getCurrentSpeed(actor) * duration;
             const float prevDistance = (destination - mPrev).length();
             const float currentDistance = (destination - position).length();
             const float movedDistance = prevDistance - currentDistance;
