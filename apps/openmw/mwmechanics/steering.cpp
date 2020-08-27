@@ -32,7 +32,7 @@ bool smoothTurn(const MWWorld::Ptr& actor, float targetAngleRadians, int axis, f
     if (absDiff < epsilonRadians)
         return true;
 
-    float limit = getAngularVelocity(actor.getClass().getSpeed(actor)) * MWBase::Environment::get().getFrameDuration();
+    float limit = getAngularVelocity(actor.getClass().getMaxSpeed(actor)) * MWBase::Environment::get().getFrameDuration();
     if (absDiff > limit)
         diff = osg::sign(diff) * limit;
 

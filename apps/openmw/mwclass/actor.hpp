@@ -31,7 +31,7 @@ namespace MWClass
         virtual void block(const MWWorld::Ptr &ptr) const;
 
         virtual osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const;
-        ///< Return desired rotations, as euler angles.
+        ///< Return desired rotations, as euler angles. Sets getMovementSettings(ptr).mRotation to zero.
 
         virtual float getEncumbrance(const MWWorld::Ptr& ptr) const;
         ///< Returns total weight of objects inside this object (including modifications from magic
@@ -42,6 +42,9 @@ namespace MWClass
 
         virtual bool isActor() const;
 
+        /// Return current movement speed.
+        virtual float getCurrentSpeed(const MWWorld::Ptr& ptr) const;
+        
         // not implemented
         Actor(const Actor&);
         Actor& operator= (const Actor&);
