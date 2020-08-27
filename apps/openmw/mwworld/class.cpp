@@ -159,7 +159,12 @@ namespace MWWorld
         return "";
     }
 
-    float Class::getSpeed (const Ptr& ptr) const
+    float Class::getMaxSpeed (const Ptr& ptr) const
+    {
+        return 0;
+    }
+    
+    float Class::getCurrentSpeed (const Ptr& ptr) const
     {
         return 0;
     }

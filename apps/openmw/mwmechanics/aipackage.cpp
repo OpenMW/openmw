@@ -144,7 +144,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         mTimer = 0;
     }
 
-    const float actorTolerance = 2 * actor.getClass().getSpeed(actor) * duration
+    const float actorTolerance = 2 * actor.getClass().getMaxSpeed(actor) * duration
             + 1.2 * std::max(halfExtents.x(), halfExtents.y());
     const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
@@ -300,7 +300,7 @@ bool MWMechanics::AiPackage::checkWayIsClearForActor(const osg::Vec3f& startPoin
     if (canActorMoveByZAxis(actor))
         return true;
 
-    const float actorSpeed = actor.getClass().getSpeed(actor);
+    const float actorSpeed = actor.getClass().getMaxSpeed(actor);
     const float maxAvoidDist = AI_REACTION_TIME * actorSpeed + actorSpeed / getAngularVelocity(actorSpeed) * 2; // *2 - for reliability
     const float distToTarget = osg::Vec2f(endPoint.x(), endPoint.y()).length();
 
@@ -360,7 +360,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
 bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& actor, const osg::Vec3f& dest)
 {
     // get actor's shortest radius for moving in circle
-    float speed = actor.getClass().getSpeed(actor);
+    float speed = actor.getClass().getMaxSpeed(actor);
     speed += speed * 0.1f; // 10% real speed inaccuracy
     float radius = speed / getAngularVelocity(speed);
 

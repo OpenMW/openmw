@@ -94,7 +94,7 @@ namespace MWClass
             virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
             ///< Return desired movement.
 
-            float getSpeed (const MWWorld::Ptr& ptr) const;
+            float getMaxSpeed (const MWWorld::Ptr& ptr) const;
 
             static void registerSelf();
 

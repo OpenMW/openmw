@@ -84,8 +84,8 @@ namespace MWClass
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
             ///< Return name of the script attached to ptr
 
-            virtual float getSpeed (const MWWorld::Ptr& ptr) const;
-            ///< Return movement speed.
+            virtual float getMaxSpeed (const MWWorld::Ptr& ptr) const;
+            ///< Return maximal movement speed.
 
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
