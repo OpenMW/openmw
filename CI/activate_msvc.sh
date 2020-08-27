@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eu
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "Error: Script not sourced."
