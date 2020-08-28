@@ -5,6 +5,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include <components/esm/magiceffects.hpp>
+
 #include "magiceffects.hpp"
 
 namespace MWMechanics
@@ -30,7 +32,7 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mActor;
 
-        std::set<std::tuple<int, std::string, int>> mActiveEffects;
+        std::set<ESM::SummonKey> mActiveEffects;
     };
 
 }

@@ -270,7 +270,8 @@ namespace MWMechanics
                 if (isSummoningEffect(effectIt->mEffectID) && !target.isEmpty() && target.getClass().isActor())
                 {
                     CreatureStats& targetStats = target.getClass().getCreatureStats(target);
-                    std::map<CreatureStats::SummonKey, int>::iterator findCreature = targetStats.getSummonedCreatureMap().find(std::make_tuple(effectIt->mEffectID, mId, currentEffectIndex));
+                    ESM::SummonKey key(effectIt->mEffectID, mId, currentEffectIndex);
+                    auto findCreature = targetStats.getSummonedCreatureMap().find(key);
                     if (findCreature != targetStats.getSummonedCreatureMap().end())
                     {
                         MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(target, findCreature->second);

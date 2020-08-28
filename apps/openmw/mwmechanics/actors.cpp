@@ -2016,7 +2016,7 @@ namespace MWMechanics
 
             // Remove the summoned creature's summoned creatures as well
             MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-            std::map<CreatureStats::SummonKey, int>& creatureMap = stats.getSummonedCreatureMap();
+            std::map<ESM::SummonKey, int>& creatureMap = stats.getSummonedCreatureMap();
             for (const auto& creature : creatureMap)
                 cleanupSummonedCreature(stats, creature.second);
             creatureMap.clear();
