@@ -1051,6 +1051,12 @@ void NpcAnimation::attachArrow()
     updateQuiver();
 }
 
+void NpcAnimation::detachArrow()
+{
+    WeaponAnimation::detachArrow(mPtr);
+    updateQuiver();
+}
+
 void NpcAnimation::releaseArrow(float attackStrength)
 {
     WeaponAnimation::releaseArrow(mPtr, attackStrength);

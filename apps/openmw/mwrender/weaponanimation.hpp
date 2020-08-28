@@ -36,6 +36,8 @@ namespace MWRender
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void attachArrow(MWWorld::Ptr actor);
 
+        void detachArrow(MWWorld::Ptr actor);
+
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void releaseArrow(MWWorld::Ptr actor, float attackStrength);
 
