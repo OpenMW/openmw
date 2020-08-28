@@ -1,6 +1,16 @@
 #!/bin/bash
 
-set -euo pipefail
+oldSettings=$-
+set -eu
+
+function restoreOldSettings {
+    if [[ $oldSettings != *e* ]]; then
+        set +e
+    fi
+    if [[ $oldSettings != *u* ]]; then
+        set +u
+    fi
+}
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "Error: Script not sourced."
@@ -8,6 +18,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     echo "source ./activate_msvc.sh"
     echo "or"
     echo ". ./activate_msvc.sh"
+    restoreOldSettings
     exit 1
 fi
 
@@ -78,7 +89,10 @@ command -v mt >/dev/null 2>&1 || { echo "Error: mt (MS Windows Manifest Tool) mi
 
 if [ $MISSINGTOOLS -ne 0 ]; then
     echo "Some build tools were unavailable after activating MSVC in the shell. It's likely that your Visual Studio $MSVC_DISPLAY_YEAR installation needs repairing."
+    restoreOldSettings
     return 1
 fi
 
 IFS="$originalIFS"
+
+restoreOldSettings
