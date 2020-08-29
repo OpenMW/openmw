@@ -5,6 +5,7 @@
 #include <components/esm/loadmgef.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/misc/coordinateconverter.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/world.hpp"
 #include "../mwbase/environment.hpp"
@@ -87,6 +88,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     //... But AI processing distance may increase in the future.
     if (isNearInactiveCell(position))
     {
+        actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
         return false;
@@ -169,11 +171,33 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     }
 
     // turn to next path point by X,Z axes
-    zTurn(actor, mPathFinder.getZAngleToNext(position.x(), position.y()));
+    float zAngleToNext = mPathFinder.getZAngleToNext(position.x(), position.y());
+    zTurn(actor, zAngleToNext);
     smoothTurn(actor, mPathFinder.getXAngleToNext(position.x(), position.y(), position.z()), 0);
 
     const auto destination = mPathFinder.getPath().empty() ? dest : mPathFinder.getPath().front();
     mObstacleCheck.update(actor, destination, duration);
+
+    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+    if (smoothMovement)
+    {
+        const float smoothTurnReservedDist = 150;
+        auto& movement = actor.getClass().getMovementSettings(actor);
+        float distToNextSqr = osg::Vec2f(destination.x() - position.x(), destination.y() - position.y()).length2();
+        float diffAngle = zAngleToNext - actor.getRefData().getPosition().rot[2];
+        if (std::cos(diffAngle) < -0.1)
+            movement.mPosition[0] = movement.mPosition[1] = 0;
+        else if (distToNextSqr > smoothTurnReservedDist * smoothTurnReservedDist)
+        { // Go forward (and slowly turn towards the next path point)
+            movement.mPosition[0] = 0;
+            movement.mPosition[1] = 1;
+        }
+        else
+        { // Next path point is near, so use diagonal movement to follow the path precisely.
+            movement.mPosition[0] = std::sin(diffAngle);
+            movement.mPosition[1] = std::max(std::cos(diffAngle), 0.f);
+        }
+    }
 
     // handle obstacles on the way
     evadeObstacles(actor);

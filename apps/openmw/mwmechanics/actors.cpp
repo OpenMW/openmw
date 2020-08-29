@@ -473,6 +473,10 @@ namespace MWMechanics
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
     {
+        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+        if (smoothMovement)
+            return;
+
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         MWMechanics::AiSequence& seq = stats.getAiSequence();
 
@@ -481,9 +485,10 @@ namespace MWMechanics
             osg::Vec3f targetPos = seq.getActivePackage().getDestination();
             osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
             float distance = (targetPos - actorPos).length();
+
             if (distance < DECELERATE_DISTANCE)
             {
-                float speedCoef = std::max(0.7f, 0.1f * (distance/64.f + 2.f));
+                float speedCoef = std::max(0.7f, 0.2f + 0.8f * distance / DECELERATE_DISTANCE);
                 auto& movement = actor.getClass().getMovementSettings(actor);
                 movement.mPosition[0] *= speedCoef;
                 movement.mPosition[1] *= speedCoef;
@@ -1769,20 +1774,29 @@ namespace MWMechanics
 
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
                             bool firstPersonPlayer = isPlayer && world->isFirstPerson();
+                            bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue);
 
                             // 1. Unconsious actor can not track target
                             // 2. Actors in combat and pursue mode do not bother to headtrack
                             // 3. Player character does not use headtracking in the 1st-person view
-                            if (!stats.getKnockedDown() &&
-                                !stats.getAiSequence().isInCombat() &&
-                                !stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue) &&
-                                !firstPersonPlayer)
+                            if (!stats.getKnockedDown() && !firstPersonPlayer && !inCombatOrPursue)
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
                                     if (it->first == iter->first)
                                         continue;
                                     updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                }
+                            }
+
+                            if (!stats.getKnockedDown() && !isPlayer && inCombatOrPursue)
+                            {
+                                // Actors in combat and pursue mode always look at their target.
+                                for (const auto& package : stats.getAiSequence())
+                                {
+                                    headTrackTarget = package->getTarget();
+                                    if (!headTrackTarget.isEmpty())
+                                        break;
                                 }
                             }
 

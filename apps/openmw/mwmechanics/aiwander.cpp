@@ -96,6 +96,7 @@ namespace MWMechanics
 
         void stopMovement(const MWWorld::Ptr& actor)
         {
+            actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         }
 
