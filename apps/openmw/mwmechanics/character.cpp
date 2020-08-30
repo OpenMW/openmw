@@ -2737,10 +2737,9 @@ void CharacterController::setVisibility(float visibility)
 void CharacterController::setAttackTypeBasedOnMovement()
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-
-    if (move[1] && !move[0]) // forward-backward
+    if (std::abs(move[1]) > std::abs(move[0]) + 0.2f) // forward-backward
         mAttackType = "thrust";
-    else if (move[0] && !move[1]) //sideway
+    else if (std::abs(move[0]) > std::abs(move[1]) + 0.2f) // sideway
         mAttackType = "slash";
     else
         mAttackType = "chop";
