@@ -58,7 +58,7 @@ namespace MWMechanics
     template<class T>
     void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount)
     {
-        ESM::NPC copy = *MWBase::Environment::get().getWorld()->getStore().get<ESM::NPC>().find(actorId);
+        T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(actorId);
         for(auto& it : copy.mInventory.mList)
         {
             if(Misc::StringUtils::ciEqual(it.mItem, itemId))
