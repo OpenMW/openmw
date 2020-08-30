@@ -68,6 +68,13 @@ namespace MWScript
                     }
 
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    // Calls to containers affect the base record
+                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+                    {
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        // TODO Add to every modified instance
+                        return;
+                    }
                     // Create a Ptr for the first added item to recover the item name later
                     MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
                     if (itemPtr.getClass().getScript(itemPtr).empty())
@@ -155,7 +162,10 @@ namespace MWScript
                         item = "gold_001";
 
                     // Explicit calls to non-unique actors affect the base record
-                    if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                    if(
+                        (!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                        // Calls to unmodified containers affect the base record instead
+                        || (ptr.getClass().getTypeName() == typeid(ESM::Container).name() && !store.isModified()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;

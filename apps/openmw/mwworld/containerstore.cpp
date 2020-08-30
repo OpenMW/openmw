@@ -119,7 +119,8 @@ MWWorld::ContainerStore::ContainerStore()
     : mListener(nullptr)
     , mRechargingItemsUpToDate(false)
     , mCachedWeight (0)
-    , mWeightUpToDate (false) {}
+    , mWeightUpToDate (false)
+    , mModified(false) {}
 
 MWWorld::ContainerStore::~ContainerStore() {}
 
@@ -328,7 +329,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
     return it;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr, int count, bool markModified)
 {
     int type = getType(ptr);
 
@@ -347,6 +348,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             {
                 iter->getRefData().setCount(iter->getRefData().getCount() + realCount);
                 flagAsModified();
+                if(markModified)
+                    mModified = true;
                 return iter;
             }
         }
@@ -364,14 +367,16 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
             iter->getRefData().setCount( iter->getRefData().getCount() + count );
 
             flagAsModified();
+            if(markModified)
+                mModified = true;
             return iter;
         }
     }
     // if we got here, this means no stacking
-    return addNewStack(ptr, count);
+    return addNewStack(ptr, count, markModified);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const ConstPtr& ptr, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const ConstPtr& ptr, int count, bool markModified)
 {
     ContainerStoreIterator it = begin();
 
@@ -394,6 +399,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addNewStack (const Cons
     it->getRefData().setCount(count);
 
     flagAsModified();
+    if(markModified)
+        mModified = true;
     return it;
 }
 
@@ -446,6 +453,7 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
             toRemove -= remove(*iter, toRemove, actor);
 
     flagAsModified();
+    mModified = true;
 
     // number of removed items
     return count - toRemove;
@@ -481,6 +489,7 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     }
 
     flagAsModified();
+    mModified = true;
 
     // we should not fire event for InventoryStore yet - it has some custom logic
     if (mListener && !actor.getClass().hasInventoryStore(actor))
@@ -562,7 +571,7 @@ void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const s
         count = std::abs(count);
 
         ptr.getCellRef().setOwner(owner);
-        addImp (ptr, count);
+        addImp (ptr, count, false);
     }
 }
 
@@ -657,12 +666,18 @@ void MWWorld::ContainerStore::clear()
         iter->getRefData().setCount (0);
 
     flagAsModified();
+    mModified = true;
 }
 
 void MWWorld::ContainerStore::flagAsModified()
 {
     mWeightUpToDate = false;
     mRechargingItemsUpToDate = false;
+}
+
+bool MWWorld::ContainerStore::isModified() const
+{
+    return mModified;
 }
 
 float MWWorld::ContainerStore::getWeight() const
@@ -860,6 +875,7 @@ void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
 {
     clear();
+    mModified = true;
 
     int index = 0;
     for (std::vector<ESM::ObjectState>::const_iterator

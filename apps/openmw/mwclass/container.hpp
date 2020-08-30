@@ -65,6 +65,8 @@ namespace MWClass
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 
             virtual bool useAnim() const;
+
+            virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
     };
 }
 

@@ -305,6 +305,11 @@ namespace MWClass
         return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
+    void Container::modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const
+    {
+        //TODO
+    }
+
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
@@ -331,7 +336,7 @@ namespace MWClass
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
-        if (!ptr.getRefData().getCustomData())
+        if (!ptr.getRefData().getCustomData() || !ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore.isModified())
         {
             state.mHasCustomState = false;
             return;

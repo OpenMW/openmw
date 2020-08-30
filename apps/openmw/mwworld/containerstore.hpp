@@ -99,7 +99,10 @@ namespace MWWorld
 
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr, int count);
+
+            bool mModified;
+
+            ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
             void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
             void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
 
@@ -186,7 +189,7 @@ namespace MWWorld
             void setContListener(ContainerStoreListener* listener);
 
         protected:
-            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
+            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count, bool markModified = true);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
@@ -219,6 +222,8 @@ namespace MWWorld
             virtual void writeState (ESM::InventoryState& state) const;
 
             virtual void readState (const ESM::InventoryState& state);
+
+            bool isModified() const;
 
             friend class ContainerStoreIteratorBase<Ptr>;
             friend class ContainerStoreIteratorBase<ConstPtr>;
