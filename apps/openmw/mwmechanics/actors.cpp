@@ -6,6 +6,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/mathutil.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -36,6 +37,7 @@
 #include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
+#include "aiwander.hpp"
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "combat.hpp"
@@ -1664,6 +1666,131 @@ namespace MWMechanics
 
     }
 
+    void Actors::predictAndAvoidCollisions()
+    {
+        const float minGap = 10.f;
+        const float maxDistToCheck = 100.f;
+        const float maxTimeToCheck = 1.f;
+        static const bool giveWayWhenIdle = Settings::Manager::getBool("NPCs give way", "Game");
+
+        MWWorld::Ptr player = getPlayer();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        {
+            const MWWorld::Ptr& ptr = iter->first;
+            if (ptr == player)
+                continue; // Don't interfere with player controls.
+
+            Movement& movement = ptr.getClass().getMovementSettings(ptr);
+            osg::Vec2f origMovement(movement.mPosition[0], movement.mPosition[1]);
+            bool isMoving = origMovement.length2() > 0.01;
+
+            // Moving NPCs always should avoid collisions.
+            // Standing NPCs give way to moving ones if they are not in combat (or pursue) mode and either
+            // follow player or have a AIWander package with non-empty wander area.
+            bool shouldAvoidCollision = isMoving;
+            bool shouldTurnToApproachingActor = !isMoving;
+            MWWorld::Ptr currentTarget; // Combat or pursue target (NPCs should not avoid collision with their targets).
+            for (const auto& package : ptr.getClass().getCreatureStats(ptr).getAiSequence())
+            {
+                if (package->getTypeId() == AiPackageTypeId::Follow)
+                    shouldAvoidCollision = true;
+                else if (package->getTypeId() == AiPackageTypeId::Wander && giveWayWhenIdle)
+                {
+                    if (!dynamic_cast<const AiWander*>(package.get())->isStationary())
+                        shouldAvoidCollision = true;
+                }
+                else if (package->getTypeId() == AiPackageTypeId::Combat || package->getTypeId() == AiPackageTypeId::Pursue)
+                {
+                    currentTarget = package->getTarget();
+                    shouldAvoidCollision = isMoving;
+                    shouldTurnToApproachingActor = false;
+                    break;
+                }
+            }
+            if (!shouldAvoidCollision)
+                continue;
+
+            float maxSpeed = ptr.getClass().getMaxSpeed(ptr);
+            osg::Vec2f baseSpeed = origMovement * maxSpeed;
+            osg::Vec3f basePos = ptr.getRefData().getPosition().asVec3();
+            float baseRotZ = ptr.getRefData().getPosition().rot[2];
+            osg::Vec3f halfExtents = world->getHalfExtents(ptr);
+
+            float timeToCollision = maxTimeToCheck;
+            osg::Vec2f movementCorrection(0, 0);
+            float angleToApproachingActor = 0;
+
+            // Iterate through all other actors and predict collisions.
+            for(PtrActorMap::iterator otherIter(mActors.begin()); otherIter != mActors.end(); ++otherIter)
+            {
+                const MWWorld::Ptr& otherPtr = otherIter->first;
+                if (otherPtr == ptr || otherPtr == currentTarget)
+                    continue;
+
+                osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
+                osg::Vec3f deltaPos = otherPtr.getRefData().getPosition().asVec3() - basePos;
+                osg::Vec2f relPos = Misc::rotateVec2f(osg::Vec2f(deltaPos.x(), deltaPos.y()), baseRotZ);
+
+                // Ignore actors which are not close enough or come from behind.
+                if (deltaPos.length2() > maxDistToCheck * maxDistToCheck || relPos.y() < 0)
+                    continue;
+
+                // Don't check for a collision if vertical distance is greater then the actor's height.
+                if (deltaPos.z() > halfExtents.z() * 2 || deltaPos.z() < -otherHalfExtents.z() * 2)
+                    continue;
+
+                osg::Vec3f speed = otherPtr.getClass().getMovementSettings(otherPtr).asVec3() *
+                                   otherPtr.getClass().getMaxSpeed(otherPtr);
+                float rotZ = otherPtr.getRefData().getPosition().rot[2];
+                osg::Vec2f relSpeed = Misc::rotateVec2f(osg::Vec2f(speed.x(), speed.y()), baseRotZ - rotZ) - baseSpeed;
+
+                float collisionDist = minGap + world->getHalfExtents(ptr).x() + world->getHalfExtents(otherPtr).x();
+                collisionDist = std::min(collisionDist, relPos.length());
+
+                // Find the earliest `t` when |relPos + relSpeed * t| == collisionDist.
+                float vr = relPos.x() * relSpeed.x() + relPos.y() * relSpeed.y();
+                float v2 = relSpeed.length2();
+                float Dh = vr * vr - v2 * (relPos.length2() - collisionDist * collisionDist);
+                if (Dh <= 0 || v2 == 0)
+                    continue; // No solution; distance is always >= collisionDist.
+                float t = (-vr - std::sqrt(Dh)) / v2;
+
+                if (t < 0 || t > timeToCollision)
+                    continue;
+
+                // Check visibility and awareness last as it's expensive.
+                if (!MWBase::Environment::get().getWorld()->getLOS(otherPtr, ptr))
+                    continue;
+                if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(otherPtr, ptr))
+                    continue;
+
+                timeToCollision = t;
+                angleToApproachingActor = std::atan2(deltaPos.x(), deltaPos.y());
+                osg::Vec2f posAtT = relPos + relSpeed * t;
+                float coef = (posAtT.x() * relSpeed.x() + posAtT.y() * relSpeed.y()) / (collisionDist * maxSpeed);
+                movementCorrection = posAtT * coef;
+                // Step to the side rather than backward. Otherwise player will be able to push the NPC far away from it's original location.
+                movementCorrection.y() = std::max(0.f, movementCorrection.y());
+            }
+
+            if (timeToCollision < maxTimeToCheck)
+            {
+                // Try to evade the nearest collision.
+                osg::Vec2f newMovement = origMovement + movementCorrection;
+                if (isMoving)
+                { // Keep the original speed.
+                    newMovement.normalize();
+                    newMovement *= origMovement.length();
+                }
+                movement.mPosition[0] = newMovement.x();
+                movement.mPosition[1] = newMovement.y();
+                if (shouldTurnToApproachingActor)
+                    zTurn(ptr, angleToApproachingActor);
+            }
+        }
+    }
+
     void Actors::update (float duration, bool paused)
     {
         if(!paused)
@@ -1837,6 +1964,10 @@ namespace MWMechanics
                     }
                 }
             }
+
+            static const bool avoidCollisions = Settings::Manager::getBool("NPCs avoid collisions", "Game");
+            if (avoidCollisions)
+                predictAndAvoidCollisions();
 
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
