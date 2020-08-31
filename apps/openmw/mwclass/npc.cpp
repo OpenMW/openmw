@@ -938,6 +938,8 @@ namespace MWClass
 
     float Npc::getMaxSpeed(const MWWorld::Ptr& ptr) const
     {
+        // TODO: This function is called several times per frame for each NPC.
+        // It would be better to calculate it only once per frame for each NPC and save the result in CreatureStats.
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
         if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
             return 0.f;
