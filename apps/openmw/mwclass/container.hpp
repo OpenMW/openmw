@@ -66,7 +66,7 @@ namespace MWClass
 
             virtual bool useAnim() const;
 
-            virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
+            virtual void modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const;
     };
 }
 

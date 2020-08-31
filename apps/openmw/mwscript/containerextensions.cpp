@@ -68,8 +68,10 @@ namespace MWScript
                     }
 
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
-                    // Calls to containers affect the base record
-                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name())
+                    // Calls to unmodified containers affect the base record
+                    // Currently open containers are always considered modified
+                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                        (!store.isModified() && !MWBase::Environment::get().getWindowManager()->containerIsOpen(ptr)))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                         // TODO Add to every modified instance
@@ -161,17 +163,19 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+
                     // Explicit calls to non-unique actors affect the base record
                     if(
                         (!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                         // Calls to unmodified containers affect the base record instead
-                        || (ptr.getClass().getTypeName() == typeid(ESM::Container).name() && !store.isModified()))
+                        // Currently open containers are always considered modified
+                        || (ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                            (!store.isModified() && !MWBase::Environment::get().getWindowManager()->containerIsOpen(ptr))))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
-
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)

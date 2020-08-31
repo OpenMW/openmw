@@ -1149,6 +1149,20 @@ namespace MWGui
         pushGuiMode(mode, MWWorld::Ptr());
     }
 
+    bool WindowManager::containerIsOpen(const MWWorld::Ptr& container) const
+    {
+        const auto it = mGuiModeStates.find(GuiMode::GM_Container);
+        if(it != mGuiModeStates.end())
+        {
+            for(WindowBase* window : it->second.mWindows)
+            {
+                if(window->getPtr() == container)
+                    return true;
+            }
+        }
+        return false;
+    }
+
     void WindowManager::pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg)
     {
         if (mode==GM_Inventory && mAllowed==GW_None)

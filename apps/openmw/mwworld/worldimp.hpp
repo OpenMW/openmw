@@ -487,6 +487,10 @@ namespace MWWorld
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
+            const ESM::Container *createOverrideRecord (const ESM::Container& record) override;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             void update (float duration, bool paused) override;
             void updatePhysics (float duration, bool paused) override;
 

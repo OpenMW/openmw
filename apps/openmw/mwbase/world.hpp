@@ -36,6 +36,7 @@ namespace ESM
     struct Position;
     struct Cell;
     struct Class;
+    struct Container;
     struct Creature;
     struct Potion;
     struct Spell;
@@ -382,6 +383,10 @@ namespace MWBase
             /// \return pointer to created record
 
             virtual const ESM::NPC *createOverrideRecord (const ESM::NPC& record) = 0;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
+            virtual const ESM::Container *createOverrideRecord (const ESM::Container& record) = 0;
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 

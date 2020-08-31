@@ -1734,6 +1734,11 @@ namespace MWWorld
         return mStore.overrideRecord(record);
     }
 
+    const ESM::Container *World::createOverrideRecord(const ESM::Container &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;

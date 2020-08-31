@@ -76,6 +76,11 @@ void WindowBase::center()
     mMainWidget->setCoord(coord);
 }
 
+MWWorld::Ptr WindowBase::getPtr() const
+{
+    return {};
+}
+
 WindowModal::WindowModal(const std::string& parLayout)
     : WindowBase(parLayout)
 {

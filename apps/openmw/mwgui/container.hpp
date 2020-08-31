@@ -34,6 +34,7 @@ namespace MWGui
         ContainerWindow(DragAndDrop* dragAndDrop);
 
         void setPtr(const MWWorld::Ptr& container);
+        MWWorld::Ptr getPtr() const;
         virtual void onClose();
         void clear() { resetReference(); }
 
