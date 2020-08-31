@@ -44,6 +44,7 @@
     Bug #5531: Actors flee using current rotation by axis x
     Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
     Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
+    Bug #5557: Diagonal movement is noticeably slower with analogue stick
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
