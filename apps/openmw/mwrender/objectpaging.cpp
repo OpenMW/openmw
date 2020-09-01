@@ -289,7 +289,9 @@ namespace MWRender
         }
         virtual void apply(osg::Geometry& geom)
         {
-            mResult.mNumVerts += geom.getVertexArray()->getNumElements();
+            if (osg::Array* array = geom.getVertexArray())
+                mResult.mNumVerts += array->getNumElements();
+
             ++mResult.mStateSetCounter[mCurrentStateSet];
             ++mGlobalStateSetCounter[mCurrentStateSet];
         }
