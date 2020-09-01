@@ -1965,8 +1965,11 @@ void CharacterController::update(float duration, bool animationOnly)
         vec.normalize();
 
         float effectiveRotation = rot.z();
+        bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
-        if (turnToMovementDirection && !isFirstPersonPlayer)
+        if (!turnToMovementDirection || isFirstPersonPlayer)
+            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
+        else if (canMove)
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
             movementSettings.mIsStrafing = (stats.getDrawState() != MWMechanics::DrawState_Nothing || inwater)
@@ -1986,8 +1989,6 @@ void CharacterController::update(float duration, bool animationOnly)
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
-        else
-            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
 
         mAnimation->setLegsYawRadians(stats.getSideMovementAngle());
         if (stats.getDrawState() == MWMechanics::DrawState_Nothing || inwater)
