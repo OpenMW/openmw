@@ -13,6 +13,7 @@
 #include "drawstate.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm/magiceffects.hpp>
 
 namespace ESM
 {
@@ -83,10 +84,8 @@ namespace MWMechanics
         // The difference between view direction and lower body direction.
         float mSideMovementAngle;
 
-    public:
-        typedef std::pair<int, std::string> SummonKey; // <ESM::MagicEffect index, spell ID>
     private:
-        std::map<SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
+        std::map<ESM::SummonKey, int> mSummonedCreatures; // <SummonKey, ActorId>
 
         // Contains ActorIds of summoned creatures with an expired lifetime that have not been deleted yet.
         // This may be necessary when the creature is in an inactive cell.
@@ -235,7 +234,7 @@ namespace MWMechanics
         void setBlock(bool value);
         bool getBlock() const;
 
-        std::map<SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
+        std::map<ESM::SummonKey, int>& getSummonedCreatureMap(); // <SummonKey, ActorId of summoned creature>
         std::vector<int>& getSummonedCreatureGraveyard(); // ActorIds
 
         enum Flag

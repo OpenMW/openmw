@@ -206,7 +206,7 @@ namespace MWWorld
             void purgeEffect (short effectId, bool wholeSpell = false);
             ///< Remove a magic effect
 
-            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false);
+            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false, int effectIndex=-1);
             ///< Remove a magic effect
 
             virtual void clear();
