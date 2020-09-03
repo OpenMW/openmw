@@ -18,6 +18,8 @@
 #include <components/esm/loadrepa.hpp>
 #include <components/esm/loadweap.hpp>
 
+#include <components/misc/rng.hpp>
+
 #include "ptr.hpp"
 #include "cellreflist.hpp"
 
@@ -103,8 +105,8 @@ namespace MWWorld
             bool mModified;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng& generator, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng& generator, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -188,6 +190,7 @@ namespace MWWorld
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);
 
+            void setModified();
         protected:
             ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count, bool markModified = true);
             ///< Add the item to this container (do not try to stack it onto existing items)
@@ -199,7 +202,7 @@ namespace MWWorld
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner);
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator = Misc::Rng::sInstance);
             ///< Insert items into *this.
 
             void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);

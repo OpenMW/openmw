@@ -1156,7 +1156,7 @@ namespace MWGui
         {
             for(WindowBase* window : it->second.mWindows)
             {
-                if(window->getPtr() == container)
+                if(window->isVisible() && window->getPtr() == container)
                     return true;
             }
         }

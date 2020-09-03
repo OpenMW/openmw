@@ -36,6 +36,7 @@ namespace MWClass
     {
     public:
         MWWorld::ContainerStore mContainerStore;
+        unsigned int mSeed;
 
         virtual MWWorld::CustomData *clone() const;
 
@@ -59,14 +60,15 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
+            data->mSeed = Misc::Rng::rollDice(std::numeric_limits<int>::max());
 
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();
 
+            Misc::Rng generator(data->mSeed);
             // setting ownership not needed, since taking items from a container inherits the
             // container's owner automatically
-            data->mContainerStore.fill(
-                ref->mBase->mInventory, "");
+            data->mContainerStore.fill(ref->mBase->mInventory, "", generator);
 
             // store
             ptr.getRefData().setCustomData (data.release());
@@ -274,6 +276,9 @@ namespace MWClass
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
+        const auto customData = ptr.getRefData().getCustomData();
+        if(customData && customData->asContainerCustomData().mContainerStore.isModified())
+            text += "\nmodified";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
