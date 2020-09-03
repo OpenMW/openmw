@@ -380,17 +380,14 @@ esac
 case $CONFIGURATION in
 	debug|Debug|DEBUG )
 		CONFIGURATION=Debug
-		BUILD_CONFIG=Debug
 		;;
 
 	release|Release|RELEASE )
 		CONFIGURATION=Release
-		BUILD_CONFIG=Release
 		;;
 
 	relwithdebinfo|RelWithDebInfo|RELWITHDEBINFO )
-		CONFIGURATION=Release
-		BUILD_CONFIG=RelWithDebInfo
+		CONFIGURATION=RelWithDebInfo
 		;;
 esac
 
@@ -422,7 +419,7 @@ else
 fi
 
 if [ -n "$SINGLE_CONFIG" ]; then
-	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
+	add_cmake_opts "-DCMAKE_BUILD_TYPE=${CONFIGURATION}"
 fi
 
 if ! [ -z $UNITY_BUILD ]; then
@@ -525,7 +522,7 @@ elif [ -n "$NINJA" ]; then
 fi
 
 if [ -n "$SINGLE_CONFIG" ]; then
-	BUILD_DIR="${BUILD_DIR}_${BUILD_CONFIG}"
+	BUILD_DIR="${BUILD_DIR}_${CONFIGURATION}"
 fi
 
 if [ -z $KEEP ]; then
@@ -907,8 +904,8 @@ fi
 	echo "- Copying Runtime DLLs..."
 	DLL_PREFIX=""
 	if [ -z $SINGLE_CONFIG ]; then
-		mkdir -p $BUILD_CONFIG
-		DLL_PREFIX="$BUILD_CONFIG/"
+		mkdir -p $CONFIGURATION
+		DLL_PREFIX="$CONFIGURATION/"
 	fi
 	for DLL in $RUNTIME_DLLS; do
 		TARGET="$(basename "$DLL")"
