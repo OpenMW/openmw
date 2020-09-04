@@ -39,9 +39,13 @@ namespace ESM
         {
             if (mEffectId < other.mEffectId)
                 return true;
+            if (mEffectId > other.mEffectId)
+                return false;
 
             if (mSourceId < other.mSourceId)
                 return true;
+            if (mSourceId > other.mSourceId)
+                return false;
 
             return mEffectIndex < other.mEffectIndex;
         }
