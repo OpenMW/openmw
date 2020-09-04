@@ -469,6 +469,9 @@ namespace MWMechanics
 
     void AiWander::onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
+        // Wait while fully stop before starting idle animation (important if "smooth movement" is enabled).
+        if (actor.getClass().getCurrentSpeed(actor) > 0)
+            return;
 
         unsigned short idleAnimation = getRandomIdle();
         storage.mIdleAnimation = idleAnimation;

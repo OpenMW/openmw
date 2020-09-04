@@ -1963,6 +1963,50 @@ void CharacterController::update(float duration, bool animationOnly)
         if (isPlayer && !isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
             movementSettings.mSpeedFactor *= 2.f;
 
+        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+        if (smoothMovement && !isFirstPersonPlayer)
+        {
+            float angle = mPtr.getRefData().getPosition().rot[2];
+            osg::Vec2f targetSpeed = Misc::rotateVec2f(osg::Vec2f(vec.x(), vec.y()), -angle) * movementSettings.mSpeedFactor;
+            osg::Vec2f delta = targetSpeed - mSmoothedSpeed;
+            float speedDelta = movementSettings.mSpeedFactor - mSmoothedSpeed.length();
+            float deltaLen = delta.length();
+
+            float maxDelta;
+            if (std::abs(speedDelta) < deltaLen / 2)
+                // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
+                maxDelta = duration * (isPlayer ? 3.f : 6.f);
+            else if (isPlayer && speedDelta < -deltaLen / 2)
+                // As soon as controls are released, mwinput switches player from running to walking.
+                // So stopping should be instant for player, otherwise it causes a small twitch.
+                maxDelta = 1;
+            else // In all other cases speeding up and stopping are smooth.
+                maxDelta = duration * 3.f;
+
+            if (deltaLen > maxDelta)
+                delta *= maxDelta / deltaLen;
+            mSmoothedSpeed += delta;
+
+            osg::Vec2f newSpeed = Misc::rotateVec2f(mSmoothedSpeed, angle);
+            movementSettings.mSpeedFactor = newSpeed.normalize();
+            vec.x() = newSpeed.x();
+            vec.y() = newSpeed.y();
+
+            const float eps = 0.001f;
+            if (movementSettings.mSpeedFactor < eps)
+            {
+                movementSettings.mSpeedFactor = 0;
+                vec.x() = 0;
+                vec.y() = 1;
+            }
+            else if ((vec.y() < 0) != mIsMovingBackward)
+            {
+                if (targetSpeed.length() < eps || (movementSettings.mPosition[1] < 0) == mIsMovingBackward)
+                    vec.y() = mIsMovingBackward ? -eps : eps;
+            }
+            vec.normalize();
+        }
+
         float effectiveRotation = rot.z();
         bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
@@ -2185,13 +2229,11 @@ void CharacterController::update(float duration, bool animationOnly)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if (effectiveRotation != 0.0f)
+            else
             {
                 // Do not play turning animation for player if rotation speed is very slow.
                 // Actual threshold should take framerate in account.
-                float rotationThreshold = 0.f;
-                if (isPlayer)
-                    rotationThreshold = 0.015 * 60 * duration;
+                float rotationThreshold = (isPlayer ? 0.015f : 0.001f) * 60 * duration;
 
                 // It seems only bipedal actors use turning animations.
                 // Also do not use turning animations in the first-person view and when sneaking.
