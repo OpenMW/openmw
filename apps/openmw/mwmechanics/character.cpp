@@ -1788,7 +1788,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                         mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                         break;
                     }
-                    playSwishSound(0.0f);
+
+                    if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+                        playSwishSound(0.0f);
                 }
 
                 if(mAttackType == "shoot")
