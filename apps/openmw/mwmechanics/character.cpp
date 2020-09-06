@@ -1306,6 +1306,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 mUpperBodyState = UpperCharState_UnEquipingWeap;
 
+                mAnimation->detachArrow();
+
                 // If we do not have the "unequip detach" key, hide weapon manually.
                 if (mAnimation->getTextKeyTime(weapgroup+": unequip detach") < 0)
                     mAnimation->showWeapons(false);

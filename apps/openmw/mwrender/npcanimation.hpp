@@ -142,6 +142,7 @@ public:
     virtual void showCarriedLeft(bool show);
 
     virtual void attachArrow();
+    virtual void detachArrow();
     virtual void releaseArrow(float attackStrength);
 
     virtual osg::Group* getArrowBone();
