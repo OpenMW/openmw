@@ -504,6 +504,8 @@ if [ -n "$BULLET_DOUBLE" ]; then
 	add_cmake_opts "-DBULLET_USE_DOUBLES=True"
 fi
 
+add_cmake_opts "-DOPENMW_LTO_BUILD-True"
+
 echo
 echo "==================================="
 echo "Starting prebuild on MSVC${MSVC_DISPLAY_YEAR} WIN${BITS}"
