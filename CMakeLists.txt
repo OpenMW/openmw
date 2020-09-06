@@ -1,6 +1,11 @@
 project(OpenMW)
 cmake_minimum_required(VERSION 3.1.0)
 
+# for link time optimization, remove if cmake version is >= 3.9
+if(POLICY CMP0069)
+    cmake_policy(SET CMP0069 NEW)
+endif()
+
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
 option(BUILD_LAUNCHER           "Build Launcher" ON)
@@ -97,6 +102,7 @@ option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" FALSE)
 option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
+option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
 # what is necessary to build documentation
 IF( BUILD_DOCS )
@@ -110,7 +116,6 @@ option(OPENMW_OSX_DEPLOYMENT OFF)
 
 if (MSVC)
     option(OPENMW_MP_BUILD "Build OpenMW with /MP flag" OFF)
-    option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 endif()
 
 # Set up common paths
@@ -388,6 +393,26 @@ endif()
 
 # CXX Compiler settings
 set(CMAKE_CXX_STANDARD 14)
+
+if(OPENMW_LTO_BUILD)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.9)
+        include(CheckIPOSupported)
+        check_ipo_supported(RESULT HAVE_IPO OUTPUT HAVE_IPO_OUTPUT)
+        if(HAVE_IPO)
+            message(STATUS "LTO enabled for Release configuration.")
+            set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        else()
+            message(WARNING "Requested option OPENMW_LTO_BUILD not supported by this compiler: ${HAVE_IPO_OUTPUT}")
+            if(MSVC)
+                message(STATUS "Note: Flags used to be set manually for this setting with MSVC. We now rely on CMake for this. Upgrade CMake to at least 3.13 to re-enable this setting.")
+            endif()
+        endif()
+    else()
+        message(WARNING "Requested option OPENMW_LTO_BUILD not supported by this cmake version: ${CMAKE_VERSION}. Upgrade CMake to at least 3.9 to enable support for certain compilers. Newer CMake versions support more compilers.")
+    endif()
+endif()
+
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wundef -Wno-unused-parameter -std=c++14 -pedantic -Wno-long-long")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
@@ -407,14 +432,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-but-set-parameter")
     endif()
 elseif (MSVC)
-    # Enable link-time code generation globally for all linking
-    if (OPENMW_LTO_BUILD)
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
-        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
-        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
-        set(CMAKE_STATIC_LINKER_FLAGS_RELEASE "${CMAKE_STATIC_LINKER_FLAGS_RELEASE} /LTCG")
-    endif()
-
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE")
 endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
