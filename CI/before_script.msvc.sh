@@ -504,7 +504,7 @@ if [ -n "$BULLET_DOUBLE" ]; then
 	add_cmake_opts "-DBULLET_USE_DOUBLES=True"
 fi
 
-add_cmake_opts "-DOPENMW_LTO_BUILD-True"
+add_cmake_opts "-DOPENMW_LTO_BUILD=True"
 
 echo
 echo "==================================="
