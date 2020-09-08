@@ -99,8 +99,9 @@ namespace MWGui
 
         for (int i=0; i<3; ++i)
         {
-            int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer
-                    (mPtr,pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->mValue.getInteger(),true);
+            int price = static_cast<int>(pcStats.getSkill (skills[i].first).getBase() * gmst.find("iTrainingMod")->mValue.getInteger());
+            price = std::max(1, price);
+            price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
             MyGUI::Button* button = mTrainingOptions->createWidget<MyGUI::Button>(price <= playerGold ? "SandTextButton" : "SandTextButtonDisabled", // can't use setEnabled since that removes tooltip
                 MyGUI::IntCoord(5, 5+i*18, mTrainingOptions->getWidth()-10, 18), MyGUI::Align::Default);

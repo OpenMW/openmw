@@ -475,7 +475,8 @@ namespace MWGui
         float fSpellMakingValueMult =
             store.get<ESM::GameSetting>().find("fSpellMakingValueMult")->mValue.getFloat();
 
-        int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, static_cast<int>(y * fSpellMakingValueMult),true);
+        int price = std::max(1, static_cast<int>(y * fSpellMakingValueMult));
+        price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         mPriceLabel->setCaption(MyGUI::utility::toString(int(price)));
 

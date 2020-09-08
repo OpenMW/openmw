@@ -63,6 +63,7 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
 
             int x = static_cast<int>((maxDurability - durability) / r);
             x = static_cast<int>(fRepairMult * x);
+            x = std::max(1, x);
 
             int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mActor, x, true);
 
