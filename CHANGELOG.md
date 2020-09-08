@@ -58,6 +58,7 @@
     Feature #5524: Resume failed script execution after reload
     Feature #5525: Search fields tweaks (utf-8)
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
+    Feature #5579: MCP SetAngle enhancement
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 
