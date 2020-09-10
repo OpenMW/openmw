@@ -95,10 +95,6 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
-            /// This is used to restock levelled items(s) if the old item was sold.
-
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
 
@@ -183,10 +179,6 @@ namespace MWWorld
             int count (const std::string& id);
             ///< @return How many items with refID \a id are in this container?
 
-            int restockCount (const std::string& id);
-            ///< Item count with restock adjustments (such as ignoring filled soul gems).
-            ///  @return How many items with refID \a id are in this container?
-
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);
 
@@ -204,8 +196,6 @@ namespace MWWorld
 
             void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator = Misc::Rng::sInstance);
             ///< Insert items into *this.
-
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);
 
             virtual void clear();
             ///< Empty container.
