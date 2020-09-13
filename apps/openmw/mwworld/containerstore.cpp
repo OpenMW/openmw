@@ -59,24 +59,6 @@ namespace
 
         return MWWorld::Ptr();
     }
-
-    /// + and - operations that can deal with negative stacks
-    /// Note that negativity is infectious
-    int addItems(int count1, int count2)
-    {
-        int sum = std::abs(count1) + std::abs(count2);
-        if(count1 < 0 || count2 < 0)
-            return -sum;
-        return sum;
-    }
-
-    int subtractItems(int count1, int count2)
-    {
-        int sum = std::abs(count1) - std::abs(count2);
-        if(count1 < 0 || count2 < 0)
-            return -sum;
-        return sum;
-    }
 }
 
 template<typename T>
@@ -769,6 +751,22 @@ MWWorld::Ptr MWWorld::ContainerStore::search (const std::string& id)
     return Ptr();
 }
 
+int MWWorld::ContainerStore::addItems(int count1, int count2)
+{
+    int sum = std::abs(count1) + std::abs(count2);
+    if(count1 < 0 || count2 < 0)
+        return -sum;
+    return sum;
+}
+
+int MWWorld::ContainerStore::subtractItems(int count1, int count2)
+{
+    int sum = std::abs(count1) - std::abs(count2);
+    if(count1 < 0 || count2 < 0)
+        return -sum;
+    return sum;
+}
+
 void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 {
     state.mItems.clear();
@@ -823,6 +821,18 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
             default:
                 Log(Debug::Warning) << "Warning: Invalid item type in inventory state, refid " << state.mRef.mRefID;
                 break;
+        }
+    }
+
+    // Fix old saves
+    for(const auto& entry : inventory.mLevelledItemMap)
+    {
+        const std::string& id = entry.first.first;
+        const int count = entry.second;
+        for(const auto& ptr : *this)
+        {
+            if(ptr.mRef->mData.getCount() == count && Misc::StringUtils::ciEqual(id, ptr.getCellRef().getRefId()))
+                ptr.mRef->mData.setCount(-count);
         }
     }
 }

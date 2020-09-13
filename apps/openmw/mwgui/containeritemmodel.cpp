@@ -93,7 +93,7 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
 
 MWWorld::Ptr ContainerItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
 {
-    const MWWorld::Ptr& source = mItemSources[mItemSources.size()-1];
+    const MWWorld::Ptr& source = mItemSources[0];
     if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
         throw std::runtime_error("Item to copy needs to be from a different container!");
     return *source.getClass().getContainerStore(source).add(item.mBase, count, source, allowAutoEquip);
@@ -153,7 +153,7 @@ void ContainerItemModel::update()
                 if (stacks(*it, itemStack.mBase))
                 {
                     // we already have an item stack of this kind, add to it
-                    itemStack.mCount += it->getRefData().getCount();
+                    itemStack.mCount += std::abs(it->getRefData().getCount());
                     found = true;
                     break;
                 }
@@ -162,7 +162,7 @@ void ContainerItemModel::update()
             if (!found)
             {
                 // no stack yet, create one
-                ItemStack newItem (*it, this, it->getRefData().getCount());
+                ItemStack newItem (*it, this, std::abs(it->getRefData().getCount()));
                 mItems.push_back(newItem);
             }
         }

@@ -189,6 +189,10 @@ namespace MWWorld
 
             virtual void flagAsModified();
 
+            /// + and - operations that can deal with negative stacks
+            /// Note that negativity is infectious
+            static int addItems(int count1, int count2);
+            static int subtractItems(int count1, int count2);
         public:
 
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;

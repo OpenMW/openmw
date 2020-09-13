@@ -99,20 +99,6 @@ namespace MWGui
         setCoord(400, 0, 400, 300);
     }
 
-    void TradeWindow::restock()
-    {
-        // Restock items on the actor inventory
-        mPtr.getClass().restock(mPtr);
-
-        // Also restock any containers owned by this merchant, which are also available to buy in the trade window
-        std::vector<MWWorld::Ptr> itemSources;
-        MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
-        for (MWWorld::Ptr& source : itemSources)
-        {
-            source.getClass().restock(source);
-        }
-    }
-
     void TradeWindow::setPtr(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
@@ -121,10 +107,10 @@ namespace MWGui
         mCurrentMerchantOffer = 0;
 
         std::vector<MWWorld::Ptr> itemSources;
+        // Important: actor goes first, so purchased items come out of the actor's pocket first
+        itemSources.push_back(actor);
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
-        // Important: actor goes last, so that items purchased by the merchant go into his inventory
-        itemSources.push_back(actor);
         std::vector<MWWorld::Ptr> worldItems;
         MWBase::Environment::get().getWorld()->getItemsOwnedBy(actor, worldItems);
 
@@ -364,7 +350,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
 
-        restock();
+        //TODO restock
     }
 
     void TradeWindow::onAccept(MyGUI::EditBox *sender)

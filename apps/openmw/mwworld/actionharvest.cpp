@@ -36,7 +36,7 @@ namespace MWWorld
             if (!it->getClass().showsInInventory(*it))
                 continue;
 
-            int itemCount = it->getRefData().getCount();
+            int itemCount = std::abs(it->getRefData().getCount());
             // Note: it is important to check for crime before move an item from container. Otherwise owner check will not work
             // for a last item in the container - empty harvested containers are considered as "allowed to use".
             MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);

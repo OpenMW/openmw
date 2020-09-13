@@ -101,17 +101,6 @@ namespace MWClass
         }
     }
 
-    void Container::restock(const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
-        const ESM::InventoryList& list = ref->mBase->mInventory;
-        MWWorld::ContainerStore& store = getContainerStore(ptr);
-
-        // setting ownership not needed, since taking items from a container inherits the
-        // container's owner automatically
-        store.restock(list, ptr, "");
-    }
-
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
     {
         if (!model.empty()) {
