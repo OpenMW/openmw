@@ -43,11 +43,12 @@ namespace MWGui
 ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems)
     : mItemSources(itemSources)
     , mWorldItems(worldItems)
+    , mTrading(true)
 {
     assert (!mItemSources.empty());
 }
 
-ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source)
+ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(false)
 {
     mItemSources.push_back(source);
 }
@@ -111,7 +112,12 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
         {
             if (stacks(*it, item.mBase))
             {
-                toRemove -= store.remove(*it, toRemove, source);
+                int quantity = it->mRef->mData.getCount();
+                // If this is a restocking quantity, just don't remove it
+                if(quantity < 0)
+                    toRemove += quantity;
+                else
+                    toRemove -= store.remove(*it, toRemove, source);
                 if (toRemove <= 0)
                     return;
             }

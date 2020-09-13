@@ -267,8 +267,8 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         // were there any items traded at all?
-        std::vector<ItemStack> playerBought = playerItemModel->getItemsBorrowedToUs();
-        std::vector<ItemStack> merchantBought = mTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& playerBought = playerItemModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& merchantBought = mTradeModel->getItemsBorrowedToUs();
         if (playerBought.empty() && merchantBought.empty())
         {
             // user notification
@@ -299,7 +299,7 @@ namespace MWGui
         }
 
         // check if the player is attempting to sell back an item stolen from this actor
-        for (ItemStack& itemStack : merchantBought)
+        for (const ItemStack& itemStack : merchantBought)
         {
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(itemStack.mBase.getCellRef().getRefId(), mPtr))
             {
@@ -349,8 +349,6 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
-
-        //TODO restock
     }
 
     void TradeWindow::onAccept(MyGUI::EditBox *sender)
@@ -464,7 +462,7 @@ namespace MWGui
         // connected to buying and selling the same item.
         // This value has been determined by researching the limitations of the vanilla formula
         // and may not be sufficient if getBarterOffer behavior has been changed.
-        std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : playerBorrowed)
         {
             const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
@@ -473,7 +471,7 @@ namespace MWGui
             merchantOffer -= std::max(cap, buyingPrice);
         }
 
-        std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : merchantBorrowed)
         {
             const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
