@@ -69,7 +69,7 @@ NMAKE=""
 NINJA=""
 PDBS=""
 PLATFORM=""
-CONFIGURATION=""
+CONFIGURATIONS=()
 TEST_FRAMEWORK=""
 GOOGLE_INSTALL_ROOT=""
 INSTALL_PREFIX="."
@@ -129,7 +129,7 @@ while [ $# -gt 0 ]; do
 				PDBS=true ;;
 
 			c )
-				CONFIGURATION=$1
+				CONFIGURATIONS+=( $1 )
 				shift ;;
 
 			t )
@@ -143,8 +143,10 @@ while [ $# -gt 0 ]; do
 				cat <<EOF
 Usage: $0 [-cdehkpuvVi]
 Options:
-	-c <Release/Debug>
+	-c <Release/Debug/RelWithDebInfo>
 		Set the configuration, can also be set with environment variable CONFIGURATION.
+		For mutli-config generators, this is ignored, and all configurations are set up.
+		For single-config generators, several configurations can be set up at once by specifying -c multiple times.
 	-d
 		Skip checking the downloads.
 	-D
@@ -164,7 +166,7 @@ Options:
 	-v <2017/2019>
 		Choose the Visual Studio version to use.
 	-n
-		Produce NMake makefiles instead of a Visual Studio solution. Cannout be used with -N.
+		Produce NMake makefiles instead of a Visual Studio solution. Cannot be used with -N.
 	-N
 		Produce Ninja (multi-config if CMake is new enough to support it) files instead of a Visual Studio solution. Cannot be used with -n..
 	-P
@@ -187,7 +189,7 @@ done
 
 if [ -n "$NMAKE" ] || [ -n "$NINJA" ]; then
 	if [ -n "$NMAKE" ] && [ -n "$NINJA" ]; then
-		echo "Cannout run in NMake and Ninja mode at the same time."
+		echo "Cannot run in NMake and Ninja mode at the same time."
 		wrappedExit 1
 	fi
 	ACTIVATE_MSVC=true
@@ -293,27 +295,38 @@ add_cmake_opts() {
 	CMAKE_OPTS="$CMAKE_OPTS $@"
 }
 
-RUNTIME_DLLS=""
+declare -A RUNTIME_DLLS
+RUNTIME_DLLS["Release"]=""
+RUNTIME_DLLS["Debug"]=""
+RUNTIME_DLLS["RelWithDebInfo"]=""
 add_runtime_dlls() {
-	RUNTIME_DLLS="$RUNTIME_DLLS $@"
+	local CONFIG=$1
+	shift
+	RUNTIME_DLLS[$CONFIG]="${RUNTIME_DLLS[$CONFIG]} $@"
 }
 
-OSG_PLUGINS=""
+declare -A OSG_PLUGINS
+OSG_PLUGINS["Release"]=""
+OSG_PLUGINS["Debug"]=""
+OSG_PLUGINS["RelWithDebInfo"]=""
 add_osg_dlls() {
-	OSG_PLUGINS="$OSG_PLUGINS $@"
+	local CONFIG=$1
+	shift
+	OSG_PLUGINS[$CONFIG]="${OSG_PLUGINS[$CONFIG]} $@"
 }
 
-QT_PLATFORMS=""
+declare -A QT_PLATFORMS
+QT_PLATFORMS["Release"]=""
+QT_PLATFORMS["Debug"]=""
+QT_PLATFORMS["RelWithDebInfo"]=""
 add_qt_platform_dlls() {
-	QT_PLATFORMS="$QT_PLATFORMS $@"
+	local CONFIG=$1
+	shift
+	QT_PLATFORMS[$CONFIG]="${QT_PLATFORMS[$CONFIG]} $@"
 }
 
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
-fi
-
-if [ -z $CONFIGURATION ]; then
-	CONFIGURATION="Debug"
 fi
 
 if [ -z $VS_VERSION ]; then
@@ -377,23 +390,6 @@ case $PLATFORM in
 		;;
 esac
 
-case $CONFIGURATION in
-	debug|Debug|DEBUG )
-		CONFIGURATION=Debug
-		BUILD_CONFIG=Debug
-		;;
-
-	release|Release|RELEASE )
-		CONFIGURATION=Release
-		BUILD_CONFIG=Release
-		;;
-
-	relwithdebinfo|RelWithDebInfo|RELWITHDEBINFO )
-		CONFIGURATION=Release
-		BUILD_CONFIG=RelWithDebInfo
-		;;
-esac
-
 if [ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ]; then
 	GENERATOR="${GENERATOR} Win64"
 fi
@@ -411,6 +407,79 @@ if [ -n "$NINJA" ]; then
 	fi
 fi
 
+if [ -n "$SINGLE_CONFIG" ]; then
+	if [ ${#CONFIGURATIONS[@]} -eq 0 ]; then
+		if [ -n "${CONFIGURATION:-}" ]; then
+			CONFIGURATIONS=("$CONFIGURATION")
+		else
+			CONFIGURATIONS=("Debug")
+		fi
+	elif [ ${#CONFIGURATIONS[@]} -ne 1 ]; then
+		# It's simplest just to recursively call the script a few times.
+		RECURSIVE_OPTIONS=()
+		if [ -n "$VERBOSE" ]; then
+			RECURSIVE_OPTIONS+=("-V")
+		fi
+		if [ -n "$SKIP_DOWNLOAD" ]; then
+			RECURSIVE_OPTIONS+=("-d")
+		fi
+		if [ -n "$BULLET_DOUBLE" ]; then
+			RECURSIVE_OPTIONS+=("-D")
+		fi
+		if [ -n "$SKIP_EXTRACT" ]; then
+			RECURSIVE_OPTIONS+=("-e")
+		fi
+		if [ -n "$KEEP" ]; then
+			RECURSIVE_OPTIONS+=("-k")
+		fi
+		if [ -n "$UNITY_BUILD" ]; then
+			RECURSIVE_OPTIONS+=("-u")
+		fi
+		if [ -n "$NMAKE" ]; then
+			RECURSIVE_OPTIONS+=("-n")
+		fi
+		if [ -n "$NINJA" ]; then
+			RECURSIVE_OPTIONS+=("-N")
+		fi
+		if [ -n "$PDBS" ]; then
+			RECURSIVE_OPTIONS+=("-P")
+		fi
+		if [ -n "$TEST_FRAMEWORK" ]; then
+			RECURSIVE_OPTIONS+=("-t")
+		fi
+		RECURSIVE_OPTIONS+=("-v $VS_VERSION")
+		RECURSIVE_OPTIONS+=("-p $PLATFORM")
+		RECURSIVE_OPTIONS+=("-i '$INSTALL_PREFIX'")
+
+		for config in ${CONFIGURATIONS[@]}; do
+			$0 ${RECURSIVE_OPTIONS[@]} -c $config
+		done
+
+		wrappedExit 1
+	fi
+else
+	if [ ${#CONFIGURATIONS[@]} -ne 0 ]; then
+		echo "Ignoring configurations argument - generator is multi-config"
+	fi
+	CONFIGURATIONS=("Release" "Debug" "RelWithDebInfo")
+fi
+
+for i in ${!CONFIGURATIONS[@]}; do
+	case ${CONFIGURATIONS[$i]} in
+		debug|Debug|DEBUG )
+			CONFIGURATIONS[$i]=Debug
+			;;
+
+		release|Release|RELEASE )
+			CONFIGURATIONS[$i]=Release
+			;;
+
+		relwithdebinfo|RelWithDebInfo|RELWITHDEBINFO )
+			CONFIGURATIONS[$i]=RelWithDebInfo
+			;;
+	esac
+done
+
 if [ $MSVC_REAL_VER -ge 16 ] && [ -z "$NMAKE" ] && [ -z "$NINJA" ]; then
 	if [ $BITS -eq 64 ]; then
 		add_cmake_opts "-G\"$GENERATOR\" -A x64"
@@ -422,7 +491,7 @@ else
 fi
 
 if [ -n "$SINGLE_CONFIG" ]; then
-	add_cmake_opts "-DCMAKE_BUILD_TYPE=${BUILD_CONFIG}"
+	add_cmake_opts "-DCMAKE_BUILD_TYPE=${CONFIGURATIONS[0]}"
 fi
 
 if ! [ -z $UNITY_BUILD ]; then
@@ -525,7 +594,7 @@ elif [ -n "$NINJA" ]; then
 fi
 
 if [ -n "$SINGLE_CONFIG" ]; then
-	BUILD_DIR="${BUILD_DIR}_${BUILD_CONFIG}"
+	BUILD_DIR="${BUILD_DIR}_${CONFIGURATIONS[0]}"
 fi
 
 if [ -z $KEEP ]; then
@@ -626,7 +695,9 @@ printf "FFmpeg 4.2.2... "
 		rm -rf "ffmpeg-4.2.2-win${BITS}-dev"
 	fi
 	export FFMPEG_HOME="$(real_pwd)/FFmpeg"
-	add_runtime_dlls "$(pwd)/FFmpeg/bin/"{avcodec-58,avformat-58,avutil-56,swresample-3,swscale-5}.dll
+	for config in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $config "$(pwd)/FFmpeg/bin/"{avcodec-58,avformat-58,avutil-56,swresample-3,swscale-5}.dll
+	done
 	if [ $BITS -eq 32 ]; then
 		add_cmake_opts "-DCMAKE_EXE_LINKER_FLAGS=\"/machine:X86 /safeseh:no\""
 	fi
@@ -651,14 +722,16 @@ printf "MyGUI 3.4.0... "
 		mv "MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}" MyGUI
 	fi
 	export MYGUI_HOME="$(real_pwd)/MyGUI"
-	if [ $CONFIGURATION == "Debug" ]; then
-		SUFFIX="_d"
-		MYGUI_CONFIGURATION="Debug"
-	else
-		SUFFIX=""
-		MYGUI_CONFIGURATION="RelWithDebInfo"
-	fi
-	add_runtime_dlls "$(pwd)/MyGUI/bin/${MYGUI_CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		if [ $CONFIGURATION == "Debug" ]; then
+			SUFFIX="_d"
+			MYGUI_CONFIGURATION="Debug"
+		else
+			SUFFIX=""
+			MYGUI_CONFIGURATION="RelWithDebInfo"
+		fi
+		add_runtime_dlls $CONFIGURATION "$(pwd)/MyGUI/bin/${MYGUI_CONFIGURATION}/MyGUIEngine${SUFFIX}.dll"
+	done
 	echo Done.
 }
 cd $DEPS
@@ -675,7 +748,9 @@ printf "OpenAL-Soft 1.20.1... "
 	OPENAL_SDK="$(real_pwd)/openal-soft-1.20.1-bin"
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
-	add_runtime_dlls "$(pwd)/openal-soft-1.20.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+	for config in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $config "$(pwd)/openal-soft-1.20.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+	done
 	echo Done.
 }
 cd $DEPS
@@ -698,15 +773,17 @@ printf "OSG 3.6.5... "
 	fi
 	OSG_SDK="$(real_pwd)/OSG"
 	add_cmake_opts -DOSG_DIR="$OSG_SDK"
-	if [ $CONFIGURATION == "Debug" ]; then
-		SUFFIX="d"
-	else
-		SUFFIX=""
-	fi
-	add_runtime_dlls "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
-		"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
-	add_osg_dlls "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		if [ $CONFIGURATION == "Debug" ]; then
+			SUFFIX="d"
+		else
+			SUFFIX=""
+		fi
+		add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,zlib,libpng}${SUFFIX}.dll \
+			"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_"{bmp,dds,freetype,jpeg,osg,png,tga}${SUFFIX}.dll
+		add_osg_dlls $CONFIGURATION "$(pwd)/OSG/bin/osgPlugins-3.6.5/osgdb_serializers_osg"{,animation,fx,ga,particle,text,util,viewer,shadow}${SUFFIX}.dll
+	done
 	echo Done.
 }
 cd $DEPS
@@ -778,26 +855,30 @@ fi
 		cd $QT_SDK
 		add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
-		if [ $CONFIGURATION == "Debug" ]; then
-			SUFFIX="d"
-		else
-			SUFFIX=""
-		fi
-		add_runtime_dlls "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
-		add_qt_platform_dlls "$(pwd)/plugins/platforms/qwindows${SUFFIX}.dll"
+		for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+			if [ $CONFIGURATION == "Debug" ]; then
+				DLLSUFFIX="d"
+			else
+				DLLSUFFIX=""
+			fi
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+			add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
+		done
 		echo Done.
 	else
 		QT_SDK="C:/Qt/5.13/msvc2017${SUFFIX}"
 		add_cmake_opts -DQT_QMAKE_EXECUTABLE="${QT_SDK}/bin/qmake.exe" \
 			-DCMAKE_PREFIX_PATH="$QT_SDK"
-		if [ $CONFIGURATION == "Debug" ]; then
-			SUFFIX="d"
-		else
-			SUFFIX=""
-		fi
-		DIR=$(windowsPathAsUnix "${QT_SDK}")
-		add_runtime_dlls "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${SUFFIX}.dll
-		add_qt_platform_dlls "${DIR}/plugins/platforms/qwindows${SUFFIX}.dll"
+		for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+			if [ $CONFIGURATION == "Debug" ]; then
+				DLLSUFFIX="d"
+			else
+				DLLSUFFIX=""
+			fi
+			DIR=$(windowsPathAsUnix "${QT_SDK}")
+			add_runtime_dlls $CONFIGURATION "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+			add_qt_platform_dlls $CONFIGURATION "${DIR}/plugins/platforms/qwindows${DLLSUFFIX}.dll"
+		done
 		echo Done.
 	fi
 }
@@ -813,7 +894,9 @@ printf "SDL 2.0.12... "
 		eval 7z x -y SDL2-2.0.12.zip $STRIP
 	fi
 	export SDL2DIR="$(real_pwd)/SDL2-2.0.12"
-	add_runtime_dlls "$(pwd)/SDL2-2.0.12/lib/x${ARCHSUFFIX}/SDL2.dll"
+	for config in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $config "$(pwd)/SDL2-2.0.12/lib/x${ARCHSUFFIX}/SDL2.dll"
+	done
 	echo Done.
 }
 cd $DEPS
@@ -823,41 +906,51 @@ if [ ! -z $TEST_FRAMEWORK ]; then
 	printf "Google test 1.10.0 ..."
 
 	cd googletest
-	if [ ! -d build ]; then
-		mkdir build
-	fi
+	mkdir -p build${MSVC_REAL_YEAR}
 
-	cd build
+	cd build${MSVC_REAL_YEAR}
 
 	GOOGLE_INSTALL_ROOT="${DEPS_INSTALL}/GoogleTest"
-	if [ $CONFIGURATION == "Debug" ]; then
+	
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		# FindGMock.cmake mentions Release explicitly, but not RelWithDebInfo. Only one optimised library config can be used, so go for the safer one.
+		GTEST_CONFIG=$([ $CONFIGURATION == "RelWithDebInfo" ] && echo "Release" || echo "$CONFIGURATION" )
+		if [ $GTEST_CONFIG == "Debug" ]; then
 			DEBUG_SUFFIX="d"
 		else
 			DEBUG_SUFFIX=""
-	fi
+		fi
 
-	if [ ! -d $GOOGLE_INSTALL_ROOT ]; then
+		if [ ! -f "$GOOGLE_INSTALL_ROOT/lib/gtest${DEBUG_SUFFIX}.lib" ]; then
+			# Always use MSBuild solution files as they don't need the environment activating
+			cmake .. -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "Visual Studio $MSVC_REAL_VER $MSVC_REAL_YEAR$([ $BITS -eq 64 ] && [ $MSVC_REAL_VER -lt 16 ] && echo " Win64")" $([ $MSVC_REAL_VER -ge 16 ] && echo "-A $([ $BITS -eq 64 ] && echo "x64" || echo "Win32")") -DBUILD_SHARED_LIBS=1
+			cmake --build . --config "${GTEST_CONFIG}"
+			cmake --install . --config "${GTEST_CONFIG}" --prefix "${GOOGLE_INSTALL_ROOT}"
+		fi
 
-		cmake .. -DCMAKE_BUILD_TYPE="${CONFIGURATION}" -DCMAKE_INSTALL_PREFIX="${GOOGLE_INSTALL_ROOT}" -DCMAKE_USE_WIN32_THREADS_INIT=1 -G "${GENERATOR}" -DBUILD_SHARED_LIBS=1
-		cmake --build . --config "${CONFIGURATION}"
-		cmake --build . --target install --config "${CONFIGURATION}"
-
-		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gtest_main${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gtest${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gmock_main${DEBUG_SUFFIX}.dll"
-		add_runtime_dlls "${GOOGLE_INSTALL_ROOT}\bin\gmock${DEBUG_SUFFIX}.dll"
-	fi
+		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gtest_main${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gtest${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gmock_main${DEBUG_SUFFIX}.dll"
+		add_runtime_dlls $CONFIGURATION "${GOOGLE_INSTALL_ROOT}\bin\gmock${DEBUG_SUFFIX}.dll"
+	done
 
 	add_cmake_opts -DBUILD_UNITTESTS=yes
 	# FindGTest and FindGMock do not work perfectly on Windows
 	# but we can help them by telling them everything we know about installation
 	add_cmake_opts -DGMOCK_ROOT="$GOOGLE_INSTALL_ROOT"
 	add_cmake_opts -DGTEST_ROOT="$GOOGLE_INSTALL_ROOT"
-	add_cmake_opts -DGTEST_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest${DEBUG_SUFFIX}.lib"
-	add_cmake_opts -DGTEST_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest_main${DEBUG_SUFFIX}.lib"
-	add_cmake_opts -DGMOCK_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock${DEBUG_SUFFIX}.lib"
-	add_cmake_opts -DGMOCK_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock_main${DEBUG_SUFFIX}.lib"
+	add_cmake_opts -DGTEST_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest.lib"
+	add_cmake_opts -DGTEST_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gtest_main.lib"
+	add_cmake_opts -DGMOCK_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock.lib"
+	add_cmake_opts -DGMOCK_MAIN_LIBRARY="$GOOGLE_INSTALL_ROOT/lib/gmock_main.lib"
+	add_cmake_opts -DGTEST_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gtestd.lib"
+	add_cmake_opts -DGTEST_MAIN_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gtest_maind.lib"
+	add_cmake_opts -DGMOCK_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gmockd.lib"
+	add_cmake_opts -DGMOCK_MAIN_LIBRARY_DEBUG="$GOOGLE_INSTALL_ROOT/lib/gmock_maind.lib"
 	add_cmake_opts -DGTEST_LINKED_AS_SHARED_LIBRARY=True
+	add_cmake_opts -DGTEST_LIBRARY_TYPE=SHARED
+	add_cmake_opts -DGTEST_MAIN_LIBRARY_TYPE=SHARED
+
 	echo Done.
 
 fi
@@ -904,45 +997,47 @@ if [ ! -z $CI ]; then
 fi
 # NOTE: Disable this when/if we want to run test cases
 #if [ -z $CI ]; then
-	echo "- Copying Runtime DLLs..."
-	DLL_PREFIX=""
-	if [ -z $SINGLE_CONFIG ]; then
-		mkdir -p $BUILD_CONFIG
-		DLL_PREFIX="$BUILD_CONFIG/"
-	fi
-	for DLL in $RUNTIME_DLLS; do
-		TARGET="$(basename "$DLL")"
-		if [[ "$DLL" == *":"* ]]; then
-			originalIFS="$IFS"
-			IFS=':'; SPLIT=( ${DLL} ); IFS=$originalIFS
-			DLL=${SPLIT[0]}
-			TARGET=${SPLIT[1]}
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		echo "- Copying Runtime DLLs for $CONFIGURATION..."
+		DLL_PREFIX=""
+		if [ -z $SINGLE_CONFIG ]; then
+			mkdir -p $CONFIGURATION
+			DLL_PREFIX="$CONFIGURATION/"
 		fi
-		echo "    ${TARGET}."
-		cp "$DLL" "${DLL_PREFIX}$TARGET"
+		for DLL in ${RUNTIME_DLLS[$CONFIGURATION]}; do
+			TARGET="$(basename "$DLL")"
+			if [[ "$DLL" == *":"* ]]; then
+				originalIFS="$IFS"
+				IFS=':'; SPLIT=( ${DLL} ); IFS=$originalIFS
+				DLL=${SPLIT[0]}
+				TARGET=${SPLIT[1]}
+			fi
+			echo "    ${TARGET}."
+			cp "$DLL" "${DLL_PREFIX}$TARGET"
+		done
+		echo
+		echo "- OSG Plugin DLLs..."
+		mkdir -p ${DLL_PREFIX}osgPlugins-3.6.5
+		for DLL in ${OSG_PLUGINS[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)."
+			cp "$DLL" ${DLL_PREFIX}osgPlugins-3.6.5
+		done
+		echo
+		echo "- Qt Platform DLLs..."
+		mkdir -p ${DLL_PREFIX}platforms
+		for DLL in ${QT_PLATFORMS[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}platforms"
+		done
+		echo
 	done
-	echo
-	echo "- OSG Plugin DLLs..."
-	mkdir -p ${DLL_PREFIX}osgPlugins-3.6.5
-	for DLL in $OSG_PLUGINS; do
-		echo "    $(basename $DLL)."
-		cp "$DLL" ${DLL_PREFIX}osgPlugins-3.6.5
-	done
-	echo
-	echo "- Qt Platform DLLs..."
-	mkdir -p ${DLL_PREFIX}platforms
-	for DLL in $QT_PLATFORMS; do
-		echo "    $(basename $DLL)"
-		cp "$DLL" "${DLL_PREFIX}platforms"
-	done
-	echo
 #fi
 
 if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
-	MSVC_INSTALLATION_PATH=$(vswhere -legacy -products '*' -version "[$MSVC_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	MSVC_INSTALLATION_PATH=$(vswhere -products '*' -version "[$MSVC_REAL_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
 	if [ -z "$MSVC_INSTALLATION_PATH" ]; then
 		echo "vswhere was unable to find MSVC $MSVC_DISPLAY_YEAR"
 		wrappedExit 1
