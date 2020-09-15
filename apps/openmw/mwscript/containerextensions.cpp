@@ -67,6 +67,7 @@ namespace MWScript
                         return;
                     }
 
+//TODO stuff
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
                     // Calls to unmodified containers affect the base record
                     // Currently open containers are always considered modified
@@ -129,6 +130,7 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
+//TODO stuff
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     runtime.push (store.count(item));
@@ -163,6 +165,7 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
+//TODO stuff
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
                     // Explicit calls to non-unique actors affect the base record

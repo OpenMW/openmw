@@ -43,7 +43,7 @@ namespace
                 continue;
 
             MWWorld::Ptr ptr =
-                container.getClass().getContainerStore (container).search (id);
+                container.getClass().getStoreManager (container).getMutable().search (id);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -1016,7 +1016,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
                 }
             }
             for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
@@ -1024,7 +1024,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
                 }
             }
             for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
@@ -1032,6 +1032,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0)
                 {
+                    //TODO stuff
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }

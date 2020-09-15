@@ -39,6 +39,21 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
+    class StoreManager {
+        public:
+            virtual ContainerStore& getMutable() const;
+            virtual const ContainerStore& getImmutable() const;
+            virtual ~StoreManager() = default;
+    };
+
+    class ContainerStoreWrapper : public StoreManager
+    {
+            ContainerStore& mStore;
+        public:
+            ContainerStoreWrapper(ContainerStore& store);
+            virtual ContainerStore& getMutable() const override;
+            virtual const ContainerStore& getImmutable() const override;
+    };
     
     class ContainerStoreListener
     {
@@ -176,7 +191,7 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            int count (const std::string& id);
+            int count (const std::string& id) const;
             ///< @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;

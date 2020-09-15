@@ -30,7 +30,7 @@ namespace MWWorld
         int count = std::abs(getTarget().getRefData().getCount());
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
                     actor, getTarget(), MWWorld::Ptr(), count);
-        MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), count, actor);
+        MWWorld::Ptr newitem = *actor.getClass().getStoreManager (actor).getMutable().add (getTarget(), count, actor);
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
         setTarget(newitem);
     }

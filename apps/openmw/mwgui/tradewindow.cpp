@@ -247,15 +247,15 @@ namespace MWGui
 
     void TradeWindow::addOrRemoveGold(int amount, const MWWorld::Ptr& actor)
     {
-        MWWorld::ContainerStore& store = actor.getClass().getContainerStore(actor);
+        auto store = actor.getClass().getStoreManager(actor);
 
         if (amount > 0)
         {
-            store.add(MWWorld::ContainerStore::sGoldId, amount, actor);
+            store.getMutable().add(MWWorld::ContainerStore::sGoldId, amount, actor);
         }
         else
         {
-            store.remove(MWWorld::ContainerStore::sGoldId, - amount, actor);
+            store.getMutable().remove(MWWorld::ContainerStore::sGoldId, - amount, actor);
         }
     }
 
@@ -278,7 +278,7 @@ namespace MWGui
         }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
 
         // check if the player can afford this
         if (mCurrentBalance < 0 && playerGold < std::abs(mCurrentBalance))
@@ -434,7 +434,7 @@ namespace MWGui
     void TradeWindow::updateLabels()
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
 
         mPlayerGold->setCaptionWithReplacing("#{sYourGold} " + MyGUI::utility::toString(playerGold));
 

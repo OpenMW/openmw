@@ -28,8 +28,10 @@ namespace MWWorld
             return;
 
         MWWorld::Ptr target = getTarget();
-        MWWorld::ContainerStore& store = target.getClass().getContainerStore (target);
-        MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
+        auto targetManager = target.getClass().getStoreManager(target);
+        auto actorManager = actor.getClass().getStoreManager(actor);
+        MWWorld::ContainerStore& store = targetManager.getMutable();
+        MWWorld::ContainerStore& actorStore = actorManager.getMutable();
         std::map<std::string, int> takenMap;
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {

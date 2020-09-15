@@ -117,7 +117,7 @@ namespace MWClass
         const std::string lockedSound = "LockedDoor";
         const std::string trapActivationSound = "Disarm Trap Fail";
 
-        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
+        auto store = actor.getClass().getStoreManager(actor);
 
         bool isLocked = ptr.getCellRef().getLockLevel() > 0;
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
@@ -150,7 +150,7 @@ namespace MWClass
         const std::string keyId = ptr.getCellRef().getKey();
         if (!keyId.empty())
         {
-            MWWorld::Ptr keyPtr = invStore.search(keyId);
+            MWWorld::Ptr keyPtr = store.getMutable().search(keyId);
             if (!keyPtr.isEmpty())
             {
                 hasKey = true;

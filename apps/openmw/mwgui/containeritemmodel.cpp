@@ -39,7 +39,7 @@ namespace
 
 namespace MWGui
 {
-
+//TODO containerstore
 ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems)
     : mItemSources(itemSources)
     , mWorldItems(worldItems)
@@ -55,7 +55,7 @@ ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(f
 
 bool ContainerItemModel::allowedToUseItems() const
 {
-    if (mItemSources.size() == 0)
+    if (mItemSources.empty())
         return true;
 
     MWWorld::Ptr ptr = MWMechanics::getPlayer();

@@ -257,7 +257,7 @@ namespace MWMechanics
             {
                 float fProjectileThrownStoreChance = gmst.find("fProjectileThrownStoreChance")->mValue.getFloat();
                 if (Misc::Rng::rollProbability() < fProjectileThrownStoreChance / 100.f)
-                    victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+                    victim.getClass().getStoreManager(victim).getMutable().add(projectile, 1, victim);
             }
 
             victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);

@@ -913,12 +913,11 @@ namespace MWClass
         return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
     }
 
-    MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::StoreManager Npc::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
 
-        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        return MWWorld::ContainerStoreWrapper(ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore);
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)

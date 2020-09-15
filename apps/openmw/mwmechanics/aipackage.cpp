@@ -244,8 +244,8 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
         if (keyId.empty())
             return;
 
-        MWWorld::ContainerStore &invStore = actor.getClass().getContainerStore(actor);
-        MWWorld::Ptr keyPtr = invStore.search(keyId);
+        auto storeManager = actor.getClass().getStoreManager(actor);
+        MWWorld::Ptr keyPtr = storeManager.getMutable().search(keyId);
 
         if (!keyPtr.isEmpty())
             world->activate(door, actor);

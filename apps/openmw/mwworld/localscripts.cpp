@@ -47,7 +47,8 @@ namespace
                 containerPtr.getRefData().getCustomData() == nullptr)
                 return false;
 
-            MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
+            auto store = containerPtr.getClass().getStoreManager(containerPtr);
+            const MWWorld::ContainerStore& container = store.getImmutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);

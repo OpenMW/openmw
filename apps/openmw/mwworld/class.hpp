@@ -45,7 +45,7 @@ namespace ESM
 
 namespace MWWorld
 {
-    class ContainerStore;
+    class StoreManager;
     class InventoryStore;
     class CellStore;
     class Action;
@@ -147,8 +147,8 @@ namespace MWWorld
             ///< Generate action for using via inventory menu (default implementation: return a
             /// null action).
 
-            virtual ContainerStore& getContainerStore (const Ptr& ptr) const;
-            ///< Return container store or throw an exception, if class does not have a
+            virtual StoreManager getStoreManager (const Ptr& ptr) const;
+            ///< Return container store manager or throw an exception, if class does not have a
             /// container store (default implementation: throw an exception)
 
             virtual InventoryStore& getInventoryStore (const Ptr& ptr) const;

@@ -220,12 +220,11 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::StoreManager Container::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-
-        return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
+        auto& store = ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
+        return MWWorld::ContainerStoreWrapper(store);
     }
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
@@ -291,7 +290,8 @@ namespace MWClass
 
     float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        return getContainerStore (ptr).getWeight();
+        auto store = getStoreManager(ptr);
+        return store.getImmutable().getWeight();
     }
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const

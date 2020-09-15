@@ -32,7 +32,7 @@ namespace MWClass
             virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
+            virtual MWWorld::StoreManager getStoreManager (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;

@@ -39,7 +39,8 @@ namespace MWRender
 ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
     : Animation(ptr, parentNode, resourceSystem)
 {
-    MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
+    auto storeManager = mPtr.getClass().getStoreManager(mPtr);
+    const MWWorld::ContainerStore& store = storeManager.getImmutable();
 
     for (MWWorld::ConstContainerStoreIterator iter = store.cbegin(MWWorld::ContainerStore::Type_Light);
          iter != store.cend(); ++iter)

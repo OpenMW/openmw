@@ -61,6 +61,18 @@ namespace
     }
 }
 
+MWWorld::ContainerStoreWrapper::ContainerStoreWrapper(MWWorld::ContainerStore& store) : mStore(store) {}
+
+MWWorld::ContainerStore& MWWorld::ContainerStoreWrapper::getMutable() const
+{
+    return mStore;
+}
+
+const MWWorld::ContainerStore& MWWorld::ContainerStoreWrapper::getImmutable() const
+{
+    return mStore;
+}
+
 template<typename T>
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T>& collection,
     const ESM::ObjectState& state)
@@ -159,7 +171,7 @@ void MWWorld::ContainerStore::setModified()
     mModified = true;
 }
 
-int MWWorld::ContainerStore::count(const std::string &id)
+int MWWorld::ContainerStore::count(const std::string &id) const
 {
     int total=0;
     for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
