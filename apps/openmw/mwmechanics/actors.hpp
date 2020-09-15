@@ -211,6 +211,7 @@ namespace MWMechanics
         float mTimerDisposeSummonsCorpses;
         float mActorsProcessingRange;
 
+        bool mSmoothMovement;
     };
 }
 

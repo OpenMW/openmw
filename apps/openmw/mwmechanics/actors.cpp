@@ -426,7 +426,7 @@ namespace MWMechanics
         const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
         float sqrDist = (actor1Pos - actor2Pos).length2();
 
-        if (sqrDist > maxDistance*maxDistance)
+        if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance))
             return;
 
         // stop tracking when target is behind the actor
@@ -434,10 +434,7 @@ namespace MWMechanics
         osg::Vec3f targetDirection(actor2Pos - actor1Pos);
         actorDirection.z() = 0;
         targetDirection.z() = 0;
-        actorDirection.normalize();
-        targetDirection.normalize();
-        if (std::acos(actorDirection * targetDirection) < osg::DegreesToRadians(90.f)
-            && sqrDist <= sqrHeadTrackDistance
+        if (actorDirection * targetDirection > 0
             && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
             && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
         {
@@ -475,8 +472,7 @@ namespace MWMechanics
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
     {
-        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
-        if (smoothMovement)
+        if (mSmoothMovement)
             return;
 
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
@@ -594,8 +590,11 @@ namespace MWMechanics
 
         if (!actorState.isTurningToPlayer())
         {
-            actorState.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
-            actorState.setTurningToPlayer(true);
+            float angle = std::atan2(dir.x(), dir.y());
+            actorState.setAngleToPlayer(angle);
+            float deltaAngle = Misc::normalizeAngle(angle - actor.getRefData().getPosition().rot[2]);
+            if (!mSmoothMovement || std::abs(deltaAngle) > osg::DegreesToRadians(60.f))
+                actorState.setTurningToPlayer(true);
         }
     }
 
@@ -1467,7 +1466,7 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors()
+    Actors::Actors() : mSmoothMovement(Settings::Manager::getBool("smooth movement", "Game"))
     {
         mTimerDisposeSummonsCorpses = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
 

@@ -2038,6 +2038,8 @@ void CharacterController::update(float duration, bool animationOnly)
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 2);
         else
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 4);
+        if (smoothMovement && !isPlayer && !inwater)
+            mAnimation->setUpperBodyYawRadians(mAnimation->getUpperBodyYawRadians() + mAnimation->getHeadYaw() / 2);
 
         speed = cls.getCurrentSpeed(mPtr);
         vec.x() *= speed;
@@ -2934,19 +2936,21 @@ void CharacterController::updateHeadTracking(float duration)
             return;
         const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
-        zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
-        xAngleRadians = -std::asin(direction.z());
-
-        const double xLimit = osg::DegreesToRadians(40.0);
-        const double zLimit = osg::DegreesToRadians(30.0);
-        zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians), -xLimit, xLimit);
-        xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -zLimit, zLimit);
+        zAngleRadians = std::atan2(actorDirection.x(), actorDirection.y()) - std::atan2(direction.x(), direction.y());
+        xAngleRadians = std::asin(direction.z());
     }
+
+    const double xLimit = osg::DegreesToRadians(40.0);
+    const double zLimit = osg::DegreesToRadians(30.0);
+    double zLimitOffset = mAnimation->getUpperBodyYawRadians();
+    xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -xLimit, xLimit);
+    zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians),
+                                      -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);
-    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
-    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
+    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * xAngleRadians;
+    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * zAngleRadians;
 
     mAnimation->setHeadPitch(xAngleRadians);
     mAnimation->setHeadYaw(zAngleRadians);
