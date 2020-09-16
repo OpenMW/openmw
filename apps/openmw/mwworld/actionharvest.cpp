@@ -46,6 +46,8 @@ namespace MWWorld
             store.remove(*it, itemCount, getTarget());
             takenMap[it->getClass().getName(*it)]+=itemCount;
         }
+        // Mark as modified eveen if we took nothing
+        store.setModified();
 
         // Spawn a messagebox (only for items added to player's inventory)
         if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())

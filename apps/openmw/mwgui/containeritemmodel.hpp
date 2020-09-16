@@ -1,7 +1,13 @@
 #ifndef MWGUI_CONTAINER_ITEM_MODEL_H
 #define MWGUI_CONTAINER_ITEM_MODEL_H
 
+#include <memory>
+#include <utility>
+#include <vector>
+
 #include "itemmodel.hpp"
+
+#include "../mwworld/containerstore.hpp"
 
 namespace MWGui
 {
@@ -32,7 +38,7 @@ namespace MWGui
         virtual void update();
 
     private:
-        std::vector<MWWorld::Ptr> mItemSources;
+        std::vector<std::pair<MWWorld::Ptr, std::unique_ptr<MWWorld::StoreManager>>> mItemSources;
         std::vector<MWWorld::Ptr> mWorldItems;
         const bool mTrading;
         std::vector<ItemStack> mItems;

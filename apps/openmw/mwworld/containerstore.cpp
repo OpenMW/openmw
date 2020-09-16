@@ -53,6 +53,7 @@ namespace
             {
                 MWWorld::Ptr ptr (&*iter, 0);
                 ptr.setContainerStore (store);
+                store->setModified();
                 return ptr;
             }
         }
@@ -174,9 +175,9 @@ void MWWorld::ContainerStore::setModified()
 int MWWorld::ContainerStore::count(const std::string &id) const
 {
     int total=0;
-    for (MWWorld::ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
-            total += std::abs(iter->getRefData().getCount());
+    for (const auto& iter : *this)
+        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
+            total += std::abs(iter.getRefData().getCount());
     return total;
 }
 

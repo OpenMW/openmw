@@ -787,8 +787,9 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
+//TODO stuff
             auto store = reference.getClass().getStoreManager(reference);
-            const MWWorld::ContainerStore& container = store.getImmutable();
+            MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);
@@ -830,6 +831,7 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
+//TODO stuff
             auto store = reference.getClass().getStoreManager(reference);
             for(auto& it : store.getMutable())
             {

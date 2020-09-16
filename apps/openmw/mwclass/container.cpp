@@ -34,9 +34,10 @@ namespace MWClass
 {
     class ContainerCustomData : public MWWorld::CustomData
     {
-    public:
         MWWorld::ContainerStore mContainerStore;
-        unsigned int mSeed;
+        const unsigned int mSeed;
+    public:
+        ContainerCustomData() : mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max())) {}
 
         virtual MWWorld::CustomData *clone() const;
 
@@ -48,6 +49,8 @@ namespace MWClass
         {
             return *this;
         }
+
+        friend class Container;
     };
 
     MWWorld::CustomData *ContainerCustomData::clone() const
@@ -60,7 +63,6 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
         {
             std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-            data->mSeed = Misc::Rng::rollDice(std::numeric_limits<int>::max());
 
             MWWorld::LiveCellRef<ESM::Container> *ref =
                 ptr.get<ESM::Container>();

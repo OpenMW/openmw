@@ -39,18 +39,24 @@ namespace
 
 namespace MWGui
 {
-//TODO containerstore
 ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSources, const std::vector<MWWorld::Ptr>& worldItems)
-    : mItemSources(itemSources)
-    , mWorldItems(worldItems)
+    : mWorldItems(worldItems)
     , mTrading(true)
 {
-    assert (!mItemSources.empty());
+    assert (!itemSources.empty());
+    // Tie StoreManager lifetimes to the ItemModel
+    mItemSources.reserve(itemSources.size());
+    for(const MWWorld::Ptr& source : itemSources)
+    {
+        auto store = std::make_unique<MWWorld::StoreManager>(source.getClass().getStoreManager(source));
+        mItemSources.push_back(std::move(std::make_pair(source, std::move(store))));
+    }
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(false)
 {
-    mItemSources.push_back(source);
+    auto store = std::make_unique<MWWorld::StoreManager>(source.getClass().getStoreManager(source));
+    mItemSources.push_back(std::move(std::make_pair(source, std::move(store))));
 }
 
 bool ContainerItemModel::allowedToUseItems() const
@@ -63,7 +69,7 @@ bool ContainerItemModel::allowedToUseItems() const
 
     // Check if the player is allowed to use items from opened container
     MWBase::MechanicsManager* mm = MWBase::Environment::get().getMechanicsManager();
-    return mm->isAllowedToUse(ptr, mItemSources[0], victim);
+    return mm->isAllowedToUse(ptr, mItemSources[0].first, victim);
 }
 
 ItemStack ContainerItemModel::getItem (ModelIndex index)
@@ -94,19 +100,19 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
 
 MWWorld::Ptr ContainerItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
 {
-    const MWWorld::Ptr& source = mItemSources[0];
-    if (item.mBase.getContainerStore() == &source.getClass().getContainerStore(source))
+    const auto& source = mItemSources[0];
+    if (item.mBase.getContainerStore() == &source.second->getMutable())
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *source.getClass().getContainerStore(source).add(item.mBase, count, source, allowAutoEquip);
+    return *source.second->getMutable().add(item.mBase, count, source.first, allowAutoEquip);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 {
     int toRemove = count;
 
-    for (MWWorld::Ptr& source : mItemSources)
+    for (auto& source : mItemSources)
     {
-        MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
+        MWWorld::ContainerStore& store = source.second->getMutable();
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -117,7 +123,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
                 if(quantity < 0)
                     toRemove += quantity;
                 else
-                    toRemove -= store.remove(*it, toRemove, source);
+                    toRemove -= store.remove(*it, toRemove, source.first);
                 if (toRemove <= 0)
                     return;
             }
@@ -144,9 +150,9 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 void ContainerItemModel::update()
 {
     mItems.clear();
-    for (MWWorld::Ptr& source : mItemSources)
+    for (const auto& source : mItemSources)
     {
-        MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
+        MWWorld::ContainerStore& store = source.second->getMutable();
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -200,7 +206,7 @@ bool ContainerItemModel::onDropItem(const MWWorld::Ptr &item, int count)
     if (mItemSources.empty())
         return false;
 
-    MWWorld::Ptr target = mItemSources[0];
+    MWWorld::Ptr target = mItemSources[0].first;
 
     if (target.getTypeName() != typeid(ESM::Container).name())
         return true;
@@ -230,7 +236,7 @@ bool ContainerItemModel::onTakeItem(const MWWorld::Ptr &item, int count)
     if (mItemSources.empty())
         return false;
 
-    MWWorld::Ptr target = mItemSources[0];
+    MWWorld::Ptr target = mItemSources[0].first;
 
     // Looting a dead corpse is considered OK
     if (target.getClass().isActor() && target.getClass().getCreatureStats(target).isDead())

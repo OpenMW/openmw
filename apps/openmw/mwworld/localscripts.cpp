@@ -46,9 +46,9 @@ namespace
             if (containerPtr.getTypeName() == typeid(ESM::Container).name() &&
                 containerPtr.getRefData().getCustomData() == nullptr)
                 return false;
-
+//TODO stuff
             auto store = containerPtr.getClass().getStoreManager(containerPtr);
-            const MWWorld::ContainerStore& container = store.getImmutable();
+            MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);
