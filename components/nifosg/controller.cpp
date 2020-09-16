@@ -449,7 +449,7 @@ void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *n
 }
 
 FlipController::FlipController(const Nif::NiFlipController *ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
-    : mTexSlot(ctrl->mTexSlot)
+    : mTexSlot(0) // always affects diffuse
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
 {
