@@ -3,6 +3,7 @@
 
     Bug #1662: Qt4 and Windows binaries crash if there's a non-ASCII character in a file path/config path
     Bug #1952: Incorrect particle lighting
+    Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
