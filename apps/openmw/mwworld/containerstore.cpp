@@ -62,16 +62,18 @@ namespace
     }
 }
 
-MWWorld::ContainerStoreWrapper::ContainerStoreWrapper(MWWorld::ContainerStore& store) : mStore(store) {}
-
-MWWorld::ContainerStore& MWWorld::ContainerStoreWrapper::getMutable() const
+MWWorld::ContainerStore& MWWorld::StoreManager::getMutable()
 {
-    return mStore;
+    if(!mResolved)
+        return mStoreManager->getMutable();
+    return *mStore;
 }
 
-const MWWorld::ContainerStore& MWWorld::ContainerStoreWrapper::getImmutable() const
+const MWWorld::ContainerStore& MWWorld::StoreManager::getImmutable() const
 {
-    return mStore;
+    if(!mResolved)
+        return mStoreManager->getImmutable();
+    return *mStore;
 }
 
 template<typename T>

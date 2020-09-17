@@ -21,6 +21,8 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwclass/container.hpp"
+
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/recharge.hpp"
 
@@ -1030,10 +1032,10 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0
+                && ptr.getRefData().getCustomData()->asContainerCustomData().isModified())
                 {
-                    //TODO stuff
-                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
+                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
                 }
             }
 

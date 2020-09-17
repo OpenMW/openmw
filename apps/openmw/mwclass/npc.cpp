@@ -915,9 +915,7 @@ namespace MWClass
 
     MWWorld::StoreManager Npc::getStoreManager (const MWWorld::Ptr& ptr) const
     {
-        ensureCustomData (ptr);
-
-        return MWWorld::ContainerStoreWrapper(ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore);
+        return &getInventoryStore(ptr);
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)

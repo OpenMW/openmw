@@ -32,48 +32,123 @@
 
 namespace MWClass
 {
-    class ContainerCustomData : public MWWorld::CustomData
+    class ResolutionListener
     {
-        MWWorld::ContainerStore mContainerStore;
-        const unsigned int mSeed;
+        ContainerCustomData& mCustomData;
     public:
-        ContainerCustomData() : mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max())) {}
+        ResolutionListener(ContainerCustomData& customData) : mCustomData(customData) {}
 
-        virtual MWWorld::CustomData *clone() const;
-
-        virtual ContainerCustomData& asContainerCustomData()
-        {
-            return *this;
-        }
-        virtual const ContainerCustomData& asContainerCustomData() const
-        {
-            return *this;
-        }
-
-        friend class Container;
+        ~ResolutionListener();
     };
+
+    class ResolvingStoreManager : public MWWorld::ContainerStoreProvider
+    {
+        ContainerCustomData& mCustomData;
+        std::shared_ptr<ResolutionListener> mListener;
+    public:
+        ResolvingStoreManager(ContainerCustomData& customData) : mCustomData(customData) {}
+
+        virtual MWWorld::ContainerStore& getMutable() override;
+
+        virtual const MWWorld::ContainerStore& getImmutable() const override;
+    };
+
+    ContainerCustomData::ContainerCustomData(const ESM::Container& container)
+    : mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max()))
+    , mUnresolvedStore(std::make_unique<MWWorld::ContainerStore>()) {
+        Misc::Rng generator(mSeed);
+        // setting ownership not needed, since taking items from a container inherits the
+        // container's owner automatically
+        mUnresolvedStore->fill(container.mInventory, "", generator);
+    }
+
+    ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
+    : mSeed(), mResolvedStore(std::make_unique<MWWorld::ContainerStore>())
+    {
+        mResolvedStore->readState(inventory);
+    }
+
+    ContainerCustomData::ContainerCustomData(const ContainerCustomData& other) : mSeed(other.mSeed)
+    {
+        if(other.mResolvedStore && other.mResolvedStore->isModified())
+            mResolvedStore = std::make_unique<MWWorld::ContainerStore>(*other.mResolvedStore);
+        else
+            mUnresolvedStore = std::make_unique<MWWorld::ContainerStore>(*other.mUnresolvedStore);
+    }
 
     MWWorld::CustomData *ContainerCustomData::clone() const
     {
         return new ContainerCustomData (*this);
     }
 
+    ContainerCustomData& ContainerCustomData::asContainerCustomData()
+    {
+        return *this;
+    }
+    const ContainerCustomData& ContainerCustomData::asContainerCustomData() const
+    {
+        return *this;
+    }
+
+    const MWWorld::ContainerStore& ContainerCustomData::getImmutable() const
+    {
+        if(mResolvedStore)
+            return *mResolvedStore;
+        return *mUnresolvedStore;
+    }
+
+    MWWorld::ContainerStore& ContainerCustomData::getMutable(std::shared_ptr<ResolutionListener>& listener)
+    {
+        if(mUnresolvedStore)
+        {
+            listener = mListener.lock();
+            if(!listener)
+            {
+                listener = std::make_shared<ResolutionListener>(*this);
+                mListener = listener;
+            }
+            if(!mResolvedStore)
+            {
+                //TODO
+            }
+        }
+        return *mResolvedStore;
+    }
+
+    bool ContainerCustomData::isModified() const
+    {
+        return !!mResolvedStore;
+    }
+
+    MWWorld::ContainerStore& ResolvingStoreManager::getMutable()
+    {
+        return mCustomData.getMutable(mListener);
+    }
+
+    const MWWorld::ContainerStore& ResolvingStoreManager::getImmutable() const
+    {
+        return mCustomData.getImmutable();
+    }
+
+    ResolutionListener::~ResolutionListener()
+    {
+        if(mCustomData.mResolvedStore)
+        {
+            if(mCustomData.mResolvedStore->isModified())
+                mCustomData.mUnresolvedStore.reset();
+            else
+                mCustomData.mResolvedStore.reset();
+        }
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-
-            MWWorld::LiveCellRef<ESM::Container> *ref =
-                ptr.get<ESM::Container>();
-
-            Misc::Rng generator(data->mSeed);
-            // setting ownership not needed, since taking items from a container inherits the
-            // container's owner automatically
-            data->mContainerStore.fill(ref->mBase->mInventory, "", generator);
+            MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
             // store
-            ptr.getRefData().setCustomData (data.release());
+            ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase).release());
 
             MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
@@ -225,8 +300,10 @@ namespace MWClass
     MWWorld::StoreManager Container::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-        auto& store = ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
-        return MWWorld::ContainerStoreWrapper(store);
+        auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
+        if(!data.mUnresolvedStore)
+            return data.mResolvedStore.get();
+        return std::make_unique<ResolvingStoreManager>(data).release();
     }
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
@@ -246,7 +323,7 @@ namespace MWClass
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
+            return !canBeHarvested(ptr) || data->asContainerCustomData().getImmutable().hasVisibleItems();
 
         return true;
     }
@@ -267,7 +344,7 @@ namespace MWClass
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
         const auto customData = ptr.getRefData().getCustomData();
-        if(customData && customData->asContainerCustomData().mContainerStore.isModified())
+        if(customData && customData->asContainerCustomData().isModified())
             text += "\nmodified";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
@@ -319,21 +396,13 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        if (!ptr.getRefData().getCustomData())
-        {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-            ptr.getRefData().setCustomData (data.release());
-        }
-
-        ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
         const ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.readState (containerState.mInventory);
+        ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory).release());
     }
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
-        if (!ptr.getRefData().getCustomData() || !ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore.isModified())
+        if (!ptr.getRefData().getCustomData() || !ptr.getRefData().getCustomData()->asContainerCustomData().isModified())
         {
             state.mHasCustomState = false;
             return;
@@ -341,6 +410,6 @@ namespace MWClass
 
         const ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
         ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.writeState (containerState.mInventory);
+        customData.mResolvedStore->writeState (containerState.mInventory);
     }
 }

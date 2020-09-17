@@ -464,8 +464,7 @@ namespace MWClass
     MWWorld::StoreManager Creature::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-        auto store = ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
-        return MWWorld::ContainerStoreWrapper(*store);
+        return ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const

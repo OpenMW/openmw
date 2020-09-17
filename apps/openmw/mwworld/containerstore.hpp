@@ -39,19 +39,24 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
-    class StoreManager {
+    class ContainerStoreProvider {
         public:
-            virtual ContainerStore& getMutable() const;
+            virtual ContainerStore& getMutable();
             virtual const ContainerStore& getImmutable() const;
-            virtual ~StoreManager() = default;
+            virtual ~ContainerStoreProvider() = default;
     };
 
-    class ContainerStoreWrapper : public StoreManager
+    class StoreManager : public ContainerStoreProvider
     {
-            ContainerStore& mStore;
+            const bool mResolved;
+            union {
+                ContainerStoreProvider* mStoreManager;
+                ContainerStore* mStore;
+            };
         public:
-            ContainerStoreWrapper(ContainerStore& store);
-            virtual ContainerStore& getMutable() const override;
+            StoreManager(ContainerStoreProvider* manager) : mResolved(false), mStoreManager(manager) {}
+            StoreManager(ContainerStore* store) : mResolved(true), mStore(store) {}
+            virtual ContainerStore& getMutable() override;
             virtual const ContainerStore& getImmutable() const override;
     };
     

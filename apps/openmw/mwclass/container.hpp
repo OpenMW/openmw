@@ -2,9 +2,44 @@
 #define GAME_MWCLASS_CONTAINER_H
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/customdata.hpp"
+
+namespace ESM
+{
+    struct Container;
+    struct InventoryState;
+}
 
 namespace MWClass
 {
+    class ResolutionListener;
+
+    class ContainerCustomData : public MWWorld::CustomData
+    {
+        std::unique_ptr<MWWorld::ContainerStore> mResolvedStore;
+        std::unique_ptr<MWWorld::ContainerStore> mUnresolvedStore;
+        const unsigned int mSeed;
+        std::weak_ptr<ResolutionListener> mListener;
+    public:
+        ContainerCustomData(const ESM::Container& container);
+        ContainerCustomData(const ESM::InventoryState& inventory);
+        ContainerCustomData(const ContainerCustomData& other);
+
+        virtual MWWorld::CustomData *clone() const;
+
+        virtual ContainerCustomData& asContainerCustomData();
+        virtual const ContainerCustomData& asContainerCustomData() const;
+
+        const MWWorld::ContainerStore& getImmutable() const;
+
+        MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener);
+
+        bool isModified() const;
+
+        friend class Container;
+        friend class ResolutionListener;
+    };
+
     class Container : public MWWorld::Class
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
