@@ -2,6 +2,8 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include "../mwclass/container.hpp"
+
 #include "esmstore.hpp"
 #include "cellstore.hpp"
 #include "class.hpp"
@@ -44,9 +46,9 @@ namespace
         {
             // Ignore containers without generated content
             if (containerPtr.getTypeName() == typeid(ESM::Container).name() &&
-                containerPtr.getRefData().getCustomData() == nullptr)
+                (containerPtr.getRefData().getCustomData() == nullptr ||
+                !containerPtr.getRefData().getCustomData()->asContainerCustomData().isModified()))
                 return false;
-//TODO stuff
             auto store = containerPtr.getClass().getStoreManager(containerPtr);
             MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)

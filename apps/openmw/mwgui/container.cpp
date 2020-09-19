@@ -151,11 +151,6 @@ namespace MWGui
         setTitle(container.getClass().getName(container));
     }
 
-    MWWorld::Ptr ContainerWindow::getPtr() const
-    {
-        return mPtr;
-    }
-
     void ContainerWindow::resetReference()
     {
         ReferenceInterface::resetReference();

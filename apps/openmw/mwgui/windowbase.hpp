@@ -31,9 +31,6 @@ namespace MWGui
         /// Open this object in the GUI, for windows that support it
         virtual void setPtr(const MWWorld::Ptr& ptr) {}
 
-        /// Return the opened object, if any
-        virtual MWWorld::Ptr getPtr() const;
-
         /// Called every frame if the window is in an active GUI mode
         virtual void onFrame(float duration) {}
 

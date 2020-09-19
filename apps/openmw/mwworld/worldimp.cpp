@@ -53,6 +53,7 @@
 #include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"
+#include "../mwclass/container.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
@@ -783,11 +784,15 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
+        if( isContainer ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-//TODO stuff
+            //Ignore non-resolved containers
+            if(isContainer && (reference.getRefData().getCustomData() == nullptr
+            || !reference.getRefData().getCustomData()->asContainerCustomData().isModified()))
+                return;
             auto store = reference.getClass().getStoreManager(reference);
             MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
@@ -827,11 +832,15 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
+        if( isContainer ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-//TODO stuff
+            //Ignore non-resolved containers
+            if(isContainer && (reference.getRefData().getCustomData() == nullptr
+            || !reference.getRefData().getCustomData()->asContainerCustomData().isModified()))
+                return;
             auto store = reference.getClass().getStoreManager(reference);
             for(auto& it : store.getMutable())
             {

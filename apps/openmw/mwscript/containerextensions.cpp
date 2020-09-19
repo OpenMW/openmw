@@ -19,6 +19,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwclass/container.hpp"
+
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -67,17 +69,17 @@ namespace MWScript
                         return;
                     }
 
-//TODO stuff
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
                     // Calls to unmodified containers affect the base record
                     // Currently open containers are always considered modified
-                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
-                        (!store.isModified() && !MWBase::Environment::get().getWindowManager()->containerIsOpen(ptr)))
+                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                    !ptr.getRefData().getCustomData()->asContainerCustomData().isModified()))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                         // TODO Add to every modified instance
                         return;
                     }
+                    auto storeManager = ptr.getClass().getStoreManager(ptr);
+                    MWWorld::ContainerStore& store = storeManager.getMutable();
                     // Create a Ptr for the first added item to recover the item name later
                     MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
                     if (itemPtr.getClass().getScript(itemPtr).empty())
@@ -130,10 +132,9 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
-//TODO stuff
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    int count = ptr.getClass().getStoreManager(ptr).getImmutable().count(item);
 
-                    runtime.push (store.count(item));
+                    runtime.push (count);
                 }
         };
 
@@ -165,20 +166,19 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
-//TODO stuff
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-
                     // Explicit calls to non-unique actors affect the base record
                     if(
                         (!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                         // Calls to unmodified containers affect the base record instead
                         // Currently open containers are always considered modified
-                        || (ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
-                            (!store.isModified() && !MWBase::Environment::get().getWindowManager()->containerIsOpen(ptr))))
+                        || (ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                        !ptr.getRefData().getCustomData()->asContainerCustomData().isModified())))
                     {
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
+                    auto storeManager = ptr.getClass().getStoreManager(ptr);
+                    MWWorld::ContainerStore& store = storeManager.getMutable();
 
                     std::string itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
@@ -235,7 +235,7 @@ namespace MWScript
                     }
                     if (it == invStore.end())
                     {
-                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
+                        it = static_cast<MWWorld::ContainerStore&>(invStore).add (item, 1, ptr);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";

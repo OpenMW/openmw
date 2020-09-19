@@ -20,6 +20,8 @@ namespace MWClass
         std::unique_ptr<MWWorld::ContainerStore> mUnresolvedStore;
         const unsigned int mSeed;
         std::weak_ptr<ResolutionListener> mListener;
+
+        void assignListener(std::shared_ptr<ResolutionListener>& listener);
     public:
         ContainerCustomData(const ESM::Container& container);
         ContainerCustomData(const ESM::InventoryState& inventory);
@@ -30,7 +32,7 @@ namespace MWClass
         virtual ContainerCustomData& asContainerCustomData();
         virtual const ContainerCustomData& asContainerCustomData() const;
 
-        const MWWorld::ContainerStore& getImmutable() const;
+        const MWWorld::ContainerStore& getImmutable(std::shared_ptr<ResolutionListener>& listener);
 
         MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener);
 

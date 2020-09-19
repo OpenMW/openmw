@@ -76,6 +76,20 @@ const MWWorld::ContainerStore& MWWorld::StoreManager::getImmutable() const
     return *mStore;
 }
 
+MWWorld::StoreManager::StoreManager(StoreManager&& storeManager) : mResolved(storeManager.mResolved)
+{
+    if(mResolved)
+        mStore = storeManager.mStore;
+    else
+        std::swap(mStoreManager, storeManager.mStoreManager);
+}
+
+MWWorld::StoreManager::~StoreManager()
+{
+    if(!mResolved)
+        mStoreManager->~ContainerStoreProvider();
+}
+
 template<typename T>
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState (CellRefList<T>& collection,
     const ESM::ObjectState& state)

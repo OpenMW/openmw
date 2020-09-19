@@ -382,8 +382,6 @@ namespace MWGui
     virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat=false);
     virtual bool injectKeyRelease(MyGUI::KeyCode key);
 
-    virtual bool containerIsOpen(const MWWorld::Ptr& container) const;
-
   private:
     unsigned int mOldUpdateMask; unsigned int mOldCullMask;
 

@@ -44,7 +44,7 @@ namespace MWClass
     class ResolvingStoreManager : public MWWorld::ContainerStoreProvider
     {
         ContainerCustomData& mCustomData;
-        std::shared_ptr<ResolutionListener> mListener;
+        mutable std::shared_ptr<ResolutionListener> mListener;
     public:
         ResolvingStoreManager(ContainerCustomData& customData) : mCustomData(customData) {}
 
@@ -90,10 +90,13 @@ namespace MWClass
         return *this;
     }
 
-    const MWWorld::ContainerStore& ContainerCustomData::getImmutable() const
+    const MWWorld::ContainerStore& ContainerCustomData::getImmutable(std::shared_ptr<ResolutionListener>& listener)
     {
         if(mResolvedStore)
+        {
+            assignListener(listener);
             return *mResolvedStore;
+        }
         return *mUnresolvedStore;
     }
 
@@ -101,12 +104,7 @@ namespace MWClass
     {
         if(mUnresolvedStore)
         {
-            listener = mListener.lock();
-            if(!listener)
-            {
-                listener = std::make_shared<ResolutionListener>(*this);
-                mListener = listener;
-            }
+            assignListener(listener);
             if(!mResolvedStore)
             {
                 //TODO
@@ -120,6 +118,19 @@ namespace MWClass
         return !!mResolvedStore;
     }
 
+    void ContainerCustomData::assignListener(std::shared_ptr<ResolutionListener>& listener)
+    {
+        if(mUnresolvedStore)
+        {
+            listener = mListener.lock();
+            if(!listener)
+            {
+                listener = std::make_shared<ResolutionListener>(*this);
+                mListener = listener;
+            }
+        }
+    }
+
     MWWorld::ContainerStore& ResolvingStoreManager::getMutable()
     {
         return mCustomData.getMutable(mListener);
@@ -127,7 +138,7 @@ namespace MWClass
 
     const MWWorld::ContainerStore& ResolvingStoreManager::getImmutable() const
     {
-        return mCustomData.getImmutable();
+        return mCustomData.getImmutable(mListener);
     }
 
     ResolutionListener::~ResolutionListener()
@@ -303,7 +314,7 @@ namespace MWClass
         auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
         if(!data.mUnresolvedStore)
             return data.mResolvedStore.get();
-        return std::make_unique<ResolvingStoreManager>(data).release();
+        return std::make_unique<ResolvingStoreManager>(data);
     }
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
@@ -323,8 +334,15 @@ namespace MWClass
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().getImmutable().hasVisibleItems();
-
+        {
+            if(!canBeHarvested(ptr))
+                return true;
+            if(data->asContainerCustomData().mResolvedStore)
+                return data->asContainerCustomData().mResolvedStore->hasVisibleItems();
+            if(data->asContainerCustomData().mUnresolvedStore)
+                return data->asContainerCustomData().mUnresolvedStore->hasVisibleItems();
+            return false;
+        }
         return true;
     }
 

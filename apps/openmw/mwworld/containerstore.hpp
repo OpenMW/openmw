@@ -41,8 +41,8 @@ namespace MWWorld
 
     class ContainerStoreProvider {
         public:
-            virtual ContainerStore& getMutable();
-            virtual const ContainerStore& getImmutable() const;
+            virtual ContainerStore& getMutable() = 0;
+            virtual const ContainerStore& getImmutable() const = 0;
             virtual ~ContainerStoreProvider() = default;
     };
 
@@ -50,14 +50,16 @@ namespace MWWorld
     {
             const bool mResolved;
             union {
-                ContainerStoreProvider* mStoreManager;
+                std::unique_ptr<ContainerStoreProvider> mStoreManager;
                 ContainerStore* mStore;
             };
         public:
-            StoreManager(ContainerStoreProvider* manager) : mResolved(false), mStoreManager(manager) {}
+            StoreManager(std::unique_ptr<ContainerStoreProvider> manager) : mResolved(false), mStoreManager(std::move(manager)) {}
             StoreManager(ContainerStore* store) : mResolved(true), mStore(store) {}
+            StoreManager(StoreManager&& storeManager);
             virtual ContainerStore& getMutable() override;
             virtual const ContainerStore& getImmutable() const override;
+            virtual ~StoreManager() override;
     };
     
     class ContainerStoreListener

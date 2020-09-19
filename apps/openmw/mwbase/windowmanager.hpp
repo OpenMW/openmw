@@ -348,8 +348,6 @@ namespace MWBase
 
             virtual void watchActor(const MWWorld::Ptr& ptr) = 0;
             virtual MWWorld::Ptr getWatchedActor() const = 0;
-
-            virtual bool containerIsOpen(const MWWorld::Ptr& container) const = 0;
     };
 }
 
