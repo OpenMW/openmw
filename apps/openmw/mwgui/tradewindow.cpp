@@ -516,4 +516,9 @@ namespace MWGui
         mTradeModel = nullptr;
         mSortModel = nullptr;
     }
+
+    void TradeWindow::onClose()
+    {
+        resetReference();
+    }
 }

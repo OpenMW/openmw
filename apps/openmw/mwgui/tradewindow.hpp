@@ -29,6 +29,7 @@ namespace MWGui
 
             void setPtr(const MWWorld::Ptr& actor);
 
+            virtual void onClose() override;
             void onFrame(float dt);
             void clear() { resetReference(); }
 

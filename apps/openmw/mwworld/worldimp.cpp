@@ -838,18 +838,14 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
             //Ignore non-resolved containers
-            if(isContainer && (reference.getRefData().getCustomData() == nullptr
-            || !reference.getRefData().getCustomData()->asContainerCustomData().isModified()))
+            if(isContainer && reference.getRefData().getCustomData() == nullptr)
                 return;
             auto store = reference.getClass().getStoreManager(reference);
-            for(auto& it : store.getMutable())
+            for(auto& item : store.getImmutable())
             {
-                std::string script = it.getClass().getScript(it);
+                const std::string& script = item.getClass().getScript(item);
                 if(!script.empty())
-                {
-                    MWWorld::Ptr item = it;
                     mLocalScripts.remove (item);
-                }
             }
         }
     }

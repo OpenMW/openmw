@@ -81,13 +81,16 @@ MWWorld::StoreManager::StoreManager(StoreManager&& storeManager) : mResolved(sto
     if(mResolved)
         mStore = storeManager.mStore;
     else
-        std::swap(mStoreManager, storeManager.mStoreManager);
+    {
+        mStoreManager = storeManager.mStoreManager;
+        storeManager.mStoreManager = nullptr;
+    }
 }
 
 MWWorld::StoreManager::~StoreManager()
 {
     if(!mResolved)
-        mStoreManager->~ContainerStoreProvider();
+        delete mStoreManager;
 }
 
 template<typename T>
@@ -527,18 +530,28 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
 void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator)
 {
-    for (std::vector<ESM::ContItem>::const_iterator iter (items.mList.begin()); iter!=items.mList.end();
-        ++iter)
+    for (const ESM::ContItem& iter : items.mList)
     {
-        std::string id = Misc::StringUtils::lowerCase(iter->mItem);
-        addInitialItem(id, owner, iter->mCount, generator);
+        std::string id = Misc::StringUtils::lowerCase(iter.mItem);
+        addInitialItem(id, owner, iter.mCount, &generator);
+    }
+
+    flagAsModified();
+}
+
+void MWWorld::ContainerStore::fillNonRandom (const ESM::InventoryList& items, const std::string& owner)
+{
+    for (const ESM::ContItem& iter : items.mList)
+    {
+        std::string id = Misc::StringUtils::lowerCase(iter.mItem);
+        addInitialItem(id, owner, iter.mCount, nullptr);
     }
 
     flagAsModified();
 }
 
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count,
-                                            Misc::Rng& generator, bool topLevel, const std::string& levItem)
+                                            Misc::Rng* generator, bool topLevel, const std::string& levItem)
 {
     if (count == 0) return; //Don't restock with nothing.
     try
@@ -562,10 +575,12 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 }
 
 void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count,
-                                               Misc::Rng& generator, bool topLevel, const std::string& levItem)
+                                               Misc::Rng* generator, bool topLevel, const std::string& levItem)
 {
     if (ptr.getTypeName()==typeid (ESM::ItemLevList).name())
     {
+        if(!generator)
+            return;
         const ESM::ItemLevList* levItemList = ptr.get<ESM::ItemLevList>()->mBase;
 
         if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
@@ -576,7 +591,7 @@ void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const s
         }
         else
         {
-            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, generator);
+            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *generator);
             if (itemId.empty())
                 return;
             addInitialItem(itemId, owner, count, generator, false, levItemList->mId);

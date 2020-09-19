@@ -34,7 +34,7 @@ namespace MWClass
 
         const MWWorld::ContainerStore& getImmutable(std::shared_ptr<ResolutionListener>& listener);
 
-        MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener);
+        MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener, const ESM::Container& container);
 
         bool isModified() const;
 

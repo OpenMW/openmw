@@ -167,7 +167,7 @@ void MWWorld::LocalScripts::remove (RefData *ref)
         }
 }
 
-void MWWorld::LocalScripts::remove (const Ptr& ptr)
+void MWWorld::LocalScripts::remove (const ConstPtr& ptr)
 {
     for (std::list<std::pair<std::string, Ptr> >::iterator iter = mScripts.begin();
         iter!=mScripts.end(); ++iter)

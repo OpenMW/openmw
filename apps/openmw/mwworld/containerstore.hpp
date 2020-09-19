@@ -50,12 +50,13 @@ namespace MWWorld
     {
             const bool mResolved;
             union {
-                std::unique_ptr<ContainerStoreProvider> mStoreManager;
+                ContainerStoreProvider* mStoreManager;
                 ContainerStore* mStore;
             };
         public:
-            StoreManager(std::unique_ptr<ContainerStoreProvider> manager) : mResolved(false), mStoreManager(std::move(manager)) {}
+            StoreManager(std::unique_ptr<ContainerStoreProvider> manager) : mResolved(false), mStoreManager(manager.release()) {}
             StoreManager(ContainerStore* store) : mResolved(true), mStore(store) {}
+            StoreManager(const StoreManager& storeManager) = delete;
             StoreManager(StoreManager&& storeManager);
             virtual ContainerStore& getMutable() override;
             virtual const ContainerStore& getImmutable() const override;
@@ -123,8 +124,8 @@ namespace MWWorld
             bool mModified;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng& generator, bool topLevel=true, const std::string& levItem = "");
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng& generator, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng* generator, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng* generator, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -222,6 +223,9 @@ namespace MWWorld
 
             void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator = Misc::Rng::sInstance);
             ///< Insert items into *this.
+
+            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner);
+            ///< Insert items into *this, excluding leveled items
 
             virtual void clear();
             ///< Empty container.

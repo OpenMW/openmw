@@ -38,7 +38,7 @@ namespace MWGui
         virtual void update();
 
     private:
-        std::vector<std::pair<MWWorld::Ptr, std::unique_ptr<MWWorld::StoreManager>>> mItemSources;
+        std::vector<std::pair<MWWorld::Ptr, MWWorld::StoreManager>> mItemSources;
         std::vector<MWWorld::Ptr> mWorldItems;
         const bool mTrading;
         std::vector<ItemStack> mItems;

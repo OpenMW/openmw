@@ -7,6 +7,8 @@
     Bug #2473: Unable to overstock merchants
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
+    Bug #3862: Random container contents behave differently than vanilla
+    Bug #3929: Leveled list merchant containers respawn on barter
     Bug #4021: Attributes and skills are not stored as floats
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4623: Corprus implementation is incorrect
