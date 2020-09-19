@@ -49,14 +49,14 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     for(const MWWorld::Ptr& source : itemSources)
     {
         auto store = source.getClass().getStoreManager(source);
-        mItemSources.push_back(std::move(std::make_pair(source, std::move(store))));
+        mItemSources.push_back(std::make_pair(source, std::move(store)));
     }
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(false)
 {
     auto store = source.getClass().getStoreManager(source);
-    mItemSources.push_back(std::move(std::make_pair(source, std::move(store))));
+    mItemSources.push_back(std::make_pair(source, std::move(store)));
 }
 
 bool ContainerItemModel::allowedToUseItems() const
@@ -120,7 +120,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
             {
                 int quantity = it->mRef->mData.getCount();
                 // If this is a restocking quantity, just don't remove it
-                if(quantity < 0)
+                if(quantity < 0 && mTrading)
                     toRemove += quantity;
                 else
                     toRemove -= store.remove(*it, toRemove, source.first);

@@ -46,7 +46,7 @@ namespace
     void addScripts(MWWorld::ContainerStore& store, MWWorld::CellStore* cell)
     {
         auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
-        for(MWWorld::Ptr& ptr : store)
+        for(const MWWorld::Ptr& ptr : store)
         {
             const std::string& script = ptr.getClass().getScript(ptr);
             if(!script.empty())
@@ -87,8 +87,8 @@ namespace MWClass
     };
 
     ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
-    : mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max()))
-    , mUnresolvedStore(std::make_unique<MWWorld::ContainerStore>()) {
+    : mUnresolvedStore(std::make_unique<MWWorld::ContainerStore>())
+    , mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max())) {
         // setting ownership not needed, since taking items from a container inherits the
         // container's owner automatically
         mUnresolvedStore->fillNonRandom(container.mInventory, "");
@@ -96,7 +96,7 @@ namespace MWClass
     }
 
     ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
-    : mSeed(), mResolvedStore(std::make_unique<MWWorld::ContainerStore>())
+    : mResolvedStore(std::make_unique<MWWorld::ContainerStore>()), mSeed()
     {
         mResolvedStore->readState(inventory);
     }
