@@ -841,7 +841,7 @@ namespace MWWorld
             if(isContainer && reference.getRefData().getCustomData() == nullptr)
                 return;
             auto store = reference.getClass().getStoreManager(reference);
-            for(auto& item : store.getImmutable())
+            for(const MWWorld::ConstPtr& item : store.getImmutable())
             {
                 const std::string& script = item.getClass().getScript(item);
                 if(!script.empty())
@@ -3402,7 +3402,7 @@ namespace MWWorld
                     return true;
 
                 auto store = ptr.getClass().getStoreManager(ptr);
-                for (const auto& it : store.getImmutable())
+                for (const MWWorld::ConstPtr& it : store.getImmutable())
                 {
                     if (needToAdd(it))
                     {
