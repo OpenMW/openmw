@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include <components/esm/loadalch.hpp>

@@ -21,9 +21,9 @@ namespace MWClass
         const unsigned int mSeed;
         std::weak_ptr<ResolutionListener> mListener;
 
-        void assignListener(std::shared_ptr<ResolutionListener>& listener);
+        void assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell);
     public:
-        ContainerCustomData(const ESM::Container& container);
+        ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
         ContainerCustomData(const ESM::InventoryState& inventory);
         ContainerCustomData(const ContainerCustomData& other);
 
@@ -32,9 +32,9 @@ namespace MWClass
         virtual ContainerCustomData& asContainerCustomData();
         virtual const ContainerCustomData& asContainerCustomData() const;
 
-        const MWWorld::ContainerStore& getImmutable(std::shared_ptr<ResolutionListener>& listener);
+        const MWWorld::ContainerStore& getImmutable(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell);
 
-        MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener, const ESM::Container& container);
+        MWWorld::ContainerStore& getMutable(std::shared_ptr<ResolutionListener>& listener, const ESM::Container& container, MWWorld::CellStore* cell);
 
         bool isModified() const;
 

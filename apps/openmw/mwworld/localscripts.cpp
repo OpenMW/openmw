@@ -45,10 +45,8 @@ namespace
         bool operator()(const MWWorld::Ptr& containerPtr)
         {
             // Ignore containers without generated content
-            if (containerPtr.getTypeName() == typeid(ESM::Container).name() &&
-                (containerPtr.getRefData().getCustomData() == nullptr ||
-                !containerPtr.getRefData().getCustomData()->asContainerCustomData().isModified()))
-                return false;
+            if (containerPtr.getTypeName() == typeid(ESM::Container).name() && containerPtr.getRefData().getCustomData() == nullptr)
+                return true;
             auto store = containerPtr.getClass().getStoreManager(containerPtr);
             MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
