@@ -31,6 +31,8 @@ either expressed or implied, of the FreeBSD Project.
 
 #include "gldebug.hpp"
 
+#include <cstdlib>
+
 #include <components/debug/debuglog.hpp>
 
 // OpenGL constants not provided by OSG:
@@ -143,4 +145,16 @@ void Debug::EnableGLDebugOperation::operator()(osg::GraphicsContext* graphicsCon
 
     unsigned int contextID = graphicsContext->getState()->getContextID();
     enableGLDebugExtension(contextID);
+}
+
+bool Debug::shouldDebugOpenGL()
+{
+    const char* env = std::getenv("OPENMW_DEBUG_OPENGL");
+    if (!env)
+        return false;
+    std::string str(env);
+    if (str.length() == 0)
+        return true;
+
+    return str.find("OFF") == std::string::npos && str.find("0") == std::string::npos && str.find("NO") == std::string::npos;
 }

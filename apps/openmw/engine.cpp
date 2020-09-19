@@ -516,7 +516,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
-    checkSDLError(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
+    if (Debug::shouldDebugOpenGL())
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 
     if (antialiasing > 0)
     {
@@ -577,7 +578,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     camera->setGraphicsContext(graphicsWindow);
     camera->setViewport(0, 0, traits->width, traits->height);
 
-    mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
+    if (Debug::shouldDebugOpenGL())
+        mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
 
     mViewer->realize();
 

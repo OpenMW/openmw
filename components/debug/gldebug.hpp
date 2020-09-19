@@ -15,5 +15,7 @@ namespace Debug
     private:
         OpenThreads::Mutex mMutex;
     };
+
+    bool shouldDebugOpenGL();
 }
 #endif
