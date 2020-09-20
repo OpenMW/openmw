@@ -40,6 +40,7 @@ either expressed or implied, of the FreeBSD Project.
 
 void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
+#ifdef GL_DEBUG_OUTPUT
     std::string srcStr;
     switch (source)
     {
@@ -96,10 +97,12 @@ void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsiz
     }
 
     Log(logSeverity) << "OpenGL " << typeStr << " [" << srcStr << "]: " << message;
+#endif
 }
 
 void enableGLDebugExtension(unsigned int contextID)
 {
+#ifdef GL_DEBUG_OUTPUT
     typedef void (GL_APIENTRY *DEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
     typedef void (GL_APIENTRY *GLDebugMessageControlFunction)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
     typedef void (GL_APIENTRY *GLDebugMessageCallbackFunction)(DEBUGPROC, const void* userParam);
@@ -132,6 +135,7 @@ void enableGLDebugExtension(unsigned int contextID)
         Log(Debug::Info) << "OpenGL debug callback attached.";
     }
     else
+#endif
         Log(Debug::Error) << "Unable to attach OpenGL debug callback.";
 }
 
