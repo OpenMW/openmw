@@ -48,9 +48,10 @@ ItemModel::ModelIndex InventoryItemModel::getIndex (ItemStack item)
 
 MWWorld::Ptr InventoryItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
 {
-    if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
+    auto store = mActor.getClass().getStoreManager(mActor);
+    if (item.mBase.getContainerStore() == &store.getMutable())
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, allowAutoEquip);
+    return *store.getMutable().add(item.mBase, count, mActor, allowAutoEquip);
 }
 
 void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
@@ -64,8 +65,8 @@ void InventoryItemModel::removeItem (const ItemStack& item, size_t count)
     }
     else
     {
-        MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
-        removed = store.remove(item.mBase, count, mActor);
+        auto store = mActor.getClass().getStoreManager(mActor);
+        removed = store.getMutable().remove(item.mBase, count, mActor);
     }
 
     std::stringstream error;
@@ -95,7 +96,8 @@ MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack &item, size_t count, I
 
 void InventoryItemModel::update()
 {
-    MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
+    auto storeManager = mActor.getClass().getStoreManager(mActor);
+    MWWorld::ContainerStore& store = storeManager.getMutable();
 
     mItems.clear();
 

@@ -124,7 +124,7 @@ namespace MWWorld
         return std::shared_ptr<Action> (new NullAction);
     }
 
-    ContainerStore& Class::getContainerStore (const Ptr& ptr) const
+    StoreManager Class::getStoreManager (const Ptr& ptr) const
     {
         throw std::runtime_error ("class does not have a container store");
     }

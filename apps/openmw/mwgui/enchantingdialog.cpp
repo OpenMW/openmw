@@ -323,7 +323,7 @@ namespace MWGui
         mEnchanting.setEffect(mEffectList);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
         if (mPtr != player && mEnchanting.getEnchantPrice() > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");

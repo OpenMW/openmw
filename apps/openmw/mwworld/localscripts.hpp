@@ -44,7 +44,7 @@ namespace MWWorld
             
             void remove (RefData *ref);
 
-            void remove (const Ptr& ptr);
+            void remove (const ConstPtr& ptr);
             ///< Remove script for given reference (ignored if reference does not have a script listed).
     };
 }

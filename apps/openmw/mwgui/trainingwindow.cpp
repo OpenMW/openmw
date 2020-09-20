@@ -72,7 +72,7 @@ namespace MWGui
         mPtr = actor;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
 
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
 
@@ -142,7 +142,8 @@ namespace MWGui
         int price = pcStats.getSkill (skillId).getBase() * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr,price,true);
 
-        if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+        auto storeManager = player.getClass().getStoreManager(player);
+        if (price > storeManager.getImmutable().count(MWWorld::ContainerStore::sGoldId))
             return;
 
         if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skillId) <= pcStats.getSkill(skillId).getBase())
@@ -167,7 +168,7 @@ namespace MWGui
         pcStats.increaseSkill (skillId, *class_, true);
 
         // remove gold
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+        storeManager.getMutable().remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);

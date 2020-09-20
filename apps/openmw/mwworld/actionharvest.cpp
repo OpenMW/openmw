@@ -28,15 +28,17 @@ namespace MWWorld
             return;
 
         MWWorld::Ptr target = getTarget();
-        MWWorld::ContainerStore& store = target.getClass().getContainerStore (target);
-        MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
+        auto targetManager = target.getClass().getStoreManager(target);
+        auto actorManager = actor.getClass().getStoreManager(actor);
+        MWWorld::ContainerStore& store = targetManager.getMutable();
+        MWWorld::ContainerStore& actorStore = actorManager.getMutable();
         std::map<std::string, int> takenMap;
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
             if (!it->getClass().showsInInventory(*it))
                 continue;
 
-            int itemCount = it->getRefData().getCount();
+            int itemCount = std::abs(it->getRefData().getCount());
             // Note: it is important to check for crime before move an item from container. Otherwise owner check will not work
             // for a last item in the container - empty harvested containers are considered as "allowed to use".
             MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);
@@ -44,6 +46,8 @@ namespace MWWorld
             store.remove(*it, itemCount, getTarget());
             takenMap[it->getClass().getName(*it)]+=itemCount;
         }
+        // Mark as modified eveen if we took nothing
+        store.setModified();
 
         // Spawn a messagebox (only for items added to player's inventory)
         if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())

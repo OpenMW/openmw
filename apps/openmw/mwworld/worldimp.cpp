@@ -53,6 +53,7 @@
 #include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"
+#include "../mwclass/container.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
@@ -707,7 +708,7 @@ namespace MWWorld
         }
 
         Ptr ptr = mPlayer->getPlayer().getClass()
-            .getContainerStore(mPlayer->getPlayer()).search(lowerCaseName);
+            .getStoreManager(mPlayer->getPlayer()).getMutable().search(lowerCaseName);
 
         return ptr;
     }
@@ -746,7 +747,7 @@ namespace MWWorld
 
         bool operator() (Ptr ptr)
         {
-            if (mContainedPtr.getContainerStore() == &ptr.getClass().getContainerStore(ptr))
+            if (mContainedPtr.getContainerStore() == &ptr.getClass().getStoreManager(ptr).getImmutable())
             {
                 mResult = ptr;
                 return false;
@@ -762,7 +763,7 @@ namespace MWWorld
             return Ptr();
 
         Ptr player = getPlayerPtr();
-        if (ptr.getContainerStore() == &player.getClass().getContainerStore(player))
+        if (ptr.getContainerStore() == &player.getClass().getStoreManager(player).getMutable())
             return player;
 
         for (CellStore* cellstore : mWorldScene->getActiveCells())
@@ -783,11 +784,17 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
+        if( isContainer ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
+            //Ignore non-resolved containers
+            if(isContainer && (reference.getRefData().getCustomData() == nullptr
+            || !reference.getRefData().getCustomData()->asContainerCustomData().isModified()))
+                return;
+            auto store = reference.getClass().getStoreManager(reference);
+            MWWorld::ContainerStore& container = store.getMutable();
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);
@@ -825,19 +832,20 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        if( reference.getTypeName()==typeid (ESM::Container).name() ||
+        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
+        if( isContainer ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
-            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+            //Ignore non-resolved containers
+            if(isContainer && reference.getRefData().getCustomData() == nullptr)
+                return;
+            auto store = reference.getClass().getStoreManager(reference);
+            for(const MWWorld::ConstPtr& item : store.getImmutable())
             {
-                std::string script = it->getClass().getScript(*it);
-                if(script != "")
-                {
-                    MWWorld::Ptr item = *it;
+                const std::string& script = item.getClass().getScript(item);
+                if(!script.empty())
                     mLocalScripts.remove (item);
-                }
             }
         }
     }
@@ -3388,15 +3396,13 @@ namespace MWWorld
                 if (isContainer && ptr.getRefData().getCustomData() == nullptr)
                     return true;
 
-                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                auto store = ptr.getClass().getStoreManager(ptr);
+                for (const MWWorld::ConstPtr& it : store.getImmutable())
                 {
-                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
+                    if (needToAdd(it))
                     {
-                        if (needToAdd(*it, mDetector))
-                        {
-                            mOut.push_back(ptr);
-                            return true;
-                        }
+                        mOut.push_back(ptr);
+                        return true;
                     }
                 }
             }
@@ -3404,6 +3410,15 @@ namespace MWWorld
             if (needToAdd(ptr, mDetector))
                 mOut.push_back(ptr);
 
+            return true;
+        }
+
+        bool needToAdd(const MWWorld::ConstPtr& ptr)
+        {
+            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
+                return false;
+            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
+                return false;
             return true;
         }
 
@@ -3423,11 +3438,7 @@ namespace MWWorld
                 if (ptr.getClass().getCreatureStats(ptr).isDead())
                     return false;
             }
-            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
-                return false;
-            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
-                return false;
-            return true;
+            return needToAdd(ptr);
         }
     };
 
@@ -3488,7 +3499,7 @@ namespace MWWorld
     {
         MWWorld::Ptr player = getPlayerPtr();
         int bounty = player.getClass().getNpcStats(player).getBounty();
-        int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
+        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(ContainerStore::sGoldId);
 
         static float fCrimeGoldDiscountMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
         static float fCrimeGoldTurnInMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();

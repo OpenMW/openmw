@@ -21,7 +21,7 @@ namespace MWWorld
 
         actor.getClass().apply (actor, mId, actor);
 
-        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
+        actor.getClass().getStoreManager(actor).getMutable().remove(getTarget(), 1, actor);
     }
 
 
@@ -37,6 +37,6 @@ namespace MWWorld
         if (actor.getClass().apply (actor, mId, actor) && mUsageType!=-1 && actor == MWMechanics::getPlayer())
             actor.getClass().skillUsageSucceeded (actor, mSkillIndex, mUsageType);
 
-        actor.getClass().getContainerStore(actor).remove(getTarget(), 1, actor);
+        actor.getClass().getStoreManager(actor).getMutable().remove(getTarget(), 1, actor);
     }
 }

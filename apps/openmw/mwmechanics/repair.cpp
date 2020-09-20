@@ -22,8 +22,9 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     MWWorld::LiveCellRef<ESM::Repair> *ref =
         mTool.get<ESM::Repair>();
 
+    auto storeManager = player.getClass().getStoreManager(player);
     // unstack tool if required
-    player.getClass().getContainerStore(player).unstack(mTool, player);
+    storeManager.getMutable().unstack(mTool, player);
 
     // reduce number of uses left
     int uses = mTool.getClass().getItemHealth(mTool);
@@ -55,7 +56,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
         itemToRepair.getCellRef().setCharge(charge);
 
         // attempt to re-stack item, in case it was fully repaired
-        MWWorld::ContainerStoreIterator stacked = player.getClass().getContainerStore(player).restack(itemToRepair);
+        MWWorld::ContainerStoreIterator stacked = storeManager.getMutable().restack(itemToRepair);
 
         // set the OnPCRepair variable on the item's script
         std::string script = stacked->getClass().getScript(itemToRepair);
@@ -77,7 +78,7 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
     // tool used up?
     if (mTool.getCellRef().getCharge() == 0)
     {
-        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+        MWWorld::ContainerStore& store = storeManager.getMutable();
 
         store.remove(mTool, 1, player);
 

@@ -596,7 +596,7 @@ namespace MWScript
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
-                    MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
+                    MWWorld::Ptr item = *ptr.getClass().getStoreManager(ptr).getMutable().add(gem, 1, ptr);
 
                     // Set the soul on just one of the gems, not the whole stack
                     item.getContainerStore()->unstack(item, ptr);
@@ -674,7 +674,7 @@ namespace MWScript
                             MWWorld::ConstContainerStoreIterator it = store.getSlot (slot);
                             if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                             {
-                                numNotEquipped -= it->getRefData().getCount();
+                                numNotEquipped -= std::abs(it->getRefData().getCount());
                             }
                         }
 
@@ -683,7 +683,7 @@ namespace MWScript
                             MWWorld::ContainerStoreIterator it = store.getSlot (slot);
                             if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                             {
-                                int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
+                                int numToRemove = std::min(amount - numNotEquipped, std::abs(it->getRefData().getCount()));
                                 store.unequipItemQuantity(*it, ptr, numToRemove);
                                 numNotEquipped += numToRemove;
                             }

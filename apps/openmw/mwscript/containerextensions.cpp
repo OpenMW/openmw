@@ -19,6 +19,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwclass/container.hpp"
+
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -67,7 +69,8 @@ namespace MWScript
                         return;
                     }
 
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    auto storeManager = ptr.getClass().getStoreManager(ptr);
+                    MWWorld::ContainerStore& store = storeManager.getMutable();
                     // Create a Ptr for the first added item to recover the item name later
                     MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
                     if (itemPtr.getClass().getScript(itemPtr).empty())
@@ -120,9 +123,9 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    int count = ptr.getClass().getStoreManager(ptr).getImmutable().count(item);
 
-                    runtime.push (store.count(item));
+                    runtime.push (count);
                 }
         };
 
@@ -160,8 +163,8 @@ namespace MWScript
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
-
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
+                    auto storeManager = ptr.getClass().getStoreManager(ptr);
+                    MWWorld::ContainerStore& store = storeManager.getMutable();
 
                     std::string itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
@@ -218,7 +221,7 @@ namespace MWScript
                     }
                     if (it == invStore.end())
                     {
-                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
+                        it = static_cast<MWWorld::ContainerStore&>(invStore).add (item, 1, ptr);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";

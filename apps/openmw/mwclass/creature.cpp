@@ -159,7 +159,7 @@ namespace MWClass
             // store
             ptr.getRefData().setCustomData(data.release());
 
-            getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
+            ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore->fill(ref->mBase->mInventory, ptr.getCellRef().getRefId());
 
             if (hasInventory)
                 getInventoryStore(ptr).autoEquip(ptr);
@@ -461,17 +461,20 @@ namespace MWClass
         return std::shared_ptr<MWWorld::Action>(new MWWorld::FailedAction(""));
     }
 
-    MWWorld::ContainerStore& Creature::getContainerStore (const MWWorld::Ptr& ptr) const
+    MWWorld::StoreManager Creature::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-
-        return *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
+        return ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr &ptr) const
     {
         if (hasInventoryStore(ptr))
-            return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
+        {
+            ensureCustomData (ptr);
+            auto store = ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
+            return dynamic_cast<MWWorld::InventoryStore&>(*store);
+        }
         else
             throw std::runtime_error("this creature has no inventory store");
     }
@@ -840,14 +843,6 @@ namespace MWClass
                         ptr.getCellRef().getPosition().pos[2]);
             }
         }
-    }
-
-    void Creature::restock(const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Creature> *ref = ptr.get<ESM::Creature>();
-        const ESM::InventoryList& list = ref->mBase->mInventory;
-        MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
     int Creature::getBaseFightRating(const MWWorld::ConstPtr &ptr) const

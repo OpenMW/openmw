@@ -913,12 +913,9 @@ namespace MWClass
         return std::shared_ptr<MWWorld::Action> (new MWWorld::FailedAction(""));
     }
 
-    MWWorld::ContainerStore& Npc::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::StoreManager Npc::getStoreManager (const MWWorld::Ptr& ptr) const
     {
-        ensureCustomData (ptr);
-
-        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        return &getInventoryStore(ptr);
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore (const MWWorld::Ptr& ptr)
@@ -1397,14 +1394,6 @@ namespace MWClass
                         ptr.getCellRef().getPosition().pos[2]);
             }
         }
-    }
-
-    void Npc::restock(const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
-        const ESM::InventoryList& list = ref->mBase->mInventory;
-        MWWorld::ContainerStore& store = getContainerStore(ptr);
-        store.restock(list, ptr, ptr.getCellRef().getRefId());
     }
 
     int Npc::getBaseFightRating (const MWWorld::ConstPtr& ptr) const

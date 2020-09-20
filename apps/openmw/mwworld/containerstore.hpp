@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include <components/esm/loadalch.hpp>
@@ -17,6 +18,8 @@
 #include <components/esm/loadprob.hpp>
 #include <components/esm/loadrepa.hpp>
 #include <components/esm/loadweap.hpp>
+
+#include <components/misc/rng.hpp>
 
 #include "ptr.hpp"
 #include "cellreflist.hpp"
@@ -37,6 +40,33 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
+    class ContainerStoreProvider {
+        public:
+            virtual ContainerStore& getMutable() = 0;
+            virtual const ContainerStore& getImmutable() const = 0;
+            virtual ~ContainerStoreProvider() = default;
+    };
+
+    /// ContainerStore handle. Hides container resolution.
+    /// getMutable and getImmutable may return different stores.
+    /// Calling getImmutable after getMutable will return the same store.
+    /// Stores are not guaranteed to exist beyond the manager's lifetime.
+    class StoreManager : public ContainerStoreProvider
+    {
+            const bool mResolved;
+            union {
+                ContainerStoreProvider* mStoreManager;
+                ContainerStore* mStore;
+            };
+        public:
+            StoreManager(std::unique_ptr<ContainerStoreProvider> manager) : mResolved(false), mStoreManager(manager.release()) {}
+            StoreManager(ContainerStore* store) : mResolved(true), mStore(store) {}
+            StoreManager(const StoreManager& storeManager) = delete;
+            StoreManager(StoreManager&& storeManager);
+            virtual ContainerStore& getMutable() override;
+            virtual const ContainerStore& getImmutable() const override;
+            virtual ~StoreManager() override;
+    };
     
     class ContainerStoreListener
     {
@@ -93,15 +123,14 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
-            /// This is used to restock levelled items(s) if the old item was sold.
-
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
+
+            bool mModified;
+
+            ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng* generator, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng* generator, bool topLevel=true, const std::string& levItem = "");
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -175,31 +204,33 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            int count (const std::string& id);
+            int count (const std::string& id) const;
             ///< @return How many items with refID \a id are in this container?
-
-            int restockCount (const std::string& id);
-            ///< Item count with restock adjustments (such as ignoring filled soul gems).
-            ///  @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);
 
+            void setModified();
         protected:
-            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
+            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count, bool markModified = true);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
 
+            /// + and - operations that can deal with negative stacks
+            /// Note that negativity is infectious
+            static int addItems(int count1, int count2);
+            static int subtractItems(int count1, int count2);
         public:
 
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner);
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator = Misc::Rng::sInstance);
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);
+            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner);
+            ///< Insert items into *this, excluding leveled items
 
             virtual void clear();
             ///< Empty container.
@@ -219,6 +250,8 @@ namespace MWWorld
             virtual void writeState (ESM::InventoryState& state) const;
 
             virtual void readState (const ESM::InventoryState& state);
+
+            bool isModified() const;
 
             friend class ContainerStoreIteratorBase<Ptr>;
             friend class ContainerStoreIteratorBase<ConstPtr>;

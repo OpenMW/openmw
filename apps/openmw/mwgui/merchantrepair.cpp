@@ -41,9 +41,10 @@ void MerchantRepair::setPtr(const MWWorld::Ptr &actor)
     int currentY = 0;
 
     MWWorld::Ptr player = MWMechanics::getPlayer();
-    int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
+    auto storeManager = player.getClass().getStoreManager(player);
+    int playerGold = storeManager.getImmutable().count(MWWorld::ContainerStore::sGoldId);
 
-    MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+    MWWorld::ContainerStore& store = storeManager.getMutable();
     int categories = MWWorld::ContainerStore::Type_Weapon | MWWorld::ContainerStore::Type_Armor;
     for (MWWorld::ContainerStoreIterator iter (store.begin(categories)); iter!=store.end(); ++iter)
     {
@@ -119,20 +120,21 @@ void MerchantRepair::onOpen()
 void MerchantRepair::onRepairButtonClick(MyGUI::Widget *sender)
 {
     MWWorld::Ptr player = MWMechanics::getPlayer();
+    auto storeManager = player.getClass().getStoreManager(player);
 
     int price = MyGUI::utility::parseInt(sender->getUserString("Price"));
-    if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
+    if (price > storeManager.getImmutable().count(MWWorld::ContainerStore::sGoldId))
         return;
 
     // repair
     MWWorld::Ptr item = *sender->getUserData<MWWorld::Ptr>();
     item.getCellRef().setCharge(item.getClass().getItemMaxHealth(item));
 
-    player.getClass().getContainerStore(player).restack(item);
+    storeManager.getMutable().restack(item);
 
     MWBase::Environment::get().getWindowManager()->playSound("Repair");
 
-    player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+    storeManager.getMutable().remove(MWWorld::ContainerStore::sGoldId, price, player);
 
     // add gold to NPC trading gold pool
     MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);

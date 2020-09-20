@@ -39,7 +39,8 @@ namespace MWRender
 ActorAnimation::ActorAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
     : Animation(ptr, parentNode, resourceSystem)
 {
-    MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
+    auto storeManager = mPtr.getClass().getStoreManager(mPtr);
+    const MWWorld::ContainerStore& store = storeManager.getImmutable();
 
     for (MWWorld::ConstContainerStoreIterator iter = store.cbegin(MWWorld::ContainerStore::Type_Light);
          iter != store.cend(); ++iter)
@@ -418,7 +419,7 @@ void ActorAnimation::updateQuiver()
     const auto& weaponType = MWMechanics::getWeaponType(type);
     if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
     {
-        ammoCount = ammo->getRefData().getCount();
+        ammoCount = std::abs(ammo->getRefData().getCount());
         osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
         if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
             ammoCount--;
@@ -431,7 +432,7 @@ void ActorAnimation::updateQuiver()
         if (ammo == inv.end())
             return;
 
-        ammoCount = ammo->getRefData().getCount();
+        ammoCount = std::abs(ammo->getRefData().getCount());
         bool arrowAttached = isArrowAttached();
         if (arrowAttached)
             ammoCount--;

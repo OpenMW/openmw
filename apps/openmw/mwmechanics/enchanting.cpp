@@ -61,7 +61,8 @@ namespace MWMechanics
     bool Enchanting::create()
     {
         const MWWorld::Ptr& player = getPlayer();
-        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+        auto storeManager = player.getClass().getStoreManager(player);
+        MWWorld::ContainerStore& store = storeManager.getMutable();
         ESM::Enchantment enchantment;
         enchantment.mData.mFlags = 0;
         enchantment.mData.mType = mCastStyle;
@@ -357,7 +358,7 @@ namespace MWMechanics
             {
                 static const float multiplier = std::max(0.f, std::min(1.0f, Settings::Manager::getFloat("projectiles enchant multiplier", "Game")));
                 MWWorld::Ptr player = getPlayer();
-                int itemsInInventoryCount = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
+                int itemsInInventoryCount = player.getClass().getStoreManager(player).getImmutable().count(mOldItemPtr.getCellRef().getRefId());
                 count = std::min(itemsInInventoryCount, std::max(1, int(getGemCharge() * multiplier / enchantPoints)));
             }
         }
@@ -381,9 +382,8 @@ namespace MWMechanics
     void Enchanting::payForEnchantment() const
     {
         const MWWorld::Ptr& player = getPlayer();
-        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
+        player.getClass().getStoreManager(player).getMutable().remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
 
         // add gold to NPC trading gold pool
         CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);

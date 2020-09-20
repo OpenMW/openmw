@@ -56,7 +56,7 @@ namespace MWClass
             virtual MWMechanics::NpcStats& getNpcStats (const MWWorld::Ptr& ptr) const;
             ///< Return NPC stats
 
-            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
+            virtual MWWorld::StoreManager getStoreManager (const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual bool hasToolTip(const MWWorld::ConstPtr& ptr) const;
@@ -157,8 +157,6 @@ namespace MWClass
             virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;
-
-            virtual void restock (const MWWorld::Ptr& ptr) const;
 
             virtual int getBaseFightRating (const MWWorld::ConstPtr& ptr) const;
 

@@ -20,6 +20,7 @@
 #include "../mwworld/actiontrap.hpp"
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/localscripts.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -27,50 +28,178 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
+
+namespace
+{
+    void removeScripts(const MWWorld::ContainerStore& store)
+    {
+        auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
+        for(const MWWorld::ConstPtr& ptr : store)
+        {
+            if(!ptr.getClass().getScript(ptr).empty())
+               scripts.remove(ptr);
+        }
+    }
+
+    void addScripts(MWWorld::ContainerStore& store, MWWorld::CellStore* cell)
+    {
+        auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
+        for(const MWWorld::Ptr& ptr : store)
+        {
+            const std::string& script = ptr.getClass().getScript(ptr);
+            if(!script.empty())
+            {
+                MWWorld::Ptr item = ptr;
+                item.mCell = cell;
+                scripts.add(script, item);
+            }
+        }
+    }
+}
 
 namespace MWClass
 {
-    class ContainerCustomData : public MWWorld::CustomData
+    class ResolutionListener
     {
+        ContainerCustomData& mCustomData;
+        MWWorld::CellStore* mCell;
     public:
-        MWWorld::ContainerStore mContainerStore;
+        ResolutionListener(ContainerCustomData& customData, MWWorld::CellStore* cell) : mCustomData(customData), mCell(cell) {}
 
-        virtual MWWorld::CustomData *clone() const;
-
-        virtual ContainerCustomData& asContainerCustomData()
-        {
-            return *this;
-        }
-        virtual const ContainerCustomData& asContainerCustomData() const
-        {
-            return *this;
-        }
+        ~ResolutionListener();
     };
+
+    class ResolvingStoreManager : public MWWorld::ContainerStoreProvider
+    {
+        ContainerCustomData& mCustomData;
+        const ESM::Container& mContainer;
+        MWWorld::CellStore* mCell;
+        mutable std::shared_ptr<ResolutionListener> mListener;
+    public:
+        ResolvingStoreManager(ContainerCustomData& customData, const ESM::Container& container, MWWorld::CellStore* cell)
+        : mCustomData(customData), mContainer(container), mCell(cell) {}
+
+        virtual MWWorld::ContainerStore& getMutable() override;
+
+        virtual const MWWorld::ContainerStore& getImmutable() const override;
+    };
+
+    ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
+    : mUnresolvedStore(std::make_unique<MWWorld::ContainerStore>())
+    , mSeed(Misc::Rng::rollDice(std::numeric_limits<int>::max())) {
+        // setting ownership not needed, since taking items from a container inherits the
+        // container's owner automatically
+        mUnresolvedStore->fillNonRandom(container.mInventory, "");
+        addScripts(*mUnresolvedStore, cell);
+    }
+
+    ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
+    : mResolvedStore(std::make_unique<MWWorld::ContainerStore>()), mSeed()
+    {
+        mResolvedStore->readState(inventory);
+    }
+
+    ContainerCustomData::ContainerCustomData(const ContainerCustomData& other) : mSeed(other.mSeed)
+    {
+        if(other.mResolvedStore && other.mResolvedStore->isModified())
+            mResolvedStore = std::make_unique<MWWorld::ContainerStore>(*other.mResolvedStore);
+        else
+            mUnresolvedStore = std::make_unique<MWWorld::ContainerStore>(*other.mUnresolvedStore);
+    }
 
     MWWorld::CustomData *ContainerCustomData::clone() const
     {
         return new ContainerCustomData (*this);
     }
 
+    ContainerCustomData& ContainerCustomData::asContainerCustomData()
+    {
+        return *this;
+    }
+    const ContainerCustomData& ContainerCustomData::asContainerCustomData() const
+    {
+        return *this;
+    }
+
+    const MWWorld::ContainerStore& ContainerCustomData::getImmutable(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell)
+    {
+        assignListener(listener, cell);
+        if(mResolvedStore)
+            return *mResolvedStore;
+        return *mUnresolvedStore;
+    }
+
+    MWWorld::ContainerStore& ContainerCustomData::getMutable(std::shared_ptr<ResolutionListener>& listener, const ESM::Container& container, MWWorld::CellStore* cell)
+    {
+        assignListener(listener, cell);
+        if(!mResolvedStore)
+        {
+            auto store = std::make_unique<MWWorld::ContainerStore>();
+            Misc::Rng generator(mSeed);
+            store->fill(container.mInventory, "", generator);
+            mResolvedStore = std::move(store);
+            removeScripts(*mUnresolvedStore);
+            addScripts(*mResolvedStore, cell);
+        }
+        return *mResolvedStore;
+    }
+
+    bool ContainerCustomData::isModified() const
+    {
+        return !!mResolvedStore;
+    }
+
+    void ContainerCustomData::assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell)
+    {
+        // Only assign if no permanent resolution has taken place
+        if(mUnresolvedStore)
+        {
+            listener = mListener.lock();
+            if(!listener)
+            {
+                listener = std::make_shared<ResolutionListener>(*this, cell);
+                mListener = listener;
+            }
+        }
+    }
+
+    MWWorld::ContainerStore& ResolvingStoreManager::getMutable()
+    {
+        return mCustomData.getMutable(mListener, mContainer, mCell);
+    }
+
+    const MWWorld::ContainerStore& ResolvingStoreManager::getImmutable() const
+    {
+        return mCustomData.getImmutable(mListener, mCell);
+    }
+
+    ResolutionListener::~ResolutionListener()
+    {
+        // A mutable store was requested...
+        if(mCustomData.mResolvedStore)
+        {
+            if(mCustomData.mResolvedStore->isModified())
+                mCustomData.mUnresolvedStore.reset(); // ...and modified. Toss the unresolved store
+            else
+            {
+                // ...but not modified. Toss it
+                removeScripts(*mCustomData.mResolvedStore);
+                mCustomData.mResolvedStore.reset();
+                addScripts(*mCustomData.mUnresolvedStore, mCell);
+            }
+        }
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-
-            MWWorld::LiveCellRef<ESM::Container> *ref =
-                ptr.get<ESM::Container>();
-
-            // setting ownership not needed, since taking items from a container inherits the
-            // container's owner automatically
-            data->mContainerStore.fill(
-                ref->mBase->mInventory, "");
+            MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
             // store
-            ptr.getRefData().setCustomData (data.release());
-
-            MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
+            ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()).release());
         }
     }
 
@@ -96,17 +225,6 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
             ptr.getRefData().setCustomData(nullptr);
         }
-    }
-
-    void Container::restock(const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
-        const ESM::InventoryList& list = ref->mBase->mInventory;
-        MWWorld::ContainerStore& store = getContainerStore(ptr);
-
-        // setting ownership not needed, since taking items from a container inherits the
-        // container's owner automatically
-        store.restock(list, ptr, "");
     }
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -228,12 +346,14 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::StoreManager Container::getStoreManager (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-
-        return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
+        auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
+        if(!data.mUnresolvedStore)
+            return data.mResolvedStore.get();
+        const ESM::Container* container = ptr.get<ESM::Container>()->mBase;
+        return {std::make_unique<ResolvingStoreManager>(data, *container, ptr.getCell())};
     }
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
@@ -253,8 +373,15 @@ namespace MWClass
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
-
+        {
+            if(!canBeHarvested(ptr))
+                return true;
+            if(data->asContainerCustomData().mResolvedStore)
+                return data->asContainerCustomData().mResolvedStore->hasVisibleItems();
+            if(data->asContainerCustomData().mUnresolvedStore)
+                return data->asContainerCustomData().mUnresolvedStore->hasVisibleItems();
+            return false;
+        }
         return true;
     }
 
@@ -273,6 +400,7 @@ namespace MWClass
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
+        const auto customData = ptr.getRefData().getCustomData();
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
@@ -296,7 +424,8 @@ namespace MWClass
 
     float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        return getContainerStore (ptr).getWeight();
+        auto store = getStoreManager(ptr);
+        return store.getImmutable().getWeight();
     }
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
@@ -317,21 +446,13 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        if (!ptr.getRefData().getCustomData())
-        {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-            ptr.getRefData().setCustomData (data.release());
-        }
-
-        ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
         const ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.readState (containerState.mInventory);
+        ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory).release());
     }
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
-        if (!ptr.getRefData().getCustomData())
+        if (!ptr.getRefData().getCustomData() || !ptr.getRefData().getCustomData()->asContainerCustomData().isModified())
         {
             state.mHasCustomState = false;
             return;
@@ -339,6 +460,6 @@ namespace MWClass
 
         const ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
         ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.writeState (containerState.mInventory);
+        customData.mResolvedStore->writeState (containerState.mInventory);
     }
 }
