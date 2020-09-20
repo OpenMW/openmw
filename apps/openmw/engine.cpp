@@ -14,6 +14,7 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
 
@@ -515,6 +516,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
+    if (Debug::shouldDebugOpenGL())
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 
     if (antialiasing > 0)
     {
@@ -574,6 +577,9 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
     camera->setGraphicsContext(graphicsWindow);
     camera->setViewport(0, 0, traits->width, traits->height);
+
+    if (Debug::shouldDebugOpenGL())
+        mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
 
     mViewer->realize();
 
