@@ -1306,6 +1306,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 mUpperBodyState = UpperCharState_UnEquipingWeap;
 
+                mAnimation->detachArrow();
+
                 // If we do not have the "unequip detach" key, hide weapon manually.
                 if (mAnimation->getTextKeyTime(weapgroup+": unequip detach") < 0)
                     mAnimation->showWeapons(false);
@@ -1788,7 +1790,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                         mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                         break;
                     }
-                    playSwishSound(0.0f);
+
+                    if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+                        playSwishSound(0.0f);
                 }
 
                 if(mAttackType == "shoot")
@@ -1950,23 +1954,21 @@ void CharacterController::update(float duration, bool animationOnly)
 
         osg::Vec3f rot = cls.getRotationVector(mPtr);
         osg::Vec3f vec(movementSettings.asVec3());
-
-        if (isPlayer)
-        {
-            // TODO: Move this code to mwinput.
-            // Joystick analogue movement.
-            movementSettings.mSpeedFactor = std::max(std::abs(vec.x()), std::abs(vec.y()));
-
-            // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
-            if(!isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
-                movementSettings.mSpeedFactor *= 2.f;
-        } else
-            movementSettings.mSpeedFactor = std::min(vec.length(), 1.f);
+        movementSettings.mSpeedFactor = std::min(vec.length(), 1.f);
         vec.normalize();
 
+        // TODO: Move this check to mwinput.
+        // Joystick analogue movement.
+        // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
+        if (isPlayer && !isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
+            movementSettings.mSpeedFactor *= 2.f;
+
         float effectiveRotation = rot.z();
+        bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
-        if (turnToMovementDirection && !isFirstPersonPlayer)
+        if (!turnToMovementDirection || isFirstPersonPlayer)
+            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
+        else if (canMove)
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
             movementSettings.mIsStrafing = (stats.getDrawState() != MWMechanics::DrawState_Nothing || inwater)
@@ -1986,8 +1988,6 @@ void CharacterController::update(float duration, bool animationOnly)
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
-        else
-            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
 
         mAnimation->setLegsYawRadians(stats.getSideMovementAngle());
         if (stats.getDrawState() == MWMechanics::DrawState_Nothing || inwater)

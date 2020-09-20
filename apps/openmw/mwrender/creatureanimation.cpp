@@ -208,6 +208,12 @@ bool CreatureWeaponAnimation::isArrowAttached() const
     return mAmmunition != nullptr;
 }
 
+void CreatureWeaponAnimation::detachArrow()
+{
+    WeaponAnimation::detachArrow(mPtr);
+    updateQuiver();
+}
+
 void CreatureWeaponAnimation::attachArrow()
 {
     WeaponAnimation::attachArrow(mPtr);

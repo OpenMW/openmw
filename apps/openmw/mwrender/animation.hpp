@@ -474,6 +474,7 @@ public:
     void setAlpha(float alpha);
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
+    virtual void detachArrow() {}
     virtual void releaseArrow(float attackStrength) {}
     virtual void enableHeadAnimation(bool enable) {}
     // TODO: move outside of this class

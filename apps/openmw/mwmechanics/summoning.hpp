@@ -5,6 +5,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include <components/esm/magiceffects.hpp>
+
 #include "magiceffects.hpp"
 
 namespace MWMechanics
@@ -20,8 +22,8 @@ namespace MWMechanics
         UpdateSummonedCreatures(const MWWorld::Ptr& actor);
         virtual ~UpdateSummonedCreatures() = default;
 
-        virtual void visit (MWMechanics::EffectKey key,
-                                 const std::string& sourceName, const std::string& sourceId, int casterActorId,
+        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+                            const std::string& sourceName, const std::string& sourceId, int casterActorId,
                             float magnitude, float remainingTime = -1, float totalTime = -1);
 
         /// To call after all effect sources have been visited
@@ -30,7 +32,7 @@ namespace MWMechanics
     private:
         MWWorld::Ptr mActor;
 
-        std::set<std::pair<int, std::string> > mActiveEffects;
+        std::set<ESM::SummonKey> mActiveEffects;
     };
 
 }

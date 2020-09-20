@@ -58,6 +58,7 @@ namespace MWMechanics
         std::vector<ActiveSpells::ActiveEffect> absorbEffects;
         ActiveSpells::ActiveEffect absorbEffect = appliedEffect;
         absorbEffect.mMagnitude *= -1;
+        absorbEffect.mEffectIndex = appliedEffect.mEffectIndex;
         absorbEffects.emplace_back(absorbEffect);
 
         // Morrowind negates reflected Absorb spells so the original caster won't be harmed.

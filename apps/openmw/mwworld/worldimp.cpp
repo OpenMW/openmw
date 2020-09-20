@@ -3132,7 +3132,7 @@ namespace MWWorld
         {
         }
 
-        virtual void visit (MWMechanics::EffectKey key,
+        virtual void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
                             const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
                             float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1)
         {

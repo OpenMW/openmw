@@ -141,7 +141,7 @@ namespace MWInput
 
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight);
             float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward);
-            bool isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
+            bool isRunning = osg::Vec2f(xAxis * 2 - 1, yAxis * 2 - 1).length2() > 0.25f;
             if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
                 player.setRunState(!mBindingsManager->actionIsActive(A_Run));
             else

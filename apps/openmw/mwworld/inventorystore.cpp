@@ -919,7 +919,7 @@ void MWWorld::InventoryStore::visitEffectSources(MWMechanics::EffectSourceVisito
             float magnitude = effect.mMagnMin + (effect.mMagnMax - effect.mMagnMin) * params.mRandom;
             magnitude *= params.mMultiplier;
             if (magnitude > 0)
-                visitor.visit(MWMechanics::EffectKey(effect), (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
+                visitor.visit(MWMechanics::EffectKey(effect), i-1, (**iter).getClass().getName(**iter), (**iter).getCellRef().getRefId(), -1, magnitude);
         }
     }
 }
@@ -933,7 +933,7 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, bool wholeSpell)
     }
 }
 
-void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId, bool wholeSpell)
+void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sourceId, bool wholeSpell, int effectIndex)
 {
     TEffectMagnitudes::iterator effectMagnitudeIt = mPermanentMagicEffectMagnitudes.find(sourceId);
     if (effectMagnitudeIt == mPermanentMagicEffectMagnitudes.end())
@@ -964,6 +964,9 @@ void MWWorld::InventoryStore::purgeEffect(short effectId, const std::string &sou
                 effectIt!=enchantment.mEffects.mList.end(); ++effectIt, ++i)
             {
                 if (effectIt->mEffectID != effectId)
+                    continue;
+
+                if (effectIndex >= 0 && effectIndex != i)
                     continue;
 
                 if (wholeSpell)
