@@ -47,6 +47,10 @@ namespace MWWorld
             virtual ~ContainerStoreProvider() = default;
     };
 
+    /// ContainerStore handle. Hides container resolution.
+    /// getMutable and getImmutable may return different stores.
+    /// Calling getImmutable after getMutable will return the same store.
+    /// Stores are not guaranteed to exist beyond the manager's lifetime.
     class StoreManager : public ContainerStoreProvider
     {
             const bool mResolved;

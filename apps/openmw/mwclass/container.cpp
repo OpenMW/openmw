@@ -153,6 +153,7 @@ namespace MWClass
 
     void ContainerCustomData::assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell)
     {
+        // Only assign if no permanent resolution has taken place
         if(mUnresolvedStore)
         {
             listener = mListener.lock();
@@ -176,12 +177,14 @@ namespace MWClass
 
     ResolutionListener::~ResolutionListener()
     {
+        // A mutable store was requested...
         if(mCustomData.mResolvedStore)
         {
             if(mCustomData.mResolvedStore->isModified())
-                mCustomData.mUnresolvedStore.reset();
+                mCustomData.mUnresolvedStore.reset(); // ...and modified. Toss the unresolved store
             else
             {
+                // ...but not modified. Toss it
                 removeScripts(*mCustomData.mResolvedStore);
                 mCustomData.mResolvedStore.reset();
                 addScripts(*mCustomData.mUnresolvedStore, mCell);

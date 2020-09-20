@@ -16,9 +16,14 @@ namespace MWClass
 
     class ContainerCustomData : public MWWorld::CustomData
     {
+        /// A store changed by the player and therefore saved.
         std::unique_ptr<MWWorld::ContainerStore> mResolvedStore;
+        /// A reflection of the base record that does not get saved.
+        /// Does not contain leveled items.
         std::unique_ptr<MWWorld::ContainerStore> mUnresolvedStore;
+        /// The seed used to resolve leveled items so a container contains the same items until the game is restarted.
         const unsigned int mSeed;
+        /// Swaps the unresolved store for a resolved store if a change has been made.
         std::weak_ptr<ResolutionListener> mListener;
 
         void assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell);
