@@ -118,6 +118,29 @@ void GraphicsWindowSDL2::init()
 
     setSwapInterval(_traits->vsync);
 
+    // Update traits with what we've actually been given
+    // Use intermediate to avoid signed/unsigned mismatch
+    int intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &intermediateLocation);
+    _traits->red = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_GREEN_SIZE, &intermediateLocation);
+    _traits->green = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_BLUE_SIZE, &intermediateLocation);
+    _traits->blue = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_ALPHA_SIZE, &intermediateLocation);
+    _traits->alpha = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_DEPTH_SIZE, &intermediateLocation);
+    _traits->depth = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_STENCIL_SIZE, &intermediateLocation);
+    _traits->stencil = intermediateLocation;
+
+    SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &intermediateLocation);
+    _traits->doubleBuffer = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &intermediateLocation);
+    _traits->sampleBuffers = intermediateLocation;
+    SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &intermediateLocation);
+    _traits->samples = intermediateLocation;
+
     SDL_GL_MakeCurrent(oldWin, oldCtx);
 
     mValid = true;
