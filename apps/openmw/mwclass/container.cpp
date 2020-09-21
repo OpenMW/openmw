@@ -148,7 +148,7 @@ namespace MWClass
 
     bool ContainerCustomData::isModified() const
     {
-        return !!mResolvedStore;
+        return mResolvedStore != nullptr;
     }
 
     void ContainerCustomData::assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell)
@@ -400,7 +400,6 @@ namespace MWClass
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
-        const auto customData = ptr.getRefData().getCustomData();
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
