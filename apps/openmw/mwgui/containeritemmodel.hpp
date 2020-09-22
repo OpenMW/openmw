@@ -1,7 +1,6 @@
 #ifndef MWGUI_CONTAINER_ITEM_MODEL_H
 #define MWGUI_CONTAINER_ITEM_MODEL_H
 
-#include <memory>
 #include <utility>
 #include <vector>
 

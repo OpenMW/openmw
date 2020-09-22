@@ -148,7 +148,7 @@ namespace MWClass
 
     bool ContainerCustomData::isModified() const
     {
-        return !!mResolvedStore;
+        return mResolvedStore != nullptr;
     }
 
     void ContainerCustomData::assignListener(std::shared_ptr<ResolutionListener>& listener, MWWorld::CellStore* cell)

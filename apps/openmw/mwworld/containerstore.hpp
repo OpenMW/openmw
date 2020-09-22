@@ -40,7 +40,8 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
-    class ContainerStoreProvider {
+    class ContainerStoreProvider
+    {
         public:
             virtual ContainerStore& getMutable() = 0;
             virtual const ContainerStore& getImmutable() const = 0;
