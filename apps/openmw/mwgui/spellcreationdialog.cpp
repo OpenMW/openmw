@@ -391,8 +391,7 @@ namespace MWGui
         }
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        auto storeManager = player.getClass().getStoreManager(player);
-        int playerGold = storeManager.getImmutable().count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
         {
@@ -404,7 +403,7 @@ namespace MWGui
 
         int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
 
-        storeManager.getMutable().remove(MWWorld::ContainerStore::sGoldId, price, player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);

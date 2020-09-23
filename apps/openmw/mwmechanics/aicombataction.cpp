@@ -86,7 +86,7 @@ namespace MWMechanics
     void ActionPotion::prepare(const MWWorld::Ptr &actor)
     {
         actor.getClass().apply(actor, mPotion.getCellRef().getRefId(), actor);
-        actor.getClass().getStoreManager(actor).getMutable().remove(mPotion, 1, actor);
+        actor.getClass().getContainerStore(actor).remove(mPotion, 1, actor);
     }
 
     void ActionWeapon::prepare(const MWWorld::Ptr &actor)

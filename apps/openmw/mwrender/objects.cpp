@@ -92,7 +92,7 @@ void Objects::insertCreature(const MWWorld::Ptr &ptr, const std::string &mesh, b
         anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
 
     if (mObjects.insert(std::make_pair(ptr, anim)).second)
-        ptr.getClass().getStoreManager(ptr).getMutable().setContListener(static_cast<ActorAnimation*>(anim.get()));
+        ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
 }
 
 void Objects::insertNPC(const MWWorld::Ptr &ptr)
@@ -127,7 +127,7 @@ bool Objects::removeObject (const MWWorld::Ptr& ptr)
             if (ptr.getClass().hasInventoryStore(ptr))
                 ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr, ptr);
 
-            ptr.getClass().getStoreManager(ptr).getMutable().setContListener(nullptr);
+            ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
         }
 
         ptr.getRefData().getBaseNode()->getParent(0)->removeChild(ptr.getRefData().getBaseNode());

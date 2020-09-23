@@ -76,7 +76,7 @@ namespace MWClass
 
     float Actor::getEncumbrance(const MWWorld::Ptr& ptr) const
     {
-        float weight = getStoreManager(ptr).getImmutable().getWeight();
+        float weight = getContainerStore(ptr).getWeight();
         const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
         weight -= effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Feather)).getMagnitude();
         weight += effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).getMagnitude();

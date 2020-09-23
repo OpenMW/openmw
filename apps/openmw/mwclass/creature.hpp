@@ -63,7 +63,8 @@ namespace MWClass
                 const MWWorld::Ptr& actor) const;
             ///< Generate action for activation
 
-            virtual MWWorld::StoreManager getStoreManager (const MWWorld::Ptr& ptr) const;
+            virtual MWWorld::ContainerStore& getContainerStore (
+                const MWWorld::Ptr& ptr) const;
             ///< Return container store
 
             virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;

@@ -519,8 +519,8 @@ namespace MWDialogue
 
             if (gold)
             {
-                player.getClass().getStoreManager(player).getMutable().remove(MWWorld::ContainerStore::sGoldId, gold, player);
-                mActor.getClass().getStoreManager(mActor).getMutable().add(MWWorld::ContainerStore::sGoldId, gold, mActor);
+                player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, gold, player);
+                mActor.getClass().getContainerStore(mActor).add(MWWorld::ContainerStore::sGoldId, gold, mActor);
             }
         }
 

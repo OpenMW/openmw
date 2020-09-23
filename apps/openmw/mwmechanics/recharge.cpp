@@ -64,7 +64,7 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
 
         MWBase::Environment::get().getWindowManager()->playSound("Enchant Success");
 
-        player.getClass().getStoreManager(player).getMutable().restack(item);
+        player.getClass().getContainerStore(player).restack(item);
     }
     else
     {
@@ -83,7 +83,7 @@ bool rechargeItem(const MWWorld::Ptr &item, const MWWorld::Ptr &gem)
 
         // special case: readd Azura's Star
         if (Misc::StringUtils::ciEqual(gem.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
-            player.getClass().getStoreManager(player).getMutable().add("Misc_SoulGem_Azura", 1, player);
+            player.getClass().getContainerStore(player).add("Misc_SoulGem_Azura", 1, player);
     }
 
     return true;

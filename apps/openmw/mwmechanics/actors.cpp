@@ -256,8 +256,7 @@ namespace MWMechanics
                 return;
 
             // Use the smallest soulgem that is large enough to hold the soul
-            auto storeManager = caster.getClass().getStoreManager(caster);
-            MWWorld::ContainerStore& container = storeManager.getMutable();
+            MWWorld::ContainerStore& container = caster.getClass().getContainerStore(caster);
             MWWorld::ContainerStoreIterator gem = container.end();
             float gemCapacity = std::numeric_limits<float>::max();
             std::string soulgemFilter = "misc_soulgem"; // no other way to check for soulgems? :/
@@ -310,7 +309,7 @@ namespace MWMechanics
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
         int slot = getBoundItemSlot(itemId);
 
-        if (actor.getClass().getStoreManager(actor).getImmutable().count(itemId) != 0)
+        if (actor.getClass().getContainerStore(actor).count(itemId) != 0)
             return;
 
         MWWorld::ContainerStoreIterator prevItem = store.getSlot(slot);

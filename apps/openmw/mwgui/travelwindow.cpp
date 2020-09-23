@@ -52,7 +52,7 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (!mPtr.getCell()->isExterior())
         {
@@ -148,8 +148,7 @@ namespace MWGui
         iss >> price;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        auto storeManager = player.getClass().getStoreManager(player);
-        int playerGold = storeManager.getImmutable().count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         if (playerGold<price)
             return;
@@ -162,7 +161,7 @@ namespace MWGui
             // Interior cell -> mages guild transport
             MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");
 
-        storeManager.getMutable().remove(MWWorld::ContainerStore::sGoldId, price, player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
         // add gold to NPC trading gold pool
         MWMechanics::CreatureStats& npcStats = mPtr.getClass().getCreatureStats(mPtr);
@@ -202,7 +201,7 @@ namespace MWGui
     void TravelWindow::updateLabels()
     {
         MWWorld::Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
-        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mPlayerGold->setCaptionWithReplacing("#{sGold}: " + MyGUI::utility::toString(playerGold));
         mPlayerGold->setCoord(8,

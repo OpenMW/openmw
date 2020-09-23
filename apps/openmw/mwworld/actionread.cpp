@@ -8,7 +8,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "player.hpp"
-#include "containerstore.hpp"
 #include "class.hpp"
 #include "esmstore.hpp"
 
@@ -27,7 +26,7 @@ namespace MWWorld
         if(MWMechanics::isPlayerInCombat()
                 // Reading in combat is still allowed if the scroll/book is not in the player inventory yet
                 // (since otherwise, there would be no way to pick it up)
-                && getTarget().getContainerStore() == &actor.getClass().getStoreManager(actor).getMutable()
+                && getTarget().getContainerStore() == &actor.getClass().getContainerStore(actor)
                 ) {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sInventoryMessage4}");
             return;

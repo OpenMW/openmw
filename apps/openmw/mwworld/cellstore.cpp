@@ -21,8 +21,6 @@
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwclass/container.hpp"
-
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/recharge.hpp"
 
@@ -45,7 +43,7 @@ namespace
                 continue;
 
             MWWorld::Ptr ptr =
-                container.getClass().getStoreManager (container).getMutable().search (id);
+                container.getClass().getContainerStore (container).search (id);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -1018,7 +1016,7 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
             for (CellRefList<ESM::NPC>::List::iterator it (mNpcs.mList.begin()); it!=mNpcs.mList.end(); ++it)
@@ -1026,16 +1024,16 @@ namespace MWWorld
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
                 {
-                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
             for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
                 if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0
-                && ptr.getRefData().getCustomData()->asContainerCustomData().isModified())
+                && ptr.getClass().getContainerStore(ptr).isResolved())
                 {
-                    ptr.getClass().getStoreManager(ptr).getMutable().rechargeItems(duration);
+                    ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
             }
 

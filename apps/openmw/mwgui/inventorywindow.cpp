@@ -750,7 +750,7 @@ namespace MWGui
 
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
-        MWWorld::Ptr newObject = *player.getClass().getStoreManager (player).getMutable().add (object, object.getRefData().getCount(), player);
+        MWWorld::Ptr newObject = *player.getClass().getContainerStore (player).add (object, object.getRefData().getCount(), player);
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject (object);

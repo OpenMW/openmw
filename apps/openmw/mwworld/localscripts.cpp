@@ -2,8 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include "../mwclass/container.hpp"
-
 #include "esmstore.hpp"
 #include "cellstore.hpp"
 #include "class.hpp"
@@ -47,8 +45,8 @@ namespace
             // Ignore containers without generated content
             if (containerPtr.getTypeName() == typeid(ESM::Container).name() && containerPtr.getRefData().getCustomData() == nullptr)
                 return true;
-            auto store = containerPtr.getClass().getStoreManager(containerPtr);
-            MWWorld::ContainerStore& container = store.getMutable();
+
+            MWWorld::ContainerStore& container = containerPtr.getClass().getContainerStore(containerPtr);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);

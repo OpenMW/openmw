@@ -1946,8 +1946,8 @@ namespace MWRender
 
         if (ptr.getRefData().getCustomData() != nullptr && canBeHarvested())
         {
-            auto storeManager = ptr.getClass().getStoreManager(ptr);
-            if (!storeManager.getImmutable().hasVisibleItems())
+            const MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+            if (!store.hasVisibleItems())
             {
                 HarvestVisitor visitor;
                 mObjectRoot->accept(visitor);

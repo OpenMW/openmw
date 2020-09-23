@@ -300,9 +300,9 @@ int MWDialogue::Filter::getSelectStructInteger (const SelectWrapper& select) con
 
         case SelectWrapper::Function_Item:
         {
-            auto store = player.getClass().getStoreManager (player);
+            MWWorld::ContainerStore& store = player.getClass().getContainerStore (player);
 
-            return store.getImmutable().count(select.getName());
+            return store.count(select.getName());
         }
 
         case SelectWrapper::Function_Dead:

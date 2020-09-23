@@ -30,6 +30,11 @@ namespace ESM
     struct InventoryState;
 }
 
+namespace MWClass
+{
+    class Container;
+}
+
 namespace MWWorld
 {
     class ContainerStore;
@@ -40,33 +45,20 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
-    class ContainerStoreProvider
+    class ResolutionListener
     {
+            ContainerStore& mStore;
         public:
-            virtual ContainerStore& getMutable() = 0;
-            virtual const ContainerStore& getImmutable() const = 0;
-            virtual ~ContainerStoreProvider() = default;
+            ResolutionListener(ContainerStore& store) : mStore(store) {}
+            ~ResolutionListener();
     };
 
-    /// ContainerStore handle. Hides container resolution.
-    /// getMutable and getImmutable may return different stores.
-    /// Calling getImmutable after getMutable will return the same store.
-    /// Stores are not guaranteed to exist beyond the manager's lifetime.
-    class StoreManager : public ContainerStoreProvider
+    class ResolutionHandle
     {
-            const bool mResolved;
-            union {
-                ContainerStoreProvider* mStoreManager;
-                ContainerStore* mStore;
-            };
+            std::shared_ptr<ResolutionListener> mListener;
         public:
-            StoreManager(std::unique_ptr<ContainerStoreProvider> manager) : mResolved(false), mStoreManager(manager.release()) {}
-            StoreManager(ContainerStore* store) : mResolved(true), mStore(store) {}
-            StoreManager(const StoreManager& storeManager) = delete;
-            StoreManager(StoreManager&& storeManager);
-            virtual ContainerStore& getMutable() override;
-            virtual const ContainerStore& getImmutable() const override;
-            virtual ~StoreManager() override;
+            ResolutionHandle(std::shared_ptr<ResolutionListener> listener) : mListener(listener) {}
+            ResolutionHandle() {}
     };
     
     class ContainerStoreListener
@@ -128,6 +120,10 @@ namespace MWWorld
             mutable bool mWeightUpToDate;
 
             bool mModified;
+            bool mResolved;
+            unsigned int mSeed;
+            MWWorld::Ptr mPtr;
+            std::weak_ptr<ResolutionListener> mResolutionListener;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
             void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng* generator, bool topLevel=true, const std::string& levItem = "");
@@ -151,6 +147,7 @@ namespace MWWorld
 
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
+            void setModified();
         public:
 
             ContainerStore();
@@ -210,10 +207,8 @@ namespace MWWorld
 
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);
-
-            void setModified();
         protected:
-            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count, bool markModified = true);
+            ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
@@ -230,7 +225,7 @@ namespace MWWorld
             void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator = Misc::Rng::sInstance);
             ///< Insert items into *this.
 
-            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner);
+            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
             ///< Insert items into *this, excluding leveled items
 
             virtual void clear();
@@ -252,10 +247,15 @@ namespace MWWorld
 
             virtual void readState (const ESM::InventoryState& state);
 
-            bool isModified() const;
+            bool isResolved() const;
+
+            void resolve();
+            ResolutionHandle resolveTemporarily();
 
             friend class ContainerStoreIteratorBase<Ptr>;
             friend class ContainerStoreIteratorBase<ConstPtr>;
+            friend class ResolutionListener;
+            friend class MWClass::Container;
     };
 
     

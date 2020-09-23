@@ -12,7 +12,6 @@
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/actiontake.hpp"
-#include "../mwworld/containerstore.hpp"
 #include "../mwworld/class.hpp"
 
 #include "formatting.hpp"
@@ -47,7 +46,7 @@ namespace MWGui
         mScroll = scroll;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        bool showTakeButton = scroll.getContainerStore() != &player.getClass().getStoreManager(player).getMutable();
+        bool showTakeButton = scroll.getContainerStore() != &player.getClass().getContainerStore(player);
 
         MWWorld::LiveCellRef<ESM::Book> *ref = mScroll.get<ESM::Book>();
 

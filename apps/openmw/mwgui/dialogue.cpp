@@ -107,7 +107,7 @@ namespace MWGui
         center();
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(MWWorld::ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
         mBribe10Button->setEnabled (playerGold >= 10);
         mBribe100Button->setEnabled (playerGold >= 100);

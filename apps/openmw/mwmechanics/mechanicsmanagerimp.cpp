@@ -1034,21 +1034,18 @@ namespace MWMechanics
                 owners.erase(ownersIt);
         }
 
-        auto storeManager = player.getClass().getStoreManager(player);
-        MWWorld::ContainerStore& store = storeManager.getMutable();
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         // move items from player to owner and report about theft
-        victim.getClass().getStoreManager(victim).getMutable().add(item, toRemove, victim);
+        victim.getClass().getContainerStore(victim).add(item, toRemove, victim);
         store.remove(item, toRemove, player);
         commitCrime(player, victim, OT_Theft, item.getCellRef().getFaction(), item.getClass().getValue(item) * toRemove);
     }
 
     void MechanicsManager::confiscateStolenItems(const MWWorld::Ptr &player, const MWWorld::Ptr &targetContainer)
     {
-        auto playerStoreManager = player.getClass().getStoreManager(player);
-        MWWorld::ContainerStore& store = playerStoreManager.getMutable();
-        auto containerStoreManager = targetContainer.getClass().getStoreManager(targetContainer);
-        MWWorld::ContainerStore& containerStore = containerStoreManager.getMutable();
+        MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
+        MWWorld::ContainerStore& containerStore = targetContainer.getClass().getContainerStore(targetContainer);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
             StolenItemsMap::iterator stolenIt = mStolenItems.find(Misc::StringUtils::lowerCase(it->getCellRef().getRefId()));

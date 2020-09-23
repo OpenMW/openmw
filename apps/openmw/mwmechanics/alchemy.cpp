@@ -304,7 +304,7 @@ void MWMechanics::Alchemy::addPotion (const std::string& name)
     if (!record)
         record = MWBase::Environment::get().getWorld()->createRecord (newRecord);
 
-    mAlchemist.getClass().getStoreManager (mAlchemist).getMutable().add (record->mId, 1, mAlchemist);
+    mAlchemist.getClass().getContainerStore (mAlchemist).add (record->mId, 1, mAlchemist);
 }
 
 void MWMechanics::Alchemy::increaseSkill()
@@ -366,8 +366,7 @@ void MWMechanics::Alchemy::setAlchemist (const MWWorld::Ptr& npc)
 
     mEffects.clear();
 
-    auto storeManager = npc.getClass().getStoreManager(npc);
-    MWWorld::ContainerStore& store = storeManager.getMutable();
+    MWWorld::ContainerStore& store = npc.getClass().getContainerStore (npc);
 
     for (MWWorld::ContainerStoreIterator iter (store.begin (MWWorld::ContainerStore::Type_Apparatus));
         iter!=store.end(); ++iter)

@@ -48,15 +48,15 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     mItemSources.reserve(itemSources.size());
     for(const MWWorld::Ptr& source : itemSources)
     {
-        auto store = source.getClass().getStoreManager(source);
-        mItemSources.push_back(std::make_pair(source, std::move(store)));
+        MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
+        mItemSources.push_back(std::make_pair(source, store.resolveTemporarily()));
     }
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(false)
 {
-    auto store = source.getClass().getStoreManager(source);
-    mItemSources.push_back(std::make_pair(source, std::move(store)));
+    MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
+    mItemSources.push_back(std::make_pair(source, store.resolveTemporarily()));
 }
 
 bool ContainerItemModel::allowedToUseItems() const
@@ -101,9 +101,10 @@ ItemModel::ModelIndex ContainerItemModel::getIndex (ItemStack item)
 MWWorld::Ptr ContainerItemModel::copyItem (const ItemStack& item, size_t count, bool allowAutoEquip)
 {
     auto& source = mItemSources[0];
-    if (item.mBase.getContainerStore() == &source.second.getMutable())
+    MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
+    if (item.mBase.getContainerStore() == &store)
         throw std::runtime_error("Item to copy needs to be from a different container!");
-    return *source.second.getMutable().add(item.mBase, count, source.first, allowAutoEquip);
+    return *store.add(item.mBase, count, source.first, allowAutoEquip);
 }
 
 void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
@@ -112,7 +113,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
 
     for (auto& source : mItemSources)
     {
-        MWWorld::ContainerStore& store = source.second.getMutable();
+        MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -152,7 +153,7 @@ void ContainerItemModel::update()
     mItems.clear();
     for (auto& source : mItemSources)
     {
-        MWWorld::ContainerStore& store = source.second.getMutable();
+        MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
 
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {

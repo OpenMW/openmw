@@ -53,7 +53,6 @@
 #include "../mwscript/globalscripts.hpp"
 
 #include "../mwclass/door.hpp"
-#include "../mwclass/container.hpp"
 
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwphysics/actor.hpp"
@@ -708,7 +707,7 @@ namespace MWWorld
         }
 
         Ptr ptr = mPlayer->getPlayer().getClass()
-            .getStoreManager(mPlayer->getPlayer()).getMutable().search(lowerCaseName);
+            .getContainerStore(mPlayer->getPlayer()).search(lowerCaseName);
 
         return ptr;
     }
@@ -747,7 +746,7 @@ namespace MWWorld
 
         bool operator() (Ptr ptr)
         {
-            if (mContainedPtr.getContainerStore() == &ptr.getClass().getStoreManager(ptr).getImmutable())
+            if (mContainedPtr.getContainerStore() == &ptr.getClass().getContainerStore(ptr))
             {
                 mResult = ptr;
                 return false;
@@ -763,7 +762,7 @@ namespace MWWorld
             return Ptr();
 
         Ptr player = getPlayerPtr();
-        if (ptr.getContainerStore() == &player.getClass().getStoreManager(player).getMutable())
+        if (ptr.getContainerStore() == &player.getClass().getContainerStore(player))
             return player;
 
         for (CellStore* cellstore : mWorldScene->getActiveCells())
@@ -791,10 +790,9 @@ namespace MWWorld
         {
             //Ignore non-resolved containers
             if(isContainer && (reference.getRefData().getCustomData() == nullptr
-            || !reference.getRefData().getCustomData()->asContainerCustomData().isModified()))
+            || !reference.getClass().getContainerStore(reference).isResolved()))
                 return;
-            auto store = reference.getClass().getStoreManager(reference);
-            MWWorld::ContainerStore& container = store.getMutable();
+            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
             for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
                 std::string script = it->getClass().getScript(*it);
@@ -840,8 +838,7 @@ namespace MWWorld
             //Ignore non-resolved containers
             if(isContainer && reference.getRefData().getCustomData() == nullptr)
                 return;
-            auto store = reference.getClass().getStoreManager(reference);
-            for(const MWWorld::ConstPtr& item : store.getImmutable())
+            for(const MWWorld::ConstPtr& item : reference.getClass().getContainerStore(reference))
             {
                 const std::string& script = item.getClass().getScript(item);
                 if(!script.empty())
@@ -3401,8 +3398,7 @@ namespace MWWorld
                 if (isContainer && ptr.getRefData().getCustomData() == nullptr)
                     return true;
 
-                auto store = ptr.getClass().getStoreManager(ptr);
-                for (const MWWorld::ConstPtr& it : store.getImmutable())
+                for (const MWWorld::ConstPtr& it : ptr.getClass().getContainerStore(ptr))
                 {
                     if (needToAdd(it))
                     {
@@ -3504,7 +3500,7 @@ namespace MWWorld
     {
         MWWorld::Ptr player = getPlayerPtr();
         int bounty = player.getClass().getNpcStats(player).getBounty();
-        int playerGold = player.getClass().getStoreManager(player).getImmutable().count(ContainerStore::sGoldId);
+        int playerGold = player.getClass().getContainerStore(player).count(ContainerStore::sGoldId);
 
         static float fCrimeGoldDiscountMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldDiscountMult")->mValue.getFloat();
         static float fCrimeGoldTurnInMult = mStore.get<ESM::GameSetting>().find("fCrimeGoldTurnInMult")->mValue.getFloat();

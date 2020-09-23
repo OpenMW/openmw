@@ -28,10 +28,9 @@ namespace MWWorld
             return;
 
         MWWorld::Ptr target = getTarget();
-        auto targetManager = target.getClass().getStoreManager(target);
-        auto actorManager = actor.getClass().getStoreManager(actor);
-        MWWorld::ContainerStore& store = targetManager.getMutable();
-        MWWorld::ContainerStore& actorStore = actorManager.getMutable();
+        MWWorld::ContainerStore& store = target.getClass().getContainerStore(target);
+        store.resolve();
+        MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
         std::map<std::string, int> takenMap;
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
@@ -46,8 +45,6 @@ namespace MWWorld
             store.remove(*it, itemCount, getTarget());
             takenMap[it->getClass().getName(*it)]+=itemCount;
         }
-        // Mark as modified eveen if we took nothing
-        store.setModified();
 
         // Spawn a messagebox (only for items added to player's inventory)
         if (actor == MWBase::Environment::get().getWorld()->getPlayerPtr())

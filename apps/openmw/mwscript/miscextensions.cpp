@@ -596,7 +596,7 @@ namespace MWScript
                     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
                     store.get<ESM::Creature>().find(creature); // This line throws an exception if it can't find the creature
 
-                    MWWorld::Ptr item = *ptr.getClass().getStoreManager(ptr).getMutable().add(gem, 1, ptr);
+                    MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
 
                     // Set the soul on just one of the gems, not the whole stack
                     item.getContainerStore()->unstack(item, ptr);
