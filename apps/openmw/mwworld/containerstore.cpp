@@ -185,11 +185,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
     return ContainerStoreIterator (this);
 }
 
-void MWWorld::ContainerStore::setModified()
-{
-    mModified = true;
-}
-
 int MWWorld::ContainerStore::count(const std::string &id) const
 {
     int total=0;
@@ -610,7 +605,7 @@ void MWWorld::ContainerStore::clear()
         iter->getRefData().setCount (0);
 
     flagAsModified();
-    setModified();
+    mModified = true;
 }
 
 void MWWorld::ContainerStore::flagAsModified()
@@ -868,7 +863,7 @@ void MWWorld::ContainerStore::writeState (ESM::InventoryState& state) const
 void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
 {
     clear();
-    setModified();
+    mModified = true;
     mResolved = true;
 
     int index = 0;

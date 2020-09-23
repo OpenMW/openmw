@@ -231,7 +231,7 @@ namespace MWScript
                     }
                     if (it == invStore.end())
                     {
-                        it = static_cast<MWWorld::ContainerStore&>(invStore).add (item, 1, ptr);
+                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";

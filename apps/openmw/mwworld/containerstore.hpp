@@ -147,7 +147,6 @@ namespace MWWorld
 
             virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
 
-            void setModified();
         public:
 
             ContainerStore();

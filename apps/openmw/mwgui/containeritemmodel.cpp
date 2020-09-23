@@ -44,7 +44,7 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     , mTrading(true)
 {
     assert (!itemSources.empty());
-    // Tie StoreManager lifetimes to the ItemModel
+    // Tie resolution lifetimes to the ItemModel
     mItemSources.reserve(itemSources.size());
     for(const MWWorld::Ptr& source : itemSources)
     {

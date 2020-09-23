@@ -285,7 +285,7 @@ namespace MWClass
 
     float Container::getEncumbrance (const MWWorld::Ptr& ptr) const
     {
-        return getContainerStore(ptr).getWeight();
+        return getContainerStore (ptr).getWeight();
     }
 
     bool Container::canLock(const MWWorld::ConstPtr &ptr) const
