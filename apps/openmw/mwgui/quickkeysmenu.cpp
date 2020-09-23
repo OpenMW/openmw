@@ -100,7 +100,7 @@ namespace MWGui
                 {
                     MWWorld::Ptr item = *mKey[i].button->getUserData<MWWorld::Ptr>();
                     // Make sure the item is available and is not broken
-                    if (!item || item.getRefData().getCount() < 1 ||
+                    if (!item || !item.getRefData().getCount() ||
                         (item.getClass().hasItemHealth(item) &&
                         item.getClass().getItemHealth(item) <= 0))
                     {
@@ -370,12 +370,12 @@ namespace MWGui
                 item = nullptr;
 
             // check the item is available and not broken
-            if (!item || item.getRefData().getCount() < 1 ||
+            if (!item || !item.getRefData().getCount() ||
                (item.getClass().hasItemHealth(item) && item.getClass().getItemHealth(item) <= 0))
             {
                 item = store.findReplacement(key->id);
 
-                if (!item || item.getRefData().getCount() < 1)
+                if (!item || !item.getRefData().getCount())
                 {
                     MWBase::Environment::get().getWindowManager()->messageBox(
                         "#{sQuickMenu5} " + key->name);

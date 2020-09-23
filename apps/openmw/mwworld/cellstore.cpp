@@ -1030,7 +1030,8 @@ namespace MWWorld
             for (CellRefList<ESM::Container>::List::iterator it (mContainers.mList.begin()); it!=mContainers.mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
-                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0)
+                if (!ptr.isEmpty() && ptr.getRefData().getCustomData() != nullptr && ptr.getRefData().getCount() > 0
+                && ptr.getClass().getContainerStore(ptr).isResolved())
                 {
                     ptr.getClass().getContainerStore(ptr).rechargeItems(duration);
                 }
@@ -1096,7 +1097,7 @@ namespace MWWorld
         for (CellRefList<ESM::Weapon>::List::iterator it (mWeapons.mList.begin()); it!=mWeapons.mList.end(); ++it)
         {
             Ptr ptr = getCurrentPtr(&*it);
-            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            if (!ptr.isEmpty() && ptr.getRefData().getCount())
             {
                 checkItem(ptr);
             }
@@ -1104,7 +1105,7 @@ namespace MWWorld
         for (CellRefList<ESM::Armor>::List::iterator it (mArmors.mList.begin()); it!=mArmors.mList.end(); ++it)
         {
             Ptr ptr = getCurrentPtr(&*it);
-            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            if (!ptr.isEmpty() && ptr.getRefData().getCount())
             {
                 checkItem(ptr);
             }
@@ -1112,7 +1113,7 @@ namespace MWWorld
         for (CellRefList<ESM::Clothing>::List::iterator it (mClothes.mList.begin()); it!=mClothes.mList.end(); ++it)
         {
             Ptr ptr = getCurrentPtr(&*it);
-            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            if (!ptr.isEmpty() && ptr.getRefData().getCount())
             {
                 checkItem(ptr);
             }
@@ -1120,7 +1121,7 @@ namespace MWWorld
         for (CellRefList<ESM::Book>::List::iterator it (mBooks.mList.begin()); it!=mBooks.mList.end(); ++it)
         {
             Ptr ptr = getCurrentPtr(&*it);
-            if (!ptr.isEmpty() && ptr.getRefData().getCount() > 0)
+            if (!ptr.isEmpty() && ptr.getRefData().getCount())
             {
                 checkItem(ptr);
             }

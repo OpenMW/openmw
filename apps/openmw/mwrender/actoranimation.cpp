@@ -418,7 +418,7 @@ void ActorAnimation::updateQuiver()
     const auto& weaponType = MWMechanics::getWeaponType(type);
     if (weaponType->mWeaponClass == ESM::WeaponType::Thrown)
     {
-        ammoCount = ammo->getRefData().getCount();
+        ammoCount = std::abs(ammo->getRefData().getCount());
         osg::Group* throwingWeaponNode = getBoneByName(weaponType->mAttachBone);
         if (throwingWeaponNode && throwingWeaponNode->getNumChildren())
             ammoCount--;
@@ -431,7 +431,7 @@ void ActorAnimation::updateQuiver()
         if (ammo == inv.end())
             return;
 
-        ammoCount = ammo->getRefData().getCount();
+        ammoCount = std::abs(ammo->getRefData().getCount());
         bool arrowAttached = isArrowAttached();
         if (arrowAttached)
             ammoCount--;

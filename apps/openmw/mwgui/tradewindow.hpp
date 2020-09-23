@@ -29,6 +29,7 @@ namespace MWGui
 
             void setPtr(const MWWorld::Ptr& actor);
 
+            virtual void onClose() override;
             void onFrame(float dt);
             void clear() { resetReference(); }
 
@@ -111,8 +112,6 @@ namespace MWGui
             virtual void onReferenceUnavailable();
 
             int getMerchantGold();
-
-            void restock();
     };
 }
 

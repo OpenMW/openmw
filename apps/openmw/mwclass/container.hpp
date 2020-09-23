@@ -2,9 +2,32 @@
 #define GAME_MWCLASS_CONTAINER_H
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
+
+namespace ESM
+{
+    struct Container;
+    struct InventoryState;
+}
 
 namespace MWClass
 {
+    class ContainerCustomData : public MWWorld::CustomData
+    {
+        MWWorld::ContainerStore mStore;
+    public:
+        ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
+        ContainerCustomData(const ESM::InventoryState& inventory);
+
+        virtual MWWorld::CustomData *clone() const;
+
+        virtual ContainerCustomData& asContainerCustomData();
+        virtual const ContainerCustomData& asContainerCustomData() const;
+
+        friend class Container;
+    };
+
     class Container : public MWWorld::Class
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
@@ -59,8 +82,6 @@ namespace MWClass
             static void registerSelf();
 
             virtual void respawn (const MWWorld::Ptr& ptr) const;
-
-            virtual void restock (const MWWorld::Ptr &ptr) const;
 
             virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
 

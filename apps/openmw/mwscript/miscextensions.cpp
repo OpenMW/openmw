@@ -674,7 +674,7 @@ namespace MWScript
                             MWWorld::ConstContainerStoreIterator it = store.getSlot (slot);
                             if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                             {
-                                numNotEquipped -= it->getRefData().getCount();
+                                numNotEquipped -= std::abs(it->getRefData().getCount());
                             }
                         }
 
@@ -683,7 +683,7 @@ namespace MWScript
                             MWWorld::ContainerStoreIterator it = store.getSlot (slot);
                             if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
                             {
-                                int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
+                                int numToRemove = std::min(amount - numNotEquipped, std::abs(it->getRefData().getCount()));
                                 store.unequipItemQuantity(*it, ptr, numToRemove);
                                 numNotEquipped += numToRemove;
                             }
