@@ -788,16 +788,14 @@ namespace MWWorld
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
+            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
+                std::string script = it->getClass().getScript(*it);
+                if(script != "")
                 {
-                    std::string script = it->getClass().getScript(*it);
-                    if(script != "")
-                    {
-                        MWWorld::Ptr item = *it;
-                        item.mCell = cell;
-                        mLocalScripts.add (script, item);
-                    }
+                    MWWorld::Ptr item = *it;
+                    item.mCell = cell;
+                    mLocalScripts.add (script, item);
                 }
             }
         }
@@ -3391,12 +3389,14 @@ namespace MWWorld
                     return true;
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (needToAdd(*it, mDetector))
+                    for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                     {
-                        mOut.push_back(ptr);
-                        return true;
+                        if (needToAdd(*it, mDetector))
+                        {
+                            mOut.push_back(ptr);
+                            return true;
+                        }
                     }
                 }
             }
