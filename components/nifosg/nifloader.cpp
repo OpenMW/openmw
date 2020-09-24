@@ -1507,6 +1507,8 @@ namespace NifOsg
 
                         texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
                         texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+
+                        uvSet = tex.uvSet;
                     }
                     else
                     {
