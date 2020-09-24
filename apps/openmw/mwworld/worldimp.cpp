@@ -783,24 +783,21 @@ namespace MWWorld
 
     void World::addContainerScripts(const Ptr& reference, CellStore * cell)
     {
-        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
-        if( isContainer ||
+        if( reference.getTypeName()==typeid (ESM::Container).name() ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            //Ignore non-resolved containers
-            if(isContainer && (reference.getRefData().getCustomData() == nullptr
-            || !reference.getClass().getContainerStore(reference).isResolved()))
-                return;
             MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
-            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                std::string script = it->getClass().getScript(*it);
-                if(script != "")
+                for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
                 {
-                    MWWorld::Ptr item = *it;
-                    item.mCell = cell;
-                    mLocalScripts.add (script, item);
+                    std::string script = it->getClass().getScript(*it);
+                    if(script != "")
+                    {
+                        MWWorld::Ptr item = *it;
+                        item.mCell = cell;
+                        mLocalScripts.add (script, item);
+                    }
                 }
             }
         }
@@ -830,19 +827,19 @@ namespace MWWorld
 
     void World::removeContainerScripts(const Ptr& reference)
     {
-        bool isContainer = reference.getTypeName()==typeid (ESM::Container).name();
-        if( isContainer ||
+        if( reference.getTypeName()==typeid (ESM::Container).name() ||
             reference.getTypeName()==typeid (ESM::NPC).name() ||
             reference.getTypeName()==typeid (ESM::Creature).name())
         {
-            //Ignore non-resolved containers
-            if(isContainer && reference.getRefData().getCustomData() == nullptr)
-                return;
-            for(const MWWorld::ConstPtr& item : reference.getClass().getContainerStore(reference))
+            MWWorld::ContainerStore& container = reference.getClass().getContainerStore(reference);
+            for(MWWorld::ContainerStoreIterator it = container.begin(); it != container.end(); ++it)
             {
-                const std::string& script = item.getClass().getScript(item);
-                if(!script.empty())
+                std::string script = it->getClass().getScript(*it);
+                if(script != "")
+                {
+                    MWWorld::Ptr item = *it;
                     mLocalScripts.remove (item);
+                }
             }
         }
     }
@@ -3393,9 +3390,10 @@ namespace MWWorld
                 if (isContainer && ptr.getRefData().getCustomData() == nullptr)
                     return true;
 
-                for (const MWWorld::ConstPtr& it : ptr.getClass().getContainerStore(ptr))
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (needToAdd(it))
+                    if (needToAdd(*it, mDetector))
                     {
                         mOut.push_back(ptr);
                         return true;
@@ -3406,15 +3404,6 @@ namespace MWWorld
             if (needToAdd(ptr, mDetector))
                 mOut.push_back(ptr);
 
-            return true;
-        }
-
-        bool needToAdd(const MWWorld::ConstPtr& ptr)
-        {
-            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
-                return false;
-            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
-                return false;
             return true;
         }
 
@@ -3434,7 +3423,11 @@ namespace MWWorld
                 if (ptr.getClass().getCreatureStats(ptr).isDead())
                     return false;
             }
-            return needToAdd(ptr);
+            if (mType == World::Detect_Key && !ptr.getClass().isKey(ptr))
+                return false;
+            if (mType == World::Detect_Enchantment && ptr.getClass().getEnchantment(ptr).empty())
+                return false;
+            return true;
         }
     };
 

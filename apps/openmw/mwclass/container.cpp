@@ -258,9 +258,6 @@ namespace MWClass
             text += "\n#{sUnlocked}";
         if (ptr.getCellRef().getTrap() != "")
             text += "\n#{sTrapped}";
-        const auto customData = ptr.getRefData().getCustomData();
-        if(customData && customData->asContainerCustomData().mStore.isResolved())
-            text += "\nresolved";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {   text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
