@@ -84,9 +84,9 @@ void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIt
             slot = allowedSlots.first.front();
 
         // unstack if required
-        if (!allowedSlots.second && std::abs(iter->getRefData().getCount()) > 1)
+        if (!allowedSlots.second && iter->getRefData().getCount() > 1)
         {
-            int count = iter->getRefData().getCount();
+            int count = iter->getRefData().getCount(false);
             MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, count > 0 ? 1 : -1);
             iter->getRefData().setCount(subtractItems(count, 1));
             mSlots[slot] = newIter;
@@ -173,7 +173,7 @@ void MWWorld::InventoryStore::equip (int slot, const ContainerStoreIterator& ite
         unequipSlot(slot, actor);
 
     // unstack item pointed to by iterator if required
-    if (iterator!=end() && !slots_.second && std::abs(iterator->getRefData().getCount()) > 1) // if slots.second is true, item can stay stacked when equipped
+    if (iterator!=end() && !slots_.second && iterator->getRefData().getCount() > 1) // if slots.second is true, item can stay stacked when equipped
     {
         unstack(*iterator, actor);
     }
@@ -217,7 +217,7 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot (int slot) con
     if (mSlots[slot]==end())
         return mSlots[slot];
 
-    if (!mSlots[slot]->getRefData().getCount())
+    if (mSlots[slot]->getRefData().getCount()<1)
     {
         // Object has been deleted
         // This should no longer happen, since the new remove function will unequip first
@@ -363,7 +363,7 @@ void MWWorld::InventoryStore::autoEquipWeapon (const MWWorld::Ptr& actor, TSlots
                 {
                     if (!itemsSlots.second)
                     {
-                        if (std::abs(weapon->getRefData().getCount()) > 1)
+                        if (weapon->getRefData().getCount() > 1)
                         {
                             unstack(*weapon, actor);
                         }
@@ -485,7 +485,7 @@ void MWWorld::InventoryStore::autoEquipArmor (const MWWorld::Ptr& actor, TSlots&
             if (!itemsSlots.second) // if itemsSlots.second is true, item can stay stacked when equipped
             {
                 // unstack item pointed to by iterator if required
-                if (std::abs(iter->getRefData().getCount()) > 1)
+                if (iter->getRefData().getCount() > 1)
                 {
                     unstack(*iter, actor);
                 }
@@ -839,11 +839,10 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
         throw std::runtime_error ("attempt to unequip an item that is not currently equipped");
     if (count <= 0)
         throw std::runtime_error ("attempt to unequip nothing (count <= 0)");
-    const int absCount = std::abs(item.getRefData().getCount());
-    if (count > absCount)
+    if (count > item.getRefData().getCount())
         throw std::runtime_error ("attempt to unequip more items than equipped");
 
-    if (count == absCount)
+    if (count == item.getRefData().getCount())
         return unequipItem(item, actor);
 
     // Move items to an existing stack if possible, otherwise split count items out into a new stack.
@@ -852,13 +851,13 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     {
         if (stacks(*iter, item) && !isEquipped(*iter))
         {
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(), count));
-            item.getRefData().setCount(subtractItems(item.getRefData().getCount(), count));
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
+            item.getRefData().setCount(subtractItems(item.getRefData().getCount(false), count));
             return iter;
         }
     }
 
-    return unstack(item, actor, absCount - count);
+    return unstack(item, actor, item.getRefData().getCount() - count);
 }
 
 MWWorld::InventoryStoreListener* MWWorld::InventoryStore::getInvListener()

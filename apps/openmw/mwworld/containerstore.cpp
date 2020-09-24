@@ -48,8 +48,8 @@ namespace
             iter!=cellRefList.mList.end();
             ++iter)
         {
-            if (iter->mData.getCount()!=0)
-                sum += std::abs(iter->mData.getCount())*iter->mBase->mData.mWeight;
+            if (iter->mData.getCount()>0)
+                sum += iter->mData.getCount()*iter->mBase->mData.mWeight;
         }
 
         return sum;
@@ -190,7 +190,7 @@ int MWWorld::ContainerStore::count(const std::string &id) const
     int total=0;
     for (const auto& iter : *this)
         if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
-            total += std::abs(iter.getRefData().getCount());
+            total += iter.getRefData().getCount();
     return total;
 }
 
@@ -208,15 +208,14 @@ void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* l
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
     resolve();
-    int absCount = std::abs(ptr.getRefData().getCount());
-    if (absCount <= count)
+    if (ptr.getRefData().getCount() <= count)
         return end();
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(), count));
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(false), count));
     const std::string script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, absCount-count, container);
+    remove(ptr, ptr.getRefData().getCount()-count, container);
 
     return it;
 }
@@ -241,7 +240,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     {
         if (stacks(*iter, item))
         {
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(), item.getRefData().getCount()));
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), item.getRefData().getCount(false)));
             item.getRefData().setCount(0);
             retval = iter;
             break;
@@ -372,7 +371,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         {
             if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             {
-                iter->getRefData().setCount(addItems(iter->getRefData().getCount(), realCount));
+                iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), realCount));
                 flagAsModified();
                 return iter;
             }
@@ -388,7 +387,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         if (stacks(*iter, ptr))
         {
             // stack
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(), count));
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
 
             flagAsModified();
             return iter;
@@ -497,16 +496,15 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
     int toRemove = count;
     RefData& itemRef = item.getRefData();
-    int absCount = std::abs(itemRef.getCount());
 
-    if (absCount <= toRemove)
+    if (itemRef.getCount() <= toRemove)
     {
-        toRemove -= absCount;
+        toRemove -= itemRef.getCount();
         itemRef.setCount(0);
     }
     else
     {
-        itemRef.setCount(subtractItems(itemRef.getCount(), toRemove));
+        itemRef.setCount(subtractItems(itemRef.getCount(false), toRemove));
         toRemove = 0;
     }
 
@@ -906,7 +904,7 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
         const int count = entry.second;
         for(const auto& ptr : *this)
         {
-            if(ptr.mRef->mData.getCount() == count && Misc::StringUtils::ciEqual(id, ptr.getCellRef().getRefId()))
+            if(ptr.mRef->mData.getCount(false) == count && Misc::StringUtils::ciEqual(id, ptr.getCellRef().getRefId()))
                 ptr.mRef->mData.setCount(-count);
         }
     }

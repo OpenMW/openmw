@@ -119,7 +119,7 @@ void ContainerItemModel::removeItem (const ItemStack& item, size_t count)
         {
             if (stacks(*it, item.mBase))
             {
-                int quantity = it->mRef->mData.getCount();
+                int quantity = it->mRef->mData.getCount(false);
                 // If this is a restocking quantity, just don't remove it
                 if(quantity < 0 && mTrading)
                     toRemove += quantity;
@@ -166,7 +166,7 @@ void ContainerItemModel::update()
                 if (stacks(*it, itemStack.mBase))
                 {
                     // we already have an item stack of this kind, add to it
-                    itemStack.mCount += std::abs(it->getRefData().getCount());
+                    itemStack.mCount += it->getRefData().getCount();
                     found = true;
                     break;
                 }
@@ -175,7 +175,7 @@ void ContainerItemModel::update()
             if (!found)
             {
                 // no stack yet, create one
-                ItemStack newItem (*it, this, std::abs(it->getRefData().getCount()));
+                ItemStack newItem (*it, this, it->getRefData().getCount());
                 mItems.push_back(newItem);
             }
         }

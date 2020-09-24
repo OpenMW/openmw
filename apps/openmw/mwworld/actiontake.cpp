@@ -27,10 +27,9 @@ namespace MWWorld
             }
         }
 
-        int count = std::abs(getTarget().getRefData().getCount());
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
-                    actor, getTarget(), MWWorld::Ptr(), count);
-        MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), count, actor);
+                    actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
+        MWWorld::Ptr newitem = *actor.getClass().getContainerStore (actor).add (getTarget(), getTarget().getRefData().getCount(), actor);
         MWBase::Environment::get().getWorld()->deleteObject (getTarget());
         setTarget(newitem);
     }
