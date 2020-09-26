@@ -43,6 +43,16 @@
            </property>
           </widget>
          </item>
+         <item row="6" column="0">
+          <widget class="QCheckBox" name="avoidCollisionsCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If enabled NPCs apply evasion maneuver to avoid collisions with others.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>NPCs avoid collisions</string>
+           </property>
+          </widget>
+         </item>
          <item row="4" column="0">
           <widget class="QCheckBox" name="enableNavigatorCheckBox">
            <property name="toolTip">
@@ -233,6 +243,16 @@
            </property>
           </widget>
          </item>
+         <item row="5" column="0">
+          <widget class="QCheckBox" name="smoothMovementCheckBox">
+           <property name="toolTip">
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Makes NPCs and player movement more smooth. Recommended to use with "turn to movement direction" enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+           <property name="text">
+            <string>Smooth movement</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="1">
           <widget class="QCheckBox" name="distantLandCheckBox">
            <property name="toolTip">
@@ -283,7 +303,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="6" column="0">
           <widget class="QCheckBox" name="animSourcesCheckBox">
            <property name="toolTip">
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load per-group KF-files and skeleton files from Animations folder&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>

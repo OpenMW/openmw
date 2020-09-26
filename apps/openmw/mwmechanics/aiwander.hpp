@@ -53,7 +53,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point mCurrentNode;
         bool mTrimCurrentNode;
 
-        float mDoorCheckDuration;
+        float mCheckIdlePositionTimer;
         int mStuckCount;
 
         AiWanderStorage():
@@ -66,7 +66,7 @@ namespace MWMechanics
             mPopulateAvailableNodes(true),
             mAllowedNodes(),
             mTrimCurrentNode(false),
-            mDoorCheckDuration(0), // TODO: maybe no longer needed
+            mCheckIdlePositionTimer(0),
             mStuckCount(0)
             {};
 
@@ -117,6 +117,8 @@ namespace MWMechanics
                 return mDestination;
             }
 
+            bool isStationary() const { return mDistance == 0; }
+
         private:
             void stopWalking(const MWWorld::Ptr& actor);
 
@@ -137,6 +139,7 @@ namespace MWMechanics
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
+            bool isNearAllowedNode(const MWWorld::Ptr &actor, const AiWanderStorage& storage, float distance) const;
 
             const int mDistance; // how far the actor can wander from the spawn point
             const int mDuration;
