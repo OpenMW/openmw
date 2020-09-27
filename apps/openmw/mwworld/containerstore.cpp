@@ -896,18 +896,6 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
                 break;
         }
     }
-
-    // Fix old saves
-    for(const auto& entry : inventory.mLevelledItemMap)
-    {
-        const std::string& id = entry.first.first;
-        const int count = entry.second;
-        for(const auto& ptr : *this)
-        {
-            if(ptr.mRef->mData.getCount(false) == count && Misc::StringUtils::ciEqual(id, ptr.getCellRef().getRefId()))
-                ptr.mRef->mData.setCount(-count);
-        }
-    }
 }
 
 template<class PtrType>
