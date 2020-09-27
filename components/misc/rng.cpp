@@ -3,35 +3,44 @@
 #include <chrono>
 #include <random>
 
+namespace
+{
+    Misc::Rng::Seed sSeed;
+}
+
 namespace Misc
 {
-    Rng Rng::sInstance{};
 
-    Rng::Rng() {}
+    Rng::Seed::Seed() {}
 
-    Rng::Rng(unsigned int seed)
+    Rng::Seed::Seed(unsigned int seed)
     {
         mGenerator.seed(seed);
     }
 
-    void Rng::seed(unsigned int seed)
+    Rng::Seed& Rng::getSeed()
     {
-        mGenerator.seed(seed);
+        return sSeed;
     }
 
-    float Rng::exclusiveRandom()
+    void Rng::init(unsigned int seed)
     {
-        return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(mGenerator);
+        sSeed.mGenerator.seed(seed);
     }
 
-    float Rng::inclusiveRandom()
+    float Rng::rollProbability(Seed& seed)
     {
-        return std::uniform_real_distribution<float>(0, 1)(mGenerator);
+        return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(sSeed.mGenerator);
     }
 
-    int Rng::exclusiveRandom(int max)
+    float Rng::rollClosedProbability(Seed& seed)
     {
-        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(mGenerator) : 0;
+        return std::uniform_real_distribution<float>(0, 1)(sSeed.mGenerator);
+    }
+
+    int Rng::rollDice(int max, Seed& seed)
+    {
+        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(sSeed.mGenerator) : 0;
     }
 
     unsigned int Rng::generateDefaultSeed()

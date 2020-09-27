@@ -12,40 +12,33 @@ namespace Misc
 */
 class Rng
 {
-    std::mt19937 mGenerator;
-
-    void seed(unsigned int seed);
-
 public:
-    Rng();
+    class Seed
+    {
+        std::mt19937 mGenerator;
+    public:
+        Seed();
+        Seed(const Seed&) = delete;
+        Seed(unsigned int seed);
+        friend class Rng;
+    };
 
-    Rng(const Rng&) = delete;
-
-    Rng(unsigned int seed);
-
-    float exclusiveRandom();
-
-    float inclusiveRandom();
-
-    int exclusiveRandom(int max);
-
-    /// create a RNG
-    static Rng sInstance;
+    static Seed& getSeed();
 
     /// seed the RNG
-    static void init(unsigned int seed = generateDefaultSeed()) { sInstance.seed(seed); }
+    static void init(unsigned int seed = generateDefaultSeed());
 
     /// return value in range [0.0f, 1.0f)  <- note open upper range.
-    static float rollProbability() { return sInstance.exclusiveRandom(); }
+    static float rollProbability(Seed& seed = getSeed());
   
     /// return value in range [0.0f, 1.0f]  <- note closed upper range.
-    static float rollClosedProbability() { return sInstance.inclusiveRandom(); }
+    static float rollClosedProbability(Seed& seed = getSeed());
 
     /// return value in range [0, max)  <- note open upper range.
-    static int rollDice(int max) { return sInstance.exclusiveRandom(max); }
+    static int rollDice(int max, Seed& seed = getSeed());
 
     /// return value in range [0, 99]
-    static int roll0to99() { return sInstance.exclusiveRandom(100); }
+    static int roll0to99(Seed& seed = getSeed()) { return rollDice(100, seed); }
 
     /// returns default seed for RNG
     static unsigned int generateDefaultSeed();
