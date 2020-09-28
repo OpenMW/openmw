@@ -88,6 +88,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         loadSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
+        loadSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
         int unarmedFactorsStrengthIndex = mEngineSettings.getInt("strength influences hand to hand", "Game");
         if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
             unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
@@ -112,6 +113,7 @@ bool Launcher::AdvancedPage::loadSettings()
             loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
         }
         loadSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
+        loadSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
 
         const bool distantTerrain = mEngineSettings.getBool("distant terrain", "Terrain");
         const bool objectPaging = mEngineSettings.getBool("object paging", "Terrain");
@@ -200,6 +202,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
         saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
         saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
+        saveSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
         int unarmedFactorsStrengthIndex = unarmedFactorsStrengthComboBox->currentIndex();
         if (unarmedFactorsStrengthIndex != mEngineSettings.getInt("strength influences hand to hand", "Game"))
             mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
@@ -220,6 +223,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
         saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
         saveSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
+        saveSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
 
         const bool distantTerrain = mEngineSettings.getBool("distant terrain", "Terrain");
         const bool objectPaging = mEngineSettings.getBool("object paging", "Terrain");

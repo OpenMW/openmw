@@ -49,6 +49,7 @@
     Bug #5557: Diagonal movement is noticeably slower with analogue stick
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
+    Feature #4894: Consider actors as obstacles for pathfinding
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
@@ -59,6 +60,7 @@
     Feature #5525: Search fields tweaks (utf-8)
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
     Feature #5579: MCP SetAngle enhancement
+    Feature #5610: Actors movement should be smoother
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

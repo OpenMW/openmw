@@ -5,6 +5,8 @@
 
 #include <components/esm/aisequence.hpp>
 
+#include <components/misc/mathutil.hpp>
+
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwphysics/collisiontype.hpp"
@@ -240,10 +242,6 @@ namespace MWMechanics
 
         if (storage.mReadyToAttack)
         {
-            storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
-            // start new attack
-            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
-
             if (isRangedCombat)
             {
                 // rotate actor taking into account target movement direction and projectile speed
@@ -259,6 +257,10 @@ namespace MWMechanics
                 storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
                 storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
             }
+
+            storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
+            // start new attack
+            storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
         }
         return false;
     }
@@ -372,9 +374,13 @@ namespace MWMechanics
     void AiCombat::updateActorsMovement(const MWWorld::Ptr& actor, float duration, AiCombatStorage& storage)
     {
         // apply combat movement
+        float deltaAngle = storage.mMovement.mRotation[2] - actor.getRefData().getPosition().rot[2];
+        osg::Vec2f movement = Misc::rotateVec2f(
+            osg::Vec2f(storage.mMovement.mPosition[0], storage.mMovement.mPosition[1]), -deltaAngle);
+
         MWMechanics::Movement& actorMovementSettings = actor.getClass().getMovementSettings(actor);
-        actorMovementSettings.mPosition[0] = storage.mMovement.mPosition[0];
-        actorMovementSettings.mPosition[1] = storage.mMovement.mPosition[1];
+        actorMovementSettings.mPosition[0] = movement.x();
+        actorMovementSettings.mPosition[1] = movement.y();
         actorMovementSettings.mPosition[2] = storage.mMovement.mPosition[2];
 
         rotateActorOnAxis(actor, 2, actorMovementSettings, storage);
@@ -385,26 +391,11 @@ namespace MWMechanics
         MWMechanics::Movement& actorMovementSettings, AiCombatStorage& storage)
     {
         actorMovementSettings.mRotation[axis] = 0;
-        float& targetAngleRadians = storage.mMovement.mRotation[axis];
-        if (targetAngleRadians != 0)
-        {
-            // Some attack animations contain small amount of movement.
-            // Since we use cone shapes for melee, we can use a threshold to avoid jittering
-            std::shared_ptr<Action>& currentAction = storage.mCurrentAction;
-            bool isRangedCombat = false;
-            currentAction->getCombatRange(isRangedCombat);
-            // Check if the actor now facing desired direction, no need to turn any more
-            if (isRangedCombat)
-            {
-                if (smoothTurn(actor, targetAngleRadians, axis))
-                    targetAngleRadians = 0;
-            }
-            else
-            {
-                if (smoothTurn(actor, targetAngleRadians, axis, osg::DegreesToRadians(3.f)))
-                    targetAngleRadians = 0;
-            }
-        }
+        bool isRangedCombat = false;
+        storage.mCurrentAction->getCombatRange(isRangedCombat);
+        float eps = isRangedCombat ? osg::DegreesToRadians(0.5) : osg::DegreesToRadians(3.f);
+        float targetAngleRadians = storage.mMovement.mRotation[axis];
+        smoothTurn(actor, targetAngleRadians, axis, eps);
     }
 
     MWWorld::Ptr AiCombat::getTarget() const
@@ -489,12 +480,19 @@ namespace MWMechanics
         // Note: do not use for ranged combat yet since in couple with back up behaviour can move actor out of cliff
         else if (actor.getClass().isBipedal(actor))
         {
-            // apply sideway movement (kind of dodging) with some probability
-            // if actor is within range of target's weapon
-            if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
+            float moveDuration = 0;
+            float angleToTarget = Misc::normalizeAngle(mMovement.mRotation[2] - actor.getRefData().getPosition().rot[2]);
+            // Apply a big side step if enemy tries to get around and come from behind.
+            // Otherwise apply a random side step (kind of dodging) with some probability
+            // if actor is within range of target's weapon.
+            if (std::abs(angleToTarget) > osg::PI / 4)
+                moveDuration = 0.2;
+            else if (distToTarget <= rangeAttackOfTarget && Misc::Rng::rollClosedProbability() < 0.25)
+                moveDuration = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
+            if (moveDuration > 0)
             {
                 mMovement.mPosition[0] = Misc::Rng::rollProbability() < 0.5 ? 1.0f : -1.0f; // to the left/right
-                mTimerCombatMove = 0.1f + 0.1f * Misc::Rng::rollClosedProbability();
+                mTimerCombatMove = moveDuration;
                 mCombatMove = true;
             }
         }
