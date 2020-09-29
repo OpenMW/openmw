@@ -48,8 +48,8 @@ namespace
             iter!=cellRefList.mList.end();
             ++iter)
         {
-            if (iter->mData.getCount()!=0)
-                sum += std::abs(iter->mData.getCount())*iter->mBase->mData.mWeight;
+            if (iter->mData.getCount()>0)
+                sum += iter->mData.getCount()*iter->mBase->mData.mWeight;
         }
 
         return sum;
@@ -190,7 +190,7 @@ int MWWorld::ContainerStore::count(const std::string &id) const
     int total=0;
     for (const auto& iter : *this)
         if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
-            total += std::abs(iter.getRefData().getCount());
+            total += iter.getRefData().getCount();
     return total;
 }
 
@@ -208,15 +208,14 @@ void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* l
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr &ptr, const Ptr& container, int count)
 {
     resolve();
-    int absCount = std::abs(ptr.getRefData().getCount());
-    if (absCount <= count)
+    if (ptr.getRefData().getCount() <= count)
         return end();
-    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(), count));
+    MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(false), count));
     const std::string script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, absCount-count, container);
+    remove(ptr, ptr.getRefData().getCount()-count, container);
 
     return it;
 }
@@ -241,7 +240,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::restack(const MWWorld::
     {
         if (stacks(*iter, item))
         {
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(), item.getRefData().getCount()));
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), item.getRefData().getCount(false)));
             item.getRefData().setCount(0);
             retval = iter;
             break;
@@ -372,7 +371,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         {
             if (Misc::StringUtils::ciEqual((*iter).getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
             {
-                iter->getRefData().setCount(addItems(iter->getRefData().getCount(), realCount));
+                iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), realCount));
                 flagAsModified();
                 return iter;
             }
@@ -388,7 +387,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp (const Ptr& ptr,
         if (stacks(*iter, ptr))
         {
             // stack
-            iter->getRefData().setCount(addItems(iter->getRefData().getCount(), count));
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
 
             flagAsModified();
             return iter;
@@ -497,16 +496,15 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
 
     int toRemove = count;
     RefData& itemRef = item.getRefData();
-    int absCount = std::abs(itemRef.getCount());
 
-    if (absCount <= toRemove)
+    if (itemRef.getCount() <= toRemove)
     {
-        toRemove -= absCount;
+        toRemove -= itemRef.getCount();
         itemRef.setCount(0);
     }
     else
     {
-        itemRef.setCount(subtractItems(itemRef.getCount(), toRemove));
+        itemRef.setCount(subtractItems(itemRef.getCount(false), toRemove));
         toRemove = 0;
     }
 
@@ -520,12 +518,12 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     return count - toRemove;
 }
 
-void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng& generator)
+void MWWorld::ContainerStore::fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed)
 {
     for (const ESM::ContItem& iter : items.mList)
     {
         std::string id = Misc::StringUtils::lowerCase(iter.mItem);
-        addInitialItem(id, owner, iter.mCount, &generator);
+        addInitialItem(id, owner, iter.mCount, &seed);
     }
 
     flagAsModified();
@@ -546,7 +544,7 @@ void MWWorld::ContainerStore::fillNonRandom (const ESM::InventoryList& items, co
 }
 
 void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::string& owner, int count,
-                                            Misc::Rng* generator, bool topLevel, const std::string& levItem)
+                                            Misc::Rng::Seed* seed, bool topLevel, const std::string& levItem)
 {
     if (count == 0) return; //Don't restock with nothing.
     try
@@ -554,13 +552,13 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
         ManualRef ref (MWBase::Environment::get().getWorld()->getStore(), id, count);
         if (ref.getPtr().getClass().getScript(ref.getPtr()).empty())
         {
-            addInitialItemImp(ref.getPtr(), owner, count, generator, topLevel, levItem);
+            addInitialItemImp(ref.getPtr(), owner, count, seed, topLevel, levItem);
         }
         else
         {
             // Adding just one item per time to make sure there isn't a stack of scripted items
             for (int i = 0; i < std::abs(count); i++)
-                addInitialItemImp(ref.getPtr(), owner, count < 0 ? -1 : 1, generator, topLevel, levItem);
+                addInitialItemImp(ref.getPtr(), owner, count < 0 ? -1 : 1, seed, topLevel, levItem);
         }
     }
     catch (const std::exception& e)
@@ -570,26 +568,26 @@ void MWWorld::ContainerStore::addInitialItem (const std::string& id, const std::
 }
 
 void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count,
-                                               Misc::Rng* generator, bool topLevel, const std::string& levItem)
+                                               Misc::Rng::Seed* seed, bool topLevel, const std::string& levItem)
 {
     if (ptr.getTypeName()==typeid (ESM::ItemLevList).name())
     {
-        if(!generator)
+        if(!seed)
             return;
         const ESM::ItemLevList* levItemList = ptr.get<ESM::ItemLevList>()->mBase;
 
         if (topLevel && std::abs(count) > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
         {
             for (int i=0; i<std::abs(count); ++i)
-                addInitialItem(ptr.getCellRef().getRefId(), owner, count > 0 ? 1 : -1, generator, true, levItemList->mId);
+                addInitialItem(ptr.getCellRef().getRefId(), owner, count > 0 ? 1 : -1, seed, true, levItemList->mId);
             return;
         }
         else
         {
-            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *generator);
+            std::string itemId = MWMechanics::getLevelledItem(ptr.get<ESM::ItemLevList>()->mBase, false, *seed);
             if (itemId.empty())
                 return;
-            addInitialItem(itemId, owner, count, generator, false, levItemList->mId);
+            addInitialItem(itemId, owner, count, seed, false, levItemList->mId);
         }
     }
     else
@@ -625,8 +623,8 @@ void MWWorld::ContainerStore::resolve()
     {
         for(const MWWorld::Ptr& ptr : *this)
             ptr.getRefData().setCount(0);
-        Misc::Rng generator{mSeed};
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", generator);
+        Misc::Rng::Seed seed{mSeed};
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
         addScripts(*this, mPtr.mCell);
     }
     mModified = true;
@@ -646,8 +644,8 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
     {
         for(const MWWorld::Ptr& ptr : *this)
             ptr.getRefData().setCount(0);
-        Misc::Rng generator{mSeed};
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", generator);
+        Misc::Rng::Seed seed{mSeed};
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
         addScripts(*this, mPtr.mCell);
     }
     return {listener};
@@ -896,18 +894,6 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
             default:
                 Log(Debug::Warning) << "Warning: Invalid item type in inventory state, refid " << state.mRef.mRefID;
                 break;
-        }
-    }
-
-    // Fix old saves
-    for(const auto& entry : inventory.mLevelledItemMap)
-    {
-        const std::string& id = entry.first.first;
-        const int count = entry.second;
-        for(const auto& ptr : *this)
-        {
-            if(ptr.mRef->mData.getCount() == count && Misc::StringUtils::ciEqual(id, ptr.getCellRef().getRefId()))
-                ptr.mRef->mData.setCount(-count);
         }
     }
 }

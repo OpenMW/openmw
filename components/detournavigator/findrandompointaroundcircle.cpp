@@ -36,7 +36,7 @@ namespace DetourNavigator
         dtPolyRef resultRef = 0;
         osg::Vec3f resultPosition;
         navMeshQuery.findRandomPointAroundCircle(startRef, start.ptr(), maxRadius, &queryFilter,
-            &Misc::Rng::rollProbability, &resultRef, resultPosition.ptr());
+            []() { return Misc::Rng::rollProbability(); }, &resultRef, resultPosition.ptr());
 
         if (resultRef == 0)
             return boost::optional<osg::Vec3f>();

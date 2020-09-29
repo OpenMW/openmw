@@ -799,21 +799,22 @@ namespace NifOsg
                 {
                     const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
                     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
+
+                    // inherit wrap settings from the target slot
+                    osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
+                    osg::Texture2D::WrapMode wrapS = osg::Texture2D::REPEAT;
+                    osg::Texture2D::WrapMode wrapT = osg::Texture2D::REPEAT;
+                    if (inherit)
+                    {
+                        wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
+                        wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
+                    }
+
                     for (unsigned int i=0; i<flipctrl->mSources.length(); ++i)
                     {
                         Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
                         if (st.empty())
                             continue;
-
-                        // inherit wrap settings from the target slot
-                        osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(flipctrl->mTexSlot, osg::StateAttribute::TEXTURE));
-                        osg::Texture2D::WrapMode wrapS = osg::Texture2D::CLAMP_TO_EDGE;
-                        osg::Texture2D::WrapMode wrapT = osg::Texture2D::CLAMP_TO_EDGE;
-                        if (inherit)
-                        {
-                            wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
-                            wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
-                        }
 
                         osg::ref_ptr<osg::Image> image (handleSourceTexture(st.getPtr(), imageManager));
                         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(image));
@@ -1451,7 +1452,7 @@ namespace NifOsg
             // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the shadow casting shader will need to be updated accordingly.
             for (size_t i=0; i<texprop->textures.size(); ++i)
             {
-                if (texprop->textures[i].inUse)
+                if (texprop->textures[i].inUse || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->controller.empty()))
                 {
                     switch(i)
                     {
@@ -1477,32 +1478,44 @@ namespace NifOsg
                         }
                     }
 
-                    const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                    if(tex.texture.empty() && texprop->controller.empty())
-                    {
-                        if (i == 0)
-                            Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
-                        continue;
-                    }
-
+                    unsigned int uvSet = 0;
                     // create a new texture, will later attempt to share using the SharedStateManager
                     osg::ref_ptr<osg::Texture2D> texture2d;
-                    if (!tex.texture.empty())
+                    if (texprop->textures[i].inUse)
                     {
-                        const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                        osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
-                        texture2d = new osg::Texture2D(image);
-                        if (image)
-                            texture2d->setTextureSize(image->s(), image->t());
+                        const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
+                        if(tex.texture.empty() && texprop->controller.empty())
+                        {
+                            if (i == 0)
+                                Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
+                            continue;
+                        }
+
+                        if (!tex.texture.empty())
+                        {
+                            const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                            osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+                            texture2d = new osg::Texture2D(image);
+                            if (image)
+                                texture2d->setTextureSize(image->s(), image->t());
+                        }
+                        else
+                            texture2d = new osg::Texture2D;
+
+                        bool wrapT = tex.clamp & 0x1;
+                        bool wrapS = (tex.clamp >> 1) & 0x1;
+
+                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
                     }
                     else
+                    {
+                        // Texture only comes from NiFlipController, so tex is ignored, set defaults
                         texture2d = new osg::Texture2D;
-
-                    bool wrapT = tex.clamp & 0x1;
-                    bool wrapS = (tex.clamp >> 1) & 0x1;
-
-                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                        texture2d->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                        uvSet = 0;
+                    }
 
                     unsigned int texUnit = boundTextures.size();
 
@@ -1590,7 +1603,7 @@ namespace NifOsg
                         break;
                     }
 
-                    boundTextures.push_back(tex.uvSet);
+                    boundTextures.push_back(uvSet);
                 }
             }
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);

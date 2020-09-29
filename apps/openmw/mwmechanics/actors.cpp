@@ -2053,10 +2053,11 @@ namespace MWMechanics
 
         for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
         {
-            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
-
             if (iter->first.getClass().getCreatureStats(iter->first).isDead())
+            {
+                iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
                 continue;
+            }
 
             if (!sleep || iter->first == player)
                 restoreDynamicStats(iter->first, hours, sleep);
@@ -2073,13 +2074,14 @@ namespace MWMechanics
             if (iter->first.getClass().isNpc())
                 calculateNpcStatModifiers(iter->first, duration);
 
+            iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
+
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(iter->first);
             if (animation)
             {
                 animation->removeEffects();
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(iter->first);
             }
-
         }
 
         fastForwardAi();

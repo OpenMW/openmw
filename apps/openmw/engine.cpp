@@ -14,6 +14,7 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
 
@@ -489,7 +490,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     bool fullscreen = settings.getBool("fullscreen", "Video");
     bool windowBorder = settings.getBool("window border", "Video");
     bool vsync = settings.getBool("vsync", "Video");
-    int antialiasing = settings.getInt("antialiasing", "Video");
+    unsigned int antialiasing = std::max(0, settings.getInt("antialiasing", "Video"));
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
@@ -515,6 +516,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
+    if (Debug::shouldDebugOpenGL())
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 
     if (antialiasing > 0)
     {
@@ -522,62 +525,80 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
         checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
     }
 
-    while (!mWindow)
+    osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow;
+    while (!graphicsWindow || !graphicsWindow->valid())
     {
-        mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
-        if (!mWindow)
+        while (!mWindow)
         {
-            // Try with a lower AA
-            if (antialiasing > 0)
+            mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
+            if (!mWindow)
             {
-                Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2;
-                antialiasing /= 2;
-                Settings::Manager::setInt("antialiasing", "Video", antialiasing);
-                checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
-                continue;
-            }
-            else
-            {
-                std::stringstream error;
-                error << "Failed to create SDL window: " << SDL_GetError();
-                throw std::runtime_error(error.str());
+                // Try with a lower AA
+                if (antialiasing > 0)
+                {
+                    Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2;
+                    antialiasing /= 2;
+                    Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+                    checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
+                    continue;
+                }
+                else
+                {
+                    std::stringstream error;
+                    error << "Failed to create SDL window: " << SDL_GetError();
+                    throw std::runtime_error(error.str());
+                }
             }
         }
+
+        setWindowIcon();
+
+        osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+        SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
+        SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
+        traits->windowName = SDL_GetWindowTitle(mWindow);
+        traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
+        traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
+        traits->vsync = vsync;
+        traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
+
+        graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
+        if (!graphicsWindow->valid()) throw std::runtime_error("Failed to create GraphicsContext");
+
+        if (traits->samples < antialiasing)
+        {
+            Log(Debug::Warning) << "Warning: Framebuffer MSAA level is only " << traits->samples << "x instead of " << antialiasing << "x. Trying " << antialiasing / 2 << "x instead.";
+            graphicsWindow->closeImplementation();
+            SDL_DestroyWindow(mWindow);
+            mWindow = nullptr;
+            antialiasing /= 2;
+            Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+            checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
+            continue;
+        }
+
+        if (traits->red < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->red << " bit red channel.";
+        if (traits->green < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->green << " bit green channel.";
+        if (traits->blue < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->blue << " bit blue channel.";
+        if (traits->depth < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has " << traits->red << " bits of depth precision.";
+
+        traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
     }
-
-    setWindowIcon();
-
-    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
-    SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
-    traits->windowName = SDL_GetWindowTitle(mWindow);
-    traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
-    traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-    // We tried to get rid of the hardcoding but failed: https://github.com/OpenMW/openmw/pull/1771
-    // Here goes kcat's quote:
-    // It's ultimately a chicken and egg problem, and the reason why the code is like it was in the first place.
-    // It needs a context to get the current attributes, but it needs the attributes to set up the context.
-    // So it just specifies the same values that were given to SDL in the hopes that it's good enough to what the window eventually gets.
-    traits->red = 8;
-    traits->green = 8;
-    traits->blue = 8;
-    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
-    traits->depth = 24;
-    traits->stencil = 8;
-    traits->vsync = vsync;
-    traits->doubleBuffer = true;
-    traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
-
-    osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
-    if(!graphicsWindow->valid()) throw std::runtime_error("Failed to create GraphicsContext");
 
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
     camera->setGraphicsContext(graphicsWindow);
-    camera->setViewport(0, 0, traits->width, traits->height);
+    camera->setViewport(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
+
+    if (Debug::shouldDebugOpenGL())
+        mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
 
     mViewer->realize();
 
-    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, traits->width, traits->height);
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
 }
 
 void OMW::Engine::setWindowIcon()

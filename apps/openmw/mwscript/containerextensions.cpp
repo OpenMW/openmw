@@ -130,9 +130,9 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
-                    int count = ptr.getClass().getContainerStore(ptr).count(item);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
-                    runtime.push (count);
+                    runtime.push (store.count(item));
                 }
         };
 
@@ -174,7 +174,7 @@ namespace MWScript
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;
                     for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
