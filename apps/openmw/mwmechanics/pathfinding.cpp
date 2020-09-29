@@ -88,6 +88,24 @@ namespace
         const auto halfExtents = world->getHalfExtents(actor);
         return 2.0 * halfExtents.z();
     }
+
+    // Returns true if turn in `p2` is less than 10 degrees and all the 3 points are almost on one line.
+    bool isAlmostStraight(const osg::Vec3f& p1, const osg::Vec3f& p2, const osg::Vec3f& p3, float pointTolerance) {
+        osg::Vec3f v1 = p1 - p2;
+        osg::Vec3f v3 = p3 - p2;
+        v1.z() = v3.z() = 0;
+        float dotProduct = v1.x() * v3.x() + v1.y() * v3.y();
+        float crossProduct = v1.x() * v3.y() - v1.y() * v3.x();
+
+        // Check that the angle between v1 and v3 is less or equal than 10 degrees.
+        static const float cos170 = std::cos(osg::PI / 180 * 170);
+        bool checkAngle = dotProduct <= cos170 * v1.length() * v3.length();
+
+        // Check that distance from p2 to the line (p1, p3) is less or equal than `pointTolerance`.
+        bool checkDist = std::abs(crossProduct) <= pointTolerance * (p3 - p1).length() * 2;
+
+        return checkAngle && checkDist;
+    }
 }
 
 namespace MWMechanics
@@ -284,6 +302,11 @@ namespace MWMechanics
             return;
 
         while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
+            mPath.pop_front();
+
+        while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
+            mPath.erase(mPath.begin() + 1);
+        if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
             mPath.pop_front();
 
         if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)

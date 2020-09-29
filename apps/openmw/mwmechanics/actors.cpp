@@ -6,6 +6,7 @@
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
+#include <components/misc/mathutil.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwworld/esmstore.hpp"
@@ -36,6 +37,7 @@
 #include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
+#include "aiwander.hpp"
 #include "actor.hpp"
 #include "summoning.hpp"
 #include "combat.hpp"
@@ -424,7 +426,7 @@ namespace MWMechanics
         const osg::Vec3f actor2Pos(targetActor.getRefData().getPosition().asVec3());
         float sqrDist = (actor1Pos - actor2Pos).length2();
 
-        if (sqrDist > maxDistance*maxDistance)
+        if (sqrDist > std::min(maxDistance * maxDistance, sqrHeadTrackDistance))
             return;
 
         // stop tracking when target is behind the actor
@@ -432,10 +434,7 @@ namespace MWMechanics
         osg::Vec3f targetDirection(actor2Pos - actor1Pos);
         actorDirection.z() = 0;
         targetDirection.z() = 0;
-        actorDirection.normalize();
-        targetDirection.normalize();
-        if (std::acos(actorDirection * targetDirection) < osg::DegreesToRadians(90.f)
-            && sqrDist <= sqrHeadTrackDistance
+        if (actorDirection * targetDirection > 0
             && MWBase::Environment::get().getWorld()->getLOS(actor, targetActor) // check LOS and awareness last as it's the most expensive function
             && MWBase::Environment::get().getMechanicsManager()->awarenessCheck(targetActor, actor))
         {
@@ -473,6 +472,9 @@ namespace MWMechanics
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor)
     {
+        if (mSmoothMovement)
+            return;
+
         CreatureStats &stats = actor.getClass().getCreatureStats(actor);
         MWMechanics::AiSequence& seq = stats.getAiSequence();
 
@@ -481,9 +483,10 @@ namespace MWMechanics
             osg::Vec3f targetPos = seq.getActivePackage().getDestination();
             osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
             float distance = (targetPos - actorPos).length();
+
             if (distance < DECELERATE_DISTANCE)
             {
-                float speedCoef = std::max(0.7f, 0.1f * (distance/64.f + 2.f));
+                float speedCoef = std::max(0.7f, 0.2f + 0.8f * distance / DECELERATE_DISTANCE);
                 auto& movement = actor.getClass().getMovementSettings(actor);
                 movement.mPosition[0] *= speedCoef;
                 movement.mPosition[1] *= speedCoef;
@@ -587,8 +590,11 @@ namespace MWMechanics
 
         if (!actorState.isTurningToPlayer())
         {
-            actorState.setAngleToPlayer(std::atan2(dir.x(), dir.y()));
-            actorState.setTurningToPlayer(true);
+            float angle = std::atan2(dir.x(), dir.y());
+            actorState.setAngleToPlayer(angle);
+            float deltaAngle = Misc::normalizeAngle(angle - actor.getRefData().getPosition().rot[2]);
+            if (!mSmoothMovement || std::abs(deltaAngle) > osg::DegreesToRadians(60.f))
+                actorState.setTurningToPlayer(true);
         }
     }
 
@@ -1460,7 +1466,7 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors()
+    Actors::Actors() : mSmoothMovement(Settings::Manager::getBool("smooth movement", "Game"))
     {
         mTimerDisposeSummonsCorpses = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
 
@@ -1659,6 +1665,131 @@ namespace MWMechanics
 
     }
 
+    void Actors::predictAndAvoidCollisions()
+    {
+        const float minGap = 10.f;
+        const float maxDistToCheck = 100.f;
+        const float maxTimeToCheck = 1.f;
+        static const bool giveWayWhenIdle = Settings::Manager::getBool("NPCs give way", "Game");
+
+        MWWorld::Ptr player = getPlayer();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
+        {
+            const MWWorld::Ptr& ptr = iter->first;
+            if (ptr == player)
+                continue; // Don't interfere with player controls.
+
+            Movement& movement = ptr.getClass().getMovementSettings(ptr);
+            osg::Vec2f origMovement(movement.mPosition[0], movement.mPosition[1]);
+            bool isMoving = origMovement.length2() > 0.01;
+
+            // Moving NPCs always should avoid collisions.
+            // Standing NPCs give way to moving ones if they are not in combat (or pursue) mode and either
+            // follow player or have a AIWander package with non-empty wander area.
+            bool shouldAvoidCollision = isMoving;
+            bool shouldTurnToApproachingActor = !isMoving;
+            MWWorld::Ptr currentTarget; // Combat or pursue target (NPCs should not avoid collision with their targets).
+            for (const auto& package : ptr.getClass().getCreatureStats(ptr).getAiSequence())
+            {
+                if (package->getTypeId() == AiPackageTypeId::Follow)
+                    shouldAvoidCollision = true;
+                else if (package->getTypeId() == AiPackageTypeId::Wander && giveWayWhenIdle)
+                {
+                    if (!dynamic_cast<const AiWander*>(package.get())->isStationary())
+                        shouldAvoidCollision = true;
+                }
+                else if (package->getTypeId() == AiPackageTypeId::Combat || package->getTypeId() == AiPackageTypeId::Pursue)
+                {
+                    currentTarget = package->getTarget();
+                    shouldAvoidCollision = isMoving;
+                    shouldTurnToApproachingActor = false;
+                    break;
+                }
+            }
+            if (!shouldAvoidCollision)
+                continue;
+
+            float maxSpeed = ptr.getClass().getMaxSpeed(ptr);
+            osg::Vec2f baseSpeed = origMovement * maxSpeed;
+            osg::Vec3f basePos = ptr.getRefData().getPosition().asVec3();
+            float baseRotZ = ptr.getRefData().getPosition().rot[2];
+            osg::Vec3f halfExtents = world->getHalfExtents(ptr);
+
+            float timeToCollision = maxTimeToCheck;
+            osg::Vec2f movementCorrection(0, 0);
+            float angleToApproachingActor = 0;
+
+            // Iterate through all other actors and predict collisions.
+            for(PtrActorMap::iterator otherIter(mActors.begin()); otherIter != mActors.end(); ++otherIter)
+            {
+                const MWWorld::Ptr& otherPtr = otherIter->first;
+                if (otherPtr == ptr || otherPtr == currentTarget)
+                    continue;
+
+                osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
+                osg::Vec3f deltaPos = otherPtr.getRefData().getPosition().asVec3() - basePos;
+                osg::Vec2f relPos = Misc::rotateVec2f(osg::Vec2f(deltaPos.x(), deltaPos.y()), baseRotZ);
+
+                // Ignore actors which are not close enough or come from behind.
+                if (deltaPos.length2() > maxDistToCheck * maxDistToCheck || relPos.y() < 0)
+                    continue;
+
+                // Don't check for a collision if vertical distance is greater then the actor's height.
+                if (deltaPos.z() > halfExtents.z() * 2 || deltaPos.z() < -otherHalfExtents.z() * 2)
+                    continue;
+
+                osg::Vec3f speed = otherPtr.getClass().getMovementSettings(otherPtr).asVec3() *
+                                   otherPtr.getClass().getMaxSpeed(otherPtr);
+                float rotZ = otherPtr.getRefData().getPosition().rot[2];
+                osg::Vec2f relSpeed = Misc::rotateVec2f(osg::Vec2f(speed.x(), speed.y()), baseRotZ - rotZ) - baseSpeed;
+
+                float collisionDist = minGap + world->getHalfExtents(ptr).x() + world->getHalfExtents(otherPtr).x();
+                collisionDist = std::min(collisionDist, relPos.length());
+
+                // Find the earliest `t` when |relPos + relSpeed * t| == collisionDist.
+                float vr = relPos.x() * relSpeed.x() + relPos.y() * relSpeed.y();
+                float v2 = relSpeed.length2();
+                float Dh = vr * vr - v2 * (relPos.length2() - collisionDist * collisionDist);
+                if (Dh <= 0 || v2 == 0)
+                    continue; // No solution; distance is always >= collisionDist.
+                float t = (-vr - std::sqrt(Dh)) / v2;
+
+                if (t < 0 || t > timeToCollision)
+                    continue;
+
+                // Check visibility and awareness last as it's expensive.
+                if (!MWBase::Environment::get().getWorld()->getLOS(otherPtr, ptr))
+                    continue;
+                if (!MWBase::Environment::get().getMechanicsManager()->awarenessCheck(otherPtr, ptr))
+                    continue;
+
+                timeToCollision = t;
+                angleToApproachingActor = std::atan2(deltaPos.x(), deltaPos.y());
+                osg::Vec2f posAtT = relPos + relSpeed * t;
+                float coef = (posAtT.x() * relSpeed.x() + posAtT.y() * relSpeed.y()) / (collisionDist * maxSpeed);
+                movementCorrection = posAtT * coef;
+                // Step to the side rather than backward. Otherwise player will be able to push the NPC far away from it's original location.
+                movementCorrection.y() = std::max(0.f, movementCorrection.y());
+            }
+
+            if (timeToCollision < maxTimeToCheck)
+            {
+                // Try to evade the nearest collision.
+                osg::Vec2f newMovement = origMovement + movementCorrection;
+                if (isMoving)
+                { // Keep the original speed.
+                    newMovement.normalize();
+                    newMovement *= origMovement.length();
+                }
+                movement.mPosition[0] = newMovement.x();
+                movement.mPosition[1] = newMovement.y();
+                if (shouldTurnToApproachingActor)
+                    zTurn(ptr, angleToApproachingActor);
+            }
+        }
+    }
+
     void Actors::update (float duration, bool paused)
     {
         if(!paused)
@@ -1769,20 +1900,29 @@ namespace MWMechanics
 
                             MWMechanics::CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
                             bool firstPersonPlayer = isPlayer && world->isFirstPerson();
+                            bool inCombatOrPursue = stats.getAiSequence().isInCombat() || stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue);
 
                             // 1. Unconsious actor can not track target
                             // 2. Actors in combat and pursue mode do not bother to headtrack
                             // 3. Player character does not use headtracking in the 1st-person view
-                            if (!stats.getKnockedDown() &&
-                                !stats.getAiSequence().isInCombat() &&
-                                !stats.getAiSequence().hasPackage(AiPackageTypeId::Pursue) &&
-                                !firstPersonPlayer)
+                            if (!stats.getKnockedDown() && !firstPersonPlayer && !inCombatOrPursue)
                             {
                                 for(PtrActorMap::iterator it(mActors.begin()); it != mActors.end(); ++it)
                                 {
                                     if (it->first == iter->first)
                                         continue;
                                     updateHeadTracking(iter->first, it->first, headTrackTarget, sqrHeadTrackDistance);
+                                }
+                            }
+
+                            if (!stats.getKnockedDown() && !isPlayer && inCombatOrPursue)
+                            {
+                                // Actors in combat and pursue mode always look at their target.
+                                for (const auto& package : stats.getAiSequence())
+                                {
+                                    headTrackTarget = package->getTarget();
+                                    if (!headTrackTarget.isEmpty())
+                                        break;
                                 }
                             }
 
@@ -1823,6 +1963,10 @@ namespace MWMechanics
                     }
                 }
             }
+
+            static const bool avoidCollisions = Settings::Manager::getBool("NPCs avoid collisions", "Game");
+            if (avoidCollisions)
+                predictAndAvoidCollisions();
 
             timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;

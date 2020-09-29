@@ -739,5 +739,24 @@ namespace MWGui
     {
         mAddEffectDialog.setConstantEffect(constant);
         mConstantEffect = constant;
+
+        if (!constant)
+            return;
+
+        for (auto it = mEffects.begin(); it != mEffects.end();)
+        {
+            if (it->mRange != ESM::RT_Self)
+            {
+                auto& store = MWBase::Environment::get().getWorld()->getStore();
+                auto magicEffect = store.get<ESM::MagicEffect>().find(it->mEffectID);
+                if ((magicEffect->mData.mFlags & ESM::MagicEffect::CastSelf) == 0)
+                {
+                    it = mEffects.erase(it);
+                    continue;
+                }
+                it->mRange = ESM::RT_Self;
+            }
+            ++it;
+        }
     }
 }

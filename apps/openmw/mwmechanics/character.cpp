@@ -1963,6 +1963,50 @@ void CharacterController::update(float duration, bool animationOnly)
         if (isPlayer && !isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
             movementSettings.mSpeedFactor *= 2.f;
 
+        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+        if (smoothMovement && !isFirstPersonPlayer)
+        {
+            float angle = mPtr.getRefData().getPosition().rot[2];
+            osg::Vec2f targetSpeed = Misc::rotateVec2f(osg::Vec2f(vec.x(), vec.y()), -angle) * movementSettings.mSpeedFactor;
+            osg::Vec2f delta = targetSpeed - mSmoothedSpeed;
+            float speedDelta = movementSettings.mSpeedFactor - mSmoothedSpeed.length();
+            float deltaLen = delta.length();
+
+            float maxDelta;
+            if (std::abs(speedDelta) < deltaLen / 2)
+                // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
+                maxDelta = duration * (isPlayer ? 3.f : 6.f);
+            else if (isPlayer && speedDelta < -deltaLen / 2)
+                // As soon as controls are released, mwinput switches player from running to walking.
+                // So stopping should be instant for player, otherwise it causes a small twitch.
+                maxDelta = 1;
+            else // In all other cases speeding up and stopping are smooth.
+                maxDelta = duration * 3.f;
+
+            if (deltaLen > maxDelta)
+                delta *= maxDelta / deltaLen;
+            mSmoothedSpeed += delta;
+
+            osg::Vec2f newSpeed = Misc::rotateVec2f(mSmoothedSpeed, angle);
+            movementSettings.mSpeedFactor = newSpeed.normalize();
+            vec.x() = newSpeed.x();
+            vec.y() = newSpeed.y();
+
+            const float eps = 0.001f;
+            if (movementSettings.mSpeedFactor < eps)
+            {
+                movementSettings.mSpeedFactor = 0;
+                vec.x() = 0;
+                vec.y() = 1;
+            }
+            else if ((vec.y() < 0) != mIsMovingBackward)
+            {
+                if (targetSpeed.length() < eps || (movementSettings.mPosition[1] < 0) == mIsMovingBackward)
+                    vec.y() = mIsMovingBackward ? -eps : eps;
+            }
+            vec.normalize();
+        }
+
         float effectiveRotation = rot.z();
         bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
@@ -1994,6 +2038,8 @@ void CharacterController::update(float duration, bool animationOnly)
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 2);
         else
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 4);
+        if (smoothMovement && !isPlayer && !inwater)
+            mAnimation->setUpperBodyYawRadians(mAnimation->getUpperBodyYawRadians() + mAnimation->getHeadYaw() / 2);
 
         speed = cls.getCurrentSpeed(mPtr);
         vec.x() *= speed;
@@ -2185,13 +2231,11 @@ void CharacterController::update(float duration, bool animationOnly)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if (effectiveRotation != 0.0f)
+            else
             {
                 // Do not play turning animation for player if rotation speed is very slow.
                 // Actual threshold should take framerate in account.
-                float rotationThreshold = 0.f;
-                if (isPlayer)
-                    rotationThreshold = 0.015 * 60 * duration;
+                float rotationThreshold = (isPlayer ? 0.015f : 0.001f) * 60 * duration;
 
                 // It seems only bipedal actors use turning animations.
                 // Also do not use turning animations in the first-person view and when sneaking.
@@ -2695,10 +2739,9 @@ void CharacterController::setVisibility(float visibility)
 void CharacterController::setAttackTypeBasedOnMovement()
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-
-    if (move[1] && !move[0]) // forward-backward
+    if (std::abs(move[1]) > std::abs(move[0]) + 0.2f) // forward-backward
         mAttackType = "thrust";
-    else if (move[0] && !move[1]) //sideway
+    else if (std::abs(move[0]) > std::abs(move[1]) + 0.2f) // sideway
         mAttackType = "slash";
     else
         mAttackType = "chop";
@@ -2893,19 +2936,21 @@ void CharacterController::updateHeadTracking(float duration)
             return;
         const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
-        zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
-        xAngleRadians = -std::asin(direction.z());
-
-        const double xLimit = osg::DegreesToRadians(40.0);
-        const double zLimit = osg::DegreesToRadians(30.0);
-        zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians), -xLimit, xLimit);
-        xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -zLimit, zLimit);
+        zAngleRadians = std::atan2(actorDirection.x(), actorDirection.y()) - std::atan2(direction.x(), direction.y());
+        xAngleRadians = std::asin(direction.z());
     }
+
+    const double xLimit = osg::DegreesToRadians(40.0);
+    const double zLimit = osg::DegreesToRadians(30.0);
+    double zLimitOffset = mAnimation->getUpperBodyYawRadians();
+    xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -xLimit, xLimit);
+    zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians),
+                                      -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);
-    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
-    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
+    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * xAngleRadians;
+    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * zAngleRadians;
 
     mAnimation->setHeadPitch(xAngleRadians);
     mAnimation->setHeadYaw(zAngleRadians);
