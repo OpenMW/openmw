@@ -119,7 +119,7 @@ namespace MWMechanics
                                          // effects, we display a "can't re-cast" message
 
         // Try absorbing the spell. Some handling must still happen for absorbed effects.
-        bool absorbed = absorbSpell(spell, caster, target);
+        bool absorbed = absorbSpell(mId, caster, target);
 
         int currentEffectIndex = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
