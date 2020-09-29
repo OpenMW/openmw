@@ -536,7 +536,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	download "FFmpeg 4.2.2" \
 	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-win${BITS}.zip" \
 		"ffmpeg-4.2.2-win${BITS}.zip" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-win${BITS}-dev.zip" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-dev-win${BITS}.zip" \
 		"ffmpeg-4.2.2-dev-win${BITS}.zip"
 
 	# MyGUI
