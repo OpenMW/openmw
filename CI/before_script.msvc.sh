@@ -552,7 +552,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# OpenAL
 	download "OpenAL-Soft 1.20.1" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/openal-soft-1.20.1-bin.zip" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
 		"OpenAL-Soft-1.20.1.zip"
 
 	# OSG
@@ -568,7 +568,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# SDL2
 	download "SDL 2.0.12" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-devel-2.0.12-VC.zip" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.12.zip" \
 		"SDL2-2.0.12.zip"
 
 	# Google test and mock
