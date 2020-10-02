@@ -523,7 +523,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	# Boost
 	if [ -z $APPVEYOR ]; then
 		download "Boost ${BOOST_VER}" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/${BOOST_VER}/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
 			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
 
