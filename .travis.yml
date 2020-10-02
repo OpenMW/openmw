@@ -45,6 +45,12 @@ matrix:
       os: linux
       dist: focal
       if: branch != coverity_scan
+    - name: OpenMW (tests only) on Ubuntu Focal with GCC
+      os: linux
+      dist: focal
+      if: branch != coverity_scan
+      env:
+        - BUILD_TESTS_ONLY: 1
     - name: OpenMW (openmw) on Ubuntu Focal with Clang's Static Analysis
       os: linux
       dist: focal
@@ -73,7 +79,7 @@ script:
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ${ANALYZE} make -j3; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then ./openmw_test_suite; fi
+ - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${BUILD_TESTS_ONLY}" ]; then ./openmw_test_suite; fi
  - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
  - cd "${TRAVIS_BUILD_DIR}"
  - ccache -s
