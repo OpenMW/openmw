@@ -14,7 +14,7 @@ stages:
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
-    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake build-essential libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt5opengl5-dev libopenal-dev libopenscenegraph-dev libunshield-dev libtinyxml-dev libmygui-dev libbullet-dev ccache git
+    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake build-essential libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt5opengl5-dev libopenal-dev libopenscenegraph-dev libunshield-dev libtinyxml-dev libmygui-dev libbullet-dev ccache git clang
   stage: build
   script:
     - export CCACHE_BASEDIR="`pwd`"
@@ -41,6 +41,19 @@ Debian_GCC_tests:
   variables:
     CC: gcc
     CXX: g++
+    BUILD_TESTS_ONLY: 1
+
+Debian_Clang:
+  extends: .Debian
+  variables:
+    CC: clang
+    CXX: clang++
+
+Debian_Clang_tests:
+  extends: .Debian
+  variables:
+    CC: clang
+    CXX: clang++
     BUILD_TESTS_ONLY: 1
 
 MacOS:
