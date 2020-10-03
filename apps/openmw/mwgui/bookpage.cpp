@@ -941,6 +941,9 @@ public:
         if (!mBook)
             return;
 
+        if (mPage >= mBook->mPages.size())
+            return;
+
         dirtyFocusItem ();
 
         mFocusItem = 0;
@@ -950,6 +953,9 @@ public:
     void onMouseMove (int left, int top)
     {
         if (!mBook)
+            return;
+
+        if (mPage >= mBook->mPages.size())
             return;
 
         left -= mCroppedParent->getAbsoluteLeft ();
@@ -988,6 +994,9 @@ public:
         if (!mBook)
             return;
 
+        if (mPage >= mBook->mPages.size())
+            return;
+
         // work around inconsistency in MyGUI where the mouse press coordinates aren't
         // transformed by the current Layer (even though mouse *move* events are).
         MyGUI::IntPoint pos (left, top);
@@ -1011,6 +1020,9 @@ public:
     void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
         if (!mBook)
+            return;
+
+        if (mPage >= mBook->mPages.size())
             return;
 
         // work around inconsistency in MyGUI where the mouse release coordinates aren't

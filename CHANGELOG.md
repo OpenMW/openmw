@@ -47,6 +47,7 @@
     Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
     Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
     Bug #5557: Diagonal movement is noticeably slower with analogue stick
+    Bug #5588: Randomly clicking on the journal's right-side page when it's empty shows random topics
     Bug #5603: Setting constant effect cast style doesn't correct effects view
     Bug #5611: Usable items with "0 Uses" should be used only once
     Feature #390: 3rd person look "over the shoulder"
