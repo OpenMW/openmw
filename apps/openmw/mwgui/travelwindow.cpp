@@ -74,7 +74,7 @@ namespace MWGui
 
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
-        MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
+        MWWorld::ActionTeleport::getFollowers(player, followers);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
