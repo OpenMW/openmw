@@ -118,6 +118,7 @@ class NiLookAtController : public Controller
 {
 public:
     NodePtr target;
+    unsigned short lookAtFlags{0};
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);

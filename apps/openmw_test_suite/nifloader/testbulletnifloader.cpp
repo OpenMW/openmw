@@ -244,6 +244,7 @@ namespace
     void init(Nif::Named& value)
     {
         value.extra = Nif::ExtraPtr(nullptr);
+        value.extralist = Nif::ExtraList();
         value.controller = Nif::ControllerPtr(nullptr);
     }
 
