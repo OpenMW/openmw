@@ -139,20 +139,93 @@ void NIFFile::parse(Files::IStreamPtr stream)
     // It's not used by Morrowind assets but Morrowind supports it.
     if(ver != NIFStream::generateVersion(4,0,0,0) && ver != VER_MW)
         fail("Unsupported NIF version: " + printVersion(ver));
+
+    // NIF data endianness
+    if (ver >= NIFStream::generateVersion(20,0,0,4))
+    {
+        unsigned char endianness = nif.getChar();
+        if (endianness == 0)
+            fail("Big endian NIF files are unsupported");
+    }
+
+    // User version
+    if (ver > NIFStream::generateVersion(10,0,1,8))
+        userVer = nif.getUInt();
+
     // Number of records
     size_t recNum = nif.getUInt();
     records.resize(recNum);
 
+    // Bethesda stream header
+    // It contains Bethesda format version and (useless) export information
+    if (ver == VER_OB_OLD ||
+       (userVer >= 3 && ((ver == VER_OB || ver == VER_BGS)
+    || (ver >= NIFStream::generateVersion(10,1,0,0) && ver <= NIFStream::generateVersion(20,0,0,4) && userVer <= 11))))
+    {
+        bethVer = nif.getUInt();
+        nif.getExportString(); // Author
+        if (bethVer > BETHVER_FO4)
+            nif.getUInt(); // Unknown
+        nif.getExportString(); // Process script
+        nif.getExportString(); // Export script
+        if (bethVer == BETHVER_FO4)
+            nif.getExportString(); // Max file path
+    }
+
+    std::vector<std::string> recTypes;
+    std::vector<unsigned short> recTypeIndices;
+
+    const bool hasRecTypeListings = ver >= NIFStream::generateVersion(5,0,0,1);
+    if (hasRecTypeListings)
+    {
+        unsigned short recTypeNum = nif.getUShort();
+        if (recTypeNum) // Record type list
+            nif.getSizedStrings(recTypes, recTypeNum);
+        if (recNum) // Record type mapping for each record
+            nif.getUShorts(recTypeIndices, recNum);
+        if (ver >= NIFStream::generateVersion(5,0,0,6)) // Groups
+        {
+            if (ver >= NIFStream::generateVersion(20,1,0,1)) // String table
+            {
+                if (ver >= NIFStream::generateVersion(20,2,0,5) && recNum) // Record sizes
+                {
+                    std::vector<unsigned int> recSizes; // Currently unused
+                    nif.getUInts(recSizes, recNum);
+                }
+                unsigned int stringNum = nif.getUInt();
+                nif.getUInt(); // Max string length
+                if (stringNum)
+                    nif.getSizedStrings(strings, stringNum);
+            }
+            std::vector<unsigned int> groups; // Currently unused
+            unsigned int groupNum = nif.getUInt();
+            if (groupNum)
+                nif.getUInts(groups, groupNum);
+        }
+    }
+
+    const bool hasRecordSeparators = ver >= NIFStream::generateVersion(10,0,0,0) && ver < NIFStream::generateVersion(10,2,0,0);
     for(size_t i = 0;i < recNum;i++)
     {
         Record *r = nullptr;
 
-        std::string rec = nif.getString();
+        std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.getString();
         if(rec.empty())
         {
             std::stringstream error;
             error << "Record number " << i << " out of " << recNum << " is blank.";
             fail(error.str());
+        }
+
+        // Record separator. Some Havok records in Oblivion do not have it.
+        if (hasRecordSeparators && rec.compare(0, 3, "bhk"))
+        {
+            if (nif.getInt())
+            {
+                std::stringstream warning;
+                warning << "Record number " << i << " out of " << recNum << " is preceded by a non-zero separator.";
+                warn(warning.str());
+            }
         }
 
         std::map<std::string,RecordFactoryEntry>::const_iterator entry = factories.find(rec);

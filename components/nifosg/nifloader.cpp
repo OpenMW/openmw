@@ -1732,7 +1732,7 @@ namespace NifOsg
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
             // Specular lighting is enabled by default, but there's a quirk...
-            int specFlags = 1;
+            bool specEnabled = true;
             osg::ref_ptr<osg::Material> mat (new osg::Material);
             mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
 
@@ -1751,7 +1751,8 @@ namespace NifOsg
                 case Nif::RC_NiSpecularProperty:
                 {
                     // Specular property can turn specular lighting off.
-                    specFlags = property->flags;
+                    auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
+                    specEnabled = specprop->flags & 1;
                     break;
                 }
                 case Nif::RC_NiMaterialProperty:
@@ -1835,7 +1836,7 @@ namespace NifOsg
             }
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
-            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || specFlags == 0)
+            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || !specEnabled)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
 
             if (lightmode == 0)

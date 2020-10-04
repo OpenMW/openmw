@@ -6,25 +6,44 @@
 namespace Nif
 {
 
-void Property::read(NIFStream *nif)
-{
-    Named::read(nif);
-    flags = nif->getUShort();
-}
-
 void NiTexturingProperty::Texture::read(NIFStream *nif)
 {
     inUse = nif->getBoolean();
     if(!inUse) return;
 
     texture.read(nif);
-    clamp = nif->getUInt();
-    nif->skip(4); // Filter mode. Ignoring because global filtering settings are more sensible
-    uvSet = nif->getUInt();
+    if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+    {
+        clamp = nif->getInt();
+        nif->skip(4); // Filter mode. Ignoring because global filtering settings are more sensible
+    }
+    else
+    {
+        clamp = nif->getUShort() & 0xF;
+    }
+    // Max anisotropy. I assume we'll always only use the global anisotropy setting.
+    if (nif->getVersion() >= NIFStream::generateVersion(20,5,0,4))
+        nif->getUShort();
+
+    if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        uvSet = nif->getUInt();
 
     // Two PS2-specific shorts.
-    nif->skip(4);
-    nif->skip(2); // Unknown short
+    if (nif->getVersion() < NIFStream::generateVersion(10,4,0,2))
+        nif->skip(4);
+    if (nif->getVersion() <= NIFStream::generateVersion(4,1,0,18))
+        nif->skip(2); // Unknown short
+    else if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+    {
+        if (nif->getBoolean()) // Has texture transform
+        {
+            nif->getVector2(); // UV translation
+            nif->getVector2(); // UV scale
+            nif->getFloat(); // W axis rotation
+            nif->getUInt(); // Transform method
+            nif->getVector2(); // Texture rotation origin
+        }
+    }
 }
 
 void NiTexturingProperty::Texture::post(NIFFile *nif)
@@ -35,7 +54,10 @@ void NiTexturingProperty::Texture::post(NIFFile *nif)
 void NiTexturingProperty::read(NIFStream *nif)
 {
     Property::read(nif);
-    apply = nif->getUInt();
+    if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD || nif->getVersion() >= NIFStream::generateVersion(20,1,0,2))
+        flags = nif->getUShort();
+    if (nif->getVersion() <= NIFStream::generateVersion(20,1,0,1))
+        apply = nif->getUInt();
 
     unsigned int numTextures = nif->getUInt();
 
@@ -51,32 +73,53 @@ void NiTexturingProperty::read(NIFStream *nif)
             envMapLumaBias = nif->getVector2();
             bumpMapMatrix = nif->getVector4();
         }
+        else if (i == 7 && textures[7].inUse && nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+            /*float parallaxOffset = */nif->getFloat();
+    }
+
+    if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
+    {
+        unsigned int numShaderTextures = nif->getUInt();
+        shaderTextures.resize(numShaderTextures);
+        for (unsigned int i = 0; i < numShaderTextures; i++)
+        {
+            shaderTextures[i].read(nif);
+            if (shaderTextures[i].inUse)
+                nif->getUInt(); // Unique identifier
+        }
     }
 }
 
 void NiTexturingProperty::post(NIFFile *nif)
 {
     Property::post(nif);
-    for(int i = 0;i < 7;i++)
+    for (size_t i = 0; i < textures.size(); i++)
         textures[i].post(nif);
+    for (size_t i = 0; i < shaderTextures.size(); i++)
+        shaderTextures[i].post(nif);
 }
 
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);
-
+    mFlags = nif->getUShort();
     mFogDepth = nif->getFloat();
     mColour = nif->getVector3();
 }
 
 void S_MaterialProperty::read(NIFStream *nif)
 {
-    ambient = nif->getVector3();
-    diffuse = nif->getVector3();
+    if (nif->getBethVersion() < 26)
+    {
+        ambient = nif->getVector3();
+        diffuse = nif->getVector3();
+    }
     specular = nif->getVector3();
     emissive = nif->getVector3();
     glossiness = nif->getFloat();
     alpha = nif->getFloat();
+    if (nif->getBethVersion() > 21)
+        emissive *= nif->getFloat();
 }
 
 void S_VertexColorProperty::read(NIFStream *nif)
@@ -92,14 +135,29 @@ void S_AlphaProperty::read(NIFStream *nif)
 
 void S_StencilProperty::read(NIFStream *nif)
 {
-    enabled = nif->getChar();
-    compareFunc = nif->getInt();
-    stencilRef = nif->getUInt();
-    stencilMask = nif->getUInt();
-    failAction = nif->getInt();
-    zFailAction = nif->getInt();
-    zPassAction = nif->getInt();
-    drawMode = nif->getInt();
+    if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+    {
+        enabled = nif->getChar();
+        compareFunc = nif->getInt();
+        stencilRef = nif->getUInt();
+        stencilMask = nif->getUInt();
+        failAction = nif->getInt();
+        zFailAction = nif->getInt();
+        zPassAction = nif->getInt();
+        drawMode = nif->getInt();
+    }
+    else
+    {
+        unsigned short flags = nif->getUShort();
+        enabled = flags & 0x1;
+        failAction = (flags >> 1) & 0x7;
+        zFailAction = (flags >> 4) & 0x7;
+        zPassAction = (flags >> 7) & 0x7;
+        drawMode = (flags >> 10) & 0x3;
+        compareFunc = (flags >> 12) & 0x7;
+        stencilRef = nif->getUInt();
+        stencilMask = nif->getUInt();
+    }
 }
 
 
