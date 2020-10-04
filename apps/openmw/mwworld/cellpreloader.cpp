@@ -13,6 +13,7 @@
 #include <components/misc/stringops.hpp>
 #include <components/terrain/world.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
+#include <components/settings/settings.hpp>
 #include <components/esm/loadcell.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -31,11 +32,26 @@ namespace MWWorld
     {
         ListModelsVisitor(std::vector<std::string>& out)
             : mOut(out)
+            , mCurrentGrass(0.f)
         {
         }
 
         virtual bool operator()(const MWWorld::Ptr& ptr)
         {
+            static const bool grassEnabled = Settings::Manager::getBool("enabled", "Grass");
+            static const float density = Settings::Manager::getFloat("density", "Grass");
+
+            if (grassEnabled && ptr.getTypeName()==typeid (ESM::Static).name())
+            {
+                if (MWRender::Grass::isGrassItem(ptr.getClass().getModel(ptr)))
+                {
+                    mCurrentGrass += density;
+                    if (mCurrentGrass < 1.f) return true;
+
+                    mCurrentGrass -= 1.f;
+                }
+            }
+
             ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;
@@ -44,6 +60,7 @@ namespace MWWorld
         virtual ~ListModelsVisitor() = default;
 
         std::vector<std::string>& mOut;
+        float mCurrentGrass;
     };
 
     /// Worker thread item: preload models in a cell.

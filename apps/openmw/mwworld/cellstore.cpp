@@ -530,17 +530,6 @@ namespace MWWorld
 
                     Misc::StringUtils::lowerCaseInPlace (ref.mRefID);
 
-                    static const bool grassEnabled = Settings::Manager::getBool("enabled", "Grass");
-                    if (grassEnabled && mStore.find(ref.mRefID) == ESM::REC_STAT)
-                    {
-                        const ESM::Static* staticRecord = mStore.get<ESM::Static>().find(ref.mRefID);
-                        if (!staticRecord->mModel.empty())
-                        {
-                            if (mGrass.isGrassItem(staticRecord->mModel) && !mGrass.isEnabled(staticRecord->mModel))
-                                continue;
-                        }
-                    }
-
                     mIds.push_back (ref.mRefID);
                 }
             }
