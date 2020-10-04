@@ -46,7 +46,7 @@ namespace MWRender
         bool mIsNearest;
 
         float mHeight, mBaseCameraDistance;
-        float mPitch, mYaw;
+        float mPitch, mYaw, mRoll;
 
         bool mVanityToggleQueued;
         bool mVanityToggleQueuedValue;
@@ -71,6 +71,12 @@ namespace MWRender
         float mZoomOutWhenMoveCoef;
         bool mDynamicCameraDistanceEnabled;
         bool mShowCrosshairInThirdPersonMode;
+
+        bool mHeadBobbingEnabled;
+        float mHeadBobbingOffset;
+        float mHeadBobbingWeight = 0; // Value from 0 to 1 for smooth enabling/disabling.
+        float mTotalMovement = 0; // Needed for head bobbing.
+        void updateHeadBobbing(float duration);
 
         void updateFocalPointOffset(float duration);
         void updatePosition();
