@@ -34,6 +34,9 @@ struct NiDynamicEffect : public Node
     void read(NIFStream *nif)
     {
         Node::read(nif);
+        if (nif->getVersion() >= nif->generateVersion(10,1,0,106)
+         && nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
+            nif->getBoolean(); // Switch state
         unsigned int numAffectedNodes = nif->getUInt();
         for (unsigned int i=0; i<numAffectedNodes; ++i)
             nif->getUInt(); // ref to another Node

@@ -14,16 +14,31 @@ namespace Nif
         if (external)
             filename = nif->getString();
         else
-            internal = nif->getChar();
-
-        if (!external && internal)
+        {
+            if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,3))
+                internal = nif->getChar();
+            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+                filename = nif->getString(); // Original file path of the internal texture
+        }
+        if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,3))
+        {
+            if (!external && internal)
+                data.read(nif);
+        }
+        else
+        {
             data.read(nif);
+        }
 
         pixel = nif->getUInt();
         mipmap = nif->getUInt();
         alpha = nif->getUInt();
 
         nif->getChar(); // always 1
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,103))
+            nif->getBoolean(); // Direct rendering
+        if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,4))
+            nif->getBoolean(); // NiPersistentSrcTextureRendererData is used instead of NiPixelData
     }
 
     void NiSourceTexture::post(NIFFile *nif)
@@ -79,6 +94,12 @@ namespace Nif
         NiParticleModifier::read(nif);
 
         mBounceFactor = nif->getFloat();
+        if (nif->getVersion() >= NIFStream::generateVersion(4,2,2,0))
+        {
+            // Unused in NifSkope. Need to figure out what these do.
+            /*bool spawnOnCollision = */nif->getBoolean();
+            /*bool dieOnCollision = */nif->getBoolean();
+        }
     }
 
     void NiPlanarCollider::read(NIFStream *nif)

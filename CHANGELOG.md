@@ -16,6 +16,7 @@
     Bug #4631: Setting MSAA level too high doesn't fall back to highest supported level
     Bug #4764: Data race in osg ParticleSystem
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5101: Hostile followers travel with the player
     Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5165: Active spells should use real time intead of timestamps
     Bug #5358: ForceGreeting always resets the dialogue window completely
@@ -50,8 +51,12 @@
     Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
     Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
     Bug #5557: Diagonal movement is noticeably slower with analogue stick
+    Bug #5588: Randomly clicking on the journal's right-side page when it's empty shows random topics
+    Bug #5603: Setting constant effect cast style doesn't correct effects view
+    Bug #5611: Usable items with "0 Uses" should be used only once
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
+    Feature #4894: Consider actors as obstacles for pathfinding
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
@@ -61,6 +66,8 @@
     Feature #5524: Resume failed script execution after reload
     Feature #5525: Search fields tweaks (utf-8)
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
+    Feature #5579: MCP SetAngle enhancement
+    Feature #5610: Actors movement should be smoother
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

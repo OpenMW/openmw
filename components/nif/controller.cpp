@@ -97,7 +97,10 @@ namespace Nif
         // 01: Diffuse
         // 10: Specular
         // 11: Emissive
-        targetColor = (flags >> 4) & 3;
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+            targetColor = nif->getUShort() & 3;
+        else
+            targetColor = (flags >> 4) & 3;
         data.read(nif);
     }
 
@@ -110,6 +113,8 @@ namespace Nif
     void NiLookAtController::read(NIFStream *nif)
     {
         Controller::read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+            lookAtFlags = nif->getUShort();
         target.read(nif);
     }
 
@@ -192,6 +197,8 @@ namespace Nif
     void NiGeomMorpherController::read(NIFStream *nif)
     {
         Controller::read(nif);
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_OB_OLD)
+            /*bool updateNormals = !!*/nif->getUShort();
         data.read(nif);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
             /*bool alwaysActive = */nif->getChar(); // Always 0
@@ -219,8 +226,11 @@ namespace Nif
     {
         Controller::read(nif);
         mTexSlot = nif->getUInt();
-        /*unknown=*/nif->getUInt();/*0?*/
-        mDelta = nif->getFloat();
+        if (nif->getVersion() <= NIFStream::generateVersion(10,1,0,103))
+        {
+            timeStart = nif->getFloat();
+            mDelta = nif->getFloat();
+        }
         mSources.read(nif);
     }
 

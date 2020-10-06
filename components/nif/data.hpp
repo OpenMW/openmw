@@ -35,7 +35,7 @@ namespace Nif
 class NiGeometryData : public Record
 {
 public:
-    std::vector<osg::Vec3f> vertices, normals;
+    std::vector<osg::Vec3f> vertices, normals, tangents, bitangents;
     std::vector<osg::Vec4f> colors;
     std::vector< std::vector<osg::Vec2f> > uvlist;
     osg::Vec3f center;
@@ -73,13 +73,15 @@ struct NiLinesData : public NiGeometryData
 class NiAutoNormalParticlesData : public NiGeometryData
 {
 public:
-    int numParticles;
+    int numParticles{0};
 
     float particleRadius;
 
     int activeCount;
 
-    std::vector<float> sizes;
+    std::vector<float> particleRadii, sizes, rotationAngles;
+    std::vector<osg::Quat> rotations;
+    std::vector<osg::Vec3f> rotationAxes;
 
     void read(NIFStream *nif);
 };
@@ -87,8 +89,6 @@ public:
 class NiRotatingParticlesData : public NiAutoNormalParticlesData
 {
 public:
-    std::vector<osg::Quat> rotations;
-
     void read(NIFStream *nif);
 };
 
@@ -133,7 +133,8 @@ public:
     Format fmt;
 
     unsigned int colorMask[4];
-    unsigned int bpp;
+    unsigned int bpp, pixelTiling{0};
+    bool sRGB{false};
 
     NiPalettePtr palette;
     unsigned int numberOfMipmaps;

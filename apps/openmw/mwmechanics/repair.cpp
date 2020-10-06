@@ -27,7 +27,8 @@ void Repair::repair(const MWWorld::Ptr &itemToRepair)
 
     // reduce number of uses left
     int uses = mTool.getClass().getItemHealth(mTool);
-    mTool.getCellRef().setCharge(uses-1);
+    uses -= std::min(uses, 1);
+    mTool.getCellRef().setCharge(uses);
 
     MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
