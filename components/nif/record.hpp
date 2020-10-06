@@ -101,7 +101,15 @@ enum RecordType
   RC_RootCollisionNode,
   RC_NiSphericalCollider,
   RC_NiLookAtController,
-  RC_NiPalette
+  RC_NiPalette,
+  RC_NiIntegerExtraData,
+  RC_NiIntegersExtraData,
+  RC_NiBinaryExtraData,
+  RC_NiBooleanExtraData,
+  RC_NiVectorExtraData,
+  RC_NiColorExtraData,
+  RC_NiFloatExtraData,
+  RC_NiFloatsExtraData
 };
 
 /// Base class for all records

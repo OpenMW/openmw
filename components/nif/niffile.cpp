@@ -105,6 +105,14 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiSkinInstance"]               = {&construct <NiSkinInstance>              , RC_NiSkinInstance             };
     factory["NiLookAtController"]           = {&construct <NiLookAtController>          , RC_NiLookAtController         };
     factory["NiPalette"]                    = {&construct <NiPalette>                   , RC_NiPalette                  };
+    factory["NiIntegerExtraData"]           = {&construct <NiIntegerExtraData>          , RC_NiIntegerExtraData         };
+    factory["NiIntegersExtraData"]          = {&construct <NiIntegersExtraData>         , RC_NiIntegersExtraData        };
+    factory["NiBinaryExtraData"]            = {&construct <NiBinaryExtraData>           , RC_NiBinaryExtraData          };
+    factory["NiBooleanExtraData"]           = {&construct <NiBooleanExtraData>          , RC_NiBooleanExtraData         };
+    factory["NiVectorExtraData"]            = {&construct <NiVectorExtraData>           , RC_NiVectorExtraData          };
+    factory["NiColorExtraData"]             = {&construct <NiVectorExtraData>           , RC_NiColorExtraData           };
+    factory["NiFloatExtraData"]             = {&construct <NiFloatExtraData>            , RC_NiFloatExtraData           };
+    factory["NiFloatsExtraData"]            = {&construct <NiFloatsExtraData>           , RC_NiFloatsExtraData          };
     return factory;
 }
 
