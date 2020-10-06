@@ -233,8 +233,15 @@ target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
     INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Debug/openmw-cs.cfg" DESTINATION "." CONFIGURATIONS Debug)
-    INSTALL(FILES "${OpenMW_BINARY_DIR}/Release/openmw-cs.cfg" DESTINATION "." CONFIGURATIONS Release;RelWithDebInfo;MinSizeRel)
+
+    get_generator_is_multi_config(multi_config)
+    if (multi_config)
+        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}/$<CONFIG>")
+    else ()
+        SET(INSTALL_SOURCE "${OpenMW_BINARY_DIR}")
+    endif ()
+
+    INSTALL(FILES "${INSTALL_SOURCE}/openmw-cs.cfg" DESTINATION ".")
 endif()
 
 if (MSVC)
