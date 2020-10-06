@@ -108,7 +108,6 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     return factory;
 }
 
-
 ///Make the factory map used for parsing the file
 static const std::map<std::string,RecordFactoryEntry> factories = makeFactory();
 
