@@ -106,7 +106,7 @@ namespace Shader
             else
             {
                 lineDirectivePosition = 0;
-                lineNumber = 1;
+                lineNumber = 0;
             }
             lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
 
