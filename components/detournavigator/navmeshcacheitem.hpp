@@ -143,7 +143,7 @@ namespace DetourNavigator
 
         UpdateNavMeshStatus removeTile(const TilePosition& position)
         {
-            const auto removed = dtStatusSucceed(removeTileImpl(position));
+            const auto removed = removeTileImpl(position);
             if (removed)
                 removeUsedTile(position);
             return UpdateNavMeshStatusBuilder().removed(removed).getResult();
@@ -181,13 +181,15 @@ namespace DetourNavigator
             return mImpl->addTile(data, size, doNotTransferOwnership, lastRef, result);
         }
 
-        dtStatus removeTileImpl(const TilePosition& position)
+        bool removeTileImpl(const TilePosition& position)
         {
             const int layer = 0;
             const auto tileRef = mImpl->getTileRefAt(position.x(), position.y(), layer);
+            if (tileRef == 0)
+                return false;
             unsigned char** const data = nullptr;
             int* const dataSize = nullptr;
-            return mImpl->removeTile(tileRef, data, dataSize);
+            return dtStatusSucceed(mImpl->removeTile(tileRef, data, dataSize));
         }
     };
 
