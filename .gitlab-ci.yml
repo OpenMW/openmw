@@ -59,9 +59,6 @@ Debian_Clang_tests:
 MacOS:
   tags:
     - macos
-    - xcode
-  except:
-    - branches # because our CI VMs are not public, MRs can't use them and timeout
   stage: build
   allow_failure: true
   script:
