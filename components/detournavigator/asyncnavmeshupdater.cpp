@@ -38,6 +38,12 @@ namespace DetourNavigator
                 return stream << "failed";
             case UpdateNavMeshStatus::lost:
                 return stream << "lost";
+            case UpdateNavMeshStatus::cached:
+                return stream << "cached";
+            case UpdateNavMeshStatus::unchanged:
+                return stream << "unchanged";
+            case UpdateNavMeshStatus::restored:
+                return stream << "restored";
         }
         return stream << "unknown(" << static_cast<unsigned>(value) << ")";
     }

@@ -22,6 +22,9 @@ namespace DetourNavigator
         replaced = removed | added,
         failed = 1 << 2,
         lost = removed | failed,
+        cached = 1 << 3,
+        unchanged = replaced | cached,
+        restored = added | cached,
     };
 
     inline bool isSuccess(UpdateNavMeshStatus value)
@@ -33,6 +36,9 @@ namespace DetourNavigator
     {
     public:
         UpdateNavMeshStatusBuilder() = default;
+
+        explicit UpdateNavMeshStatusBuilder(UpdateNavMeshStatus value)
+            : mResult(value) {}
 
         UpdateNavMeshStatusBuilder removed(bool value)
         {
@@ -58,6 +64,15 @@ namespace DetourNavigator
                 set(UpdateNavMeshStatus::failed);
             else
                 unset(UpdateNavMeshStatus::failed);
+            return *this;
+        }
+
+        UpdateNavMeshStatusBuilder cached(bool value)
+        {
+            if (value)
+                set(UpdateNavMeshStatus::cached);
+            else
+                unset(UpdateNavMeshStatus::cached);
             return *this;
         }
 
