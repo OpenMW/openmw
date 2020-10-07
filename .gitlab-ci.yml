@@ -7,7 +7,6 @@ stages:
     - linux
   image: debian:bullseye
   cache:
-    key: cache.002
     paths:
     - apt-cache/
     - ccache/
@@ -32,12 +31,16 @@ stages:
 
 Debian_GCC:
   extends: .Debian
+  cache:
+    key: Debian_GCC.v1
   variables:
     CC: gcc
     CXX: g++
 
 Debian_GCC_tests:
   extends: .Debian
+  cache:
+    key: Debian_GCC_tests.v1
   variables:
     CC: gcc
     CXX: g++
@@ -45,12 +48,16 @@ Debian_GCC_tests:
 
 Debian_Clang:
   extends: .Debian
+  cache:
+    key: Debian_Clang.v1
   variables:
     CC: clang
     CXX: clang++
 
 Debian_Clang_tests:
   extends: .Debian
+  cache:
+    key: Debian_Clang_tests.v1
   variables:
     CC: clang
     CXX: clang++
