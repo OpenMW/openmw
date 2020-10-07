@@ -39,7 +39,7 @@ namespace DetourNavigator
             case UpdateNavMeshStatus::lost:
                 return stream << "lost";
         }
-        return stream << "unknown";
+        return stream << "unknown(" << static_cast<unsigned>(value) << ")";
     }
 
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
