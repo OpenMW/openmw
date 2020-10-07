@@ -9,42 +9,32 @@ namespace DetourNavigator
 {
     namespace
     {
-        inline std::string makeNavMeshKey(const RecastMesh& recastMesh,
+        inline std::vector<unsigned char> makeNavMeshKey(const RecastMesh& recastMesh,
             const std::vector<OffMeshConnection>& offMeshConnections)
         {
-            std::string result;
-            result.reserve(
-                recastMesh.getIndices().size() * sizeof(int)
-                + recastMesh.getVertices().size() * sizeof(float)
-                + recastMesh.getAreaTypes().size() * sizeof(AreaType)
-                + recastMesh.getWater().size() * sizeof(RecastMesh::Water)
-                + offMeshConnections.size() * sizeof(OffMeshConnection)
-            );
-            std::copy(
-                reinterpret_cast<const char*>(recastMesh.getIndices().data()),
-                reinterpret_cast<const char*>(recastMesh.getIndices().data() + recastMesh.getIndices().size()),
-                std::back_inserter(result)
-            );
-            std::copy(
-                reinterpret_cast<const char*>(recastMesh.getVertices().data()),
-                reinterpret_cast<const char*>(recastMesh.getVertices().data() + recastMesh.getVertices().size()),
-                std::back_inserter(result)
-            );
-            std::copy(
-                reinterpret_cast<const char*>(recastMesh.getAreaTypes().data()),
-                reinterpret_cast<const char*>(recastMesh.getAreaTypes().data() + recastMesh.getAreaTypes().size()),
-                std::back_inserter(result)
-            );
-            std::copy(
-                reinterpret_cast<const char*>(recastMesh.getWater().data()),
-                reinterpret_cast<const char*>(recastMesh.getWater().data() + recastMesh.getWater().size()),
-                std::back_inserter(result)
-            );
-            std::copy(
-                reinterpret_cast<const char*>(offMeshConnections.data()),
-                reinterpret_cast<const char*>(offMeshConnections.data() + offMeshConnections.size()),
-                std::back_inserter(result)
-            );
+            const std::size_t indicesSize = recastMesh.getIndices().size() * sizeof(int);
+            const std::size_t verticesSize = recastMesh.getVertices().size() * sizeof(float);
+            const std::size_t areaTypesSize = recastMesh.getAreaTypes().size() * sizeof(AreaType);
+            const std::size_t waterSize = recastMesh.getWater().size() * sizeof(RecastMesh::Water);
+            const std::size_t offMeshConnectionsSize = offMeshConnections.size() * sizeof(OffMeshConnection);
+
+            std::vector<unsigned char> result(indicesSize + verticesSize + areaTypesSize + waterSize + offMeshConnectionsSize);
+            unsigned char* dst = result.data();
+
+            std::memcpy(dst, recastMesh.getIndices().data(), indicesSize);
+            dst += indicesSize;
+
+            std::memcpy(dst, recastMesh.getVertices().data(), verticesSize);
+            dst += verticesSize;
+
+            std::memcpy(dst, recastMesh.getAreaTypes().data(), areaTypesSize);
+            dst += areaTypesSize;
+
+            std::memcpy(dst, recastMesh.getWater().data(), waterSize);
+            dst += waterSize;
+
+            std::memcpy(dst, offMeshConnections.data(), offMeshConnectionsSize);
+
             return result;
         }
     }
@@ -189,8 +179,8 @@ namespace DetourNavigator
     {
         struct CompareBytes
         {
-            const char* mRhsIt;
-            const char* mRhsEnd;
+            const unsigned char* mRhsIt;
+            const unsigned char* const mRhsEnd;
 
             template <class T>
             int operator ()(const std::vector<T>& lhs)
@@ -225,7 +215,7 @@ namespace DetourNavigator
         };
     }
 
-    int NavMeshTilesCache::RecastMeshKeyView::compare(const std::string& other) const
+    int NavMeshTilesCache::RecastMeshKeyView::compare(const std::vector<unsigned char>& other) const
     {
         CompareBytes compareBytes {other.data(), other.data() + other.size()};
 
