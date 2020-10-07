@@ -71,6 +71,15 @@ MacOS:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
+      - "*.log"
+      - build/*.log
+      - build/*/*.log
+      - build/*/*/*.log
+      - build/*/*/*/*.log
+      - build/*/*/*/*/*.log
+      - build/*/*/*/*/*/*.log
+      - build/*/*/*/*/*/*/*.log
+      - build/*/*/*/*/*/*/*/*.log
 
 variables: &engine-targets
   targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
