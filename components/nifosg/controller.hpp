@@ -268,11 +268,11 @@ namespace NifOsg
     {
     private:
         FloatInterpolator mData;
-        double mStartingTime;
+        double mStartingTime{0};
 
     public:
         RollController(const Nif::NiFloatData *data);
-        RollController();
+        RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
@@ -326,14 +326,14 @@ namespace NifOsg
     class FlipController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     private:
-        int mTexSlot;
-        float mDelta;
+        int mTexSlot{0};
+        float mDelta{0.f};
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
 
     public:
         FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
         FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);
-        FlipController();
+        FlipController() = default;
         FlipController(const FlipController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, FlipController)

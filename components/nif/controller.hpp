@@ -143,23 +143,16 @@ public:
     void post(NIFFile *nif);
 };
 
-class NiAlphaController : public Controller
+struct NiFloatInterpController : public Controller
 {
-public:
     NiFloatDataPtr data;
 
     void read(NIFStream *nif);
     void post(NIFFile *nif);
 };
 
-class NiRollController : public Controller
-{
-public:
-    NiFloatDataPtr data;
-
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
-};
+class NiAlphaController : public NiFloatInterpController { };
+class NiRollController : public NiFloatInterpController { };
 
 class NiGeomMorpherController : public Controller
 {
