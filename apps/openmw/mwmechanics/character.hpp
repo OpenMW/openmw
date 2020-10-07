@@ -196,6 +196,7 @@ class CharacterController : public MWRender::Animation::TextKeyListener
     float mTimeUntilWake;
 
     bool mIsMovingBackward;
+    osg::Vec2f mSmoothedSpeed;
 
     void setAttackTypeBasedOnMovement();
 

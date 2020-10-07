@@ -331,8 +331,43 @@ If enabled then the character turns lower body to the direction of movement. Upp
 
 This setting can be controlled in Advanced tab of the launcher.
 
+smooth movement
+---------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Makes NPCs and player movement more smooth.
+
+Recommended to use with "turn to movement direction" enabled.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+NPCs avoid collisions
+---------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+If enabled NPCs apply evasion maneuver to avoid collisions with others.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+NPCs give way
+-------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Standing NPCs give way to moving ones. Works only if 'NPCs avoid collisions' is enabled.
+
+This setting can only be configured by editing the settings configuration file.
+
 swim upward correction
-----------------
+----------------------
 
 :Type:		boolean
 :Range:		True/False

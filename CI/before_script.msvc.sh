@@ -523,52 +523,52 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	# Boost
 	if [ -z $APPVEYOR ]; then
 		download "Boost ${BOOST_VER}" \
-			"https://sourceforge.net/projects/boost/files/boost-binaries/${BOOST_VER}/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
 			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
 
 	# Bullet
 	download "Bullet 2.89 (${BULLET_DBL_DISPLAY})" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" \
 		"Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z"
 
 	# FFmpeg
 	download "FFmpeg 4.2.2" \
-		"https://ffmpeg.zeranoe.com/builds/win${BITS}/shared/ffmpeg-4.2.2-win${BITS}-shared.zip" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-win${BITS}.zip" \
 		"ffmpeg-4.2.2-win${BITS}.zip" \
-		"https://ffmpeg.zeranoe.com/builds/win${BITS}/dev/ffmpeg-4.2.2-win${BITS}-dev.zip" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/ffmpeg-4.2.2-dev-win${BITS}.zip" \
 		"ffmpeg-4.2.2-dev-win${BITS}.zip"
 
 	# MyGUI
 	download "MyGUI 3.4.0" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
 		"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "MyGUI symbols" \
-			"https://rgw.ctrl-c.liu.se/openmw/Deps/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
 			"MyGUI-3.4.0-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# OpenAL
 	download "OpenAL-Soft 1.20.1" \
-		"http://openal-soft.org/openal-binaries/openal-soft-1.20.1-bin.zip" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
 		"OpenAL-Soft-1.20.1.zip"
 
 	# OSG
 	download "OpenSceneGraph 3.6.5" \
-		"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z" \
 		"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "OpenSceneGraph symbols" \
-			"https://rgw.ctrl-c.liu.se/openmw/Deps/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z" \
 			"OSG-3.6.5-msvc${MSVC_REAL_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# SDL2
 	download "SDL 2.0.12" \
-		"https://www.libsdl.org/release/SDL2-devel-2.0.12-VC.zip" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.12.zip" \
 		"SDL2-2.0.12.zip"
 
 	# Google test and mock

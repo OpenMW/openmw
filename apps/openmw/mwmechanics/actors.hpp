@@ -63,6 +63,8 @@ namespace MWMechanics
 
             void purgeSpellEffects (int casterActorId);
 
+            void predictAndAvoidCollisions();
+
         public:
 
             Actors();
@@ -209,6 +211,7 @@ namespace MWMechanics
         float mTimerDisposeSummonsCorpses;
         float mActorsProcessingRange;
 
+        bool mSmoothMovement;
     };
 }
 
