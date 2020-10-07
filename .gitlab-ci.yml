@@ -60,7 +60,8 @@ MacOS:
   tags:
     - macos
   stage: build
-  allow_failure: true
+  before_script:
+    - command -v cmake >/dev/null 2>&1 || brew install cmake
   script:
     - rm -fr build/*  #  remove anything in the build directory
     - CI/before_install.osx.sh
