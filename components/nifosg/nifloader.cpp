@@ -1239,15 +1239,13 @@ namespace NifOsg
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
-                const std::vector<Nif::NiSkinData::VertWeight> &weights = data->bones[i].weights;
+                const auto& weights = data->bones[i].weights;
                 for(size_t j = 0;j < weights.size();j++)
-                {
-                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
-                }
+                    influence.mWeights.push_back({weights[j].vertex, weights[j].weight});
                 influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
                 influence.mBoundSphere = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
 
-                map->mData.emplace_back(boneName, influence);
+                map->mData.push_back({boneName, influence});
             }
             rig->setInfluenceMap(map);
 
