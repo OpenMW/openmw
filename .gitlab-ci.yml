@@ -18,8 +18,8 @@ stages:
   script:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
+    - export CCACHE_DEBUG=1
     - ccache -s
-    - ccache --dump-manifest=ccache-manifest-before.txt
     - ccache -z -M 1G
     - CI/before_script.linux.sh
     - cd build
@@ -27,12 +27,10 @@ stages:
     - cmake --install .
     - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite; fi
     - ccache -s
-    - ccache --dump-manifest=ccache-manifest-after.txt
   artifacts:
     paths:
       - build/install/
-      - ccache-manifest-before.txt
-      - ccache-manifest-after.txt
+      - "**/*.ccache-*"
 
 Debian_GCC:
   extends: .Debian
