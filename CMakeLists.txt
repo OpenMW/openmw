@@ -882,7 +882,7 @@ elseif(NOT APPLE)
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
         INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
     endif(WIN32)
-endif()
+endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
 
 # Doxygen Target -- simply run 'make doc' or 'make doc_pages'
 # output directory for 'make doc'       is "${OpenMW_BINARY_DIR}/docs/Doxygen"
