@@ -68,7 +68,7 @@ MacOS:
     - CI/before_install.osx.sh
     - CI/before_script.osx.sh
     - cd build; make -j2 package
-    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.dmg"; done
+    - for dmg in *.dmg; do mv "$dmg" "${dmg%.dmg}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.dmg"; done
   artifacts:
     paths:
       - build/OpenMW-*.dmg
