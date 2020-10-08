@@ -116,20 +116,21 @@ struct NiShadeProperty : public Property
     }
 };
 
+
+enum class BSShaderType : unsigned int
+{
+    ShaderType_TallGrass = 0,
+    ShaderType_Default = 1,
+    ShaderType_Sky = 10,
+    ShaderType_Skin = 14,
+    ShaderType_Water = 17,
+    ShaderType_Lighting30 = 29,
+    ShaderType_Tile = 32,
+    ShaderType_NoLighting = 33
+};
+
 struct BSShaderProperty : public NiShadeProperty
 {
-    enum BSShaderType
-    {
-        SHADER_TALL_GRASS = 0,
-        SHADER_DEFAULT = 1,
-        SHADER_SKY = 10,
-        SHADER_SKIN = 14,
-        SHADER_WATER = 17,
-        SHADER_LIGHTING30 = 29,
-        SHADER_TILE = 32,
-        SHADER_NOLIGHTING = 33
-    };
-
     unsigned int type{0u}, flags1{0u}, flags2{0u};
     float envMapIntensity{0.f};
     void read(NIFStream *nif) override;
@@ -167,6 +168,44 @@ struct BSShaderNoLightingProperty : public BSShaderLightingProperty
     osg::Vec4f falloffParams;
 
     void read(NIFStream *nif) override;
+};
+
+enum class BSLightingShaderType : unsigned int
+{
+    ShaderType_Default = 0,
+    ShaderType_EnvMap = 1,
+    ShaderType_Glow = 2,
+    ShaderType_Parallax = 3,
+    ShaderType_FaceTint = 4,
+    ShaderType_SkinTint = 5,
+    ShaderType_HairTint = 6,
+    ShaderType_ParallaxOcc = 7,
+    ShaderType_MultitexLand = 8,
+    ShaderType_LODLand = 9,
+    ShaderType_Snow = 10,
+    ShaderType_MultiLayerParallax = 11,
+    ShaderType_TreeAnim = 12,
+    ShaderType_LODObjects = 13,
+    ShaderType_SparkleSnow = 14,
+    ShaderType_LODObjectsHD = 15,
+    ShaderType_EyeEnvmap = 16,
+    ShaderType_Cloud = 17,
+    ShaderType_LODNoise = 18,
+    ShaderType_MultitexLandLODBlend = 19,
+    ShaderType_Dismemberment = 20
+};
+
+struct BSLightingShaderProperty : public BSShaderProperty
+{
+    BSShaderTextureSetPtr mTextureSet;
+    unsigned int mClamp{0u};
+    float mAlpha;
+    float mGlossiness;
+    osg::Vec3f mEmissive, mSpecular;
+    float mEmissiveMult, mSpecStrength;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 struct NiDitherProperty : public Property

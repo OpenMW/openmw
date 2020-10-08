@@ -152,6 +152,7 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["bhkListShape"]                 = {&construct <bhkListShape>                , RC_bhkListShape               };
     factory["bhkRigidBody"]                 = {&construct <bhkRigidBody>                , RC_bhkRigidBody               };
     factory["bhkRigidBodyT"]                = {&construct <bhkRigidBody>                , RC_bhkRigidBodyT              };
+    factory["BSLightingShaderProperty"]     = {&construct <BSLightingShaderProperty>    , RC_BSLightingShaderProperty   };
     return factory;
 }
 

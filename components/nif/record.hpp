@@ -139,7 +139,8 @@ enum RecordType
   RC_bhkBoxShape,
   RC_bhkListShape,
   RC_bhkRigidBody,
-  RC_bhkRigidBodyT
+  RC_bhkRigidBodyT,
+  RC_BSLightingShaderProperty
 };
 
 /// Base class for all records
