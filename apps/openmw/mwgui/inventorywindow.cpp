@@ -778,7 +778,8 @@ namespace MWGui
             return;
 
         const MWMechanics::CreatureStats &stats = player.getClass().getCreatureStats(player);
-        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
+        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
+        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
             return;
 
         ItemModel::ModelIndex selected = -1;

@@ -68,11 +68,14 @@ namespace MWMechanics
             return false;
 
         bool receivedMagicDamage = false;
+        bool godmode = actor == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
         switch (effectKey.mId)
         {
         case ESM::MagicEffect::DamageAttribute:
         {
+            if (godmode)
+                break;
             AttributeValue attr = creatureStats.getAttribute(effectKey.mArg);
             attr.damage(magnitude);
             creatureStats.setAttribute(effectKey.mArg, attr);
@@ -91,6 +94,8 @@ namespace MWMechanics
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::RestoreHealth, magnitude);
             break;
         case ESM::MagicEffect::DamageHealth:
+            if (godmode)
+                break;
             receivedMagicDamage = true;
             adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::DamageHealth, -magnitude);
             break;
@@ -98,25 +103,32 @@ namespace MWMechanics
         case ESM::MagicEffect::DamageMagicka:
         case ESM::MagicEffect::DamageFatigue:
         {
+            if (godmode)
+                break;
             int index = effectKey.mId-ESM::MagicEffect::DamageHealth;
             static const bool uncappedDamageFatigue = Settings::Manager::getBool("uncapped damage fatigue", "Game");
             adjustDynamicStat(creatureStats, index, -magnitude, index == 2 && uncappedDamageFatigue);
             break;
         }
         case ESM::MagicEffect::AbsorbHealth:
-            if (magnitude > 0.f)
-                receivedMagicDamage = true;
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
-
+            if (!godmode || magnitude <= 0)
+            {
+                if (magnitude > 0.f)
+                    receivedMagicDamage = true;
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            }
             break;
 
         case ESM::MagicEffect::AbsorbMagicka:
         case ESM::MagicEffect::AbsorbFatigue:
-            adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
+            if (!godmode || magnitude <= 0)
+                adjustDynamicStat(creatureStats, effectKey.mId-ESM::MagicEffect::AbsorbHealth, -magnitude);
             break;
 
         case ESM::MagicEffect::DisintegrateArmor:
         {
+            if (godmode)
+                break;
             static const std::array<int, 9>  priorities
             {
                 MWWorld::InventoryStore::Slot_CarriedLeft,
@@ -138,13 +150,14 @@ namespace MWMechanics
             break;
         }
         case ESM::MagicEffect::DisintegrateWeapon:
-            disintegrateSlot(actor, MWWorld::InventoryStore::Slot_CarriedRight, magnitude);
+            if (!godmode)
+                disintegrateSlot(actor, MWWorld::InventoryStore::Slot_CarriedRight, magnitude);
             break;
 
         case ESM::MagicEffect::SunDamage:
         {
             // isInCell shouldn't be needed, but updateActor called during game start
-            if (!actor.isInCell() || !actor.getCell()->isExterior())
+            if (!actor.isInCell() || !actor.getCell()->isExterior() || godmode)
                 break;
             float time = MWBase::Environment::get().getWorld()->getTimeStamp().getHour();
             float timeDiff = std::min(7.f, std::max(0.f, std::abs(time - 13)));
@@ -169,6 +182,8 @@ namespace MWMechanics
         case ESM::MagicEffect::FrostDamage:
         case ESM::MagicEffect::Poison:
         {
+            if (godmode)
+                break;
             adjustDynamicStat(creatureStats, 0, -magnitude);
             receivedMagicDamage = true;
             break;
@@ -178,6 +193,8 @@ namespace MWMechanics
         case ESM::MagicEffect::RestoreSkill:
         {
             if (!actor.getClass().isNpc())
+                break;
+            if (godmode && effectKey.mId == ESM::MagicEffect::DamageSkill)
                 break;
             NpcStats &npcStats = actor.getClass().getNpcStats(actor);
             SkillValue& skill = npcStats.getSkill(effectKey.mArg);

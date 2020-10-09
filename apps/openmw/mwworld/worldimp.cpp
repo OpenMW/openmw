@@ -1863,10 +1863,13 @@ namespace MWWorld
         else
             mRendering->getCamera()->setSneakOffset(0.f);
 
-        int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
+        int blind = 0;
+        auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
+        if (!mGodMode)
+            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
 
-        int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
+        int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
     }
 

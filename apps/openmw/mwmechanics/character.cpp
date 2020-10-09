@@ -1929,7 +1929,7 @@ void CharacterController::update(float duration, bool animationOnly)
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
         bool onground = world->isOnGround(mPtr);
-        bool incapacitated = (cls.getCreatureStats(mPtr).isParalyzed() || cls.getCreatureStats(mPtr).getKnockedDown());
+        bool incapacitated = ((!godmode && cls.getCreatureStats(mPtr).isParalyzed()) || cls.getCreatureStats(mPtr).getKnockedDown());
         bool inwater = world->isSwimming(mPtr);
         bool flying = world->isFlying(mPtr);
         bool solid = world->isActorCollisionEnabled(mPtr);

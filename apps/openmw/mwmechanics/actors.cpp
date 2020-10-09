@@ -918,6 +918,7 @@ namespace MWMechanics
     {
         CreatureStats &creatureStats = ptr.getClass().getCreatureStats(ptr);
         const MagicEffects &effects = creatureStats.getMagicEffects();
+        bool godmode = ptr == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
         bool wasDead = creatureStats.isDead();
 
@@ -969,8 +970,11 @@ namespace MWMechanics
         for (int i = 0; i < 3; ++i)
         {
             DynamicStat<float> stat = creatureStats.getDynamic(i);
-            stat.setCurrentModifier(effects.get(ESM::MagicEffect::FortifyHealth + i).getMagnitude() -
-                effects.get(ESM::MagicEffect::DrainHealth + i).getMagnitude(),
+            float fortify = effects.get(ESM::MagicEffect::FortifyHealth + i).getMagnitude();
+            float drain = 0.f;
+            if (!godmode)
+                drain = effects.get(ESM::MagicEffect::DrainHealth + i).getMagnitude();
+            stat.setCurrentModifier(fortify - drain,
                 // Magicka can be decreased below zero due to a fortify effect wearing off
                 // Fatigue can be decreased below zero meaning the actor will be knocked out
                 i == 1 || i == 2);
@@ -982,9 +986,14 @@ namespace MWMechanics
         for(int i = 0;i < ESM::Attribute::Length;++i)
         {
             AttributeValue stat = creatureStats.getAttribute(i);
-            stat.setModifier(static_cast<int>(effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude()));
+            float fortify = effects.get(EffectKey(ESM::MagicEffect::FortifyAttribute, i)).getMagnitude();
+            float drain = 0.f, absorb = 0.f;
+            if (!godmode)
+            {
+                drain = effects.get(EffectKey(ESM::MagicEffect::DrainAttribute, i)).getMagnitude();
+                absorb = effects.get(EffectKey(ESM::MagicEffect::AbsorbAttribute, i)).getMagnitude();
+            }
+            stat.setModifier(static_cast<int>(fortify - drain - absorb));
 
             creatureStats.setAttribute(i, stat);
         }
@@ -1214,14 +1223,20 @@ namespace MWMechanics
     {
         NpcStats &npcStats = ptr.getClass().getNpcStats(ptr);
         const MagicEffects &effects = npcStats.getMagicEffects();
+        bool godmode = ptr == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
         // skills
         for(int i = 0;i < ESM::Skill::Length;++i)
         {
             SkillValue& skill = npcStats.getSkill(i);
-            skill.setModifier(static_cast<int>(effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude() -
-                             effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude()));
+            float fortify = effects.get(EffectKey(ESM::MagicEffect::FortifySkill, i)).getMagnitude();
+            float drain = 0.f, absorb = 0.f;
+            if (!godmode)
+            {
+                drain = effects.get(EffectKey(ESM::MagicEffect::DrainSkill, i)).getMagnitude();
+                absorb = effects.get(EffectKey(ESM::MagicEffect::AbsorbSkill, i)).getMagnitude();
+            }
+            skill.setModifier(static_cast<int>(fortify - drain - absorb));
         }
     }
 
@@ -1839,6 +1854,7 @@ namespace MWMechanics
                 if (!playerHitAttemptActor.isInCell())
                     player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
             }
+            bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
 
              // AI and magic effects update
             for(PtrActorMap::iterator iter(mActors.begin()); iter != mActors.end(); ++iter)
@@ -2019,7 +2035,7 @@ namespace MWMechanics
                     iter->first.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Actor);
 
                 const bool isDead = iter->first.getClass().getCreatureStats(iter->first).isDead();
-                if (!isDead && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
+                if (!isDead && (!godmode || !isPlayer) && iter->first.getClass().getCreatureStats(iter->first).isParalyzed())
                     ctrl->skipAnim();
 
                 // Handle player last, in case a cell transition occurs by casting a teleportation spell
