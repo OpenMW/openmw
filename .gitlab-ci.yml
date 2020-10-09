@@ -20,7 +20,7 @@ stages:
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - export CCACHE_DEBUG=1
     - ccache -s
-    - ccache -z -M 1G
+    - ccache -z -M 2G
     - CI/before_script.linux.sh
     - cd build
     - cmake --build . -- -j $(nproc)
