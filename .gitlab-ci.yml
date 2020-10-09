@@ -20,7 +20,7 @@ stages:
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
     - export CCACHE_DEBUG=1
     - ccache -s
-    - ccache -z -M 2G
+    - ccache -z -M 8G
     - CI/before_script.linux.sh
     - cd build
     - cmake --build . -- -j $(nproc)
@@ -35,7 +35,7 @@ stages:
 Debian_GCC:
   extends: .Debian
   cache:
-    key: Debian_GCC.v1
+    key: Debian_GCC.v1-testing
   variables:
     CC: gcc
     CXX: g++
