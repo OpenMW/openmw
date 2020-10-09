@@ -18,7 +18,7 @@ stages:
   script:
     - export CCACHE_BASEDIR="`pwd`"
     - export CCACHE_DIR="`pwd`/ccache" && mkdir -pv "$CCACHE_DIR"
-    - ccache -z -M 1G
+    - ccache -z -M "${CCACHE_SIZE}"
     - CI/before_script.linux.sh
     - cd build
     - cmake --build . -- -j $(nproc)
@@ -36,6 +36,7 @@ Debian_GCC:
   variables:
     CC: gcc
     CXX: g++
+    CCACHE_SIZE: 3G
 
 Debian_GCC_tests:
   extends: .Debian
@@ -44,6 +45,7 @@ Debian_GCC_tests:
   variables:
     CC: gcc
     CXX: g++
+    CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
 
 Debian_Clang:
@@ -53,6 +55,7 @@ Debian_Clang:
   variables:
     CC: clang
     CXX: clang++
+    CCACHE_SIZE: 2G
 
 Debian_Clang_tests:
   extends: .Debian
@@ -61,6 +64,7 @@ Debian_Clang_tests:
   variables:
     CC: clang
     CXX: clang++
+    CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
 
 MacOS:
