@@ -32,7 +32,6 @@ stages:
       - build/install/
       - "**/*.ccache-*"
 
-
 Debian_GCC:
   extends: .Debian
   cache:
