@@ -32,7 +32,7 @@ stages:
 Debian_GCC:
   extends: .Debian
   cache:
-    key: Debian_GCC.v1
+    key: Debian_GCC.v2
   variables:
     CC: gcc
     CXX: g++
@@ -41,7 +41,7 @@ Debian_GCC:
 Debian_GCC_tests:
   extends: .Debian
   cache:
-    key: Debian_GCC_tests.v1
+    key: Debian_GCC_tests.v2
   variables:
     CC: gcc
     CXX: g++
@@ -51,7 +51,7 @@ Debian_GCC_tests:
 Debian_Clang:
   extends: .Debian
   cache:
-    key: Debian_Clang.v1
+    key: Debian_Clang.v2
   variables:
     CC: clang
     CXX: clang++
@@ -60,7 +60,7 @@ Debian_Clang:
 Debian_Clang_tests:
   extends: .Debian
   cache:
-    key: Debian_Clang_tests.v1
+    key: Debian_Clang_tests.v2
   variables:
     CC: clang
     CXX: clang++
