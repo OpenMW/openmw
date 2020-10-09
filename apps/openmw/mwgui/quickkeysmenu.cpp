@@ -340,7 +340,8 @@ namespace MWGui
                 || playerStats.getKnockedDown()
                 || playerStats.getHitRecovery();
 
-        bool isReturnNeeded = playerStats.isParalyzed() || playerStats.isDead();
+        bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
+        bool isReturnNeeded = (!godmode && playerStats.isParalyzed()) || playerStats.isDead();
 
         if (isReturnNeeded && key->type != Type_Item)
         {
