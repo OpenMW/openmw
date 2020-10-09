@@ -60,9 +60,6 @@ MacOS:
   tags:
     - macos
   stage: build
-  before_script:
-    - command -v cmake >/dev/null 2>&1 || brew install cmake
-    - brew list qt || brew install qt
   script:
     - rm -fr build/*  #  remove anything in the build directory
     - CI/before_install.osx.sh
@@ -72,15 +69,7 @@ MacOS:
   artifacts:
     paths:
       - build/OpenMW-*.dmg
-      - "*.log"
-      - build/*.log
-      - build/*/*.log
-      - build/*/*/*.log
-      - build/*/*/*/*.log
-      - build/*/*/*/*/*.log
-      - build/*/*/*/*/*/*.log
-      - build/*/*/*/*/*/*/*.log
-      - build/*/*/*/*/*/*/*/*.log
+      - "build/**/*.log"
 
 variables: &engine-targets
   targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
