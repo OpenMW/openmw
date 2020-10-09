@@ -145,7 +145,7 @@ void NiTriStripsData::read(NIFStream *nif)
     nif->getUShorts(lengths, numStrips);
 
     // "Has Strips" flag. Exceptionally useful.
-    bool hasStrips = false;
+    bool hasStrips = true;
     if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
         hasStrips = nif->getBoolean();
     if (!hasStrips || !numStrips)
