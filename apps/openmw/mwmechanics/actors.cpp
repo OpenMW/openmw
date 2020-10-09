@@ -1668,8 +1668,9 @@ namespace MWMechanics
     void Actors::predictAndAvoidCollisions()
     {
         const float minGap = 10.f;
-        const float maxDistToCheck = 100.f;
-        const float maxTimeToCheck = 1.f;
+        const float maxDistForPartialAvoiding = 200.f;
+        const float maxDistForStrictAvoiding = 100.f;
+        const float maxTimeToCheck = 2.0f;
         static const bool giveWayWhenIdle = Settings::Manager::getBool("NPCs give way", "Game");
 
         MWWorld::Ptr player = getPlayer();
@@ -1680,9 +1681,15 @@ namespace MWMechanics
             if (ptr == player)
                 continue; // Don't interfere with player controls.
 
+            float maxSpeed = ptr.getClass().getMaxSpeed(ptr);
+            if (maxSpeed == 0.0)
+                continue; // Can't move, so there is no sense to predict collisions.
+
             Movement& movement = ptr.getClass().getMovementSettings(ptr);
             osg::Vec2f origMovement(movement.mPosition[0], movement.mPosition[1]);
             bool isMoving = origMovement.length2() > 0.01;
+            if (movement.mPosition[1] < 0)
+                continue; // Actors can not see others when move backward.
 
             // Moving NPCs always should avoid collisions.
             // Standing NPCs give way to moving ones if they are not in combat (or pursue) mode and either
@@ -1710,11 +1717,11 @@ namespace MWMechanics
             if (!shouldAvoidCollision)
                 continue;
 
-            float maxSpeed = ptr.getClass().getMaxSpeed(ptr);
             osg::Vec2f baseSpeed = origMovement * maxSpeed;
             osg::Vec3f basePos = ptr.getRefData().getPosition().asVec3();
             float baseRotZ = ptr.getRefData().getPosition().rot[2];
             osg::Vec3f halfExtents = world->getHalfExtents(ptr);
+            float maxDistToCheck = isMoving ? maxDistForPartialAvoiding : maxDistForStrictAvoiding;
 
             float timeToCollision = maxTimeToCheck;
             osg::Vec2f movementCorrection(0, 0);
@@ -1730,9 +1737,10 @@ namespace MWMechanics
                 osg::Vec3f otherHalfExtents = world->getHalfExtents(otherPtr);
                 osg::Vec3f deltaPos = otherPtr.getRefData().getPosition().asVec3() - basePos;
                 osg::Vec2f relPos = Misc::rotateVec2f(osg::Vec2f(deltaPos.x(), deltaPos.y()), baseRotZ);
+                float dist = deltaPos.length();
 
                 // Ignore actors which are not close enough or come from behind.
-                if (deltaPos.length2() > maxDistToCheck * maxDistToCheck || relPos.y() < 0)
+                if (dist > maxDistToCheck || relPos.y() < 0)
                     continue;
 
                 // Don't check for a collision if vertical distance is greater then the actor's height.
@@ -1767,16 +1775,20 @@ namespace MWMechanics
                 timeToCollision = t;
                 angleToApproachingActor = std::atan2(deltaPos.x(), deltaPos.y());
                 osg::Vec2f posAtT = relPos + relSpeed * t;
-                float coef = (posAtT.x() * relSpeed.x() + posAtT.y() * relSpeed.y()) / (collisionDist * maxSpeed);
+                float coef = (posAtT.x() * relSpeed.x() + posAtT.y() * relSpeed.y()) / (collisionDist * collisionDist * maxSpeed);
+                coef *= osg::clampBetween((maxDistForPartialAvoiding - dist) / (maxDistForPartialAvoiding - maxDistForStrictAvoiding), 0.f, 1.f);
                 movementCorrection = posAtT * coef;
-                // Step to the side rather than backward. Otherwise player will be able to push the NPC far away from it's original location.
-                movementCorrection.y() = std::max(0.f, movementCorrection.y());
+                if (otherPtr.getClass().getCreatureStats(otherPtr).isDead())
+                    // In case of dead body still try to go around (it looks natural), but reduce the correction twice.
+                    movementCorrection.y() *= 0.5f;
             }
 
             if (timeToCollision < maxTimeToCheck)
             {
                 // Try to evade the nearest collision.
                 osg::Vec2f newMovement = origMovement + movementCorrection;
+                // Step to the side rather than backward. Otherwise player will be able to push the NPC far away from it's original location.
+                newMovement.y() = std::max(newMovement.y(), 0.f);
                 if (isMoving)
                 { // Keep the original speed.
                     newMovement.normalize();
