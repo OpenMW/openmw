@@ -126,7 +126,7 @@ namespace DetourNavigator
         mNavMeshTilesCache.reportStats(frameNumber, stats);
     }
 
-    void AsyncNavMeshUpdater::process() throw()
+    void AsyncNavMeshUpdater::process() noexcept
     {
         Log(Debug::Debug) << "Start process navigator jobs by thread=" << std::this_thread::get_id();
         while (!mShouldStop)
