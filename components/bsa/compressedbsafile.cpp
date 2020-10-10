@@ -27,6 +27,8 @@
 #include <stdexcept>
 #include <cassert>
 
+#include <lz4frame.h>
+
 #include <boost/scoped_array.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -132,8 +134,11 @@ void CompressedBSAFile::readHeader()
 
         input.read(reinterpret_cast<char*>(header), 36);
 
-        if(header[0] != 0x00415342 /*"BSA\x00"*/ || (header[1] != 0x67 /*TES4*/ && header[1] != 0x68 /*TES5*/))
-            fail("Unrecognized TES4 BSA header");
+        if (header[0] != 0x00415342) /*"BSA\x00"*/
+            fail("Unrecognized compressed BSA format");
+        mVersion = header[1];
+        if (mVersion != 0x67 /*TES4*/ && mVersion != 0x68 /*FO3, FNV, TES5*/ && mVersion != 0x69 /*SSE*/)
+            fail("Unrecognized compressed BSA version");
 
         // header[2] is offset, should be 36 = 0x24 which is the size of the header
 
@@ -158,7 +163,8 @@ void CompressedBSAFile::readHeader()
         // header[8]; // fileFlags : an opportunity to optimize here
 
         mCompressedByDefault = (archiveFlags & 0x4) != 0;
-        mEmbeddedFileNames = header[1] == 0x68 /*TES5*/ && (archiveFlags & 0x100) != 0;
+        if (mVersion == 0x68 || mVersion == 0x69) /*FO3, FNV, TES5, SSE*/
+            mEmbeddedFileNames = (archiveFlags & 0x100) != 0;
     }
 
     // folder records
@@ -168,7 +174,14 @@ void CompressedBSAFile::readHeader()
     {
         input.read(reinterpret_cast<char*>(&hash), 8);
         input.read(reinterpret_cast<char*>(&fr.count), 4); // not sure purpose of count
-        input.read(reinterpret_cast<char*>(&fr.offset), 4); // not sure purpose of offset
+        if (mVersion == 0x69) // SSE
+        {
+            std::uint32_t unknown;
+            input.read(reinterpret_cast<char*>(&unknown), 4);
+            input.read(reinterpret_cast<char*>(&fr.offset), 8);
+        }
+        else
+            input.read(reinterpret_cast<char*>(&fr.offset), 4); // not sure purpose of offset
 
         std::map<std::uint64_t, FolderRecord>::const_iterator lb = mFolders.lower_bound(hash);
         if (lb != mFolders.end() && !(mFolders.key_comp()(hash, lb->first)))
@@ -327,32 +340,56 @@ Files::IStreamPtr CompressedBSAFile::getFile(const char* file)
 
 Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
 {
-    if (fileRecord.isCompressed(mCompressedByDefault)) {
-        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
+    size_t size = fileRecord.getSizeWithoutCompressionFlag();
+    size_t uncompressedSize = size;
+    bool compressed = fileRecord.isCompressed(mCompressedByDefault);
+    Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, size);
+    std::istream* fileStream = streamPtr.get();
+    if (mEmbeddedFileNames)
+    {
+        // Skip over the embedded file name
+        char length = 0;
+        fileStream->read(&length, 1);
+        fileStream->ignore(length);
+        size -= length + sizeof(char);
+    }
+    if (compressed)
+    {
+        fileStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(uint32_t));
+        size -= sizeof(uint32_t);
+    }
+    std::shared_ptr<Bsa::MemoryInputStream> memoryStreamPtr = std::make_shared<MemoryInputStream>(uncompressedSize);
 
-        std::istream* fileStream = streamPtr.get();
+    if (compressed)
+    {
+        if (mVersion != 0x69) // Non-SSE: zlib
+        {
+            boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
+            inputStreamBuf.push(boost::iostreams::zlib_decompressor());
+            inputStreamBuf.push(*fileStream);
 
-        if (mEmbeddedFileNames) {
-            std::string embeddedFileName;
-            getBZString(embeddedFileName, *fileStream);
+            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
+            boost::iostreams::copy(inputStreamBuf, sr);
         }
-
-        uint32_t uncompressedSize = 0u;
-        fileStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(uncompressedSize));
-
-        boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-        inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-        inputStreamBuf.push(*fileStream);
-
-        std::shared_ptr<Bsa::MemoryInputStream> memoryStreamPtr = std::make_shared<MemoryInputStream>(uncompressedSize);
-
-        boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
-        boost::iostreams::copy(inputStreamBuf, sr);
-
-        return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
+        else // SSE: lz4
+        {
+            boost::scoped_array<char> buffer(new char[size]);
+            fileStream->read(buffer.get(), size);
+            LZ4F_dctx* context = nullptr;
+            LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
+            LZ4F_decompressOptions_t options = {};
+            LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
+            LZ4F_errorCode_t errorCode = LZ4F_freeDecompressionContext(context);
+            if (LZ4F_isError(errorCode))
+                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+        }
+    }
+    else
+    {
+        fileStream->read(memoryStreamPtr->getRawData(), size);
     }
 
-    return Files::openConstrainedFileStream(mFilename.c_str(), fileRecord.offset, fileRecord.size);
+    return std::shared_ptr<std::istream>(memoryStreamPtr, (std::istream*)memoryStreamPtr.get());
 }
 
 BsaVersion CompressedBSAFile::detectVersion(std::string filePath)
