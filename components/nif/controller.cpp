@@ -170,25 +170,13 @@ namespace Nif
         data.post(nif);
     }
 
-    void NiAlphaController::read(NIFStream *nif)
+    void NiFloatInterpController::read(NIFStream *nif)
     {
         Controller::read(nif);
         data.read(nif);
     }
 
-    void NiAlphaController::post(NIFFile *nif)
-    {
-        Controller::post(nif);
-        data.post(nif);
-    }
-
-    void NiRollController::read(NIFStream *nif)
-    {
-        Controller::read(nif);
-        data.read(nif);
-    }
-
-    void NiRollController::post(NIFFile *nif)
+    void NiFloatInterpController::post(NIFFile *nif)
     {
         Controller::post(nif);
         data.post(nif);

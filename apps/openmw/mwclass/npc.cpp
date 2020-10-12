@@ -941,7 +941,8 @@ namespace MWClass
         // TODO: This function is called several times per frame for each NPC.
         // It would be better to calculate it only once per frame for each NPC and save the result in CreatureStats.
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -990,7 +991,8 @@ namespace MWClass
             return 0.f;
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
-        if (stats.isParalyzed() || stats.getKnockedDown() || stats.isDead())
+        bool godmode = ptr == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+        if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead())
             return 0.f;
 
         const NpcCustomData *npcdata = static_cast<const NpcCustomData*>(ptr.getRefData().getCustomData());

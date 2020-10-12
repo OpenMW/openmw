@@ -92,7 +92,7 @@ namespace
                         "\n"
                         "void bar() { foo() }\n"
                         "\n"
-                        "#line 2 0\n"
+                        "#line 1 0\n"
                         "\n"
                         "void main() { bar() }\n";
                     EXPECT_EQ(shader->getShaderSource(), expected);

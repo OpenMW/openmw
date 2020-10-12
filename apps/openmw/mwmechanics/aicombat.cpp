@@ -240,24 +240,24 @@ namespace MWMechanics
 
         storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
 
+        if (isRangedCombat)
+        {
+            // rotate actor taking into account target movement direction and projectile speed
+            osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
+            vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
+            lastTargetPos = vTargetPos;
+
+            storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
+            storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
+        }
+        else
+        {
+            storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
+            storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
+        }
+
         if (storage.mReadyToAttack)
         {
-            if (isRangedCombat)
-            {
-                // rotate actor taking into account target movement direction and projectile speed
-                osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-                vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
-                lastTargetPos = vTargetPos;
-
-                storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-                storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
-            }
-            else
-            {
-                storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
-                storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
-            }
-
             storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);

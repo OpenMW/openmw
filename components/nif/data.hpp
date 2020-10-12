@@ -75,8 +75,6 @@ class NiAutoNormalParticlesData : public NiGeometryData
 public:
     int numParticles{0};
 
-    float particleRadius;
-
     int activeCount;
 
     std::vector<float> particleRadii, sizes, rotationAngles;
