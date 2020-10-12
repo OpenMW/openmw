@@ -6,6 +6,7 @@
     <Layer name="AdditiveOverlay" type="AdditiveLayer" pick="false"/>
     <Layer name="HUD" overlapped="false" pick="true"/>
     <Layer name="Menu" overlapped="false" pick="true"/>
+    <Layer name="MainMenu" overlapped="true" pick="true"/>
     <Layer name="JournalBooks" type="ScalingLayer" pick="true">
         <Property key="Size" value="600 520"/>
     </Layer>

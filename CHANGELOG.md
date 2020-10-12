@@ -51,6 +51,7 @@
     Bug #5588: Randomly clicking on the journal's right-side page when it's empty shows random topics
     Bug #5603: Setting constant effect cast style doesn't correct effects view
     Bug #5611: Usable items with "0 Uses" should be used only once
+    Bug #5622: Can't properly interact with the console when in pause menu
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #4894: Consider actors as obstacles for pathfinding
