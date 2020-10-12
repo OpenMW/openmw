@@ -162,7 +162,6 @@ struct NiWireframeProperty : public Property
     }
 };
 
-
 // The rest are all struct-based
 template <typename T>
 struct StructPropT : Property

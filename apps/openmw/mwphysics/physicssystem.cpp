@@ -265,7 +265,11 @@ namespace MWPhysics
     RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
         if (from == to)
-            return RayCastingResult { false };
+        {
+            RayCastingResult result;
+            result.mHit = false;
+            return result;
+        }
         btVector3 btFrom = Misc::Convert::toBullet(from);
         btVector3 btTo = Misc::Convert::toBullet(to);
 

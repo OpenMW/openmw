@@ -60,5 +60,54 @@ public:
     void read(NIFStream *nif);
 };
 
+struct NiIntegerExtraData : public Extra
+{
+    unsigned int data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiIntegersExtraData : public Extra
+{
+    std::vector<unsigned int> data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiBinaryExtraData : public Extra
+{
+    std::vector<char> data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiBooleanExtraData : public Extra
+{
+    bool data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiVectorExtraData : public Extra
+{
+    osg::Vec4f data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiFloatExtraData : public Extra
+{
+    float data;
+
+    void read(NIFStream *nif);
+};
+
+struct NiFloatsExtraData : public Extra
+{
+    std::vector<float> data;
+
+    void read(NIFStream *nif);
+};
+
 } // Namespace
 #endif

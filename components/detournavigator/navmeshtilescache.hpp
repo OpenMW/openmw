@@ -11,6 +11,8 @@
 #include <list>
 #include <mutex>
 #include <cassert>
+#include <cstring>
+#include <vector>
 
 namespace osg
 {
@@ -33,10 +35,10 @@ namespace DetourNavigator
             std::atomic<std::int64_t> mUseCount;
             osg::Vec3f mAgentHalfExtents;
             TilePosition mChangedTile;
-            std::string mNavMeshKey;
+            std::vector<unsigned char> mNavMeshKey;
             NavMeshData mNavMeshData;
 
-            Item(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile, std::string navMeshKey)
+            Item(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile, std::vector<unsigned char>&& navMeshKey)
                 : mUseCount(0)
                 , mAgentHalfExtents(agentHalfExtents)
                 , mChangedTile(changedTile)
@@ -120,19 +122,32 @@ namespace DetourNavigator
 
             virtual ~KeyView() = default;
 
-            KeyView(const std::string& value)
+            KeyView(const std::vector<unsigned char>& value)
                 : mValue(&value) {}
 
-            const std::string& getValue() const
+            const std::vector<unsigned char>& getValue() const
             {
                 assert(mValue);
                 return *mValue;
             }
 
-            virtual int compare(const std::string& other) const
+            virtual int compare(const std::vector<unsigned char>& other) const
             {
                 assert(mValue);
-                return mValue->compare(other);
+
+                const auto valueSize = mValue->size();
+                const auto otherSize = other.size();
+
+                if (const auto result = std::memcmp(mValue->data(), other.data(), std::min(valueSize, otherSize)))
+                    return result;
+
+                if (valueSize < otherSize)
+                    return -1;
+
+                if (valueSize > otherSize)
+                    return 1;
+
+                return 0;
             }
 
             virtual bool isLess(const KeyView& other) const
@@ -147,7 +162,7 @@ namespace DetourNavigator
             }
 
         private:
-            const std::string* mValue = nullptr;
+            const std::vector<unsigned char>* mValue = nullptr;
         };
 
         class RecastMeshKeyView : public KeyView
@@ -156,7 +171,7 @@ namespace DetourNavigator
             RecastMeshKeyView(const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections)
                 : mRecastMesh(recastMesh), mOffMeshConnections(offMeshConnections) {}
 
-            int compare(const std::string& other) const override;
+            int compare(const std::vector<unsigned char>& other) const override;
 
             bool isLess(const KeyView& other) const override
             {

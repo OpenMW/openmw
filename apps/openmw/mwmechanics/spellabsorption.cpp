@@ -46,7 +46,7 @@ namespace MWMechanics
 
     bool absorbSpell (const std::string& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
     {
-        if (spellId.empty() || caster == target || !target.getClass().isActor())
+        if (spellId.empty() || target.isEmpty() || caster == target || !target.getClass().isActor())
             return false;
 
         CreatureStats& stats = target.getClass().getCreatureStats(target);
