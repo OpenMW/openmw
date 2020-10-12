@@ -12,8 +12,8 @@
     </Layer>
     <Layer name="Windows" overlapped="true" pick="true"/>
     <Layer name="Debug" overlapped="true" pick="true"/>
-    <Layer name="Notification" overlapped="false" pick="false"/>
     <Layer name="Popup" overlapped="true" pick="true"/>
+    <Layer name="Notification" overlapped="false" pick="false"/>
     <Layer name="DragAndDrop" overlapped="false" pick="false"/>
     <Layer name="LoadingScreen" overlapped="false" pick="true"/>
     <Layer name="MessageBox" overlapped="false" pick="true"/>
