@@ -113,7 +113,7 @@ namespace DetourNavigator
         std::map<std::thread::id, Queue> mThreadsQueues;
         std::vector<std::thread> mThreads;
 
-        void process() throw();
+        void process() noexcept;
 
         bool processJob(const Job& job);
 
