@@ -146,8 +146,10 @@ namespace MWWorld
         return mBaseNode;
     }
 
-    int RefData::getCount() const
+    int RefData::getCount(bool absolute) const
     {
+        if(absolute)
+            return std::abs(mCount);
         return mCount;
     }
 

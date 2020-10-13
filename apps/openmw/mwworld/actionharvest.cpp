@@ -29,6 +29,7 @@ namespace MWWorld
 
         MWWorld::Ptr target = getTarget();
         MWWorld::ContainerStore& store = target.getClass().getContainerStore (target);
+        store.resolve();
         MWWorld::ContainerStore& actorStore = actor.getClass().getContainerStore(actor);
         std::map<std::string, int> takenMap;
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)

@@ -19,14 +19,14 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature)
+    inline std::string getLevelledItem (const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Seed& seed = Misc::Rng::getSeed())
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
         const MWWorld::Ptr& player = getPlayer();
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
-        if (Misc::Rng::roll0to99() < levItem->mChanceNone)
+        if (Misc::Rng::roll0to99(seed) < levItem->mChanceNone)
             return std::string();
 
         std::vector<std::string> candidates;
@@ -55,7 +55,7 @@ namespace MWMechanics
         }
         if (candidates.empty())
             return std::string();
-        std::string item = candidates[Misc::Rng::rollDice(candidates.size())];
+        std::string item = candidates[Misc::Rng::rollDice(candidates.size(), seed)];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(Misc::StringUtils::lowerCase(item)))
@@ -74,9 +74,9 @@ namespace MWMechanics
         else
         {
             if (ref.getPtr().getTypeName() == typeid(ESM::ItemLevList).name())
-                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false);
+                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, seed);
             else
-                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true);
+                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, seed);
         }
     }
 

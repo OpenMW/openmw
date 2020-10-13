@@ -168,6 +168,7 @@ namespace MWGui
 
         if (!mPtr.isEmpty())
             MWBase::Environment::get().getMechanicsManager()->onClose(mPtr);
+        resetReference();
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

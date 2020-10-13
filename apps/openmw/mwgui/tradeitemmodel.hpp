@@ -40,7 +40,7 @@ namespace MWGui
         /// and removing weight for items we've lent to someone else.
         void adjustEncumbrance (float& encumbrance);
 
-        std::vector<ItemStack> getItemsBorrowedToUs();
+        const std::vector<ItemStack> getItemsBorrowedToUs() const;
 
     private:
         void borrowImpl(const ItemStack& item, std::vector<ItemStack>& out);

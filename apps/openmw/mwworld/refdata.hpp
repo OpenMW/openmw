@@ -86,7 +86,7 @@ namespace MWWorld
             /// Set base node (can be a null pointer).
             void setBaseNode (SceneUtil::PositionAttitudeTransform* base);
 
-            int getCount() const;
+            int getCount(bool absolute = true) const;
 
             void setLocals (const ESM::Script& script);
 

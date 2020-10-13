@@ -86,8 +86,9 @@ void MWWorld::InventoryStore::readEquipmentState(const MWWorld::ContainerStoreIt
         // unstack if required
         if (!allowedSlots.second && iter->getRefData().getCount() > 1)
         {
-            MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, 1);
-            iter->getRefData().setCount(iter->getRefData().getCount()-1);
+            int count = iter->getRefData().getCount(false);
+            MWWorld::ContainerStoreIterator newIter = addNewStack(*iter, count > 0 ? 1 : -1);
+            iter->getRefData().setCount(subtractItems(count, 1));
             mSlots[slot] = newIter;
         }
         else
@@ -850,8 +851,8 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::unequipItemQuantity(con
     {
         if (stacks(*iter, item) && !isEquipped(*iter))
         {
-            iter->getRefData().setCount(iter->getRefData().getCount() + count);
-            item.getRefData().setCount(item.getRefData().getCount() - count);
+            iter->getRefData().setCount(addItems(iter->getRefData().getCount(false), count));
+            item.getRefData().setCount(subtractItems(item.getRefData().getCount(false), count));
             return iter;
         }
     }
