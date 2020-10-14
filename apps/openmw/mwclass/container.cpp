@@ -308,8 +308,14 @@ namespace MWClass
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
     {
+        if (!ptr.getRefData().getCustomData())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         const ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
-        if (!ptr.getRefData().getCustomData() || !customData.mStore.isResolved())
+        if (!customData.mStore.isResolved())
         {
             state.mHasCustomState = false;
             return;
