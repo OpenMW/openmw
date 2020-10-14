@@ -242,33 +242,39 @@ Every weapon type has an attack animation group and a suffix for the movement an
 For example, long blades use ``weapononehand`` attack animation group, ``idle1h`` idle animation group, ``jump1h`` jumping animation group, etc.
 This is the full table of supported animation groups:
 
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|  Weapon type  |  Animation group  |  Movement suffix |   Attack (fallback)  |   Suffix (fallback)   |
-+===============+===================+==================+======================+=======================+
-|  Short blade  | shortbladeonehand |        1s        |    weapononehand     |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-| Long blade 1H |   weapononehand   |        1h        |                      |                       |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-| Long blade 2H |   weapontwohand   |        2c        |                      |                       |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|   Blunt 1H    |   bluntonehand    |        1b        |    weapononehand     |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|   Blunt 2H    |   blunttwohand    |        2b        |    weapontwohand     |          2c           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|    Axe 1H     |   bluntonehand    |        1b        |    weapononehand     |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|    Axe 2H     |   blunttwohand    |        2b        |    weapontwohand     |          2c           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-| Blunt 2H wide |   weapontwowide   |        2w        |    weapontwohand     |          2c           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|     Spear     |   weapontwowide   |        2w        |    weapontwohand     |          2c           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|      Bow      |    bowandarrow    |        bow       |                      |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|    Crossbow   |     crossbow      |     crossbow     |                      |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
-|     Thrown    |    throwweapon    |        1t        |                      |          1h           |
-+---------------+-------------------+------------------+----------------------+-----------------------+
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|  Weapon type  |  Animation group  |  Movement suffix |   Attack (fallback)  |   Suffix (fallback)   |      Attach bone      |
++===============+===================+==================+======================+=======================+=======================+
+|  Short blade  | shortbladeonehand |        1s        |    weapononehand     |          1h           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+| Long blade 1H |   weapononehand   |        1h        |                      |                       |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+| Long blade 2H |   weapontwohand   |        2c        |                      |                       |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|   Blunt 1H    |   bluntonehand    |        1b        |    weapononehand     |          1h           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|   Blunt 2H    |   blunttwohand    |        2b        |    weapontwohand     |          2c           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|    Axe 1H     |   bluntonehand    |        1b        |    weapononehand     |          1h           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|    Axe 2H     |   blunttwohand    |        2b        |    weapontwohand     |          2c           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+| Blunt 2H wide |   weapontwowide   |        2w        |    weapontwohand     |          2c           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|     Spear     |   weapontwowide   |        2w        |    weapontwohand     |          2c           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|      Bow      |    bowandarrow    |        bow       |                      |          1h           |    Weapon Bone Left   |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|    Crossbow   |     crossbow      |     crossbow     |                      |          1h           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+|     Thrown    |    throwweapon    |        1t        |                      |          1h           |      Weapon Bone      |
++---------------+-------------------+------------------+----------------------+-----------------------+-----------------------+
+
+Note that bows can be attached to the "Weapon Bone Left" bone if it is present in shooter's skeleton, and if it is not, "Weapon Bone" is used as a fallback.
+
+Also it is possible to add a "Bip01 Arrow" bone to actor skeletons. In this case OpenMW attaches arrows to this bone instead of ArrowBone in the bow mesh.
+Such approach allows to implement better shooting animations (for example, beast races have tail, so quivers should be attached under different angle and
+default arrow fetching animation does not look good).
 
 .. _`Graphic Herbalism`: https://www.nexusmods.com/morrowind/mods/46599
 .. _`OpenMW Containers Animated`: https://www.nexusmods.com/morrowind/mods/46232

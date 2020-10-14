@@ -69,6 +69,7 @@
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
     Feature #5579: MCP SetAngle enhancement
     Feature #5610: Actors movement should be smoother
+    Feature #5642: Ability to attach arrows to actor skeleton instead of bow mesh
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

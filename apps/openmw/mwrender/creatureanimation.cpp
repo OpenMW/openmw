@@ -252,11 +252,15 @@ osg::Group *CreatureWeaponAnimation::getArrowBone()
     int type = weapon->get<ESM::Weapon>()->mBase->mData.mType;
     int ammoType = MWMechanics::getWeaponType(type)->mAmmoType;
 
-    SceneUtil::FindByNameVisitor findVisitor (MWMechanics::getWeaponType(ammoType)->mAttachBone);
-
-    mWeapon->getNode()->accept(findVisitor);
-
-    return findVisitor.mFoundNode;
+    // Try to find and attachment bone in actor's skeleton, otherwise fall back to the ArrowBone in weapon's mesh
+    osg::Group* bone = getBoneByName(MWMechanics::getWeaponType(ammoType)->mAttachBone);
+    if (bone == nullptr)
+    {
+        SceneUtil::FindByNameVisitor findVisitor ("ArrowBone");
+        mWeapon->getNode()->accept(findVisitor);
+        bone = findVisitor.mFoundNode;
+    }
+    return bone;
 }
 
 osg::Node *CreatureWeaponAnimation::getWeaponNode()
