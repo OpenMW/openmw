@@ -76,6 +76,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btColl
     updatePosition();
 
     addCollisionMask(getCollisionMask());
+    commitPositionChange();
 }
 
 Actor::~Actor()
@@ -105,8 +106,7 @@ void Actor::addCollisionMask(int collisionMask)
 
 void Actor::updateCollisionMask()
 {
-    mCollisionWorld->removeCollisionObject(mCollisionObject.get());
-    addCollisionMask(getCollisionMask());
+    mCollisionObject->getBroadphaseHandle()->m_collisionFilterMask = getCollisionMask();
 }
 
 int Actor::getCollisionMask() const
@@ -126,29 +126,53 @@ void Actor::updatePosition()
     mPosition = position;
     mPreviousPosition = position;
 
+    mTransformUpdatePending = true;
     updateCollisionObjectPosition();
 }
 
 void Actor::updateCollisionObjectPosition()
 {
-    btTransform tr = mCollisionObject->getWorldTransform();
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
     osg::Vec3f newPosition = scaledTranslation + mPosition;
-    tr.setOrigin(Misc::Convert::toBullet(newPosition));
-    mCollisionObject->setWorldTransform(tr);
+    mLocalTransform.setOrigin(Misc::Convert::toBullet(newPosition));
+    mLocalTransform.setRotation(Misc::Convert::toBullet(mRotation));
+
+}
+
+void Actor::commitPositionChange()
+{
+    if (mScaleUpdatePending)
+    {
+        mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
+        mScaleUpdatePending = false;
+    }
+    if (mTransformUpdatePending)
+    {
+        mCollisionObject->setWorldTransform(mLocalTransform);
+        mTransformUpdatePending = false;
+    }
 }
 
 osg::Vec3f Actor::getCollisionObjectPosition() const
 {
-    return Misc::Convert::toOsg(mCollisionObject->getWorldTransform().getOrigin());
+    return Misc::Convert::toOsg(mLocalTransform.getOrigin());
 }
 
 void Actor::setPosition(const osg::Vec3f &position)
 {
-    mPreviousPosition = mPosition;
+    if (mTransformUpdatePending)
+    {
+        mCollisionObject->setWorldTransform(mLocalTransform);
+        mTransformUpdatePending = false;
+    }
+    else
+    {
+        mPreviousPosition = mPosition;
 
-    mPosition = position;
-    updateCollisionObjectPosition();
+        mPosition = position;
+        updateCollisionObjectPosition();
+        mCollisionObject->setWorldTransform(mLocalTransform);
+    }
 }
 
 osg::Vec3f Actor::getPosition() const
@@ -163,11 +187,11 @@ osg::Vec3f Actor::getPreviousPosition() const
 
 void Actor::updateRotation ()
 {
-    btTransform tr = mCollisionObject->getWorldTransform();
+    if (mRotation == mPtr.getRefData().getBaseNode()->getAttitude())
+        return;
     mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
-    tr.setRotation(Misc::Convert::toBullet(mRotation));
-    mCollisionObject->setWorldTransform(tr);
 
+    mTransformUpdatePending = true;
     updateCollisionObjectPosition();
 }
 
@@ -183,12 +207,13 @@ void Actor::updateScale()
 
     mPtr.getClass().adjustScale(mPtr, scaleVec, false);
     mScale = scaleVec;
-    mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
+    mScaleUpdatePending = true;
 
     scaleVec = osg::Vec3f(scale,scale,scale);
     mPtr.getClass().adjustScale(mPtr, scaleVec, true);
     mRenderingScale = scaleVec;
 
+    mTransformUpdatePending = true;
     updateCollisionObjectPosition();
 }
 

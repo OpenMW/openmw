@@ -5,6 +5,7 @@
 
 #include "ptrholder.hpp"
 
+#include <LinearMath/btTransform.h>
 #include <osg/Vec3f>
 #include <osg/Quat>
 #include <osg/ref_ptr>
@@ -61,6 +62,7 @@ namespace MWPhysics
         void updatePosition();
 
         void updateCollisionObjectPosition();
+        void commitPositionChange();
 
         /**
          * Returns the half extents of the collision body (scaled according to collision scale)
@@ -157,6 +159,9 @@ namespace MWPhysics
         osg::Vec3f mRenderingScale;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
+        btTransform mLocalTransform;
+        bool mScaleUpdatePending;
+        bool mTransformUpdatePending;
 
         osg::Vec3f mForce;
         bool mOnGround;
