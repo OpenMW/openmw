@@ -212,7 +212,7 @@ endif ()
 
 include_directories(${BULLET_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR})
 
-add_library(components OBJECT ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
+add_library(components STATIC ${COMPONENT_FILES} ${MOC_SRCS} ${ESM_UI_HDR})
 
 target_link_libraries(components
     ${Boost_SYSTEM_LIBRARY}
