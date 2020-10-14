@@ -17,32 +17,29 @@ namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btCollisionWorld* world)
   : mCanWaterWalk(false), mWalkingOnWater(false)
-  , mCollisionObject(nullptr), mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
+  , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBoxTranslate), mHalfExtents(shape->mCollisionBoxHalfExtents)
+  , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
   , mCollisionWorld(world)
 {
     mPtr = ptr;
 
-    mHalfExtents = shape->mCollisionBoxHalfExtents;
-    mMeshTranslation = shape->mCollisionBoxTranslate;
-
     // We can not create actor without collisions - he will fall through the ground.
     // In this case we should autogenerate collision box based on mesh shape
     // (NPCs have bodyparts and use a different approach)
     if (!ptr.getClass().isNpc() && mHalfExtents.length2() == 0.f)
     {
-        const Resource::BulletShape* collisionShape = shape.get();
-        if (collisionShape && collisionShape->mCollisionShape)
+        if (shape->mCollisionShape)
         {
             btTransform transform;
             transform.setIdentity();
             btVector3 min;
             btVector3 max;
 
-            collisionShape->mCollisionShape->getAabb(transform, min, max);
+            shape->mCollisionShape->getAabb(transform, min, max);
             mHalfExtents.x() = (max[0] - min[0])/2.f;
             mHalfExtents.y() = (max[1] - min[1])/2.f;
             mHalfExtents.z() = (max[2] - min[2])/2.f;
@@ -83,7 +80,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> 
 
 Actor::~Actor()
 {
-    if (mCollisionObject.get())
+    if (mCollisionObject)
         mCollisionWorld->removeCollisionObject(mCollisionObject.get());
 }
 
@@ -112,7 +109,7 @@ void Actor::updateCollisionMask()
     addCollisionMask(getCollisionMask());
 }
 
-int Actor::getCollisionMask()
+int Actor::getCollisionMask() const
 {
     int collisionMask = CollisionType_World | CollisionType_HeightMap;
     if (mExternalCollisionMode)
@@ -120,7 +117,6 @@ int Actor::getCollisionMask()
     if (mCanWaterWalk)
         collisionMask |= CollisionType_Water;
     return collisionMask;
-    
 }
 
 void Actor::updatePosition()

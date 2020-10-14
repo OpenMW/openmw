@@ -1494,24 +1494,22 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
-        mPhysics->stepSimulation(duration);
+        mPhysics->stepSimulation();
         processDoors(duration);
 
         mProjectileManager->update(duration);
 
-        const MWPhysics::PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
-        MWPhysics::PtrVelocityList::const_iterator player(results.end());
-        for(MWPhysics::PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
+        const auto results = mPhysics->applyQueuedMovement(duration);
+
+        for(const auto& result : results)
         {
-            if(iter->first == getPlayerPtr())
-            {
-                // Handle player last, in case a cell transition occurs
-                player = iter;
-                continue;
-            }
-            moveObjectImp(iter->first, iter->second.x(), iter->second.y(), iter->second.z(), false);
+            // Handle player last, in case a cell transition occurs
+            if(result.first != getPlayerPtr())
+                moveObjectImp(result.first, result.second.x(), result.second.y(), result.second.z(), false);
         }
-        if(player != results.end())
+
+        const auto player = results.find(getPlayerPtr());
+        if (player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
     }
 

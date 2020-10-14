@@ -14,9 +14,10 @@
 
 namespace MWPhysics
 {
-    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance)
+    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, btCollisionWorld* world)
         : mShapeInstance(shapeInstance)
         , mSolid(true)
+        , mCollisionWorld(world)
     {
         mPtr = ptr;
 
@@ -29,6 +30,12 @@ namespace MWPhysics
         setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
         const float* pos = ptr.getRefData().getPosition().pos;
         setOrigin(btVector3(pos[0], pos[1], pos[2]));
+    }
+
+    Object::~Object()
+    {
+        if (mCollisionObject)
+            mCollisionWorld->removeCollisionObject(mCollisionObject.get());
     }
 
     const Resource::BulletShapeInstance* Object::getShapeInstance() const

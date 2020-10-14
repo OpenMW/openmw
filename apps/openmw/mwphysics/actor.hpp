@@ -21,12 +21,13 @@ namespace Resource
 
 namespace MWPhysics
 {
+    class PhysicsTaskScheduler;
 
-    class Actor : public PtrHolder
+    class Actor final : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, osg::ref_ptr<const Resource::BulletShape> shape, btCollisionWorld* world);
-        ~Actor();
+        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btCollisionWorld* world);
+        ~Actor() override;
 
         /**
          * Sets the collisionMode for this actor. If disabled, the actor can fly and clip geometry.
@@ -136,7 +137,7 @@ namespace MWPhysics
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);
-        int getCollisionMask();
+        int getCollisionMask() const;
 
         bool mCanWaterWalk;
         bool mWalkingOnWater;

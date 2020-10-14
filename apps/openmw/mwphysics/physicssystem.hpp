@@ -47,7 +47,8 @@ class btCollisionShape;
 
 namespace MWPhysics
 {
-    typedef std::vector<std::pair<MWWorld::Ptr,osg::Vec3f> > PtrVelocityList;
+    using PtrPositionList = std::map<MWWorld::Ptr, osg::Vec3f>;
+    using CollisionMap = std::map<MWWorld::Ptr, MWWorld::Ptr>;
 
     class HeightField;
     class Object;
@@ -93,7 +94,7 @@ namespace MWPhysics
 
             bool toggleCollisionMode();
 
-            void stepSimulation(float dt);
+            void stepSimulation();
             void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
@@ -102,7 +103,7 @@ namespace MWPhysics
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
                                                                const osg::Vec3f &origin,
                                                                const osg::Quat &orientation,
-                                                               float queryDistance, std::vector<MWWorld::Ptr> targets = std::vector<MWWorld::Ptr>());
+                                                               float queryDistance, std::vector<MWWorld::Ptr>& targets);
 
 
             /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
@@ -146,7 +147,7 @@ namespace MWPhysics
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
-            const PtrVelocityList& applyQueuedMovement(float dt);
+            const PtrPositionList& applyQueuedMovement(float dt);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();
@@ -192,37 +193,37 @@ namespace MWPhysics
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
-            btBroadphaseInterface* mBroadphase;
-            btDefaultCollisionConfiguration* mCollisionConfiguration;
-            btCollisionDispatcher* mDispatcher;
-            btCollisionWorld* mCollisionWorld;
+            std::unique_ptr<btBroadphaseInterface> mBroadphase;
+            std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
+            std::unique_ptr<btCollisionDispatcher> mDispatcher;
+            std::shared_ptr<btCollisionWorld> mCollisionWorld;
 
             std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
 
-            typedef std::map<MWWorld::ConstPtr, Object*> ObjectMap;
+            using ObjectMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Object>>;
             ObjectMap mObjects;
 
             std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
 
-            typedef std::map<MWWorld::ConstPtr, Actor*> ActorMap;
+            using ActorMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Actor>>;
             ActorMap mActors;
 
-            typedef std::map<std::pair<int, int>, HeightField*> HeightFieldMap;
+            using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
 
             // Tracks standing collisions happening during a single frame. <actor handle, collided handle>
             // This will detect standing on an object, but won't detect running e.g. against a wall.
-            typedef std::map<MWWorld::Ptr, MWWorld::Ptr> CollisionMap;
             CollisionMap mStandingCollisions;
 
             // replaces all occurrences of 'old' in the map by 'updated', no matter if it's a key or value
             void updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated);
 
+            using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
             PtrVelocityList mMovementQueue;
-            PtrVelocityList mMovementResults;
+            PtrPositionList mMovementResults;
 
             float mTimeAccum;
 

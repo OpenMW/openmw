@@ -20,10 +20,11 @@ class btVector3;
 
 namespace MWPhysics
 {
-    class Object : public PtrHolder
+    class Object final : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance);
+        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, btCollisionWorld* world);
+        ~Object() override;
 
         const Resource::BulletShapeInstance* getShapeInstance() const;
         void setScale(float scale);
@@ -42,6 +43,7 @@ namespace MWPhysics
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
+        btCollisionWorld* mCollisionWorld;
     };
 }
 
