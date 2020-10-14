@@ -3,6 +3,7 @@
 
 #include "ptrholder.hpp"
 
+#include <LinearMath/btTransform.h>
 #include <osg/Node>
 
 #include <map>
@@ -30,13 +31,17 @@ namespace MWPhysics
         void setScale(float scale);
         void setRotation(const btQuaternion& quat);
         void setOrigin(const btVector3& vec);
+        void commitPositionChange();
         btCollisionObject* getCollisionObject();
         const btCollisionObject* getCollisionObject() const;
+        btTransform getTransform() const;
         /// Return solid flag. Not used by the object itself, true by default.
         bool isSolid() const;
         void setSolid(bool solid);
         bool isAnimated() const;
-        void animateCollisionShapes(btCollisionWorld* collisionWorld);
+        /// @brief update object shape
+        /// @return true if shape changed
+        bool animateCollisionShapes();
 
     private:
         std::unique_ptr<btCollisionObject> mCollisionObject;
@@ -44,6 +49,10 @@ namespace MWPhysics
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
         btCollisionWorld* mCollisionWorld;
+        btVector3 mScale;
+        btTransform mLocalTransform;
+        bool mScaleUpdatePending;
+        bool mTransformUpdatePending;
     };
 }
 

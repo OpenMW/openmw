@@ -30,6 +30,7 @@ namespace MWPhysics
         setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
         const float* pos = ptr.getRefData().getPosition().pos;
         setOrigin(btVector3(pos[0], pos[1], pos[2]));
+        commitPositionChange();
     }
 
     Object::~Object()
@@ -45,17 +46,34 @@ namespace MWPhysics
 
     void Object::setScale(float scale)
     {
-        mShapeInstance->setLocalScaling(btVector3(scale, scale, scale));
+        mScale = { scale,scale,scale };
+        mScaleUpdatePending = true;
     }
 
     void Object::setRotation(const btQuaternion& quat)
     {
-        mCollisionObject->getWorldTransform().setRotation(quat);
+        mLocalTransform.setRotation(quat);
+        mTransformUpdatePending = true;
     }
 
     void Object::setOrigin(const btVector3& vec)
     {
-        mCollisionObject->getWorldTransform().setOrigin(vec);
+        mLocalTransform.setOrigin(vec);
+        mTransformUpdatePending = true;
+    }
+
+    void Object::commitPositionChange()
+    {
+        if (mScaleUpdatePending)
+        {
+            mShapeInstance->setLocalScaling(mScale);
+            mScaleUpdatePending = false;
+        }
+        if (mTransformUpdatePending)
+        {
+            mCollisionObject->setWorldTransform(mLocalTransform);
+            mTransformUpdatePending = false;
+        }
     }
 
     btCollisionObject* Object::getCollisionObject()
@@ -66,6 +84,11 @@ namespace MWPhysics
     const btCollisionObject* Object::getCollisionObject() const
     {
         return mCollisionObject.get();
+    }
+
+    btTransform Object::getTransform() const
+    {
+        return mLocalTransform;
     }
 
     bool Object::isSolid() const
@@ -83,10 +106,10 @@ namespace MWPhysics
         return !mShapeInstance->mAnimatedShapes.empty();
     }
 
-    void Object::animateCollisionShapes(btCollisionWorld* collisionWorld)
+    bool Object::animateCollisionShapes()
     {
         if (mShapeInstance->mAnimatedShapes.empty())
-            return;
+            return false;
 
         assert (mShapeInstance->getCollisionShape()->isCompound());
 
@@ -107,7 +130,7 @@ namespace MWPhysics
 
                     // Remove nonexistent nodes from animated shapes map and early out
                     mShapeInstance->mAnimatedShapes.erase(recIndex);
-                    return;
+                    return false;
                 }
                 osg::NodePath nodePath = visitor.mFoundPath;
                 nodePath.erase(nodePath.begin());
@@ -129,7 +152,6 @@ namespace MWPhysics
             if (!(transform == compound->getChildTransform(shapeIndex)))
                 compound->updateChildTransform(shapeIndex, transform);
         }
-
-        collisionWorld->updateSingleAabb(mCollisionObject.get());
+        return true;
     }
 }

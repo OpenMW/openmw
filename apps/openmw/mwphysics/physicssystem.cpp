@@ -768,7 +768,12 @@ namespace MWPhysics
     void PhysicsSystem::stepSimulation()
     {
         for (Object* animatedObject : mAnimatedObjects)
-            animatedObject->animateCollisionShapes(mCollisionWorld.get());
+            if (animatedObject->animateCollisionShapes())
+            {
+                auto obj = mObjects.find(animatedObject->getPtr());
+                assert(obj != mObjects.end());
+                mCollisionWorld->updateSingleAabb(obj->second->getCollisionObject());
+            }
 
 #ifndef BT_NO_PROFILE
         CProfileManager::Reset();
@@ -780,7 +785,8 @@ namespace MWPhysics
     {
         ObjectMap::iterator found = mObjects.find(object);
         if (found != mObjects.end())
-            found->second->animateCollisionShapes(mCollisionWorld.get());
+            if (found->second->animateCollisionShapes())
+                mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
     }
 
     void PhysicsSystem::debugDraw()
