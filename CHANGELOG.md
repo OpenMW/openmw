@@ -67,6 +67,7 @@
     Feature #5524: Resume failed script execution after reload
     Feature #5525: Search fields tweaks (utf-8)
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
+    Feature #5563: Run physics update in background thread
     Feature #5579: MCP SetAngle enhancement
     Feature #5610: Actors movement should be smoother
     Task #5480: Drop Qt4 support
