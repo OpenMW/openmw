@@ -913,7 +913,7 @@ printf "LZ4 1.9.2... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf LZ4-1.9.2
-		eval 7z x -y lz4_win${BITS}_v1.9.2.zip $STRIP
+		eval 7z x -y lz4_win${BITS}_v1_9_2.zip $STRIP
 	fi
 	export LZ4DIR="$(real_pwd)/LZ4-1.9.2"
 	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
