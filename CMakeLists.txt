@@ -586,6 +586,10 @@ if (WIN32)
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
     set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
+    
+    if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
+        target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
+    endif()
 
     if (BUILD_BSATOOL)
         set_target_properties(bsatool PROPERTIES COMPILE_FLAGS "${WARNINGS} ${MT_BUILD}")
