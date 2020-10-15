@@ -152,6 +152,8 @@ endif()
 # Dependencies
 find_package(OpenGL REQUIRED)
 
+find_package(LZ4 REQUIRED)
+
 if (USE_QT)
     find_package(Qt5Core 5.12 REQUIRED)
     find_package(Qt5Widgets REQUIRED)

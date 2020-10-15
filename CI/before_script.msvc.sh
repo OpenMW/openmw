@@ -571,6 +571,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.12.zip" \
 		"SDL2-2.0.12.zip"
 
+  # LZ4
+  download "LZ4 1.9.2" \
+    "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.zip" \
+    "lz4_win${BITS}_v1_9_2.zip"
+
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
 		echo "Google test 1.10.0..."
@@ -896,6 +901,25 @@ printf "SDL 2.0.12... "
 	export SDL2DIR="$(real_pwd)/SDL2-2.0.12"
 	for config in ${CONFIGURATIONS[@]}; do
 		add_runtime_dlls $config "$(pwd)/SDL2-2.0.12/lib/x${ARCHSUFFIX}/SDL2.dll"
+	done
+	echo Done.
+}
+cd $DEPS
+echo
+# LZ4
+printf "LZ4 1.9.2... "
+{
+	if [ -d LZ4-1.9.2 ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf LZ4-1.9.2
+		eval 7z x -y lz4_win${BITS}_v1.9.2.zip $STRIP
+	fi
+	export LZ4DIR="$(real_pwd)/LZ4-1.9.2"
+	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
+		-DLZ4_LIBRARY="${LZ4DIR}/static/liblz4_static.lib"
+	for config in ${CONFIGURATIONS[@]}; do
+		add_runtime_dlls $config "$(pwd)/LZ4-1.9.2/dll/liblz4.dll.a"
 	done
 	echo Done.
 }
