@@ -35,7 +35,6 @@
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/player.hpp"
 
 #include "../mwrender/bulletdebugdraw.hpp"
 
@@ -52,6 +51,7 @@
 #include "contacttestresultcallback.hpp"
 #include "constants.hpp"
 #include "movementsolver.hpp"
+#include "mtphysics.hpp"
 
 namespace MWPhysics
 {
@@ -88,6 +88,8 @@ namespace MWPhysics
                 Log(Debug::Warning) << "Warning: using custom physics framerate (" << physFramerate << " FPS).";
             }
         }
+
+        mTaskScheduler = std::make_unique<PhysicsTaskScheduler>(mPhysicsDt, mCollisionWorld);
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -95,11 +97,11 @@ namespace MWPhysics
         mResourceSystem->removeResourceManager(mShapeManager.get());
 
         if (mWaterCollisionObject)
-            mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
+            mTaskScheduler->removeCollisionObject(mWaterCollisionObject.get());
 
         for (auto& heightField : mHeightFields)
         {
-            mCollisionWorld->removeCollisionObject(heightField.second->getCollisionObject());
+            mTaskScheduler->removeCollisionObject(heightField.second->getCollisionObject());
             delete heightField.second;
         }
 
@@ -211,7 +213,7 @@ namespace MWPhysics
         DeepestNotMeContactTestResultCallback resultCallback(me, targetCollisionObjects, Misc::Convert::toBullet(origin));
         resultCallback.m_collisionFilterGroup = CollisionType_Actor;
         resultCallback.m_collisionFilterMask = CollisionType_World | CollisionType_Door | CollisionType_HeightMap | CollisionType_Actor;
-        mCollisionWorld->contactTest(&object, resultCallback);
+        mTaskScheduler->contactTest(&object, resultCallback);
 
         if (resultCallback.mObject)
         {
@@ -235,21 +237,12 @@ namespace MWPhysics
         rayFrom.setIdentity();
         rayFrom.setOrigin(Misc::Convert::toBullet(point));
 
-        // target the collision object's world origin, this should be the center of the collision object
-        btTransform rayTo;
-        rayTo.setIdentity();
-        rayTo.setOrigin(targetCollisionObj->getWorldTransform().getOrigin());
+        auto hitpoint = mTaskScheduler->getHitPoint(rayFrom, targetCollisionObj);
+        if (hitpoint)
+            return (point - Misc::Convert::toOsg(hitpoint.get())).length();
 
-        btCollisionWorld::ClosestRayResultCallback cb(rayFrom.getOrigin(), rayTo.getOrigin());
-
-        btCollisionWorld::rayTestSingle(rayFrom, rayTo, targetCollisionObj, targetCollisionObj->getCollisionShape(), targetCollisionObj->getWorldTransform(), cb);
-        if (!cb.hasHit())
-        {
-            // didn't hit the target. this could happen if point is already inside the collision box
-            return 0.f;
-        }
-        else
-            return (point - Misc::Convert::toOsg(cb.m_hitPointWorld)).length();
+        // didn't hit the target. this could happen if point is already inside the collision box
+        return 0.f;
     }
 
     RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
@@ -293,7 +286,7 @@ namespace MWPhysics
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
-        mCollisionWorld->rayTest(btFrom, btTo, resultCallback);
+        mTaskScheduler->rayTest(btFrom, btTo, resultCallback);
 
         RayCastingResult result;
         result.mHit = resultCallback.hasHit();
@@ -319,7 +312,7 @@ namespace MWPhysics
         btTransform from_ (btrot, Misc::Convert::toBullet(from));
         btTransform to_ (btrot, Misc::Convert::toBullet(to));
 
-        mCollisionWorld->convexSweepTest(&shape, from_, to_, callback);
+        mTaskScheduler->convexSweepTest(&shape, from_, to_, callback);
 
         RayCastingResult result;
         result.mHit = callback.hasHit();
@@ -333,18 +326,15 @@ namespace MWPhysics
 
     bool PhysicsSystem::getLineOfSight(const MWWorld::ConstPtr &actor1, const MWWorld::ConstPtr &actor2) const
     {
-        const Actor* physactor1 = getActor(actor1);
-        const Actor* physactor2 = getActor(actor2);
+        const auto getWeakPtr = [&](const MWWorld::ConstPtr &ptr) -> std::weak_ptr<Actor>
+        {
+            const auto found = mActors.find(ptr);
+            if (found != mActors.end())
+                return { found->second };
+            return {};
+        };
 
-        if (!physactor1 || !physactor2)
-            return false;
-
-        osg::Vec3f pos1 (physactor1->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor1->getHalfExtents().z() * 0.9)); // eye level
-        osg::Vec3f pos2 (physactor2->getCollisionObjectPosition() + osg::Vec3f(0,0,physactor2->getHalfExtents().z() * 0.9));
-
-        RayCastingResult result = castRay(pos1, pos2, MWWorld::ConstPtr(), std::vector<MWWorld::Ptr>(), CollisionType_World|CollisionType_HeightMap|CollisionType_Door);
-
-        return !result.mHit;
+        return mTaskScheduler->getLineOfSight(getWeakPtr(actor1), getWeakPtr(actor2));
     }
 
     bool PhysicsSystem::isOnGround(const MWWorld::Ptr &actor)
@@ -398,7 +388,7 @@ namespace MWPhysics
         const Object * physobject = getObject(object);
         if (!physobject) return osg::BoundingBox();
         btVector3 min, max;
-        physobject->getCollisionObject()->getCollisionShape()->getAabb(physobject->getCollisionObject()->getWorldTransform(), min, max);
+        mTaskScheduler->getAabb(physobject->getCollisionObject(), min, max);
         return osg::BoundingBox(Misc::Convert::toOsg(min), Misc::Convert::toOsg(max));
     }
 
@@ -424,7 +414,7 @@ namespace MWPhysics
         ContactTestResultCallback resultCallback (me);
         resultCallback.m_collisionFilterGroup = collisionGroup;
         resultCallback.m_collisionFilterMask = collisionMask;
-        mCollisionWorld->contactTest(me, resultCallback);
+        mTaskScheduler->contactTest(me, resultCallback);
         return resultCallback.mResult;
     }
 
@@ -442,7 +432,7 @@ namespace MWPhysics
         HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject);
         mHeightFields[std::make_pair(x,y)] = heightfield;
 
-        mCollisionWorld->addCollisionObject(heightfield->getCollisionObject(), CollisionType_HeightMap,
+        mTaskScheduler->addCollisionObject(heightfield->getCollisionObject(), CollisionType_HeightMap,
             CollisionType_Actor|CollisionType_Projectile);
     }
 
@@ -451,7 +441,7 @@ namespace MWPhysics
         HeightFieldMap::iterator heightfield = mHeightFields.find(std::make_pair(x,y));
         if(heightfield != mHeightFields.end())
         {
-            mCollisionWorld->removeCollisionObject(heightfield->second->getCollisionObject());
+            mTaskScheduler->removeCollisionObject(heightfield->second->getCollisionObject());
             delete heightfield->second;
             mHeightFields.erase(heightfield);
         }
@@ -471,13 +461,13 @@ namespace MWPhysics
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
-        auto obj = std::make_shared<Object>(ptr, shapeInstance, mCollisionWorld.get());
+        auto obj = std::make_shared<Object>(ptr, shapeInstance, mTaskScheduler.get());
         mObjects.emplace(ptr, obj);
 
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj.get());
 
-        mCollisionWorld->addCollisionObject(obj->getCollisionObject(), collisionType,
+        mTaskScheduler->addCollisionObject(obj->getCollisionObject(), collisionType,
                                            CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
@@ -571,14 +561,14 @@ namespace MWPhysics
         {
             float scale = ptr.getCellRef().getScale();
             found->second->setScale(scale);
-            mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
         ActorMap::iterator foundActor = mActors.find(ptr);
         if (foundActor != mActors.end())
         {
             foundActor->second->updateScale();
-            mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(foundActor->second);
             return;
         }
     }
@@ -589,7 +579,7 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             found->second->setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
-            mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
         ActorMap::iterator foundActor = mActors.find(ptr);
@@ -598,7 +588,7 @@ namespace MWPhysics
             if (!foundActor->second->isRotationallyInvariant())
             {
                 foundActor->second->updateRotation();
-                mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+                mTaskScheduler->updateSingleAabb(foundActor->second);
             }
             return;
         }
@@ -610,14 +600,14 @@ namespace MWPhysics
         if (found != mObjects.end())
         {
             found->second->setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
-            mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
         ActorMap::iterator foundActor = mActors.find(ptr);
         if (foundActor != mActors.end())
         {
             foundActor->second->updatePosition();
-            mCollisionWorld->updateSingleAabb(foundActor->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(foundActor->second);
             return;
         }
     }
@@ -639,7 +629,7 @@ namespace MWPhysics
         if (!shape)
             return;
 
-        auto actor = std::make_shared<Actor>(ptr, shape, mCollisionWorld.get());
+        auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get());
         mActors.emplace(ptr, std::move(actor));
     }
 
@@ -678,10 +668,8 @@ namespace MWPhysics
         mStandingCollisions.clear();
     }
 
-    const PtrPositionList& PhysicsSystem::applyQueuedMovement(float dt)
+    const PtrPositionList& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation)
     {
-        mMovementResults.clear();
-
         mTimeAccum += dt;
 
         const int maxAllowedSteps = 20;
@@ -689,100 +677,8 @@ namespace MWPhysics
         numSteps = std::min(numSteps, maxAllowedSteps);
 
         mTimeAccum -= numSteps * mPhysicsDt;
-        mActorsFrameData = prepareFrameData();
-        bool advanceSimulation = (numSteps != 0);
-        if (advanceSimulation)
-            mWorldFrameData = std::make_unique<WorldFrameData>();
 
-        // update each actor position based on latest data
-        for (auto& data : mActorsFrameData)
-            data.updatePosition();
-
-        mMovementResults.clear();
-        while (numSteps--)
-        {
-            for (auto& actorData : mActorsFrameData)
-                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
-
-            // update actors position
-            for (auto& actorData : mActorsFrameData)
-            {
-                if(const auto actor = actorData.mActor.lock())
-                {
-                    if (actorData.mPosition != actorData.mActorRaw->getPosition())
-                        actorData.mPositionChanged = true;
-                    actorData.mActorRaw->setPosition(actorData.mPosition);
-                }
-            }
-        }
-
-        for (auto& actorData : mActorsFrameData)
-        {
-            // handle fall of actor
-            const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
-
-            const bool isStillOnGround = (advanceSimulation && actorData.mWasOnGround && actorData.mActorRaw->getOnGround());
-
-            if (isStillOnGround || actorData.mFlying || actorData.mSwimming || actorData.mSlowFall < 1)
-                actorData.mNeedLand = true;
-            else if (heightDiff < 0)
-                actorData.mFallHeight += heightDiff;
-
-            // interpolate position
-            const float interpolationFactor = mTimeAccum / mPhysicsDt;
-            mMovementResults[actorData.mPtr] = actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
-
-            // update mechanics if actor jumped
-            if (actorData.mDidJump)
-            {
-                const bool isPlayer = (actorData.mPtr == MWMechanics::getPlayer());
-                // Advance acrobatics and set flag for GetPCJumping
-                if (isPlayer)
-                {
-                    actorData.mPtr.getClass().skillUsageSucceeded(actorData.mPtr, ESM::Skill::Acrobatics, 0);
-                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
-                }
-
-                // Decrease fatigue
-                if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
-                {
-                    const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-                    const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
-                    const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
-                    const float normalizedEncumbrance = std::min(1.f, actorData.mPtr.getClass().getNormalizedEncumbrance(actorData.mPtr));
-                    const float fatigueDecrease = fFatigueJumpBase + normalizedEncumbrance * fFatigueJumpMult;
-                    MWMechanics::DynamicStat<float> fatigue = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr).getFatigue();
-                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
-                    actorData.mPtr.getClass().getCreatureStats(actorData.mPtr).setFatigue(fatigue);
-                }
-                actorData.mPtr.getClass().getMovementSettings(actorData.mPtr).mPosition[2] = 0;
-            }
-
-            MWMechanics::CreatureStats& stats = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr);
-            if (actorData.mNeedLand)
-                stats.land(actorData.mPtr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
-            else if (actorData.mFallHeight < 0)
-                stats.addToFallHeight(-actorData.mFallHeight);
-        }
-
-        // update actors aabb
-        for (const auto& actorData : mActorsFrameData)
-            if (actorData.mPositionChanged)
-                mCollisionWorld->updateSingleAabb(actorData.mActorRaw->getCollisionObject());
-
-        // update standing collisions map
-        if (advanceSimulation)
-        {
-            mStandingCollisions.clear();
-            for (auto& actorData : mActorsFrameData)
-            {
-                if (!actorData.mStandingOn.isEmpty())
-                    mStandingCollisions[actorData.mPtr] = actorData.mStandingOn;
-                else
-                    mStandingCollisions.erase(actorData.mPtr);
-            }
-        }
-        return mMovementResults;
+        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(), mStandingCollisions, skipSimulation);
     }
 
     std::vector<ActorFrameData> PhysicsSystem::prepareFrameData()
@@ -840,7 +736,7 @@ namespace MWPhysics
             {
                 auto obj = mObjects.find(animatedObject->getPtr());
                 assert(obj != mObjects.end());
-                mCollisionWorld->updateSingleAabb(obj->second->getCollisionObject());
+                mTaskScheduler->updateSingleAabb(obj->second);
             }
 
 #ifndef BT_NO_PROFILE
@@ -854,7 +750,7 @@ namespace MWPhysics
         ObjectMap::iterator found = mObjects.find(object);
         if (found != mObjects.end())
             if (found->second->animateCollisionShapes())
-                mCollisionWorld->updateSingleAabb(found->second->getCollisionObject());
+                mTaskScheduler->updateSingleAabb(found->second);
     }
 
     void PhysicsSystem::debugDraw()
@@ -926,7 +822,7 @@ namespace MWPhysics
     {
         if (mWaterCollisionObject)
         {
-            mCollisionWorld->removeCollisionObject(mWaterCollisionObject.get());
+            mTaskScheduler->removeCollisionObject(mWaterCollisionObject.get());
         }
 
         if (!mWaterEnabled)
@@ -938,7 +834,7 @@ namespace MWPhysics
         mWaterCollisionObject.reset(new btCollisionObject());
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
-        mCollisionWorld->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
+        mTaskScheduler->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
                                                     CollisionType_Actor);
     }
 
@@ -954,7 +850,7 @@ namespace MWPhysics
         const int mask = MWPhysics::CollisionType_Actor;
         const int group = 0xff;
         HasSphereCollisionCallback callback(bulletPosition, radius, object, mask, group);
-        mCollisionWorld->getBroadphase()->aabbTest(aabbMin, aabbMax, callback);
+        mTaskScheduler->aabbTest(aabbMin, aabbMax, callback);
         return callback.getResult();
     }
 

@@ -12,18 +12,19 @@
 #include "../mwworld/class.hpp"
 
 #include "collisiontype.hpp"
+#include "mtphysics.hpp"
 
 namespace MWPhysics
 {
 
 
-Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btCollisionWorld* world)
+Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler)
   : mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBoxTranslate), mHalfExtents(shape->mCollisionBoxHalfExtents)
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
-  , mCollisionWorld(world)
+  , mTaskScheduler(scheduler)
 {
     mPtr = ptr;
 
@@ -82,12 +83,12 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btColl
 Actor::~Actor()
 {
     if (mCollisionObject)
-        mCollisionWorld->removeCollisionObject(mCollisionObject.get());
+        mTaskScheduler->removeCollisionObject(mCollisionObject.get());
 }
 
 void Actor::enableCollisionMode(bool collision)
 {
-    mInternalCollisionMode = collision;
+    mInternalCollisionMode.store(collision, std::memory_order_release);
 }
 
 void Actor::enableCollisionBody(bool collision)
@@ -101,12 +102,12 @@ void Actor::enableCollisionBody(bool collision)
 
 void Actor::addCollisionMask(int collisionMask)
 {
-    mCollisionWorld->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
+    mTaskScheduler->addCollisionObject(mCollisionObject.get(), CollisionType_Actor, collisionMask);
 }
 
 void Actor::updateCollisionMask()
 {
-    mCollisionObject->getBroadphaseHandle()->m_collisionFilterMask = getCollisionMask();
+    mTaskScheduler->setCollisionFilterMask(mCollisionObject.get(), getCollisionMask());
 }
 
 int Actor::getCollisionMask() const
@@ -121,6 +122,7 @@ int Actor::getCollisionMask() const
 
 void Actor::updatePosition()
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     osg::Vec3f position = mPtr.getRefData().getPosition().asVec3();
 
     mPosition = position;
@@ -141,6 +143,7 @@ void Actor::updateCollisionObjectPosition()
 
 void Actor::commitPositionChange()
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     if (mScaleUpdatePending)
     {
         mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
@@ -155,11 +158,13 @@ void Actor::commitPositionChange()
 
 osg::Vec3f Actor::getCollisionObjectPosition() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return Misc::Convert::toOsg(mLocalTransform.getOrigin());
 }
 
-void Actor::setPosition(const osg::Vec3f &position)
+void Actor::setPosition(const osg::Vec3f &position, bool updateCollisionObject)
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     if (mTransformUpdatePending)
     {
         mCollisionObject->setWorldTransform(mLocalTransform);
@@ -170,23 +175,29 @@ void Actor::setPosition(const osg::Vec3f &position)
         mPreviousPosition = mPosition;
 
         mPosition = position;
-        updateCollisionObjectPosition();
-        mCollisionObject->setWorldTransform(mLocalTransform);
+        if (updateCollisionObject)
+        {
+            updateCollisionObjectPosition();
+            mCollisionObject->setWorldTransform(mLocalTransform);
+        }
     }
 }
 
 osg::Vec3f Actor::getPosition() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return mPosition;
 }
 
 osg::Vec3f Actor::getPreviousPosition() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return mPreviousPosition;
 }
 
 void Actor::updateRotation ()
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     if (mRotation == mPtr.getRefData().getBaseNode()->getAttitude())
         return;
     mRotation = mPtr.getRefData().getBaseNode()->getAttitude();
@@ -202,6 +213,7 @@ bool Actor::isRotationallyInvariant() const
 
 void Actor::updateScale()
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     float scale = mPtr.getCellRef().getScale();
     osg::Vec3f scaleVec(scale,scale,scale);
 
@@ -219,16 +231,19 @@ void Actor::updateScale()
 
 osg::Vec3f Actor::getHalfExtents() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return osg::componentMultiply(mHalfExtents, mScale);
 }
 
 osg::Vec3f Actor::getOriginalHalfExtents() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return mHalfExtents;
 }
 
 osg::Vec3f Actor::getRenderingHalfExtents() const
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     return osg::componentMultiply(mHalfExtents, mRenderingScale);
 }
 
@@ -239,26 +254,27 @@ void Actor::setInertialForce(const osg::Vec3f &force)
 
 void Actor::setOnGround(bool grounded)
 {
-    mOnGround = grounded;
+    mOnGround.store(grounded, std::memory_order_release);
 }
 
 void Actor::setOnSlope(bool slope)
 {
-    mOnSlope = slope;
+    mOnSlope.store(slope, std::memory_order_release);
 }
 
 bool Actor::isWalkingOnWater() const
 {
-    return mWalkingOnWater;
+    return mWalkingOnWater.load(std::memory_order_acquire);
 }
 
 void Actor::setWalkingOnWater(bool walkingOnWater)
 {
-    mWalkingOnWater = walkingOnWater;
+    mWalkingOnWater.store(walkingOnWater, std::memory_order_release);
 }
 
 void Actor::setCanWaterWalk(bool waterWalk)
 {
+    std::unique_lock<std::mutex> lock(mPositionMutex);
     if (waterWalk != mCanWaterWalk)
     {
         mCanWaterWalk = waterWalk;

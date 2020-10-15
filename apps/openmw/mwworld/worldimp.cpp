@@ -144,7 +144,7 @@ namespace MWWorld
         const std::string& resourcePath, const std::string& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts (mStore),
       mCells (mStore, mEsm), mSky (true),
-      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
       mUserDataPath(userDataPath), mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
       mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
@@ -932,6 +932,7 @@ namespace MWWorld
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
+        mDiscardMovements = true;
 
         if (changeEvent && mCurrentWorldSpace != cellName)
         {
@@ -951,6 +952,7 @@ namespace MWWorld
     void World::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
+        mDiscardMovements = true;
 
         if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
         {
@@ -1499,7 +1501,8 @@ namespace MWWorld
 
         mProjectileManager->update(duration);
 
-        const auto results = mPhysics->applyQueuedMovement(duration);
+        const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements);
+        mDiscardMovements = false;
 
         for(const auto& result : results)
         {

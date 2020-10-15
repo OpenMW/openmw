@@ -1,7 +1,9 @@
 #ifndef OPENMW_MWPHYSICS_ACTOR_H
 #define OPENMW_MWPHYSICS_ACTOR_H
 
+#include <atomic>
 #include <memory>
+#include <mutex>
 
 #include "ptrholder.hpp"
 
@@ -10,7 +12,6 @@
 #include <osg/Quat>
 #include <osg/ref_ptr>
 
-class btCollisionWorld;
 class btCollisionShape;
 class btCollisionObject;
 class btConvexShape;
@@ -27,7 +28,7 @@ namespace MWPhysics
     class Actor final : public PtrHolder
     {
     public:
-        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, btCollisionWorld* world);
+        Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler);
         ~Actor() override;
 
         /**
@@ -37,7 +38,7 @@ namespace MWPhysics
 
         bool getCollisionMode() const
         {
-            return mInternalCollisionMode;
+            return mInternalCollisionMode.load(std::memory_order_acquire);
         }
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -82,8 +83,9 @@ namespace MWPhysics
 
         /**
           * Store the current position into mPreviousPosition, then move to this position.
+          * Optionally, inform the physics engine about the change of position.
           */
-        void setPosition(const osg::Vec3f& position);
+        void setPosition(const osg::Vec3f& position, bool updateCollisionObject=true);
 
         osg::Vec3f getPosition() const;
 
@@ -113,14 +115,14 @@ namespace MWPhysics
 
         bool getOnGround() const
         {
-            return mInternalCollisionMode && mOnGround;
+            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnGround.load(std::memory_order_acquire);
         }
 
         void setOnSlope(bool slope);
 
         bool getOnSlope() const
         {
-            return mInternalCollisionMode && mOnSlope;
+            return mInternalCollisionMode.load(std::memory_order_acquire) && mOnSlope.load(std::memory_order_acquire);
         }
 
         btCollisionObject* getCollisionObject() const
@@ -142,7 +144,7 @@ namespace MWPhysics
         int getCollisionMask() const;
 
         bool mCanWaterWalk;
-        bool mWalkingOnWater;
+        std::atomic<bool> mWalkingOnWater;
 
         bool mRotationallyInvariant;
 
@@ -162,14 +164,15 @@ namespace MWPhysics
         btTransform mLocalTransform;
         bool mScaleUpdatePending;
         bool mTransformUpdatePending;
+        mutable std::mutex mPositionMutex;
 
         osg::Vec3f mForce;
-        bool mOnGround;
-        bool mOnSlope;
-        bool mInternalCollisionMode;
+        std::atomic<bool> mOnGround;
+        std::atomic<bool> mOnSlope;
+        std::atomic<bool> mInternalCollisionMode;
         bool mExternalCollisionMode;
 
-        btCollisionWorld* mCollisionWorld;
+        PhysicsTaskScheduler* mTaskScheduler;
 
         Actor(const Actor&);
         Actor& operator=(const Actor&);

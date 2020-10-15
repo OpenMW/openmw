@@ -193,7 +193,7 @@ namespace MWPhysics
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
-            const PtrPositionList& applyQueuedMovement(float dt);
+            const PtrPositionList& applyQueuedMovement(float dt, bool skipSimulation);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();
@@ -245,6 +245,7 @@ namespace MWPhysics
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
             std::unique_ptr<btCollisionDispatcher> mDispatcher;
             std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            std::unique_ptr<PhysicsTaskScheduler> mTaskScheduler;
 
             std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
             Resource::ResourceSystem* mResourceSystem;
@@ -271,9 +272,6 @@ namespace MWPhysics
 
             using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
             PtrVelocityList mMovementQueue;
-            PtrPositionList mMovementResults;
-            std::unique_ptr<WorldFrameData> mWorldFrameData;
-            std::vector<ActorFrameData> mActorsFrameData;
 
             float mTimeAccum;
 

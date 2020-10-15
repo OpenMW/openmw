@@ -1,4 +1,5 @@
 #include "object.hpp"
+#include "mtphysics.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/nifosg/particle.hpp>
@@ -8,16 +9,15 @@
 
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
-#include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include <LinearMath/btTransform.h>
 
 namespace MWPhysics
 {
-    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, btCollisionWorld* world)
+    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, PhysicsTaskScheduler* scheduler)
         : mShapeInstance(shapeInstance)
         , mSolid(true)
-        , mCollisionWorld(world)
+        , mTaskScheduler(scheduler)
     {
         mPtr = ptr;
 
@@ -36,7 +36,7 @@ namespace MWPhysics
     Object::~Object()
     {
         if (mCollisionObject)
-            mCollisionWorld->removeCollisionObject(mCollisionObject.get());
+            mTaskScheduler->removeCollisionObject(mCollisionObject.get());
     }
 
     const Resource::BulletShapeInstance* Object::getShapeInstance() const
@@ -46,24 +46,28 @@ namespace MWPhysics
 
     void Object::setScale(float scale)
     {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
         mScale = { scale,scale,scale };
         mScaleUpdatePending = true;
     }
 
     void Object::setRotation(const btQuaternion& quat)
     {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
         mLocalTransform.setRotation(quat);
         mTransformUpdatePending = true;
     }
 
     void Object::setOrigin(const btVector3& vec)
     {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
         mLocalTransform.setOrigin(vec);
         mTransformUpdatePending = true;
     }
 
     void Object::commitPositionChange()
     {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
         if (mScaleUpdatePending)
         {
             mShapeInstance->setLocalScaling(mScale);
@@ -88,6 +92,7 @@ namespace MWPhysics
 
     btTransform Object::getTransform() const
     {
+        std::unique_lock<std::mutex> lock(mPositionMutex);
         return mLocalTransform;
     }
 

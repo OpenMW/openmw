@@ -8,6 +8,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 
 namespace Resource
 {
@@ -15,16 +16,17 @@ namespace Resource
 }
 
 class btCollisionObject;
-class btCollisionWorld;
 class btQuaternion;
 class btVector3;
 
 namespace MWPhysics
 {
+    class PhysicsTaskScheduler;
+
     class Object final : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, btCollisionWorld* world);
+        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, PhysicsTaskScheduler* scheduler);
         ~Object() override;
 
         const Resource::BulletShapeInstance* getShapeInstance() const;
@@ -48,11 +50,12 @@ namespace MWPhysics
         osg::ref_ptr<Resource::BulletShapeInstance> mShapeInstance;
         std::map<int, osg::NodePath> mRecIndexToNodePath;
         bool mSolid;
-        btCollisionWorld* mCollisionWorld;
         btVector3 mScale;
         btTransform mLocalTransform;
         bool mScaleUpdatePending;
         bool mTransformUpdatePending;
+        mutable std::mutex mPositionMutex;
+        PhysicsTaskScheduler* mTaskScheduler;
     };
 }
 
