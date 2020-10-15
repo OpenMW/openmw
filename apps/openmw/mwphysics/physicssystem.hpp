@@ -1,6 +1,7 @@
 #ifndef OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 #define OPENMW_MWPHYSICS_PHYSICSSYSTEM_H
 
+#include <array>
 #include <memory>
 #include <map>
 #include <set>
@@ -53,6 +54,51 @@ namespace MWPhysics
     class HeightField;
     class Object;
     class Actor;
+    class PhysicsTaskScheduler;
+
+    struct LOSRequest
+    {
+        LOSRequest(const std::weak_ptr<Actor>& a1, const std::weak_ptr<Actor>& a2);
+        std::array<std::weak_ptr<Actor>, 2> mActors;
+        std::array<const Actor*, 2> mRawActors;
+        bool mResult;
+        bool mStale;
+        int mAge;
+    };
+    bool operator==(const LOSRequest& lhs, const LOSRequest& rhs) noexcept;
+
+    struct ActorFrameData
+    {
+        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
+        void updatePosition();
+        std::weak_ptr<Actor> mActor;
+        Actor* mActorRaw;
+        MWWorld::Ptr mPtr;
+        MWWorld::Ptr mStandingOn;
+        bool mFlying;
+        bool mSwimming;
+        bool mPositionChanged;
+        bool mWasOnGround;
+        bool mWantJump;
+        bool mDidJump;
+        bool mIsDead;
+        bool mNeedLand;
+        bool mMoveToWaterSurface;
+        float mWaterlevel;
+        float mSlowFall;
+        float mOldHeight;
+        float mFallHeight;
+        osg::Vec3f mMovement;
+        osg::Vec3f mPosition;
+        ESM::Position mRefpos;
+    };
+
+    struct WorldFrameData
+    {
+        WorldFrameData();
+        bool mIsInStorm;
+        osg::Vec3f mStormDirection;
+    };
 
     class PhysicsSystem : public RayCastingInterface
     {
@@ -191,6 +237,8 @@ namespace MWPhysics
 
             void updateWater();
 
+            std::vector<ActorFrameData> prepareFrameData();
+
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
@@ -224,6 +272,8 @@ namespace MWPhysics
             using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
             PtrVelocityList mMovementQueue;
             PtrPositionList mMovementResults;
+            std::unique_ptr<WorldFrameData> mWorldFrameData;
+            std::vector<ActorFrameData> mActorsFrameData;
 
             float mTimeAccum;
 

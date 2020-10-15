@@ -31,9 +31,11 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/movement.hpp"
 
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/player.hpp"
 
 #include "../mwrender/bulletdebugdraw.hpp"
 
@@ -687,14 +689,106 @@ namespace MWPhysics
         numSteps = std::min(numSteps, maxAllowedSteps);
 
         mTimeAccum -= numSteps * mPhysicsDt;
+        mActorsFrameData = prepareFrameData();
+        bool advanceSimulation = (numSteps != 0);
+        if (advanceSimulation)
+            mWorldFrameData = std::make_unique<WorldFrameData>();
 
-        if (numSteps)
+        // update each actor position based on latest data
+        for (auto& data : mActorsFrameData)
+            data.updatePosition();
+
+        mMovementResults.clear();
+        while (numSteps--)
         {
-            // Collision events should be available on every frame
-            mStandingCollisions.clear();
+            for (auto& actorData : mActorsFrameData)
+                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+
+            // update actors position
+            for (auto& actorData : mActorsFrameData)
+            {
+                if(const auto actor = actorData.mActor.lock())
+                {
+                    if (actorData.mPosition != actorData.mActorRaw->getPosition())
+                        actorData.mPositionChanged = true;
+                    actorData.mActorRaw->setPosition(actorData.mPosition);
+                }
+            }
         }
 
-        const MWWorld::Ptr player = MWMechanics::getPlayer();
+        for (auto& actorData : mActorsFrameData)
+        {
+            // handle fall of actor
+            const float heightDiff = actorData.mPosition.z() - actorData.mOldHeight;
+
+            const bool isStillOnGround = (advanceSimulation && actorData.mWasOnGround && actorData.mActorRaw->getOnGround());
+
+            if (isStillOnGround || actorData.mFlying || actorData.mSwimming || actorData.mSlowFall < 1)
+                actorData.mNeedLand = true;
+            else if (heightDiff < 0)
+                actorData.mFallHeight += heightDiff;
+
+            // interpolate position
+            const float interpolationFactor = mTimeAccum / mPhysicsDt;
+            mMovementResults[actorData.mPtr] = actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
+
+            // update mechanics if actor jumped
+            if (actorData.mDidJump)
+            {
+                const bool isPlayer = (actorData.mPtr == MWMechanics::getPlayer());
+                // Advance acrobatics and set flag for GetPCJumping
+                if (isPlayer)
+                {
+                    actorData.mPtr.getClass().skillUsageSucceeded(actorData.mPtr, ESM::Skill::Acrobatics, 0);
+                    MWBase::Environment::get().getWorld()->getPlayer().setJumping(true);
+                }
+
+                // Decrease fatigue
+                if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
+                {
+                    const MWWorld::Store<ESM::GameSetting> &gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                    const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
+                    const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
+                    const float normalizedEncumbrance = std::min(1.f, actorData.mPtr.getClass().getNormalizedEncumbrance(actorData.mPtr));
+                    const float fatigueDecrease = fFatigueJumpBase + normalizedEncumbrance * fFatigueJumpMult;
+                    MWMechanics::DynamicStat<float> fatigue = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr).getFatigue();
+                    fatigue.setCurrent(fatigue.getCurrent() - fatigueDecrease);
+                    actorData.mPtr.getClass().getCreatureStats(actorData.mPtr).setFatigue(fatigue);
+                }
+                actorData.mPtr.getClass().getMovementSettings(actorData.mPtr).mPosition[2] = 0;
+            }
+
+            MWMechanics::CreatureStats& stats = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr);
+            if (actorData.mNeedLand)
+                stats.land(actorData.mPtr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
+            else if (actorData.mFallHeight < 0)
+                stats.addToFallHeight(-actorData.mFallHeight);
+        }
+
+        // update actors aabb
+        for (const auto& actorData : mActorsFrameData)
+            if (actorData.mPositionChanged)
+                mCollisionWorld->updateSingleAabb(actorData.mActorRaw->getCollisionObject());
+
+        // update standing collisions map
+        if (advanceSimulation)
+        {
+            mStandingCollisions.clear();
+            for (auto& actorData : mActorsFrameData)
+            {
+                if (!actorData.mStandingOn.isEmpty())
+                    mStandingCollisions[actorData.mPtr] = actorData.mStandingOn;
+                else
+                    mStandingCollisions.erase(actorData.mPtr);
+            }
+        }
+        return mMovementResults;
+    }
+
+    std::vector<ActorFrameData> PhysicsSystem::prepareFrameData()
+    {
+        std::vector<ActorFrameData> actorsFrameData;
+        actorsFrameData.reserve(mMovementQueue.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
         for (const auto& m : mMovementQueue)
         {
@@ -702,7 +796,10 @@ namespace MWPhysics
             const auto& movement = m.second;
             const auto foundActor = mActors.find(character);
             if (foundActor == mActors.end()) // actor was already removed from the scene
+            {
+                mStandingCollisions.erase(character);
                 continue;
+            }
             auto physicActor = foundActor->second;
 
             float waterlevel = -std::numeric_limits<float>::max();
@@ -713,56 +810,27 @@ namespace MWPhysics
             const MWMechanics::MagicEffects& effects = character.getClass().getCreatureStats(character).getMagicEffects();
 
             bool waterCollision = false;
+            bool moveToWaterSurface = false;
             if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
                 if (!world->isUnderwater(character.getCell(), osg::Vec3f(character.getRefData().getPosition().asVec3())))
                     waterCollision = true;
                 else if (physicActor->getCollisionMode() && canMoveToWaterSurface(character, waterlevel))
                 {
-                    const osg::Vec3f actorPosition = physicActor->getPosition();
-                    physicActor->setPosition(osg::Vec3f(actorPosition.x(), actorPosition.y(), waterlevel));
+                    moveToWaterSurface = true;
                     waterCollision = true;
                 }
             }
+
             physicActor->setCanWaterWalk(waterCollision);
 
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
-            float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
+            const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
-            bool flying = world->isFlying(character);
-            bool swimming = world->isSwimming(character);
-
-            bool wasOnGround = physicActor->getOnGround();
-            osg::Vec3f position = physicActor->getPosition();
-            float oldHeight = position.z();
-            bool positionChanged = false;
-            for (int i=0; i<numSteps; ++i)
-            {
-                position = MovementSolver::move(position, physicActor->getPtr(), physicActor.get(), movement, mPhysicsDt,
-                                                flying, waterlevel, slowFall, mCollisionWorld.get(), mStandingCollisions);
-                if (position != physicActor->getPosition())
-                    positionChanged = true;
-                physicActor->setPosition(position); // always set even if unchanged to make sure interpolation is correct
-            }
-            if (positionChanged)
-                mCollisionWorld->updateSingleAabb(physicActor->getCollisionObject());
-
-            float interpolationFactor = mTimeAccum / mPhysicsDt;
-            osg::Vec3f interpolated = position * interpolationFactor + physicActor->getPreviousPosition() * (1.f - interpolationFactor);
-
-            float heightDiff = position.z() - oldHeight;
-
-            MWMechanics::CreatureStats& stats = character.getClass().getCreatureStats(character);
-            bool isStillOnGround = (numSteps > 0 && wasOnGround && physicActor->getOnGround());
-            if (isStillOnGround || flying || swimming || slowFall < 1)
-                stats.land(character == player && (flying || swimming));
-            else if (heightDiff < 0)
-                stats.addToFallHeight(-heightDiff);
-
-            mMovementResults.emplace(character, interpolated);
+            actorsFrameData.emplace_back(std::move(physicActor), character, mStandingCollisions[character], moveToWaterSurface, movement, slowFall, waterlevel);
         }
         mMovementQueue.clear();
-        return mMovementResults;
+        return actorsFrameData;
     }
 
     void PhysicsSystem::stepSimulation()
@@ -895,5 +963,62 @@ namespace MWPhysics
         stats.setAttribute(frameNumber, "Physics Actors", mActors.size());
         stats.setAttribute(frameNumber, "Physics Objects", mObjects.size());
         stats.setAttribute(frameNumber, "Physics HeightFields", mHeightFields.size());
+    }
+
+    ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn,
+            bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel)
+        : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
+        mPositionChanged(false), mDidJump(false), mNeedLand(false), mMoveToWaterSurface(moveToWaterSurface),
+        mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
+    {
+        const MWBase::World *world = MWBase::Environment::get().getWorld();
+        mPtr = actor->getPtr();
+        mFlying = world->isFlying(character);
+        mSwimming = world->isSwimming(character);
+        mWantJump = mPtr.getClass().getMovementSettings(mPtr).mPosition[2] != 0;
+        mIsDead = mPtr.getClass().getCreatureStats(mPtr).isDead();
+        mWasOnGround = actor->getOnGround();
+    }
+
+    void ActorFrameData::updatePosition()
+    {
+        mPosition = mActorRaw->getPosition();
+        if (mMoveToWaterSurface)
+        {
+            mPosition.z() = mWaterlevel;
+            mActorRaw->setPosition(mPosition);
+        }
+        mOldHeight = mPosition.z();
+        mRefpos = mPtr.getRefData().getPosition();
+    }
+
+    WorldFrameData::WorldFrameData()
+        : mIsInStorm(MWBase::Environment::get().getWorld()->isInStorm())
+        , mStormDirection(MWBase::Environment::get().getWorld()->getStormDirection())
+    {}
+
+    LOSRequest::LOSRequest(const std::weak_ptr<Actor>& a1, const std::weak_ptr<Actor>& a2)
+        : mResult(false), mStale(false), mAge(0)
+    {
+        // we use raw actor pointer pair to uniquely identify request
+        // sort the pointer value in ascending order to not duplicate equivalent requests, eg. getLOS(A, B) and getLOS(B, A)
+        auto* raw1 = a1.lock().get();
+        auto* raw2 = a2.lock().get();
+        assert(raw1 != raw2);
+        if (raw1 < raw2)
+        {
+            mActors = {a1, a2};
+            mRawActors = {raw1, raw2};
+        }
+        else
+        {
+            mActors = {a2, a1};
+            mRawActors = {raw2, raw1};
+        }
+    }
+
+    bool operator==(const LOSRequest& lhs, const LOSRequest& rhs) noexcept
+    {
+        return lhs.mRawActors == rhs.mRawActors;
     }
 }
