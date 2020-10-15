@@ -94,6 +94,9 @@ bool Launcher::AdvancedPage::loadSettings()
             unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
         loadSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         loadSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
+        int numPhysicsThreads = mEngineSettings.getInt("async num threads", "Physics");
+        if (numPhysicsThreads >= 0)
+            physicsThreadsSpinBox->setValue(numPhysicsThreads);
     }
 
     // Visuals
@@ -208,6 +211,9 @@ void Launcher::AdvancedPage::saveSettings()
             mEngineSettings.setInt("strength influences hand to hand", "Game", unarmedFactorsStrengthIndex);
         saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
         saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
+        int numPhysicsThreads = physicsThreadsSpinBox->value();
+        if (numPhysicsThreads != mEngineSettings.getInt("async num threads", "Physics"))
+            mEngineSettings.setInt("async num threads", "Physics", numPhysicsThreads);
     }
 
     // Visuals
