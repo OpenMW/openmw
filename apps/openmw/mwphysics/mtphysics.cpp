@@ -515,26 +515,27 @@ namespace MWPhysics
                 mPreStepBarrier->wait();
 
             int job = 0;
-            while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
+            while (mRemainingSteps && (job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
             {
                 MaybeSharedLock<std::shared_timed_mutex> lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
                 if(const auto actor = mActorsFrameData[job].mActor.lock())
-                {
-                    if (mRemainingSteps)
-                        MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
-                    else
-                    {
-                        auto& actorData = mActorsFrameData[job];
-                        handleFall(actorData, mAdvanceSimulation);
-                        mMovementResults[actorData.mPtr] = interpolateMovements(actorData, mTimeAccum, mPhysicsDt);
-                    }
-                }
+                    MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
             }
 
             mPostStepBarrier->wait();
 
             if (!mRemainingSteps)
             {
+                while ((job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
+                {
+                    if(const auto actor = mActorsFrameData[job].mActor.lock())
+                    {
+                        auto& actorData = mActorsFrameData[job];
+                        handleFall(actorData, mAdvanceSimulation);
+                        mMovementResults[actorData.mPtr] = interpolateMovements(actorData, mTimeAccum, mPhysicsDt);
+                    }
+                }
+
                 if (mLOSCacheExpiry >= 0)
                     refreshLOSCache();
                 mPostSimBarrier->wait();
