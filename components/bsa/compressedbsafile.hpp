@@ -88,10 +88,10 @@ namespace Bsa
         static BsaVersion detectVersion(std::string filePath);
 
         /// Read header information from the input source
-        virtual void readHeader();
+        void readHeader() override;
        
-        Files::IStreamPtr getFile(const char* filePath);
-        Files::IStreamPtr getFile(const FileStruct* fileStruct);
+        Files::IStreamPtr getFile(const char* filePath) override;
+        Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
         
     };
 }

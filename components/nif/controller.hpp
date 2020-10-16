@@ -75,8 +75,8 @@ public:
     NiParticleModifierPtr affectors;
     NiParticleModifierPtr colliders;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 using NiBSPArrayController = NiParticleSystemController;
 
@@ -86,8 +86,8 @@ public:
     NiPosDataPtr data;
     unsigned int targetColor;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiPathController : public Controller
@@ -110,8 +110,8 @@ public:
     float maxBankAngle, smoothing;
     short followAxis;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiLookAtController : public Controller
@@ -120,8 +120,8 @@ public:
     NodePtr target;
     unsigned short lookAtFlags{0};
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiUVController : public Controller
@@ -130,8 +130,8 @@ public:
     NiUVDataPtr data;
     unsigned int uvSet;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiKeyframeController : public Controller
@@ -139,16 +139,16 @@ class NiKeyframeController : public Controller
 public:
     NiKeyframeDataPtr data;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 struct NiFloatInterpController : public Controller
 {
     NiFloatDataPtr data;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiAlphaController : public NiFloatInterpController { };
@@ -159,8 +159,8 @@ class NiGeomMorpherController : public Controller
 public:
     NiMorphDataPtr data;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiVisController : public Controller
@@ -168,8 +168,8 @@ class NiVisController : public Controller
 public:
     NiVisDataPtr data;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiFlipController : public Controller
@@ -179,8 +179,8 @@ public:
     float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
     NiSourceTextureList mSources;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 } // Namespace

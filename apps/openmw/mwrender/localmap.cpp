@@ -39,7 +39,7 @@ namespace
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor*)
+        void operator()(osg::Node* node, osg::NodeVisitor*) override
         {
             if (mRendered)
                 node->setNodeMask(0);

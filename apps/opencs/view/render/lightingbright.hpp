@@ -17,11 +17,11 @@ namespace CSVRender
 
             LightingBright();
 
-            virtual void activate (osg::Group* rootNode, bool /*isExterior*/);
+            void activate (osg::Group* rootNode, bool /*isExterior*/) override;
 
-            virtual void deactivate();
+            void deactivate() override;
 
-            virtual osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient);
+            osg::Vec4f getAmbientColour(osg::Vec4f* defaultAmbient) override;
     };
 }
 

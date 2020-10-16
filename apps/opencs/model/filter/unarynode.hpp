@@ -18,11 +18,11 @@ namespace CSMFilter
 
             Node& getChild();
 
-            virtual std::vector<int> getReferencedColumns() const;
+            std::vector<int> getReferencedColumns() const override;
             ///< Return a list of the IDs of the columns referenced by this node. The column mapping
             /// passed into test as columns must contain all columns listed here.
 
-            virtual std::string toString (bool numericColumns) const;
+            std::string toString (bool numericColumns) const override;
             ///< Return a string that represents this node.
             ///
             /// \param numericColumns Use numeric IDs instead of string to represent columns.

@@ -203,12 +203,12 @@ namespace CSVRender
 
             virtual void updateOverlay();
 
-            virtual void mouseMoveEvent (QMouseEvent *event);
-            virtual void wheelEvent (QWheelEvent *event);
+            void mouseMoveEvent (QMouseEvent *event) override;
+            void wheelEvent (QWheelEvent *event) override;
 
             virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
 
-            virtual void settingChanged (const CSMPrefs::Setting *setting);
+            void settingChanged (const CSMPrefs::Setting *setting) override;
 
             EditMode *getEditMode();
 
@@ -216,11 +216,11 @@ namespace CSVRender
 
         private:
 
-            void dragEnterEvent(QDragEnterEvent *event);
+            void dragEnterEvent(QDragEnterEvent *event) override;
 
-            void dropEvent(QDropEvent* event);
+            void dropEvent(QDropEvent* event) override;
 
-            void dragMoveEvent(QDragMoveEvent *event);
+            void dragMoveEvent(QDragMoveEvent *event) override;
 
             virtual std::string getStartupInstruction() = 0;
 

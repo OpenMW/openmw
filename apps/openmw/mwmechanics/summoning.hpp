@@ -22,9 +22,9 @@ namespace MWMechanics
         UpdateSummonedCreatures(const MWWorld::Ptr& actor);
         virtual ~UpdateSummonedCreatures() = default;
 
-        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+        void visit (MWMechanics::EffectKey key, int effectIndex,
                             const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1);
+                            float magnitude, float remainingTime = -1, float totalTime = -1) override;
 
         /// To call after all effect sources have been visited
         void process(bool cleanup);

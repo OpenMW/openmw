@@ -19,9 +19,9 @@ class Repair : public WindowBase
 public:
     Repair();
 
-    virtual void onOpen();
+    void onOpen() override;
 
-    void setPtr (const MWWorld::Ptr& item);
+    void setPtr (const MWWorld::Ptr& item) override;
 
 protected:
     ItemChargeView* mRepairBox;

@@ -640,7 +640,7 @@ public:
 	dtPolyRef nearestRef() const { return m_nearestRef; }
 	const float* nearestPoint() const { return m_nearestPoint; }
 
-	void process(const dtMeshTile* tile, dtPoly** polys, dtPolyRef* refs, int count)
+	void process(const dtMeshTile* tile, dtPoly** polys, dtPolyRef* refs, int count) override
 	{
 		dtIgnoreUnused(polys);
 
@@ -842,7 +842,7 @@ public:
 	int numCollected() const { return m_numCollected; }
 	bool overflowed() const { return m_overflow; }
 
-	void process(const dtMeshTile* tile, dtPoly** polys, dtPolyRef* refs, int count)
+	void process(const dtMeshTile* tile, dtPoly** polys, dtPolyRef* refs, int count) override
 	{
 		dtIgnoreUnused(tile);
 		dtIgnoreUnused(polys);

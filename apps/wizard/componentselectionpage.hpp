@@ -15,8 +15,8 @@ namespace Wizard
     public:
         ComponentSelectionPage(QWidget *parent);
 
-        int nextId() const;
-        virtual bool validatePage();
+        int nextId() const override;
+        bool validatePage() override;
 
     private slots:
         void updateButton(QListWidgetItem *item);
@@ -25,7 +25,7 @@ namespace Wizard
         MainWizard *mWizard;
 
     protected:
-        void initializePage();
+        void initializePage() override;
 
     };
 

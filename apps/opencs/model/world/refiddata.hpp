@@ -66,24 +66,24 @@ namespace CSMWorld
     {
         std::vector<Record<RecordT> > mContainer;
 
-        virtual int getSize() const;
+        int getSize() const override;
 
-        virtual const RecordBase& getRecord (int index) const;
+        const RecordBase& getRecord (int index) const override;
 
-        virtual RecordBase& getRecord (int index);
+        RecordBase& getRecord (int index) override;
 
-        virtual void appendRecord (const std::string& id, bool base);
+        void appendRecord (const std::string& id, bool base) override;
 
-        virtual void insertRecord (RecordBase& record);
+        void insertRecord (RecordBase& record) override;
 
-        virtual int load (ESM::ESMReader& reader, bool base);
+        int load (ESM::ESMReader& reader, bool base) override;
         ///< \return index of a loaded record or -1 if no record was loaded
 
-        virtual void erase (int index, int count);
+        void erase (int index, int count) override;
 
-        virtual std::string getId (int index) const;
+        std::string getId (int index) const override;
 
-        virtual void save (int index, ESM::ESMWriter& writer) const;
+        void save (int index, ESM::ESMWriter& writer) const override;
     };
 
     template<typename RecordT>

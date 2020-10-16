@@ -23,7 +23,7 @@ namespace MWRender
         void setGroup(const std::string& group, bool relativeTime);
         void updateStartTime();
 
-        virtual float getValue(osg::NodeVisitor* nv);
+        float getValue(osg::NodeVisitor* nv) override;
     };
 
     /// Handles attach & release of projectiles for ranged weapons

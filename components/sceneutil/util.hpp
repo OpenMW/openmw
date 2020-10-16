@@ -19,10 +19,10 @@ namespace SceneUtil
         GlowUpdater(int texUnit, const osg::Vec4f& color, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures,
             osg::Node* node, float duration, Resource::ResourceSystem* resourcesystem);
 
-        virtual void setDefaults(osg::StateSet *stateset);
+        void setDefaults(osg::StateSet *stateset) override;
 
         void removeTexture(osg::StateSet* stateset);
-        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
+        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
 
         bool isPermanentGlowUpdater();
 

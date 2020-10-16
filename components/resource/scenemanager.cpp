@@ -40,7 +40,7 @@ namespace
     class InitWorldSpaceParticlesCallback : public osg::NodeCallback
     {
     public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgParticle::ParticleSystem* partsys = static_cast<osgParticle::ParticleSystem*>(node);
 
@@ -91,7 +91,7 @@ namespace
                     && partsys->getUserDataContainer()->getDescriptions()[0] == "worldspace");
         }
 
-        void apply(osg::Drawable& drw)
+        void apply(osg::Drawable& drw) override
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
             {
@@ -143,7 +143,7 @@ namespace Resource
         {
         }
 
-        virtual void visit(osg::Node& node, SceneUtil::Controller& ctrl)
+        void visit(osg::Node& node, SceneUtil::Controller& ctrl) override
         {
             if (NifOsg::FlipController* flipctrl = dynamic_cast<NifOsg::FlipController*>(&ctrl))
             {
@@ -175,7 +175,7 @@ namespace Resource
         {
         }
 
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             osg::StateSet* stateset = node.getStateSet();
             if (stateset)
@@ -316,7 +316,7 @@ namespace Resource
         {
         }
 
-        virtual osgDB::ReaderWriter::ReadResult readImage(const std::string& filename, const osgDB::Options* options)
+        osgDB::ReaderWriter::ReadResult readImage(const std::string& filename, const osgDB::Options* options) override
         {
             try
             {
@@ -400,7 +400,7 @@ namespace Resource
             return it != reservedNames.end();
         }
 
-        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
+        bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const override
         {
             if (option & SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS)
             {
@@ -412,7 +412,7 @@ namespace Resource
             return (option & optimizer->getPermissibleOptimizationsForObject(node))!=0;
         }
 
-        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
+        bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const override
         {
             if (node->getNumDescriptions()>0) return false;
             if (node->getDataVariance() == osg::Object::DYNAMIC) return false;

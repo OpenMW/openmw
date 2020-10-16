@@ -341,9 +341,9 @@ namespace MWBase
             virtual bool injectKeyPress(MyGUI::KeyCode key, unsigned int text, bool repeat) = 0;
             virtual bool injectKeyRelease(MyGUI::KeyCode key) = 0;
 
-            virtual void windowVisibilityChange(bool visible) = 0;
-            virtual void windowResized(int x, int y) = 0;
-            virtual void windowClosed() = 0;
+            void windowVisibilityChange(bool visible) override = 0;
+            void windowResized(int x, int y) override = 0;
+            void windowClosed() override = 0;
             virtual bool isWindowVisible() = 0;
 
             virtual void watchActor(const MWWorld::Ptr& ptr) = 0;

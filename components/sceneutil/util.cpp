@@ -24,7 +24,7 @@ public:
     {
     }
 
-    virtual void apply(osg::Node& node)
+    void apply(osg::Node& node) override
     {
         if (osg::StateSet* stateset = node.getStateSet())
             mLowestUnusedTexUnit = std::max(mLowestUnusedTexUnit, int(stateset->getTextureAttributeList().size()));

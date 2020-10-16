@@ -23,7 +23,7 @@ namespace CSVWorld
         private:
 
             /// \return ID entered by user.
-            virtual std::string getId() const;
+            std::string getId() const override;
 
         public:
 
@@ -33,10 +33,10 @@ namespace CSVWorld
                 const CSMWorld::UniversalId& id);
 
             /// \return Error description for current user input.
-            virtual std::string getErrors() const;
+            std::string getErrors() const override;
 
             /// \brief Clear ID and checkbox input widgets.
-            virtual void reset();
+            void reset() override;
 
         private slots:
 

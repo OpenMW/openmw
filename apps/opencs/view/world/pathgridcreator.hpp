@@ -33,7 +33,7 @@ namespace CSVWorld
         private:
 
             /// \return Cell ID entered by user.
-            virtual std::string getId() const;
+            std::string getId() const override;
 
             /// \return reference to table containing pathgrids.
             CSMWorld::IdTable& getPathgridsTable() const;
@@ -49,18 +49,18 @@ namespace CSVWorld
             /// \brief Set cell ID input widget to ID of record to be cloned.
             /// \param originId Cell ID to be cloned.
             /// \param type Type of record to be cloned.
-            virtual void cloneMode(
+            void cloneMode(
                 const std::string& originId,
-                const CSMWorld::UniversalId::Type type);
+                const CSMWorld::UniversalId::Type type) override;
 
             /// \return Error description for current user input.
-            virtual std::string getErrors() const;
+            std::string getErrors() const override;
 
             /// \brief Set focus to cell ID input widget.
-            virtual void focus();
+            void focus() override;
 
             /// \brief Clear cell ID input widget.
-            virtual void reset();
+            void reset() override;
 
         private slots:
 
@@ -73,9 +73,9 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator(
+            Creator *makeCreator(
                 CSMDoc::Document& document,
-                const CSMWorld::UniversalId& id) const;
+                const CSMWorld::UniversalId& id) const override;
     };
 }
 

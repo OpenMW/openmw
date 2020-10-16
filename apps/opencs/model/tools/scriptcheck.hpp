@@ -36,20 +36,20 @@ namespace CSMTools
 
             CSMDoc::Message::Severity getSeverity (Type type);
 
-            virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
+            void report (const std::string& message, const Compiler::TokenLoc& loc, Type type) override;
             ///< Report error to the user.
 
-            virtual void report (const std::string& message, Type type);
+            void report (const std::string& message, Type type) override;
             ///< Report a file related error
 
         public:
 
             ScriptCheckStage (const CSMDoc::Document& document);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, CSMDoc::Messages& messages);
+            void perform (int stage, CSMDoc::Messages& messages) override;
             ///< Messages resulting from this tage will be appended to \a messages.
     };
 }

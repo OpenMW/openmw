@@ -68,7 +68,7 @@ public:
 
     }
 
-    virtual void apply(osg::Drawable &drawable)
+    void apply(osg::Drawable &drawable) override
     {
         if (!mTriangleMesh)
             mTriangleMesh.reset(new btTriangleMesh);

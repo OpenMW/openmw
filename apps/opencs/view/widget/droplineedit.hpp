@@ -29,9 +29,9 @@ namespace CSVWidget
             DropLineEdit(CSMWorld::ColumnBase::Display type, QWidget *parent = 0);
 
         protected:
-            void dragEnterEvent(QDragEnterEvent *event);
-            void dragMoveEvent(QDragMoveEvent *event);
-            void dropEvent(QDropEvent *event);
+            void dragEnterEvent(QDragEnterEvent *event) override;
+            void dragMoveEvent(QDragMoveEvent *event) override;
+            void dropEvent(QDropEvent *event) override;
 
         signals:
             void tableMimeDataDropped(const CSMWorld::UniversalId &id, const CSMDoc::Document *document);

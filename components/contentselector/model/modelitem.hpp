@@ -26,7 +26,7 @@ namespace ContentSelectorModel
         void appendChild(ModelItem *child);
         void removeChild(int row);
 
-        bool hasFormat(const QString &mimetype) const;
+        bool hasFormat(const QString &mimetype) const override;
 
         //virtual bool acceptChild(ModelItem *child);
 

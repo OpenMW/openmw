@@ -9,10 +9,10 @@ namespace Compiler
 
     class NullErrorHandler : public ErrorHandler
     {
-            virtual void report (const std::string& message, const TokenLoc& loc, Type type);
+            void report (const std::string& message, const TokenLoc& loc, Type type) override;
             ///< Report error to the user.
 
-            virtual void report (const std::string& message, Type type);
+            void report (const std::string& message, Type type) override;
             ///< Report a file related error
     };
 }

@@ -24,11 +24,11 @@ namespace osgMyGUI
 
         ~CustomLogListener() {}
 
-        virtual void open();
-        virtual void close();
-        virtual void flush();
+        void open() override;
+        void close() override;
+        void flush() override;
 
-        virtual void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line);
+        void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time, const std::string& _message, const char* _file, int _line) override;
 
         const std::string& getFileName() const { return mFileName; }
 

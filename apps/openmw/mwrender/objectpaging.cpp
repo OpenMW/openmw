@@ -89,11 +89,11 @@ namespace MWRender
     class CanOptimizeCallback : public SceneUtil::Optimizer::IsOperationPermissibleForObjectCallback
     {
     public:
-        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const
+        bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Drawable* node,unsigned int option) const override
         {
             return true;
         }
-        virtual bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const
+        bool isOperationPermissibleForObjectImplementation(const SceneUtil::Optimizer* optimizer, const osg::Node* node,unsigned int option) const override
         {
             return (node->getDataVariance() != osg::Object::DYNAMIC);
         }
@@ -119,7 +119,7 @@ namespace MWRender
             }
         }
 
-        virtual osg::Node* operator() (const osg::Node* node) const
+        osg::Node* operator() (const osg::Node* node) const override
         {
             if (const osg::Drawable* d = node->asDrawable())
                 return operator()(d);
@@ -222,7 +222,7 @@ namespace MWRender
 
             matrixTransform->setMatrix(newMatrix);
         }
-        virtual osg::Drawable* operator() (const osg::Drawable* drawable) const
+        osg::Drawable* operator() (const osg::Drawable* drawable) const override
         {
             if (dynamic_cast<const osgParticle::ParticleSystem*>(drawable))
                 return nullptr;
@@ -243,7 +243,7 @@ namespace MWRender
             else
                 return const_cast<osg::Drawable*>(drawable);
         }
-        virtual osg::Callback* operator() (const osg::Callback* callback) const
+        osg::Callback* operator() (const osg::Callback* callback) const override
         {
             return nullptr;
         }
@@ -281,13 +281,13 @@ namespace MWRender
             unsigned int mNumVerts = 0;
         };
 
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             if (node.getStateSet())
                 mCurrentStateSet = node.getStateSet();
             traverse(node);
         }
-        virtual void apply(osg::Geometry& geom)
+        void apply(osg::Geometry& geom) override
         {
             if (osg::Array* array = geom.getVertexArray())
                 mResult.mNumVerts += array->getNumElements();
@@ -328,7 +328,7 @@ namespace MWRender
     {
     public:
         DebugVisitor() : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN) {}
-        virtual void apply(osg::Drawable& node)
+        void apply(osg::Drawable& node) override
         {
             osg::ref_ptr<osg::Material> m (new osg::Material);
             osg::Vec4f color(Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), Misc::Rng::rollProbability(), 0.f);
@@ -349,7 +349,7 @@ namespace MWRender
     public:
         AddRefnumMarkerVisitor(const ESM::RefNum &refnum) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mRefnum(refnum) {}
         ESM::RefNum mRefnum;
-        virtual void apply(osg::Geometry &node)
+        void apply(osg::Geometry &node) override
         {
             osg::ref_ptr<RefnumMarker> marker (new RefnumMarker);
             marker->mRefnum = mRefnum;

@@ -11,8 +11,8 @@ namespace CSVWorld
     {
         private:
 
-            virtual void addCommands (QAbstractItemModel *model,
-                const QModelIndex& index, int type) const;
+            void addCommands (QAbstractItemModel *model,
+                const QModelIndex& index, int type) const override;
 
         public:
 
@@ -30,8 +30,8 @@ namespace CSVWorld
                 ESM::VarType type1 = ESM::VT_Unknown, ESM::VarType type2 = ESM::VT_Unknown,
                 ESM::VarType type3 = ESM::VT_Unknown);
 
-            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher,
-                CSMDoc::Document& document, QObject *parent) const;
+            CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher,
+                CSMDoc::Document& document, QObject *parent) const override;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
             void add (ESM::VarType type);

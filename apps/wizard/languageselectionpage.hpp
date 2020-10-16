@@ -15,13 +15,13 @@ namespace Wizard
     public:
         LanguageSelectionPage(QWidget *parent);
 
-        int nextId() const;
+        int nextId() const override;
 
     private:
         MainWizard *mWizard;
 
     protected:
-        void initializePage();
+        void initializePage() override;
     };
 }
 

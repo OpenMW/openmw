@@ -20,7 +20,7 @@ namespace CSMWorld
     {
             const IdCollection<Cell>& mCells;
 
-            virtual void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted);
+            void loadRecord (ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted) override;
 
         public:
 

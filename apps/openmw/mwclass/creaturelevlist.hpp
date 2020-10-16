@@ -11,27 +11,27 @@ namespace MWClass
 
         public:
 
-            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
+            std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
+            bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
             ///< @return true if this object has a tooltip when focused (default implementation: true)
 
             static void registerSelf();
 
-            virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+            void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
+            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
-            virtual void respawn (const MWWorld::Ptr& ptr) const;
+            void respawn (const MWWorld::Ptr& ptr) const override;
     };
 }
 

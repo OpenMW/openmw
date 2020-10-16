@@ -19,7 +19,7 @@ namespace CSVRender
         void setAlteredHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
 
-        virtual bool useAlteration() const { return true; }
+        bool useAlteration() const override { return true; }
         float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
         float* getAlteredHeight(int inCellX, int inCellY);
 

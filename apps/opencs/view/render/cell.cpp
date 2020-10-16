@@ -45,7 +45,7 @@ namespace CSVRender
     {
         public:
 
-            virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+            void operator()(osg::Node* node, osg::NodeVisitor* nv) override
             {
                 traverse(node, nv);
                 CellNodeContainer* container = static_cast<CellNodeContainer*>(node->getUserData());

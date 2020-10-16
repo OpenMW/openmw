@@ -17,7 +17,7 @@ class MyView : public View
 public:
     osg::ref_ptr<osg::Node> mLoaded;
 
-    virtual void reset() {}
+    void reset() override {}
 };
 
 TerrainGrid::TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask)

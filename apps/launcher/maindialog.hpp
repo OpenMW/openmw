@@ -84,7 +84,7 @@ namespace Launcher
         inline bool startProgram(const QString &name, bool detached = false) { return startProgram(name, QStringList(), detached); }
         bool startProgram(const QString &name, const QStringList &arguments, bool detached = false);
 
-        void closeEvent(QCloseEvent *event);
+        void closeEvent(QCloseEvent *event) override;
 
         PlayPage *mPlayPage;
         GraphicsPage *mGraphicsPage;

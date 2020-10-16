@@ -12,7 +12,7 @@ namespace CSVDoc
     {
         public:
 
-            virtual CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+            CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
     };
 
     template<class SubViewT>
@@ -32,7 +32,7 @@ namespace CSVDoc
 
             SubViewFactoryWithCreator (bool sorting = true);
 
-            virtual CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
+            CSVDoc::SubView *makeSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) override;
     };
 
     template<class SubViewT, class CreatorFactoryT>

@@ -141,7 +141,7 @@ namespace MWGui
         {
         }
 
-        virtual void operator () (osg::RenderInfo& renderInfo) const
+        void operator () (osg::RenderInfo& renderInfo) const override
         {
             if (!oneshot)
                 return;
@@ -159,7 +159,7 @@ namespace MWGui
     class DontComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
     {
     public:
-        virtual osg::BoundingSphere computeBound(const osg::Node&) const { return osg::BoundingSphere(); }
+        osg::BoundingSphere computeBound(const osg::Node&) const override { return osg::BoundingSphere(); }
     };
 
     void LoadingScreen::loadingOn(bool visible)

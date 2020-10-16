@@ -10,7 +10,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime, unsigned int arg0)
+            void execute (Runtime& runtime, unsigned int arg0) override
             {
                 runtime.push (static_cast<Type_Integer> (arg0));
             }        
@@ -20,7 +20,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 Type_Float floatValue = static_cast<Type_Float> (data);
@@ -32,7 +32,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[0].mFloat;
                 Type_Integer integerValue = static_cast<Type_Integer> (data);
@@ -44,7 +44,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 data = -data;
@@ -56,7 +56,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[0].mFloat;
                 data = -data;
@@ -68,7 +68,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[1].mInteger;
                 Type_Float floatValue = static_cast<Type_Float> (data);
@@ -80,7 +80,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[1].mFloat;
                 Type_Integer integerValue = static_cast<Type_Integer> (data);

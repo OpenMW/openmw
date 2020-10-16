@@ -17,15 +17,15 @@ namespace Terrain
         TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask=~0, int borderMask=0);
         ~TerrainGrid();
 
-        virtual void cacheCell(View* view, int x, int y);
+        void cacheCell(View* view, int x, int y) override;
 
         /// @note Not thread safe.
-        virtual void loadCell(int x, int y);
+        void loadCell(int x, int y) override;
 
         /// @note Not thread safe.
-        virtual void unloadCell(int x, int y);
+        void unloadCell(int x, int y) override;
 
-        View* createView();
+        View* createView() override;
 
     protected:
         bool isGridEmpty() const { return mGrid.empty(); }

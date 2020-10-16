@@ -112,11 +112,11 @@ namespace CSVWidget
 
             SceneToolTextureBrush (SceneToolbar *parent, const QString& toolTip, CSMDoc::Document& document);
 
-            virtual void showPanel (const QPoint& position);
+            void showPanel (const QPoint& position) override;
             void updatePanel ();
 
-            void dropEvent (QDropEvent *event);
-            void dragEnterEvent (QDragEnterEvent *event);
+            void dropEvent (QDropEvent *event) override;
+            void dragEnterEvent (QDragEnterEvent *event) override;
 
         friend class CSVRender::TerrainTextureMode;
 
@@ -124,7 +124,7 @@ namespace CSVWidget
             void setButtonIcon(CSVWidget::BrushShape brushShape);
             void updateBrushHistory (const std::string& mBrushTexture);
             void clicked (const QModelIndex& index);
-            virtual void activate();
+            void activate() override;
 
         signals:
             void passEvent(QDropEvent *event);

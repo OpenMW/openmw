@@ -39,9 +39,9 @@ namespace MWGui
 
             Console(int w, int h, bool consoleOnlyScripts);
 
-            virtual void onOpen();
+            void onOpen() override;
 
-            void onResChange(int width, int height);
+            void onResChange(int width, int height) override;
 
             // Print a message to the console, in specified color.
             void print(const std::string &msg, const std::string& color = "#FFFFFF");
@@ -60,13 +60,13 @@ namespace MWGui
 
             void updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr);
 
-            void clear();
+            void clear() override;
 
-            virtual void resetReference ();
+            void resetReference () override;
 
         protected:
 
-            virtual void onReferenceUnavailable();
+            void onReferenceUnavailable() override;
 
         private:
 
@@ -86,10 +86,10 @@ namespace MWGui
             bool compile (const std::string& cmd, Compiler::Output& output);
 
             /// Report error to the user.
-            virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
+            void report (const std::string& message, const Compiler::TokenLoc& loc, Type type) override;
 
             /// Report a file related error
-            virtual void report (const std::string& message, Type type);
+            void report (const std::string& message, Type type) override;
 
             /// Write all valid identifiers and keywords into mNames and sort them.
             /// \note If mNames is not empty, this function is a no-op.

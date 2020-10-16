@@ -53,9 +53,9 @@ namespace CSVWorld
 
         ~DataDisplayDelegate();
 
-        virtual void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+        void paint (QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
-        virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+        QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
         /// pass a QSize defining height / width of icon. Default is QSize (16,16).
         void setIconSize (const QSize& icon);
@@ -74,7 +74,7 @@ namespace CSVWorld
         /// rebuild the list of pixmaps from the provided icons (called when icon size is changed)
         void buildPixmaps();
 
-        virtual void settingChanged (const CSMPrefs::Setting *setting);
+        void settingChanged (const CSMPrefs::Setting *setting) override;
     };
 
     class DataDisplayDelegateFactory : public EnumDelegateFactory
@@ -85,7 +85,7 @@ namespace CSVWorld
 
     public:
 
-        virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
+        CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const override;
         ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
     protected:

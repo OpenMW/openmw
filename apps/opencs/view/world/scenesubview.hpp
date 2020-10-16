@@ -51,13 +51,13 @@ namespace CSVWorld
 
             SceneSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
-            virtual void setStatusBar (bool show);
+            void setStatusBar (bool show) override;
 
-            virtual void useHint (const std::string& hint);
+            void useHint (const std::string& hint) override;
 
-            virtual std::string getTitle() const;
+            std::string getTitle() const override;
 
         private:
 

@@ -54,37 +54,37 @@ namespace CSVWorld
 
         private:
 
-            virtual bool parseInt (int value, const Compiler::TokenLoc& loc,
-                Compiler::Scanner& scanner);
+            bool parseInt (int value, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner) override;
             ///< Handle an int token.
             /// \return fetch another token?
 
-            virtual bool parseFloat (float value, const Compiler::TokenLoc& loc,
-                Compiler::Scanner& scanner);
+            bool parseFloat (float value, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner) override;
             ///< Handle a float token.
             /// \return fetch another token?
 
-            virtual bool parseName (const std::string& name,
-                const Compiler::TokenLoc& loc, Compiler::Scanner& scanner);
+            bool parseName (const std::string& name,
+                const Compiler::TokenLoc& loc, Compiler::Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseKeyword (int keyword, const Compiler::TokenLoc& loc,
-                Compiler::Scanner& scanner);
+            bool parseKeyword (int keyword, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner) override;
             ///< Handle a keyword token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const Compiler::TokenLoc& loc,
-                Compiler::Scanner& scanner);
+            bool parseSpecial (int code, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            virtual bool parseComment (const std::string& comment, const Compiler::TokenLoc& loc,
-                Compiler::Scanner& scanner);
+            bool parseComment (const std::string& comment, const Compiler::TokenLoc& loc,
+                Compiler::Scanner& scanner) override;
             ///< Handle comment token.
             /// \return fetch another token?
 
-            virtual void parseEOF (Compiler::Scanner& scanner);
+            void parseEOF (Compiler::Scanner& scanner) override;
             ///< Handle EOF token.
 
             void highlight (const Compiler::TokenLoc& loc, Type type);
@@ -93,7 +93,7 @@ namespace CSVWorld
 
             ScriptHighlighter (const CSMWorld::Data& data, Mode mode, QTextDocument *parent);
 
-            virtual void highlightBlock (const QString& text);
+            void highlightBlock (const QString& text) override;
 
             void setMarkOccurrences(bool);
 

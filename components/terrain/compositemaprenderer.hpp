@@ -41,7 +41,7 @@ namespace Terrain
         CompositeMapRenderer();
         ~CompositeMapRenderer();
 
-        virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
+        void drawImplementation(osg::RenderInfo& renderInfo) const override;
 
         void compile(CompositeMap& compositeMap, osg::RenderInfo& renderInfo, double* timeLeft) const;
 

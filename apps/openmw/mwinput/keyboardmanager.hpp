@@ -15,9 +15,9 @@ namespace MWInput
 
         virtual ~KeyboardManager() = default;
 
-        virtual void textInput(const SDL_TextInputEvent &arg);
-        virtual void keyPressed(const SDL_KeyboardEvent &arg);
-        virtual void keyReleased(const SDL_KeyboardEvent &arg);
+        void textInput(const SDL_TextInputEvent &arg) override;
+        void keyPressed(const SDL_KeyboardEvent &arg) override;
+        void keyReleased(const SDL_KeyboardEvent &arg) override;
 
     private:
         BindingsManager* mBindingsManager;

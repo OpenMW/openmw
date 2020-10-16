@@ -166,7 +166,7 @@ namespace MWWorld
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osg::PositionAttitudeTransform* transform = static_cast<osg::PositionAttitudeTransform*>(node);
 

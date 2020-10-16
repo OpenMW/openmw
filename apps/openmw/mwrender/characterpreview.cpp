@@ -41,7 +41,7 @@ namespace MWRender
         {
         }
 
-        virtual void operator () (osg::Node* node, osg::NodeVisitor* nv)
+        void operator () (osg::Node* node, osg::NodeVisitor* nv) override
         {
             if (!mRendered)
             {
@@ -89,7 +89,7 @@ namespace MWRender
         {
         }
 
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             if (osg::StateSet* stateset = node.getStateSet())
             {
@@ -432,7 +432,7 @@ namespace MWRender
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osg::Camera* cam = static_cast<osg::Camera*>(node);
 

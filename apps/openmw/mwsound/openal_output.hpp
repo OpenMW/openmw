@@ -59,41 +59,41 @@ namespace MWSound
         OpenAL_Output(const OpenAL_Output &rhs);
 
     public:
-        virtual std::vector<std::string> enumerate();
-        virtual bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode);
-        virtual void deinit();
+        std::vector<std::string> enumerate() override;
+        bool init(const std::string &devname, const std::string &hrtfname, HrtfMode hrtfmode) override;
+        void deinit() override;
 
-        virtual std::vector<std::string> enumerateHrtf();
-        virtual void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode);
+        std::vector<std::string> enumerateHrtf() override;
+        void setHrtf(const std::string &hrtfname, HrtfMode hrtfmode) override;
 
-        virtual std::pair<Sound_Handle,size_t> loadSound(const std::string &fname);
-        virtual size_t unloadSound(Sound_Handle data);
+        std::pair<Sound_Handle,size_t> loadSound(const std::string &fname) override;
+        size_t unloadSound(Sound_Handle data) override;
 
-        virtual bool playSound(Sound *sound, Sound_Handle data, float offset);
-        virtual bool playSound3D(Sound *sound, Sound_Handle data, float offset);
-        virtual void finishSound(Sound *sound);
-        virtual bool isSoundPlaying(Sound *sound);
-        virtual void updateSound(Sound *sound);
+        bool playSound(Sound *sound, Sound_Handle data, float offset) override;
+        bool playSound3D(Sound *sound, Sound_Handle data, float offset) override;
+        void finishSound(Sound *sound) override;
+        bool isSoundPlaying(Sound *sound) override;
+        void updateSound(Sound *sound) override;
 
-        virtual bool streamSound(DecoderPtr decoder, Stream *sound, bool getLoudnessData=false);
-        virtual bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData);
-        virtual void finishStream(Stream *sound);
-        virtual double getStreamDelay(Stream *sound);
-        virtual double getStreamOffset(Stream *sound);
-        virtual float getStreamLoudness(Stream *sound);
-        virtual bool isStreamPlaying(Stream *sound);
-        virtual void updateStream(Stream *sound);
+        bool streamSound(DecoderPtr decoder, Stream *sound, bool getLoudnessData=false) override;
+        bool streamSound3D(DecoderPtr decoder, Stream *sound, bool getLoudnessData) override;
+        void finishStream(Stream *sound) override;
+        double getStreamDelay(Stream *sound) override;
+        double getStreamOffset(Stream *sound) override;
+        float getStreamLoudness(Stream *sound) override;
+        bool isStreamPlaying(Stream *sound) override;
+        void updateStream(Stream *sound) override;
 
-        virtual void startUpdate();
-        virtual void finishUpdate();
+        void startUpdate() override;
+        void finishUpdate() override;
 
-        virtual void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env);
+        void updateListener(const osg::Vec3f &pos, const osg::Vec3f &atdir, const osg::Vec3f &updir, Environment env) override;
 
-        virtual void pauseSounds(int types);
-        virtual void resumeSounds(int types);
+        void pauseSounds(int types) override;
+        void resumeSounds(int types) override;
 
-        virtual void pauseActiveDevice();
-        virtual void resumeActiveDevice();
+        void pauseActiveDevice() override;
+        void resumeActiveDevice() override;
 
         OpenAL_Output(SoundManager &mgr);
         virtual ~OpenAL_Output();

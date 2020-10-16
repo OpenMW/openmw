@@ -22,7 +22,7 @@ namespace SceneUtil
         void setSourceGeometry(osg::ref_ptr<osg::Geometry> sourceGeom);
 
         // Currently empty as this is difficult to implement. Technically we would need to compile both internal geometries in separate frames but this method is only called once. Alternatively we could compile just the static parts of the model.
-        virtual void compileGLObjects(osg::RenderInfo& renderInfo) const {}
+        void compileGLObjects(osg::RenderInfo& renderInfo) const override {}
 
         class MorphTarget
         {
@@ -59,11 +59,11 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::Geometry> getSourceGeometry() const;
 
-        virtual void accept(osg::NodeVisitor &nv);
-        virtual bool supports(const osg::PrimitiveFunctor&) const { return true; }
-        virtual void accept(osg::PrimitiveFunctor&) const;
+        void accept(osg::NodeVisitor &nv) override;
+        bool supports(const osg::PrimitiveFunctor&) const override { return true; }
+        void accept(osg::PrimitiveFunctor&) const override;
 
-        virtual osg::BoundingBox computeBoundingBox() const;
+        osg::BoundingBox computeBoundingBox() const override;
 
     private:
         void cull(osg::NodeVisitor* nv);

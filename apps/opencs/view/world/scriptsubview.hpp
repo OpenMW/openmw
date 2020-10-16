@@ -70,11 +70,11 @@ namespace CSVWorld
 
             ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
-            virtual void useHint (const std::string& hint);
+            void useHint (const std::string& hint) override;
 
-            virtual void setStatusBar (bool show);
+            void setStatusBar (bool show) override;
 
         public slots:
 

@@ -23,7 +23,7 @@ namespace Resource
         /// to be done in advance by other managers accessing the NifFileManager.
         Nif::NIFFilePtr get(const std::string& name);
 
-        void reportStats(unsigned int frameNumber, osg::Stats *stats) const;
+        void reportStats(unsigned int frameNumber, osg::Stats *stats) const override;
     };
 
 }

@@ -13,7 +13,7 @@ namespace CSVDoc
 
             RunLogSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
     };
 }
 

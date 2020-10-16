@@ -24,7 +24,7 @@ namespace CSVWorld
 
             RegionMapSubView (CSMWorld::UniversalId universalId, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
         private slots:
 

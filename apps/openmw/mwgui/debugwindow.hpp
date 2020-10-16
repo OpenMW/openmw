@@ -11,7 +11,7 @@ namespace MWGui
     public:
         DebugWindow();
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
     private:
         MyGUI::TabControl* mTabControl;

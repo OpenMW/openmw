@@ -19,20 +19,20 @@ namespace MWGui
     public:
         TrainingWindow();
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        bool exit();
+        bool exit() override;
 
-        void setPtr(const MWWorld::Ptr& actor);
+        void setPtr(const MWWorld::Ptr& actor) override;
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
         WindowBase* getProgressBar() { return &mProgressBar; }
 
-        void clear() { resetReference(); }
+        void clear() override { resetReference(); }
 
     protected:
-        virtual void onReferenceUnavailable ();
+        void onReferenceUnavailable() override;
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onTrainingSelected(MyGUI::Widget* sender);

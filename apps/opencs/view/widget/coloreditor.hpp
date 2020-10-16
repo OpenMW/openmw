@@ -37,8 +37,8 @@ namespace CSVWidget
             void setColor(const int colorInt);
 
         protected:
-            virtual void paintEvent(QPaintEvent *event);
-            virtual void showEvent(QShowEvent *event);
+            void paintEvent(QPaintEvent *event) override;
+            void showEvent(QShowEvent *event) override;
 
         private:
             ColorEditor(QWidget *parent = 0, const bool popupOnStart = false);

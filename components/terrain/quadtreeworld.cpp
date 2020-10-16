@@ -61,7 +61,7 @@ public:
     {
     }
 
-    virtual ReturnValue isSufficientDetail(QuadTreeNode* node, float dist)
+    ReturnValue isSufficientDetail(QuadTreeNode* node, float dist) override
     {
         const osg::Vec2f& center = node->getCenter();
         bool activeGrid = (center.x() > mActiveGrid.x() && center.y() > mActiveGrid.y() && center.x() < mActiveGrid.z() && center.y() < mActiveGrid.w());
@@ -106,7 +106,7 @@ public:
         mWorld = world;
     }
 
-    virtual void accept(osg::NodeVisitor &nv)
+    void accept(osg::NodeVisitor &nv) override
     {
         if (!nv.validNodeMask(*this))
             return;

@@ -236,7 +236,7 @@ class VDSMCameraCullCallback : public osg::NodeCallback
 
         VDSMCameraCullCallback(MWShadowTechnique* vdsm, osg::Polytope& polytope);
 
-        virtual void operator()(osg::Node*, osg::NodeVisitor* nv);
+        void operator()(osg::Node*, osg::NodeVisitor* nv) override;
 
         osg::RefMatrix* getProjectionMatrix() { return _projectionMatrix.get(); }
         osgUtil::RenderStage* getRenderStage() { return _renderStage.get(); }
@@ -3077,7 +3077,7 @@ class DoubleBufferCallback : public osg::Callback
 public:
     DoubleBufferCallback(osg::NodeList &children) : mChildren(children) {}
 
-    virtual bool run(osg::Object* node, osg::Object* visitor) override
+    bool run(osg::Object* node, osg::Object* visitor) override
     {
         // We can't use a static cast as NodeVisitor virtually inherits from Object
         osg::ref_ptr<osg::NodeVisitor> nodeVisitor = visitor->asNodeVisitor();

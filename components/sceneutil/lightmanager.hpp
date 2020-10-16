@@ -172,7 +172,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, LightListCallback)
 
-        void operator()(osg::Node* node, osg::NodeVisitor* nv);
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
 
         bool pushLightState(osg::Node* node, osgUtil::CullVisitor* nv);
 

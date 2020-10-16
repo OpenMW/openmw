@@ -14,7 +14,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 T result = getData<T> (runtime[1]) + getData<T> (runtime[0]);
                 
@@ -29,7 +29,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 T result = getData<T> (runtime[1]) - getData<T> (runtime[0]);
                 
@@ -44,7 +44,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 T result = getData<T> (runtime[1]) * getData<T> (runtime[0]);
                 
@@ -59,7 +59,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 T left = getData<T> (runtime[0]);
             
@@ -78,7 +78,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float value = runtime[0].mFloat;
                 
@@ -97,7 +97,7 @@ namespace Interpreter
     {
         public:
         
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int result = C() (getData<T> (runtime[1]), getData<T> (runtime[0]));
                 

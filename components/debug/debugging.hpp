@@ -89,7 +89,7 @@ namespace Debug
             mColors[NoLevel] = Reset;
         }
 
-        virtual std::streamsize writeImpl(const char *str, std::streamsize size, Level debugLevel)
+        std::streamsize writeImpl(const char *str, std::streamsize size, Level debugLevel) override
         {
             out.write (str, size);
             out.flush();

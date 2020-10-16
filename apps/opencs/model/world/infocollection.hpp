@@ -29,11 +29,11 @@ namespace CSMWorld
 
         public:
 
-            virtual int getAppendIndex (const std::string& id,
-                UniversalId::Type type = UniversalId::Type_None) const;
+            int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            bool reorderRows (int baseIndex, const std::vector<int>& newOrder) override;
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///

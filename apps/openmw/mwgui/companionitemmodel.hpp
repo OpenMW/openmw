@@ -13,8 +13,8 @@ namespace MWGui
     public:
         CompanionItemModel (const MWWorld::Ptr& actor);
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true);
-        virtual void removeItem (const ItemStack& item, size_t count);
+        MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        void removeItem (const ItemStack& item, size_t count) override;
 
         bool hasProfit(const MWWorld::Ptr& actor);
     };

@@ -149,8 +149,8 @@ namespace MWGui
             public:
                 TextElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
                             const TextStyle & textStyle, const std::string & text);
-                virtual int getHeight();
-                virtual int pageSplit();
+                int getHeight() override;
+                int pageSplit() override;
             private:
                 int currentFontHeight() const;
                 TextStyle mTextStyle;
@@ -162,8 +162,8 @@ namespace MWGui
             public:
                 ImageElement(MyGUI::Widget * parent, Paginator & pag, const BlockStyle & blockStyle,
                              const std::string & src, int width, int height);
-                virtual int getHeight();
-                virtual int pageSplit();
+                int getHeight() override;
+                int pageSplit() override;
 
             private:
                 int mImageHeight;

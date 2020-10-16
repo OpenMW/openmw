@@ -169,111 +169,111 @@ namespace MWSound
         SoundManager(const VFS::Manager* vfs, bool useSound);
         virtual ~SoundManager();
 
-        virtual void processChangedSettings(const Settings::CategorySettingVector& settings);
+        void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
-        virtual void stopMusic();
+        void stopMusic() override;
         ///< Stops music if it's playing
 
-        virtual void streamMusic(const std::string& filename);
+        void streamMusic(const std::string& filename) override;
         ///< Play a soundifle
         /// \param filename name of a sound file in "Music/" in the data directory.
 
-        virtual bool isMusicPlaying();
+        bool isMusicPlaying() override;
         ///< Returns true if music is playing
 
-        virtual void playPlaylist(const std::string &playlist);
+        void playPlaylist(const std::string &playlist) override;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
 
-        virtual void playTitleMusic();
+        void playTitleMusic() override;
         ///< Start playing title music
 
-        virtual void say(const MWWorld::ConstPtr &reference, const std::string& filename);
+        void say(const MWWorld::ConstPtr &reference, const std::string& filename) override;
         ///< Make an actor say some text.
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        virtual void say(const std::string& filename);
+        void say(const std::string& filename) override;
         ///< Say some text, without an actor ref
         /// \param filename name of a sound file in "Sound/" in the data directory.
 
-        virtual bool sayActive(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        bool sayActive(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const override;
         ///< Is actor not speaking?
 
-        virtual bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const;
+        bool sayDone(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) const override;
         ///< For scripting backward compatibility
 
-        virtual void stopSay(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr());
+        void stopSay(const MWWorld::ConstPtr &reference=MWWorld::ConstPtr()) override;
         ///< Stop an actor speaking
 
-        virtual float getSaySoundLoudness(const MWWorld::ConstPtr& reference) const;
+        float getSaySoundLoudness(const MWWorld::ConstPtr& reference) const override;
         ///< Check the currently playing say sound for this actor
         /// and get an average loudness value (scale [0,1]) at the current time position.
         /// If the actor is not saying anything, returns 0.
 
-        virtual Stream *playTrack(const DecoderPtr& decoder, Type type);
+        Stream *playTrack(const DecoderPtr& decoder, Type type) override;
         ///< Play a 2D audio track, using a custom decoder
 
-        virtual void stopTrack(Stream *stream);
+        void stopTrack(Stream *stream) override;
         ///< Stop the given audio track from playing
 
-        virtual double getTrackTimeDelay(Stream *stream);
+        double getTrackTimeDelay(Stream *stream) override;
         ///< Retives the time delay, in seconds, of the audio track (must be a sound
         /// returned by \ref playTrack). Only intended to be called by the track
         /// decoder's read method.
 
-        virtual Sound *playSound(const std::string& soundId, float volume, float pitch, Type type=Type::Sfx, PlayMode mode=PlayMode::Normal, float offset=0);
+        Sound *playSound(const std::string& soundId, float volume, float pitch, Type type=Type::Sfx, PlayMode mode=PlayMode::Normal, float offset=0) override;
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound *playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
+        Sound *playSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId,
                                    float volume, float pitch, Type type=Type::Sfx,
-                                   PlayMode mode=PlayMode::Normal, float offset=0);
+                                   PlayMode mode=PlayMode::Normal, float offset=0) override;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless Play_NoTrack is specified.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound *playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
-                                   float volume, float pitch, Type type, PlayMode mode, float offset=0);
+        Sound *playSound3D(const osg::Vec3f& initialPos, const std::string& soundId,
+                                   float volume, float pitch, Type type, PlayMode mode, float offset=0) override;
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using Sound::setPosition.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual void stopSound(Sound *sound);
+        void stopSound(Sound *sound) override;
         ///< Stop the given sound from playing
         /// @note no-op if \a sound is null
 
-        virtual void stopSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId);
+        void stopSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId) override;
         ///< Stop the given object from playing the given sound,
 
-        virtual void stopSound3D(const MWWorld::ConstPtr &reference);
+        void stopSound3D(const MWWorld::ConstPtr &reference) override;
         ///< Stop the given object from playing all sounds.
 
-        virtual void stopSound(const MWWorld::CellStore *cell);
+        void stopSound(const MWWorld::CellStore *cell) override;
         ///< Stop all sounds for the given cell.
 
-        virtual void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration);
+        void fadeOutSound3D(const MWWorld::ConstPtr &reference, const std::string& soundId, float duration) override;
         ///< Fade out given sound (that is already playing) of given object
         ///< @param reference Reference to object, whose sound is faded out
         ///< @param soundId ID of the sound to fade out.
         ///< @param duration Time until volume reaches 0.
 
-        virtual bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const;
+        bool getSoundPlaying(const MWWorld::ConstPtr &reference, const std::string& soundId) const override;
         ///< Is the given sound currently playing on the given object?
 
-        virtual void pauseSounds(MWSound::BlockerType blocker, int types=int(Type::Mask));
+        void pauseSounds(MWSound::BlockerType blocker, int types=int(Type::Mask)) override;
         ///< Pauses all currently playing sounds, including music.
 
-        virtual void resumeSounds(MWSound::BlockerType blocker);
+        void resumeSounds(MWSound::BlockerType blocker) override;
         ///< Resumes all previously paused sounds.
 
-        virtual void pausePlayback();
-        virtual void resumePlayback();
+        void pausePlayback() override;
+        void resumePlayback() override;
 
-        virtual void update(float duration);
+        void update(float duration) override;
 
-        virtual void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater);
+        void setListenerPosDir(const osg::Vec3f &pos, const osg::Vec3f &dir, const osg::Vec3f &up, bool underwater) override;
 
-        virtual void updatePtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated);
+        void updatePtr (const MWWorld::ConstPtr& old, const MWWorld::ConstPtr& updated) override;
 
-        virtual void clear();
+        void clear() override;
     };
 }
 

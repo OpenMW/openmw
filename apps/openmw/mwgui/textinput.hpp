@@ -20,9 +20,9 @@ namespace MWGui
 
         void setNextButtonShow(bool shown);
         void setTextLabel(const std::string &label);
-        virtual void onOpen();
+        void onOpen() override;
 
-        bool exit() { return false; }
+        bool exit() override { return false; }
 
         /** Event : Dialog finished, OK button clicked.\n
             signature : void method()\n

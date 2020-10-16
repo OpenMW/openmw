@@ -30,7 +30,7 @@ namespace CSVRender
             ///
             /// \return Have there been any menu items to be added (if menu is 0 and there
             /// items to be added, the function must return true anyway.
-            virtual bool createContextMenu (QMenu* menu);
+            bool createContextMenu (QMenu* menu) override;
 
         private:
 

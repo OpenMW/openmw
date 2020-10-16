@@ -38,11 +38,11 @@ namespace CSVWidget
 
         protected:
 
-            virtual void keyPressEvent (QKeyEvent *event);
+            void keyPressEvent (QKeyEvent *event) override;
 
-            virtual void keyReleaseEvent (QKeyEvent *event);
+            void keyReleaseEvent (QKeyEvent *event) override;
 
-            virtual void mouseReleaseEvent (QMouseEvent *event);
+            void mouseReleaseEvent (QMouseEvent *event) override;
 
         public:
 

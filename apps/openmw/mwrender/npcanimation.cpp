@@ -145,7 +145,7 @@ public:
     void setBlinkStart(float value);
     void setBlinkStop(float value);
 
-    virtual float getValue(osg::NodeVisitor* nv);
+    float getValue(osg::NodeVisitor* nv) override;
 };
 
 // --------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ public:
         mOffset = offset;
     }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
     {
         osg::MatrixTransform* transform = static_cast<osg::MatrixTransform*>(node);
         osg::Matrix matrix = transform->getMatrix();
@@ -378,7 +378,7 @@ public:
         mDepth->setWriteMask(true);
     }
 
-    virtual void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous)
+    void drawImplementation(osgUtil::RenderBin* bin, osg::RenderInfo& renderInfo, osgUtil::RenderLeaf*& previous) override
     {
         renderInfo.getState()->applyAttribute(mDepth);
 
@@ -400,7 +400,7 @@ public:
     {
     }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
     {
         osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
         float fov, aspect, zNear, zFar;

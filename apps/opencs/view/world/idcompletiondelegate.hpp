@@ -13,22 +13,22 @@ namespace CSVWorld
                                  CSMDoc::Document& document, 
                                  QObject *parent);
 
-            virtual QWidget *createEditor (QWidget *parent,
+            QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem &option,
-                                           const QModelIndex &index) const;
+                                           const QModelIndex &index) const override;
 
-            virtual QWidget *createEditor (QWidget *parent,
+            QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem &option,
                                            const QModelIndex &index,
-                                           CSMWorld::ColumnBase::Display display) const;
+                                           CSMWorld::ColumnBase::Display display) const override;
     };
 
     class IdCompletionDelegateFactory : public CommandDelegateFactory
     {
         public:
-            virtual CommandDelegate *makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
+            CommandDelegate *makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                                   CSMDoc::Document& document, 
-                                                  QObject *parent) const;
+                                                  QObject *parent) const override;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
 }

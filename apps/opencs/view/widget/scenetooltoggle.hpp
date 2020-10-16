@@ -46,7 +46,7 @@ namespace CSVWidget
             SceneToolToggle (SceneToolbar *parent, const QString& toolTip,
                 const std::string& emptyIcon);
 
-            virtual void showPanel (const QPoint& position);
+            void showPanel (const QPoint& position) override;
 
             /// \attention After the last button has been added, setSelection must be called at
             /// least once to finalise the layout.

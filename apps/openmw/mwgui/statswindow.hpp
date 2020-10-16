@@ -35,7 +35,7 @@ namespace MWGui
             void setBounty (int bounty) { if (bounty != mBounty) mChanged = true; this->mBounty = bounty; }
             void updateSkillArea();
 
-            virtual void onOpen() override { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
+            void onOpen() override { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
         private:
             void addSkills(const SkillList &skills, const std::string &titleId, const std::string &titleDefault, MyGUI::IntCoord &coord1, MyGUI::IntCoord &coord2);
@@ -70,8 +70,8 @@ namespace MWGui
             const int mMinFullWidth;
 
         protected:
-            virtual void onPinToggled() override;
-            virtual void onTitleDoubleClicked() override;
+            void onPinToggled() override;
+            void onTitleDoubleClicked() override;
     };
 }
 #endif

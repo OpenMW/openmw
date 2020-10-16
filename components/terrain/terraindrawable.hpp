@@ -30,17 +30,17 @@ namespace Terrain
     class TerrainDrawable : public osg::Geometry
     {
     public:
-        virtual osg::Object* cloneType() const { return new TerrainDrawable (); }
-        virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new TerrainDrawable (*this,copyop); }
-        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const TerrainDrawable *>(obj)!=nullptr; }
-        virtual const char* className() const { return "TerrainDrawable"; }
-        virtual const char* libraryName() const { return "Terrain"; }
+        osg::Object* cloneType() const override { return new TerrainDrawable (); }
+        osg::Object* clone(const osg::CopyOp& copyop) const override { return new TerrainDrawable (*this,copyop); }
+        bool isSameKindAs(const osg::Object* obj) const override { return dynamic_cast<const TerrainDrawable *>(obj)!=nullptr; }
+        const char* className() const override { return "TerrainDrawable"; }
+        const char* libraryName() const override { return "Terrain"; }
 
         TerrainDrawable();
         ~TerrainDrawable(); // has to be defined in the cpp file because we only forward declared some members.
         TerrainDrawable(const TerrainDrawable& copy, const osg::CopyOp& copyop);
 
-        virtual void accept(osg::NodeVisitor &nv);
+        void accept(osg::NodeVisitor &nv) override;
         void cull(osgUtil::CullVisitor* cv);
 
         typedef std::vector<osg::ref_ptr<osg::StateSet> > PassVector;
@@ -50,7 +50,7 @@ namespace Terrain
 
         void createClusterCullingCallback();
 
-        virtual void compileGLObjects(osg::RenderInfo& renderInfo) const;
+        void compileGLObjects(osg::RenderInfo& renderInfo) const override;
 
         void setupWaterBoundingBox(float waterheight, float margin);
         const osg::BoundingBox& getWaterBoundingBox() const { return mWaterBoundingBox; }

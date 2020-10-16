@@ -31,26 +31,26 @@ namespace SceneUtil
         LightStateAttribute(const LightStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
             : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex), mLights(copy.mLights) {}
 
-        unsigned int getMember() const
+        unsigned int getMember() const override
         {
             return mIndex;
         }
 
-        virtual bool getModeUsage(ModeUsage & usage) const
+        bool getModeUsage(ModeUsage & usage) const override
         {
             for (unsigned int i=0; i<mLights.size(); ++i)
                 usage.usesMode(GL_LIGHT0 + mIndex + i);
             return true;
         }
 
-        virtual int compare(const StateAttribute &sa) const
+        int compare(const StateAttribute &sa) const override
         {
             throw std::runtime_error("LightStateAttribute::compare: unimplemented");
         }
 
         META_StateAttribute(NifOsg, LightStateAttribute, osg::StateAttribute::LIGHT)
 
-        virtual void apply(osg::State& state) const
+        void apply(osg::State& state) const override
         {
             if (mLights.empty())
                 return;
@@ -119,7 +119,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, SceneUtil::CollectLightCallback)
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             if (!mLightManager)
             {
@@ -151,7 +151,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, LightManagerUpdateCallback)
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             LightManager* lightManager = static_cast<LightManager*>(node);
             lightManager->update();
@@ -295,30 +295,30 @@ namespace SceneUtil
         DisableLight(const DisableLight& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
             : osg::StateAttribute(copy,copyop), mIndex(copy.mIndex) {}
 
-        virtual osg::Object* cloneType() const { return new DisableLight(mIndex); }
-        virtual osg::Object* clone(const osg::CopyOp& copyop) const { return new DisableLight(*this,copyop); }
-        virtual bool isSameKindAs(const osg::Object* obj) const { return dynamic_cast<const DisableLight *>(obj)!=nullptr; }
-        virtual const char* libraryName() const { return "SceneUtil"; }
-        virtual const char* className() const { return "DisableLight"; }
-        virtual Type getType() const { return LIGHT; }
+        osg::Object* cloneType() const override { return new DisableLight(mIndex); }
+        osg::Object* clone(const osg::CopyOp& copyop) const override { return new DisableLight(*this,copyop); }
+        bool isSameKindAs(const osg::Object* obj) const override { return dynamic_cast<const DisableLight *>(obj)!=nullptr; }
+        const char* libraryName() const override { return "SceneUtil"; }
+        const char* className() const override { return "DisableLight"; }
+        Type getType() const override { return LIGHT; }
 
-        unsigned int getMember() const
+        unsigned int getMember() const override
         {
             return mIndex;
         }
 
-        virtual bool getModeUsage(ModeUsage & usage) const
+        bool getModeUsage(ModeUsage & usage) const override
         {
             usage.usesMode(GL_LIGHT0 + mIndex);
             return true;
         }
 
-        virtual int compare(const StateAttribute &sa) const
+        int compare(const StateAttribute &sa) const override
         {
             throw std::runtime_error("DisableLight::compare: unimplemented");
         }
 
-        virtual void apply(osg::State& state) const
+        void apply(osg::State& state) const override
         {
             int lightNum = GL_LIGHT0 + mIndex;
             glLightfv( lightNum, GL_AMBIENT,               mnullptr.ptr() );

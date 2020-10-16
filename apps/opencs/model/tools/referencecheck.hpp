@@ -14,8 +14,8 @@ namespace CSMTools
                 const CSMWorld::IdCollection<CSMWorld::Cell>& cells,
                 const CSMWorld::IdCollection<ESM::Faction>& factions);
 
-            virtual void perform(int stage, CSMDoc::Messages& messages);
-            virtual int setup();
+            void perform(int stage, CSMDoc::Messages& messages) override;
+            int setup() override;
 
         private:
             const CSMWorld::RefCollection& mReferences;

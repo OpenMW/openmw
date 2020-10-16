@@ -18,9 +18,9 @@ namespace CSVPrefs
     
         protected:
     
-            void contextMenuEvent(QContextMenuEvent* e);
+            void contextMenuEvent(QContextMenuEvent* e) override;
 
-            void mousePressEvent(QMouseEvent* e);
+            void mousePressEvent(QMouseEvent* e) override;
     
         private slots:
     

@@ -95,9 +95,9 @@ public:
         : mActor(actor)
         , mCommanded(false){}
 
-    virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+    void visit (MWMechanics::EffectKey key, int effectIndex,
                         const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                        float magnitude, float remainingTime = -1, float totalTime = -1)
+                        float magnitude, float remainingTime = -1, float totalTime = -1) override
     {
         if (((key.mId == ESM::MagicEffect::CommandHumanoid && mActor.getClass().isNpc())
             || (key.mId == ESM::MagicEffect::CommandCreature && mActor.getTypeName() == typeid(ESM::Creature).name()))
@@ -159,9 +159,9 @@ namespace MWMechanics
         GetStuntedMagickaDuration(const MWWorld::Ptr& actor)
             : mRemainingTime(0.f){}
 
-        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+        void visit (MWMechanics::EffectKey key, int effectIndex,
                             const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1)
+                            float magnitude, float remainingTime = -1, float totalTime = -1) override
         {
             if (mRemainingTime == -1) return;
 
@@ -189,9 +189,9 @@ namespace MWMechanics
         {
         }
 
-        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+        void visit (MWMechanics::EffectKey key, int effectIndex,
                             const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1)
+                            float magnitude, float remainingTime = -1, float totalTime = -1) override
         {
             if (magnitude <= 0)
                 return;
@@ -209,9 +209,9 @@ namespace MWMechanics
     {
 
     public:
-        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+        void visit (MWMechanics::EffectKey key, int effectIndex,
                             const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1)
+                            float magnitude, float remainingTime = -1, float totalTime = -1) override
         {
             if (key.mId != ESM::MagicEffect::Corprus)
                 return;
@@ -234,9 +234,9 @@ namespace MWMechanics
         {
         }
 
-        virtual void visit (MWMechanics::EffectKey key, int effectIndex,
+        void visit (MWMechanics::EffectKey key, int effectIndex,
                             const std::string& sourceName, const std::string& sourceId, int casterActorId,
-                            float magnitude, float remainingTime = -1, float totalTime = -1)
+                            float magnitude, float remainingTime = -1, float totalTime = -1) override
         {
             if (mTrapped)
                 return;
@@ -901,9 +901,9 @@ namespace MWMechanics
             {
             }
 
-            virtual void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
+            void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
                                 const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                                float magnitude, float remainingTime = -1, float /*totalTime*/ = -1)
+                                float magnitude, float remainingTime = -1, float /*totalTime*/ = -1) override
             {
                 if (magnitude > 0 && remainingTime > 0 && remainingTime < mDuration)
                 {

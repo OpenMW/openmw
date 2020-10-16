@@ -15,9 +15,9 @@ namespace Wizard
     public:
         ExistingInstallationPage(QWidget *parent);
 
-        int nextId() const;
-        virtual bool isComplete() const;
-        virtual bool validatePage();
+        int nextId() const override;
+        bool isComplete() const override;
+        bool validatePage() override;
 
     private slots:
         void on_browseButton_clicked();
@@ -28,7 +28,7 @@ namespace Wizard
         MainWizard *mWizard;
 
     protected:
-        void initializePage();
+        void initializePage() override;
 
     };
 

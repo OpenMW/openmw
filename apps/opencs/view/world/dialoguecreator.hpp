@@ -11,7 +11,7 @@ namespace CSVWorld
 
         protected:
 
-            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+            void configureCreateCommand (CSMWorld::CreateCommand& command) const override;
 
         public:
 
@@ -23,7 +23,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
             ///< The ownership of the returned Creator is transferred to the caller.
     };
 
@@ -31,7 +31,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
             ///< The ownership of the returned Creator is transferred to the caller.
     };
 }

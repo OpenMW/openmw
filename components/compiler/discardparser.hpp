@@ -21,24 +21,24 @@ namespace Compiler
 
             DiscardParser (ErrorHandler& errorHandler, const Context& context);
 
-            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
+            bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle an int token.
             /// \return fetch another token?
 
-            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
+            bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a float token.
             /// \return fetch another token?
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
+            bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
+            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            virtual void reset();
+            void reset() override;
             ///< Reset parser to clean state.
 
             /// Returns TokenLoc object for value. If no value has been parsed, the TokenLoc

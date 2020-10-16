@@ -46,24 +46,24 @@ namespace SceneUtil {
         META_Object(SceneUtil, MWShadowTechnique);
 
         /** initialize the ShadowedScene and local cached data structures.*/
-        virtual void init();
+        void init() override;
 
         /** run the update traversal of the ShadowedScene and update any loca chached data structures.*/
-        virtual void update(osg::NodeVisitor& nv);
+        void update(osg::NodeVisitor& nv) override;
 
         /** run the cull traversal of the ShadowedScene and set up the rendering for this ShadowTechnique.*/
-        virtual void cull(osgUtil::CullVisitor& cv);
+        void cull(osgUtil::CullVisitor& cv) override;
 
         /** Resize any per context GLObject buffers to specified size. */
-        virtual void resizeGLObjectBuffers(unsigned int maxSize);
+        void resizeGLObjectBuffers(unsigned int maxSize) override;
 
         /** If State is non-zero, this function releases any associated OpenGL objects for
         * the specified graphics context. Otherwise, releases OpenGL objects
         * for all graphics contexts. */
-        virtual void releaseGLObjects(osg::State* = 0) const;
+        void releaseGLObjects(osg::State* = 0) const override;
 
         /** Clean scene graph from any shadow technique specific nodes, state and drawables.*/
-        virtual void cleanSceneGraph();
+        void cleanSceneGraph() override;
 
         virtual void enableShadows();
 
@@ -92,19 +92,19 @@ namespace SceneUtil {
         public:
             ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix);
 
-            void apply(osg::Node& node);
+            void apply(osg::Node& node) override;
 
-            void apply(osg::Drawable& drawable);
+            void apply(osg::Drawable& drawable) override;
 
             void apply(Terrain::QuadTreeWorld& quadTreeWorld);
 
-            void apply(osg::Billboard&);
+            void apply(osg::Billboard&) override;
 
-            void apply(osg::Projection&);
+            void apply(osg::Projection&) override;
 
-            void apply(osg::Transform& transform);
+            void apply(osg::Transform& transform) override;
 
-            void apply(osg::Camera&);
+            void apply(osg::Camera&) override;
 
             using osg::NodeVisitor::apply;
 

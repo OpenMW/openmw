@@ -23,23 +23,23 @@ namespace CSMWorld
 
             ScriptContext (const Data& data);
 
-            virtual bool canDeclareLocals() const;
+            bool canDeclareLocals() const override;
             ///< Is the compiler allowed to declare local variables?
 
-            virtual char getGlobalType (const std::string& name) const;
+            char getGlobalType (const std::string& name) const override;
             ///< 'l: long, 's': short, 'f': float, ' ': does not exist.
 
-            virtual std::pair<char, bool> getMemberType (const std::string& name,
-                const std::string& id) const;
+            std::pair<char, bool> getMemberType (const std::string& name,
+                const std::string& id) const override;
             ///< Return type of member variable \a name in script \a id or in script of reference of
             /// \a id
             /// \return first: 'l: long, 's': short, 'f': float, ' ': does not exist.
             /// second: true: script of reference
 
-            virtual bool isId (const std::string& name) const;
+            bool isId (const std::string& name) const override;
             ///< Does \a name match an ID, that can be referenced?
 
-            virtual bool isJournalId (const std::string& name) const;
+            bool isJournalId (const std::string& name) const override;
             ///< Does \a name match a journal ID?
 
             void invalidateIds();

@@ -36,7 +36,7 @@ namespace CSMWorld
 
             ~TableMimeData();
 
-            virtual QStringList formats() const;
+            QStringList formats() const override;
 
             std::string getIcon() const;
 

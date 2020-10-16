@@ -33,7 +33,7 @@ public:
     {
     }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
     {
         osg::Camera* cam = static_cast<osg::Camera*>(node);
 

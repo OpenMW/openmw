@@ -25,11 +25,11 @@ namespace MWInput
 
         bool update(float dt);
 
-        virtual void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg);
-        virtual void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg);
-        virtual void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg);
-        virtual void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg);
-        virtual void controllerRemoved(const SDL_ControllerDeviceEvent &arg);
+        void buttonPressed(int deviceID, const SDL_ControllerButtonEvent &arg) override;
+        void buttonReleased(int deviceID, const SDL_ControllerButtonEvent &arg) override;
+        void axisMoved(int deviceID, const SDL_ControllerAxisEvent &arg) override;
+        void controllerAdded(int deviceID, const SDL_ControllerDeviceEvent &arg) override;
+        void controllerRemoved(const SDL_ControllerDeviceEvent &arg) override;
 
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 

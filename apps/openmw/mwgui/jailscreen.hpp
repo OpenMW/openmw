@@ -12,9 +12,9 @@ namespace MWGui
             JailScreen();
             void goToJail(int days);
 
-            void onFrame(float dt);
+            void onFrame(float dt) override;
 
-            bool exit() { return false; }
+            bool exit() override { return false; }
 
         private:
             int mDays;

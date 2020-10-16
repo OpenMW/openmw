@@ -51,28 +51,28 @@ namespace Compiler
             ///< \param allowExpression Allow lines consisting of a naked expression
             /// (result is send to the messagebox interface)
 
-            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
+            bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle an int token.
             /// \return fetch another token?
 
-            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
+            bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a float token.
             /// \return fetch another token?
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
+            bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
+            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a keyword token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
+            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            void reset();
+            void reset() override;
             ///< Reset parser to clean state.
     };
 
@@ -82,11 +82,11 @@ namespace Compiler
             std::string mArguments;
 
         protected:
-            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation);
-            virtual void visitedCharacter(char c) {}
+            void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation) override;
+            void visitedCharacter(char c) override {}
 
         public:
-            virtual void process(const std::string& message)
+            void process(const std::string& message) override
             {
                 mArguments.clear();
                 ::Misc::MessageFormatParser::process(message);

@@ -60,7 +60,7 @@ namespace ESMTerrain
         virtual osg::ref_ptr<const LandObject> getLand (int cellX, int cellY)= 0;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
         /// Get bounds of the whole terrain in cell units
-        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
+        void getBounds(float& minX, float& maxX, float& minY, float& maxY) override = 0;
 
         /// Get the minimum and maximum heights of a terrain region.
         /// @note Will only be called for chunks with size = minBatchSize, i.e. leafs of the quad tree.
@@ -70,7 +70,7 @@ namespace ESMTerrain
         /// @param min min height will be stored here
         /// @param max max height will be stored here
         /// @return true if there was data available for this terrain chunk
-        virtual bool getMinMaxHeights (float size, const osg::Vec2f& center, float& min, float& max);
+        bool getMinMaxHeights (float size, const osg::Vec2f& center, float& min, float& max) override;
 
         /// Fill vertex buffers for a terrain chunk.
         /// @note May be called from background threads. Make sure to only call thread-safe functions from here!
@@ -82,10 +82,10 @@ namespace ESMTerrain
         /// @param positions buffer to write vertices
         /// @param normals buffer to write vertex normals
         /// @param colours buffer to write vertex colours
-        virtual void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
+        void fillVertexBuffers (int lodLevel, float size, const osg::Vec2f& center,
                                 osg::ref_ptr<osg::Vec3Array> positions,
                                 osg::ref_ptr<osg::Vec3Array> normals,
-                                osg::ref_ptr<osg::Vec4ubArray> colours);
+                                osg::ref_ptr<osg::Vec4ubArray> colours) override;
 
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might
@@ -95,18 +95,18 @@ namespace ESMTerrain
         /// @param chunkCenter center of the chunk in cell units
         /// @param blendmaps created blendmaps will be written here
         /// @param layerList names of the layer textures used will be written here
-        virtual void getBlendmaps (float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
-                               std::vector<Terrain::LayerInfo>& layerList);
+        void getBlendmaps (float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
+                               std::vector<Terrain::LayerInfo>& layerList) override;
 
-        virtual float getHeightAt (const osg::Vec3f& worldPos);
+        float getHeightAt (const osg::Vec3f& worldPos) override;
 
         /// Get the transformation factor for mapping cell units to world units.
-        virtual float getCellWorldSize();
+        float getCellWorldSize() override;
 
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
-        virtual int getCellVertices();
+        int getCellVertices() override;
 
-        virtual int getBlendmapScale(float chunkSize);
+        int getBlendmapScale(float chunkSize) override;
 
         float getVertexHeight (const ESM::Land::LandData* data, int x, int y)
         {

@@ -29,8 +29,8 @@ namespace MWInput
 
         void update(float dt);
 
-        virtual void sensorUpdated(const SDL_SensorEvent &arg);
-        virtual void displayOrientationChanged();
+        void sensorUpdated(const SDL_SensorEvent &arg) override;
+        void displayOrientationChanged() override;
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 
         void setGuiCursorEnabled(bool enabled) { mGuiCursorEnabled = enabled; }

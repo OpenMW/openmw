@@ -29,23 +29,23 @@ namespace Compiler
             void getCode (std::vector<Interpreter::Type_Code>& code) const;
             ///< store generated code in \a code.
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
+            bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
+            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a keyword token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
+            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
 
-            virtual void parseEOF (Scanner& scanner);
+            void parseEOF (Scanner& scanner) override;
             ///< Handle EOF token.
 
-            void reset();
+            void reset() override;
             ///< Reset parser to clean state.
     };
 }

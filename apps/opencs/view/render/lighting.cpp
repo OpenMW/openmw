@@ -14,7 +14,7 @@ public:
         , mIndex(index)
     { }
 
-    virtual void apply(osg::Switch &switchNode)
+    void apply(osg::Switch &switchNode) override
     {
         if (switchNode.getName() == Constants::NightDayLabel)
             switchNode.setSingleChildOn(mIndex);

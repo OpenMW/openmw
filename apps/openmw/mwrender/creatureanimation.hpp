@@ -28,37 +28,37 @@ namespace MWRender
         CreatureWeaponAnimation(const MWWorld::Ptr &ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
         virtual ~CreatureWeaponAnimation() {}
 
-        virtual void equipmentChanged() { updateParts(); }
+        void equipmentChanged() override { updateParts(); }
 
-        virtual void showWeapons(bool showWeapon);
+        void showWeapons(bool showWeapon) override;
 
-        virtual bool getCarriedLeftShown() const { return mShowCarriedLeft; }
-        virtual void showCarriedLeft(bool show);
+        bool getCarriedLeftShown() const override { return mShowCarriedLeft; }
+        void showCarriedLeft(bool show) override;
 
         void updateParts();
 
         void updatePart(PartHolderPtr& scene, int slot);
 
-        virtual void attachArrow();
-        virtual void detachArrow();
-        virtual void releaseArrow(float attackStrength);
+        void attachArrow() override;
+        void detachArrow() override;
+        void releaseArrow(float attackStrength) override;
         // WeaponAnimation
-        virtual osg::Group* getArrowBone();
-        virtual osg::Node* getWeaponNode();
-        virtual Resource::ResourceSystem* getResourceSystem();
-        virtual void showWeapon(bool show) { showWeapons(show); }
-        virtual void setWeaponGroup(const std::string& group, bool relativeDuration) { mWeaponAnimationTime->setGroup(group, relativeDuration); }
+        osg::Group* getArrowBone() override;
+        osg::Node* getWeaponNode() override;
+        Resource::ResourceSystem* getResourceSystem() override;
+        void showWeapon(bool show) override { showWeapons(show); }
+        void setWeaponGroup(const std::string& group, bool relativeDuration) override { mWeaponAnimationTime->setGroup(group, relativeDuration); }
 
-        virtual void addControllers();
+        void addControllers() override;
 
-        virtual osg::Vec3f runAnimation(float duration);
+        osg::Vec3f runAnimation(float duration) override;
 
         /// A relative factor (0-1) that decides if and how much the skeleton should be pitched
         /// to indicate the facing orientation of the character.
-        virtual void setPitchFactor(float factor) { mPitchFactor = factor; }
+        void setPitchFactor(float factor) override { mPitchFactor = factor; }
 
     protected:
-        virtual bool isArrowAttached() const;
+        bool isArrowAttached() const override;
 
     private:
         PartHolderPtr mWeapon;
