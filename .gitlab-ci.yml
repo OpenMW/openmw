@@ -71,9 +71,10 @@ MacOS:
   tags:
     - macos
   stage: build
-  before_script:
-    - echo $CI_PROJECT_ID
-    - "false"
+  rules:
+    - if: '$CI_PROJECT_ID != "7107382"'
+      allow_failure: true
+
   script:
     - rm -fr build/*  #  remove anything in the build directory
     - CI/before_install.osx.sh
