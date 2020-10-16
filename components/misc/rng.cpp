@@ -30,17 +30,17 @@ namespace Misc
 
     float Rng::rollProbability(Seed& seed)
     {
-        return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(sSeed.mGenerator);
+        return std::uniform_real_distribution<float>(0, 1 - std::numeric_limits<float>::epsilon())(seed.mGenerator);
     }
 
     float Rng::rollClosedProbability(Seed& seed)
     {
-        return std::uniform_real_distribution<float>(0, 1)(sSeed.mGenerator);
+        return std::uniform_real_distribution<float>(0, 1)(seed.mGenerator);
     }
 
     int Rng::rollDice(int max, Seed& seed)
     {
-        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(sSeed.mGenerator) : 0;
+        return max > 0 ? std::uniform_int_distribution<int>(0, max - 1)(seed.mGenerator) : 0;
     }
 
     unsigned int Rng::generateDefaultSeed()
