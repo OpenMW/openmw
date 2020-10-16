@@ -71,11 +71,9 @@ MacOS:
   tags:
     - macos
   stage: build
-  rules:
-    - if: '$CI_PROJECT_ID == "7107382"'
-      allow_failure: false
-    - if: '$CI_PROJECT_ID != "7107382"'
-      allow_failure: true
+  only:
+    variables:
+      - $CI_PROJECT_ID == "7107382"
   script:
     - rm -fr build/*  # remove anything in the build directory
     - CI/before_install.osx.sh
