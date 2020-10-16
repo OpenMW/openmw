@@ -71,6 +71,9 @@ MacOS:
   tags:
     - macos
   stage: build
+  before_script:
+    - echo $CI_PROJECT_ID
+    - "false"
   script:
     - rm -fr build/*  #  remove anything in the build directory
     - CI/before_install.osx.sh
