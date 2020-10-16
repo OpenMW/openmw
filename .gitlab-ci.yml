@@ -74,7 +74,7 @@ MacOS:
   rules:
     - if: '$CI_PROJECT_ID != "7107382"'
       allow_failure: true
-
+    - when: always
   script:
     - rm -fr build/*  #  remove anything in the build directory
     - CI/before_install.osx.sh
