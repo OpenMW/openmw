@@ -344,6 +344,17 @@ Recommended to use with "turn to movement direction" enabled.
 
 This setting can be controlled in Advanced tab of the launcher.
 
+smooth movement player turning delay
+------------------------------------
+
+:Type:		floating point
+:Range:		>= 0.01
+:Default:	0.333
+
+Max delay of turning (in seconds) if player drastically changes direction on the run. Makes sense only if "smooth movement" is enabled.
+
+This setting can only be configured by editing the settings configuration file.
+
 NPCs avoid collisions
 ---------------------
 

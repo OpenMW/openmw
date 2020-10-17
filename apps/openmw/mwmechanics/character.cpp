@@ -1966,6 +1966,7 @@ void CharacterController::update(float duration, bool animationOnly)
         static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
         if (smoothMovement && !isFirstPersonPlayer)
         {
+            static const float playerTurningCoef = 1.0 / std::max(0.01f, Settings::Manager::getFloat("smooth movement player turning delay", "Game"));
             float angle = mPtr.getRefData().getPosition().rot[2];
             osg::Vec2f targetSpeed = Misc::rotateVec2f(osg::Vec2f(vec.x(), vec.y()), -angle) * movementSettings.mSpeedFactor;
             osg::Vec2f delta = targetSpeed - mSmoothedSpeed;
@@ -1975,7 +1976,7 @@ void CharacterController::update(float duration, bool animationOnly)
             float maxDelta;
             if (std::abs(speedDelta) < deltaLen / 2)
                 // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
-                maxDelta = duration * (isPlayer ? 3.f : 6.f);
+                maxDelta = duration * (isPlayer ? playerTurningCoef : 6.f);
             else if (isPlayer && speedDelta < -deltaLen / 2)
                 // As soon as controls are released, mwinput switches player from running to walking.
                 // So stopping should be instant for player, otherwise it causes a small twitch.
