@@ -571,10 +571,10 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/SDL2-2.0.12.zip" \
 		"SDL2-2.0.12.zip"
 
-  # LZ4
-  download "LZ4 1.9.2" \
-    "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.zip" \
-    "lz4_win${BITS}_v1_9_2.zip"
+	# LZ4
+	download "LZ4 1.9.2" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.zip" \
+		"lz4_win${BITS}_v1_9_2.zip"
 
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
