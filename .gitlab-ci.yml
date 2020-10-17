@@ -71,8 +71,11 @@ MacOS:
   tags:
     - macos
   stage: build
+  only:
+    variables:
+      - $CI_PROJECT_ID == "7107382"
   script:
-    - rm -fr build/*  #  remove anything in the build directory
+    - rm -fr build/*  # remove anything in the build directory
     - CI/before_install.osx.sh
     - CI/before_script.osx.sh
     - cd build; make -j2 package
