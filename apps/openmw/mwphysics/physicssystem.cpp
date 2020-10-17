@@ -648,7 +648,7 @@ namespace MWPhysics
         return false;
     }
 
-    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &movement)
+    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity)
     {
         for(auto& movementItem : mMovementQueue)
         {
