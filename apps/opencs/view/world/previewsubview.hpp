@@ -26,9 +26,9 @@ namespace CSVWorld
 
             PreviewSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
-            virtual std::string getTitle() const;
+            std::string getTitle() const override;
 
         private slots:
 

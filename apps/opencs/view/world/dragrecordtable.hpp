@@ -37,11 +37,11 @@ namespace CSVWorld
         protected:
             void startDragFromTable(const DragRecordTable& table);
 
-            void dragEnterEvent(QDragEnterEvent *event);
+            void dragEnterEvent(QDragEnterEvent *event) override;
 
-            void dragMoveEvent(QDragMoveEvent *event);
+            void dragMoveEvent(QDragMoveEvent *event) override;
 
-            void dropEvent(QDropEvent *event);
+            void dropEvent(QDropEvent *event) override;
 
         private:
             CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex &index) const;

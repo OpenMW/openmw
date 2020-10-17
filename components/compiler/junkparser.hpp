@@ -15,24 +15,24 @@ namespace Compiler
             JunkParser (ErrorHandler& errorHandler, const Context& context,
                 int ignoreKeyword = -1);
 
-            virtual bool parseInt (int value, const TokenLoc& loc, Scanner& scanner);
+            bool parseInt (int value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle an int token.
             /// \return fetch another token?
 
-            virtual bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner);
+            bool parseFloat (float value, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a float token.
             /// \return fetch another token?
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
+            bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
+            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a keyword token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
+            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
     };

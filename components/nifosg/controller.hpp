@@ -179,9 +179,9 @@ namespace NifOsg
     public:
         ControllerFunction(const Nif::Controller *ctrl);
 
-        float calculate(float value) const;
+        float calculate(float value) const override;
 
-        virtual float getMaximum() const;
+        float getMaximum() const override;
     };
 
     /// Must be set on a SceneUtil::MorphGeometry.
@@ -194,7 +194,7 @@ namespace NifOsg
 
         META_Object(NifOsg, GeomMorpherController)
 
-        virtual void update(osg::NodeVisitor* nv, osg::Drawable* drawable);
+        void update(osg::NodeVisitor* nv, osg::Drawable* drawable) override;
 
     private:
         std::vector<FloatInterpolator> mKeyFrames;
@@ -211,7 +211,7 @@ namespace NifOsg
 
         virtual osg::Vec3f getTranslation(float time) const;
 
-        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+        void operator() (osg::Node*, osg::NodeVisitor*) override;
 
     private:
         QuaternionInterpolator mRotations;
@@ -235,8 +235,8 @@ namespace NifOsg
 
         META_Object(NifOsg,UVController)
 
-        virtual void setDefaults(osg::StateSet* stateset);
-        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
+        void setDefaults(osg::StateSet* stateset) override;
+        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
 
     private:
         FloatInterpolator mUTrans;
@@ -261,7 +261,7 @@ namespace NifOsg
 
         META_Object(NifOsg, VisController)
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
     };
 
     class RollController : public osg::NodeCallback, public SceneUtil::Controller
@@ -275,7 +275,7 @@ namespace NifOsg
         RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
 
         META_Object(NifOsg, RollController)
     };
@@ -290,9 +290,9 @@ namespace NifOsg
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
-        virtual void setDefaults(osg::StateSet* stateset);
+        void setDefaults(osg::StateSet* stateset) override;
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
         META_Object(NifOsg, AlphaController)
     };
@@ -313,9 +313,9 @@ namespace NifOsg
 
         META_Object(NifOsg, MaterialColorController)
 
-        virtual void setDefaults(osg::StateSet* stateset);
+        void setDefaults(osg::StateSet* stateset) override;
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     private:
         Vec3Interpolator mData;
@@ -340,7 +340,7 @@ namespace NifOsg
 
         std::vector<osg::ref_ptr<osg::Texture2D> >& getTextures() { return mTextures; }
 
-        virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv);
+        void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override;
     };
 
     class ParticleSystemController : public osg::NodeCallback, public SceneUtil::Controller
@@ -352,7 +352,7 @@ namespace NifOsg
 
         META_Object(NifOsg, ParticleSystemController)
 
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv);
+        void operator() (osg::Node* node, osg::NodeVisitor* nv) override;
 
     private:
         float mEmitStart;
@@ -368,7 +368,7 @@ namespace NifOsg
 
         META_Object(NifOsg, PathController)
 
-        virtual void operator() (osg::Node*, osg::NodeVisitor*);
+        void operator() (osg::Node*, osg::NodeVisitor*) override;
 
     private:
         Vec3Interpolator mPath;

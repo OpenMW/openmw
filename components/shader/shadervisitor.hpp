@@ -38,10 +38,10 @@ namespace Shader
 
         void setSpecularMapPattern(const std::string& pattern);
 
-        virtual void apply(osg::Node& node);
+        void apply(osg::Node& node) override;
 
-        virtual void apply(osg::Drawable& drawable);
-        virtual void apply(osg::Geometry& geometry);
+        void apply(osg::Drawable& drawable) override;
+        void apply(osg::Geometry& geometry) override;
 
         void applyStateSet(osg::ref_ptr<osg::StateSet> stateset, osg::Node& node);
 

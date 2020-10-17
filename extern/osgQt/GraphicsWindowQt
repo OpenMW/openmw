@@ -84,10 +84,10 @@ protected:
 
     qreal _devicePixelRatio;
 
-    virtual void resizeEvent( QResizeEvent* event );
-    virtual void moveEvent( QMoveEvent* event );
-    virtual void glDraw();
-    virtual bool event( QEvent* event );
+    void resizeEvent( QResizeEvent* event ) override;
+    void moveEvent( QMoveEvent* event ) override;
+    void glDraw() override;
+    bool event( QEvent* event ) override;
 };
 
 class GraphicsWindowQt : public osgViewer::GraphicsWindow
@@ -118,28 +118,28 @@ public:
     static void qglFormat2traits( const QGLFormat& format, osg::GraphicsContext::Traits* traits );
     static osg::GraphicsContext::Traits* createTraits( const QGLWidget* widget );
 
-    virtual bool setWindowRectangleImplementation( int x, int y, int width, int height );
-    virtual void getWindowRectangle( int& x, int& y, int& width, int& height );
-    virtual bool setWindowDecorationImplementation( bool windowDecoration );
-    virtual bool getWindowDecoration() const;
-    virtual void grabFocus();
-    virtual void grabFocusIfPointerInWindow();
-    virtual void raiseWindow();
-    virtual void setWindowName( const std::string& name );
-    virtual std::string getWindowName();
-    virtual void useCursor( bool cursorOn );
-    virtual void setCursor( MouseCursor cursor );
+    bool setWindowRectangleImplementation( int x, int y, int width, int height ) override;
+    void getWindowRectangle( int& x, int& y, int& width, int& height ) override;
+    bool setWindowDecorationImplementation( bool windowDecoration ) override;
+    bool getWindowDecoration() const override;
+    void grabFocus() override;
+    void grabFocusIfPointerInWindow( )override;
+    void raiseWindow() override;
+    void setWindowName( const std::string& name ) override;
+    std::string getWindowName() override;
+    void useCursor( bool cursorOn ) override;
+    void setCursor( MouseCursor cursor ) override;
 
-    virtual bool valid() const;
-    virtual bool realizeImplementation();
-    virtual bool isRealizedImplementation() const;
-    virtual void closeImplementation();
-    virtual bool makeCurrentImplementation();
-    virtual bool releaseContextImplementation();
-    virtual void swapBuffersImplementation();
-    virtual void runOperations();
+    bool valid() const override;
+    bool realizeImplementation() override;
+    bool isRealizedImplementation() const override;
+    void closeImplementation() override;
+    bool makeCurrentImplementation() override;
+    bool releaseContextImplementation() override;
+    void swapBuffersImplementation() override;
+    void runOperations() override;
 
-    virtual void requestWarpPointer( float x, float y );
+    void requestWarpPointer( float x, float y ) override;
 
 protected:
 

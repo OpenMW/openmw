@@ -32,9 +32,9 @@ namespace CSMTools
         PathgridCheckStage (const CSMWorld::SubCellCollection<CSMWorld::Pathgrid,
             CSMWorld::IdAccessor<CSMWorld::Pathgrid> >& pathgrids);
 
-        virtual int setup();
+        int setup() override;
 
-        virtual void perform (int stage, CSMDoc::Messages& messages);
+        void perform (int stage, CSMDoc::Messages& messages) override;
     };
 }
 

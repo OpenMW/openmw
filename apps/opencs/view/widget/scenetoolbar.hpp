@@ -19,7 +19,7 @@ namespace CSVWidget
 
         protected:
 
-            virtual void focusInEvent (QFocusEvent *event);
+            void focusInEvent (QFocusEvent *event) override;
 
         public:
 

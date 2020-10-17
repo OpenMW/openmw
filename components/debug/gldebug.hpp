@@ -10,7 +10,7 @@ namespace Debug
     public:
         EnableGLDebugOperation();
 
-        virtual void operator()(osg::GraphicsContext* graphicsContext);
+        void operator()(osg::GraphicsContext* graphicsContext) override;
 
     private:
         OpenThreads::Mutex mMutex;

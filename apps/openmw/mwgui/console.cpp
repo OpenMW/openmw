@@ -30,7 +30,7 @@ namespace MWGui
 
             ConsoleInterpreterContext (Console& console, MWWorld::Ptr reference);
 
-            virtual void report (const std::string& message);
+            void report (const std::string& message) override;
     };
 
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,

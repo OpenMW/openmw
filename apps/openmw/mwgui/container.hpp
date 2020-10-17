@@ -33,13 +33,13 @@ namespace MWGui
     public:
         ContainerWindow(DragAndDrop* dragAndDrop);
 
-        void setPtr(const MWWorld::Ptr& container);
-        virtual void onClose();
-        void clear() { resetReference(); }
+        void setPtr(const MWWorld::Ptr& container) override;
+        void onClose() override;
+        void clear() override { resetReference(); }
 
-        void onFrame(float dt) { checkReferenceAvailable(); }
+        void onFrame(float dt) override { checkReferenceAvailable(); }
 
-        virtual void resetReference();
+        void resetReference() override;
 
     private:
         DragAndDrop* mDragAndDrop;
@@ -64,7 +64,7 @@ namespace MWGui
         /// @return is taking the item allowed?
         bool onTakeItem(const ItemStack& item, int count);
 
-        virtual void onReferenceUnavailable();
+        void onReferenceUnavailable() override;
     };
 }
 #endif // CONTAINER_H

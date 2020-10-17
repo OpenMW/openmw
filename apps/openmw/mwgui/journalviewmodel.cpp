@@ -46,11 +46,11 @@ struct JournalViewModelImpl : JournalViewModel
         return Utf8Span (point, point + str.size ());
     }
 
-    void load ()
+    void load () override
     {
     }
 
-    void unload ()
+    void unload () override
     {
         mKeywordSearch.clear ();
         mKeywordSearchLoaded = false;
@@ -69,7 +69,7 @@ struct JournalViewModelImpl : JournalViewModel
         }
     }
 
-    bool isEmpty () const
+    bool isEmpty () const override
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -141,14 +141,14 @@ struct JournalViewModelImpl : JournalViewModel
             }
         }
 
-        Utf8Span body () const
+        Utf8Span body () const override
         {
             ensureLoaded ();
 
             return toUtf8Span (utf8text);
         }
 
-        void visitSpans (std::function < void (TopicId, size_t, size_t)> visitor) const
+        void visitSpans (std::function < void (TopicId, size_t, size_t)> visitor) const override
         {
             ensureLoaded ();
             mModel->ensureKeyWordSearchLoaded ();
@@ -192,7 +192,7 @@ struct JournalViewModelImpl : JournalViewModel
 
     };
 
-    void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const
+    void visitQuestNames (bool active_only, std::function <void (const std::string&, bool)> visitor) const override
     {
         MWBase::Journal * journal = MWBase::Environment::get ().getJournal ();
 
@@ -242,12 +242,12 @@ struct JournalViewModelImpl : JournalViewModel
             BaseEntry <iterator_t, JournalEntry> (model, itr)
         {}
 
-        std::string getText () const
+        std::string getText () const override
         {
             return itr->getText();
         }
 
-        Utf8Span timestamp () const
+        Utf8Span timestamp () const override
         {
             if (timestamp_buffer.empty ())
             {
@@ -267,7 +267,7 @@ struct JournalViewModelImpl : JournalViewModel
         }
     };
 
-    void visitJournalEntries (const std::string& questName, std::function <void (JournalEntry const &)> visitor) const
+    void visitJournalEntries (const std::string& questName, std::function <void (JournalEntry const &)> visitor) const override
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -300,13 +300,13 @@ struct JournalViewModelImpl : JournalViewModel
         }
     }
 
-    void visitTopicName (TopicId topicId, std::function <void (Utf8Span)> visitor) const
+    void visitTopicName (TopicId topicId, std::function <void (Utf8Span)> visitor) const override
     {
         MWDialogue::Topic const & topic = * reinterpret_cast <MWDialogue::Topic const *> (topicId);
         visitor (toUtf8Span (topic.getName()));
     }
 
-    void visitTopicNamesStartingWith (Utf8Stream::UnicodeChar character, std::function < void (const std::string&) > visitor) const
+    void visitTopicNamesStartingWith (Utf8Stream::UnicodeChar character, std::function < void (const std::string&) > visitor) const override
     {
         MWBase::Journal * journal = MWBase::Environment::get().getJournal();
 
@@ -330,19 +330,19 @@ struct JournalViewModelImpl : JournalViewModel
             BaseEntry (model, itr), mTopic (topic)
         {}
 
-        std::string getText () const
+        std::string getText () const override
         {
             return  itr->getText();
         }
 
-        Utf8Span source () const
+        Utf8Span source () const override
         {
             return toUtf8Span (itr->mActorName);
         }
 
     };
 
-    void visitTopicEntries (TopicId topicId, std::function <void (TopicEntry const &)> visitor) const
+    void visitTopicEntries (TopicId topicId, std::function <void (TopicEntry const &)> visitor) const override
     {
         typedef MWDialogue::Topic::TEntryIter iterator_t;
 

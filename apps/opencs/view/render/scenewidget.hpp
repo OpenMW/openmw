@@ -97,8 +97,8 @@ namespace CSVRender
 
             void setAmbient(const osg::Vec4f& ambient);
 
-            virtual void mouseMoveEvent (QMouseEvent *event);
-            virtual void wheelEvent (QWheelEvent *event);
+            void mouseMoveEvent (QMouseEvent *event) override;
+            void wheelEvent (QWheelEvent *event) override;
 
             std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 

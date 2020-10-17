@@ -35,7 +35,7 @@ public:
     Matrix3 boundRot;
     osg::Vec3f boundXYZ; // Box size
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Named::read(nif);
 
@@ -64,7 +64,7 @@ public:
         isBone = false;
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Named::post(nif);
         props.post(nif);
@@ -104,7 +104,7 @@ struct NiNode : Node
         ControllerFlag_Active = 0x8
     };
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         children.read(nif);
@@ -120,7 +120,7 @@ struct NiNode : Node
         }
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         children.post(nif);
@@ -183,7 +183,7 @@ struct NiTriShape : NiGeometry
 
     NiTriShapeDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
@@ -191,7 +191,7 @@ struct NiTriShape : NiGeometry
         materialData.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -205,7 +205,7 @@ struct NiTriStrips : NiGeometry
 {
     NiTriStripsDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
@@ -213,7 +213,7 @@ struct NiTriStrips : NiGeometry
         materialData.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -227,14 +227,14 @@ struct NiLines : NiGeometry
 {
     NiLinesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -284,7 +284,7 @@ struct NiCamera : Node
     };
     Camera cam;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
 
@@ -301,14 +301,14 @@ struct NiAutoNormalParticles : Node
 {
     NiAutoNormalParticlesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         nif->getInt(); // -1
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -319,14 +319,14 @@ struct NiRotatingParticles : Node
 {
     NiRotatingParticlesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         nif->getInt(); // -1
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -339,7 +339,7 @@ struct NiSwitchNode : public NiNode
     unsigned int switchFlags{0};
     unsigned int initialIndex;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         NiNode::read(nif);
         if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
@@ -359,7 +359,7 @@ struct NiLODNode : public NiSwitchNode
     };
     std::vector<LODRange> lodLevels;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         NiSwitchNode::read(nif);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))

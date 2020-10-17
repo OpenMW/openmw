@@ -12,7 +12,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 runtime.setPC (-1);
             }
@@ -22,7 +22,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 runtime.pop();
@@ -36,7 +36,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 runtime.pop();
@@ -50,7 +50,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime, unsigned int arg0)
+            void execute (Runtime& runtime, unsigned int arg0) override
             {
                 if (arg0==0)
                     throw std::logic_error ("infinite loop");
@@ -63,7 +63,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime, unsigned int arg0)
+            void execute (Runtime& runtime, unsigned int arg0) override
             {
                 if (arg0==0)
                     throw std::logic_error ("infinite loop");

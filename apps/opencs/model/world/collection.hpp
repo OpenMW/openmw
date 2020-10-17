@@ -120,19 +120,19 @@ namespace CSMWorld
             void add (const ESXRecordT& record);
             ///< Add a new record (modified)
 
-            virtual int getSize() const;
+            int getSize() const override;
 
-            virtual std::string getId (int index) const;
+            std::string getId (int index) const override;
 
-            virtual int getIndex (const std::string& id) const;
+            int getIndex (const std::string& id) const override;
 
-            virtual int getColumns() const;
+            int getColumns() const override;
 
-            virtual QVariant getData (int index, int column) const;
+            QVariant getData (int index, int column) const override;
 
-            virtual void setData (int index, int column, const QVariant& data);
+            void setData (int index, int column, const QVariant& data) override;
 
-            virtual const ColumnBase& getColumn (int column) const;
+            const ColumnBase& getColumn (int column) const override;
 
             virtual void merge();
             ///< Merge modified into base.
@@ -140,43 +140,43 @@ namespace CSMWorld
             virtual void purge();
             ///< Remove records that are flagged as erased.
 
-            virtual void removeRows (int index, int count) ;
+            void removeRows (int index, int count) override;
 
-            virtual void appendBlankRecord (const std::string& id,
-                UniversalId::Type type = UniversalId::Type_None);
+            void appendBlankRecord (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual void cloneRecord(const std::string& origin,
+            void cloneRecord(const std::string& origin,
                                      const std::string& destination,
-                                     const UniversalId::Type type);
+                                     const UniversalId::Type type) override;
 
-            virtual bool touchRecord(const std::string& id);
+            bool touchRecord(const std::string& id) override;
             ///< Change the state of a record from base to modified, if it is not already.
             ///  \return True if the record was changed.
 
-            virtual int searchId (const std::string& id) const;
+            int searchId (const std::string& id) const override;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
-            virtual void replace (int index, const RecordBase& record);
+            void replace (int index, const RecordBase& record) override;
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
 
-            virtual void appendRecord (const RecordBase& record,
-                UniversalId::Type type = UniversalId::Type_None);
+            void appendRecord (const RecordBase& record,
+                UniversalId::Type type = UniversalId::Type_None) override;
             ///< If the record type does not match, an exception is thrown.
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual const Record<ESXRecordT>& getRecord (const std::string& id) const;
+            const Record<ESXRecordT>& getRecord (const std::string& id) const override;
 
-            virtual const Record<ESXRecordT>& getRecord (int index) const;
+            const Record<ESXRecordT>& getRecord (int index) const override;
 
-            virtual int getAppendIndex (const std::string& id,
-                UniversalId::Type type = UniversalId::Type_None) const;
+            int getAppendIndex (const std::string& id,
+                UniversalId::Type type = UniversalId::Type_None) const override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual std::vector<std::string> getIds (bool listDeleted = true) const;
+            std::vector<std::string> getIds (bool listDeleted = true) const override;
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
@@ -190,7 +190,7 @@ namespace CSMWorld
             /// If the index is invalid either generally (by being out of range) or for the particular
             /// record, an exception is thrown.
 
-            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            bool reorderRows (int baseIndex, const std::vector<int>& newOrder) override;
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///

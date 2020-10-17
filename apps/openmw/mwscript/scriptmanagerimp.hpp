@@ -68,23 +68,23 @@ namespace MWScript
                 Compiler::Context& compilerContext, int warningsMode,
                 const std::vector<std::string>& scriptBlacklist);
 
-            virtual void clear();
+            void clear() override;
 
-            virtual bool run (const std::string& name, Interpreter::Context& interpreterContext);
+            bool run (const std::string& name, Interpreter::Context& interpreterContext) override;
             ///< Run the script with the given name (compile first, if not compiled yet)
 
-            virtual bool compile (const std::string& name);
+            bool compile (const std::string& name) override;
             ///< Compile script with the given namen
             /// \return Success?
 
-            virtual std::pair<int, int> compileAll();
+            std::pair<int, int> compileAll() override;
             ///< Compile all scripts
             /// \return count, success
 
-            virtual const Compiler::Locals& getLocals (const std::string& name);
+            const Compiler::Locals& getLocals (const std::string& name) override;
             ///< Return locals for script \a name.
 
-            virtual GlobalScripts& getGlobalScripts();
+            GlobalScripts& getGlobalScripts() override;
     };
 }
 

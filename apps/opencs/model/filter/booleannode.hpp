@@ -13,12 +13,12 @@ namespace CSMFilter
 
             BooleanNode (bool true_);
 
-            virtual bool test (const CSMWorld::IdTableBase& table, int row,
-                const std::map<int, int>& columns) const;
+            bool test (const CSMWorld::IdTableBase& table, int row,
+                const std::map<int, int>& columns) const override;
             ///< \return Can the specified table row pass through to filter?
             /// \param columns column ID to column index mapping
 
-            virtual std::string toString (bool numericColumns) const;
+            std::string toString (bool numericColumns) const override;
             ///< Return a string that represents this node.
             ///
             /// \param numericColumns Use numeric IDs instead of string to represent columns.

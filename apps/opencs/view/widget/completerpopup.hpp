@@ -10,7 +10,7 @@ namespace CSVWidget
         public:
             CompleterPopup(QWidget *parent = 0);
 
-            virtual int sizeHintForRow(int row) const;
+            int sizeHintForRow(int row) const override;
     };
 }
 

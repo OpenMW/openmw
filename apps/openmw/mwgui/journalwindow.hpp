@@ -21,10 +21,10 @@ namespace MWGui
         static JournalWindow * create (std::shared_ptr <JournalViewModel> Model, bool questList, ToUTF8::FromType encoding);
 
         /// destroy this instance of the JournalWindow implementation
-        virtual ~JournalWindow () {};
+        virtual ~JournalWindow () {}
 
         /// show/hide the journal window
-        virtual void setVisible (bool newValue) = 0;
+        void setVisible (bool newValue) override = 0;
     };
 }
 

@@ -24,9 +24,9 @@ namespace MWMechanics
 
         GetAbsorptionProbability() = default;
 
-        virtual void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
+        void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
                             const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                            float magnitude, float /*remainingTime*/, float /*totalTime*/)
+                            float magnitude, float /*remainingTime*/, float /*totalTime*/) override
         {
             if (key.mId == ESM::MagicEffect::SpellAbsorption)
             {

@@ -35,7 +35,7 @@ namespace MWScript
                 : mControl (control), mEnable (enable)
                 {}
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWBase::Environment::get()
                         .getInputManager()
@@ -53,7 +53,7 @@ namespace MWScript
                 : mControl (control)
                 {}
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     runtime.push(!MWBase::Environment::get().getInputManager()->getControlSwitch (mControl));
                 }
@@ -63,7 +63,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     bool enabled = MWBase::Environment::get().getWorld()->toggleCollisionMode();
 
@@ -80,7 +80,7 @@ namespace MWScript
 
                 OpClearMovementFlag (MWMechanics::CreatureStats::Flag flag) : mFlag (flag) {}
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -97,7 +97,7 @@ namespace MWScript
 
                 OpSetMovementFlag (MWMechanics::CreatureStats::Flag flag) : mFlag (flag) {}
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -110,7 +110,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -124,7 +124,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -138,7 +138,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -152,7 +152,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -165,7 +165,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
@@ -183,7 +183,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->getPlayerPtr();
                     runtime.push(MWBase::Environment::get().getMechanicsManager()->isSneaking(ptr));

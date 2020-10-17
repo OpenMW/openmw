@@ -45,7 +45,7 @@ class EffectAnimationTime : public SceneUtil::ControllerSource
 private:
     float mTime;
 public:
-    virtual float getValue(osg::NodeVisitor* nv);
+    float getValue(osg::NodeVisitor* nv) override;
 
     void addTime(float duration);
     void resetTime(float time);
@@ -173,13 +173,13 @@ protected:
         std::shared_ptr<float> getTimePtr() const
         { return mTimePtr; }
 
-        virtual float getValue(osg::NodeVisitor* nv);
+        float getValue(osg::NodeVisitor* nv) override;
     };
 
     class NullAnimationTime : public SceneUtil::ControllerSource
     {
     public:
-        virtual float getValue(osg::NodeVisitor *nv)
+        float getValue(osg::NodeVisitor *nv) override
         {
             return 0.f;
         }
@@ -506,7 +506,7 @@ class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
 
-    bool canBeHarvested() const;
+    bool canBeHarvested() const override;
 };
 
 class UpdateVfxCallback : public osg::NodeCallback
@@ -522,7 +522,7 @@ public:
     bool mFinished;
     EffectParams mParams;
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
 
 private:
     double mStartingTime;

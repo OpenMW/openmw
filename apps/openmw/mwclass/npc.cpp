@@ -253,13 +253,13 @@ namespace MWClass
         MWMechanics::Movement mMovement;
         MWWorld::InventoryStore mInventoryStore;
 
-        virtual MWWorld::CustomData *clone() const;
+        MWWorld::CustomData *clone() const override;
 
-        virtual NpcCustomData& asNpcCustomData()
+        NpcCustomData& asNpcCustomData() override
         {
             return *this;
         }
-        virtual const NpcCustomData& asNpcCustomData() const
+        const NpcCustomData& asNpcCustomData() const override
         {
             return *this;
         }

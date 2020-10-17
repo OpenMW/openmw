@@ -31,7 +31,7 @@ namespace MWGui
 
         ReviewDialog();
 
-        bool exit() { return false; }
+        bool exit() override { return false; }
 
         void setPlayerName(const std::string &name);
         void setRace(const std::string &raceId);
@@ -47,9 +47,9 @@ namespace MWGui
         void configureSkills(const SkillList& major, const SkillList& minor);
         void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        void onFrame(float duration);
+        void onFrame(float duration) override;
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

@@ -22,7 +22,7 @@ namespace ContentSelectorView
         QString mPlaceholderText;
 
     protected:
-        void paintEvent(QPaintEvent *);
+        void paintEvent(QPaintEvent *) override;
         QRegExpValidator *mValidator;
     };
 }

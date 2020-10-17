@@ -24,7 +24,7 @@ namespace MWDialogue
 
             Quest (const ESM::QuestState& state);
 
-            virtual std::string getName() const;
+            std::string getName() const override;
             ///< May be an empty string
 
             int getIndex() const;
@@ -34,7 +34,7 @@ namespace MWDialogue
 
             bool isFinished() const;
 
-            virtual void addEntry (const JournalEntry& entry);
+            void addEntry (const JournalEntry& entry) override;
             ///< Add entry and adjust index accordingly.
             ///
             /// \note Redundant entries are ignored, but the index is still adjusted.

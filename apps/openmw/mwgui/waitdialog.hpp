@@ -13,7 +13,7 @@ namespace MWGui
     public:
         WaitDialogProgressBar();
 
-        virtual void onOpen();
+        void onOpen() override;
 
         void setProgress(int cur, int total);
 
@@ -27,15 +27,15 @@ namespace MWGui
     public:
         WaitDialog();
 
-        void setPtr(const MWWorld::Ptr &ptr);
+        void setPtr(const MWWorld::Ptr &ptr) override;
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        virtual bool exit();
+        bool exit() override;
 
-        virtual void clear();
+        void clear() override;
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
         bool getSleeping() { return mTimeAdvancer.isRunning() && mSleeping; }
         void wakeUp();

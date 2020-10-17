@@ -30,20 +30,20 @@ namespace SceneUtil
             mFilter2 = "tri " + mFilter;
         }
 
-        virtual void apply(osg::MatrixTransform& node)
+        void apply(osg::MatrixTransform& node) override
         {
             traverse(node);
         }
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             traverse(node);
         }
-        virtual void apply(osg::Group& node)
+        void apply(osg::Group& node) override
         {
             traverse(node);
         }
 
-        virtual void apply(osg::Drawable& drawable)
+        void apply(osg::Drawable& drawable) override
         {
             if (!filterMatches(drawable.getName()))
                 return;

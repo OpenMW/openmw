@@ -24,7 +24,7 @@ namespace CSVWidget
 
         protected:
 
-            void mouseReleaseEvent (QMouseEvent *event);
+            void mouseReleaseEvent (QMouseEvent *event) override;
 
         private slots:
 

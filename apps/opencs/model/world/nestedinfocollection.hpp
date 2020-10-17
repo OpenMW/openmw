@@ -24,24 +24,24 @@ namespace CSMWorld
             NestedInfoCollection ();
             ~NestedInfoCollection();
 
-            virtual void addNestedRow(int row, int column, int position);
+            void addNestedRow(int row, int column, int position) override;
 
-            virtual void removeNestedRows(int row, int column, int subRow);
+            void removeNestedRows(int row, int column, int subRow) override;
 
-            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+            QVariant getNestedData(int row, int column, int subRow, int subColumn) const override;
 
-            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
+            void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn) override;
 
-            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
+            NestedTableWrapperBase* nestedTable(int row, int column) const override;
 
-            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
+            void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable) override;
 
-            virtual int getNestedRowsCount(int row, int column) const;
+            int getNestedRowsCount(int row, int column) const override;
 
-            virtual int getNestedColumnsCount(int row, int column) const;
+            int getNestedColumnsCount(int row, int column) const override;
 
             // this method is inherited from NestedCollection, not from Collection<Info, IdAccessor<Info> >
-            virtual NestableColumn *getNestableColumn(int column);
+            NestableColumn *getNestableColumn(int column) override;
 
             void addAdapter(std::pair<const ColumnBase*, NestedColumnAdapter<Info>* > adapter);
     };

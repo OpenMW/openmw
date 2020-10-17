@@ -21,7 +21,7 @@ class TextureOverrideVisitor : public osg::NodeVisitor
         {
         }
 
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             int index = 0;
             osg::ref_ptr<osg::Node> nodePtr(&node);

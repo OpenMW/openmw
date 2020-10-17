@@ -58,13 +58,13 @@ namespace MWClass
         MWWorld::ContainerStore* mContainerStore; // may be InventoryStore for some creatures
         MWMechanics::Movement mMovement;
 
-        virtual MWWorld::CustomData *clone() const;
+        MWWorld::CustomData *clone() const override;
 
-        virtual CreatureCustomData& asCreatureCustomData()
+        CreatureCustomData& asCreatureCustomData() override
         {
             return *this;
         }
-        virtual const CreatureCustomData& asCreatureCustomData() const
+        const CreatureCustomData& asCreatureCustomData() const override
         {
             return *this;
         }

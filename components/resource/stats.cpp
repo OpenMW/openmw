@@ -211,7 +211,7 @@ public:
     {
     }
 
-    virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const
+    void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* drawable) const override
     {
         if (!mStats) return;
 

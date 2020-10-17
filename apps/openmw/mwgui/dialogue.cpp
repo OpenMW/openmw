@@ -41,7 +41,7 @@ namespace MWGui
 
         }
 
-        void addResponse(const std::string& title, const std::string& text)
+        void addResponse(const std::string& title, const std::string& text) override
         {
             mWindow->addResponse(title, text, mNeedMargin);
         }

@@ -15,19 +15,19 @@ namespace CSVWorld
 
         private:
 
-            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+            void configureCreateCommand (CSMWorld::CreateCommand& command) const override;
 
         public:
 
             ReferenceableCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id);
 
-            virtual void reset();
+            void reset() override;
 
-            virtual void cloneMode (const std::string& originId,
-                const CSMWorld::UniversalId::Type type);
+            void cloneMode (const std::string& originId,
+                const CSMWorld::UniversalId::Type type) override;
 
-            virtual void toggleWidgets(bool active = true);
+            void toggleWidgets(bool active = true) override;
 
     };
 }

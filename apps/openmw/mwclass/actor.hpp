@@ -20,30 +20,30 @@ namespace MWClass
     public:
         virtual ~Actor();
 
-        virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) const;
+        void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
         ///< Adjust position to stand on ground. Must be called post model load
         /// @param force do this even if the ptr is flying
 
-        virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
+        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
 
-        virtual bool useAnim() const;
+        bool useAnim() const override;
 
-        virtual void block(const MWWorld::Ptr &ptr) const;
+        void block(const MWWorld::Ptr &ptr) const override;
 
-        virtual osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const;
+        osg::Vec3f getRotationVector(const MWWorld::Ptr& ptr) const override;
         ///< Return desired rotations, as euler angles. Sets getMovementSettings(ptr).mRotation to zero.
 
-        virtual float getEncumbrance(const MWWorld::Ptr& ptr) const;
+        float getEncumbrance(const MWWorld::Ptr& ptr) const override;
         ///< Returns total weight of objects inside this object (including modifications from magic
         /// effects). Throws an exception, if the object can't hold other objects.
 
-        virtual bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const;
+        bool allowTelekinesis(const MWWorld::ConstPtr& ptr) const override;
         ///< Return whether this class of object can be activated with telekinesis
 
-        virtual bool isActor() const;
+        bool isActor() const override;
 
         /// Return current movement speed.
-        virtual float getCurrentSpeed(const MWWorld::Ptr& ptr) const;
+        float getCurrentSpeed(const MWWorld::Ptr& ptr) const override;
         
         // not implemented
         Actor(const Actor&);

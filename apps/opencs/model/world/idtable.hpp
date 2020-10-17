@@ -31,24 +31,23 @@ namespace CSMWorld
 
             virtual ~IdTable();
 
-            virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
+            int rowCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            virtual int columnCount (const QModelIndex & parent = QModelIndex()) const;
+            int columnCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            virtual QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const;
+            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
-            virtual QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
+            QVariant headerData (int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-            virtual bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+            bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-            virtual Qt::ItemFlags flags (const QModelIndex & index) const;
+            Qt::ItemFlags flags (const QModelIndex & index) const override;
 
-            virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
+            bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
-            virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
-                const;
+            QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
-            virtual QModelIndex parent (const QModelIndex& index) const;
+            QModelIndex parent (const QModelIndex& index) const override;
 
             void addRecord (const std::string& id, UniversalId::Type type = UniversalId::Type_None);
             ///< \param type Will be ignored, unless the collection supports multiple record types
@@ -66,7 +65,7 @@ namespace CSMWorld
 
             std::string getId(int row) const;
 
-            virtual QModelIndex getModelIndex (const std::string& id, int column) const;
+            QModelIndex getModelIndex (const std::string& id, int column) const override;
 
             void setRecord (const std::string& id, const RecordBase& record,
                     UniversalId::Type type = UniversalId::Type_None);
@@ -74,10 +73,10 @@ namespace CSMWorld
 
             const RecordBase& getRecord (const std::string& id) const;
 
-            virtual int searchColumnIndex (Columns::ColumnId id) const;
+            int searchColumnIndex (Columns::ColumnId id) const override;
             ///< Return index of column with the given \a id. If no such column exists, -1 is returned.
 
-            virtual int findColumnIndex (Columns::ColumnId id) const;
+            int findColumnIndex (Columns::ColumnId id) const override;
             ///< Return index of column with the given \a id. If no such column exists, an exception is
             /// thrown.
 
@@ -85,14 +84,14 @@ namespace CSMWorld
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
 
-            virtual std::pair<UniversalId, std::string> view (int row) const;
+            std::pair<UniversalId, std::string> view (int row) const override;
             ///< Return the UniversalId and the hint for viewing \a row. If viewing is not
             /// supported by this table, return (UniversalId::Type_None, "").
 
             /// Is \a id flagged as deleted?
-            virtual bool isDeleted (const std::string& id) const;
+            bool isDeleted (const std::string& id) const override;
 
-            virtual int getColumnId(int column) const;
+            int getColumnId(int column) const override;
 
         protected:
 

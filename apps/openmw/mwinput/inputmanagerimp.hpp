@@ -58,43 +58,43 @@ namespace MWInput
         virtual ~InputManager();
 
         /// Clear all savegame-specific data
-        virtual void clear();
+        void clear() override;
 
-        virtual void update(float dt, bool disableControls=false, bool disableEvents=false);
+        void update(float dt, bool disableControls=false, bool disableEvents=false) override;
 
-        virtual void changeInputMode(bool guiMode);
+        void changeInputMode(bool guiMode) override;
 
-        virtual void processChangedSettings(const Settings::CategorySettingVector& changed);
+        void processChangedSettings(const Settings::CategorySettingVector& changed) override;
 
-        virtual void setDragDrop(bool dragDrop);
-        virtual void setGamepadGuiCursorEnabled(bool enabled);
-        virtual void setAttemptJump(bool jumping);
+        void setDragDrop(bool dragDrop) override;
+        void setGamepadGuiCursorEnabled(bool enabled) override;
+        void setAttemptJump(bool jumping) override;
 
-        virtual void toggleControlSwitch (const std::string& sw, bool value);
-        virtual bool getControlSwitch (const std::string& sw);
+        void toggleControlSwitch (const std::string& sw, bool value) override;
+        bool getControlSwitch (const std::string& sw) override;
 
-        virtual std::string getActionDescription (int action);
-        virtual std::string getActionKeyBindingName (int action);
-        virtual std::string getActionControllerBindingName (int action);
-        virtual int getNumActions() { return A_Last; }
-        virtual std::vector<int> getActionKeySorting();
-        virtual std::vector<int> getActionControllerSorting();
-        virtual void enableDetectingBindingMode (int action, bool keyboard);
-        virtual void resetToDefaultKeyBindings();
-        virtual void resetToDefaultControllerBindings();
+        std::string getActionDescription (int action) override;
+        std::string getActionKeyBindingName (int action) override;
+        std::string getActionControllerBindingName (int action) override;
+        int getNumActions() override { return A_Last; }
+        std::vector<int> getActionKeySorting() override;
+        std::vector<int> getActionControllerSorting() override;
+        void enableDetectingBindingMode (int action, bool keyboard) override;
+        void resetToDefaultKeyBindings() override;
+        void resetToDefaultControllerBindings() override;
 
-        virtual void setJoystickLastUsed(bool enabled);
-        virtual bool joystickLastUsed();
+        void setJoystickLastUsed(bool enabled) override;
+        bool joystickLastUsed() override;
 
-        virtual int countSavedGameRecords() const;
-        virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress);
-        virtual void readRecord(ESM::ESMReader& reader, uint32_t type);
+        int countSavedGameRecords() const override;
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
+        void readRecord(ESM::ESMReader& reader, uint32_t type) override;
 
-        virtual void resetIdleTime();
+        void resetIdleTime() override;
 
-        virtual void executeAction(int action);
+        void executeAction(int action) override;
 
-        virtual bool controlsDisabled() { return mControlsDisabled; }
+        bool controlsDisabled() override { return mControlsDisabled; }
 
     private:
         void convertMousePosForMyGUI(int& x, int& y);

@@ -211,13 +211,13 @@ namespace CSMWorld
             : Column<ESXRecordT> (id, ColumnBase::Display_NestedHeader, flags), mFixedRows(fixedRows)
         {}
 
-        virtual void set (Record<ESXRecordT>& record, const QVariant& data)
+        void set (Record<ESXRecordT>& record, const QVariant& data) override
         {
             // There is nothing to do here.
             // This prevents exceptions from parent's implementation
         }
 
-        virtual QVariant get (const Record<ESXRecordT>& record) const
+        QVariant get (const Record<ESXRecordT>& record) const override
         {
             // by default editable; also see IdTree::hasChildren()
             if (mFixedRows)
@@ -226,7 +226,7 @@ namespace CSMWorld
                 return QVariant::fromValue(ColumnBase::TableEdit_Full);
         }
 
-        virtual bool isEditable() const
+        bool isEditable() const override
         {
             return true;
         }
@@ -240,7 +240,7 @@ namespace CSMWorld
         NestedChildColumn (int id,
                 Display display, int flags = ColumnBase::Flag_Dialogue, bool isEditable = true);
 
-        virtual bool isEditable() const;
+        bool isEditable() const override;
 
     private:
         bool mIsEditable;

@@ -35,7 +35,7 @@ namespace CSVTools
             CSVDoc::AdjusterWidget *mAdjuster;
             CSMDoc::DocumentManager& mDocumentManager;
 
-            void keyPressEvent (QKeyEvent *event);
+            void keyPressEvent (QKeyEvent *event) override;
 
         public:
 

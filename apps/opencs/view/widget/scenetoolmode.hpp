@@ -31,7 +31,7 @@ namespace CSVWidget
 
             void adjustToolTip (const ModeButton *activeMode);
 
-            virtual void contextMenuEvent (QContextMenuEvent *event);
+            void contextMenuEvent (QContextMenuEvent *event) override;
 
             /// Add context menu items to \a menu. Default-implementation: Pass on request to
             /// current mode button or return false, if there is no current mode button.
@@ -46,13 +46,13 @@ namespace CSVWidget
 
         protected:
 
-            bool event(QEvent* event);
+            bool event(QEvent* event) override;
 
         public:
 
             SceneToolMode (SceneToolbar *parent, const QString& toolTip);
 
-            virtual void showPanel (const QPoint& position);
+            void showPanel (const QPoint& position) override;
 
             void addButton (const std::string& icon, const std::string& id,
                 const QString& tooltip = "");

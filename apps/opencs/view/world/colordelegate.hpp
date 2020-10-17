@@ -19,17 +19,17 @@ namespace CSVWorld
                           CSMDoc::Document& document, 
                           QObject *parent);
 
-            virtual void paint(QPainter *painter, 
+            void paint(QPainter *painter, 
                                const QStyleOptionViewItem &option,
-                               const QModelIndex &index) const;
+                               const QModelIndex &index) const override;
     };
 
     class ColorDelegateFactory : public CommandDelegateFactory
     {
         public:
-            virtual CommandDelegate *makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
+            CommandDelegate *makeDelegate(CSMWorld::CommandDispatcher *dispatcher, 
                                                   CSMDoc::Document &document, 
-                                                  QObject *parent) const;
+                                                  QObject *parent) const override;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
 }

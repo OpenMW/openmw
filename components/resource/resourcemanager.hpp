@@ -48,23 +48,23 @@ namespace Resource
         virtual ~GenericResourceManager() {}
 
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
-        virtual void updateCache(double referenceTime)
+        void updateCache(double referenceTime) override
         {
             mCache->updateTimeStampOfObjectsInCacheWithExternalReferences(referenceTime);
             mCache->removeExpiredObjectsInCache(referenceTime - mExpiryDelay);
         }
 
         /// Clear all cache entries.
-        virtual void clearCache() { mCache->clear(); }
+        void clearCache() override { mCache->clear(); }
 
         /// How long to keep objects in cache after no longer being referenced.
-        void setExpiryDelay (double expiryDelay) { mExpiryDelay = expiryDelay; }
+        void setExpiryDelay (double expiryDelay) override { mExpiryDelay = expiryDelay; }
 
         const VFS::Manager* getVFS() const { return mVFS; }
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const {}
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override {}
 
-        virtual void releaseGLObjects(osg::State* state) { mCache->releaseGLObjects(state); }
+        void releaseGLObjects(osg::State* state) override { mCache->releaseGLObjects(state); }
 
     protected:
         const VFS::Manager* mVFS;

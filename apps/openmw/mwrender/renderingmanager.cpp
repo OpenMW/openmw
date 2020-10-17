@@ -89,7 +89,7 @@ namespace MWRender
         {
         }
 
-        virtual void setDefaults(osg::StateSet *stateset)
+        void setDefaults(osg::StateSet *stateset) override
         {
             osg::LightModel* lightModel = new osg::LightModel;
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
@@ -106,7 +106,7 @@ namespace MWRender
                 stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
         }
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
             osg::LightModel* lightModel = static_cast<osg::LightModel*>(stateset->getAttribute(osg::StateAttribute::LIGHTMODEL));
             lightModel->setAmbientIntensity(mAmbientColor);
@@ -166,7 +166,7 @@ namespace MWRender
         {
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             try
             {
@@ -701,7 +701,7 @@ namespace MWRender
         {
         }
 
-        virtual void operator () (osg::RenderInfo& renderInfo) const
+        void operator () (osg::RenderInfo& renderInfo) const override
         {
             std::lock_guard<std::mutex> lock(mMutex);
             if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame)
@@ -928,7 +928,7 @@ namespace MWRender
             : mWidth(width), mHeight(height), mImage(image)
         {
         }
-        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const
+        void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const override
         {
             int screenW = renderInfo.getCurrentCamera()->getViewport()->width();
             int screenH = renderInfo.getCurrentCamera()->getViewport()->height();

@@ -37,10 +37,10 @@ namespace CSMDoc
             OpenSaveStage (Document& document, SavingState& state, bool projectFile);
             ///< \param projectFile Saving the project file instead of the content file.
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -55,10 +55,10 @@ namespace CSMDoc
             WriteHeaderStage (Document& document, SavingState& state, bool simple);
             ///< \param simple Simplified header (used for project files).
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -75,10 +75,10 @@ namespace CSMDoc
             WriteCollectionStage (const CollectionT& collection, SavingState& state,
                 CSMWorld::Scope scope = CSMWorld::Scope_Content);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -125,10 +125,10 @@ namespace CSMDoc
 
             WriteDialogueCollectionStage (Document& document, SavingState& state, bool journal);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -142,10 +142,10 @@ namespace CSMDoc
 
             WriteRefIdCollectionStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -159,10 +159,10 @@ namespace CSMDoc
 
             CollectionReferencesStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -175,10 +175,10 @@ namespace CSMDoc
 
             WriteCellCollectionStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -192,10 +192,10 @@ namespace CSMDoc
 
             WritePathgridCollectionStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -209,10 +209,10 @@ namespace CSMDoc
 
             WriteLandCollectionStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -226,10 +226,10 @@ namespace CSMDoc
 
             WriteLandTextureCollectionStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -241,10 +241,10 @@ namespace CSMDoc
 
             CloseSaveStage (SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 
@@ -257,10 +257,10 @@ namespace CSMDoc
 
             FinalSavingStage (Document& document, SavingState& state);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
 
-            virtual void perform (int stage, Messages& messages);
+            void perform (int stage, Messages& messages) override;
             ///< Messages resulting from this stage will be appended to \a messages.
     };
 }

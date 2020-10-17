@@ -60,12 +60,12 @@ namespace SceneUtil
 
         bool getActive() const;
 
-        void traverse(osg::NodeVisitor& nv);
+        void traverse(osg::NodeVisitor& nv) override;
 
         void markDirty();
 
-        virtual void childInserted(unsigned int);
-        virtual void childRemoved(unsigned int, unsigned int);
+        void childInserted(unsigned int) override;
+        void childRemoved(unsigned int, unsigned int) override;
 
     private:
         // The root bone is not a "real" bone, it has no corresponding node in the scene graph.

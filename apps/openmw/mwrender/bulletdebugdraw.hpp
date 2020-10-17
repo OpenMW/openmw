@@ -39,19 +39,19 @@ public:
 
     void step();
 
-    void drawLine(const btVector3& from,const btVector3& to,const btVector3& color);
+    void drawLine(const btVector3& from,const btVector3& to,const btVector3& color) override;
 
-    void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color);
+    void drawContactPoint(const btVector3& PointOnB,const btVector3& normalOnB,btScalar distance,int lifeTime,const btVector3& color) override;
 
-    void reportErrorWarning(const char* warningString);
+    void reportErrorWarning(const char* warningString) override;
 
-    void draw3dText(const btVector3& location,const char* textString) {}
-
-    //0 for off, anything else for on.
-    void setDebugMode(int isOn);
+    void draw3dText(const btVector3& location,const char* textString) override {}
 
     //0 for off, anything else for on.
-    int getDebugMode() const;
+    void setDebugMode(int isOn) override;
+
+    //0 for off, anything else for on.
+    int getDebugMode() const override;
 
 };
 

@@ -26,7 +26,7 @@ namespace SceneUtil
 
         void setDiffuse(const osg::Vec4f& color);
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
 
     private:
         LightType mType;

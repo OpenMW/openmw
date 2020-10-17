@@ -14,7 +14,7 @@ namespace MWPhysics
     public:
         ClosestNotMeRayResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3& from, const btVector3& to);
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace);
+        btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override;
     private:
         const btCollisionObject* mMe;
         const std::vector<const btCollisionObject*> mTargets;

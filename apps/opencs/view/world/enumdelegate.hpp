@@ -23,8 +23,8 @@ namespace CSVWorld
 
         private:
 
-            virtual void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
-                const QModelIndex& index) const;
+            void setModelDataImp (QWidget *editor, QAbstractItemModel *model,
+                const QModelIndex& index) const override;
 
             virtual void addCommands (QAbstractItemModel *model,
                 const QModelIndex& index, int type) const;
@@ -34,21 +34,21 @@ namespace CSVWorld
             EnumDelegate (const std::vector<std::pair<int, QString> >& values,
                 CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent);
 
-            virtual QWidget *createEditor(QWidget *parent,
+            QWidget *createEditor(QWidget *parent,
                                           const QStyleOptionViewItem& option,
-                                          const QModelIndex& index) const;
+                                          const QModelIndex& index) const override;
 
-            virtual QWidget *createEditor(QWidget *parent,
+            QWidget *createEditor(QWidget *parent,
                                           const QStyleOptionViewItem& option,
                                           const QModelIndex& index,
-                                          CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const;
+                                          CSMWorld::ColumnBase::Display display = CSMWorld::ColumnBase::Display_None) const override;
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const;
+            void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay = false) const override;
 
-            virtual void paint (QPainter *painter, const QStyleOptionViewItem& option,
-                const QModelIndex& index) const;
+            void paint (QPainter *painter, const QStyleOptionViewItem& option,
+                const QModelIndex& index) const override;
 
-            virtual QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const;
+            QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
     };
 
@@ -68,7 +68,7 @@ namespace CSVWorld
             EnumDelegateFactory (const std::vector<std::pair<int,std::string>>& names, bool allowNone = false);
             /// \param allowNone Use value of -1 for "none selected" (empty string)
 
-            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
+            CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const override;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
 
             void add (int value, const QString& name);

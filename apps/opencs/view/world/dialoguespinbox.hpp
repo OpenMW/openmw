@@ -16,9 +16,9 @@ namespace CSVWorld
 
         protected:
 
-            virtual void focusInEvent(QFocusEvent *event);
-            virtual void focusOutEvent(QFocusEvent *event);
-            virtual void wheelEvent(QWheelEvent *event);
+            void focusInEvent(QFocusEvent *event) override;
+            void focusOutEvent(QFocusEvent *event) override;
+            void wheelEvent(QWheelEvent *event) override;
     };
 
     class DialogueDoubleSpinBox : public QDoubleSpinBox
@@ -31,9 +31,9 @@ namespace CSVWorld
 
         protected:
 
-            virtual void focusInEvent(QFocusEvent *event);
-            virtual void focusOutEvent(QFocusEvent *event);
-            virtual void wheelEvent(QWheelEvent *event);
+            void focusInEvent(QFocusEvent *event) override;
+            void focusOutEvent(QFocusEvent *event) override;
+            void wheelEvent(QWheelEvent *event) override;
     };
 }
 

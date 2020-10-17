@@ -23,10 +23,10 @@ namespace MWInput
         void updateCursorMode();
         void update(float dt);
 
-        virtual void mouseMoved(const SDLUtil::MouseMotionEvent &arg);
-        virtual void mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id);
-        virtual void mouseReleased(const SDL_MouseButtonEvent &arg, Uint8 id);
-        virtual void mouseWheelMoved(const SDL_MouseWheelEvent &arg);
+        void mouseMoved(const SDLUtil::MouseMotionEvent &arg) override;
+        void mousePressed(const SDL_MouseButtonEvent &arg, Uint8 id) override;
+        void mouseReleased(const SDL_MouseButtonEvent &arg, Uint8 id) override;
+        void mouseWheelMoved(const SDL_MouseWheelEvent &arg) override;
 
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 

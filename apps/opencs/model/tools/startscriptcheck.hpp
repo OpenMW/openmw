@@ -21,8 +21,8 @@ namespace CSMTools
             StartScriptCheckStage (const CSMWorld::IdCollection<ESM::StartScript>& startScripts,
                 const CSMWorld::IdCollection<ESM::Script>& scripts);
 
-            virtual void perform(int stage, CSMDoc::Messages& messages);
-            virtual int setup();
+            void perform(int stage, CSMDoc::Messages& messages) override;
+            int setup() override;
     };
 }
 

@@ -40,13 +40,13 @@ namespace CSVWorld
 
             NastyTableModelHack (QAbstractItemModel& model);
 
-            int rowCount (const QModelIndex & parent = QModelIndex()) const;
+            int rowCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            int columnCount (const QModelIndex & parent = QModelIndex()) const;
+            int columnCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const;
+            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
-            bool setData (const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+            bool setData (const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
             QVariant getData() const;
     };
@@ -124,12 +124,12 @@ namespace CSVWorld
             /// cells, a 0-pointer can be passed here.
             CommandDelegate (CSMWorld::CommandDispatcher *commandDispatcher, CSMDoc::Document& document, QObject *parent);
 
-            virtual void setModelData (QWidget *editor, QAbstractItemModel *model,
-                const QModelIndex& index) const;
+            void setModelData (QWidget *editor, QAbstractItemModel *model,
+                const QModelIndex& index) const override;
 
-            virtual QWidget *createEditor (QWidget *parent,
+            QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem& option,
-                                           const QModelIndex& index) const;
+                                           const QModelIndex& index) const override;
 
             virtual QWidget *createEditor (QWidget *parent,
                                            const QStyleOptionViewItem& option,
@@ -142,7 +142,7 @@ namespace CSVWorld
 
             ///< \return Does column require update?
 
-            virtual void setEditorData (QWidget *editor, const QModelIndex& index) const;
+            void setEditorData (QWidget *editor, const QModelIndex& index) const override;
 
             virtual void setEditorData (QWidget *editor, const QModelIndex& index, bool tryDisplay) const;
 

@@ -11,8 +11,8 @@ namespace CSMFilter
 
             NotNode (std::shared_ptr<Node> child);
 
-            virtual bool test (const CSMWorld::IdTableBase& table, int row,
-                const std::map<int, int>& columns) const;
+            bool test (const CSMWorld::IdTableBase& table, int row,
+                const std::map<int, int>& columns) const override;
             ///< \return Can the specified table row pass through to filter?
             /// \param columns column ID to column index mapping
     };

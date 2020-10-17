@@ -17,7 +17,7 @@ namespace MWWorld
             bool mTeleportFollowers;
 
             /// Teleports this actor and also teleports anyone following that actor.
-            virtual void executeImp (const Ptr& actor);
+            void executeImp (const Ptr& actor) override;
 
             /// Teleports only the given actor (internal use).
             void teleport(const Ptr &actor);

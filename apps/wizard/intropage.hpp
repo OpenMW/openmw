@@ -15,7 +15,7 @@ namespace Wizard
     public:
         IntroPage(QWidget *parent);
 
-        int nextId() const;
+        int nextId() const override;
 
     private:
         MainWizard *mWizard;

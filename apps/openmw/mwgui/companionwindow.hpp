@@ -22,13 +22,13 @@ namespace MWGui
     public:
         CompanionWindow(DragAndDrop* dragAndDrop, MessageBoxManager* manager);
 
-        virtual bool exit();
+        bool exit() override;
 
-        virtual void resetReference();
+        void resetReference() override;
 
-        void setPtr(const MWWorld::Ptr& npc);
-        void onFrame (float dt);
-        void clear() { resetReference(); }
+        void setPtr(const MWWorld::Ptr& npc) override;
+        void onFrame (float dt) override;
+        void clear() override { resetReference(); }
 
     private:
         ItemView* mItemView;
@@ -55,7 +55,7 @@ namespace MWGui
 
         void onCloseButtonClicked(MyGUI::Widget* _sender);
 
-        virtual void onReferenceUnavailable();
+        void onReferenceUnavailable() override;
     };
 
 }

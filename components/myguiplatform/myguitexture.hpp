@@ -37,26 +37,26 @@ namespace osgMyGUI
         OSGTexture(osg::Texture2D* texture);
         virtual ~OSGTexture();
 
-        virtual const std::string& getName() const { return mName; }
+        const std::string& getName() const override { return mName; }
 
-        virtual void createManual(int width, int height, MyGUI::TextureUsage usage, MyGUI::PixelFormat format);
-        virtual void loadFromFile(const std::string &fname);
-        virtual void saveToFile(const std::string &fname);
+        void createManual(int width, int height, MyGUI::TextureUsage usage, MyGUI::PixelFormat format) override;
+        void loadFromFile(const std::string &fname) override;
+        void saveToFile(const std::string &fname) override;
 
-        virtual void destroy();
+        void destroy() override;
 
-        virtual void* lock(MyGUI::TextureUsage access);
-        virtual void unlock();
-        virtual bool isLocked();
+        void* lock(MyGUI::TextureUsage access) override;
+        void unlock() override;
+        bool isLocked() override;
 
-        virtual int getWidth();
-        virtual int getHeight();
+        int getWidth() override;
+        int getHeight() override;
 
-        virtual MyGUI::PixelFormat getFormat() { return mFormat; }
-        virtual MyGUI::TextureUsage getUsage() { return mUsage; }
-        virtual size_t getNumElemBytes() { return mNumElemBytes; }
+        MyGUI::PixelFormat getFormat() override { return mFormat; }
+        MyGUI::TextureUsage getUsage() override { return mUsage; }
+        size_t getNumElemBytes() override { return mNumElemBytes; }
 
-        virtual MyGUI::IRenderTarget *getRenderTarget();
+        MyGUI::IRenderTarget *getRenderTarget() override;
 
     /*internal:*/
         osg::Texture2D *getTexture() const { return mTexture.get(); }

@@ -57,13 +57,13 @@ namespace MWSound
     private:
         // MovieAudioDecoder overrides
 
-        virtual double getAudioClock()
+        double getAudioClock() override
         {
             return (double)getSampleOffset()/(double)mAudioContext->sample_rate -
                    MWBase::Environment::get().getSoundManager()->getTrackTimeDelay(mAudioTrack);
         }
 
-        virtual void adjustAudioSettings(AVSampleFormat& sampleFormat, uint64_t& channelLayout, int& sampleRate)
+        void adjustAudioSettings(AVSampleFormat& sampleFormat, uint64_t& channelLayout, int& sampleRate) override
         {
             if (sampleFormat == AV_SAMPLE_FMT_U8P || sampleFormat == AV_SAMPLE_FMT_U8)
                 sampleFormat = AV_SAMPLE_FMT_U8;

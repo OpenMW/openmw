@@ -15,7 +15,7 @@ namespace BulletHelpers
             : mImpl(std::move(impl))
         {}
 
-        void processTriangle(btVector3* triangle, int partId, int triangleIndex) override final
+        void processTriangle(btVector3* triangle, int partId, int triangleIndex) final
         {
             return mImpl(triangle, partId, triangleIndex);
         }

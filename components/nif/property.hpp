@@ -92,8 +92,8 @@ public:
     osg::Vec2f envMapLumaBias;
     osg::Vec4f bumpMapMatrix;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiFogProperty : public Property
@@ -103,14 +103,14 @@ public:
     float mFogDepth;
     osg::Vec3f mColour;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 // These contain no other data than the 'flags' field
 struct NiShadeProperty : public Property
 {
     unsigned short flags{0u};
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
@@ -121,7 +121,7 @@ struct NiShadeProperty : public Property
 struct NiDitherProperty : public Property
 {
     unsigned short flags;
-    void read(NIFStream* nif)
+    void read(NIFStream* nif) override
     {
         Property::read(nif);
         flags = nif->getUShort();
@@ -132,7 +132,7 @@ struct NiZBufferProperty : public Property
 {
     unsigned short flags;
     unsigned int testFunction;
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
         flags = nif->getUShort();
@@ -145,7 +145,7 @@ struct NiZBufferProperty : public Property
 struct NiSpecularProperty : public Property
 {
     unsigned short flags;
-    void read(NIFStream* nif)
+    void read(NIFStream* nif) override
     {
         Property::read(nif);
         flags = nif->getUShort();
@@ -155,7 +155,7 @@ struct NiSpecularProperty : public Property
 struct NiWireframeProperty : public Property
 {
     unsigned short flags;
-    void read(NIFStream* nif)
+    void read(NIFStream* nif) override
     {
         Property::read(nif);
         flags = nif->getUShort();
@@ -169,7 +169,7 @@ struct StructPropT : Property
     T data;
     unsigned short flags;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
         flags = nif->getUShort();
@@ -301,7 +301,7 @@ struct NiStencilProperty : public Property
     S_StencilProperty data;
     unsigned short flags{0u};
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
@@ -315,7 +315,7 @@ struct NiMaterialProperty : public Property
     S_MaterialProperty data;
     unsigned short flags{0u};
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
         if (nif->getVersion() >= NIFStream::generateVersion(3,0,0,0)

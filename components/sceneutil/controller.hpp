@@ -18,7 +18,7 @@ namespace SceneUtil
     {
     public:
         FrameTimeSource();
-        virtual float getValue(osg::NodeVisitor* nv);
+        float getValue(osg::NodeVisitor* nv) override;
     };
 
     /// @note ControllerFunctions may be shared - you should not hold any state in it. That is why all its methods are declared const.
@@ -63,12 +63,12 @@ namespace SceneUtil
     public:
         ControllerVisitor();
 
-        virtual void apply(osg::Node& node);
+        void apply(osg::Node& node) override;
 
         // Technically not required as the default implementation would trickle down to apply(Node&) anyway,
         // but we'll shortcut instead to avoid the chain of virtual function calls
-        virtual void apply(osg::MatrixTransform& node);
-        virtual void apply(osg::Geometry& node);
+        void apply(osg::MatrixTransform& node) override;
+        void apply(osg::Geometry& node) override;
 
         void applyNode(osg::Node& node);
 
@@ -83,7 +83,7 @@ namespace SceneUtil
 
         /// Assign the wanted ControllerSource. May be overridden in derived classes.
         /// By default assigns the ControllerSource passed to the constructor of this class if no ControllerSource is assigned to that controller yet.
-        virtual void visit(osg::Node& node, Controller& ctrl);
+        void visit(osg::Node& node, Controller& ctrl) override;
 
     private:
         std::shared_ptr<ControllerSource> mToAssign;
@@ -95,7 +95,7 @@ namespace SceneUtil
     public:
         FindMaxControllerLengthVisitor();
 
-        virtual void visit(osg::Node& , Controller& ctrl);
+        void visit(osg::Node& , Controller& ctrl) override;
 
         float getMaxLength() const;
 

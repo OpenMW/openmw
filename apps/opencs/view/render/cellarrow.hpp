@@ -27,7 +27,7 @@ namespace CSVRender
 
             CellArrow *getCellArrow() const;
 
-            virtual QString getToolTip (bool hideBasics) const;
+            QString getToolTip (bool hideBasics) const override;
     };
 
 

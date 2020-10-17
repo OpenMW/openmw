@@ -32,9 +32,9 @@ namespace CSMTools
                                   const CSMWorld::Resources &icons,
                                   const CSMWorld::Resources &textures);
 
-            virtual int setup();
+            int setup() override;
             ///< \return number of steps
-            virtual void perform (int stage, CSMDoc::Messages &messages);
+            void perform (int stage, CSMDoc::Messages &messages) override;
             ///< Messages resulting from this tage will be appended to \a messages.
     };
 }

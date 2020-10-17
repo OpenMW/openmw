@@ -98,7 +98,7 @@ namespace MWRender
 
         osgUtil::IncrementalCompileOperation* getIncrementalCompileOperation();
 
-        MWRender::Objects& getObjects();
+        MWRender::Objects& getObjects() override;
 
         Resource::ResourceSystem* getResourceSystem();
 

@@ -35,9 +35,9 @@ namespace CSVWidget
             SceneToolRun (SceneToolbar *parent, const QString& toolTip, const QString& icon,
                 const std::vector<std::string>& profiles);
 
-            virtual void showPanel (const QPoint& position);
+            void showPanel (const QPoint& position) override;
 
-            virtual void activate();
+            void activate() override;
 
             /// \attention This function does not remove the profile from the profile selection
             /// panel.

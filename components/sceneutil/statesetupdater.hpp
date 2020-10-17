@@ -24,7 +24,7 @@ namespace SceneUtil
 
         META_Object(SceneUtil, StateSetUpdater)
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
 
         /// Apply state - to override in derived classes
         /// @note Due to the double buffering approach you *have* to apply all state
@@ -57,11 +57,11 @@ namespace SceneUtil
 
         void addController(StateSetUpdater* ctrl);
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv);
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override;
 
     protected:
 
-        virtual void setDefaults(osg::StateSet *stateset);
+        void setDefaults(osg::StateSet *stateset) override;
 
         std::vector<osg::ref_ptr<StateSetUpdater> > mCtrls;
     };

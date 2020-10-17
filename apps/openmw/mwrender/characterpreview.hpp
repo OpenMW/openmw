@@ -86,7 +86,7 @@ namespace MWRender
     protected:
         osg::ref_ptr<osg::Viewport> mViewport;
 
-        virtual void onSetup();
+        void onSetup() override;
     };
 
     class UpdateCameraCallback;
@@ -98,8 +98,8 @@ namespace MWRender
 
     protected:
 
-        virtual bool renderHeadOnly() { return true; }
-        virtual void onSetup();
+        bool renderHeadOnly() override { return true; }
+        void onSetup() override;
 
     public:
         RaceSelectionPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem);

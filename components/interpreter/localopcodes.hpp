@@ -11,7 +11,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
@@ -27,7 +27,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
@@ -43,7 +43,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[0].mFloat;
                 int index = runtime[1].mInteger;
@@ -59,7 +59,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer intValue = runtime.getIntegerLiteral (runtime[0].mInteger);
                 runtime[0].mInteger = intValue;
@@ -70,7 +70,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float floatValue = runtime.getFloatLiteral (runtime[0].mInteger);
                 runtime[0].mFloat = floatValue;
@@ -81,7 +81,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 int value = runtime.getContext().getLocalShort (index);
@@ -93,7 +93,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 int value = runtime.getContext().getLocalLong (index);
@@ -105,7 +105,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 float value = runtime.getContext().getLocalFloat (index);
@@ -117,7 +117,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
@@ -135,7 +135,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 int index = runtime[1].mInteger;
@@ -153,7 +153,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[0].mFloat;
                 int index = runtime[1].mInteger;
@@ -171,7 +171,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 std::string name = runtime.getStringLiteral (index);
@@ -184,7 +184,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 std::string name = runtime.getStringLiteral (index);
@@ -197,7 +197,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 int index = runtime[0].mInteger;
                 std::string name = runtime.getStringLiteral (index);
@@ -214,7 +214,7 @@ namespace Interpreter
 
             OpStoreMemberShort (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 Type_Integer index = runtime[1].mInteger;
@@ -238,7 +238,7 @@ namespace Interpreter
 
             OpStoreMemberLong (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer data = runtime[0].mInteger;
                 Type_Integer index = runtime[1].mInteger;
@@ -262,7 +262,7 @@ namespace Interpreter
 
             OpStoreMemberFloat (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Float data = runtime[0].mFloat;
                 Type_Integer index = runtime[1].mInteger;
@@ -286,7 +286,7 @@ namespace Interpreter
 
             OpFetchMemberShort (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
                 std::string id = runtime.getStringLiteral (index);
@@ -307,7 +307,7 @@ namespace Interpreter
 
             OpFetchMemberLong (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
                 std::string id = runtime.getStringLiteral (index);
@@ -328,7 +328,7 @@ namespace Interpreter
 
             OpFetchMemberFloat (bool global) : mGlobal (global) {}
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 Type_Integer index = runtime[0].mInteger;
                 std::string id = runtime.getStringLiteral (index);

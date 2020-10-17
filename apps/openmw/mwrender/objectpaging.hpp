@@ -31,7 +31,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile);
 
-        virtual unsigned int getNodeMask() override;
+        unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
         bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);

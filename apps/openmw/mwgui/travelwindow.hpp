@@ -24,7 +24,7 @@ namespace MWGui
         public:
             TravelWindow();
 
-            void setPtr (const MWWorld::Ptr& actor);
+            void setPtr (const MWWorld::Ptr& actor) override;
 
         protected:
             MyGUI::Button* mCancelButton;
@@ -43,7 +43,7 @@ namespace MWGui
 
             void updateLabels();
 
-            virtual void onReferenceUnavailable();
+            void onReferenceUnavailable() override;
     };
 }
 

@@ -21,7 +21,7 @@ namespace Launcher
         inline LineEdit *lineEdit() { return mLineEdit; }
         void setOkButtonEnabled(bool enabled);
 
-        int exec();
+        int exec() override;
 
     private:
 

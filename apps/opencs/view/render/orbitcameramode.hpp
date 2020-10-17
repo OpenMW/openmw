@@ -24,9 +24,9 @@ namespace CSVRender
                 QWidget* parent = nullptr);
             ~OrbitCameraMode();
 
-            virtual void activate(CSVWidget::SceneToolbar* toolbar);
-            virtual void deactivate(CSVWidget::SceneToolbar* toolbar);
-            virtual bool createContextMenu(QMenu* menu);
+            void activate(CSVWidget::SceneToolbar* toolbar) override;
+            void deactivate(CSVWidget::SceneToolbar* toolbar) override;
+            bool createContextMenu(QMenu* menu) override;
 
         private:
 

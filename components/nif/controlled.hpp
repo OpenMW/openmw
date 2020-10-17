@@ -62,8 +62,8 @@ public:
     */
     unsigned int alpha;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 struct NiParticleModifier : public Record
@@ -71,8 +71,8 @@ struct NiParticleModifier : public Record
     NiParticleModifierPtr next;
     ControllerPtr controller;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiParticleGrowFade : public NiParticleModifier
@@ -81,7 +81,7 @@ public:
     float growTime;
     float fadeTime;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 class NiParticleColorModifier : public NiParticleModifier
@@ -89,8 +89,8 @@ class NiParticleColorModifier : public NiParticleModifier
 public:
     NiColorDataPtr data;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiGravity : public NiParticleModifier
@@ -105,20 +105,20 @@ public:
     osg::Vec3f mPosition;
     osg::Vec3f mDirection;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 struct NiParticleCollider : public NiParticleModifier
 {
     float mBounceFactor;
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 // NiPinaColada
 class NiPlanarCollider : public NiParticleCollider
 {
 public:
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 
     osg::Vec3f mPlaneNormal;
     float mPlaneDistance;
@@ -130,13 +130,13 @@ public:
     float mRadius;
     osg::Vec3f mCenter;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 class NiParticleRotation : public NiParticleModifier
 {
 public:
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 

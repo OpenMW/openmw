@@ -39,26 +39,26 @@ namespace CSVRender
             /// \return Any cells added or removed?
             bool adjustCells();
 
-            virtual void referenceableDataChanged (const QModelIndex& topLeft,
-                const QModelIndex& bottomRight);
+            void referenceableDataChanged (const QModelIndex& topLeft,
+                const QModelIndex& bottomRight) override;
 
-            virtual void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceableAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
 
-            virtual void referenceableAdded (const QModelIndex& index, int start, int end);
+            void referenceableAdded (const QModelIndex& index, int start, int end) override;
 
-            virtual void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+            void referenceDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 
-            virtual void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void referenceAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
 
-            virtual void referenceAdded (const QModelIndex& index, int start, int end);
+            void referenceAdded (const QModelIndex& index, int start, int end) override;
 
-            virtual void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight);
+            void pathgridDataChanged (const QModelIndex& topLeft, const QModelIndex& bottomRight) override;
 
-            virtual void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end);
+            void pathgridAboutToBeRemoved (const QModelIndex& parent, int start, int end) override;
 
-            virtual void pathgridAdded (const QModelIndex& parent, int start, int end);
+            void pathgridAdded (const QModelIndex& parent, int start, int end) override;
 
-            virtual std::string getStartupInstruction();
+            std::string getStartupInstruction() override;
 
             /// \note Does not update the view or any cell marker
             void addCellToScene (const CSMWorld::CellCoordinates& coordinates);
@@ -86,45 +86,45 @@ namespace CSVRender
             virtual ~PagedWorldspaceWidget();
 
             /// Decodes the the hint string to set of cell that are rendered.
-            void useViewHint (const std::string& hint);
+            void useViewHint (const std::string& hint) override;
 
             void setCellSelection(const CSMWorld::CellSelection& selection);
 
             const CSMWorld::CellSelection& getCellSelection() const;
 
             /// \return Drop handled?
-            virtual bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
-                DropType type);
+            bool handleDrop (const std::vector<CSMWorld::UniversalId>& data,
+                DropType type) override;
 
-            virtual dropRequirments getDropRequirements(DropType type) const;
+            dropRequirments getDropRequirements(DropType type) const override;
 
             /// \attention The created tool is not added to the toolbar (via addTool). Doing
             /// that is the responsibility of the calling function.
             virtual CSVWidget::SceneToolToggle2 *makeControlVisibilitySelector (
                 CSVWidget::SceneToolbar *parent);
 
-            virtual unsigned int getVisibilityMask() const;
+            unsigned int getVisibilityMask() const override;
 
             /// \param elementMask Elements to be affected by the clear operation
-            virtual void clearSelection (int elementMask);
+            void clearSelection (int elementMask) override;
 
             /// \param elementMask Elements to be affected by the select operation
-            virtual void invertSelection (int elementMask);
+            void invertSelection (int elementMask) override;
 
             /// \param elementMask Elements to be affected by the select operation
-            virtual void selectAll (int elementMask);
+            void selectAll (int elementMask) override;
 
             // Select everything that references the same ID as at least one of the elements
             // already selected
             //
             /// \param elementMask Elements to be affected by the select operation
-            virtual void selectAllWithSameParentId (int elementMask);
+            void selectAllWithSameParentId (int elementMask) override;
 
-            virtual std::string getCellId (const osg::Vec3f& point) const;
+            std::string getCellId (const osg::Vec3f& point) const override;
 
-            virtual Cell* getCell(const osg::Vec3d& point) const;
+            Cell* getCell(const osg::Vec3d& point) const override;
 
-            virtual Cell* getCell(const CSMWorld::CellCoordinates& coords) const;
+            Cell* getCell(const CSMWorld::CellCoordinates& coords) const override;
 
             void setCellAlteredHeight(const CSMWorld::CellCoordinates& coords, int inCellX, int inCellY, float height);
 
@@ -132,24 +132,24 @@ namespace CSVRender
 
             void resetAllAlteredHeights();
 
-            virtual std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
-                const;
+            std::vector<osg::ref_ptr<TagBase> > getSelection (unsigned int elementMask)
+                const override;
 
-            virtual std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
-                const;
+            std::vector<osg::ref_ptr<TagBase> > getEdited (unsigned int elementMask)
+                const override;
 
-            virtual void setSubMode (int subMode, unsigned int elementMask);
+            void setSubMode (int subMode, unsigned int elementMask) override;
 
             /// Erase all overrides and restore the visual representation to its true state.
-            virtual void reset (unsigned int elementMask);
+            void reset (unsigned int elementMask) override;
 
         protected:
 
-            virtual void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool);
+            void addVisibilitySelectorButtons (CSVWidget::SceneToolToggle2 *tool) override;
 
-            virtual void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool);
+            void addEditModeSelectorButtons (CSVWidget::SceneToolMode *tool) override;
 
-            virtual void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type);
+            void handleInteractionPress (const WorldspaceHitResult& hit, InteractionType type) override;
 
         signals:
 

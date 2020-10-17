@@ -30,16 +30,16 @@ namespace Compiler
 
             StringParser (ErrorHandler& errorHandler, const Context& context, Literals& literals);
 
-            virtual bool parseName (const std::string& name, const TokenLoc& loc,
-                Scanner& scanner);
+            bool parseName (const std::string& name, const TokenLoc& loc,
+                Scanner& scanner) override;
             ///< Handle a name token.
             /// \return fetch another token?
 
-            virtual bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner);
+            bool parseKeyword (int keyword, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a keyword token.
             /// \return fetch another token?
 
-            virtual bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner);
+            bool parseSpecial (int code, const TokenLoc& loc, Scanner& scanner) override;
             ///< Handle a special character token.
             /// \return fetch another token?
 
@@ -49,7 +49,7 @@ namespace Compiler
             void smashCase();
             ///< Transform all scanned strings to lower case
 
-            void reset();
+            void reset() override;
             ///< Reset parser to clean state (this includes the smashCase function).
 
             /// Returns TokenLoc object for string. If no string has been parsed, the TokenLoc

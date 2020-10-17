@@ -22,7 +22,7 @@ namespace Interpreter
             Runtime& mRuntime;
 
         protected:
-            virtual void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation)
+            void visitedPlaceholder(Placeholder placeholder, char padding, int width, int precision, Notation notation) override
             {
                 std::ostringstream out;
                 out.fill(padding);
@@ -86,7 +86,7 @@ namespace Interpreter
                 }
             }
 
-            virtual void visitedCharacter(char c)
+            void visitedCharacter(char c) override
             {
                 mFormattedMessage += c;
             }
@@ -97,7 +97,7 @@ namespace Interpreter
             {
             }
 
-            virtual void process(const std::string& message)
+            void process(const std::string& message) override
             {
                 mFormattedMessage.clear();
                 MessageFormatParser::process(message);
@@ -123,7 +123,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime, unsigned int arg0)
+            void execute (Runtime& runtime, unsigned int arg0) override
             {
                 // message
                 int index = runtime[0].mInteger;
@@ -153,7 +153,7 @@ namespace Interpreter
     {
         public:
 
-            virtual void execute (Runtime& runtime)
+            void execute (Runtime& runtime) override
             {
                 // message
                 int index = runtime[0].mInteger;

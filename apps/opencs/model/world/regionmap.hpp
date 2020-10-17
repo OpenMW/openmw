@@ -91,15 +91,15 @@ namespace CSMWorld
 
             RegionMap (Data& data);
 
-            virtual int rowCount (const QModelIndex& parent = QModelIndex()) const;
+            int rowCount (const QModelIndex& parent = QModelIndex()) const override;
 
-            virtual int columnCount (const QModelIndex& parent = QModelIndex()) const;
+            int columnCount (const QModelIndex& parent = QModelIndex()) const override;
 
-            virtual QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const;
+            QVariant data (const QModelIndex& index, int role = Qt::DisplayRole) const override;
             ///< \note Calling this function with role==Role_CellId may return the ID of a cell
             /// that does not exist.
 
-            virtual Qt::ItemFlags flags (const QModelIndex& index) const;
+            Qt::ItemFlags flags (const QModelIndex& index) const override;
 
         private slots:
 

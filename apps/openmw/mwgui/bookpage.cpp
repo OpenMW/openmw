@@ -115,9 +115,9 @@ struct TypesetBookImpl : TypesetBook
         return Range (i->data(), i->data() + i->size());
     }
 
-    size_t pageCount () const { return mPages.size (); }
+    size_t pageCount () const override { return mPages.size (); }
 
-    std::pair <unsigned int, unsigned int> getSize () const
+    std::pair <unsigned int, unsigned int> getSize () const override
     {
         return std::make_pair (mRect.width (), mRect.height ());
     }
@@ -261,7 +261,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
     }
 
-    Style * createStyle (const std::string& fontName, const Colour& fontColour, bool useBookFont)
+    Style * createStyle (const std::string& fontName, const Colour& fontColour, bool useBookFont) override
     {
         std::string fullFontName;
         if (fontName.empty())
@@ -291,7 +291,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     }
 
     Style* createHotStyle (Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
-                           const Colour& activeColour, InteractiveId id, bool unique)
+                           const Colour& activeColour, InteractiveId id, bool unique) override
     {
         StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 
@@ -311,14 +311,14 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return &style;
     }
 
-    void write (Style * style, Utf8Span text)
+    void write (Style * style, Utf8Span text) override
     {
         Range range = mBook->addContent (text);
 
         writeImpl (static_cast <StyleImpl*> (style), range.first, range.second);
     }
 
-    intptr_t addContent (Utf8Span text, bool select)
+    intptr_t addContent (Utf8Span text, bool select) override
     {
         add_partial_text();
 
@@ -330,14 +330,14 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return reinterpret_cast <intptr_t> (&(*i));
     }
 
-    void selectContent (intptr_t contentHandle)
+    void selectContent (intptr_t contentHandle) override
     {
         add_partial_text();
 
         mCurrentContent = reinterpret_cast <Content const *> (contentHandle);
     }
 
-    void write (Style * style, size_t begin, size_t end)
+    void write (Style * style, size_t begin, size_t end) override
     {
         assert (mCurrentContent != nullptr);
         assert (end <= mCurrentContent->size ());
@@ -349,7 +349,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
 
-    void lineBreak (float margin)
+    void lineBreak (float margin) override
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
 
@@ -359,7 +359,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mLine = nullptr;
     }
 
-    void sectionBreak (int margin)
+    void sectionBreak (int margin) override
     {
         add_partial_text();
 
@@ -374,7 +374,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         }
     }
 
-    void setSectionAlignment (Alignment sectionAlignment)
+    void setSectionAlignment (Alignment sectionAlignment) override
     {
         add_partial_text();
 
@@ -383,7 +383,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mCurrentAlignment = sectionAlignment;
     }
 
-    TypesetBook::Ptr complete ()
+    TypesetBook::Ptr complete () override
     {
         int curPageStart = 0;
         int curPageStop  = 0;
@@ -869,12 +869,12 @@ protected:
             }
         }
 
-        void doRender() { mDisplay->doRender (*this); }
+        void doRender() override { mDisplay->doRender (*this); }
 
         // this isn't really a sub-widget, its just a "drawitem" which
         // should have its own interface
-        void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) {}
-        void destroyDrawItem() {};
+        void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) override {}
+        void destroyDrawItem() override {}
     };
 
     void resetPage()

@@ -29,9 +29,9 @@ namespace MWGui
     public:
         PersuasionDialog(ResponseCallback* callback);
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        virtual MyGUI::Widget* getDefaultKeyFocus();
+        MyGUI::Widget* getDefaultKeyFocus() override;
 
     private:
         std::unique_ptr<ResponseCallback> mCallback;
@@ -62,7 +62,7 @@ namespace MWGui
         EventHandle_TopicId eventTopicActivated;
         Topic(const std::string& id) : mTopicId(id) {}
         std::string mTopicId;
-        virtual void activated ();
+        void activated () override;
     };
 
     struct Choice : Link
@@ -71,14 +71,14 @@ namespace MWGui
         EventHandle_ChoiceId eventChoiceActivated;
         Choice(int id) : mChoiceId(id) {}
         int mChoiceId;
-        virtual void activated ();
+        void activated () override;
     };
 
     struct Goodbye : Link
     {
         typedef MyGUI::delegates::CMultiDelegate0 Event_Activated;
         Event_Activated eventActivated;
-        virtual void activated ();
+        void activated () override;
     };
 
     typedef MWDialogue::KeywordSearch <std::string, intptr_t> KeywordSearchT;
@@ -93,7 +93,7 @@ namespace MWGui
     struct Response : DialogueText
     {
         Response(const std::string& text, const std::string& title = "", bool needMargin = true);
-        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const;
+        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
         void addTopicLink (BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
         std::string mTitle;
         bool mNeedMargin;
@@ -102,7 +102,7 @@ namespace MWGui
     struct Message : DialogueText
     {
         Message(const std::string& text);
-        virtual void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const;
+        void write (BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch, std::map<std::string, Link*>& topicLinks) const override;
     };
 
     class DialogueWindow: public WindowBase, public ReferenceInterface
@@ -113,14 +113,14 @@ namespace MWGui
 
         void onTradeComplete();
 
-        virtual bool exit();
+        bool exit() override;
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 
         void notifyLinkClicked (TypesetBook::InteractiveId link);
 
-        void setPtr(const MWWorld::Ptr& actor);
+        void setPtr(const MWWorld::Ptr& actor) override;
 
         void setKeywords(std::list<std::string> keyWord);
 
@@ -128,12 +128,12 @@ namespace MWGui
 
         void addMessageBox(const std::string& text);
 
-        void onFrame(float dt);
-        void clear() { resetReference(); }
+        void onFrame(float dt) override;
+        void clear() override { resetReference(); }
 
         void updateTopics();
 
-        void onClose();
+        void onClose() override;
 
     protected:
         void updateTopicsPane();
@@ -152,7 +152,7 @@ namespace MWGui
 
         void updateHistory(bool scrollbar=false);
 
-        virtual void onReferenceUnavailable();
+        void onReferenceUnavailable() override;
 
     private:
         void updateDisposition();

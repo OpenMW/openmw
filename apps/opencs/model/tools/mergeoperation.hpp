@@ -31,7 +31,7 @@ namespace CSMTools
 
         protected slots:
 
-            virtual void operationDone();
+            void operationDone() override;
 
         signals:
 

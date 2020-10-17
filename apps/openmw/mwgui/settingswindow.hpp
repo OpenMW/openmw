@@ -15,11 +15,11 @@ namespace MWGui
         public:
             SettingsWindow();
 
-            virtual void onOpen();
+            void onOpen() override;
 
             void updateControlsBox();
 
-            void onResChange(int, int) { center(); }
+            void onResChange(int, int) override { center(); }
 
     protected:
             MyGUI::TabControl* mSettingsTab;

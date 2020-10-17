@@ -774,7 +774,7 @@ public:
     {
     }
 
-    virtual void operator()(const osg::Image& image, const unsigned int context_id)
+    void operator()(const osg::Image& image, const unsigned int context_id) override
     {
         // Count screenshots.
         int shotCount = 0;

@@ -96,10 +96,10 @@ namespace CSVRender
             void fixUpAxis(const osg::Vec3d& up);
             void unfixUpAxis();
 
-            void handleMouseMoveEvent(int x, int y);
-            void handleMouseScrollEvent(int x);
+            void handleMouseMoveEvent(int x, int y) override;
+            void handleMouseScrollEvent(int x) override;
 
-            void update(double dt);
+            void update(double dt) override;
 
         private:
 
@@ -152,10 +152,10 @@ namespace CSVRender
             void setOrbitSpeedMultiplier(double value);
             void setPickingMask(unsigned int value);
 
-            void handleMouseMoveEvent(int x, int y);
-            void handleMouseScrollEvent(int x);
+            void handleMouseMoveEvent(int x, int y) override;
+            void handleMouseScrollEvent(int x) override;
 
-            void update(double dt);
+            void update(double dt) override;
 
             /// \brief Flag controller to be re-initialized.
             void reset();
