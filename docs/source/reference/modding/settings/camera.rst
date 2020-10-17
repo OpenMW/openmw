@@ -199,3 +199,50 @@ If disabled then the camera rotates rather than the character.
 
 This setting can be controlled in Advanced tab of the launcher.
 
+head bobbing
+------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enables head bobbing when move in first person mode.
+
+This setting can be controlled in Advanced tab of the launcher.
+
+head bobbing step
+-----------------
+
+:Type:		floating point
+:Range:		>0
+:Default:	90.0
+
+Makes diffence only in first person mode if 'head bobbing' is enabled.
+Length of each step.
+
+This setting can only be configured by editing the settings configuration file.
+
+head bobbing height
+-------------------
+
+:Type:		floating point
+:Range:		Any
+:Default:	3.0
+
+Makes diffence only in first person mode if 'head bobbing' is enabled.
+Amplitude of the head bobbing.
+
+This setting can only be configured by editing the settings configuration file.
+
+head bobbing roll
+-----------------
+
+:Type:		floating point
+:Range:		0-90
+:Default:	0.2
+
+Makes diffence only in first person mode if 'head bobbing' is enabled.
+Maximum roll angle in degrees.
+
+This setting can only be configured by editing the settings configuration file.
+

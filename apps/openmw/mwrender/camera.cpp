@@ -80,6 +80,7 @@ namespace MWRender
       mZoomOutWhenMoveCoef(Settings::Manager::getFloat("zoom out when move coef", "Camera")),
       mDynamicCameraDistanceEnabled(false),
       mShowCrosshairInThirdPersonMode(false),
+      mHeadBobbingEnabled(Settings::Manager::getBool("head bobbing", "Camera")),
       mDeferredRotation(osg::Vec3f()),
       mDeferredRotationDisabled(false)
     {
@@ -104,7 +105,9 @@ namespace MWRender
         osg::Matrix worldMat = osg::computeLocalToWorld(nodepaths[0]);
 
         osg::Vec3d position = worldMat.getTrans();
-        if (!isFirstPerson())
+        if (isFirstPerson())
+            position.z() += mHeadBobbingOffset;
+        else
         {
             position.z() += mHeight * mHeightScale;
 
@@ -143,11 +146,29 @@ namespace MWRender
         osg::Vec3d focal, position;
         getPosition(focal, position);
 
-        osg::Quat orient =  osg::Quat(getPitch(), osg::Vec3d(1,0,0)) * osg::Quat(getYaw(), osg::Vec3d(0,0,1));
+        osg::Quat orient = osg::Quat(mRoll, osg::Vec3d(0, 1, 0)) * osg::Quat(mPitch, osg::Vec3d(1, 0, 0)) * osg::Quat(mYaw, osg::Vec3d(0, 0, 1));
         osg::Vec3d forward = orient * osg::Vec3d(0,1,0);
         osg::Vec3d up = orient * osg::Vec3d(0,0,1);
 
         cam->setViewMatrixAsLookAt(position, position + forward, up);
+    }
+
+    void Camera::updateHeadBobbing(float duration) {
+        static const float doubleStepLength = Settings::Manager::getFloat("head bobbing step", "Camera") * 2;
+        static const float stepHeight = Settings::Manager::getFloat("head bobbing height", "Camera");
+        static const float maxRoll = osg::DegreesToRadians(Settings::Manager::getFloat("head bobbing roll", "Camera"));
+
+        if (MWBase::Environment::get().getWorld()->isOnGround(mTrackingPtr))
+            mHeadBobbingWeight = std::min(mHeadBobbingWeight + duration * 5, 1.f);
+        else
+            mHeadBobbingWeight = std::max(mHeadBobbingWeight - duration * 5, 0.f);
+
+        float doubleStepState = mTotalMovement / doubleStepLength - std::floor(mTotalMovement / doubleStepLength); // from 0 to 1 during 2 steps
+        float stepState = std::abs(doubleStepState * 4 - 2) - 1; // from -1 to 1 on even steps and from 1 to -1 on odd steps
+        float effect = (1 - std::cos(stepState * osg::DegreesToRadians(30.f))) * 7.5f; // range from 0 to 1
+        float coef = std::min(mSmoothedSpeed / 300.f, 1.f) * mHeadBobbingWeight;
+        mHeadBobbingOffset = (0.5f - effect) * coef * stepHeight; // range from -stepHeight/2 to stepHeight/2
+        mRoll = osg::sign(stepState) * effect * coef * maxRoll; // range from -maxRoll to maxRoll
     }
 
     void Camera::reset()
@@ -198,10 +219,16 @@ namespace MWRender
         if(mMode == Mode::Vanity)
             rotateCamera(0.f, osg::DegreesToRadians(3.f * duration), true);
 
+        if (isFirstPerson() && mHeadBobbingEnabled)
+            updateHeadBobbing(duration);
+        else
+            mRoll = mHeadBobbingOffset = 0;
+
         updateFocalPointOffset(duration);
         updatePosition();
 
         float speed = mTrackingPtr.getClass().getCurrentSpeed(mTrackingPtr);
+        mTotalMovement += speed * duration;
         speed /= (1.f + speed / 500.f);
         float maxDelta = 300.f * duration;
         mSmoothedSpeed += osg::clampBetween(speed - mSmoothedSpeed, -maxDelta, maxDelta);

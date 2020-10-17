@@ -584,6 +584,16 @@ True: In non-combat mode camera is positioned behind the character's shoulder. C
         </widget>
        </item>
        <item>
+        <widget class="QCheckBox" name="headBobbingCheckBox">
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables head bobbing when move in first person mode.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Head bobbing in 1st person mode</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
