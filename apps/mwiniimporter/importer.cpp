@@ -645,7 +645,7 @@ MwIniImporter::MwIniImporter()
     }
 
     for(int i=0; fallback[i]; i++) {
-        mMergeFallback.push_back(fallback[i]);
+        mMergeFallback.emplace_back(fallback[i]);
     }
 }
 
@@ -910,7 +910,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
                     std::time_t time = lastWriteTime(path, defaultTime);
                     if (time != defaultTime)
                     {
-                        contentFiles.push_back({time, path});
+                        contentFiles.emplace_back(time, std::move(path));
                         found = true;
                         break;
                     }

@@ -127,7 +127,7 @@ std::vector<CSMWorld::UniversalId> CSMWorld::CommandDispatcher::getExtendedTypes
     if (mId==UniversalId::Type_Cells)
     {
         tables.push_back (mId);
-        tables.push_back (UniversalId::Type_References);
+        tables.emplace_back(UniversalId::Type_References);
         /// \todo add other cell-specific types
     }
 

@@ -244,7 +244,7 @@ namespace MWGui
         {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(screen, i, &mode);
-            resolutions.push_back(std::make_pair(mode.w, mode.h));
+            resolutions.emplace_back(mode.w, mode.h);
         }
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)

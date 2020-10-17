@@ -73,7 +73,7 @@ namespace SceneUtil
         : StateSetUpdater(copy, copyop)
     {
         for (unsigned int i=0; i<copy.mCtrls.size(); ++i)
-            mCtrls.push_back(osg::clone(copy.mCtrls[i].get(), copyop));
+            mCtrls.emplace_back(osg::clone(copy.mCtrls[i].get(), copyop));
     }
 
     unsigned int CompositeStateSetUpdater::getNumControllers()
@@ -88,7 +88,7 @@ namespace SceneUtil
 
     void CompositeStateSetUpdater::addController(StateSetUpdater *ctrl)
     {
-        mCtrls.push_back(ctrl);
+        mCtrls.emplace_back(ctrl);
     }
 
 }

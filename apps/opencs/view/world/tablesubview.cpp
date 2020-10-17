@@ -133,12 +133,12 @@ void CSVWorld::TableSubView::createFilterRequest (std::vector< CSMWorld::Univers
         std::vector<std::string> col = mTable->getColumnsWithDisplay(CSMWorld::TableMimeData::convertEnums(type));
         if(!col.empty())
         {
-            filterSource.push_back(std::make_pair(it->getId(), col));
+            filterSource.emplace_back(it->getId(), col);
         }
 
         if(hasRefIdDisplay && CSMWorld::TableMimeData::isReferencable(type))
         {
-            filterSource.push_back(std::make_pair(it->getId(), refIdColumns));
+            filterSource.emplace_back(it->getId(), refIdColumns);
         }
     }
 

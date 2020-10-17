@@ -49,14 +49,14 @@ ContainerItemModel::ContainerItemModel(const std::vector<MWWorld::Ptr>& itemSour
     for(const MWWorld::Ptr& source : itemSources)
     {
         MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
-        mItemSources.push_back(std::make_pair(source, store.resolveTemporarily()));
+        mItemSources.emplace_back(source, store.resolveTemporarily());
     }
 }
 
 ContainerItemModel::ContainerItemModel (const MWWorld::Ptr& source) : mTrading(false)
 {
     MWWorld::ContainerStore& store = source.getClass().getContainerStore(source);
-    mItemSources.push_back(std::make_pair(source, store.resolveTemporarily()));
+    mItemSources.emplace_back(source, store.resolveTemporarily());
 }
 
 bool ContainerItemModel::allowedToUseItems() const

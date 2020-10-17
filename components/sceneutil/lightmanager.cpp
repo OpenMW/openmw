@@ -237,7 +237,7 @@ namespace SceneUtil
             std::vector<osg::ref_ptr<osg::Light> > lights;
             lights.reserve(lightList.size());
             for (unsigned int i=0; i<lightList.size();++i)
-                lights.push_back(lightList[i]->mLightSource->getLight(frameNum));
+                lights.emplace_back(lightList[i]->mLightSource->getLight(frameNum));
 
             // the first light state attribute handles the actual state setting for all lights
             // it's best to batch these up so that we don't need to touch the modelView matrix more than necessary

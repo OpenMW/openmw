@@ -180,7 +180,7 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
 GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
 {
     for (unsigned int i=0; i<data->mMorphs.size(); ++i)
-        mKeyFrames.push_back(FloatInterpolator(data->mMorphs[i].mKeyFrames));
+        mKeyFrames.emplace_back(data->mMorphs[i].mKeyFrames);
 }
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)

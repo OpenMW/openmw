@@ -163,8 +163,8 @@ bool CompanionWindow::exit()
     if (mModel && mModel->hasProfit(mPtr) && getProfit(mPtr) < 0)
     {
         std::vector<std::string> buttons;
-        buttons.push_back("#{sCompanionWarningButtonOne}");
-        buttons.push_back("#{sCompanionWarningButtonTwo}");
+        buttons.emplace_back("#{sCompanionWarningButtonOne}");
+        buttons.emplace_back("#{sCompanionWarningButtonTwo}");
         mMessageBoxManager->createInteractiveMessageBox("#{sCompanionWarningMessage}", buttons);
         mMessageBoxManager->eventButtonPressed += MyGUI::newDelegate(this, &CompanionWindow::onMessageBoxButtonClicked);
         return false;

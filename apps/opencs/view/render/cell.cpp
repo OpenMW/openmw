@@ -553,7 +553,7 @@ std::vector<osg::ref_ptr<CSVRender::TagBase> > CSVRender::Cell::getSelection (un
                 result.push_back (iter->second->getTag());
     if (mPathgrid && elementMask & Mask_Pathgrid)
         if (mPathgrid->isSelected())
-            result.push_back(mPathgrid->getTag());
+            result.emplace_back(mPathgrid->getTag());
 
     return result;
 }

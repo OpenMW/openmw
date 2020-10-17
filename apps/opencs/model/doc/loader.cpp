@@ -127,7 +127,7 @@ void CSMDoc::Loader::load()
 
 void CSMDoc::Loader::loadDocument (CSMDoc::Document *document)
 {
-    mDocuments.push_back (std::make_pair (document, Stage()));
+    mDocuments.emplace_back (document, Stage());
 }
 
 void CSMDoc::Loader::abortLoading (CSMDoc::Document *document)

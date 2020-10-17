@@ -34,7 +34,7 @@ namespace Gui
 
     void MWList::addSeparator()
     {
-        mItems.push_back("");
+        mItems.emplace_back("");
     }
 
     void MWList::adjustSize()

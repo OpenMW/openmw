@@ -118,7 +118,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
         if (segment.mFogOfWarImage && segment.mHasFogState)
         {
             std::unique_ptr<ESM::FogState> fog (new ESM::FogState());
-            fog->mFogTextures.push_back(ESM::FogTexture());
+            fog->mFogTextures.emplace_back();
 
             segment.saveFogOfWar(fog->mFogTextures.back());
 
@@ -150,7 +150,7 @@ void LocalMap::saveFogOfWar(MWWorld::CellStore* cell)
             {
                 const MapSegment& segment = mSegments[std::make_pair(x,y)];
 
-                fog->mFogTextures.push_back(ESM::FogTexture());
+                fog->mFogTextures.emplace_back();
 
                 // saving even if !segment.mHasFogState so we don't mess up the segmenting
                 // plus, older openmw versions can't deal with empty images

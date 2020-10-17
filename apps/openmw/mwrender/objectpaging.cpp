@@ -596,7 +596,7 @@ namespace MWRender
             if (numinstances > 0)
             {
                 // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-                templateRefs->mObjects.push_back(cnode);
+                templateRefs->mObjects.emplace_back(cnode);
 
                 if (pair.second.mNeedCompile)
                 {

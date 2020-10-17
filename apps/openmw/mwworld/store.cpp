@@ -352,7 +352,7 @@ namespace MWWorld
     //=========================================================================
     Store<ESM::LandTexture>::Store()
     {
-        mStatic.push_back(LandTextureList());
+        mStatic.emplace_back();
         LandTextureList &ltexl = mStatic[0];
         // More than enough to hold Morrowind.esm. Extra lists for plugins will we
         //  added on-the-fly in a different method.

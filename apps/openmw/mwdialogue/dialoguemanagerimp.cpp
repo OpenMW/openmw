@@ -468,7 +468,7 @@ namespace MWDialogue
     void DialogueManager::addChoice (const std::string& text, int choice)
     {
         mIsInChoice = true;
-        mChoices.push_back(std::make_pair(text, choice));
+        mChoices.emplace_back(text, choice);
     }
 
     const std::vector<std::pair<std::string, int> >& DialogueManager::getChoices()

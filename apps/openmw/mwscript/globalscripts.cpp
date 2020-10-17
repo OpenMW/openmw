@@ -186,7 +186,7 @@ namespace MWScript
         // make list of global scripts to be added
         std::vector<std::string> scripts;
 
-        scripts.push_back ("main");
+        scripts.emplace_back("main");
 
         for (MWWorld::Store<ESM::StartScript>::iterator iter =
             mStore.get<ESM::StartScript>().begin();

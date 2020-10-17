@@ -345,18 +345,16 @@ std::vector< CSMWorld::UniversalId > CSVWorld::RegionMap::getDraggedRecords() co
     std::vector<CSMWorld::UniversalId> ids;
     for (const QModelIndex& it : selected)
     {
-        ids.push_back(
-            CSMWorld::UniversalId(
+        ids.emplace_back(
                 CSMWorld::UniversalId::Type_Cell,
-                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
     }
     selected = getSelectedCells(false, true);
     for (const QModelIndex& it : selected)
     {
-        ids.push_back(
-            CSMWorld::UniversalId(
+        ids.emplace_back(
                 CSMWorld::UniversalId::Type_Cell_Missing,
-                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData()));
+                model()->data(it, CSMWorld::RegionMap::Role_CellId).toString().toUtf8().constData());
     }
     return ids;
 }

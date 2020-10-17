@@ -118,8 +118,8 @@ void MWState::StateManager::askLoadRecent()
         {
             MWState::Slot lastSave = *character->begin();
             std::vector<std::string> buttons;
-            buttons.push_back("#{sYes}");
-            buttons.push_back("#{sNo}");
+            buttons.emplace_back("#{sYes}");
+            buttons.emplace_back("#{sNo}");
             std::string tag("%s");
             std::string message = MWBase::Environment::get().getWindowManager()->getGameSettingString("sLoadLastSaveMsg", tag);
             size_t pos = message.find(tag);
@@ -165,7 +165,7 @@ void MWState::StateManager::newGame (bool bypass)
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
 
         std::vector<std::string> buttons;
-        buttons.push_back("#{sOk}");
+        buttons.emplace_back("#{sOk}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
     }
 }
@@ -306,7 +306,7 @@ void MWState::StateManager::saveGame (const std::string& description, const Slot
         Log(Debug::Error) << error.str();
 
         std::vector<std::string> buttons;
-        buttons.push_back("#{sOk}");
+        buttons.emplace_back("#{sOk}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
@@ -557,7 +557,7 @@ void MWState::StateManager::loadGame (const Character *character, const std::str
         MWBase::Environment::get().getWindowManager()->pushGuiMode (MWGui::GM_MainMenu);
 
         std::vector<std::string> buttons;
-        buttons.push_back("#{sOk}");
+        buttons.emplace_back("#{sOk}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
     }
 }
@@ -633,8 +633,8 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
     if (notFound)
     {
         std::vector<std::string> buttons;
-        buttons.push_back("#{sYes}");
-        buttons.push_back("#{sNo}");
+        buttons.emplace_back("#{sYes}");
+        buttons.emplace_back("#{sNo}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{sMissingMastersMsg}", buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
         if (selectedButton == 1 || selectedButton == -1)

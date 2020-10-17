@@ -1508,7 +1508,7 @@ void MWShadowTechnique::createShaders()
     {
         perFrameUniformList.clear();
         perFrameUniformList.push_back(baseTextureSampler);
-        perFrameUniformList.push_back(baseTextureUnit.get());
+        perFrameUniformList.emplace_back(baseTextureUnit.get());
         perFrameUniformList.push_back(maxDistance);
         perFrameUniformList.push_back(fadeStart);
     }
@@ -1520,7 +1520,7 @@ void MWShadowTechnique::createShaders()
             sstr<<"shadowTexture"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureSampler = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
             for (auto& perFrameUniformList : _uniforms)
-                perFrameUniformList.push_back(shadowTextureSampler.get());
+                perFrameUniformList.emplace_back(shadowTextureSampler.get());
         }
 
         {
@@ -1528,7 +1528,7 @@ void MWShadowTechnique::createShaders()
             sstr<<"shadowTextureUnit"<<sm_i;
             osg::ref_ptr<osg::Uniform> shadowTextureUnit = new osg::Uniform(sstr.str().c_str(),(int)(settings->getBaseShadowTextureUnit()+sm_i));
             for (auto& perFrameUniformList : _uniforms)
-                perFrameUniformList.push_back(shadowTextureUnit.get());
+                perFrameUniformList.emplace_back(shadowTextureUnit.get());
         }
     }
 
@@ -2558,12 +2558,12 @@ bool MWShadowTechnique::cropShadowCameraToMainFrustum(Frustum& frustum, osg::Cam
         yMax = convexHull.max(1);
         zMin = convexHull.min(2);
 
-        planeList.push_back(osg::Plane(0.0, -1.0, 0.0, yMax));
-        planeList.push_back(osg::Plane(0.0, 1.0, 0.0, -yMin));
-        planeList.push_back(osg::Plane(-1.0, 0.0, 0.0, xMax));
-        planeList.push_back(osg::Plane(1.0, 0.0, 0.0, -xMin));
+        planeList.emplace_back(0.0, -1.0, 0.0, yMax);
+        planeList.emplace_back(0.0, 1.0, 0.0, -yMin);
+        planeList.emplace_back(-1.0, 0.0, 0.0, xMax);
+        planeList.emplace_back(1.0, 0.0, 0.0, -xMin);
         // In view space, the light is at the most positive value, and we want to cull stuff beyond the minimum value.
-        planeList.push_back(osg::Plane(0.0, 0.0, 1.0, -zMin));
+        planeList.emplace_back(0.0, 0.0, 1.0, -zMin);
         // Don't add a zMax culling plane - we still want those objects, but don't care about their depth buffer value.
     }
 
@@ -3192,7 +3192,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::addAnotherShadowMap()
     mDebugCameras[shadowMapNumber]->setClearColor(osg::Vec4(1.0, 1.0, 0.0, 1.0));
     mDebugCameras[shadowMapNumber]->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
 
-    mDebugGeometry.push_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
+    mDebugGeometry.emplace_back(osg::createTexturedQuadGeometry(osg::Vec3(-1, -1, 0), osg::Vec3(2, 0, 0), osg::Vec3(0, 2, 0)));
     mDebugGeometry[shadowMapNumber]->setCullingActive(false);
     mDebugCameras[shadowMapNumber]->addChild(mDebugGeometry[shadowMapNumber]);
     osg::ref_ptr<osg::StateSet> stateSet = mDebugGeometry[shadowMapNumber]->getOrCreateStateSet();

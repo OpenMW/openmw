@@ -101,7 +101,7 @@ void MWWorld::LocalScripts::add (const std::string& scriptName, const Ptr& ptr)
                     break;
                 }
 
-            mScripts.push_back (std::make_pair (scriptName, ptr));
+            mScripts.emplace_back (scriptName, ptr);
         }
         catch (const std::exception& exception)
         {

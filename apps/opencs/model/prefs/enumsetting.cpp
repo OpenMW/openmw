@@ -35,7 +35,7 @@ CSMPrefs::EnumValues& CSMPrefs::EnumValues::add (const EnumValue& value)
 
 CSMPrefs::EnumValues& CSMPrefs::EnumValues::add (const std::string& value, const std::string& tooltip)
 {
-    mValues.push_back (EnumValue (value, tooltip));
+    mValues.emplace_back(value, tooltip);
     return *this;
 }
 

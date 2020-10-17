@@ -57,7 +57,7 @@ void CSMDoc::Operation::run()
 
 void CSMDoc::Operation::appendStage (Stage *stage)
 {
-    mStages.push_back (std::make_pair (stage, 0));
+    mStages.emplace_back (stage, 0);
 }
 
 void CSMDoc::Operation::setDefaultSeverity (Message::Severity severity)
