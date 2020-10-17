@@ -1804,11 +1804,9 @@ namespace MWMechanics
                 osg::Vec2f newMovement = origMovement + movementCorrection;
                 // Step to the side rather than backward. Otherwise player will be able to push the NPC far away from it's original location.
                 newMovement.y() = std::max(newMovement.y(), 0.f);
+                newMovement.normalize();
                 if (isMoving)
-                { // Keep the original speed.
-                    newMovement.normalize();
-                    newMovement *= origMovement.length();
-                }
+                    newMovement *= origMovement.length(); // Keep the original speed.
                 movement.mPosition[0] = newMovement.x();
                 movement.mPosition[1] = newMovement.y();
                 if (shouldTurnToApproachingActor)
