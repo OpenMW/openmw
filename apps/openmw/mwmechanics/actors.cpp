@@ -1198,6 +1198,11 @@ namespace MWMechanics
             }
         }
 
+        // Summoned creature update visitor assumes the actor belongs to a cell.
+        // This assumption isn't always valid for the player character.
+        if (!ptr.isInCell())
+            return;
+
         bool hasSummonEffect = false;
         for (MagicEffects::Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
         {
