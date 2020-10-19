@@ -917,9 +917,9 @@ printf "LZ4 1.9.2... "
 	fi
 	export LZ4DIR="$(real_pwd)/LZ4-1.9.2"
 	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
-		-DLZ4_LIBRARY="${LZ4DIR}/static/liblz4_static.lib"
+		-DLZ4_LIBRARY="${LZ4DIR}/static/liblz4.lib"
 	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/LZ4-1.9.2/dll/liblz4.dll.a"
+		add_runtime_dlls $config "$(pwd)/LZ4-1.9.2/dll/liblz4.dll"
 	done
 	echo Done.
 }
