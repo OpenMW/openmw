@@ -837,7 +837,11 @@ elseif(NOT APPLE)
 
         # Install binaries
         IF(BUILD_OPENMW)
-            INSTALL(PROGRAMS "${INSTALL_SOURCE}/openmw" DESTINATION "${BINDIR}" )
+            IF(ANDROID)
+                INSTALL(PROGRAMS "${INSTALL_SOURCE}/libopenmw.so" DESTINATION "${BINDIR}" )
+            ELSE(ANDROID)
+                INSTALL(PROGRAMS "${INSTALL_SOURCE}/openmw" DESTINATION "${BINDIR}" )
+            ENDIF(ANDROID)
         ENDIF(BUILD_OPENMW)
         IF(BUILD_LAUNCHER)
             INSTALL(PROGRAMS "${INSTALL_SOURCE}/openmw-launcher" DESTINATION "${BINDIR}" )
