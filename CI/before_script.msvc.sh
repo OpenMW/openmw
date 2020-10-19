@@ -909,13 +909,13 @@ echo
 # LZ4
 printf "LZ4 1.9.2... "
 {
-	if [ -d LZ4-1.9.2 ]; then
+	if [ -d LZ4_1.9.2 ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf LZ4-1.9.2
-		eval 7z x -y lz4_win${BITS}_v1_9_2.7z -o./LZ4-1.9.2 $STRIP
+		eval 7z x -y lz4_win${BITS}_v1_9_2.7z -o./LZ4_1.9.2 $STRIP
 	fi
-	export LZ4DIR="$(real_pwd)/LZ4-1.9.2"
+	export LZ4DIR="$(real_pwd)/LZ4_1.9.2"
 	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
 		-DLZ4_LIBRARY="${LZ4DIR}/lib/liblz4.lib"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
