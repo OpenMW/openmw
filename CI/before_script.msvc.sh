@@ -573,8 +573,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# LZ4
 	download "LZ4 1.9.2" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.zip" \
-		"lz4_win${BITS}_v1_9_2.zip"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/lz4_win${BITS}_v1_9_2.7z" \
+		"lz4_win${BITS}_v1_9_2.7z"
 
 	# Google test and mock
 	if [ ! -z $TEST_FRAMEWORK ]; then
@@ -913,13 +913,19 @@ printf "LZ4 1.9.2... "
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf LZ4-1.9.2
-		eval 7z x -y lz4_win${BITS}_v1_9_2.zip -o./LZ4-1.9.2 $STRIP
+		eval 7z x -y lz4_win${BITS}_v1_9_2.7z -o./LZ4-1.9.2 $STRIP
 	fi
 	export LZ4DIR="$(real_pwd)/LZ4-1.9.2"
 	add_cmake_opts -DLZ4_INCLUDE_DIR="${LZ4DIR}/include" \
-		-DLZ4_LIBRARY="${LZ4DIR}/static/liblz4.lib"
-	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/LZ4-1.9.2/dll/liblz4.dll"
+		-DLZ4_LIBRARY="${LZ4DIR}/lib/liblz4.lib"
+	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
+		if [ $CONFIGURATION == "Debug" ]; then
+			LZ4_CONFIGURATION="Debug"
+		else
+			SUFFIX=""
+			LZ4_CONFIGURATION="Release"
+		fi
+		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4-1.9.2/bin/${LZ4_CONFIGURATION}/liblz4.dll"
 	done
 	echo Done.
 }
