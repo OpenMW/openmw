@@ -1,5 +1,5 @@
+#include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
-#include <LinearMath/btThreads.h>
 
 #include "components/debug/debuglog.hpp"
 #include <components/misc/barrier.hpp>
@@ -15,8 +15,6 @@
 #include "mtphysics.hpp"
 #include "object.hpp"
 #include "physicssystem.hpp"
-
-class btIParallelSumBody; // needed to compile with bullet < 2.88
 
 namespace
 {
@@ -122,77 +120,15 @@ namespace
 
     namespace Config
     {
-        /* The purpose of these 2 classes is to make OpenMW works with Bullet compiled with either single or multithread support.
-           At runtime, Bullet resolve the call to btParallelFor() to:
-           - btITaskScheduler::parallelFor() if bullet is multithreaded
-           - btIParallelForBody::forLoop() if bullet is singlethreaded.
-
-           NOTE: From Bullet 2.88, there is a btDefaultTaskScheduler(), that returns NULL if multithreading is not supported.
-           It might be worth considering to simplify the API once OpenMW stops supporting 2.87.
-        */
-
-        template<class ...>
-        using void_t = void;
-
-        /// @brief for Bullet <= 2.87
-        template <class T, class = void>
-        class MultiThreadedBulletImpl : public T
-        {
-            public:
-                MultiThreadedBulletImpl(): T("") {};
-                ~MultiThreadedBulletImpl() override = default;
-                int getMaxNumThreads() const override { return 1; };
-                int getNumThreads() const override { return 1; };
-                void setNumThreads(int numThreads) override {};
-
-                /// @brief will be called by Bullet if threading is supported
-                void parallelFor(int iBegin, int iEnd, int batchsize, const btIParallelForBody& body) override {};
-        };
-
-        /// @brief for Bullet >= 2.88
-        template <class T>
-        class MultiThreadedBulletImpl<T, void_t<decltype(&T::parallelSum)>> : public T
-        {
-            public:
-                MultiThreadedBulletImpl(): T("") {};
-                ~MultiThreadedBulletImpl() override = default;
-                int getMaxNumThreads() const override { return 1; };
-                int getNumThreads() const override { return 1; };
-                void setNumThreads(int numThreads) override {};
-
-                /// @brief will be called by Bullet if threading is supported
-                void parallelFor(int iBegin, int iEnd, int batchsize, const btIParallelForBody& body) override {};
-
-                btScalar parallelSum(int iBegin, int iEnd, int grainSize, const btIParallelSumBody& body) override { return {}; };
-        };
-
-        using MultiThreadedBullet = MultiThreadedBulletImpl<btITaskScheduler>;
-
-        class SingleThreadedBullet : public btIParallelForBody
-        {
-            public:
-                explicit SingleThreadedBullet(bool &threadingSupported): mThreadingSupported(threadingSupported) {};
-                /// @brief will be called by Bullet if threading is NOT supported
-                void forLoop(int iBegin, int iEnd) const override
-                {
-                    mThreadingSupported = false;
-                }
-            private:
-                bool &mThreadingSupported;
-        };
-
         /// @return either the number of thread as configured by the user, or 1 if Bullet doesn't support multithreading
         int computeNumThreads(bool& threadSafeBullet)
         {
             int wantedThread = Settings::Manager::getInt("async num threads", "Physics");
 
-            auto bulletScheduler = std::make_unique<MultiThreadedBullet>();
-            btSetTaskScheduler(bulletScheduler.get());
-            bool threadingSupported = true;
-            btParallelFor(0, 0, 0, SingleThreadedBullet(threadingSupported));
-
-            threadSafeBullet = threadingSupported;
-            if (!threadingSupported && wantedThread > 1)
+            auto broad = std::make_unique<btDbvtBroadphase>();
+            auto maxSupportedThreads = broad->m_rayTestStacks.size();
+            threadSafeBullet = (maxSupportedThreads > 1);
+            if (!threadSafeBullet && wantedThread > 1)
             {
                 Log(Debug::Warning) << "Bullet was not compiled with multithreading support, 1 async thread will be used";
                 return 1;
