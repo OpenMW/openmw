@@ -912,7 +912,7 @@ printf "LZ4 1.9.2... "
 	if [ -d LZ4_1.9.2 ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf LZ4-1.9.2
+		rm -rf LZ4_1.9.2
 		eval 7z x -y lz4_win${BITS}_v1_9_2.7z -o./LZ4_1.9.2 $STRIP
 	fi
 	export LZ4DIR="$(real_pwd)/LZ4_1.9.2"
@@ -925,7 +925,7 @@ printf "LZ4 1.9.2... "
 			SUFFIX=""
 			LZ4_CONFIGURATION="Release"
 		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4-1.9.2/bin/${LZ4_CONFIGURATION}/liblz4.dll"
+		add_runtime_dlls $CONFIGURATION "$(pwd)/LZ4_1.9.2/bin/${LZ4_CONFIGURATION}/liblz4.dll"
 	done
 	echo Done.
 }
