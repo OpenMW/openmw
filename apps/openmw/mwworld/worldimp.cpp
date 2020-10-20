@@ -1735,6 +1735,11 @@ namespace MWWorld
         return mStore.overrideRecord(record);
     }
 
+    const ESM::Container *World::createOverrideRecord(const ESM::Container &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
@@ -3909,5 +3914,10 @@ namespace MWWorld
     {
         ESM::EpochTimeStamp currentDate = mCurrentDate->getEpochTimeStamp();
         mRendering->skySetDate(currentDate.mDay, currentDate.mMonth);
+    }
+
+    std::vector<MWWorld::Ptr> World::getAll(const std::string& id)
+    {
+        return mCells.getAll(id);
     }
 }

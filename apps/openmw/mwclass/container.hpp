@@ -84,6 +84,8 @@ namespace MWClass
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
             bool useAnim() const override;
+
+            void modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const override;
     };
 }
 

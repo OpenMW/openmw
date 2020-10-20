@@ -6,6 +6,7 @@
     Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
+    Bug #2798: Mutable ESM records
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #3862: Random container contents behave differently than vanilla

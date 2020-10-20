@@ -27,6 +27,7 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 namespace MWClass
@@ -288,6 +289,11 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
         return !(ref->mBase->mFlags & ESM::Container::Organic);
+    }
+
+    void Container::modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const
+    {
+        MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
     }
 
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const

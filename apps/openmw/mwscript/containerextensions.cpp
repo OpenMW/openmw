@@ -19,14 +19,34 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwclass/container.hpp"
+
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
 #include "ref.hpp"
+
+namespace
+{
+    void addToStore(MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& ptr, MWWorld::ContainerStore& store, bool resolve = true)
+    {
+        if (itemPtr.getClass().getScript(itemPtr).empty())
+        {
+            store.add (itemPtr, count, ptr, true, resolve);
+        }
+        else
+        {
+            // Adding just one item per time to make sure there isn't a stack of scripted items
+            for (int i = 0; i < count; i++)
+                store.add (itemPtr, 1, ptr, true, resolve);
+        }
+    }
+}
 
 namespace MWScript
 {
@@ -60,6 +80,13 @@ namespace MWScript
                             || ::Misc::StringUtils::ciEqual(item, "gold_100"))
                         item = "gold_001";
 
+                    // Check if "item" can be placed in a container
+                    MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+                    MWWorld::Ptr itemPtr = manualRef.getPtr();
+                    bool isLevelledList = itemPtr.getClass().getTypeName() == typeid(ESM::ItemLevList).name();
+                    if(!isLevelledList)
+                        MWWorld::ContainerStore::getType(itemPtr);
+
                     // Explicit calls to non-unique actors affect the base record
                     if(!R::implicit && ptr.getClass().isActor() && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
                     {
@@ -67,19 +94,36 @@ namespace MWScript
                         return;
                     }
 
-                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
-                    // Create a Ptr for the first added item to recover the item name later
-                    MWWorld::Ptr itemPtr = *store.add (item, 1, ptr);
-                    if (itemPtr.getClass().getScript(itemPtr).empty())
+                    // Calls to unresolved containers affect the base record
+                    if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() && (!ptr.getRefData().getCustomData() ||
+                    !ptr.getClass().getContainerStore(ptr).isResolved()))
                     {
-                        store.add (item, count-1, ptr);
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
+                        const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
+                        const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
+                        for(const auto& container : ptrs)
+                        {
+                            // use the new base record
+                            container.get<ESM::Container>()->mBase = baseRecord;
+                            if(container.getRefData().getCustomData())
+                            {
+                                auto& store = container.getClass().getContainerStore(container);
+                                if(isLevelledList)
+                                {
+                                    if(store.isResolved())
+                                    {
+                                        // TODO #2404
+                                    }
+                                }
+                                else
+                                    addToStore(itemPtr, count, ptr, store, store.isResolved());
+                            }
+                        }
+                        return;
                     }
-                    else
-                    {
-                        // Adding just one item per time to make sure there isn't a stack of scripted items
-                        for (int i = 1; i < count; i++)
-                            store.add (item, 1, ptr);
-                    }
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                    // TODO #2404
+                    addToStore(itemPtr, count, ptr, store);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
@@ -160,7 +204,26 @@ namespace MWScript
                         ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                         return;
                     }
-
+                    // Calls to unresolved containers affect the base record instead
+                    else if(ptr.getClass().getTypeName() == typeid(ESM::Container).name() &&
+                        (!ptr.getRefData().getCustomData() || !ptr.getClass().getContainerStore(ptr).isResolved()))
+                    {
+                        ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
+                        const ESM::Container* baseRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(ptr.getCellRef().getRefId());
+                        const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
+                        for(const auto& container : ptrs)
+                        {
+                            container.get<ESM::Container>()->mBase = baseRecord;
+                            if(container.getRefData().getCustomData())
+                            {
+                                auto& store = container.getClass().getContainerStore(container);
+                                // Note that unlike AddItem, RemoveItem only removes from unresolved containers
+                                if(!store.isResolved())
+                                    store.remove(item, count, ptr, false);
+                            }
+                        }
+                        return;
+                    }
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore (ptr);
 
                     std::string itemName;

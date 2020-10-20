@@ -125,7 +125,7 @@ namespace MWWorld
 
             InventoryStore* clone() override { return new InventoryStore(*this); }
 
-            ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true) override;
+            ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true) override;
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled and allowAutoEquip is true (see the implementation).
             ///

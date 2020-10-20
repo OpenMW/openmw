@@ -290,11 +290,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const std::string &
     return add(ref.getPtr(), count, actorPtr);
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool /*allowAutoEquip*/)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool /*allowAutoEquip*/, bool resolve)
 {
     Ptr player = MWBase::Environment::get().getWorld ()->getPlayerPtr();
 
-    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count);
+    MWWorld::ContainerStoreIterator it = addImp(itemPtr, count, resolve);
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
@@ -463,14 +463,15 @@ void MWWorld::ContainerStore::updateRechargingItems()
     }
 }
 
-int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor)
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor, bool resolveFirst)
 {
-    resolve();
+    if(resolveFirst)
+        resolve();
     int toRemove = count;
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
         if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
-            toRemove -= remove(*iter, toRemove, actor);
+            toRemove -= removeImp(*iter, toRemove, actor);
 
     flagAsModified();
 
@@ -494,6 +495,11 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor
     assert(this == item.getContainerStore());
     resolve();
 
+    return removeImp(item, count, actor);
+}
+
+int MWWorld::ContainerStore::removeImp(const Ptr& item, int count, const Ptr& actor)
+{
     int toRemove = count;
     RefData& itemRef = item.getRefData();
 
