@@ -73,6 +73,7 @@
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
     Feature #5563: Run physics update in background thread
     Feature #5579: MCP SetAngle enhancement
+    Feature #5580: Service refusal filtering
     Feature #5610: Actors movement should be smoother
     Feature #5642: Ability to attach arrows to actor skeleton instead of bow mesh
     Feature #5649: Skyrim SE compressed BSA format support

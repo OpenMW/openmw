@@ -76,10 +76,22 @@ namespace MWBase
                 Exhausted = 2
             };
 
+            enum ServiceType
+            {
+                Any = -1,
+                Barter = 1,
+                Repair = 2,
+                Spells = 3,
+                Training = 4,
+                Travel = 5,
+                Spellmaking = 6,
+                Enchanting = 7
+            };
+
             virtual std::list<std::string> getAvailableTopics() = 0;
             virtual int getTopicFlag(const std::string&) = 0;
 
-            virtual bool checkServiceRefused (ResponseCallback* callback) = 0;
+            virtual bool checkServiceRefused (ResponseCallback* callback, ServiceType service = ServiceType::Any) = 0;
 
             virtual void persuade (int type, ResponseCallback* callback) = 0;
             virtual int getTemporaryDispositionChange () const = 0;
