@@ -375,7 +375,7 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
         {
             boost::scoped_array<char> buffer(new char[size]);
             fileStream->read(buffer.get(), size);
-            LZ4F_dctx* context = nullptr;
+            LZ4F_decompressionContext_t context = nullptr;
             LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
             LZ4F_decompressOptions_t options = {};
             LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
