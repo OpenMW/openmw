@@ -233,7 +233,7 @@ target_link_libraries(components
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
-    ${BSAOPTHASH_LIBRARIES}
+    LZ4::LZ4
     RecastNavigation::DebugUtils
     RecastNavigation::Detour
     RecastNavigation::Recast

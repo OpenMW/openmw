@@ -64,10 +64,12 @@ namespace Bsa
         //if each file record begins with BZ string with file name
         bool mEmbeddedFileNames;
 
+        std::uint32_t mVersion{0u};
+
         struct FolderRecord
         {
             std::uint32_t count;
-            std::uint32_t offset;
+            std::uint64_t offset;
             std::map<std::uint64_t, FileRecord> files;
         };
         std::map<std::uint64_t, FolderRecord> mFolders;

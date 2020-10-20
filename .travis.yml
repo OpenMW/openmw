@@ -23,7 +23,7 @@ addons:
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswresample-dev, libswscale-dev,
       # Audio, Video and Misc. deps
-      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev,
+      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev, liblz4-dev
       # The other ones from OpenMW ppa
       libbullet-dev, libopenscenegraph-dev, libmygui-dev
     ]

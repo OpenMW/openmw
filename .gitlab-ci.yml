@@ -13,7 +13,7 @@ stages:
   before_script:
     - export APT_CACHE_DIR=`pwd`/apt-cache && mkdir -pv $APT_CACHE_DIR
     - apt-get update -yq 
-    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake build-essential libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt5opengl5-dev libopenal-dev libopenscenegraph-dev libunshield-dev libtinyxml-dev libmygui-dev libbullet-dev ccache git clang
+    - apt-get -o dir::cache::archives="$APT_CACHE_DIR" install -y cmake build-essential libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-iostreams-dev libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libsdl2-dev libqt5opengl5-dev libopenal-dev libopenscenegraph-dev libunshield-dev libtinyxml-dev libmygui-dev libbullet-dev liblz4-dev ccache git clang
   stage: build
   script:
     - export CCACHE_BASEDIR="`pwd`"
