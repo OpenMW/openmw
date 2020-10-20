@@ -4,6 +4,8 @@
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt
+brew link --overwrite --dry-run lz4
+brew link --overwrite lz4
 brew reinstall lz4
 
 curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-ef2462c.zip -o ~/openmw-deps.zip
