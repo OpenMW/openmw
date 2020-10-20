@@ -13,12 +13,13 @@
 
 #include <SDL_video.h>
 
+#include <numeric>
+
 #include <components/files/configurationmanager.hpp>
-#include <components/misc/gcd.hpp>
 
 QString getAspect(int x, int y)
 {
-    int gcd = Misc::gcd (x, y);
+    int gcd = std::gcd (x, y);
     int xaspect = x / gcd;
     int yaspect = y / gcd;
     // special case: 8 : 5 is usually referred to as 16:10
