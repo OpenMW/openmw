@@ -270,6 +270,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             mCurrentHit = "shield";
             MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
             priorityBlock[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+            priorityBlock[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
             mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
         }
 
@@ -289,6 +290,8 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
                 mUpperBodyState = UpperCharState_Nothing;
             }
         }
+        if (mHitState != CharState_None)
+            idle = CharState_None;
     }
     else if(!mAnimation->isPlaying(mCurrentHit))
     {
@@ -308,8 +311,6 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         mAnimation->disable(mCurrentHit);
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
-    if (mHitState != CharState_None)
-        idle = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force)
