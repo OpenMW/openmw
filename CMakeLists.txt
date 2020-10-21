@@ -1,5 +1,7 @@
 project(OpenMW)
 cmake_minimum_required(VERSION 3.1.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069)
@@ -392,9 +394,6 @@ if (NOT WIN32 AND NOT APPLE)
     configure_file(${OpenMW_SOURCE_DIR}/files/org.openmw.cs.desktop
         "${OpenMW_BINARY_DIR}/org.openmw.cs.desktop")
 endif()
-
-# CXX Compiler settings
-set(CMAKE_CXX_STANDARD 17)
 
 if(OPENMW_LTO_BUILD)
     if(NOT CMAKE_VERSION VERSION_LESS 3.9)
