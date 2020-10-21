@@ -120,6 +120,8 @@ variables: &cs-targets
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
+  after_script:
+    - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
     key: ninja-v2
     paths:
@@ -208,6 +210,8 @@ Windows_Ninja_CS_RelWithDebInfo:
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
+  after_script:
+    - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
     key: msbuild-v2
     paths:
