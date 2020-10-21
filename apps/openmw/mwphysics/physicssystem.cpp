@@ -678,10 +678,10 @@ namespace MWPhysics
 
         mTimeAccum -= numSteps * mPhysicsDt;
 
-        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(), mStandingCollisions, skipSimulation);
+        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), mStandingCollisions, skipSimulation);
     }
 
-    std::vector<ActorFrameData> PhysicsSystem::prepareFrameData()
+    std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(int numSteps)
     {
         std::vector<ActorFrameData> actorsFrameData;
         actorsFrameData.reserve(mMovementQueue.size());
@@ -723,7 +723,12 @@ namespace MWPhysics
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall = 1.f - std::max(0.f, std::min(1.f, effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f));
 
-            actorsFrameData.emplace_back(std::move(physicActor), character, mStandingCollisions[character], moveToWaterSurface, movement, slowFall, waterlevel);
+            // Ue current value only if we don't advance the simulation. Otherwise we might get a stale value.
+            MWWorld::Ptr standingOn;
+            if (numSteps == 0)
+                standingOn = mStandingCollisions[character];
+
+            actorsFrameData.emplace_back(std::move(physicActor), character, standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
         }
         mMovementQueue.clear();
         return actorsFrameData;

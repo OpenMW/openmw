@@ -237,7 +237,7 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::vector<ActorFrameData> prepareFrameData();
+            std::vector<ActorFrameData> prepareFrameData(int numSteps);
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
