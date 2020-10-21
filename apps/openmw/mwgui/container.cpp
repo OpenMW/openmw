@@ -163,6 +163,10 @@ namespace MWGui
     {
         WindowBase::onClose();
 
+        // Make sure the window was actually closed and not temporarily hidden.
+        if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container))
+            return;
+
         if (mModel)
             mModel->onClose();
 
@@ -185,6 +189,7 @@ namespace MWGui
 
         // transfer everything into the player's inventory
         ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+        assert(mModel);
         mModel->update();
 
         // unequip all items to avoid unequipping/reequipping
