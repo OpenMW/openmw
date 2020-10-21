@@ -126,8 +126,8 @@ namespace MWWorld
             std::weak_ptr<ResolutionListener> mResolutionListener;
 
             ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true, const std::string& levItem = "");
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true, const std::string& levItem = "");
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
 
             int removeImp(const Ptr& item, int count, const Ptr& actor);
 
