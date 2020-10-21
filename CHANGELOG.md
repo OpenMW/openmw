@@ -58,6 +58,7 @@
     Bug #5622: Can't properly interact with the console when in pause menu
     Bug #5639: Tooltips cover Messageboxes
     Bug #5644: Summon effects running on the player during game initialization cause crashes
+    Bug #5656: Sneaking characters block hits while standing
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #4894: Consider actors as obstacles for pathfinding
