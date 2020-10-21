@@ -28,12 +28,13 @@
 #include "../mwworld/manualref.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/levelledlist.hpp"
 
 #include "ref.hpp"
 
 namespace
 {
-    void addToStore(MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& ptr, MWWorld::ContainerStore& store, bool resolve = true)
+    void addToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& ptr, MWWorld::ContainerStore& store, bool resolve = true)
     {
         if (itemPtr.getClass().getScript(itemPtr).empty())
         {
@@ -45,6 +46,30 @@ namespace
             for (int i = 0; i < count; i++)
                 store.add (itemPtr, 1, ptr, true, resolve);
         }
+    }
+
+    void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& owner, MWWorld::ContainerStore& store, bool topLevel = true)
+    {
+        if(itemPtr.getTypeName() == typeid(ESM::ItemLevList).name())
+        {
+            const ESM::ItemLevList* levItemList = itemPtr.get<ESM::ItemLevList>()->mBase;
+
+            if(topLevel && count > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
+            {
+                for(int i = 0; i < count; i++)
+                    addRandomToStore(itemPtr, 1, owner, store, true);
+            }
+            else
+            {
+                std::string itemId = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false);
+                if (itemId.empty())
+                    return;
+                MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);
+                addRandomToStore(manualRef.getPtr(), count, owner, store, false);
+            }
+        }
+        else
+            addToStore(itemPtr, count, owner, store);
     }
 }
 
@@ -112,7 +137,7 @@ namespace MWScript
                                 {
                                     if(store.isResolved())
                                     {
-                                        // TODO #2404
+                                        addRandomToStore(itemPtr, count, ptr, store);
                                     }
                                 }
                                 else
@@ -122,8 +147,10 @@ namespace MWScript
                         return;
                     }
                     MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                    // TODO #2404
-                    addToStore(itemPtr, count, ptr, store);
+                    if(isLevelledList)
+                        addRandomToStore(itemPtr, count, ptr, store);
+                    else
+                        addToStore(itemPtr, count, ptr, store);
 
                     // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                     if (ptr == MWBase::Environment::get().getWorld ()->getPlayerPtr() )
