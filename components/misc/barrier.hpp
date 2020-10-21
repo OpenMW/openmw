@@ -21,7 +21,7 @@ namespace Misc
             /// @brief stop execution of threads until count distinct threads reach this point
             void wait()
             {
-                std::unique_lock<std::mutex> lock(mMutex);
+                std::unique_lock lock(mMutex);
 
                 ++mRendezvousCount;
                 const int currentGeneration = mGeneration;

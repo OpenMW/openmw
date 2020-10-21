@@ -3,6 +3,7 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <optional>
 #include <shared_mutex>
 #include <thread>
 
@@ -35,7 +36,7 @@ namespace MWPhysics
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;
             void convexSweepTest(const btConvexShape* castShape, const btTransform& from, const btTransform& to, btCollisionWorld::ConvexResultCallback& resultCallback) const;
             void contactTest(btCollisionObject* colObj, btCollisionWorld::ContactResultCallback& resultCallback);
-            boost::optional<btVector3> getHitPoint(const btTransform& from, btCollisionObject* target);
+            std::optional<btVector3> getHitPoint(const btTransform& from, btCollisionObject* target);
             void aabbTest(const btVector3& aabbMin, const btVector3& aabbMax, btBroadphaseAabbCallback& callback);
             void getAabb(const btCollisionObject* obj, btVector3& min, btVector3& max);
             void setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask);
@@ -82,9 +83,9 @@ namespace MWPhysics
             std::atomic<int> mNextLOS;
             std::vector<std::thread> mThreads;
 
-            mutable std::shared_timed_mutex mSimulationMutex;
-            mutable std::shared_timed_mutex mCollisionWorldMutex;
-            mutable std::shared_timed_mutex mLOSCacheMutex;
+            mutable std::shared_mutex mSimulationMutex;
+            mutable std::shared_mutex mCollisionWorldMutex;
+            mutable std::shared_mutex mLOSCacheMutex;
             mutable std::mutex mUpdateAabbMutex;
             std::condition_variable_any mHasJob;
     };
