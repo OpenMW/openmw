@@ -3,10 +3,9 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <thread>
 #include <shared_mutex>
+#include <thread>
 
-#include <boost/optional/optional.hpp>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
 #include "physicssystem.hpp"
