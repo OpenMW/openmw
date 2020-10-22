@@ -239,7 +239,7 @@ namespace MWPhysics
 
         auto hitpoint = mTaskScheduler->getHitPoint(rayFrom, targetCollisionObj);
         if (hitpoint)
-            return (point - Misc::Convert::toOsg(hitpoint.get())).length();
+            return (point - Misc::Convert::toOsg(*hitpoint)).length();
 
         // didn't hit the target. this could happen if point is already inside the collision box
         return 0.f;
@@ -648,18 +648,18 @@ namespace MWPhysics
         return false;
     }
 
-    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &movement)
+    void PhysicsSystem::queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity)
     {
         for(auto& movementItem : mMovementQueue)
         {
             if (movementItem.first == ptr)
             {
-                movementItem.second = movement;
+                movementItem.second = velocity;
                 return;
             }
         }
 
-        mMovementQueue.emplace_back(ptr, movement);
+        mMovementQueue.emplace_back(ptr, velocity);
     }
 
     void PhysicsSystem::clearQueuedMovement()
@@ -686,10 +686,8 @@ namespace MWPhysics
         std::vector<ActorFrameData> actorsFrameData;
         actorsFrameData.reserve(mMovementQueue.size());
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        for (const auto& m : mMovementQueue)
+        for (const auto& [character, movement] : mMovementQueue)
         {
-            const auto& character = m.first;
-            const auto& movement = m.second;
             const auto foundActor = mActors.find(character);
             if (foundActor == mActors.end()) // actor was already removed from the scene
             {
