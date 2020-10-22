@@ -12,14 +12,14 @@ namespace ESM
         int mSpawnActorId;
         bool mSpawn;
 
-        void load (ESMReader &esm) final;
-        void save (ESMWriter &esm, bool inInventory = false) const final;
+        void load (ESMReader &esm) override;
+        void save (ESMWriter &esm, bool inInventory = false) const override;
 
-        CreatureLevListState& asCreatureLevListState() final
+        CreatureLevListState& asCreatureLevListState() override
         {
             return *this;
         }
-        const CreatureLevListState& asCreatureLevListState() const final
+        const CreatureLevListState& asCreatureLevListState() const override
         {
             return *this;
         }

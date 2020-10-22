@@ -48,10 +48,10 @@ namespace Gui
 
         void scrollToTop();
 
-        void setPropertyOverride(const std::string& _key, const std::string& _value) final;
+        void setPropertyOverride(const std::string& _key, const std::string& _value) override;
 
     protected:
-        void initialiseOverride() final;
+        void initialiseOverride() override;
 
         void redraw(bool scrollbarShown = false);
 

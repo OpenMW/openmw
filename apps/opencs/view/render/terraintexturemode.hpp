@@ -53,37 +53,37 @@ namespace CSVRender
             /// \brief Editmode for terrain texture grid
             TerrainTextureMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
-            void primaryOpenPressed (const WorldspaceHitResult& hit) final;
+            void primaryOpenPressed (const WorldspaceHitResult& hit) override;
 
             /// \brief Create single command for one-click texture editing
-            void primaryEditPressed (const WorldspaceHitResult& hit) final;
+            void primaryEditPressed (const WorldspaceHitResult& hit) override;
 
             /// \brief Open brush settings window
-            void primarySelectPressed(const WorldspaceHitResult&) final;
+            void primarySelectPressed(const WorldspaceHitResult&) override;
 
-            void secondarySelectPressed(const WorldspaceHitResult&) final;
+            void secondarySelectPressed(const WorldspaceHitResult&) override;
 
-            void activate(CSVWidget::SceneToolbar*) final;
-            void deactivate(CSVWidget::SceneToolbar*) final;
+            void activate(CSVWidget::SceneToolbar*) override;
+            void deactivate(CSVWidget::SceneToolbar*) override;
 
             /// \brief Start texture editing command macro
-            bool primaryEditStartDrag (const QPoint& pos) final;
+            bool primaryEditStartDrag (const QPoint& pos) override;
 
-            bool secondaryEditStartDrag (const QPoint& pos) final;
-            bool primarySelectStartDrag (const QPoint& pos) final;
-            bool secondarySelectStartDrag (const QPoint& pos) final;
+            bool secondaryEditStartDrag (const QPoint& pos) override;
+            bool primarySelectStartDrag (const QPoint& pos) override;
+            bool secondarySelectStartDrag (const QPoint& pos) override;
 
             /// \brief Handle texture edit behavior during dragging
-            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) final;
+            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 
             /// \brief End texture editing command macro
-            void dragCompleted(const QPoint& pos) final;
+            void dragCompleted(const QPoint& pos) override;
 
-            void dragAborted() final;
-            void dragWheel (int diff, double speedFactor) final;
-            void dragMoveEvent (QDragMoveEvent *event) final;
+            void dragAborted() override;
+            void dragWheel (int diff, double speedFactor) override;
+            void dragMoveEvent (QDragMoveEvent *event) override;
 
-            void mouseMoveEvent (QMouseEvent *event) final;
+            void mouseMoveEvent (QMouseEvent *event) override;
 
         private:
             /// \brief Handle brush mechanics, maths regarding worldspace hit etc.

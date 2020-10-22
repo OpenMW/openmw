@@ -1,7 +1,5 @@
 #include "streamerrorhandler.hpp"
 
-#include <sstream>
-
 #include <components/debug/debuglog.hpp>
 
 #include "tokenloc.hpp"
@@ -61,7 +59,7 @@ namespace Compiler
         mContext = context;
     }
 
-    StreamErrorHandler::StreamErrorHandler()  {}
+    StreamErrorHandler::StreamErrorHandler() = default;
 
     ContextOverride::ContextOverride(StreamErrorHandler& handler, const std::string& context) : mHandler(handler), mContext(handler.mContext)
     {

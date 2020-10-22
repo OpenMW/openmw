@@ -1,7 +1,6 @@
 #include "scanner.hpp"
 
 #include <cassert>
-#include <iterator>
 
 #include "exception.hpp"
 #include "errorhandler.hpp"
@@ -266,7 +265,7 @@ namespace Compiler
         "messagebox",
         "set", "to",
         "getsquareroot",
-        0
+        nullptr
     };
 
     bool Scanner::scanName (MultiChar& c, Parser& parser, bool& cont)

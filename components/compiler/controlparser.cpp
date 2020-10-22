@@ -1,7 +1,6 @@
 #include "controlparser.hpp"
 
 #include <algorithm>
-#include <iterator>
 #include <stdexcept>
 
 #include "scanner.hpp"
@@ -33,7 +32,7 @@ namespace Compiler
                 // store code for if-cascade
                 Codes codes;
 
-                for (IfCodes::reverse_iterator iter (mIfCode.rbegin());
+                for (auto iter (mIfCode.rbegin());
                     iter!=mIfCode.rend(); ++iter)
                 {
                     Codes block;

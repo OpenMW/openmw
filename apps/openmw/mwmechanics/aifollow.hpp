@@ -53,7 +53,7 @@ namespace MWMechanics
 
             AiFollow(const ESM::AiSequence::AiFollow* follow);
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Follow; }
 
@@ -69,15 +69,15 @@ namespace MWMechanics
             /// Returns the actor being followed
             std::string getFollowedActor();
 
-            void writeState (ESM::AiSequence::AiSequence& sequence) const final;
+            void writeState (ESM::AiSequence::AiSequence& sequence) const override;
 
             bool isCommanded() const;
 
             int getFollowIndex() const;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            osg::Vec3f getDestination() const final
+            osg::Vec3f getDestination() const override
             {
                 MWWorld::Ptr target = getTarget();
                 if (target.isEmpty())

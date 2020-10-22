@@ -23,13 +23,13 @@ namespace Gui
     protected:
         void updateButtonState();
 
-        void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) final;
-        void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) final;
-        void onMouseSetFocus(MyGUI::Widget* _old) final;
-        void onMouseLostFocus(MyGUI::Widget* _new) final;
-        void baseUpdateEnable() final;
+        void onMouseButtonPressed(int _left, int _top, MyGUI::MouseButton _id) override;
+        void onMouseButtonReleased(int _left, int _top, MyGUI::MouseButton _id) override;
+        void onMouseSetFocus(MyGUI::Widget* _old) override;
+        void onMouseLostFocus(MyGUI::Widget* _new) override;
+        void baseUpdateEnable() override;
 
-        void shutdownOverride() final;
+        void shutdownOverride() override;
 
         bool _setState(const std::string &_value);
 

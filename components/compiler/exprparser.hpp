@@ -28,7 +28,7 @@ namespace Compiler
             bool mRefOp;
             bool mMemberOp;
 
-            int getPriority (char op) const;
+            static int getPriority (char op) ;
 
             char getOperandType (int Index = 0) const;
 

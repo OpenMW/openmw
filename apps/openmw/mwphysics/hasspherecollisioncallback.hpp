@@ -35,7 +35,7 @@ namespace MWPhysics
         {
         }
 
-        bool process(const btBroadphaseProxy* proxy) final
+        bool process(const btBroadphaseProxy* proxy) override
         {
             if (mResult)
                 return false;

@@ -15,7 +15,7 @@ namespace Compiler
 
             Context() : mExtensions (0) {}
 
-            virtual ~Context() {}
+            virtual ~Context() = default;
 
             virtual bool canDeclareLocals() const = 0;
             ///< Is the compiler allowed to declare local variables?

@@ -13,7 +13,7 @@ namespace MWGui
     MYGUI_RTTI_DERIVED(ItemView)
     public:
         ItemView();
-        virtual ~ItemView();
+        ~ItemView() override;
 
         /// Register needed components with MyGUI's factory manager
         static void registerComponents ();
@@ -33,12 +33,12 @@ namespace MWGui
         void resetScrollBars();
 
     private:
-        void initialiseOverride() final;
+        void initialiseOverride() override;
 
         void layoutWidgets();
 
-        void setSize(const MyGUI::IntSize& _value) final;
-        void setCoord(const MyGUI::IntCoord& _value) final;
+        void setSize(const MyGUI::IntSize& _value) override;
+        void setCoord(const MyGUI::IntCoord& _value) override;
 
         void onSelectedItem (MyGUI::Widget* sender);
         void onSelectedBackground (MyGUI::Widget* sender);

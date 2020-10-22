@@ -132,11 +132,11 @@ namespace MWClass
 
             void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 
-            float getWalkSpeed(const MWWorld::Ptr& ptr) const final;
+            float getWalkSpeed(const MWWorld::Ptr& ptr) const override;
 
-            float getRunSpeed(const MWWorld::Ptr& ptr) const final;
+            float getRunSpeed(const MWWorld::Ptr& ptr) const override;
 
-            float getSwimSpeed(const MWWorld::Ptr& ptr) const final;
+            float getSwimSpeed(const MWWorld::Ptr& ptr) const override;
     };
 }
 

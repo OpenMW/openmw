@@ -5,14 +5,14 @@ struct PartialBinarySearchTest : public ::testing::Test
 {
   protected:
     std::vector<std::string> mDataVec;
-    virtual void SetUp()
+    void SetUp() override
     {
         const char* data[] = { "Head", "Chest", "Tri Head", "Tri Chest", "Bip01", "Tri Bip01" };
         mDataVec = std::vector<std::string>(data, data+sizeof(data)/sizeof(data[0]));
         std::sort(mDataVec.begin(), mDataVec.end(), Misc::StringUtils::ciLess);
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 
