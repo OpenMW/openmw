@@ -12,13 +12,9 @@ const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
 const char Config::LauncherSettings::sContentListsSectionPrefix[] = "Profiles/";
 const char Config::LauncherSettings::sContentListSuffix[] = "/content";
 
-Config::LauncherSettings::LauncherSettings()
-{
-}
+Config::LauncherSettings::LauncherSettings() = default;
 
-Config::LauncherSettings::~LauncherSettings()
-{
-}
+Config::LauncherSettings::~LauncherSettings() = default;
 
 QStringList Config::LauncherSettings::subKeys(const QString &key)
 {
