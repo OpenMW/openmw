@@ -654,12 +654,12 @@ namespace MWPhysics
         {
             if (movementItem.first == ptr)
             {
-                movementItem.second = movement;
+                movementItem.second = velocity;
                 return;
             }
         }
 
-        mMovementQueue.emplace_back(ptr, movement);
+        mMovementQueue.emplace_back(ptr, velocity);
     }
 
     void PhysicsSystem::clearQueuedMovement()
