@@ -1,5 +1,7 @@
 #include "streamerrorhandler.hpp"
 
+#include <sstream>
+
 #include <components/debug/debuglog.hpp>
 
 #include "tokenloc.hpp"
