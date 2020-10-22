@@ -80,7 +80,7 @@ namespace Bsa
         //mFiles used by OpenMW will contain uncompressed file sizes
         void convertCompressedSizesToUncompressed();
         /// \brief Normalizes given filename or folder and generates format-compatible hash. See https://en.uesp.net/wiki/Tes4Mod:Hash_Calculation.
-        std::uint64_t generateHash(std::string stem, std::string extension) const;
+        static std::uint64_t generateHash(std::string stem, std::string extension) ;
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
         CompressedBSAFile();
