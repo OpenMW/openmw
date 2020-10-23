@@ -13,7 +13,7 @@ void Fallback::validate(boost::any& v, std::vector<std::string> const& tokens, F
     {
         std::string temp = Files::EscapeHashString::processString(token);
         size_t sep = temp.find(",");
-        if (sep < 1 || sep == temp.length() - 1)
+        if (sep < 1 || sep == temp.length() - 1 || sep == std::string::npos)
 #if (BOOST_VERSION < 104200)
             throw boost::program_options::validation_error("invalid value");
 #else
