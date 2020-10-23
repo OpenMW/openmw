@@ -25,6 +25,10 @@ struct ConfigurationManager
     void readConfiguration(boost::program_options::variables_map& variables,
         boost::program_options::options_description& description, bool quiet=false);
 
+    boost::program_options::variables_map separateComposingVariables(boost::program_options::variables_map& variables, boost::program_options::options_description& description);
+
+    void mergeComposingVariables(boost::program_options::variables_map& first, boost::program_options::variables_map& second, boost::program_options::options_description& description);
+
     void processPaths(Files::PathContainer& dataDirs, bool create = false);
     ///< \param create Try creating the directory, if it does not exist.
 

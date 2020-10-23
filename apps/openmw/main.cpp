@@ -164,7 +164,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         return false;
     }
 
+    bpo::variables_map composingVariables = cfgMgr.separateComposingVariables(variables, desc);
     cfgMgr.readConfiguration(variables, desc);
+    cfgMgr.mergeComposingVariables(variables, composingVariables, desc);
 
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
     std::cout << v.describe() << std::endl;
