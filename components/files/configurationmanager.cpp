@@ -109,13 +109,20 @@ void ConfigurationManager::mergeComposingVariables(boost::program_options::varia
 
             boost::any& firstValue = variableValue.value();
             const boost::any& secondValue = second[name].value();
-
+            
             if (firstValue.type() == typeid(Files::EscapePathContainer))
             {
                 auto& firstPathContainer = boost::any_cast<Files::EscapePathContainer&>(firstValue);
                 const auto& secondPathContainer = boost::any_cast<const Files::EscapePathContainer&>(secondValue);
 
                 firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
+            }
+            else if (firstValue.type() == typeid(Files::EscapeStringVector))
+            {
+                auto& firstVector = boost::any_cast<Files::EscapeStringVector&>(firstValue);
+                const auto& secondVector = boost::any_cast<const Files::EscapeStringVector&>(secondValue);
+
+                firstVector.mVector.insert(firstVector.mVector.end(), secondVector.mVector.begin(), secondVector.mVector.end());
             }
             else if (firstValue.type() == typeid(Fallback::FallbackMap))
             {

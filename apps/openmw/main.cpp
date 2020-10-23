@@ -67,7 +67,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "set local data directory (highest priority)")
 
         ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
-            ->multitoken(), "set fallback BSA archives (later archives have higher priority)")
+            ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
 
         ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
             "set resources directory")
@@ -76,7 +76,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "set initial cell")
 
         ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-            ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
+            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
@@ -101,7 +101,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             "\t2 - treat warnings as errors")
 
         ("script-blacklist", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-            ->multitoken(), "ignore the specified script (if the use of the blacklist is enabled)")
+            ->multitoken()->composing(), "ignore the specified script (if the use of the blacklist is enabled)")
 
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
