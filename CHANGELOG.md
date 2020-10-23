@@ -7,6 +7,7 @@
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
     Bug #2798: Mutable ESM records
+    Bug #2976 [reopened]: Issues combining settings from the command line and both config files
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #3862: Random container contents behave differently than vanilla
