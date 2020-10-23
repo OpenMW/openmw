@@ -62,21 +62,18 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
     
     // User config has the highest priority.
     auto composingVariables = separateComposingVariables(variables, description);
-    Log(Debug::Info) << composingVariables.size() << " composing variables were loaded before the user config";
     loadConfig(mFixedPath.getUserConfigPath(), variables, description);
     mergeComposingVariables(variables, composingVariables, description);
     boost::program_options::notify(variables);
 
     // read either local or global config depending on type of installation
     composingVariables = separateComposingVariables(variables, description);
-    Log(Debug::Info) << composingVariables.size() << " composing variables were loaded before the local config";
     bool loaded = loadConfig(mFixedPath.getLocalPath(), variables, description);
     mergeComposingVariables(variables, composingVariables, description);
     boost::program_options::notify(variables);
     if (!loaded)
     {
         composingVariables = separateComposingVariables(variables, description);
-        Log(Debug::Info) << composingVariables.size() << " composing variables were loaded before the global config";
         loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
         mergeComposingVariables(variables, composingVariables, description);
         boost::program_options::notify(variables);
