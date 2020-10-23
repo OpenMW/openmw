@@ -461,38 +461,28 @@ std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string exte
     size_t len = stem.length();
     if (len == 0)
         return 0;
-    std::uint64_t hash = 0;
-    unsigned int hash2 = 0;
+    std::replace(stem.begin(), stem.end(), '/', '\\');
     Misc::StringUtils::lowerCaseInPlace(stem);
-    if (extension.empty()) // It's a folder.
-        std::replace(stem.begin(), stem.end(), '/', '\\');
-    else
-    {
-        Misc::StringUtils::lowerCaseInPlace(extension);
-        for (const char &c : extension)
-            hash = hash * 0x1003f + c;
-    }
+    uint64_t result = stem[len-1] | (len >= 3 ? (stem[len-2] << 8) : 0) | (len << 16) | (stem[0] << 24);
     if (len >= 4)
     {
-        for (size_t i = 1; i < len-2; i++)
-            hash2 = hash2 * 0x1003f + stem[i];
+        uint32_t hash = 0;
+        for (size_t i = 1; i <= len-3; ++i)
+            hash = hash * 0x1003f + stem[i];
+        result += static_cast<uint64_t>(hash) << 32;
     }
-    hash = (hash + hash2) << 32;
-    hash2 = (stem[0] << 24) | (len << 16);
-    if (len >= 2)
-    {
-        if (len >= 3)
-            hash2 |= stem[len-2] << 8;
-        hash2 |= stem[len-1];
-    }
-    if (!extension.empty())
-    {
-        if (extension == ".kf")       hash2 |= 0x80;
-        else if (extension == ".nif") hash2 |= 0x8000;
-        else if (extension == ".dds") hash2 |= 0x8080;
-        else if (extension == ".wav") hash2 |= 0x80000000;
-    }
-    return hash + hash2;
+    if (extension.empty())
+        return result;
+    Misc::StringUtils::lowerCaseInPlace(extension);
+    if (extension == ".kf")       result |= 0x80;
+    else if (extension == ".nif") result |= 0x8000;
+    else if (extension == ".dds") result |= 0x8080;
+    else if (extension == ".wav") result |= 0x80000000;
+    uint32_t hash = 0;
+    for (const char &c : extension)
+        hash = hash * 0x1003f + c;
+    result += static_cast<uint64_t>(hash) << 32;
+    return result;
 }
 
 } //namespace Bsa
