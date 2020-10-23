@@ -25,6 +25,7 @@
 #include <osg/Depth>
 
 #include <sstream>
+#include "shadowsbin.hpp"
 
 namespace {
 
@@ -273,10 +274,20 @@ void VDSMCameraCullCallback::operator()(osg::Node* node, osg::NodeVisitor* nv)
         cv->pushCullingSet();
     }
 #endif
+    // bin has to go inside camera cull or the rendertexture stage will override it
+    static osg::ref_ptr<osg::StateSet> ss;
+    if (!ss)
+    {
+        ShadowsBinAdder adder("ShadowsBin");
+        ss = new osg::StateSet;
+        ss->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "ShadowsBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
+    }
+    cv->pushStateSet(ss);
     if (_vdsm->getShadowedScene())
     {
         _vdsm->getShadowedScene()->osg::Group::traverse(*nv);
     }
+    cv->popStateSet();
 #if 1
     if (!_polytope.empty())
     {
@@ -1583,17 +1594,14 @@ void MWShadowTechnique::createShaders()
     _shadowCastingStateSet->setAttributeAndModes(_castingProgram, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
-    _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+    _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     _shadowCastingStateSet->addUniform(_shadowMapAlphaTestDisableUniform);
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     _shadowCastingStateSet->setMode(GL_DEPTH_CLAMP, osg::StateAttribute::ON);
 
-    _shadowCastingStateSet->setRenderBinDetails(osg::StateSet::OPAQUE_BIN, "RenderBin", osg::StateSet::OVERRIDE_PROTECTED_RENDERBIN_DETAILS);
-
     // TODO: compare performance when alpha testing is handled here versus using a discard in the fragment shader
-    // TODO: compare performance when we set a bunch of GL state to the default here with OVERRIDE set so that there are fewer pointless state switches
 }
 
 osg::Polytope MWShadowTechnique::computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight)
