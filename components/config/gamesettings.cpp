@@ -118,12 +118,19 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QStr
             QString key = keyRe.cap(1).trimmed();
             QString value = keyRe.cap(2).trimmed();
 
-            // Don't remove existing data entries
-            if (key != QLatin1String("data"))
+            // Don't remove composing entries
+            if (key != QLatin1String("data")
+                && key != QLatin1String("fallback-archive")
+                && key != QLatin1String("content")
+                && key != QLatin1String("script-blacklist"))
                 settings.remove(key);
-            else
+
+            if (key == QLatin1String("data")
+                || key == QLatin1String("data-local")
+                || key == QLatin1String("resources")
+                || key == QLatin1String("load-savegame"))
             {
-                // 'data=...' line, so needs processing to deal with ampersands and quotes
+                // Path line (e.g. 'data=...'), so needs processing to deal with ampersands and quotes
                 // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work as there are too may QStrings involved
                 QChar delim = '\"';
                 QChar escape = '&';
@@ -175,8 +182,11 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        // 'data=...' lines need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
-        if (i.key() == QLatin1String("data"))
+        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
+        if (i.key() == QLatin1String("data")
+            || i.key() == QLatin1String("data-local")
+            || i.key() == QLatin1String("resources")
+            || i.key() == QLatin1String("load-savegame"))
         {
             stream << i.key() << "=";
 
@@ -196,20 +206,6 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
 
             stream << '\n';
             continue;
-        }
-
-        // Quote paths with spaces
-        if (i.key() == QLatin1String("data-local")
-            || i.key() == QLatin1String("resources"))
-        {
-            if (i.value().contains(QChar(' ')))
-            {
-                QString stripped = i.value();
-                stripped.remove(QChar('\"')); // Remove quotes
-
-                stream << i.key() << "=\"" << stripped << "\"\n";
-                continue;
-            }
         }
 
         stream << i.key() << "=" << i.value() << "\n";
@@ -406,7 +402,10 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     {
         it.previous();
 
-        if (it.key() == QLatin1String("data"))
+        if (it.key() == QLatin1String("data")
+            || it.key() == QLatin1String("data-local")
+            || it.key() == QLatin1String("resources")
+            || it.key() == QLatin1String("load-savegame"))
         {
             settingLine = it.key() + "=";
 
@@ -423,15 +422,6 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
                 settingLine += *iter;
             }
             settingLine += delim;
-        }
-        // Quote paths with spaces
-        else if ((it.key() == QLatin1String("data-local")
-             || it.key() == QLatin1String("resources")) && it.value().contains(QChar(' ')))
-        {
-            QString stripped = it.value();
-            stripped.remove(QChar('\"')); // Remove quotes
-
-            settingLine = it.key() + "=\"" + stripped + "\"";
         }
         else
             settingLine = it.key() + "=" + it.value();

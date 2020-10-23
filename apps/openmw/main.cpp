@@ -63,13 +63,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("data", bpo::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")
             ->multitoken()->composing(), "set data directories (later directories have higher priority)")
 
-        ("data-local", bpo::value<Files::EscapeHashString>()->default_value(""),
+        ("data-local", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
             "set local data directory (highest priority)")
 
         ("fallback-archive", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "fallback-archive")
             ->multitoken()->composing(), "set fallback BSA archives (later archives have higher priority)")
 
-        ("resources", bpo::value<Files::EscapeHashString>()->default_value("resources"),
+        ("resources", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"),
             "set resources directory")
 
         ("start", bpo::value<Files::EscapeHashString>()->default_value(""),
@@ -106,7 +106,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("script-blacklist-use", bpo::value<bool>()->implicit_value(true)
             ->default_value(true), "enable script blacklisting")
 
-        ("load-savegame", bpo::value<Files::EscapeHashString>()->default_value(""),
+        ("load-savegame", bpo::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""),
             "load a save game file on game startup (specify an absolute filename or a filename relative to the current working directory)")
 
         ("skip-menu", bpo::value<bool>()->implicit_value(true)
@@ -159,7 +159,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     {
         cfgMgr.readConfiguration(variables, desc, true);
 
-        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
+        Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
         std::cout << v.describe() << std::endl;
         return false;
     }
@@ -168,7 +168,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     cfgMgr.mergeComposingVariables(variables, composingVariables, desc);
 
-    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapeHashString>().toStdString());
+    Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
     std::cout << v.describe() << std::endl;
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
@@ -183,18 +183,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     Files::PathContainer dataDirs(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
 
-    std::string local(variables["data-local"].as<Files::EscapeHashString>().toStdString());
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
     if (!local.empty())
-    {
-        if (local.front() == '\"')
-            local = local.substr(1, local.length() - 2);
-
-        dataDirs.push_back(Files::PathContainer::value_type(local));
-    }
+        dataDirs.push_back(local);
 
     cfgMgr.processPaths(dataDirs);
 
-    engine.setResourceDir(variables["resources"].as<Files::EscapeHashString>().toStdString());
+    engine.setResourceDir(variables["resources"].as<Files::EscapePath>().mPath);
     engine.setDataDirs(dataDirs);
 
     // fallback archives
@@ -232,7 +227,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     engine.setWarningsMode (variables["script-warn"].as<int>());
     engine.setScriptBlacklist (variables["script-blacklist"].as<Files::EscapeStringVector>().toStdStringVector());
     engine.setScriptBlacklistUse (variables["script-blacklist-use"].as<bool>());
-    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapeHashString>().toStdString());
+    engine.setSaveGameFile (variables["load-savegame"].as<Files::EscapePath>().mPath.string());
 
     // other settings
     Fallback::Map::init(variables["fallback"].as<FallbackMap>().mMap);
