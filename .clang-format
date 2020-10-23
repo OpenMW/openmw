@@ -36,7 +36,7 @@ BraceWrapping:
   #SplitEmptyRecord: true
   #SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: All
-BreakBeforeBraces: WebKit
+BreakBeforeBraces: Allman
 BreakBeforeInheritanceComma: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
