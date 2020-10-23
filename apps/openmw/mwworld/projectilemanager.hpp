@@ -56,7 +56,7 @@ namespace MWWorld
 
         void update(float dt);
 
-        void manualHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos);
+        void processHits();
 
         /// Removes all current projectiles. Should be called when switching to a new worldspace.
         void clear();
@@ -93,6 +93,8 @@ namespace MWWorld
 
             // MW-id of an arrow projectile
             std::string mIdArrow;
+
+            bool mToDelete;
         };
 
         struct MagicBoltState : public State

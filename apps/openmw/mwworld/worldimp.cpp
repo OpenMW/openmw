@@ -843,11 +843,6 @@ namespace MWWorld
         }
     }
 
-    void World::manualProjectileHit(int projectileId, const MWWorld::Ptr& target, const osg::Vec3f& pos)
-    {
-        mProjectileManager->manualHit(projectileId, target, pos);
-    }
-
     void World::disable (const Ptr& reference)
     {
         if (!reference.getRefData().isEnabled())
@@ -1498,6 +1493,7 @@ namespace MWWorld
         mProjectileManager->update(duration);
 
         const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        mProjectileManager->processHits();
         mDiscardMovements = false;
 
         for(const auto& [actor, position]: results)

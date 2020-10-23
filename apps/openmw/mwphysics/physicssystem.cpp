@@ -115,11 +115,7 @@ namespace MWPhysics
 
         mObjects.clear();
         mActors.clear();
-
-        for (ProjectileMap::iterator it = mProjectiles.begin(); it != mProjectiles.end(); ++it)
-        {
-            delete it->second;
-        }
+        mProjectiles.clear();
     }
 
     void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
@@ -255,7 +251,7 @@ namespace MWPhysics
         return 0.f;
     }
 
-    PhysicsSystem::RayResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
+    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
     {
         if (from == to)
         {
@@ -305,17 +301,7 @@ namespace MWPhysics
             result.mHitPos = Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
             result.mHitNormal = Misc::Convert::toOsg(resultCallback.m_hitNormalWorld);
             if (PtrHolder* ptrHolder = static_cast<PtrHolder*>(resultCallback.m_collisionObject->getUserPointer()))
-            {
                 result.mHitObject = ptrHolder->getPtr();
-
-                if (group == CollisionType_Projectile)
-                {
-                    Projectile* projectile = static_cast<Projectile*>(ptrHolder);
-                    result.mProjectileId = projectile->getProjectileId();
-                }
-                else
-                    result.mProjectileId = -1;
-            }
         }
         return result;
     }
@@ -523,13 +509,7 @@ namespace MWPhysics
     {
         ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
         if (foundProjectile != mProjectiles.end())
-        {
-            delete foundProjectile->second;
             mProjectiles.erase(foundProjectile);
-
-            if (projectileId == mProjectileId)
-                mProjectileId--;
-        }
     }
 
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
@@ -583,6 +563,14 @@ namespace MWPhysics
         return nullptr;
     }
 
+    Projectile* PhysicsSystem::getProjectile(int projectileId) const
+    {
+        ProjectileMap::const_iterator found = mProjectiles.find(projectileId);
+        if (found != mProjectiles.end())
+            return found->second.get();
+        return nullptr;
+    }
+
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -608,7 +596,7 @@ namespace MWPhysics
         if (foundProjectile != mProjectiles.end())
         {
             foundProjectile->second->setPosition(position);
-            mCollisionWorld->updateSingleAabb(foundProjectile->second->getCollisionObject());
+            mTaskScheduler->updateSingleAabb(foundProjectile->second);
             return;
         }
     }
@@ -676,8 +664,8 @@ namespace MWPhysics
     int PhysicsSystem::addProjectile (const osg::Vec3f& position)
     {
         mProjectileId++;
-        Projectile* projectile = new Projectile(mProjectileId, position, mCollisionWorld);
-        mProjectiles.insert(std::make_pair(mProjectileId, projectile));
+        auto projectile = std::make_shared<Projectile>(mProjectileId, position, mTaskScheduler.get());
+        mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;
     }

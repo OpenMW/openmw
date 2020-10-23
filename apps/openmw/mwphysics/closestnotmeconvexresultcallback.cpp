@@ -26,12 +26,13 @@ namespace MWPhysics
         if (convexResult.m_hitCollisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Projectile)
         {
             Projectile* projectileHolder = static_cast<Projectile*>(convexResult.m_hitCollisionObject->getUserPointer());
-            int projectileId = projectileHolder->getProjectileId();
+            if (!projectileHolder->isActive())
+                return btScalar(1);
             PtrHolder* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
             const MWWorld::Ptr target = targetHolder->getPtr();
 
             osg::Vec3f pos = Misc::Convert::makeOsgVec3f(convexResult.m_hitPointLocal);
-            MWBase::Environment::get().getWorld()->manualProjectileHit(projectileId, target, pos);
+            projectileHolder->hit(target, pos);
             return btScalar(1);
         }
 

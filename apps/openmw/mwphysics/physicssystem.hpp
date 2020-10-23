@@ -139,6 +139,8 @@ namespace MWPhysics
 
             const Object* getObject(const MWWorld::ConstPtr& ptr) const;
 
+            Projectile* getProjectile(int projectileId) const;
+
             // Object or Actor
             void remove (const MWWorld::Ptr& ptr);
 
@@ -172,15 +174,6 @@ namespace MWPhysics
             /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be successful.
             /// \note Only Actor targets are supported at the moment.
             float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const override;
-
-            struct RayResult
-            {
-                bool mHit;
-                osg::Vec3f mHitPos;
-                osg::Vec3f mHitNormal;
-                MWWorld::Ptr mHitObject;
-                int mProjectileId;
-            };
 
             /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all other actors.
             RayCastingResult castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore = MWWorld::ConstPtr(),
@@ -282,7 +275,7 @@ namespace MWPhysics
 
             ActorMap mActors;
 
-            using ProjectileMap = std::map<int, Projectile *>;
+            using ProjectileMap = std::map<int, std::shared_ptr<Projectile>>;
             ProjectileMap mProjectiles;
 
             using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;
@@ -295,7 +288,7 @@ namespace MWPhysics
 
             float mTimeAccum;
 
-            int mProjectileId;
+            unsigned int mProjectileId;
 
             float mWaterHeight;
             bool mWaterEnabled;
