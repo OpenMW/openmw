@@ -14,16 +14,16 @@ namespace ContentSelectorView
     {
         Q_OBJECT
 
-        QMenu *mContextMenu;
+        QMenu *mContextMenu{};
 
     protected:
 
-        ContentSelectorModel::ContentModel *mContentModel;
-        QSortFilterProxyModel *mAddonProxyModel;
+        ContentSelectorModel::ContentModel *mContentModel{};
+        QSortFilterProxyModel *mAddonProxyModel{};
 
     public:
 
-        explicit ContentSelector(QWidget *parent = 0);
+        explicit ContentSelector(QWidget *parent = nullptr);
 
         QString currentFile() const;
 
@@ -54,7 +54,7 @@ namespace ContentSelectorView
 
    private:
 
-        Ui::ContentSelector ui;
+        Ui::ContentSelector ui{};
 
         void buildContentModel();
         void buildGameFileView();
