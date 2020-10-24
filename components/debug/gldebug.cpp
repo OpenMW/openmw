@@ -38,7 +38,7 @@ either expressed or implied, of the FreeBSD Project.
 // OpenGL constants not provided by OSG:
 #include <SDL_opengl_glext.h>
 
-void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+void debugCallback(GLenum source, GLenum type, GLuint /*id*/, GLenum /*severity*/, GLsizei /*length*/, const GLchar *message, const void */*userParam*/)
 {
 #ifdef GL_DEBUG_OUTPUT
     std::string srcStr;

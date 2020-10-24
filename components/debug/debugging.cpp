@@ -86,7 +86,7 @@ namespace Debug
     }
 }
 
-int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
+int wrapApplication(int (*innerApplication)(int /*argc*/, char* /*argv*/[]), int argc, char *argv[], const std::string& appName)
 {
 #if defined _WIN32
     (void)Debug::attachParentConsole();
@@ -110,7 +110,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
     const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
     boost::filesystem::ofstream logfile;
 
-    int ret = 0;
+    int ret;
     try
     {
         Files::ConfigurationManager cfgMgr;

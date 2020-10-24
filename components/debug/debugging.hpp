@@ -109,7 +109,7 @@ namespace Debug
             return size;
         }
 
-        virtual ~Tee() {}
+        ~Tee() override = default;
 
     private:
 

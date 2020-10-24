@@ -30,7 +30,7 @@ class Log
     std::unique_lock<std::mutex> mLock;
 public:
     // Locks a global lock while the object is alive
-    Log(Debug::Level level) :
+    explicit Log(Debug::Level level) :
     mLock(sLock),
     mLevel(level)
     {
