@@ -9,8 +9,6 @@
 
 #include <osg/Vec2i>
 
-#include <boost/optional.hpp>
-
 #include <map>
 #include <unordered_map>
 #include <list>

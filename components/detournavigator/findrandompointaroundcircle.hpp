@@ -3,8 +3,7 @@
 
 #include "flags.hpp"
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <osg/Vec3f>
 
 class dtNavMesh;

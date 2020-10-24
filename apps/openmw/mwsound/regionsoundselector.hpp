@@ -1,8 +1,7 @@
 #ifndef GAME_SOUND_REGIONSOUNDSELECTOR_H
 #define GAME_SOUND_REGIONSOUNDSELECTOR_H
 
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <string>
 
 namespace MWBase

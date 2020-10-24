@@ -18,8 +18,6 @@
 
 #include <components/misc/convert.hpp>
 
-#include <boost/optional.hpp>
-
 #include <osg/Vec3f>
 
 #include <vector>

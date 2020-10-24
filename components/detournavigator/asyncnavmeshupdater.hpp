@@ -9,8 +9,6 @@
 
 #include <osg/Vec3f>
 
-#include <boost/optional.hpp>
-
 #include <atomic>
 #include <chrono>
 #include <condition_variable>

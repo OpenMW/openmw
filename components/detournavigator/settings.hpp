@@ -1,10 +1,9 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGS_H
 
-#include <boost/optional.hpp>
-
-#include <string>
 #include <chrono>
+#include <optional>
+#include <string>
 
 namespace DetourNavigator
 {

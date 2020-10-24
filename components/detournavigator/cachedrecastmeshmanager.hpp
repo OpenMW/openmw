@@ -3,8 +3,6 @@
 
 #include "recastmeshmanager.hpp"
 
-#include <boost/optional.hpp>
-
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
