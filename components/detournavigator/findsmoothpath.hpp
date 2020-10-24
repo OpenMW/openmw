@@ -19,7 +19,7 @@
 #include <components/misc/convert.hpp>
 
 #include <osg/Vec3f>
-
+#include <cassert>
 #include <vector>
 
 class dtNavMesh;
