@@ -9,9 +9,10 @@
 
 #include <osg/Vec2i>
 
-#include <map>
-#include <unordered_map>
 #include <list>
+#include <map>
+#include <optional>
+#include <unordered_map>
 
 class btCollisionShape;
 
