@@ -100,7 +100,7 @@ namespace DetourNavigator
                      const AreaType areaType, const TilePosition& tilePosition, float border,
                      std::map<TilePosition, CachedRecastMeshManager>& tiles);
 
-        bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
+        static bool updateTile(const ObjectId id, const btTransform& transform, const AreaType areaType,
                         const TilePosition& tilePosition, std::map<TilePosition, CachedRecastMeshManager>& tiles);
 
         std::optional<RemovedRecastMeshObject> removeTile(const ObjectId id, const TilePosition& tilePosition,

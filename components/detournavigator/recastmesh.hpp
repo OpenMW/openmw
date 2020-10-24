@@ -25,7 +25,7 @@ namespace DetourNavigator
         };
 
         RecastMesh(std::size_t generation, std::size_t revision, std::vector<int> indices, std::vector<float> vertices,
-            std::vector<AreaType> areaTypes, std::vector<Water> water, const std::size_t trianglesPerChunk);
+            std::vector<AreaType> areaTypes, std::vector<Water> water, std::size_t trianglesPerChunk);
 
         std::size_t getGeneration() const
         {

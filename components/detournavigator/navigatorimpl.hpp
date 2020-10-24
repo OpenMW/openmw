@@ -15,27 +15,27 @@ namespace DetourNavigator
          * @brief Navigator constructor initializes all internal data. Constructed object is ready to build a scene.
          * @param settings allows to customize navigator work. Constructor is only place to set navigator settings.
          */
-        explicit NavigatorImpl(const Settings& settings);
+        explicit NavigatorImpl(Settings  settings);
 
         void addAgent(const osg::Vec3f& agentHalfExtents) override;
 
         void removeAgent(const osg::Vec3f& agentHalfExtents) override;
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
+        bool addObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
 
-        bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
+        bool addObject(ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
-        bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
+        bool addObject(ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
 
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
+        bool updateObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform) override;
 
-        bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
+        bool updateObject(ObjectId id, const ObjectShapes& shapes, const btTransform& transform) override;
 
-        bool updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
+        bool updateObject(ObjectId id, const DoorShapes& shapes, const btTransform& transform) override;
 
-        bool removeObject(const ObjectId id) override;
+        bool removeObject(ObjectId id) override;
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, btScalar level,
             const btTransform& transform) override;
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
@@ -68,9 +68,9 @@ namespace DetourNavigator
         std::unordered_map<ObjectId, ObjectId> mAvoidIds;
         std::unordered_map<ObjectId, ObjectId> mWaterIds;
 
-        void updateAvoidShapeId(const ObjectId id, const ObjectId avoidId);
-        void updateWaterShapeId(const ObjectId id, const ObjectId waterId);
-        void updateId(const ObjectId id, const ObjectId waterId, std::unordered_map<ObjectId, ObjectId>& ids);
+        void updateAvoidShapeId(ObjectId id, ObjectId avoidId);
+        void updateWaterShapeId(ObjectId id, ObjectId waterId);
+        void updateId(ObjectId id, ObjectId waterId, std::unordered_map<ObjectId, ObjectId>& ids);
         void removeUnusedNavMeshes();
     };
 }

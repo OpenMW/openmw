@@ -22,7 +22,7 @@ namespace DetourNavigator
     class OffMeshConnectionsManager
     {
     public:
-        OffMeshConnectionsManager(const Settings& settings)
+        explicit OffMeshConnectionsManager(const Settings& settings)
             : mSettings(settings)
         {}
 
@@ -98,7 +98,7 @@ namespace DetourNavigator
         const Settings& mSettings;
         Misc::ScopeGuarded<Values> mValues;
 
-        void removeByTilePosition(std::map<TilePosition, std::unordered_set<ObjectId>>& valuesByTilePosition,
+        static void removeByTilePosition(std::map<TilePosition, std::unordered_set<ObjectId>>& valuesByTilePosition,
             const TilePosition& tilePosition, const ObjectId id)
         {
             const auto it = valuesByTilePosition.find(tilePosition);

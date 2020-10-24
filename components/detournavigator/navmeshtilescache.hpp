@@ -103,7 +103,7 @@ namespace DetourNavigator
             ItemIterator mIterator;
         };
 
-        NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
+        explicit NavMeshTilesCache(std::size_t maxNavMeshDataSize);
 
         Value get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
             const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections);
@@ -178,7 +178,7 @@ namespace DetourNavigator
                 return compare(other.getValue()) < 0;
             }
 
-            virtual ~RecastMeshKeyView() = default;
+            ~RecastMeshKeyView() override = default;
 
         private:
             std::reference_wrapper<const RecastMesh> mRecastMesh;

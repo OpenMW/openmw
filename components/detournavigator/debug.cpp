@@ -4,7 +4,6 @@
 
 #include <DetourNavMesh.h>
 
-#include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
 namespace DetourNavigator
@@ -70,7 +69,7 @@ namespace DetourNavigator
             throw NavigatorException("Open file failed: " + path);
         file.exceptions(std::ios::failbit | std::ios::badbit);
 
-        NavMeshSetHeader header;
+        NavMeshSetHeader header{};
         header.magic = navMeshSetMagic;
         header.version = navMeshSetVersion;
         header.numTiles = 0;
@@ -92,7 +91,7 @@ namespace DetourNavigator
             if (!tile || !tile->header || !tile->dataSize)
                 continue;
 
-            NavMeshTileHeader tileHeader;
+            NavMeshTileHeader tileHeader{};
             tileHeader.tileRef = navMesh.getTileRef(tile);
             tileHeader.dataSize = tile->dataSize;
 

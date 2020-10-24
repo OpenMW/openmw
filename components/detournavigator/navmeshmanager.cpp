@@ -8,8 +8,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <DetourNavMesh.h>
-
 namespace
 {
     using DetourNavigator::ChangeType;

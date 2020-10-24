@@ -11,6 +11,7 @@
 #include <DetourNavMesh.h>
 
 #include <map>
+#include <utility>
 
 namespace DetourNavigator
 {
@@ -118,8 +119,8 @@ namespace DetourNavigator
     class NavMeshCacheItem
     {
     public:
-        NavMeshCacheItem(const NavMeshPtr& impl, std::size_t generation)
-            : mImpl(impl), mGeneration(generation), mNavMeshRevision(0)
+        NavMeshCacheItem(NavMeshPtr  impl, std::size_t generation)
+            : mImpl(std::move(impl)), mGeneration(generation), mNavMeshRevision(0)
         {
         }
 

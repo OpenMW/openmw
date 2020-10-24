@@ -4,13 +4,12 @@
 
 #include <components/esm/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
-
-#include <Recast.h>
+#include <utility>
 
 namespace DetourNavigator
 {
-    NavigatorImpl::NavigatorImpl(const Settings& settings)
-        : mSettings(settings)
+    NavigatorImpl::NavigatorImpl(Settings  settings)
+        : mSettings(std::move(settings))
         , mNavMeshManager(mSettings)
         , mUpdatesEnabled(true)
     {

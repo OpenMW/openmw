@@ -11,7 +11,7 @@ namespace DetourNavigator
     {
         osg::Vec3f mStart;
         osg::Vec3f mEnd;
-        AreaType mAreaType;
+        AreaType mAreaType{};
     };
 }
 

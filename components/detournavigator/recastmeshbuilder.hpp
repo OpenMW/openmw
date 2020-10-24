@@ -22,17 +22,17 @@ namespace DetourNavigator
     public:
         RecastMeshBuilder(const Settings& settings, const TileBounds& bounds);
 
-        void addObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btCollisionShape& shape, const btTransform& transform, AreaType areaType);
 
-        void addObject(const btCompoundShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btCompoundShape& shape, const btTransform& transform, AreaType areaType);
 
-        void addObject(const btConcaveShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btConcaveShape& shape, const btTransform& transform, AreaType areaType);
 
-        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btHeightfieldTerrainShape& shape, const btTransform& transform, AreaType areaType);
 
-        void addObject(const btBoxShape& shape, const btTransform& transform, const AreaType areaType);
+        void addObject(const btBoxShape& shape, const btTransform& transform, AreaType areaType);
 
-        void addWater(const int mCellSize, const btTransform& transform);
+        void addWater(int mCellSize, const btTransform& transform);
 
         std::shared_ptr<RecastMesh> create(std::size_t generation, std::size_t revision);
 

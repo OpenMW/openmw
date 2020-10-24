@@ -71,7 +71,7 @@ namespace DetourNavigator
          * @param transform allows to setup object geometry according to its world state.
          * @return true if object is added, false if there is already object with given id.
          */
-        virtual bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
+        virtual bool addObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
 
         /**
          * @brief addObject is used to add complex object with allowed to walk and avoided to walk shapes
@@ -80,7 +80,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state
          * @return true if object is added, false if there is already object with given id
          */
-        virtual bool addObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
+        virtual bool addObject(ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief addObject is used to add doors.
@@ -89,7 +89,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is added, false if there is already object with given id.
          */
-        virtual bool addObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
+        virtual bool addObject(ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -98,7 +98,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        virtual bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
+        virtual bool updateObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -107,7 +107,7 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        virtual bool updateObject(const ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
+        virtual bool updateObject(ObjectId id, const ObjectShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief updateObject replace object geometry by given data.
@@ -116,14 +116,14 @@ namespace DetourNavigator
          * @param transform allows to setup objects geometry according to its world state.
          * @return true if object is updated, false if there is no object with given id.
          */
-        virtual bool updateObject(const ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
+        virtual bool updateObject(ObjectId id, const DoorShapes& shapes, const btTransform& transform) = 0;
 
         /**
          * @brief removeObject to make it no more available at the scene.
          * @param id is used to find object.
          * @return true if object is removed, false if there is no object with given id.
          */
-        virtual bool removeObject(const ObjectId id) = 0;
+        virtual bool removeObject(ObjectId id) = 0;
 
         /**
          * @brief addWater is used to set water level at given world cell.
@@ -135,7 +135,7 @@ namespace DetourNavigator
          * at least single object is added to the scene, false if there is already water for given cell or there is no
          * any other objects.
          */
-        virtual bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btScalar level,
+        virtual bool addWater(const osg::Vec2i& cellPosition, int cellSize, btScalar level,
             const btTransform& transform) = 0;
 
         /**
@@ -221,7 +221,7 @@ namespace DetourNavigator
          * @return not empty optional with position if point is found and empty optional if point is not found.
          */
         std::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
-            const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
+            const osg::Vec3f& start, float maxRadius, Flags includeFlags) const;
 
         virtual RecastMeshTiles getRecastMeshTiles() = 0;
     };

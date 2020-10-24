@@ -16,9 +16,9 @@ namespace DetourNavigator
     class RecastMeshObject
     {
         public:
-            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, const AreaType areaType);
+            RecastMeshObject(const btCollisionShape& shape, const btTransform& transform, AreaType areaType);
 
-            bool update(const btTransform& transform, const AreaType areaType);
+            bool update(const btTransform& transform, AreaType areaType);
 
             const btCollisionShape& getShape() const
             {

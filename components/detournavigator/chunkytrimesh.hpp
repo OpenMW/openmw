@@ -19,8 +19,8 @@ namespace DetourNavigator
     struct ChunkyTriMeshNode
     {
         Rect mBounds;
-        std::ptrdiff_t mOffset;
-        std::size_t mSize;
+        std::ptrdiff_t mOffset{};
+        std::size_t mSize{};
     };
 
     struct Chunk
@@ -33,8 +33,8 @@ namespace DetourNavigator
     inline bool checkOverlapRect(const Rect& lhs, const Rect& rhs)
     {
         bool overlap = true;
-        overlap = (lhs.mMinBound.x() > rhs.mMaxBound.x() || lhs.mMaxBound.x() < rhs.mMinBound.x()) ? false : overlap;
-        overlap = (lhs.mMinBound.y() > rhs.mMaxBound.y() || lhs.mMaxBound.y() < rhs.mMinBound.y()) ? false : overlap;
+        overlap = !(lhs.mMinBound.x() > rhs.mMaxBound.x() || lhs.mMaxBound.x() < rhs.mMinBound.x()) && overlap;
+        overlap = !(lhs.mMinBound.y() > rhs.mMaxBound.y() || lhs.mMaxBound.y() < rhs.mMinBound.y()) && overlap;
         return overlap;
     }
 
@@ -44,7 +44,7 @@ namespace DetourNavigator
         /// Creates partitioned triangle mesh (AABB tree),
         /// where each node contains at max trisPerChunk triangles.
         ChunkyTriMesh(const std::vector<float>& verts, const std::vector<int>& tris,
-                      const std::vector<AreaType>& flags, const std::size_t trisPerChunk);
+                      const std::vector<AreaType>& flags, std::size_t trisPerChunk);
 
         ChunkyTriMesh(const ChunkyTriMesh&) = delete;
         ChunkyTriMesh& operator=(const ChunkyTriMesh&) = delete;

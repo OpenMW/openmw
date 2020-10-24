@@ -1,7 +1,5 @@
 #include "recastmeshobject.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
 #include <cassert>
@@ -37,7 +35,7 @@ namespace DetourNavigator
             result = true;
         }
         if (mShape.get().isCompound())
-            result = updateCompoundObject(static_cast<const btCompoundShape&>(mShape.get()), mAreaType, mChildren)
+            result = updateCompoundObject(dynamic_cast<const btCompoundShape&>(mShape.get()), mAreaType, mChildren)
                     || result;
         return result;
     }
@@ -58,7 +56,7 @@ namespace DetourNavigator
     std::vector<RecastMeshObject> makeChildrenObjects(const btCollisionShape& shape, const AreaType areaType)
     {
         if (shape.isCompound())
-            return makeChildrenObjects(static_cast<const btCompoundShape&>(shape), areaType);
+            return makeChildrenObjects(dynamic_cast<const btCompoundShape&>(shape), areaType);
         else
             return std::vector<RecastMeshObject>();
     }

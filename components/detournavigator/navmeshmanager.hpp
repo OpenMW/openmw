@@ -21,27 +21,27 @@ namespace DetourNavigator
     class NavMeshManager
     {
     public:
-        NavMeshManager(const Settings& settings);
+        explicit NavMeshManager(const Settings& settings);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
-                       const AreaType areaType);
+        bool addObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+                       AreaType areaType);
 
-        bool updateObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
-                          const AreaType areaType);
+        bool updateObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+                          AreaType areaType);
 
-        bool removeObject(const ObjectId id);
+        bool removeObject(ObjectId id);
 
         void addAgent(const osg::Vec3f& agentHalfExtents);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, const btTransform& transform);
 
         bool removeWater(const osg::Vec2i& cellPosition);
 
         bool reset(const osg::Vec3f& agentHalfExtents);
 
-        void addOffMeshConnection(const ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, const AreaType areaType);
+        void addOffMeshConnection(ObjectId id, const osg::Vec3f& start, const osg::Vec3f& end, AreaType areaType);
 
-        void removeOffMeshConnections(const ObjectId id);
+        void removeOffMeshConnections(ObjectId id);
 
         void update(osg::Vec3f playerPosition, const osg::Vec3f& agentHalfExtents);
 
@@ -66,11 +66,11 @@ namespace DetourNavigator
         std::map<osg::Vec3f, TilePosition> mPlayerTile;
         std::map<osg::Vec3f, std::size_t> mLastRecastMeshManagerRevision;
 
-        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, const ChangeType changeType);
+        void addChangedTiles(const btCollisionShape& shape, const btTransform& transform, ChangeType changeType);
 
-        void addChangedTiles(const int cellSize, const btTransform& transform, const ChangeType changeType);
+        void addChangedTiles(int cellSize, const btTransform& transform, ChangeType changeType);
 
-        void addChangedTile(const TilePosition& tilePosition, const ChangeType changeType);
+        void addChangedTile(const TilePosition& tilePosition, ChangeType changeType);
 
         SharedNavMeshCacheItem getCached(const osg::Vec3f& agentHalfExtents) const;
     };

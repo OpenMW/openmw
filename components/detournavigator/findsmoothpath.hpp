@@ -52,12 +52,12 @@ namespace DetourNavigator
     struct SteerTarget
     {
         osg::Vec3f steerPos;
-        unsigned char steerPosFlag;
-        dtPolyRef steerPosRef;
+        unsigned char steerPosFlag{};
+        dtPolyRef steerPosRef{};
     };
 
     std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
-            const osg::Vec3f& endPos, const float minTargetDist, const std::vector<dtPolyRef>& path);
+            const osg::Vec3f& endPos, float minTargetDist, const std::vector<dtPolyRef>& path);
 
     template <class OutputIterator>
     class OutputTransformIterator
@@ -158,10 +158,10 @@ namespace DetourNavigator
     {
         // Iterate over the path to find smooth path on the detail mesh surface.
         osg::Vec3f iterPos;
-        navMeshQuery.closestPointOnPoly(polygonPath.front(), start.ptr(), iterPos.ptr(), 0);
+        navMeshQuery.closestPointOnPoly(polygonPath.front(), start.ptr(), iterPos.ptr(), nullptr);
 
         osg::Vec3f targetPos;
-        navMeshQuery.closestPointOnPoly(polygonPath.back(), end.ptr(), targetPos.ptr(), 0);
+        navMeshQuery.closestPointOnPoly(polygonPath.back(), end.ptr(), targetPos.ptr(), nullptr);
 
         const float SLOP = 0.01f;
 

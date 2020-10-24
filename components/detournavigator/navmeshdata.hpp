@@ -21,7 +21,7 @@ namespace DetourNavigator
     struct NavMeshData
     {
         NavMeshDataValue mValue;
-        int mSize;
+        int mSize{};
 
         NavMeshData() = default;
 

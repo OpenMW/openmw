@@ -58,13 +58,13 @@ namespace DetourNavigator
             return path;
 
         // Get connected polygons
-        const dtMeshTile* tile = 0;
-        const dtPoly* poly = 0;
+        const dtMeshTile* tile = nullptr;
+        const dtPoly* poly = nullptr;
         if (dtStatusFailed(navQuery.getAttachedNavMesh()->getTileAndPolyByRef(path[0], &tile, &poly)))
             return path;
 
         const std::size_t maxNeis = 16;
-        std::array<dtPolyRef, maxNeis> neis;
+        std::array<dtPolyRef, maxNeis> neis{};
         std::size_t nneis = 0;
 
         for (unsigned int k = poly->firstLink; k != DT_NULL_LINK; k = tile->links[k].next)
@@ -109,9 +109,9 @@ namespace DetourNavigator
         // Find steer target.
         SteerTarget result;
         const int MAX_STEER_POINTS = 3;
-        std::array<float, MAX_STEER_POINTS * 3> steerPath;
-        std::array<unsigned char, MAX_STEER_POINTS> steerPathFlags;
-        std::array<dtPolyRef, MAX_STEER_POINTS> steerPathPolys;
+        std::array<float, MAX_STEER_POINTS * 3> steerPath{};
+        std::array<unsigned char, MAX_STEER_POINTS> steerPathFlags{};
+        std::array<dtPolyRef, MAX_STEER_POINTS> steerPathPolys{};
         int nsteerPath = 0;
         navQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path.data(), int(path.size()), steerPath.data(),
                                     steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, MAX_STEER_POINTS);

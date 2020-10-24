@@ -120,7 +120,7 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        std::size_t jobs = 0;
+        std::size_t jobs;
 
         {
             const std::lock_guard<std::mutex> lock(mMutex);
@@ -246,7 +246,7 @@ namespace DetourNavigator
         if (jobs.top().mProcessTime > now)
             return {};
 
-        Job job = std::move(jobs.top());
+        Job job = jobs.top();
         jobs.pop();
 
         if (changeLastUpdate && job.mChangeType == ChangeType::update)

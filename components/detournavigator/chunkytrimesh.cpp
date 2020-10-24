@@ -1,7 +1,4 @@
 #include "chunkytrimesh.hpp"
-#include "exceptions.hpp"
-
-#include <osg/Vec2f>
 
 #include <algorithm>
 
@@ -12,8 +9,8 @@ namespace DetourNavigator
         struct BoundsItem
         {
             Rect mBounds;
-            std::ptrdiff_t mOffset;
-            unsigned char mAreaTypes;
+            std::ptrdiff_t mOffset{};
+            unsigned char mAreaTypes{};
         };
 
         template <std::size_t axis>

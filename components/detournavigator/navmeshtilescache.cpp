@@ -107,9 +107,9 @@ namespace DetourNavigator
 
     void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
-        std::size_t navMeshCacheSize = 0;
-        std::size_t usedNavMeshTiles = 0;
-        std::size_t cachedNavMeshTiles = 0;
+        std::size_t navMeshCacheSize;
+        std::size_t usedNavMeshTiles;
+        std::size_t cachedNavMeshTiles;
 
         {
             const std::lock_guard<std::mutex> lock(mMutex);

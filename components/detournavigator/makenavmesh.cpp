@@ -137,7 +137,7 @@ namespace
     rcConfig makeConfig(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& boundsMin, const osg::Vec3f& boundsMax,
         const Settings& settings)
     {
-        rcConfig config;
+        rcConfig config{};
 
         config.cs = settings.mCellSize;
         config.ch = settings.mCellHeight;
@@ -267,7 +267,7 @@ namespace
                 osg::Vec3f(tileBoundsMax.x(), bounds.mMin.y(), tileBoundsMin.y()),
             }};
 
-            std::array<float, 4 * 3> convertedVertices;
+            std::array<float, 4 * 3> convertedVertices{};
             auto convertedVerticesIt = convertedVertices.begin();
 
             for (const auto& vertex : vertices)
@@ -417,7 +417,7 @@ namespace
         rcFilterWalkableLowHeightSpans(&context, config.walkableHeight, solid);
 
         rcPolyMesh polyMesh;
-        rcPolyMeshDetail polyMeshDetail;
+        rcPolyMeshDetail polyMeshDetail{};
         initPolyMeshDetail(polyMeshDetail);
         const PolyMeshDetailStackPtr polyMeshDetailPtr(&polyMeshDetail);
         if (!fillPolyMesh(context, config, solid, polyMesh, polyMeshDetail))
@@ -429,7 +429,7 @@ namespace
         const std::vector<unsigned char> offMeshConAreas = getOffMeshConAreas(offMeshConnections);
         const std::vector<unsigned short> offMeshConFlags = getOffMeshFlags(offMeshConnections);
 
-        dtNavMeshCreateParams params;
+        dtNavMeshCreateParams params{};
         params.verts = polyMesh.verts;
         params.vertCount = polyMesh.nverts;
         params.polys = polyMesh.polys;
@@ -498,7 +498,7 @@ namespace DetourNavigator
 
         const auto tilesBits = polysAndTilesBits - polysBits;
 
-        dtNavMeshParams params;
+        dtNavMeshParams params{};
         std::fill_n(params.orig, 3, 0.0f);
         params.tileWidth = settings.mTileSize * settings.mCellSize;
         params.tileHeight = settings.mTileSize * settings.mCellSize;
@@ -529,7 +529,6 @@ namespace DetourNavigator
             " changedTileDistance=" << getDistance(changedTile, playerTile);
 
         const auto params = *navMeshCacheItem->lockConst()->getImpl().getParams();
-        const osg::Vec3f origin(params.orig[0], params.orig[1], params.orig[2]);
 
         if (!recastMesh)
         {

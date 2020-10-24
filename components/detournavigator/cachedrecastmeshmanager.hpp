@@ -10,16 +10,16 @@ namespace DetourNavigator
     public:
         CachedRecastMeshManager(const Settings& settings, const TileBounds& bounds, std::size_t generation);
 
-        bool addObject(const ObjectId id, const btCollisionShape& shape, const btTransform& transform,
-                       const AreaType areaType);
+        bool addObject(ObjectId id, const btCollisionShape& shape, const btTransform& transform,
+                       AreaType areaType);
 
-        bool updateObject(const ObjectId id, const btTransform& transform, const AreaType areaType);
+        bool updateObject(ObjectId id, const btTransform& transform, AreaType areaType);
 
-        bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
+        bool addWater(const osg::Vec2i& cellPosition, int cellSize, const btTransform& transform);
 
         std::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
 
-        std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
+        std::optional<RemovedRecastMeshObject> removeObject(ObjectId id);
 
         std::shared_ptr<RecastMesh> getMesh();
 

@@ -41,14 +41,14 @@ namespace DetourNavigator
             if (uniqueVertices.size() == vertices.size() / 3)
                 return;
 
-            for (std::size_t i = 0, n = indices.size(); i < n; ++i)
+            for (int & indice : indices)
             {
-                const auto index = indices[i];
+                const auto index = indice;
                 const auto vertex = std::make_tuple(vertices[index * 3], vertices[index * 3 + 1], vertices[index * 3 + 2]);
                 const auto it = std::lower_bound(uniqueVertices.begin(), uniqueVertices.end(), vertex);
                 assert(it != uniqueVertices.end());
                 assert(*it == vertex);
-                indices[i] = std::distance(uniqueVertices.begin(), it);
+                indice = std::distance(uniqueVertices.begin(), it);
             }
 
             vertices.resize(uniqueVertices.size() * 3);
@@ -74,13 +74,13 @@ namespace DetourNavigator
                                       const AreaType areaType)
     {
         if (shape.isCompound())
-            return addObject(static_cast<const btCompoundShape&>(shape), transform, areaType);
+            return addObject(dynamic_cast<const btCompoundShape&>(shape), transform, areaType);
         else if (shape.getShapeType() == TERRAIN_SHAPE_PROXYTYPE)
-            return addObject(static_cast<const btHeightfieldTerrainShape&>(shape), transform, areaType);
+            return addObject(dynamic_cast<const btHeightfieldTerrainShape&>(shape), transform, areaType);
         else if (shape.isConcave())
-            return addObject(static_cast<const btConcaveShape&>(shape), transform, areaType);
+            return addObject(dynamic_cast<const btConcaveShape&>(shape), transform, areaType);
         else if (shape.getShapeType() == BOX_SHAPE_PROXYTYPE)
-            return addObject(static_cast<const btBoxShape&>(shape), transform, areaType);
+            return addObject(dynamic_cast<const btBoxShape&>(shape), transform, areaType);
         std::ostringstream message;
         message << "Unsupported shape type: " << BroadphaseNativeTypes(shape.getShapeType());
         throw InvalidArgument(message.str());
