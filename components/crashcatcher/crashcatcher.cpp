@@ -1,18 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
-#include <sys/param.h>
 #include <sys/utsname.h>
-#include <string.h>
-#include <errno.h>
-#include <limits.h>
-
-#include <pthread.h>
-#include <stdbool.h>
-#include <sys/ptrace.h>
+#include <cstring>
+#include <cerrno>
+#include <climits>
 
 #include <components/debug/debuglog.hpp>
 
@@ -205,10 +199,10 @@ static void gdb_info(pid_t pid)
     fflush(stdout);
 }
 
-static void sys_info(void)
+static void sys_info()
 {
 #ifdef __unix__
-    struct utsname info;
+    struct utsname info{};
     if(uname(&info))
         printf("!!! Failed to get system information\n");
     else
@@ -236,9 +230,8 @@ static size_t safe_write(int fd, const void *buf, size_t len)
     return ret;
 }
 
-static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
+static void crash_catcher(int signum, siginfo_t *siginfo, [[maybe_unused]] void *context)
 {
-    //ucontext_t *ucontext = (ucontext_t*)context;
     pid_t dbg_pid;
     int fd[2];
 
@@ -259,7 +252,7 @@ static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
 
     crash_info.signum = signum;
     crash_info.pid = getpid();
-    crash_info.has_siginfo = !!siginfo;
+    crash_info.has_siginfo = siginfo != nullptr;
     if(siginfo)
         crash_info.siginfo = *siginfo;
     if(cc_user_info)
@@ -302,7 +295,7 @@ static void crash_catcher(int signum, siginfo_t *siginfo, void *context)
                 raise(signum);
                 break;
             }
-        } while(1);
+        } while(true);
     }
 }
 
@@ -451,7 +444,7 @@ static void getExecPath(char **argv)
 
     if(argv[0][0] == '/')
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else if (getcwd(argv0, sizeof(argv0)) != NULL)
+    else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
         cwdlen = strlen(argv0);
         snprintf(argv0+cwdlen, sizeof(argv0)-cwdlen, "/%s", argv[0]);
@@ -460,7 +453,7 @@ static void getExecPath(char **argv)
 
 int crashCatcherInstallHandlers(int argc, char **argv, int num_signals, int *signals, const char *logfile, int (*user_info)(char*, char*))
 {
-    struct sigaction sa;
+    struct sigaction sa{};
     stack_t altss;
     int retval;
 
@@ -562,7 +555,7 @@ static bool is_debugger_present()
 void crashCatcherInstall(int argc, char **argv, const std::string &crashLogPath)
 {
     if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"))
-        if (std::atol(env) != 0)
+        if (std::strtol(env, nullptr, 10) != 0)
             return;
     if ((argc == 2 && strcmp(argv[1], crash_switch) == 0) || !is_debugger_present())
     {
