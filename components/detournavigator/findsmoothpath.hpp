@@ -58,7 +58,7 @@ namespace DetourNavigator
         dtPolyRef steerPosRef;
     };
 
-    boost::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
+    std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
             const osg::Vec3f& endPos, const float minTargetDist, const std::vector<dtPolyRef>& path);
 
     template <class OutputIterator>
@@ -111,7 +111,7 @@ namespace DetourNavigator
         std::vector<dtPolyRef> mVisited;
     };
 
-    inline boost::optional<MoveAlongSurfaceResult> moveAlongSurface(const dtNavMeshQuery& navMeshQuery,
+    inline std::optional<MoveAlongSurfaceResult> moveAlongSurface(const dtNavMeshQuery& navMeshQuery,
         const dtPolyRef startRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& filter,
         const std::size_t maxVisitedSize)
     {
@@ -128,7 +128,7 @@ namespace DetourNavigator
         return {std::move(result)};
     }
 
-    inline boost::optional<std::vector<dtPolyRef>> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+    inline std::optional<std::vector<dtPolyRef>> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
         const std::size_t maxSize)
     {
@@ -144,7 +144,7 @@ namespace DetourNavigator
         return {std::move(result)};
     }
 
-    inline boost::optional<float> getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
+    inline std::optional<float> getPolyHeight(const dtNavMeshQuery& navMeshQuery, const dtPolyRef ref, const osg::Vec3f& pos)
     {
         float result = 0.0f;
         const auto status = navMeshQuery.getPolyHeight(ref, pos.ptr(), &result);

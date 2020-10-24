@@ -103,7 +103,7 @@ namespace DetourNavigator
         return result;
     }
 
-    boost::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
+    std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
             const osg::Vec3f& endPos, const float minTargetDist, const std::vector<dtPolyRef>& path)
     {
         // Find steer target.
@@ -117,7 +117,7 @@ namespace DetourNavigator
                                     steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, MAX_STEER_POINTS);
         assert(nsteerPath >= 0);
         if (!nsteerPath)
-            return boost::none;
+            return std::nullopt;
 
         // Find vertex far enough to steer to.
         std::size_t ns = 0;
@@ -131,7 +131,7 @@ namespace DetourNavigator
         }
         // Failed to find good point to steer to.
         if (ns >= static_cast<std::size_t>(nsteerPath))
-            return boost::none;
+            return std::nullopt;
 
         dtVcopy(result.steerPos.ptr(), &steerPath[ns * 3]);
         result.steerPos.y() = startPos[1];

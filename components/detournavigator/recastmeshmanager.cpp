@@ -34,11 +34,11 @@ namespace DetourNavigator
         return true;
     }
 
-    boost::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(const ObjectId id)
+    std::optional<RemovedRecastMeshObject> RecastMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mObjects.find(id);
         if (object == mObjects.end())
-            return boost::none;
+            return std::nullopt;
         const RemovedRecastMeshObject result {object->second->getShape(), object->second->getTransform()};
         mObjectsOrder.erase(object->second);
         mObjects.erase(object);
@@ -59,11 +59,11 @@ namespace DetourNavigator
         return true;
     }
 
-    boost::optional<RecastMeshManager::Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<RecastMeshManager::Water> RecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mWater.find(cellPosition);
         if (water == mWater.end())
-            return boost::none;
+            return std::nullopt;
         ++mRevision;
         const auto result = *water->second;
         mWaterOrder.erase(water->second);

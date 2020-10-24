@@ -15,7 +15,7 @@ namespace MWSound
     class RegionSoundSelector
     {
         public:
-            boost::optional<std::string> getNextRandom(float duration, const std::string& regionName,
+            std::optional<std::string> getNextRandom(float duration, const std::string& regionName,
                                                        const MWBase::World& world);
 
         private:

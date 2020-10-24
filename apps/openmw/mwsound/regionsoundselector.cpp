@@ -18,7 +18,7 @@ namespace MWSound
         }
     }
 
-    boost::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
+    std::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
                                                                     const MWBase::World& world)
     {
         mTimePassed += duration;
