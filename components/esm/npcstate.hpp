@@ -17,16 +17,16 @@ namespace ESM
         CreatureStats mCreatureStats;
 
         /// Initialize to default state
-        void blank();
+        void blank() override;
 
-        void load (ESMReader &esm) final;
-        void save (ESMWriter &esm, bool inInventory = false) const final;
+        void load (ESMReader &esm) override;
+        void save (ESMWriter &esm, bool inInventory = false) const override;
 
-        NpcState& asNpcState() final
+        NpcState& asNpcState() override
         {
             return *this;
         }
-        const NpcState& asNpcState() const final
+        const NpcState& asNpcState() const override
         {
             return *this;
         }

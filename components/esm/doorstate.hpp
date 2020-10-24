@@ -11,14 +11,14 @@ namespace ESM
     {
         int mDoorState = 0;
 
-        void load (ESMReader &esm) final;
-        void save (ESMWriter &esm, bool inInventory = false) const final;
+        void load (ESMReader &esm) override;
+        void save (ESMWriter &esm, bool inInventory = false) const override;
 
-        DoorState& asDoorState() final
+        DoorState& asDoorState() override
         {
             return *this;
         }
-        const DoorState& asDoorState() const final
+        const DoorState& asDoorState() const override
         {
             return *this;
         }

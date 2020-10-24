@@ -21,7 +21,7 @@ namespace Compiler
     {
         public:
 
-            const char *what() const noexcept final { return "Can't read file"; }
+            const char *what() const noexcept override { return "Can't read file"; }
             ///< Return error message
     };
 
@@ -31,7 +31,7 @@ namespace Compiler
     {
         public:
 
-            const char *what() const noexcept final { return "End of file"; }
+            const char *what() const noexcept override { return "End of file"; }
             ///< Return error message
     };
 }

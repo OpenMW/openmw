@@ -10,7 +10,7 @@ namespace MWGui
         MYGUI_RTTI_DERIVED( AutoSizedResourceSkin )
 
     public:
-        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) final;
+        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) override;
     };
 
 }

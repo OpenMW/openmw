@@ -74,12 +74,12 @@ namespace
         MyGUI::Colour mNormalColour;
         MyGUI::Colour mHoverColour;
 
-        void onMouseLostFocus(MyGUI::Widget* _new) final
+        void onMouseLostFocus(MyGUI::Widget* _new) override
         {
             setColour(mNormalColour);
         }
 
-        void onMouseSetFocus(MyGUI::Widget* _old) final
+        void onMouseSetFocus(MyGUI::Widget* _old) override
         {
             setColour(mHoverColour);
         }

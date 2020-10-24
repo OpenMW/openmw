@@ -1,8 +1,6 @@
 #include "opcodes.hpp"
 
-namespace Compiler
-{
-    namespace Control
+namespace Compiler::Control
     {
         const char *controls[numberOfControls] =
         {
@@ -10,4 +8,3 @@ namespace Compiler
             "playerviewswitch", "vanitymode"
         };
     }
-}

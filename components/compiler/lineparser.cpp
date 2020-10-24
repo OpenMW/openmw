@@ -260,7 +260,7 @@ namespace Compiler
                         /// \todo add option to disable this
                         std::unique_ptr<ErrorDowngrade> errorDowngrade (nullptr);
                         if (Misc::StringUtils::lowerCase (loc.mLiteral)=="positioncell")
-                            errorDowngrade.reset (new ErrorDowngrade (getErrorHandler()));
+                            errorDowngrade = std::make_unique<ErrorDowngrade> (getErrorHandler());
 
                         std::vector<Interpreter::Type_Code> code;
                         int optionals = mExprParser.parseArguments (argumentType, scanner, code, keyword);

@@ -25,8 +25,7 @@ namespace Compiler
     {
         const std::vector<std::string>& collection = get (type);
 
-        std::vector<std::string>::const_iterator iter =
-            std::find (collection.begin(), collection.end(), name);
+        auto iter = std::find (collection.begin(), collection.end(), name);
 
         if (iter==collection.end())
             return -1;

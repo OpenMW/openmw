@@ -1,7 +1,6 @@
 #ifndef COMPILER_SCRIPTPARSER_H_INCLUDED
 #define COMPILER_SCRIPTPARSER_H_INCLUDED
 
-
 #include "parser.hpp"
 #include "lineparser.hpp"
 #include "controlparser.hpp"

@@ -15,11 +15,11 @@ namespace MWMechanics
         public:
             AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell=false);
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Cast; }
 
-            MWWorld::Ptr getTarget() const final;
+            MWWorld::Ptr getTarget() const override;
 
             static constexpr Options makeDefaultOptions()
             {
