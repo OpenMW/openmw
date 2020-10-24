@@ -8,10 +8,11 @@
 #include <QDebug>
 
 #include <components/esm/esmreader.hpp>
+#include <utility>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
     QAbstractTableModel(parent),
-    mWarningIcon(warningIcon),
+    mWarningIcon(std::move(warningIcon)),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),
@@ -81,7 +82,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
 QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *item) const
 {
     //workaround: non-const pointer cast for calls from outside contentmodel/contentselector
-    EsmFile *non_const_file_ptr = const_cast<EsmFile *>(item);
+    auto *non_const_file_ptr = const_cast<EsmFile *>(item);
 
     if (item)
         return index(mFiles.indexOf(non_const_file_ptr),0);
@@ -354,7 +355,7 @@ QMimeData *ContentSelectorModel::ContentModel::mimeData(const QModelIndexList &i
         encodedData.append(item(index.row())->encodedData());
     }
 
-    QMimeData *mimeData = new QMimeData();
+    auto *mimeData = new QMimeData();
     mimeData->setData(mMimeType, encodedData);
 
     return mimeData;
@@ -438,11 +439,10 @@ void ContentSelectorModel::ContentModel::addFiles(const QString &path)
             fileReader.setEncoder(&encoder);
             fileReader.open(std::string(dir.absoluteFilePath(path2).toUtf8().constData()));
 
-            EsmFile *file = new EsmFile(path2);
+            auto *file = new EsmFile(path2);
          
-            for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-                itemIter != fileReader.getGameFiles().end(); ++itemIter)
-                file->addGameFile(QString::fromUtf8(itemIter->name.c_str()));
+            for (const auto & itemIter : fileReader.getGameFiles())
+                file->addGameFile(QString::fromUtf8(itemIter.name.c_str()));
 
             file->setAuthor     (QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate       (info.lastModified());

@@ -84,7 +84,7 @@ namespace Bsa
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
         CompressedBSAFile();
-        virtual ~CompressedBSAFile();
+        ~CompressedBSAFile() override;
 
         //checks version of BSA from file header
         static BsaVersion detectVersion(std::string filePath);

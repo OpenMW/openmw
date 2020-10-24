@@ -2,6 +2,7 @@
 #define LOADORDERERROR_HPP
 
 #include <QString>
+#include <utility>
 
 namespace ContentSelectorModel
 {
@@ -19,7 +20,7 @@ namespace ContentSelectorModel
 
         inline LoadOrderError() : mErrorCode(ErrorCode_None) {}
         inline LoadOrderError(ErrorCode errorCode, QString fileName)
-            : mErrorCode(errorCode), mFileName(fileName) {}
+            : mErrorCode(errorCode), mFileName(std::move(fileName)) {}
         inline ErrorCode errorCode() const { return mErrorCode; }
         inline QString fileName() const { return mFileName; }
         QString toolTip() const;

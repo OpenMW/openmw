@@ -2,6 +2,7 @@
 
 #include <QMimeData>
 #include <QDataStream>
+#include <utility>
 
 int ContentSelectorModel::EsmFile::sPropertyCount = 7;
 QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/> \
@@ -13,7 +14,7 @@ QString ContentSelectorModel::EsmFile::sToolTip = QString("<b>Author:</b> %1<br/
 
 
 ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem *parent)
-                : ModelItem(parent), mFileName(fileName), mFormat(0)
+                : ModelItem(parent), mFileName(std::move(fileName)), mFormat(0)
 {}
 
 void ContentSelectorModel::EsmFile::setFileName(const QString &fileName)
@@ -65,7 +66,7 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
 
 bool ContentSelectorModel::EsmFile::isGameFile() const
 { 
-    return (mGameFiles.size() == 0) &&
+    return (mGameFiles.empty()) &&
         (mFileName.endsWith(QLatin1String(".esm"), Qt::CaseInsensitive) || 
         mFileName.endsWith(QLatin1String(".omwgame"), Qt::CaseInsensitive));
 }
@@ -76,31 +77,24 @@ QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) co
     {
     case FileProperty_FileName:
         return mFileName;
-        break;
 
     case FileProperty_Author:
         return mAuthor;
-        break;
 
     case FileProperty_Format:
         return mFormat;
-        break;
 
     case FileProperty_DateModified:
         return mModified.toString(Qt::ISODate);
-        break;
 
     case FileProperty_FilePath:
         return mPath;
-        break;
 
     case FileProperty_Description:
         return mDescription;
-        break;
 
     case FileProperty_GameFile:
         return mGameFiles;
-        break;
 
     default:
         break;

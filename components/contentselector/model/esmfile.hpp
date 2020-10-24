@@ -28,17 +28,14 @@ namespace ContentSelectorModel
             FileProperty_GameFile       = 6
         };
 
-        EsmFile(QString fileName = QString(), ModelItem *parent = 0);
-     //   EsmFile(const EsmFile &);
+        explicit EsmFile(QString fileName = QString(), ModelItem *parent = nullptr);
 
-        ~EsmFile()
-        {}
+        ~EsmFile() override = default;
 
-        void setFileProperty (const FileProperty prop, const QString &value);
+        void setFileProperty (FileProperty prop, const QString &value);
 
         void setFileName(const QString &fileName);
         void setAuthor(const QString &author);
-        void setSize(const int size);
         void setDate(const QDateTime &modified);
         void setFormat(const int format);
         void setFilePath(const QString &path);
@@ -46,7 +43,7 @@ namespace ContentSelectorModel
         void setDescription(const QString &description);
 
         inline void addGameFile (const QString &name) {mGameFiles.append(name); }
-        QVariant fileProperty (const FileProperty prop) const;
+        QVariant fileProperty (FileProperty prop) const;
 
         inline QString fileName() const             { return mFileName; }
         inline QString author() const               { return mAuthor; }

@@ -20,7 +20,7 @@ namespace Config
     class GameSettings
     {
     public:
-        GameSettings(Files::ConfigurationManager &cfg);
+        explicit GameSettings(Files::ConfigurationManager &cfg);
         ~GameSettings();
 
         inline QString value(const QString &key, const QString &defaultValue = QString())
