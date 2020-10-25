@@ -3,8 +3,6 @@
 
 #include "recastmeshmanager.hpp"
 
-#include <boost/optional.hpp>
-
 namespace DetourNavigator
 {
     class CachedRecastMeshManager
@@ -19,9 +17,9 @@ namespace DetourNavigator
 
         bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
 
-        boost::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<RecastMeshManager::Water> removeWater(const osg::Vec2i& cellPosition);
 
-        boost::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
+        std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
         std::shared_ptr<RecastMesh> getMesh();
 

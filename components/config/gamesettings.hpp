@@ -88,7 +88,7 @@ namespace Config
 
         static const char sContentKey[];
 
-        bool isOrderedLine(const QString& line) const;
+        static bool isOrderedLine(const QString& line) ;
     };
 }
 #endif // GAMESETTINGS_HPP

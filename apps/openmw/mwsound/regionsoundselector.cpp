@@ -24,7 +24,7 @@ namespace MWSound
     , mMaxTimeBetweenSounds(Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds"))
     {}
 
-    boost::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
+    std::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
                                                                     const MWBase::World& world)
     {
         mTimePassed += duration;

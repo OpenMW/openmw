@@ -8,12 +8,9 @@
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
-#include <boost/optional/optional_io.hpp>
-
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <iterator>
 #include <deque>
 
 MATCHER_P3(Vec3fEq, x, y, z, "")

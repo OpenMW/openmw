@@ -150,7 +150,7 @@ void BSAFile::readHeader()
 /// Get the index of a given file name, or -1 if not found
 int BSAFile::getIndex(const char *str) const
 {
-    Lookup::const_iterator it = mLookup.find(str);
+    auto it = mLookup.find(str);
     if(it == mLookup.end())
         return -1;
 

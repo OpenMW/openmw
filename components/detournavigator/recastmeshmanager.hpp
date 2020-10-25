@@ -9,11 +9,10 @@
 
 #include <osg/Vec2i>
 
-#include <boost/optional.hpp>
-
-#include <map>
-#include <unordered_map>
 #include <list>
+#include <map>
+#include <optional>
+#include <unordered_map>
 
 class btCollisionShape;
 
@@ -43,9 +42,9 @@ namespace DetourNavigator
 
         bool addWater(const osg::Vec2i& cellPosition, const int cellSize, const btTransform& transform);
 
-        boost::optional<Water> removeWater(const osg::Vec2i& cellPosition);
+        std::optional<Water> removeWater(const osg::Vec2i& cellPosition);
 
-        boost::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
+        std::optional<RemovedRecastMeshObject> removeObject(const ObjectId id);
 
         std::shared_ptr<RecastMesh> getMesh();
 

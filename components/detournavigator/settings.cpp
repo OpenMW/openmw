@@ -4,10 +4,10 @@
 
 namespace DetourNavigator
 {
-    boost::optional<Settings> makeSettingsFromSettingsManager()
+    std::optional<Settings> makeSettingsFromSettingsManager()
     {
         if (!::Settings::Manager::getBool("enable", "Navigator"))
-            return boost::optional<Settings>();
+            return std::optional<Settings>();
 
         Settings navigatorSettings;
 

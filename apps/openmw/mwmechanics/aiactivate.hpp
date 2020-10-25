@@ -24,15 +24,15 @@ namespace MWMechanics
         public:
             /// Constructor
             /** \param objectId Reference to object to activate **/
-            AiActivate(const std::string &objectId);
+            explicit AiActivate(const std::string &objectId);
 
-            AiActivate(const ESM::AiSequence::AiActivate* activate);
+            explicit AiActivate(const ESM::AiSequence::AiActivate* activate);
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Activate; }
 
-            void writeState(ESM::AiSequence::AiSequence& sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence& sequence) const override;
 
         private:
             const std::string mObjectId;

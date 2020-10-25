@@ -22,8 +22,8 @@ namespace Gui
         {
         }
 
-        void initialiseOverride() final;
-        void shutdownOverride() final;
+        void initialiseOverride() override;
+        void shutdownOverride() override;
 
         typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_ValueChanged;
         EventHandle_ValueChanged eventValueChanged;
@@ -36,8 +36,8 @@ namespace Gui
         void setMaxValue(int maxValue);
     private:
         void onEditTextChange(MyGUI::EditBox* sender);
-        void onKeyLostFocus(MyGUI::Widget* _new) final;
-        void onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char character) final;
+        void onKeyLostFocus(MyGUI::Widget* _new) override;
+        void onKeyButtonPressed(MyGUI::KeyCode key, MyGUI::Char character) override;
 
         int mValue;
 

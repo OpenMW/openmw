@@ -30,7 +30,7 @@ namespace MWMechanics
 
             AiEscort(const ESM::AiSequence::AiEscort* escort);
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Escort; }
 
@@ -42,11 +42,11 @@ namespace MWMechanics
                 return options;
             }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
+            osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             const std::string mCellId;

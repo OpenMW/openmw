@@ -2,7 +2,6 @@
 
 #include <cassert>
 #include <algorithm>
-#include <iterator>
 
 #include "locals.hpp"
 

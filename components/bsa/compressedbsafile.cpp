@@ -36,7 +36,6 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
-#include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/device/array.hpp>
 #include <components/bsa/memorystream.hpp>
 
@@ -103,8 +102,7 @@ CompressedBSAFile::CompressedBSAFile()
     : mCompressedByDefault(false), mEmbeddedFileNames(false)
 { }
 
-CompressedBSAFile::~CompressedBSAFile()
-{ }
+CompressedBSAFile::~CompressedBSAFile() = default;
 
 /// Read header information from the input source
 void CompressedBSAFile::readHeader()
@@ -183,7 +181,7 @@ void CompressedBSAFile::readHeader()
         else
             input.read(reinterpret_cast<char*>(&fr.offset), 4); // not sure purpose of offset
 
-        std::map<std::uint64_t, FolderRecord>::const_iterator lb = mFolders.lower_bound(hash);
+        auto lb = mFolders.lower_bound(hash);
         if (lb != mFolders.end() && !(mFolders.key_comp()(hash, lb->first)))
             fail("Archive found duplicate folder name hash");
         else
@@ -194,7 +192,7 @@ void CompressedBSAFile::readHeader()
     std::uint64_t fileHash;
     FileRecord file;
 
-    std::string folder("");
+    std::string folder;
     std::uint64_t folderHash;
     if ((archiveFlags & 0x1) == 0)
         folderCount = 1; // TODO: not tested - unit test necessary
@@ -209,7 +207,7 @@ void CompressedBSAFile::readHeader()
 
         folderHash = generateHash(folder, std::string());
 
-        std::map<std::uint64_t, FolderRecord>::iterator iter = mFolders.find(folderHash);
+        auto iter = mFolders.find(folderHash);
         if (iter == mFolders.end())
             fail("Archive folder name hash not found");
 
@@ -219,13 +217,13 @@ void CompressedBSAFile::readHeader()
             input.read(reinterpret_cast<char*>(&file.size), 4);
             input.read(reinterpret_cast<char*>(&file.offset), 4);
 
-            std::map<std::uint64_t, FileRecord>::const_iterator lb = iter->second.files.lower_bound(fileHash);
+            auto lb = iter->second.files.lower_bound(fileHash);
             if (lb != iter->second.files.end() && !(iter->second.files.key_comp()(fileHash, lb->first)))
                 fail("Archive found duplicate file name hash");
 
             iter->second.files.insert(lb, std::pair<std::uint64_t, FileRecord>(fileHash, file));
 
-            FileStruct fileStruct;
+            FileStruct fileStruct{};
             fileStruct.fileSize = file.getSizeWithoutCompressionFlag();
             fileStruct.offset = file.offset;
             fileStruct.name = nullptr;
@@ -308,12 +306,12 @@ CompressedBSAFile::FileRecord CompressedBSAFile::getFileRecord(const std::string
     std::string folder = p.string();
     std::uint64_t folderHash = generateHash(folder, std::string());
 
-    std::map<std::uint64_t, FolderRecord>::const_iterator it = mFolders.find(folderHash);
+    auto it = mFolders.find(folderHash);
     if (it == mFolders.end())
         return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
 
     std::uint64_t fileHash = generateHash(stem, ext);
-    std::map<std::uint64_t, FileRecord>::const_iterator iter = it->second.files.find(fileHash);
+    auto iter = it->second.files.find(fileHash);
     if (iter == it->second.files.end())
         return FileRecord(); // file not found, return default which has offset of sInvalidOffset
 
@@ -430,12 +428,12 @@ BsaVersion CompressedBSAFile::detectVersion(std::string filePath)
 //mFiles used by OpenMW expects uncompressed sizes
 void CompressedBSAFile::convertCompressedSizesToUncompressed()
 {
-    for (auto iter = mFiles.begin(); iter != mFiles.end(); ++iter)
+    for (auto & mFile : mFiles)
     {
-        const FileRecord& fileRecord = getFileRecord(iter->name);
+        const FileRecord& fileRecord = getFileRecord(mFile.name);
         if (!fileRecord.isValid())
         {
-            fail("Could not find file " + std::string(iter->name) + " in BSA");
+            fail("Could not find file " + std::string(mFile.name) + " in BSA");
         }
 
         if (!fileRecord.isCompressed(mCompressedByDefault))
@@ -452,11 +450,11 @@ void CompressedBSAFile::convertCompressedSizesToUncompressed()
             getBZString(embeddedFileName, *(dataBegin.get()));
         }
 
-        dataBegin->read(reinterpret_cast<char*>(&(iter->fileSize)), sizeof(iter->fileSize));
+        dataBegin->read(reinterpret_cast<char*>(&(mFile.fileSize)), sizeof(mFile.fileSize));
     }
 }
 
-std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string extension) const
+std::uint64_t CompressedBSAFile::generateHash(std::string stem, std::string extension)
 {
     size_t len = stem.length();
     if (len == 0)

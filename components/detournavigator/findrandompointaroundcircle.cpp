@@ -10,12 +10,12 @@
 
 namespace DetourNavigator
 {
-    boost::optional<osg::Vec3f> findRandomPointAroundCircle(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
+    std::optional<osg::Vec3f> findRandomPointAroundCircle(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents,
         const osg::Vec3f& start, const float maxRadius, const Flags includeFlags, const Settings& settings)
     {
         dtNavMeshQuery navMeshQuery;
         if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
-            return boost::optional<osg::Vec3f>();
+            return std::optional<osg::Vec3f>();
 
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -31,7 +31,7 @@ namespace DetourNavigator
         }
 
         if (startRef == 0)
-            return boost::optional<osg::Vec3f>();
+            return std::optional<osg::Vec3f>();
 
         dtPolyRef resultRef = 0;
         osg::Vec3f resultPosition;
@@ -39,8 +39,8 @@ namespace DetourNavigator
             []() { return Misc::Rng::rollProbability(); }, &resultRef, resultPosition.ptr());
 
         if (resultRef == 0)
-            return boost::optional<osg::Vec3f>();
+            return std::optional<osg::Vec3f>();
 
-        return boost::optional<osg::Vec3f>(resultPosition);
+        return std::optional<osg::Vec3f>(resultPosition);
     }
 }

@@ -96,13 +96,13 @@ namespace MWMechanics
         public:
             ///Constructor
             /** \param actor Actor to fight **/
-            AiCombat(const MWWorld::Ptr& actor);
+            explicit AiCombat(const MWWorld::Ptr& actor);
 
-            AiCombat (const ESM::AiSequence::AiCombat* combat);
+            explicit AiCombat (const ESM::AiSequence::AiCombat* combat);
 
             void init();
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Combat; }
 
@@ -116,9 +116,9 @@ namespace MWMechanics
             }
 
             ///Returns target ID
-            MWWorld::Ptr getTarget() const final;
+            MWWorld::Ptr getTarget() const override;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
 
         private:
             /// Returns true if combat should end

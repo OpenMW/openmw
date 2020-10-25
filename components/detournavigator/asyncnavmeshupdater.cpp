@@ -198,7 +198,7 @@ namespace DetourNavigator
         return isSuccess(status);
     }
 
-    boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
+    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
@@ -217,7 +217,7 @@ namespace DetourNavigator
                 mFirstStart.lock()->reset();
                 if (mJobs.empty() && getTotalThreadJobsUnsafe() == 0)
                     mDone.notify_all();
-                return boost::none;
+                return std::nullopt;
             }
 
             Log(Debug::Debug) << "Got " << mJobs.size() << " navigator jobs and "
@@ -239,7 +239,7 @@ namespace DetourNavigator
         }
     }
 
-    boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
+    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
     {
         const auto now = std::chrono::steady_clock::now();
 

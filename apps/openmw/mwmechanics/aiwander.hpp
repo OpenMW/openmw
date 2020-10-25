@@ -89,9 +89,9 @@ namespace MWMechanics
                 \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
 
-            AiWander (const ESM::AiSequence::AiWander* wander);
+            explicit AiWander (const ESM::AiSequence::AiWander* wander);
 
-            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Wander; }
 
@@ -103,13 +103,13 @@ namespace MWMechanics
                 return options;
             }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const final;
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const override;
 
-            osg::Vec3f getDestination() const final
+            osg::Vec3f getDestination() const override
             {
                 if (!mHasDestination)
                     return osg::Vec3f(0, 0, 0);
