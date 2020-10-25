@@ -297,7 +297,6 @@ namespace MWRender
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
         globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
-        globalDefines["groundcoverAnimation"] = Settings::Manager::getBool("animation", "Groundcover") ? "1" : "0";
 
         float groundcoverDistance = (Constants::CellSizeInUnits * Settings::Manager::getInt("distance", "Groundcover") - 1024) * 0.93;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * Settings::Manager::getFloat("fade start", "Groundcover"));

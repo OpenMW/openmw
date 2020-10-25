@@ -597,9 +597,8 @@ namespace MWRender
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
         osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
-        static const bool useAnimation = Settings::Manager::getBool("animation", "Groundcover");
         CopyOp copyop;
-        copyop.mGroundcover = useAnimation && mGroundcover;
+        copyop.mGroundcover = mGroundcover;
         for (const auto& pair : nodes)
         {
             const osg::Node* cnode = pair.first;

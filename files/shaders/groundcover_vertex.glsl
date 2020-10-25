@@ -25,7 +25,6 @@ varying vec3 passNormal;
 #include "shadows_vertex.glsl"
 #include "lighting.glsl"
 
-#if @groundcoverAnimation
 uniform float osg_SimulationTime;
 uniform mat4 osg_ViewMatrixInverse;
 uniform float windSpeed;
@@ -75,13 +74,6 @@ void main(void)
 
     displacedVertex.xy += groundcoverDisplacement(worldPos, originalHeight);
     gl_Position = gl_ModelViewProjectionMatrix * displacedVertex;
-#else
-
-void main(void)
-{
-    vec4 viewPos = gl_ModelViewMatrix * gl_Vertex;
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-#endif
 
     gl_ClipVertex = viewPos;
     euclideanDepth = length(viewPos.xyz);

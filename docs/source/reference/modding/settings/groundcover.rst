@@ -40,18 +40,6 @@ are used in the game. Can affect performance a lot.
 
 This setting can only be configured by editing the settings configuration file.
 
-animation
----------
-
-:Type:		boolean
-:Range:		True/False
-:Default:	True
-
-When true, an engine assigns vertex data to groundcover
-pages, so these pages can be animated via vertex shader.
-
-This setting can only be configured by editing the settings configuration file.
-
 distance
 --------
 
