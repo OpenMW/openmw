@@ -25,7 +25,7 @@ namespace DetourNavigator
         return true;
     }
 
-    boost::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(const ObjectId id)
+    std::optional<RemovedRecastMeshObject> CachedRecastMeshManager::removeObject(const ObjectId id)
     {
         const auto object = mImpl.removeObject(id);
         if (object)
@@ -42,7 +42,7 @@ namespace DetourNavigator
         return true;
     }
 
-    boost::optional<RecastMeshManager::Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
+    std::optional<RecastMeshManager::Water> CachedRecastMeshManager::removeWater(const osg::Vec2i& cellPosition)
     {
         const auto water = mImpl.removeWater(cellPosition);
         if (water)

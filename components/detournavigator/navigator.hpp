@@ -220,7 +220,7 @@ namespace DetourNavigator
          * @param includeFlags setup allowed surfaces for actor to walk.
          * @return not empty optional with position if point is found and empty optional if point is not found.
          */
-        boost::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
+        std::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
             const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
 
         virtual RecastMeshTiles getRecastMeshTiles() = 0;
