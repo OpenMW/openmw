@@ -45,6 +45,7 @@ class btDefaultCollisionConfiguration;
 class btCollisionDispatcher;
 class btCollisionObject;
 class btCollisionShape;
+class btVector3;
 
 namespace MWPhysics
 {
@@ -232,6 +233,7 @@ namespace MWPhysics
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const;
 
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
+            void reportCollision(const btVector3& position, const btVector3& normal);
 
         private:
 
