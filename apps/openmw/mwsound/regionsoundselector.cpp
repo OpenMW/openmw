@@ -20,10 +20,9 @@ namespace MWSound
     }
 
     RegionSoundSelector::RegionSoundSelector()
-    {
-        mMinTimeBetweenSounds = Fallback::Map::getFloat("Weather_Minimum_Time_Between_Environmental_Sounds");
-        mMaxTimeBetweenSounds = Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds");
-    }
+    : mMinTimeBetweenSounds(Fallback::Map::getFloat("Weather_Minimum_Time_Between_Environmental_Sounds"))
+    , mMaxTimeBetweenSounds(Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds"))
+    {}
 
     boost::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
                                                                     const MWBase::World& world)
@@ -70,9 +69,6 @@ namespace MWSound
 
         if (it == region->mSoundList.end())
             return {};
-
-        // TODO
-        // mTimeToNextEnvSound += soundDuration
 
         return it->mSound;
     }

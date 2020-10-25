@@ -120,6 +120,8 @@ namespace MWSound
 
         const ESM::Cell *mLastCell = nullptr;
 
+        Sound* mCurrentRegionSound;
+
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
 
         Sound_Buffer *lookupSound(const std::string &soundId) const;
