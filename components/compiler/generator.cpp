@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 #include "literals.hpp"

@@ -4,6 +4,8 @@
 #include <cassert>
 #include <algorithm>
 #include <stack>
+#include <iterator>
+#include <sstream>
 
 #include <components/misc/stringops.hpp>
 
