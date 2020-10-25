@@ -43,7 +43,6 @@
 #include <components/sceneutil/morphgeometry.hpp>
 
 #include "matrixtransform.hpp"
-#include "nodeindexholder.hpp"
 #include "particle.hpp"
 
 namespace
@@ -527,7 +526,7 @@ namespace NifOsg
             // - finding the correct emitter node for a particle system
             // - establishing connections to the animated collision shapes, which are handled in a separate loader
             // - finding a random child NiNode in NiBspArrayController
-            node->getOrCreateUserDataContainer()->addUserObject(new NodeIndexHolder(nifNode->recIndex));
+            node->setUserValue("recIndex", nifNode->recIndex);
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {

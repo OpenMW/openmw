@@ -204,7 +204,7 @@ namespace NifOsg
     class FindGroupByRecIndex : public osg::NodeVisitor
     {
     public:
-        FindGroupByRecIndex(int recIndex);
+        FindGroupByRecIndex(unsigned int recIndex);
 
         void apply(osg::Node &node) override;
 
@@ -218,7 +218,7 @@ namespace NifOsg
         osg::Group* mFound;
         osg::NodePath mFoundPath;
     private:
-        int mRecIndex;
+        unsigned int mRecIndex;
     };
 
     // Subclass emitter to support randomly choosing one of the child node's transforms for the emit position of new particles.
