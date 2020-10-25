@@ -1,6 +1,7 @@
 #include "stringparser.hpp"
 
 #include <algorithm>
+#include <iterator>
 
 #include <components/misc/stringops.hpp>
 

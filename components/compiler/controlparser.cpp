@@ -1,6 +1,7 @@
 #include "controlparser.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 #include "scanner.hpp"
