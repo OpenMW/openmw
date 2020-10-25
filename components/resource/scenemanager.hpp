@@ -51,7 +51,7 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node);
+        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects");
 
         /// @see ShaderVisitor::setForceShaders
         void setForceShaders(bool force);
@@ -146,7 +146,7 @@ namespace Resource
 
     private:
 
-        Shader::ShaderVisitor* createShaderVisitor();
+        Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
