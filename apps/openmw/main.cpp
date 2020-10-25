@@ -63,7 +63,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
 
         ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
-            ->multitoken(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
+            ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
 
         ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
