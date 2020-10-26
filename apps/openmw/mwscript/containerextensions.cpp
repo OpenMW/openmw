@@ -246,7 +246,7 @@ namespace MWScript
                                 auto& store = container.getClass().getContainerStore(container);
                                 // Note that unlike AddItem, RemoveItem only removes from unresolved containers
                                 if(!store.isResolved())
-                                    store.remove(item, count, ptr, false);
+                                    store.remove(item, count, ptr, false, false);
                             }
                         }
                         return;
