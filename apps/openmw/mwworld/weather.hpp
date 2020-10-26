@@ -24,6 +24,7 @@ namespace ESM
 namespace MWRender
 {
     class RenderingManager;
+    enum class MoonState::Phase;
 }
 
 namespace Loading
@@ -261,7 +262,7 @@ namespace MWWorld
         float angle(const TimeStamp& gameTime) const;
         float moonRiseHour(unsigned int daysPassed) const;
         float rotation(float hours) const;
-        unsigned int phase(const TimeStamp& gameTime) const;
+        MWRender::MoonState::Phase phase(const TimeStamp& gameTime) const;
         float shadowBlend(float angle) const;
         float hourlyAlpha(float gameHour) const;
         float earlyMoonShadowAlpha(float angle) const;

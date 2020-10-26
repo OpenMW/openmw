@@ -99,17 +99,17 @@ namespace MWRender
 
     struct MoonState
     {
-        enum Phase
+        enum class Phase
         {
-            Phase_Full = 0,
-            Phase_WaningGibbous,
-            Phase_ThirdQuarter,
-            Phase_WaningCrescent,
-            Phase_New,
-            Phase_WaxingCrescent,
-            Phase_FirstQuarter,
-            Phase_WaxingGibbous,
-            Phase_Unspecified
+            Full = 0,
+            WaningGibbous,
+            ThirdQuarter,
+            WaningCrescent,
+            New,
+            WaxingCrescent,
+            FirstQuarter,
+            WaxingGibbous,
+            Unspecified
         };
 
         float mRotationFromHorizon;
