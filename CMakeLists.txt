@@ -308,7 +308,7 @@ endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 
-find_package(Boost REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 find_package(MyGUI 3.2.2 REQUIRED)
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
