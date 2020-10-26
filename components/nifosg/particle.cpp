@@ -5,6 +5,7 @@
 #include <osg/Version>
 #include <osg/MatrixTransform>
 #include <osg/Geometry>
+#include <osg/ValueObject>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
