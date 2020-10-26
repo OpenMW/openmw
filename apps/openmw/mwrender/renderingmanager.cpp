@@ -330,10 +330,10 @@ namespace MWRender
 
         mTerrainStorage.reset(new TerrainStorage(mResourceSystem, normalMapPattern, heightMapPattern, useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps));
         const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
-        const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
 
         if (Settings::Manager::getBool("distant terrain", "Terrain"))
         {
+            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
             const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
             int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
             compMapPower = std::max(-3, compMapPower);
@@ -364,14 +364,10 @@ namespace MWRender
             groundcoverRoot->setName("Groundcover Root");
             sceneRoot->addChild(groundcoverRoot);
 
-            if (Settings::Manager::getBool("animation", "Groundcover"))
-            {
-                mGroundcoverUpdater = new GroundcoverUpdater;
-                groundcoverRoot->addUpdateCallback(mGroundcoverUpdater);
-            }
+            mGroundcoverUpdater = new GroundcoverUpdater;
+            groundcoverRoot->addUpdateCallback(mGroundcoverUpdater);
 
-            mGroundcoverWorld.reset(new Terrain::QuadTreeWorld(groundcoverRoot, mTerrainStorage.get(),
-                                                               Mask_Groundcover, lodFactor, vertexLodMod));
+            mGroundcoverWorld.reset(new Terrain::QuadTreeWorld(groundcoverRoot, mTerrainStorage.get(), Mask_Groundcover, lodFactor));
 
             mGroundcoverPaging.reset(new ObjectPaging(mResourceSystem->getSceneManager(), true));
             static_cast<Terrain::QuadTreeWorld*>(mGroundcoverWorld.get())->addChunkManager(mGroundcoverPaging.get());

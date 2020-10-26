@@ -257,12 +257,12 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     mChunkManagers.push_back(mChunkManager.get());
 }
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, int vertexLodMod)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor)
     : TerrainGrid(parent, storage, nodeMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
-    , mVertexLodMod(vertexLodMod)
+    , mVertexLodMod(0)
     , mViewDistance(std::numeric_limits<float>::max())
 {
 }
