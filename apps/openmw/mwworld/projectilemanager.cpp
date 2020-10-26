@@ -10,6 +10,7 @@
 #include <components/esm/projectilestate.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/convert.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -442,6 +443,7 @@ namespace MWWorld
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = false;
                     cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
+                    mPhysics->reportCollision(Misc::Convert::toBullet(result.mHitPos), Misc::Convert::toBullet(result.mHitNormal));
                 }
             }
 
@@ -522,6 +524,7 @@ namespace MWWorld
                     caster = result.mHitObject;
 
                 MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
+                mPhysics->reportCollision(Misc::Convert::toBullet(result.mHitPos), Misc::Convert::toBullet(result.mHitNormal));
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);
