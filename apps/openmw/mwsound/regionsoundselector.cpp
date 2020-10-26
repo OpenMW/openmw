@@ -1,5 +1,6 @@
 #include "regionsoundselector.hpp"
 
+#include <components/fallback/fallback.hpp>
 #include <components/misc/rng.hpp>
 
 #include <algorithm>
@@ -18,6 +19,11 @@ namespace MWSound
         }
     }
 
+    RegionSoundSelector::RegionSoundSelector()
+    : mMinTimeBetweenSounds(Fallback::Map::getFloat("Weather_Minimum_Time_Between_Environmental_Sounds"))
+    , mMaxTimeBetweenSounds(Fallback::Map::getFloat("Weather_Maximum_Time_Between_Environmental_Sounds"))
+    {}
+
     std::optional<std::string> RegionSoundSelector::getNextRandom(float duration, const std::string& regionName,
                                                                     const MWBase::World& world)
     {
@@ -27,9 +33,7 @@ namespace MWSound
             return {};
 
         const float a = Misc::Rng::rollClosedProbability();
-        // NOTE: We should use the "Minimum Time Between Environmental Sounds" and
-        // "Maximum Time Between Environmental Sounds" fallback settings here.
-        mTimeToNextEnvSound = 5.0f * a + 15.0f * (1.0f - a);
+        mTimeToNextEnvSound = mMinTimeBetweenSounds + (mMaxTimeBetweenSounds - mMinTimeBetweenSounds) * a;
         mTimePassed = 0;
 
         if (mLastRegionName != regionName)
@@ -50,7 +54,7 @@ namespace MWSound
                 return {};
         }
 
-        const int r = Misc::Rng::rollDice(mSumChance);
+        const int r = Misc::Rng::rollDice(std::max(mSumChance, 100));
         int pos = 0;
 
         const auto isSelected = [&] (const ESM::Region::SoundRef& sound)

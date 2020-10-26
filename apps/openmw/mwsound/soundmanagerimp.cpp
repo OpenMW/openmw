@@ -895,9 +895,11 @@ namespace MWSound
 
         if (!cell->isExterior())
             return;
+        if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
+            return;
 
         if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->mRegion, *world))
-            playSound(*next, 1.0f, 1.0f);
+            mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
     }
 
     void SoundManager::updateWaterSound()
