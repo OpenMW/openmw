@@ -165,11 +165,8 @@ namespace MWWorld
             bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const override;
             ///< @return true if the two specified objects can stack with each other
 
-            virtual int remove(const std::string& itemId, int count, const Ptr& actor);
-            virtual int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement);
-
-            int remove(const Ptr& item, int count, const Ptr& actor) override;
-            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement);
+            using ContainerStore::remove;
+            int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true) override;
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed

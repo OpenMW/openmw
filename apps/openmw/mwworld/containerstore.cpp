@@ -463,7 +463,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
     }
 }
 
-int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor, bool resolveFirst)
+int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
 {
     if(resolveFirst)
         resolve();
@@ -471,7 +471,7 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
         if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), itemId))
-            toRemove -= removeImp(*iter, toRemove, actor);
+            toRemove -= remove(*iter, toRemove, actor, equipReplacement, resolveFirst);
 
     flagAsModified();
 
@@ -490,16 +490,12 @@ bool MWWorld::ContainerStore::hasVisibleItems() const
     return false;
 }
 
-int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor)
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
 {
     assert(this == item.getContainerStore());
-    resolve();
+    if(resolveFirst)
+        resolve();
 
-    return removeImp(item, count, actor);
-}
-
-int MWWorld::ContainerStore::removeImp(const Ptr& item, int count, const Ptr& actor)
-{
     int toRemove = count;
     RefData& itemRef = item.getRefData();
 
