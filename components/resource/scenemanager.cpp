@@ -249,11 +249,6 @@ namespace Resource
         node->accept(*shaderVisitor);
     }
 
-    void SceneManager::recreateShaders(osg::ref_ptr<osg::Node> node)
-    {
-        recreateShaders(node, "objects");
-    }
-
     void SceneManager::setClampLighting(bool clamp)
     {
         mClampLighting = clamp;
