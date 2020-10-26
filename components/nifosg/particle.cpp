@@ -11,8 +11,6 @@
 #include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
 
-#include "nodeindexholder.hpp"
-
 namespace NifOsg
 {
 
@@ -357,7 +355,7 @@ void Emitter::emitParticles(double dt)
     }
 }
 
-FindGroupByRecIndex::FindGroupByRecIndex(int recIndex)
+FindGroupByRecIndex::FindGroupByRecIndex(unsigned int recIndex)
     : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
     , mFound(nullptr)
     , mRecIndex(recIndex)
@@ -381,19 +379,16 @@ void FindGroupByRecIndex::apply(osg::Geometry &node)
 
 void FindGroupByRecIndex::applyNode(osg::Node &searchNode)
 {
-    if (searchNode.getUserDataContainer() && searchNode.getUserDataContainer()->getNumUserObjects())
+    unsigned int recIndex;
+    if (searchNode.getUserValue("recIndex", recIndex) && mRecIndex == recIndex)
     {
-        NodeIndexHolder* holder = dynamic_cast<NodeIndexHolder*>(searchNode.getUserDataContainer()->getUserObject(0));
-        if (holder && holder->getIndex() == mRecIndex)
-        {
-            osg::Group* group = searchNode.asGroup();
-            if (!group)
-                group = searchNode.getParent(0);
+        osg::Group* group = searchNode.asGroup();
+        if (!group)
+            group = searchNode.getParent(0);
 
-            mFound = group;
-            mFoundPath = getNodePath();
-            return;
-        }
+        mFound = group;
+        mFoundPath = getNodePath();
+        return;
     }
     traverse(searchNode);
 }
