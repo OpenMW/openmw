@@ -24,7 +24,6 @@ namespace ESM
 namespace MWRender
 {
     class RenderingManager;
-    enum class MoonState::Phase;
 }
 
 namespace Loading
