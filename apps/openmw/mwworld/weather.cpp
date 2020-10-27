@@ -370,7 +370,7 @@ MWRender::MoonState MoonModel::calculateState(const TimeStamp& gameTime) const
         {
             rotationFromHorizon,
             mAxisOffset, // Reverse engineered from Morrowind's scene graph rotation matrices.
-            static_cast<MWRender::MoonState::Phase>(phase(gameTime)),
+            phase(gameTime),
             shadowBlend(rotationFromHorizon),
             earlyMoonShadowAlpha(rotationFromHorizon) * hourlyAlpha(gameTime.getHour())
         };
@@ -439,17 +439,15 @@ inline float MoonModel::rotation(float hours) const
     return 15.0f * mSpeed * hours;
 }
 
-inline unsigned int MoonModel::phase(const TimeStamp& gameTime) const
+MWRender::MoonState::Phase MoonModel::phase(const TimeStamp& gameTime) const
 {
     // Morrowind starts with a full moon on 16 Last Seed and then begins to wane 17 Last Seed, working on 3 day phase cycle.
-    // Note: this is an internal helper, and as such we don't want to return MWRender::MoonState::Phase since we can't
-    // forward declare it (C++11 strongly typed enums solve this).
 
     // If the moon didn't rise yet today, use yesterday's moon phase.
     if(gameTime.getHour() < moonRiseHour(gameTime.getDay()))
-        return (gameTime.getDay() / 3) % 8;
+        return static_cast<MWRender::MoonState::Phase>((gameTime.getDay() / 3) % 8);
     else
-        return ((gameTime.getDay() + 1) / 3) % 8;
+        return static_cast<MWRender::MoonState::Phase>(((gameTime.getDay() + 1) / 3) % 8);
 }
 
 inline float MoonModel::shadowBlend(float angle) const
