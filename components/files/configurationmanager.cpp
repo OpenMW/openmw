@@ -87,7 +87,7 @@ boost::program_options::variables_map ConfigurationManager::separateComposingVar
     boost::program_options::variables_map composingVariables;
     for (auto itr = variables.begin(); itr != variables.end();)
     {
-        if (description.find((*itr).first, false).semantic()->is_composing())
+        if (description.find(itr->first, false).semantic()->is_composing())
         {
             composingVariables.emplace(*itr);
             itr = variables.erase(itr);
@@ -100,14 +100,23 @@ boost::program_options::variables_map ConfigurationManager::separateComposingVar
 
 void ConfigurationManager::mergeComposingVariables(boost::program_options::variables_map & first, boost::program_options::variables_map & second, boost::program_options::options_description& description)
 {
-    for (auto& [name, variableValue] : first)
+    for (const auto& option : description.options())
     {
-        if (description.find(name, false).semantic()->is_composing())
+        if (option->semantic()->is_composing())
         {
+            std::string name = option->canonical_display_name();
+
+            auto firstPosition = first.find(name);
+            if (firstPosition == first.end())
+            {
+                first.emplace(name, second[name]);
+                continue;
+            }
+
             if (second[name].defaulted() || second[name].empty())
                 continue;
 
-            boost::any& firstValue = variableValue.value();
+            boost::any& firstValue = firstPosition->second.value();
             const boost::any& secondValue = second[name].value();
             
             if (firstValue.type() == typeid(Files::EscapePathContainer))
