@@ -116,9 +116,9 @@ namespace MWSound
 
         RegionSoundSelector mRegionSoundSelector;
 
-        float mTimePassed = 0;
+        float mTimePassed;
 
-        const ESM::Cell *mLastCell = nullptr;
+        const ESM::Cell *mLastCell;
 
         Sound* mCurrentRegionSound;
 
