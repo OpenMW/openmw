@@ -331,9 +331,10 @@ namespace ESM
         std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
     }
 
-    Land& Land::operator= (Land land)
+    Land& Land::operator= (const Land& land)
     {
-        swap (land);
+        Land tmp(land);
+        swap(tmp);
         return *this;
     }
 

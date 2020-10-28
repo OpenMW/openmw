@@ -142,6 +142,7 @@ namespace MWPhysics
 {
     PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld)
           : mPhysicsDt(physicsDt)
+          , mTimeAccum(0.f)
           , mCollisionWorld(std::move(collisionWorld))
           , mNumJobs(0)
           , mRemainingSteps(0)

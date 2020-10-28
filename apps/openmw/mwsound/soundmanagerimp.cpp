@@ -65,6 +65,9 @@ namespace MWSound
         , mUnderwaterSound(nullptr)
         , mNearWaterSound(nullptr)
         , mPlaybackPaused(false)
+        , mTimePassed(0.f)
+        , mLastCell(nullptr)
+        , mCurrentRegionSound(nullptr)
     {
         mBufferCacheMin = std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1);
         mBufferCacheMax = std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1);
