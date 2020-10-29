@@ -345,7 +345,8 @@ void ESMStore::validate()
             +mWeapons.getDynamicSize()
             +mCreatureLists.getDynamicSize()
             +mItemLists.getDynamicSize()
-            +mCreatures.getDynamicSize();
+            +mCreatures.getDynamicSize()
+            +mContainers.getDynamicSize();
     }
 
     void ESMStore::write (ESM::ESMWriter& writer, Loading::Listener& progress) const
@@ -368,6 +369,7 @@ void ESMStore::validate()
         mItemLists.write (writer, progress);
         mCreatureLists.write (writer, progress);
         mCreatures.write (writer, progress);
+        mContainers.write (writer, progress);
     }
 
     bool ESMStore::readRecord (ESM::ESMReader& reader, uint32_t type)
@@ -386,6 +388,7 @@ void ESMStore::validate()
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
             case ESM::REC_CREA:
+            case ESM::REC_CONT:
                 mStores[type]->read (reader);
                 return true;
 
