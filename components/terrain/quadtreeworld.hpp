@@ -22,7 +22,7 @@ namespace Terrain
     public:
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask, int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize);
 
-        QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor);
+        QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, float chunkSize);
 
         ~QuadTreeWorld();
 
@@ -68,6 +68,7 @@ namespace Terrain
         float mLodFactor;
         int mVertexLodMod;
         float mViewDistance;
+        float mMinSize;
     };
 
 }

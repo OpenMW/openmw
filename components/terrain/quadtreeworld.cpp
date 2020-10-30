@@ -90,8 +90,6 @@ private:
     osg::Vec4i mActiveGrid;
 };
 
-const float MIN_SIZE = 1/8.f;
-
 class RootNode : public QuadTreeNode
 {
 public:
@@ -250,6 +248,7 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     , mLodFactor(lodFactor)
     , mVertexLodMod(vertexLodMod)
     , mViewDistance(std::numeric_limits<float>::max())
+    , mMinSize(1/8.f)
 {
     mChunkManager->setCompositeMapSize(compMapResolution);
     mChunkManager->setCompositeMapLevel(compMapLevel);
@@ -257,13 +256,14 @@ QuadTreeWorld::QuadTreeWorld(osg::Group *parent, osg::Group *compileRoot, Resour
     mChunkManagers.push_back(mChunkManager.get());
 }
 
-QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor)
+QuadTreeWorld::QuadTreeWorld(osg::Group *parent, Storage *storage, int nodeMask, float lodFactor, float chunkSize)
     : TerrainGrid(parent, storage, nodeMask)
     , mViewDataMap(new ViewDataMap)
     , mQuadTreeBuilt(false)
     , mLodFactor(lodFactor)
     , mVertexLodMod(0)
     , mViewDistance(std::numeric_limits<float>::max())
+    , mMinSize(chunkSize)
 {
 }
 
@@ -435,7 +435,7 @@ void QuadTreeWorld::accept(osg::NodeVisitor &nv)
     if (needsUpdate)
     {
         vd->reset();
-        DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, mActiveGrid);
+        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
         mRootNode->traverseNodes(vd, nv.getViewPoint(), &lodCallback);
     }
 
@@ -467,7 +467,7 @@ void QuadTreeWorld::ensureQuadTreeBuilt()
     if (mQuadTreeBuilt)
         return;
 
-    QuadTreeBuilder builder(mStorage, MIN_SIZE);
+    QuadTreeBuilder builder(mStorage, mMinSize);
     builder.build();
 
     mRootNode = builder.getRootNode();
@@ -501,7 +501,7 @@ void QuadTreeWorld::preload(View *view, const osg::Vec3f &viewPoint, const osg::
     ViewData* vd = static_cast<ViewData*>(view);
     vd->setViewPoint(viewPoint);
     vd->setActiveGrid(grid);
-    DefaultLodCallback lodCallback(mLodFactor, MIN_SIZE, mViewDistance, grid);
+    DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid);
     mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
     if (!progressTotal)

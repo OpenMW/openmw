@@ -678,11 +678,17 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
-            if (size > 1/8.f)
+            if (!mGroundcover && size > 1/8.f)
             {
                 optimizer.setViewPoint(relativeViewPoint);
                 optimizer.setMergeAlphaBlending(true);
             }
+
+            if (mGroundcover)
+            {
+                optimizer.setRemoveAlphaBlending(true);
+            }
+
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS|SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES|SceneUtil::Optimizer::MERGE_GEOMETRY;
             optimizer.optimize(mergeGroup, options);
