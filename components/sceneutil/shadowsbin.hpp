@@ -17,11 +17,11 @@ namespace SceneUtil
     private:
         osg::ref_ptr<osg::StateSet> mStateSet;
     public:
-         META_Object(SceneUtil, ShadowsBin)
-         ShadowsBin();
-         ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop) : osgUtil::RenderBin(rhs, copyop), mStateSet(rhs.mStateSet) {}
+        META_Object(SceneUtil, ShadowsBin)
+        ShadowsBin();
+        ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop) : osgUtil::RenderBin(rhs, copyop), mStateSet(rhs.mStateSet) {}
 
-         virtual void sortImplementation();
+        virtual void sortImplementation();
 
         struct State
         {
@@ -35,16 +35,17 @@ namespace SceneUtil
             bool mImportantState;
             bool needTexture() const { return mAlphaBlend || mAlphaTest; }
             bool needShadows() const;
+            // A state is interesting if there's anything about it that might affect whether we can optimise child state
             bool interesting() const { return !needShadows() || needTexture() || mAlphaBlendOverride || mAlphaTestOverride || mMaterialOverride || mImportantState; }
         };
 
         bool cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting);
 
-         static void addPrototype(const std::string& name)
-         {
-             osg::ref_ptr<osgUtil::RenderBin> bin (new ShadowsBin);
-             osgUtil::RenderBin::addRenderBinPrototype(name, bin);
-         }
+        static void addPrototype(const std::string& name)
+        {
+            osg::ref_ptr<osgUtil::RenderBin> bin (new ShadowsBin);
+            osgUtil::RenderBin::addRenderBinPrototype(name, bin);
+        }
     };
 
     class ShadowsBinAdder

@@ -32,6 +32,7 @@ namespace
 
     inline bool materialNeedShadows(osg::Material* m)
     {
+        // I'm pretty sure this needs to check the colour mode - vertex colours might override this value.
         return m->getDiffuse(osg::Material::FRONT).a() > 0.5;
     }
 }
@@ -45,38 +46,45 @@ ShadowsBin::ShadowsBin()
     mStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
 }
 
-bool ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninteresting)
+bool ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
 {
     std::vector<StateGraph*> return_path;
     State state;
     StateGraph* sg_new = sg;
     do
     {
-        if (uninteresting.find(sg_new) != uninteresting.end())
+        if (uninterestingCache.find(sg_new) != uninterestingCache.end())
             break;
         return_path.push_back(sg_new);
         sg_new = sg_new->_parent;
     } while (sg_new && sg_new != root);
-    for(std::vector<StateGraph*>::reverse_iterator itr=return_path.rbegin(); itr!=return_path.rend(); ++itr)
+
+    for(auto itr=return_path.rbegin(); itr!=return_path.rend(); ++itr)
     {
         const osg::StateSet* ss = (*itr)->getStateSet();
-        if (!ss) continue;
+        if (!ss)
+            continue;
+
         accumulateModeState(ss, state.mAlphaBlend, state.mAlphaBlendOverride, GL_BLEND);
         accumulateModeState(ss, state.mAlphaTest, state.mAlphaTestOverride, GL_ALPHA_TEST);
-        const osg::StateSet::AttributeList& l = ss->getAttributeList();
-        osg::StateSet::AttributeList::const_iterator f = l.find(std::make_pair(osg::StateAttribute::MATERIAL, 0));
-        if (f != l.end())
+
+        const osg::StateSet::AttributeList& attributes = ss->getAttributeList();
+        osg::StateSet::AttributeList::const_iterator found = attributes.find(std::make_pair(osg::StateAttribute::MATERIAL, 0));
+        if (found != attributes.end())
         {
-            const osg::StateSet::RefAttributePair* rap = &f->second;
-            accumulateState(state.mMaterial, static_cast<osg::Material*>(rap->first.get()), state.mMaterialOverride, rap->second);
+            const osg::StateSet::RefAttributePair& rap = found->second;
+            accumulateState(state.mMaterial, static_cast<osg::Material*>(rap.first.get()), state.mMaterialOverride, rap.second);
             if (state.mMaterial && !materialNeedShadows(state.mMaterial))
                 state.mMaterial = nullptr;
         }
-        f = l.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
-        if (f != l.end())
+
+        // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it.
+        found = attributes.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
+        if (found != attributes.end())
             state.mImportantState = true;
+
         if ((*itr) != sg && !state.interesting())
-            uninteresting.insert(*itr);
+            uninterestingCache.insert(*itr);
     }
 
     if (!state.needShadows())
@@ -103,6 +111,10 @@ bool ShadowsBin::State::needShadows() const
 
 void ShadowsBin::sortImplementation()
 {
+    // The cull visitor contains a stategraph.
+    // When a stateset is pushed, it's added/found as a child of the current stategraph node, then that node becomes the new current stategraph node.
+    // When a drawable is added, the current stategraph node is added to the current renderbin (if it's not there already) and the drawable is added as a renderleaf to the stategraph
+    // This means our list only contains stategraph nodes with directly-attached renderleaves, but they might have parents with more state set that needs to be considered.
     if (!_stateGraphList.size())
         return;
     StateGraph* root = _stateGraphList[0];
@@ -117,12 +129,16 @@ void ShadowsBin::sortImplementation()
             return;
     }
     root = root->find_or_insert(mStateSet.get());
+    // root is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
     root->_leaves.reserve(_stateGraphList.size());
     StateGraphList newList;
-    std::unordered_set<StateGraph*> uninteresting;
+    std::unordered_set<StateGraph*> uninterestingCache;
     for (StateGraph* graph : _stateGraphList)
     {
-        if (!cullStateGraph(graph, root, uninteresting))
+        // Render leaves which shouldn't use the diffuse map for shadow alpha but do cast shadows become children of root, so graph is now empty. Don't add to newList.
+        // Graphs containing just render leaves which don't cast shadows are discarded. Don't add to newList.
+        // Graphs containing other leaves need to be in newList.
+        if (!cullStateGraph(graph, root, uninterestingCache))
             newList.push_back(graph);
     }
     if (!root->_leaves.empty())
