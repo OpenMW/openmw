@@ -30,9 +30,7 @@ namespace MWPhysics
                 return btScalar(1);
             PtrHolder* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
             const MWWorld::Ptr target = targetHolder->getPtr();
-
-            osg::Vec3f pos = Misc::Convert::makeOsgVec3f(convexResult.m_hitPointLocal);
-            projectileHolder->hit(target, pos);
+            projectileHolder->hit(target, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
             return btScalar(1);
         }
 

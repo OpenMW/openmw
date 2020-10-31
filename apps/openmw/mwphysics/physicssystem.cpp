@@ -288,7 +288,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, projId);
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, getProjectile(projId));
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -664,7 +664,7 @@ namespace MWPhysics
     int PhysicsSystem::addProjectile (const osg::Vec3f& position)
     {
         mProjectileId++;
-        auto projectile = std::make_shared<Projectile>(mProjectileId, position, mTaskScheduler.get());
+        auto projectile = std::make_shared<Projectile>(mProjectileId, position, mTaskScheduler.get(), this);
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;

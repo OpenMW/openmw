@@ -5,7 +5,7 @@
 #include <memory>
 #include <mutex>
 
-#include <components/misc/convert.hpp>
+#include "components/misc/convert.hpp"
 
 #include "ptrholder.hpp"
 
@@ -32,7 +32,7 @@ namespace MWPhysics
     class Projectile final : public PtrHolder
     {
     public:
-        Projectile(const int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler);
+        Projectile(const int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
         ~Projectile() override;
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -68,7 +68,7 @@ namespace MWPhysics
             return Misc::Convert::toOsg(mHitPosition);
         }
 
-        void hit(MWWorld::Ptr target, osg::Vec3f pos);
+        void hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal);
         void activate();
 
     private:
@@ -81,12 +81,14 @@ namespace MWPhysics
         bool mTransformUpdatePending;
         std::atomic<bool> mActive;
         MWWorld::Ptr mHitTarget;
-        osg::Vec3f mHitPosition;
+        btVector3 mHitPosition;
+        btVector3 mHitNormal;
 
         mutable std::mutex mPositionMutex;
 
         osg::Vec3f mPosition;
 
+        PhysicsSystem *mPhysics;
         PhysicsTaskScheduler *mTaskScheduler;
 
         Projectile(const Projectile&);

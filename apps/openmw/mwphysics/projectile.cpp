@@ -18,8 +18,9 @@
 
 namespace MWPhysics
 {
-Projectile::Projectile(int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler)
+Projectile::Projectile(int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
     : mActive(true)
+    , mPhysics(physicssystem)
     , mTaskScheduler(scheduler)
     , mProjectileId(projectileId)
 {
@@ -35,7 +36,7 @@ Projectile::Projectile(int projectileId, const osg::Vec3f& position, PhysicsTask
     setPosition(position);
 
     const int collisionMask = CollisionType_World | CollisionType_HeightMap |
-        CollisionType_Actor | CollisionType_Door | CollisionType_Water;
+        CollisionType_Actor | CollisionType_Door | CollisionType_Water | CollisionType_Projectile;
     mTaskScheduler->addCollisionObject(mCollisionObject.get(), CollisionType_Projectile, collisionMask);
 
     commitPositionChange();
@@ -44,7 +45,11 @@ Projectile::Projectile(int projectileId, const osg::Vec3f& position, PhysicsTask
 Projectile::~Projectile()
 {
     if (mCollisionObject)
+    {
+        if (!mActive)
+            mPhysics->reportCollision(mHitPosition, mHitNormal);
         mTaskScheduler->removeCollisionObject(mCollisionObject.get());
+    }
 }
 
 void Projectile::commitPositionChange()
@@ -64,13 +69,14 @@ void Projectile::setPosition(const osg::Vec3f &position)
     mTransformUpdatePending = true;
 }
 
-void Projectile::hit(MWWorld::Ptr target, osg::Vec3f pos)
+void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
 {
     if (!mActive.load(std::memory_order_acquire))
         return;
     std::unique_lock<std::mutex> lock(mPositionMutex);
     mHitTarget = target;
     mHitPosition = pos;
+    mHitNormal = normal;
     mActive.store(false, std::memory_order_release);
 }
 
