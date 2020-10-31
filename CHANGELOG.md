@@ -34,6 +34,7 @@
     Bug #5403: Enchantment effect doesn't show on an enemy during death animation
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
+    Bug #5422: The player loses all spells when resurrected
     Bug #5424: Creatures do not headtrack player
     Bug #5425: Poison effect only appears for one frame
     Bug #5427: GetDistance unknown ID error is misleading
@@ -57,6 +58,7 @@
     Bug #5603: Setting constant effect cast style doesn't correct effects view
     Bug #5611: Usable items with "0 Uses" should be used only once
     Bug #5622: Can't properly interact with the console when in pause menu
+    Bug #5633: Damage Spells in effect before god mode is enabled continue to hurt the player character and can kill them
     Bug #5639: Tooltips cover Messageboxes
     Bug #5644: Summon effects running on the player during game initialization cause crashes
     Bug #5656: Sneaking characters block hits while standing
