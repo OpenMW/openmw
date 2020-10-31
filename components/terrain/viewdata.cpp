@@ -192,7 +192,7 @@ ViewData *ViewDataMap::createOrReuseView()
     }
     else
     {
-        mViewVector.push_back(ViewData());
+        mViewVector.emplace_back();
         vd = &mViewVector.back();
     }
     mUsedViews.push_back(vd);

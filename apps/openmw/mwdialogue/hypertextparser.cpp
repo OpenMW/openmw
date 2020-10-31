@@ -30,7 +30,7 @@ namespace MWDialogue
                         tokenizeKeywords(text.substr(iteration_pos, pos_begin - iteration_pos), result);
 
                     std::string link = text.substr(pos_begin + 1, pos_end - pos_begin - 1);
-                    result.push_back(Token(link, Token::ExplicitLink));
+                    result.emplace_back(link, Token::ExplicitLink);
 
                     iteration_pos = pos_end + 1;
                 }
@@ -65,7 +65,7 @@ namespace MWDialogue
 
             for (std::vector<KeywordSearch<std::string, int /*unused*/>::Match>::const_iterator it = matches.begin(); it != matches.end(); ++it)
             {
-                tokens.push_back(Token(std::string(it->mBeg, it->mEnd), Token::ImplicitKeyword));
+                tokens.emplace_back(std::string(it->mBeg, it->mEnd), Token::ImplicitKeyword);
             }
         }
 

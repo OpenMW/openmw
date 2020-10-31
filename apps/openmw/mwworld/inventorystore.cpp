@@ -988,7 +988,7 @@ void MWWorld::InventoryStore::writeState(ESM::InventoryState &state) const
         std::vector<std::pair<float, float> > params;
         for (std::vector<EffectParams>::const_iterator pIt = it->second.begin(); pIt != it->second.end(); ++pIt)
         {
-            params.push_back(std::make_pair(pIt->mRandom, pIt->mMultiplier));
+            params.emplace_back(pIt->mRandom, pIt->mMultiplier);
         }
 
         state.mPermanentMagicEffectMagnitudes[it->first] = params;

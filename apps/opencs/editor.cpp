@@ -224,7 +224,7 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::
     if(discoveredFiles.empty())
     {
         for (const QString &path : mFileDialog.selectedFilePaths())
-            files.push_back(path.toUtf8().constData());
+            files.emplace_back(path.toUtf8().constData());
     }
     else
     {
@@ -241,7 +241,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
-        files.push_back(path.toUtf8().constData());
+        files.emplace_back(path.toUtf8().constData());
     }
 
     files.push_back (savePath);

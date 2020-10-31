@@ -21,7 +21,7 @@ BsaArchive::BsaArchive(const std::string &filename)
     const Bsa::BSAFile::FileList &filelist = mFile->getList();
     for(Bsa::BSAFile::FileList::const_iterator it = filelist.begin();it != filelist.end();++it)
     {
-        mResources.push_back(BsaArchiveFile(&*it, mFile.get()));
+        mResources.emplace_back(&*it, mFile.get());
     }
 }
 

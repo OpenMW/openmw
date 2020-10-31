@@ -971,7 +971,7 @@ namespace MWMechanics
         {
             const OwnerMap& owners = it->second;
             for (OwnerMap::const_iterator ownerIt = owners.begin(); ownerIt != owners.end(); ++ownerIt)
-                result.push_back(std::make_pair(ownerIt->first.first, ownerIt->second));
+                result.emplace_back(ownerIt->first.first, ownerIt->second);
             return result;
         }
     }

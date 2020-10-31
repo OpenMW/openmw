@@ -231,25 +231,25 @@ namespace MWGui
         std::vector<std::string> buttons;
 
         if (state==MWBase::StateManager::State_Running)
-            buttons.push_back("return");
+            buttons.emplace_back("return");
 
-        buttons.push_back("newgame");
+        buttons.emplace_back("newgame");
 
         if (state==MWBase::StateManager::State_Running &&
             MWBase::Environment::get().getWorld()->getGlobalInt ("chargenstate")==-1 &&
                 MWBase::Environment::get().getWindowManager()->isSavingAllowed())
-            buttons.push_back("savegame");
+            buttons.emplace_back("savegame");
 
         if (MWBase::Environment::get().getStateManager()->characterBegin()!=
             MWBase::Environment::get().getStateManager()->characterEnd())
-            buttons.push_back("loadgame");
+            buttons.emplace_back("loadgame");
 
-        buttons.push_back("options");
+        buttons.emplace_back("options");
 
         if (state==MWBase::StateManager::State_NoGame)
-            buttons.push_back("credits");
+            buttons.emplace_back("credits");
 
-        buttons.push_back("exitgame");
+        buttons.emplace_back("exitgame");
 
         // Create new buttons if needed
         std::vector<std::string> allButtons { "return", "newgame", "savegame", "loadgame", "options", "credits", "exitgame"};

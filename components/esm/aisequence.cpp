@@ -171,7 +171,7 @@ namespace AiSequence
             int type;
             esm.getHT(type);
 
-            mPackages.push_back(AiPackageContainer());
+            mPackages.emplace_back();
             mPackages.back().mType = type;
 
             switch (type)

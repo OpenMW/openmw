@@ -31,18 +31,18 @@ namespace
     {
         // this defines the sorting order of types. types that are first in the vector appear before other types.
         std::vector<std::string> mapping;
-        mapping.push_back( typeid(ESM::Weapon).name() );
-        mapping.push_back( typeid(ESM::Armor).name() );
-        mapping.push_back( typeid(ESM::Clothing).name() );
-        mapping.push_back( typeid(ESM::Potion).name() );
-        mapping.push_back( typeid(ESM::Ingredient).name() );
-        mapping.push_back( typeid(ESM::Apparatus).name() );
-        mapping.push_back( typeid(ESM::Book).name() );
-        mapping.push_back( typeid(ESM::Light).name() );
-        mapping.push_back( typeid(ESM::Miscellaneous).name() );
-        mapping.push_back( typeid(ESM::Lockpick).name() );
-        mapping.push_back( typeid(ESM::Repair).name() );
-        mapping.push_back( typeid(ESM::Probe).name() );
+        mapping.emplace_back(typeid(ESM::Weapon).name() );
+        mapping.emplace_back(typeid(ESM::Armor).name() );
+        mapping.emplace_back(typeid(ESM::Clothing).name() );
+        mapping.emplace_back(typeid(ESM::Potion).name() );
+        mapping.emplace_back(typeid(ESM::Ingredient).name() );
+        mapping.emplace_back(typeid(ESM::Apparatus).name() );
+        mapping.emplace_back(typeid(ESM::Book).name() );
+        mapping.emplace_back(typeid(ESM::Light).name() );
+        mapping.emplace_back(typeid(ESM::Miscellaneous).name() );
+        mapping.emplace_back(typeid(ESM::Lockpick).name() );
+        mapping.emplace_back(typeid(ESM::Repair).name() );
+        mapping.emplace_back(typeid(ESM::Probe).name() );
 
         assert( std::find(mapping.begin(), mapping.end(), type1) != mapping.end() );
         assert( std::find(mapping.begin(), mapping.end(), type2) != mapping.end() );
@@ -166,7 +166,7 @@ namespace MWGui
 
     void SortFilterItemModel::addDragItem (const MWWorld::Ptr& dragItem, size_t count)
     {
-        mDragItems.push_back(std::make_pair(dragItem, count));
+        mDragItems.emplace_back(dragItem, count);
     }
 
     void SortFilterItemModel::clearDragItems()

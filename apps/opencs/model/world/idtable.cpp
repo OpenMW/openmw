@@ -355,7 +355,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         // If it does not exist or it is in the current plugin, it can be skipped.
         if (oldRow < 0 || plugin == 0)
         {
-            results.recordMapping.push_back(std::make_pair(id, id));
+            results.recordMapping.emplace_back(id, id);
             continue;
         }
 
@@ -366,7 +366,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         auto searchIt = reverseLookupMap.find(texture);
         if (searchIt != reverseLookupMap.end())
         {
-            results.recordMapping.push_back(std::make_pair(id, searchIt->second));
+            results.recordMapping.emplace_back(id, searchIt->second);
             continue;
         }
 
@@ -381,7 +381,7 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
                 // Id not taken, clone it
                 cloneRecord(id, newId, UniversalId::Type_LandTexture);
                 results.createdRecords.push_back(newId);
-                results.recordMapping.push_back(std::make_pair(id, newId));
+                results.recordMapping.emplace_back(id, newId);
                 reverseLookupMap.emplace(texture, newId);
                 break;
             }

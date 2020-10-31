@@ -84,7 +84,7 @@ namespace MWGui
         {
             float value = getSkillForTraining(actorStats, i);
 
-            skills.push_back(std::make_pair(i, value));
+            skills.emplace_back(i, value);
         }
 
         std::sort(skills.begin(), skills.end(), sortSkills);

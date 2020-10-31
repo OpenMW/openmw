@@ -32,7 +32,7 @@ void CSVWorld::DataDisplayDelegate::buildPixmaps ()
 
     while (it != mIcons.end())
     {
-        mPixmaps.push_back (std::make_pair (it->mValue, it->mIcon.pixmap (mIconSize) ) );
+        mPixmaps.emplace_back (it->mValue, it->mIcon.pixmap (mIconSize) );
         ++it;
     }
 }

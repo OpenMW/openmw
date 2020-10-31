@@ -191,7 +191,7 @@ namespace MWScript
                         case 2: value.setType (ESM::VT_Float); value.setFloat (mFloats.at (i2)); break;
                     }
 
-                    locals.mVariables.push_back (std::make_pair (names[i2], value));
+                    locals.mVariables.emplace_back (names[i2], value);
                 }
             }
         }

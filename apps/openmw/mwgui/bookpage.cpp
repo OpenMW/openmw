@@ -524,9 +524,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
                 break;
 
             if ( lead != origin )
-                mPartialWhitespace.push_back (PartialText (style, lead, origin, space_width));
+                mPartialWhitespace.emplace_back(style, lead, origin, space_width);
             if ( origin != extent )
-                mPartialWord.push_back (PartialText (style, origin, extent, word_width));
+                mPartialWord.emplace_back(style, origin, extent, word_width);
         }
     }
 

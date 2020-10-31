@@ -81,7 +81,7 @@ namespace
                 continue;
 
             if (magicEffect->mBolt.empty())
-                projectileIDs.push_back("VFX_DefaultBolt");
+                projectileIDs.emplace_back("VFX_DefaultBolt");
             else
                 projectileIDs.push_back(magicEffect->mBolt);
 

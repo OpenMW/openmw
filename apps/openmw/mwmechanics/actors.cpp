@@ -199,7 +199,7 @@ namespace MWMechanics
             if (sourceId != mSpellId)
                 return;
 
-            mMagnitudes.push_back(std::make_pair(key, magnitude));
+            mMagnitudes.emplace_back(key, magnitude);
         }
 
         std::vector<std::pair<MWMechanics::EffectKey, float>> mMagnitudes;

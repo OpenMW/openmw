@@ -76,7 +76,7 @@ void ESM::InventoryState::load (ESMReader &esm)
             float rand, multiplier;
             esm.getHT (rand);
             esm.getHNT (multiplier, "MULT");
-            params.push_back(std::make_pair(rand, multiplier));
+            params.emplace_back(rand, multiplier);
         }
         mPermanentMagicEffectMagnitudes[id] = params;
     }

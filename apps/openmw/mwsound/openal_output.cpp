@@ -579,7 +579,7 @@ std::vector<std::string> OpenAL_Output::enumerate()
         devnames = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     while(devnames && *devnames)
     {
-        devlist.push_back(devnames);
+        devlist.emplace_back(devnames);
         devnames += strlen(devnames)+1;
     }
     return devlist;
@@ -878,7 +878,7 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
     for(ALCint i = 0;i < num_hrtf;++i)
     {
         const ALCchar *entry = alcGetStringiSOFT(mDevice, ALC_HRTF_SPECIFIER_SOFT, i);
-        ret.push_back(entry);
+        ret.emplace_back(entry);
     }
 
     return ret;

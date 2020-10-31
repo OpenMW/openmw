@@ -637,7 +637,7 @@ namespace Compiler
     void Scanner::listKeywords (std::vector<std::string>& keywords)
     {
         for (int i=0; Compiler::sKeywords[i]; ++i)
-            keywords.push_back (Compiler::sKeywords[i]);
+            keywords.emplace_back(Compiler::sKeywords[i]);
 
         if (mExtensions)
             mExtensions->listKeywords (keywords);

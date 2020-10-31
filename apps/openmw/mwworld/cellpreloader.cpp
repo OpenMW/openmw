@@ -496,7 +496,7 @@ namespace MWWorld
             else if (mTerrainViews.size() < positions.size())
             {
                 for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
-                    mTerrainViews.push_back(mTerrain->createView());
+                    mTerrainViews.emplace_back(mTerrain->createView());
             }
 
             mTerrainPreloadPositions = positions;

@@ -428,7 +428,7 @@ namespace MWRender
             workItem->mKeyframes.push_back(std::string("meshes/") + basemodels[i] + ".kf");
         }
 
-        workItem->mTextures.push_back("textures/_land_default.dds");
+        workItem->mTextures.emplace_back("textures/_land_default.dds");
 
         mWorkQueue->addWorkItem(workItem);
     }

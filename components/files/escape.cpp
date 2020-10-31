@@ -121,7 +121,7 @@ namespace Files
         EscapeStringVector * eSV = boost::any_cast<EscapeStringVector>(&v);
 
         for (std::vector<std::string>::const_iterator it = tokens.begin(); it != tokens.end(); ++it)
-            eSV->mVector.push_back(EscapeHashString(*it));
+            eSV->mVector.emplace_back(*it);
     }
 
     PathContainer EscapePath::toPathContainer(const EscapePathContainer & escapePathContainer)

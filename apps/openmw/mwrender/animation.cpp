@@ -65,7 +65,7 @@ namespace
         void apply(osg::Node &node) override
         {
             if (dynamic_cast<osgParticle::ParticleProcessor*>(&node))
-                mToRemove.push_back(&node);
+                mToRemove.emplace_back(&node);
 
             traverse(node);
         }
@@ -73,7 +73,7 @@ namespace
         void apply(osg::Drawable& drw) override
         {
             if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&drw))
-                mToRemove.push_back(partsys);
+                mToRemove.emplace_back(partsys);
         }
 
         void remove()
@@ -277,7 +277,7 @@ namespace
                 if (vfxCallback)
                 {
                     if (vfxCallback->mFinished)
-                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                        mToRemove.emplace_back(group.asNode(), group.getParent(0));
                     else
                         mHasMagicEffects = true;
                 }
@@ -330,7 +330,7 @@ namespace
                 {
                     bool toRemove = mEffectId < 0 || vfxCallback->mParams.mEffectId == mEffectId;
                     if (toRemove)
-                        mToRemove.push_back(std::make_pair(group.asNode(), group.getParent(0)));
+                        mToRemove.emplace_back(group.asNode(), group.getParent(0));
                     else
                         mHasMagicEffects = true;
                 }
@@ -431,7 +431,7 @@ namespace
                 node.setStateSet(nullptr);
 
             if (node.getNodeMask() == 0x1 && node.getNumParents() == 1)
-                mToRemove.push_back(std::make_pair(&node, node.getParent(0)));
+                mToRemove.emplace_back(&node, node.getParent(0));
             else
                 traverse(node);
         }
@@ -449,12 +449,12 @@ namespace
                 osg::Group* parentParent = static_cast<osg::Group*>(*(parent - 1));
                 if (parentGroup->getNumChildren() == 1 && parentGroup->getDataVariance() == osg::Object::STATIC)
                 {
-                    mToRemove.push_back(std::make_pair(parentGroup, parentParent));
+                    mToRemove.emplace_back(parentGroup, parentParent);
                     return;
                 }
             }
 
-            mToRemove.push_back(std::make_pair(&node, parentGroup));
+            mToRemove.emplace_back(&node, parentGroup);
         }
     };
 
@@ -482,7 +482,7 @@ namespace
             {
                 osg::Group* parent = static_cast<osg::Group*>(*(getNodePath().end()-2));
                 // Not safe to remove in apply(), since the visitor is still iterating the child list
-                mToRemove.push_back(std::make_pair(&node, parent));
+                mToRemove.emplace_back(&node, parent);
             }
         }
     };
