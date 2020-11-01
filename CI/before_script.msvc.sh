@@ -677,8 +677,8 @@ printf "Bullet 2.89 (${BULLET_DBL_DISPLAY})... "
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
-		mv "Bullet-2.89-msvc${MSVC_REAL_YEAR}-win${BITS}${BULLET_DBL}" Bullet
+		eval 7z x -y "${DEPS}/Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}.7z" $STRIP
+		mv "Bullet-2.89-msvc${MSVC_YEAR}-win${BITS}${BULLET_DBL}" Bullet
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
