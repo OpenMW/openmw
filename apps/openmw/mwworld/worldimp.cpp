@@ -1504,11 +1504,11 @@ namespace MWWorld
         const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements);
         mDiscardMovements = false;
 
-        for(const auto& result : results)
+        for(const auto& [actor, position]: results)
         {
             // Handle player last, in case a cell transition occurs
-            if(result.first != getPlayerPtr())
-                moveObjectImp(result.first, result.second.x(), result.second.y(), result.second.z(), false);
+            if(actor != getPlayerPtr())
+                moveObjectImp(actor, position.x(), position.y(), position.z(), false);
         }
 
         const auto player = results.find(getPlayerPtr());
