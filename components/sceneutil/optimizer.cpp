@@ -18,6 +18,7 @@
 
 #include "optimizer.hpp"
 
+#include <osg/AlphaFunc>
 #include <osg/Version>
 #include <osg/Transform>
 #include <osg/MatrixTransform>
@@ -1138,9 +1139,18 @@ void Optimizer::MergeGeometryVisitor::apply(osg::Group &group)
     {
         if (_removeAlphaBlending)
         {
-            stateSet->removeAttribute(osg::StateAttribute::BLENDFUNC);
-            stateSet->removeMode(GL_BLEND);
-            stateSet->setRenderBinToInherit();
+            if (stateSet->getAttribute(osg::StateAttribute::BLENDFUNC) != nullptr)
+            {
+                stateSet->removeAttribute(osg::StateAttribute::BLENDFUNC);
+                stateSet->removeMode(GL_BLEND);
+                stateSet->setRenderBinToInherit();
+
+                if (stateSet->getAttribute(osg::StateAttribute::ALPHAFUNC) == nullptr)
+                {
+                    osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(osg::AlphaFunc::GREATER, 0.5f));
+                    stateSet->setAttributeAndModes(alphaFunc.get(), osg::StateAttribute::ON);
+                }
+            }
         }
 
         pushStateSet(stateSet);
