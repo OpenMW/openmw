@@ -683,7 +683,7 @@ namespace MWMechanics
         return mTimeOfDeath;
     }
 
-    std::map<CreatureStats::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
+    std::map<ESM::SummonKey, int>& CreatureStats::getSummonedCreatureMap()
     {
         return mSummonedCreatures;
     }

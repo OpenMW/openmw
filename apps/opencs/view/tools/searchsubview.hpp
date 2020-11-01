@@ -41,15 +41,15 @@ namespace CSVTools
 
         protected:
 
-            void showEvent (QShowEvent *event);
+            void showEvent (QShowEvent *event) override;
 
         public:
 
             SearchSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
-            virtual void setStatusBar (bool show);
+            void setStatusBar (bool show) override;
 
         private slots:
 

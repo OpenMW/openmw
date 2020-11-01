@@ -8,6 +8,12 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include "apps/openmw/mwworld/esmstore.hpp"
+#include "apps/openmw/mwmechanics/spelllist.hpp"
+
+namespace MWMechanics
+{
+    SpellList::SpellList(const std::string& id, int type) : mId(id), mType(type) {}
+}
 
 static Loading::Listener dummyListener;
 
@@ -16,7 +22,7 @@ struct ContentFileTest : public ::testing::Test
 {
   protected:
 
-    virtual void SetUp()
+    void SetUp() override
     {
         readContentFiles();
 
@@ -25,13 +31,13 @@ struct ContentFileTest : public ::testing::Test
         readerList.resize(mContentFiles.size());
 
         int index=0;
-        for (std::vector<boost::filesystem::path>::const_iterator it = mContentFiles.begin(); it != mContentFiles.end(); ++it)
+        for (const auto & mContentFile : mContentFiles)
         {
             ESM::ESMReader lEsm;
             lEsm.setEncoder(nullptr);
             lEsm.setIndex(index);
             lEsm.setGlobalReaderList(&readerList);
-            lEsm.open(it->string());
+            lEsm.open(mContentFile.string());
             readerList[index] = lEsm;
             mEsmStore.load(readerList[index], &dummyListener);
 
@@ -41,7 +47,7 @@ struct ContentFileTest : public ::testing::Test
         mEsmStore.setUp();
     }
 
-    virtual void TearDown()
+    void TearDown() override
     {
     }
 
@@ -80,8 +86,8 @@ struct ContentFileTest : public ::testing::Test
         Files::Collections collections (dataDirs, true);
 
         std::vector<std::string> contentFiles = variables["content"].as<std::vector<std::string> >();
-        for (std::vector<std::string>::iterator it = contentFiles.begin(); it != contentFiles.end(); ++it)
-            mContentFiles.push_back(collections.getPath(*it));
+        for (auto & contentFile : contentFiles)
+            mContentFiles.push_back(collections.getPath(contentFile));
     }
 
 protected:
@@ -105,14 +111,12 @@ TEST_F(ContentFileTest, dialogue_merging_test)
     stream.open(file);
 
     const MWWorld::Store<ESM::Dialogue>& dialStore = mEsmStore.get<ESM::Dialogue>();
-    for (MWWorld::Store<ESM::Dialogue>::iterator it = dialStore.begin(); it != dialStore.end(); ++it)
+    for (const auto & dial : dialStore)
     {
-        const ESM::Dialogue& dial = *it;
         stream << "Dialogue: " << dial.mId << std::endl;
 
-        for (ESM::Dialogue::InfoContainer::const_iterator infoIt = dial.mInfo.begin(); infoIt != dial.mInfo.end(); ++infoIt)
+        for (const auto & info : dial.mInfo)
         {
-            const ESM::DialInfo& info = *infoIt;
             stream << info.mId << std::endl;
         }
         stream << std::endl;
@@ -223,7 +227,7 @@ template <typename T>
 Files::IStreamPtr getEsmFile(T record, bool deleted)
 {
     ESM::ESMWriter writer;
-    std::stringstream* stream = new std::stringstream;
+    auto* stream = new std::stringstream;
     writer.setFormat(0);
     writer.save(*stream);
     writer.startRecord(T::sRecordId);

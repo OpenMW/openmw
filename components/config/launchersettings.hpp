@@ -6,7 +6,7 @@
 
 namespace Config
 {
-    class LauncherSettings : public SettingsBase<QMap<QString, QString> >
+    class LauncherSettings : public SettingsBase<QMultiMap<QString, QString> >
     {
     public:
         LauncherSettings();

@@ -8,6 +8,7 @@ ContentSelectorView::ComboBox::ComboBox(QWidget *parent) :
 {
     mValidator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
     setValidator(mValidator);
+    setEditable(true);
     setCompleter(0);
     setEnabled (true);
 

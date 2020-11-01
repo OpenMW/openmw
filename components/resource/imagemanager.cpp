@@ -115,6 +115,29 @@ namespace Resource
                 return mWarningImage;
             }
 
+            bool killAlpha = false;
+            if (reader->supportedExtensions().count("tga"))
+            {
+                // Morrowind ignores the alpha channel of 16bpp TGA files even when the header says not to
+                unsigned char header[18];
+                stream->read((char*)header, 18);
+                if (stream->gcount() != 18)
+                {
+                    Log(Debug::Error) << "Error loading " << filename << ": couldn't read TGA header";
+                    mCache->addEntryToObjectCache(normalized, mWarningImage);
+                    return mWarningImage;
+                }
+                int type = header[2];
+                int depth;
+                if (type == 1 || type == 9)
+                    depth = header[7];
+                else
+                    depth = header[16];
+                int alphaBPP = header[17] & 0x0F;
+                killAlpha = depth == 16 && alphaBPP == 1;
+                stream->seekg(0);
+            }
+
             osgDB::ReaderWriter::ReadResult result = reader->readImage(*stream, mOptions);
             if (!result.success())
             {
@@ -148,6 +171,18 @@ namespace Resource
                                 newImage->setColor(image->getColor(s,t,r), s,t,r);
                     image = newImage;
                 }
+            }
+            else if (killAlpha)
+            {
+                osg::ref_ptr<osg::Image> newImage = new osg::Image;
+                newImage->setFileName(image->getFileName());
+                newImage->allocateImage(image->s(), image->t(), image->r(), GL_RGB, GL_UNSIGNED_BYTE);
+                // OSG just won't write the alpha as there's nowhere to put it.
+                for (int s = 0; s < image->s(); ++s)
+                    for (int t = 0; t < image->t(); ++t)
+                        for (int r = 0; r < image->r(); ++r)
+                            newImage->setColor(image->getColor(s, t, r), s, t, r);
+                image = newImage;
             }
 
             mCache->addEntryToObjectCache(normalized, image);

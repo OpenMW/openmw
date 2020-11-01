@@ -2,69 +2,90 @@
 #define GAME_MWCLASS_CONTAINER_H
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/containerstore.hpp"
+#include "../mwworld/customdata.hpp"
+
+namespace ESM
+{
+    struct Container;
+    struct InventoryState;
+}
 
 namespace MWClass
 {
+    class ContainerCustomData : public MWWorld::CustomData
+    {
+        MWWorld::ContainerStore mStore;
+    public:
+        ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
+        ContainerCustomData(const ESM::InventoryState& inventory);
+
+        MWWorld::CustomData *clone() const override;
+
+        ContainerCustomData& asContainerCustomData() override;
+        const ContainerCustomData& asContainerCustomData() const override;
+
+        friend class Container;
+    };
+
     class Container : public MWWorld::Class
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
-
-            virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
+            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
         public:
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
+            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            virtual void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const;
+            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
 
-            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
+            std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor) const;
+            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+                const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
-            virtual bool hasToolTip (const MWWorld::ConstPtr& ptr) const;
+            bool hasToolTip (const MWWorld::ConstPtr& ptr) const override;
             ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
+            MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
+            MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const override;
             ///< Return container store
 
-            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
+            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
-            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
+            float getCapacity (const MWWorld::Ptr& ptr) const override;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
             /// hold other objects.
 
-            virtual float getEncumbrance (const MWWorld::Ptr& ptr) const;
+            float getEncumbrance (const MWWorld::Ptr& ptr) const override;
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
-            virtual bool canLock(const MWWorld::ConstPtr &ptr) const;
+            bool canLock(const MWWorld::ConstPtr &ptr) const override;
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-                const;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
+                const override;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
-                const;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
             static void registerSelf();
 
-            virtual void respawn (const MWWorld::Ptr& ptr) const;
+            void respawn (const MWWorld::Ptr& ptr) const override;
 
-            virtual void restock (const MWWorld::Ptr &ptr) const;
+            std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
-            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
+            bool useAnim() const override;
 
-            virtual bool useAnim() const;
+            void modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const override;
     };
 }
 

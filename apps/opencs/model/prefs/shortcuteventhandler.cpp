@@ -182,7 +182,7 @@ namespace CSMPrefs
                     }
                     else if (pos == lastPos)
                     {
-                        potentials.push_back(std::make_pair(result, shortcut));
+                        potentials.emplace_back(result, shortcut);
                     }
                 }
             }

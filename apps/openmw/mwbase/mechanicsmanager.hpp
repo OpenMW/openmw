@@ -67,10 +67,6 @@ namespace MWBase
             virtual void drop (const MWWorld::CellStore *cellStore) = 0;
             ///< Deregister all objects in the given cell.
 
-            virtual void watchActor (const MWWorld::Ptr& ptr) = 0;
-            ///< On each update look for changes in a previously registered actor and update the
-            /// GUI accordingly.
-
             virtual void update (float duration, bool paused) = 0;
             ///< Update objects
             ///

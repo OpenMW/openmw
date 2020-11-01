@@ -23,7 +23,7 @@ namespace CSVRender
     {
         public:
 
-            virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+            void operator()(osg::Node* node, osg::NodeVisitor* nv) override
             {
                 PathgridTag* tag = static_cast<PathgridTag*>(node->getUserData());
                 tag->getPathgrid()->update();

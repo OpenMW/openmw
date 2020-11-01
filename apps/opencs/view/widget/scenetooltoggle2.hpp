@@ -52,7 +52,7 @@ namespace CSVWidget
             SceneToolToggle2 (SceneToolbar *parent, const QString& toolTip,
                 const std::string& compositeIcon, const std::string& singleIcon);
 
-            virtual void showPanel (const QPoint& position);
+            void showPanel (const QPoint& position) override;
 
             /// \param buttonId used to compose the icon filename
             /// \param mask used for the reported getSelectionMask() / setSelectionMask()

@@ -20,7 +20,7 @@ source_group(game FILES ${GAME} ${GAME_HEADER})
 add_openmw_dir (mwrender
     actors objects renderingmanager animation rotatecontroller sky npcanimation vismask
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation
-    bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
+    bulletdebugdraw globalmap characterpreview camera viewovershoulder localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging
     )
 
@@ -41,7 +41,7 @@ add_openmw_dir (mwgui
     itemmodel containeritemmodel inventoryitemmodel sortfilteritemmodel itemview
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
-    draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours
+    draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours statswatcher
     )
 
 add_openmw_dir (mwdialogue
@@ -57,7 +57,7 @@ add_openmw_dir (mwscript
 
 add_openmw_dir (mwsound
     soundmanagerimp openal_output ffmpeg_decoder sound sound_buffer sound_decoder sound_output
-    loudness movieaudiofactory alext efx efx-presets
+    loudness movieaudiofactory alext efx efx-presets regionsoundselector watersoundupdater volumesettings
     )
 
 add_openmw_dir (mwworld
@@ -73,7 +73,7 @@ add_openmw_dir (mwworld
 add_openmw_dir (mwphysics
     physicssystem trace collisiontype actor convert object heightfield closestnotmerayresultcallback
     contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver
-    closestnotmeconvexresultcallback
+    closestnotmeconvexresultcallback raycasting mtphysics
     )
 
 add_openmw_dir (mwclass
@@ -82,7 +82,7 @@ add_openmw_dir (mwclass
     )
 
 add_openmw_dir (mwmechanics
-    mechanicsmanagerimp stat creaturestats magiceffects movement actorutil
+    mechanicsmanagerimp stat creaturestats magiceffects movement actorutil spelllist
     drawstate spells activespells npcstats aipackage aisequence aipursue alchemy aiwander aitravel aifollow aiavoiddoor aibreathe
     aicast aiescort aiface aiactivate aicombat recharge repair enchanting pathfinding pathgrid security spellcasting spellresistance
     disease pickpocket levelledlist combat steering obstacle autocalcspell difficultyscaling aicombataction actor summoning
@@ -123,7 +123,6 @@ include_directories(
 
 target_link_libraries(openmw
     ${OSG_LIBRARIES}
-    ${OPENTHREADS_LIBRARIES}
     ${OSGPARTICLE_LIBRARIES}
     ${OSGUTIL_LIBRARIES}
     ${OSGDB_LIBRARIES}

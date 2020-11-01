@@ -74,7 +74,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function always returns 0.
@@ -85,7 +85,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
             ///< The ownership of the returned Creator is transferred to the caller.
             ///
             /// \note The function can return a 0-pointer, which means no UI for creating/deleting

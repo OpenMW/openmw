@@ -27,7 +27,7 @@ namespace CSMPrefs
 
         protected:
 
-            bool eventFilter(QObject* watched, QEvent* event);
+            bool eventFilter(QObject* watched, QEvent* event) override;
 
         private:
 

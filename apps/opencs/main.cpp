@@ -22,7 +22,7 @@ class Application : public QApplication
 {
     private:
 
-        bool notify (QObject *receiver, QEvent *event)
+        bool notify (QObject *receiver, QEvent *event) override
         {
             try
             {
@@ -46,9 +46,6 @@ int runApplication(int argc, char *argv[])
 #ifdef Q_OS_MAC
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
-
-    // To allow background thread drawing in OSG
-    QApplication::setAttribute(Qt::AA_X11InitThreads, true);
 
     Q_INIT_RESOURCE (resources);
 

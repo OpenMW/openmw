@@ -8,21 +8,19 @@ distant terrain
 :Range:		True/False
 :Default:	False
 
-Controls whether the engine will use paging and LOD algorithms to load the terrain of the entire world at all times.
+Controls whether the engine will use paging (chunking) and LOD algorithms to load the terrain of the entire world at all times.
 Otherwise, only the terrain of the surrounding cells is loaded.
 
 .. note::
 	When enabling distant terrain, make sure the 'viewing distance' in the camera section is set to a larger value so
-	that you can actually see the additional terrain.
+	that you can actually see the additional terrain and objects.
 
 To avoid frame drops as the player moves around, nearby terrain pages are always preloaded in the background,
 regardless of the preloading settings in the 'Cells' section,
 but the preloading of terrain behind a door or a travel destination, for example,
 will still be controlled by cell preloading settings.
 
-The distant terrain engine is currently considered experimental
-and may receive updates and/or further configuration options in the future.
-The glaring omission of non-terrain objects in the distance somewhat limits this setting's usefulness.
+The distant terrain engine is currently considered experimental and may receive updates in the future.
 
 vertex lod mod
 --------------
@@ -101,3 +99,107 @@ max composite geometry size
 
 Controls the maximum size of simple composite geometry chunk in cell units. With small values there will more draw calls and small textures,
 but higher values create more overdraw (not every texture layer is used everywhere).
+
+object paging
+-------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+Controls whether the engine will use paging (chunking) algorithms to load non-terrain objects
+outside of the active cell grid.
+
+Depending on the settings below every object in the game world has a chance
+to be batched and be visible in the game world, effectively allowing
+the engine to render distant objects with a relatively low performance impact automatically.
+
+In general, an object is more likely to be batched if the number of the object's vertices
+and the corresponding memory cost of merging the object is low compared to
+the expected number of the draw calls that are going to be optimized out.
+This memory cost and the saved number of draw calls shall be called
+the "merging cost" and the "merging benefit" in the following documentation.
+
+Objects that are scripted to disappear from the game world
+will be handled properly as long as their scripts have a chance to actually disable them.
+
+This setting has no effect if distant terrain is disabled.
+
+object paging active grid
+-------------------------
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Controls whether the objects in the active cells use the mentioned paging algorithms.
+Active grid paging significantly improves the framerate when your setup is CPU-limited.
+
+.. note::
+	Given that only 8 light sources may affect an object at a time at the moment,
+	lighting issues arising due to merged objects being considered a single object
+	may disrupt your gameplay experience.
+
+object paging merge factor
+--------------------------
+:Type:		float
+:Range:		>0
+:Default:	250.0
+
+Affects the likelyhood of objects being merged.
+Higher values improve the framerate at the cost of memory.
+
+Technically this is implemented as a multiplier to the merging benefit, and since
+an object has a lot of vertices, sometimes in terms of hundreds and thousands,
+and doesn't often need as much draw calls to be rendered (typically that number is in 1 or 2 digits)
+this value needs to be large enough, as this is what makes
+the merging cost and the merging benefit actually comparable for the sake of paging.
+
+object paging min size
+----------------------
+:Type:		float
+:Range:		>0
+:Default:	0.01
+
+Controls how large an object must be to be visible in the scene.
+The object's size is divided by its distance to the camera
+and the result of the division is compared with this value.
+The smaller this value is, the more objects you will see in the scene.
+
+object paging min size merge factor
+-----------------------------------
+:Type:		float
+:Range:		>0
+:Default:	0.3
+
+This setting gives inexpensive objects a chance to be rendered from a greater distance
+even if the engine would rather discard them according to the previous setting.
+
+It controls the factor that the minimum size is multiplied by
+roughly according to the following formula:
+
+	factor = merge cost * min size cost multiplier / merge benefit
+	
+	factor = factor + (1 - factor) * min size merge factor
+
+Since the larger this factor is, the smaller chance a large object has to be rendered,
+decreasing this value makes more objects visible in the scene
+without impacting the performance as dramatically as the minimum size setting.
+
+object paging min size cost multiplier
+--------------------------------------
+:Type:		float
+:Range:		>0
+:Default:	25.0
+
+This setting adjusts the calculated cost of merging an object used in the mentioned functionality.
+The larger this value is, the less expensive objects can be before they are discarded.
+See the formula above to figure out the math.
+
+object paging debug batches
+---------------------------
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+This debug setting allows you to see what objects have been merged in the scene
+by making them colored randomly.

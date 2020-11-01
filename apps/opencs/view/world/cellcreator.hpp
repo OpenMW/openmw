@@ -21,21 +21,21 @@ namespace CSVWorld
 
         protected:
 
-            virtual std::string getId() const;
+            std::string getId() const override;
 
             /// Allow subclasses to add additional data to \a command.
-            virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
+            void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
 
         public:
 
             CellCreator (CSMWorld::Data& data, QUndoStack& undoStack, const CSMWorld::UniversalId& id);
 
-            virtual void reset();
+            void reset() override;
 
-            virtual void cloneMode(const std::string& originId, 
-                                   const CSMWorld::UniversalId::Type type);
+            void cloneMode(const std::string& originId, 
+                                   const CSMWorld::UniversalId::Type type) override;
 
-            virtual std::string getErrors() const;
+            std::string getErrors() const override;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
 

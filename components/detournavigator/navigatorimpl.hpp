@@ -15,7 +15,7 @@ namespace DetourNavigator
          * @brief Navigator constructor initializes all internal data. Constructed object is ready to build a scene.
          * @param settings allows to customize navigator work. Constructor is only place to set navigator settings.
          */
-        NavigatorImpl(const Settings& settings);
+        explicit NavigatorImpl(const Settings& settings);
 
         void addAgent(const osg::Vec3f& agentHalfExtents) override;
 
@@ -40,9 +40,9 @@ namespace DetourNavigator
 
         bool removeWater(const osg::Vec2i& cellPosition) override;
 
-        void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) final;
+        void addPathgrid(const ESM::Cell& cell, const ESM::Pathgrid& pathgrid) override;
 
-        void removePathgrid(const ESM::Pathgrid& pathgrid) final;
+        void removePathgrid(const ESM::Pathgrid& pathgrid) override;
 
         void update(const osg::Vec3f& playerPosition) override;
 

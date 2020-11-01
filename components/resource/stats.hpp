@@ -29,7 +29,7 @@ namespace Resource
         void setKey(int key) { _key = key; }
         int getKey() const { return _key; }
 
-        bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa);
+        bool handle(const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa) override;
 
         void setWindowSize(int w, int h);
 
@@ -39,7 +39,7 @@ namespace Resource
         void setUpScene(osgViewer::ViewerBase* viewer);
 
         /** Get the keyboard and mouse usage of this manipulator.*/
-        virtual void getUsage(osg::ApplicationUsage& usage) const;
+        void getUsage(osg::ApplicationUsage& usage) const override;
 
     private:
         osg::ref_ptr<osg::Switch> _switch;

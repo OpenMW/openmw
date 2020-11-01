@@ -30,21 +30,24 @@ public:
     PropertyList props;
 
     // Bounding box info
-    bool hasBounds;
+    bool hasBounds{false};
     osg::Vec3f boundPos;
     Matrix3 boundRot;
     osg::Vec3f boundXYZ; // Box size
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Named::read(nif);
 
-        flags = nif->getUShort();
+        flags = nif->getBethVersion() <= 26 ? nif->getUShort() : nif->getUInt();
         trafo = nif->getTrafo();
-        velocity = nif->getVector3();
-        props.read(nif);
+        if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
+            velocity = nif->getVector3();
+        if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+            props.read(nif);
 
-        hasBounds = nif->getBoolean();
+        if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
+            hasBounds = nif->getBoolean();
         if(hasBounds)
         {
             nif->getInt(); // always 1
@@ -52,13 +55,16 @@ public:
             boundRot = nif->getMatrix3();
             boundXYZ = nif->getVector3();
         }
+        // Reference to the collision object in Gamebryo files.
+        if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
+            nif->skip(4);
 
         parent = nullptr;
 
         isBone = false;
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Named::post(nif);
         props.post(nif);
@@ -98,11 +104,12 @@ struct NiNode : Node
         ControllerFlag_Active = 0x8
     };
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         children.read(nif);
-        effects.read(nif);
+        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
+            effects.read(nif);
 
         // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
@@ -113,7 +120,7 @@ struct NiNode : Node
         }
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         children.post(nif);
@@ -130,7 +137,39 @@ struct NiNode : Node
 
 struct NiGeometry : Node
 {
+    struct MaterialData
+    {
+        std::vector<std::string> materialNames;
+        std::vector<int> materialExtraData;
+        unsigned int activeMaterial{0};
+        bool materialNeedsUpdate{false};
+        void read(NIFStream *nif)
+        {
+            if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
+                return;
+            unsigned int numMaterials = 0;
+            if (nif->getVersion() <= NIFStream::generateVersion(20,1,0,3))
+                numMaterials = nif->getBoolean(); // Has Shader
+            else if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+                numMaterials = nif->getUInt();
+            if (numMaterials)
+            {
+                nif->getStrings(materialNames, numMaterials);
+                nif->getInts(materialExtraData, numMaterials);
+            }
+            if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+                activeMaterial = nif->getUInt();
+            if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
+            {
+                materialNeedsUpdate = nif->getBoolean();
+                if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+                    nif->skip(8);
+            }
+        }
+    };
+
     NiSkinInstancePtr skin;
+    MaterialData materialData;
 };
 
 struct NiTriShape : NiGeometry
@@ -144,14 +183,15 @@ struct NiTriShape : NiGeometry
 
     NiTriShapeDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
+        materialData.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -165,14 +205,15 @@ struct NiTriStrips : NiGeometry
 {
     NiTriStripsDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
+        materialData.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -186,14 +227,14 @@ struct NiLines : NiGeometry
 {
     NiLinesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -207,6 +248,8 @@ struct NiCamera : Node
 {
     struct Camera
     {
+        unsigned short cameraFlags{0};
+
         // Camera frustrum
         float left, right, top, bottom, nearDist, farDist;
 
@@ -216,15 +259,21 @@ struct NiCamera : Node
         // Level of detail modifier
         float LOD;
 
+        // Orthographic projection usage flag
+        bool orthographic{false};
+
         void read(NIFStream *nif)
         {
+            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+                cameraFlags = nif->getUShort();
             left = nif->getFloat();
             right = nif->getFloat();
             top = nif->getFloat();
             bottom = nif->getFloat();
             nearDist = nif->getFloat();
             farDist = nif->getFloat();
-
+            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+                orthographic = nif->getBoolean();
             vleft = nif->getFloat();
             vright = nif->getFloat();
             vtop = nif->getFloat();
@@ -235,7 +284,7 @@ struct NiCamera : Node
     };
     Camera cam;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
 
@@ -243,6 +292,8 @@ struct NiCamera : Node
 
         nif->getInt(); // -1
         nif->getInt(); // 0
+        if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
+            nif->getInt(); // 0
     }
 };
 
@@ -250,14 +301,14 @@ struct NiAutoNormalParticles : Node
 {
     NiAutoNormalParticlesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         nif->getInt(); // -1
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -268,14 +319,14 @@ struct NiRotatingParticles : Node
 {
     NiRotatingParticlesDataPtr data;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         nif->getInt(); // -1
     }
 
-    void post(NIFFile *nif)
+    void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
@@ -285,11 +336,14 @@ struct NiRotatingParticles : Node
 // A node used as the base to switch between child nodes, such as for LOD levels.
 struct NiSwitchNode : public NiNode
 {
+    unsigned int switchFlags{0};
     unsigned int initialIndex;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         NiNode::read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+            switchFlags = nif->getUShort();
         initialIndex = nif->getUInt();
     }
 };
@@ -305,11 +359,17 @@ struct NiLODNode : public NiSwitchNode
     };
     std::vector<LODRange> lodLevels;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         NiSwitchNode::read(nif);
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
             lodCenter = nif->getVector3();
+        else if (nif->getVersion() > NIFStream::generateVersion(10,0,1,0))
+        {
+            nif->skip(4); // NiLODData, unsupported at the moment
+            return;
+        }
+
         unsigned int numLodLevels = nif->getUInt();
         for (unsigned int i=0; i<numLodLevels; ++i)
         {

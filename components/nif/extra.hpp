@@ -32,7 +32,7 @@ namespace Nif
 class NiVertWeightsExtraData : public Extra
 {
 public:
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 class NiTextKeyExtraData : public Extra
@@ -45,7 +45,7 @@ public:
     };
     std::vector<TextKey> list;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 class NiStringExtraData : public Extra
@@ -57,7 +57,56 @@ public:
     */
     std::string string;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
+};
+
+struct NiIntegerExtraData : public Extra
+{
+    unsigned int data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiIntegersExtraData : public Extra
+{
+    std::vector<unsigned int> data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiBinaryExtraData : public Extra
+{
+    std::vector<char> data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiBooleanExtraData : public Extra
+{
+    bool data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiVectorExtraData : public Extra
+{
+    osg::Vec4f data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiFloatExtraData : public Extra
+{
+    float data;
+
+    void read(NIFStream *nif) override;
+};
+
+struct NiFloatsExtraData : public Extra
+{
+    std::vector<float> data;
+
+    void read(NIFStream *nif) override;
 };
 
 } // Namespace

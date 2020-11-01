@@ -64,10 +64,12 @@ namespace Bsa
         //if each file record begins with BZ string with file name
         bool mEmbeddedFileNames;
 
+        std::uint32_t mVersion{0u};
+
         struct FolderRecord
         {
             std::uint32_t count;
-            std::uint32_t offset;
+            std::uint64_t offset;
             std::map<std::uint64_t, FileRecord> files;
         };
         std::map<std::uint64_t, FolderRecord> mFolders;
@@ -78,7 +80,7 @@ namespace Bsa
         //mFiles used by OpenMW will contain uncompressed file sizes
         void convertCompressedSizesToUncompressed();
         /// \brief Normalizes given filename or folder and generates format-compatible hash. See https://en.uesp.net/wiki/Tes4Mod:Hash_Calculation.
-        std::uint64_t generateHash(std::string stem, std::string extension) const;
+        static std::uint64_t generateHash(std::string stem, std::string extension) ;
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
     public:
         CompressedBSAFile();
@@ -88,10 +90,10 @@ namespace Bsa
         static BsaVersion detectVersion(std::string filePath);
 
         /// Read header information from the input source
-        virtual void readHeader();
+        void readHeader() override;
        
-        Files::IStreamPtr getFile(const char* filePath);
-        Files::IStreamPtr getFile(const FileStruct* fileStruct);
+        Files::IStreamPtr getFile(const char* filePath) override;
+        Files::IStreamPtr getFile(const FileStruct* fileStruct) override;
         
     };
 }

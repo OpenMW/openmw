@@ -27,7 +27,7 @@ namespace Terrain
 
         osg::ref_ptr<osg::Texture2D> getTexture(const std::string& name);
 
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
     private:
         Resource::SceneManager* mSceneManager;

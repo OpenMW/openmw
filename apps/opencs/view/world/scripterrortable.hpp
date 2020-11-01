@@ -28,10 +28,10 @@ namespace CSVWorld
             Compiler::Extensions mExtensions;
             CSMWorld::ScriptContext mContext;
 
-            virtual void report (const std::string& message, const Compiler::TokenLoc& loc, Type type);
+            void report (const std::string& message, const Compiler::TokenLoc& loc, Type type) override;
             ///< Report error to the user.
 
-            virtual void report (const std::string& message, Type type);
+            void report (const std::string& message, Type type) override;
             ///< Report a file related error
 
             void addMessage (const std::string& message, CSMDoc::Message::Severity severity,

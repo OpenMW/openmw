@@ -281,7 +281,7 @@ namespace MWMechanics
         float priceMultipler = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find ("fEnchantmentValueMult")->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
         price *= getEnchantItemsCount() * getTypeMultiplier();
-        return price;
+        return std::max(1, price);
     }
 
     int Enchanting::getGemCharge() const

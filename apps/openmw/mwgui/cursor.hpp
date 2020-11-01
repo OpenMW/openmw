@@ -20,10 +20,10 @@ namespace MWGui
         ResourceImageSetPointerFix();
         virtual ~ResourceImageSetPointerFix();
 
-        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) final;
+        void deserialization(MyGUI::xml::ElementPtr _node, MyGUI::Version _version) override;
 
-        void setImage(MyGUI::ImageBox* _image) final;
-        void setPosition(MyGUI::ImageBox* _image, const MyGUI::IntPoint& _point) final;
+        void setImage(MyGUI::ImageBox* _image) override;
+        void setPosition(MyGUI::ImageBox* _image, const MyGUI::IntPoint& _point) override;
 
         //and now for the whole point of this class, allow us to get
         //the hot spot, the image and the size of the cursor.

@@ -16,7 +16,7 @@ namespace SceneUtil
     {
     public:
         std::deque<osg::ref_ptr<const osg::Referenced> > mObjects;
-        virtual void doWork();
+        void doWork() override;
     };
 
     /// @brief Handles unreferencing of objects through the WorkQueue. Typical use scenario

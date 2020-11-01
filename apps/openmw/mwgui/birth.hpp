@@ -20,9 +20,9 @@ namespace MWGui
         void setBirthId(const std::string &raceId);
 
         void setNextButtonShow(bool shown);
-        virtual void onOpen();
+        void onOpen() override;
 
-        bool exit() { return false; }
+        bool exit() override { return false; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

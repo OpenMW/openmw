@@ -89,10 +89,10 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
 
     desc.add_options()
     ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
-    ("data-local", boost::program_options::value<Files::EscapeHashString>()->default_value(""))
+    ("data-local", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""))
     ("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false))
     ("encoding", boost::program_options::value<Files::EscapeHashString>()->default_value("win1252"))
-    ("resources", boost::program_options::value<Files::EscapeHashString>()->default_value("resources"))
+    ("resources", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), "resources"))
     ("fallback-archive", boost::program_options::value<Files::EscapeStringVector>()->
         default_value(Files::EscapeStringVector(), "fallback-archive")->multitoken())
     ("fallback", boost::program_options::value<FallbackMap>()->default_value(FallbackMap(), "")
@@ -112,7 +112,7 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
     mDocumentManager.setEncoding(ToUTF8::calculateEncoding(mEncodingName));
     mFileDialog.setEncoding (QString::fromUtf8(mEncodingName.c_str()));
 
-    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapeHashString>().toStdString());
+    mDocumentManager.setResourceDir (mResources = variables["resources"].as<Files::EscapePath>().mPath);
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts (
@@ -125,14 +125,9 @@ std::pair<Files::PathContainer, std::vector<std::string> > CS::Editor::readConfi
         dataDirs = Files::PathContainer(Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>()));
     }
 
-    std::string local = variables["data-local"].as<Files::EscapeHashString>().toStdString();
+    Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
     if (!local.empty())
-    {
-        if (local.front() == '\"')
-            local = local.substr(1, local.length() - 2);
-
-        dataLocal.push_back(Files::PathContainer::value_type(local));
-    }
+        dataLocal.push_back(local);
 
     mCfgMgr.processPaths (dataDirs);
     mCfgMgr.processPaths (dataLocal, true);
@@ -229,7 +224,7 @@ void CS::Editor::openFiles (const boost::filesystem::path &savePath, const std::
     if(discoveredFiles.empty())
     {
         for (const QString &path : mFileDialog.selectedFilePaths())
-            files.push_back(path.toUtf8().constData());
+            files.emplace_back(path.toUtf8().constData());
     }
     else
     {
@@ -246,7 +241,7 @@ void CS::Editor::createNewFile (const boost::filesystem::path &savePath)
     std::vector<boost::filesystem::path> files;
 
     for (const QString &path : mFileDialog.selectedFilePaths()) {
-        files.push_back(path.toUtf8().constData());
+        files.emplace_back(path.toUtf8().constData());
     }
 
     files.push_back (savePath);

@@ -31,9 +31,12 @@ namespace Nif
 
 struct NiDynamicEffect : public Node
 {
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Node::read(nif);
+        if (nif->getVersion() >= nif->generateVersion(10,1,0,106)
+         && nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
+            nif->getBoolean(); // Switch state
         unsigned int numAffectedNodes = nif->getUInt();
         for (unsigned int i=0; i<numAffectedNodes; ++i)
             nif->getUInt(); // ref to another Node
@@ -48,7 +51,7 @@ struct NiLight : NiDynamicEffect
     osg::Vec3f diffuse;
     osg::Vec3f specular;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 struct NiPointLight : public NiLight
@@ -57,14 +60,14 @@ struct NiPointLight : public NiLight
     float linearAttenuation;
     float quadraticAttenuation;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 struct NiSpotLight : public NiPointLight
 {
     float cutoff;
     float exponent;
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
 struct NiTextureEffect : NiDynamicEffect
@@ -91,8 +94,8 @@ struct NiTextureEffect : NiDynamicEffect
     };
     CoordGenType coordGenType;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 } // Namespace

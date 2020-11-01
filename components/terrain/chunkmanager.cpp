@@ -112,7 +112,7 @@ void ChunkManager::createCompositeMapGeometry(float chunkSize, const osg::Vec2f&
 
             geom->setStateSet(*it);
 
-            compositeMap.mDrawables.push_back(geom);
+            compositeMap.mDrawables.emplace_back(geom);
         }
     }
 }

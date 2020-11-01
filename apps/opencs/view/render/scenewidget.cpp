@@ -1,5 +1,8 @@
 #include "scenewidget.hpp"
 
+#include <chrono>
+#include <thread>
+
 #include <QEvent>
 #include <QResizeEvent>
 #include <QTimer>
@@ -184,7 +187,7 @@ void CompositeViewer::update()
     double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
     if (dt < minFrameTime)
     {
-        OpenThreads::Thread::microSleep(1000*1000*(minFrameTime-dt));
+        std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
     }
 }
 

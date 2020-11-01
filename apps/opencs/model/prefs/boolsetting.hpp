@@ -23,9 +23,9 @@ namespace CSMPrefs
             BoolSetting& setTooltip (const std::string& tooltip);
 
             /// Return label, input widget.
-            virtual std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent);
+            std::pair<QWidget *, QWidget *> makeWidgets (QWidget *parent) override;
 
-            virtual void updateWidget();
+            void updateWidget() override;
 
         private slots:
 

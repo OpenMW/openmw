@@ -42,10 +42,10 @@ namespace CSVWorld
                     bool editable = true,
                     bool fixedRows = false);
 
-        virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
+        std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
 
     private:
-        void contextMenuEvent (QContextMenuEvent *event);
+        void contextMenuEvent (QContextMenuEvent *event) override;
 
     private slots:
         void removeRowActionTriggered();

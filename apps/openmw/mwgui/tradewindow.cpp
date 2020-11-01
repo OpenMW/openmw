@@ -99,20 +99,6 @@ namespace MWGui
         setCoord(400, 0, 400, 300);
     }
 
-    void TradeWindow::restock()
-    {
-        // Restock items on the actor inventory
-        mPtr.getClass().restock(mPtr);
-
-        // Also restock any containers owned by this merchant, which are also available to buy in the trade window
-        std::vector<MWWorld::Ptr> itemSources;
-        MWBase::Environment::get().getWorld()->getContainersOwnedBy(mPtr, itemSources);
-        for (MWWorld::Ptr& source : itemSources)
-        {
-            source.getClass().restock(source);
-        }
-    }
-
     void TradeWindow::setPtr(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
@@ -121,10 +107,10 @@ namespace MWGui
         mCurrentMerchantOffer = 0;
 
         std::vector<MWWorld::Ptr> itemSources;
+        // Important: actor goes first, so purchased items come out of the actor's pocket first
+        itemSources.push_back(actor);
         MWBase::Environment::get().getWorld()->getContainersOwnedBy(actor, itemSources);
 
-        // Important: actor goes last, so that items purchased by the merchant go into his inventory
-        itemSources.push_back(actor);
         std::vector<MWWorld::Ptr> worldItems;
         MWBase::Environment::get().getWorld()->getItemsOwnedBy(actor, worldItems);
 
@@ -281,8 +267,8 @@ namespace MWGui
             MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
         // were there any items traded at all?
-        std::vector<ItemStack> playerBought = playerItemModel->getItemsBorrowedToUs();
-        std::vector<ItemStack> merchantBought = mTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& playerBought = playerItemModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& merchantBought = mTradeModel->getItemsBorrowedToUs();
         if (playerBought.empty() && merchantBought.empty())
         {
             // user notification
@@ -313,7 +299,7 @@ namespace MWGui
         }
 
         // check if the player is attempting to sell back an item stolen from this actor
-        for (ItemStack& itemStack : merchantBought)
+        for (const ItemStack& itemStack : merchantBought)
         {
             if (MWBase::Environment::get().getMechanicsManager()->isItemStolenFrom(itemStack.mBase.getCellRef().getRefId(), mPtr))
             {
@@ -363,8 +349,6 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
-
-        restock();
     }
 
     void TradeWindow::onAccept(MyGUI::EditBox *sender)
@@ -478,7 +462,7 @@ namespace MWGui
         // connected to buying and selling the same item.
         // This value has been determined by researching the limitations of the vanilla formula
         // and may not be sufficient if getBarterOffer behavior has been changed.
-        std::vector<ItemStack> playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& playerBorrowed = playerTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : playerBorrowed)
         {
             const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
@@ -487,7 +471,7 @@ namespace MWGui
             merchantOffer -= std::max(cap, buyingPrice);
         }
 
-        std::vector<ItemStack> merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
+        const std::vector<ItemStack>& merchantBorrowed = mTradeModel->getItemsBorrowedToUs();
         for (const ItemStack& itemStack : merchantBorrowed)
         {
             const int basePrice = getEffectiveValue(itemStack.mBase, itemStack.mCount);
@@ -531,5 +515,13 @@ namespace MWGui
         mItemView->setModel(nullptr);
         mTradeModel = nullptr;
         mSortModel = nullptr;
+    }
+
+    void TradeWindow::onClose()
+    {
+        // Make sure the window was actually closed and not temporarily hidden.
+        if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Barter))
+            return;
+        resetReference();
     }
 }

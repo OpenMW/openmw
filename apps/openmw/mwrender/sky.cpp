@@ -119,12 +119,12 @@ public:
     }
 
 protected:
-    virtual void setDefaults(osg::StateSet* stateset)
+    void setDefaults(osg::StateSet* stateset) override
     {
         stateset->setAttributeAndModes(createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     }
 
-    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
+    void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
     {
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setEmission(osg::Material::FRONT_AND_BACK, mEmissionColor);
@@ -149,7 +149,7 @@ public:
     }
 
 protected:
-    virtual void setDefaults(osg::StateSet* stateset)
+    void setDefaults(osg::StateSet* stateset) override
     {
         osg::ref_ptr<osg::TexEnvCombine> texEnv (new osg::TexEnvCombine);
         texEnv->setCombine_Alpha(osg::TexEnvCombine::MODULATE);
@@ -162,7 +162,7 @@ protected:
         stateset->setTextureAttributeAndModes(1, texEnv, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     }
 
-    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/)
+    void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
     {
         osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(1, osg::StateAttribute::TEXENV));
         texEnv->setConstantColor(mColor);
@@ -201,7 +201,7 @@ public:
     }
 
 protected:
-    virtual void setDefaults(osg::StateSet *stateset)
+    void setDefaults(osg::StateSet *stateset) override
     {
         osg::ref_ptr<osg::TexMat> texmat (new osg::TexMat);
         stateset->setTextureAttributeAndModes(0, texmat, osg::StateAttribute::ON);
@@ -223,7 +223,7 @@ protected:
         stateset->setTextureMode(1, GL_TEXTURE_2D, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
     }
 
-    virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override
     {
         osg::TexMat* texMat = static_cast<osg::TexMat*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXMAT));
         texMat->setMatrix(osg::Matrix::translate(osg::Vec3f(0, -mAnimationTimer, 0.f)));
@@ -272,7 +272,7 @@ public:
         return mViewPoint;
     }
 
-    virtual bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const
+    bool computeLocalToWorldMatrix(osg::Matrix& matrix, osg::NodeVisitor* nv) const override
     {
         if (nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
         {
@@ -291,7 +291,7 @@ public:
         }
     }
 
-    osg::BoundingSphere computeBound() const
+    osg::BoundingSphere computeBound() const override
     {
         return osg::BoundingSphere(osg::Vec3f(0,0,0), 0);
     }
@@ -299,7 +299,7 @@ public:
     class CullCallback : public osg::NodeCallback
     {
     public:
-        virtual void operator() (osg::Node* node, osg::NodeVisitor* nv)
+        void operator() (osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
@@ -351,7 +351,7 @@ public:
     {
     }
 
-    void apply(osg::Drawable& drw)
+    void apply(osg::Drawable& drw) override
     {
         osg::Geometry* geom = drw.asGeometry();
         if (!geom)
@@ -409,7 +409,7 @@ public:
         return mEnabled && viewPoint.z() < mWaterLevel;
     }
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override
     {
         if (isUnderwater())
             return;
@@ -521,7 +521,7 @@ public:
         mUpdater->mColor.b() = color.b();
     }
 
-    virtual void adjustTransparency(const float ratio)
+    void adjustTransparency(const float ratio) override
     {
         mUpdater->mColor.a() = ratio;
         if (mSunGlareCallback)
@@ -550,7 +550,7 @@ private:
     class DummyComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
     {
     public:
-        virtual osg::BoundingSphere computeBound(const osg::Node& node) const { return osg::BoundingSphere(); }
+        osg::BoundingSphere computeBound(const osg::Node& node) const override { return osg::BoundingSphere(); }
     };
 
     /// @param queryVisible If true, queries the amount of visible pixels. If false, queries the total amount of pixels.
@@ -701,12 +701,12 @@ private:
         {
         }
 
-        virtual void setDefaults(osg::StateSet* stateset)
+        void setDefaults(osg::StateSet* stateset) override
         {
             stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON);
         }
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
             osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
             mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mColor.a()));
@@ -766,7 +766,7 @@ private:
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
@@ -851,7 +851,7 @@ private:
                 mColor[i] = std::min(1.f, mColor[i]);
         }
 
-        virtual void operator ()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator ()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
@@ -941,10 +941,10 @@ public:
     Moon(osg::Group* parentNode, Resource::ImageManager& imageManager, float scaleFactor, Type type)
         : CelestialBody(parentNode, scaleFactor, 2)
         , mType(type)
-        , mPhase(MoonState::Phase_Unspecified)
+        , mPhase(MoonState::Phase::Unspecified)
         , mUpdater(new Updater(imageManager))
     {
-        setPhase(MoonState::Phase_Full);
+        setPhase(MoonState::Phase::Full);
         setVisible(true);
 
         mGeom->addUpdateCallback(mUpdater);
@@ -955,7 +955,7 @@ public:
         mGeom->removeUpdateCallback(mUpdater);
     }
 
-    virtual void adjustTransparency(const float ratio)
+    void adjustTransparency(const float ratio) override
     {
         mUpdater->mTransparency *= ratio;
     }
@@ -993,14 +993,14 @@ public:
 
     unsigned int getPhaseInt() const
     {
-        if      (mPhase == MoonState::Phase_New)              return 0;
-        else if (mPhase == MoonState::Phase_WaxingCrescent)   return 1;
-        else if (mPhase == MoonState::Phase_WaningCrescent)   return 1;
-        else if (mPhase == MoonState::Phase_FirstQuarter)     return 2;
-        else if (mPhase == MoonState::Phase_ThirdQuarter)     return 2;
-        else if (mPhase == MoonState::Phase_WaxingGibbous)    return 3;
-        else if (mPhase == MoonState::Phase_WaningGibbous)    return 3;
-        else if (mPhase == MoonState::Phase_Full)             return 4;
+        if      (mPhase == MoonState::Phase::New)              return 0;
+        else if (mPhase == MoonState::Phase::WaxingCrescent)   return 1;
+        else if (mPhase == MoonState::Phase::WaningCrescent)   return 1;
+        else if (mPhase == MoonState::Phase::FirstQuarter)     return 2;
+        else if (mPhase == MoonState::Phase::ThirdQuarter)     return 2;
+        else if (mPhase == MoonState::Phase::WaxingGibbous)    return 3;
+        else if (mPhase == MoonState::Phase::WaningGibbous)    return 3;
+        else if (mPhase == MoonState::Phase::Full)             return 4;
         return 0;
     }
 
@@ -1026,7 +1026,7 @@ private:
         {
         }
 
-        virtual void setDefaults(osg::StateSet* stateset)
+        void setDefaults(osg::StateSet* stateset) override
         {
             stateset->setTextureAttributeAndModes(0, mPhaseTex, osg::StateAttribute::ON);
             osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
@@ -1050,7 +1050,7 @@ private:
             stateset->setAttributeAndModes(createUnlitMaterial(), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         }
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
             osg::TexEnvCombine* texEnv = static_cast<osg::TexEnvCombine*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXENV));
             texEnv->setConstantColor(mMoonColor * mShadowBlend);
@@ -1090,14 +1090,14 @@ private:
         else
             textureName += "masser_";
 
-        if     (phase == MoonState::Phase_New)            textureName += "new";
-        else if(phase == MoonState::Phase_WaxingCrescent) textureName += "one_wax";
-        else if(phase == MoonState::Phase_FirstQuarter)   textureName += "half_wax";
-        else if(phase == MoonState::Phase_WaxingGibbous)  textureName += "three_wax";
-        else if(phase == MoonState::Phase_WaningCrescent) textureName += "one_wan";
-        else if(phase == MoonState::Phase_ThirdQuarter)   textureName += "half_wan";
-        else if(phase == MoonState::Phase_WaningGibbous)  textureName += "three_wan";
-        else if(phase == MoonState::Phase_Full)           textureName += "full";
+        if     (phase == MoonState::Phase::New)            textureName += "new";
+        else if(phase == MoonState::Phase::WaxingCrescent) textureName += "one_wax";
+        else if(phase == MoonState::Phase::FirstQuarter)   textureName += "half_wax";
+        else if(phase == MoonState::Phase::WaxingGibbous)  textureName += "three_wax";
+        else if(phase == MoonState::Phase::WaningCrescent) textureName += "one_wan";
+        else if(phase == MoonState::Phase::ThirdQuarter)   textureName += "half_wan";
+        else if(phase == MoonState::Phase::WaningGibbous)  textureName += "three_wan";
+        else if(phase == MoonState::Phase::Full)           textureName += "full";
 
         textureName += ".dds";
 
@@ -1226,7 +1226,7 @@ void SkyManager::create()
 class RainCounter : public osgParticle::ConstantRateCounter
 {
 public:
-    virtual int numParticlesToCreate(double dt) const
+    int numParticlesToCreate(double dt) const override
     {
         // limit dt to avoid large particle emissions if there are jumps in the simulation time
         // 0.2 seconds is the same cap as used in Engine's frame loop
@@ -1243,7 +1243,7 @@ public:
     {
     }
 
-    virtual void shoot(osgParticle::Particle* particle) const
+    void shoot(osgParticle::Particle* particle) const override
     {
         particle->setVelocity(mVelocity);
         particle->setAngle(osg::Vec3f(-mAngle, 0, (Misc::Rng::rollProbability() * 2 - 1) * osg::PI));
@@ -1259,11 +1259,11 @@ public:
         mAngle = angle;
     }
 
-    virtual osg::Object* cloneType() const
+    osg::Object* cloneType() const override
     {
         return new RainShooter;
     }
-    virtual osg::Object* clone(const osg::CopyOp &) const
+    osg::Object* clone(const osg::CopyOp &) const override
     {
         return new RainShooter(*this);
     }
@@ -1289,14 +1289,14 @@ public:
         mAlpha = alpha;
     }
 
-    virtual void setDefaults(osg::StateSet* stateset)
+    void setDefaults(osg::StateSet* stateset) override
     {
         // need to create a deep copy of StateAttributes we will modify
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         stateset->setAttribute(osg::clone(mat, osg::CopyOp::DEEP_COPY_ALL), osg::StateAttribute::ON);
     }
 
-    virtual void apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
+    void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
     {
         osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
         mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(0,0,0,mAlpha));
@@ -1315,7 +1315,7 @@ public:
             mAlphaUpdate = alphaUpdate;
         }
 
-        virtual void apply(osg::Node &node)
+        void apply(osg::Node &node) override
         {
             if (osg::StateSet* stateset = node.getStateSet())
             {
@@ -1368,7 +1368,7 @@ public:
     {
     }
 
-    virtual void setDefaults(osg::StateSet* stateset)
+    void setDefaults(osg::StateSet* stateset) override
     {
         osg::ref_ptr<osg::Material> mat (new osg::Material);
         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1,1,1,1));
@@ -1377,7 +1377,7 @@ public:
         stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
     }
 
-    virtual void apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
+    void apply(osg::StateSet *stateset, osg::NodeVisitor *nv) override
     {
         AlphaFader::apply(stateset,nv);
         *mAlphaUpdate = mAlpha * 2.0;  // mAlpha is limited to 0.6 so multiply by 2 to reach full intensity
@@ -1400,21 +1400,21 @@ public:
         mPreviousCameraPosition = getCameraPosition();
     }
 
-    virtual osg::Object *cloneType() const override
+    osg::Object *cloneType() const override
     {
         return nullptr;
     }
 
-    virtual osg::Object *clone(const osg::CopyOp &op) const override
+    osg::Object *clone(const osg::CopyOp &op) const override
     {
         return nullptr;
     }
 
-    virtual void operate(osgParticle::Particle *P, double dt) override
+    void operate(osgParticle::Particle *P, double dt) override
     {
     }
 
-    virtual void operateParticles(osgParticle::ParticleSystem *ps, double dt) override
+    void operateParticles(osgParticle::ParticleSystem *ps, double dt) override
     {
         osg::Vec3 position = getCameraPosition();
         osg::Vec3 positionDifference = position - mPreviousCameraPosition;
@@ -1911,42 +1911,42 @@ void SkyManager::setWaterHeight(float height)
 
 void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
 {
-    models.push_back("meshes/sky_atmosphere.nif");
+    models.emplace_back("meshes/sky_atmosphere.nif");
     if (mSceneManager->getVFS()->exists("meshes/sky_night_02.nif"))
-        models.push_back("meshes/sky_night_02.nif");
-    models.push_back("meshes/sky_night_01.nif");
-    models.push_back("meshes/sky_clouds_01.nif");
+        models.emplace_back("meshes/sky_night_02.nif");
+    models.emplace_back("meshes/sky_night_01.nif");
+    models.emplace_back("meshes/sky_clouds_01.nif");
 
-    models.push_back("meshes\\ashcloud.nif");
-    models.push_back("meshes\\blightcloud.nif");
-    models.push_back("meshes\\snow.nif");
-    models.push_back("meshes\\blizzard.nif");
+    models.emplace_back("meshes\\ashcloud.nif");
+    models.emplace_back("meshes\\blightcloud.nif");
+    models.emplace_back("meshes\\snow.nif");
+    models.emplace_back("meshes\\blizzard.nif");
 
-    textures.push_back("textures/tx_mooncircle_full_s.dds");
-    textures.push_back("textures/tx_mooncircle_full_m.dds");
+    textures.emplace_back("textures/tx_mooncircle_full_s.dds");
+    textures.emplace_back("textures/tx_mooncircle_full_m.dds");
 
-    textures.push_back("textures/tx_masser_new.dds");
-    textures.push_back("textures/tx_masser_one_wax.dds");
-    textures.push_back("textures/tx_masser_half_wax.dds");
-    textures.push_back("textures/tx_masser_three_wax.dds");
-    textures.push_back("textures/tx_masser_one_wan.dds");
-    textures.push_back("textures/tx_masser_half_wan.dds");
-    textures.push_back("textures/tx_masser_three_wan.dds");
-    textures.push_back("textures/tx_masser_full.dds");
+    textures.emplace_back("textures/tx_masser_new.dds");
+    textures.emplace_back("textures/tx_masser_one_wax.dds");
+    textures.emplace_back("textures/tx_masser_half_wax.dds");
+    textures.emplace_back("textures/tx_masser_three_wax.dds");
+    textures.emplace_back("textures/tx_masser_one_wan.dds");
+    textures.emplace_back("textures/tx_masser_half_wan.dds");
+    textures.emplace_back("textures/tx_masser_three_wan.dds");
+    textures.emplace_back("textures/tx_masser_full.dds");
 
-    textures.push_back("textures/tx_secunda_new.dds");
-    textures.push_back("textures/tx_secunda_one_wax.dds");
-    textures.push_back("textures/tx_secunda_half_wax.dds");
-    textures.push_back("textures/tx_secunda_three_wax.dds");
-    textures.push_back("textures/tx_secunda_one_wan.dds");
-    textures.push_back("textures/tx_secunda_half_wan.dds");
-    textures.push_back("textures/tx_secunda_three_wan.dds");
-    textures.push_back("textures/tx_secunda_full.dds");
+    textures.emplace_back("textures/tx_secunda_new.dds");
+    textures.emplace_back("textures/tx_secunda_one_wax.dds");
+    textures.emplace_back("textures/tx_secunda_half_wax.dds");
+    textures.emplace_back("textures/tx_secunda_three_wax.dds");
+    textures.emplace_back("textures/tx_secunda_one_wan.dds");
+    textures.emplace_back("textures/tx_secunda_half_wan.dds");
+    textures.emplace_back("textures/tx_secunda_three_wan.dds");
+    textures.emplace_back("textures/tx_secunda_full.dds");
 
-    textures.push_back("textures/tx_sun_05.dds");
-    textures.push_back("textures/tx_sun_flash_grey_05.dds");
+    textures.emplace_back("textures/tx_sun_05.dds");
+    textures.emplace_back("textures/tx_sun_flash_grey_05.dds");
 
-    textures.push_back("textures/tx_raindrop_01.dds");
+    textures.emplace_back("textures/tx_raindrop_01.dds");
 }
 
 void SkyManager::setWaterEnabled(bool enabled)

@@ -70,7 +70,7 @@ namespace Terrain
             return mMask;
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             if (mLowZ <= mHighZ)
                 traverse(node, nv);

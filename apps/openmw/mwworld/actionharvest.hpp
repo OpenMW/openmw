@@ -8,7 +8,7 @@ namespace MWWorld
 {
     class ActionHarvest : public Action
     {
-            virtual void executeImp (const MWWorld::Ptr& actor);
+            void executeImp (const MWWorld::Ptr& actor) override;
 
         public:
             ActionHarvest (const Ptr& container);

@@ -11,19 +11,19 @@ namespace MWGui
     public:
         InventoryItemModel (const MWWorld::Ptr& actor);
 
-        virtual ItemStack getItem (ModelIndex index);
-        virtual ModelIndex getIndex (ItemStack item);
-        virtual size_t getItemCount();
+        ItemStack getItem (ModelIndex index) override;
+        ModelIndex getIndex (ItemStack item) override;
+        size_t getItemCount() override;
 
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
+        bool onTakeItem(const MWWorld::Ptr &item, int count) override;
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true);
-        virtual void removeItem (const ItemStack& item, size_t count);
+        MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        void removeItem (const ItemStack& item, size_t count) override;
 
         /// Move items from this model to \a otherModel.
-        virtual MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel);
+        MWWorld::Ptr moveItem (const ItemStack& item, size_t count, ItemModel* otherModel) override;
 
-        virtual void update();
+        void update() override;
 
     protected:
         MWWorld::Ptr mActor;

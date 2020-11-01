@@ -16,6 +16,50 @@
 #include "containerstore.hpp"
 #include "cellstore.hpp"
 
+namespace
+{
+    template<class Visitor, class Key>
+    bool forEachInStore(const std::string& id, Visitor&& visitor, std::map<Key, MWWorld::CellStore>& cellStore)
+    {
+        for(auto& cell : cellStore)
+        {
+            if(cell.second.getState() == MWWorld::CellStore::State_Unloaded)
+                cell.second.preload();
+            if(cell.second.getState() == MWWorld::CellStore::State_Preloaded)
+            {
+                if(cell.second.hasId(id))
+                {
+                    cell.second.load();
+                }
+                else
+                    continue;
+            }
+            bool cont = cell.second.forEach([&] (MWWorld::Ptr ptr)
+            {
+                if(*ptr.getCellRef().getRefIdPtr() == id)
+                {
+                    return visitor(ptr);
+                }
+                return true;
+            });
+            if(!cont)
+                return false;
+        }
+        return true;
+    }
+
+    struct PtrCollector
+    {
+        std::vector<MWWorld::Ptr> mPtrs;
+
+        bool operator()(MWWorld::Ptr ptr)
+        {
+            mPtrs.emplace_back(ptr);
+            return true;
+        }
+    };
+}
+
 MWWorld::CellStore *MWWorld::Cells::getCellStore (const ESM::Cell *cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
@@ -330,6 +374,14 @@ void MWWorld::Cells::getInteriorPtrs(const std::string &name, std::vector<MWWorl
     }
 }
 
+std::vector<MWWorld::Ptr> MWWorld::Cells::getAll(const std::string& id)
+{
+    PtrCollector visitor;
+    if(forEachInStore(id, visitor, mInteriors))
+        forEachInStore(id, visitor, mExteriors);
+    return visitor.mPtrs;
+}
+
 int MWWorld::Cells::countSavedGameRecords() const
 {
     int count = 0;
@@ -376,7 +428,7 @@ public:
 
     MWWorld::Cells& mCells;
 
-    virtual MWWorld::CellStore* getCellStore(const ESM::CellId& cellId)
+    MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
     {
         try
         {

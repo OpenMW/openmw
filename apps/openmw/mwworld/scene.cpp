@@ -1,6 +1,8 @@
 #include "scene.hpp"
 
 #include <limits>
+#include <chrono>
+#include <thread>
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
@@ -150,7 +152,7 @@ namespace
                         ? btVector3(distanceFromDoor, 0, 0)
                         : btVector3(0, distanceFromDoor, 0);
 
-                const auto& transform = object->getCollisionObject()->getWorldTransform();
+                const auto transform = object->getTransform();
                 const btTransform closedDoorTransform(
                     Misc::Convert::toBullet(makeObjectOsgQuat(ptr.getCellRef().getPosition())),
                     transform.getOrigin()
@@ -185,7 +187,7 @@ namespace
                         *object->getShapeInstance()->getCollisionShape(),
                         object->getShapeInstance()->getAvoidCollisionShape()
                     },
-                    object->getCollisionObject()->getWorldTransform()
+                    object->getTransform()
                 );
             }
         }
@@ -561,7 +563,7 @@ namespace MWWorld
                 if (iter==mActiveCells.end())
                 {
                     refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
-                    cellsPositionsToLoad.push_back(std::make_pair(x, y));
+                    cellsPositionsToLoad.emplace_back(x, y);
                 }
             }
         }
@@ -741,15 +743,12 @@ namespace MWWorld
             player.getClass().adjustPosition(player, true);
         }
 
-        MWBase::MechanicsManager *mechMgr =
-            MWBase::Environment::get().getMechanicsManager();
-
-        mechMgr->updateCell(old, player);
-        mechMgr->watchActor(player);
+        MWBase::Environment::get().getMechanicsManager()->updateCell(old, player);
+        MWBase::Environment::get().getWindowManager()->watchActor(player);
 
         mPhysics->updatePtr(old, player);
 
-        MWBase::Environment::get().getWorld()->adjustSky();
+        world->adjustSky();
 
         mLastPlayerPos = player.getRefData().getPosition().asVec3();
     }
@@ -962,7 +961,7 @@ namespace MWWorld
         {
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             try
             {
@@ -1028,7 +1027,7 @@ namespace MWWorld
                 {
                     continue;
                 }
-                teleportDoors.push_back(MWWorld::ConstPtr(&door, cellStore));
+                teleportDoors.emplace_back(&door, cellStore);
             }
         }
 
@@ -1143,7 +1142,7 @@ namespace MWWorld
             }
             else
                 loadingListener->setProgress(0);
-            OpenThreads::Thread::microSleep(5000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
     }
 

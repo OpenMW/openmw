@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/stringops.hpp>
+
 void ESM::InventoryState::load (ESMReader &esm)
 {
     // obsolete
@@ -74,7 +76,7 @@ void ESM::InventoryState::load (ESMReader &esm)
             float rand, multiplier;
             esm.getHT (rand);
             esm.getHNT (multiplier, "MULT");
-            params.push_back(std::make_pair(rand, multiplier));
+            params.emplace_back(rand, multiplier);
         }
         mPermanentMagicEffectMagnitudes[id] = params;
     }
@@ -106,6 +108,19 @@ void ESM::InventoryState::load (ESMReader &esm)
 
     mSelectedEnchantItem = -1;
     esm.getHNOT(mSelectedEnchantItem, "SELE");
+
+    // Old saves had restocking levelled items in a special map
+    // This turns items from that map into negative quantities
+    for(const auto& entry : mLevelledItemMap)
+    {
+        const std::string& id = entry.first.first;
+        const int count = entry.second;
+        for(auto& item : mItems)
+        {
+            if(item.mCount == count && Misc::StringUtils::ciEqual(id, item.mRef.mRefID))
+                item.mCount = -count;
+        }
+    }
 }
 
 void ESM::InventoryState::save (ESMWriter &esm) const

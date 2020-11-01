@@ -25,14 +25,14 @@ namespace MWMechanics
 
             AiTravel(float x, float y, float z);
 
-            AiTravel(const ESM::AiSequence::AiTravel* travel);
+            explicit AiTravel(const ESM::AiSequence::AiTravel* travel);
 
             /// Simulates the passing of time
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
 
-            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute (const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Travel; }
 
@@ -44,7 +44,7 @@ namespace MWMechanics
                 return options;
             }
 
-            osg::Vec3f getDestination() const final { return osg::Vec3f(mX, mY, mZ); }
+            osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
 
         private:
             const float mX;
@@ -62,7 +62,7 @@ namespace MWMechanics
 
         static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::InternalTravel; }
 
-        std::unique_ptr<AiPackage> clone() const final;
+        std::unique_ptr<AiPackage> clone() const override;
     };
 }
 

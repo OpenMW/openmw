@@ -23,7 +23,7 @@ namespace MWRender
         void setGroup(const std::string& group, bool relativeTime);
         void updateStartTime();
 
-        virtual float getValue(osg::NodeVisitor* nv);
+        float getValue(osg::NodeVisitor* nv) override;
     };
 
     /// Handles attach & release of projectiles for ranged weapons
@@ -35,6 +35,8 @@ namespace MWRender
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void attachArrow(MWWorld::Ptr actor);
+
+        void detachArrow(MWWorld::Ptr actor);
 
         /// @note If no weapon (or an invalid weapon) is equipped, this function is a no-op.
         void releaseArrow(MWWorld::Ptr actor, float attackStrength);

@@ -22,8 +22,8 @@ namespace CSMTools
                 const CSMWorld::Resources& icons,
                 const CSMWorld::IdCollection<ESM::BodyPart>& bodyparts);
 
-            virtual void perform(int stage, CSMDoc::Messages& messages);
-            virtual int setup();
+            void perform(int stage, CSMDoc::Messages& messages) override;
+            int setup() override;
 
         private:
             //CONCRETE CHECKS

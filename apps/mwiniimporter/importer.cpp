@@ -645,7 +645,7 @@ MwIniImporter::MwIniImporter()
     }
 
     for(int i=0; fallback[i]; i++) {
-        mMergeFallback.push_back(fallback[i]);
+        mMergeFallback.emplace_back(fallback[i]);
     }
 }
 
@@ -910,7 +910,7 @@ void MwIniImporter::importGameFiles(multistrmap &cfg, const multistrmap &ini, co
                     std::time_t time = lastWriteTime(path, defaultTime);
                     if (time != defaultTime)
                     {
-                        contentFiles.push_back({time, path});
+                        contentFiles.emplace_back(time, std::move(path));
                         found = true;
                         break;
                     }
@@ -985,14 +985,7 @@ std::time_t MwIniImporter::lastWriteTime(const boost::filesystem::path& filename
     std::time_t writeTime(defaultTime);
     if (boost::filesystem::exists(filename))
     {
-        // FixMe: remove #if when Boost dependency for Linux builds updated
-        // This allows Linux to build until then
-#if (BOOST_VERSION >= 104800)
-        // need to resolve any symlinks so that we get time of file, not symlink
         boost::filesystem::path resolved = boost::filesystem::canonical(filename);
-#else
-        boost::filesystem::path resolved = filename;
-#endif
         writeTime = boost::filesystem::last_write_time(resolved);
 
         // print timestamp

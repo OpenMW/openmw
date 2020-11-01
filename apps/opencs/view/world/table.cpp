@@ -452,7 +452,7 @@ std::vector<std::string> CSVWorld::Table::getSelectedIds() const
          ++iter)
     {
         int row = mProxyModel->mapToSource (mProxyModel->index (iter->row(), 0)).row();
-        ids.push_back (mModel->data (mModel->index (row, columnIndex)).toString().toUtf8().constData());
+        ids.emplace_back(mModel->data (mModel->index (row, columnIndex)).toString().toUtf8().constData());
     }
     return ids;
 }
@@ -784,7 +784,7 @@ std::vector<std::string> CSVWorld::Table::getColumnsWithDisplay(CSMWorld::Column
 
         if (display == columndisplay)
         {
-            titles.push_back(mModel->headerData (i, Qt::Horizontal).toString().toUtf8().constData());
+            titles.emplace_back(mModel->headerData (i, Qt::Horizontal).toString().toUtf8().constData());
         }
     }
     return titles;

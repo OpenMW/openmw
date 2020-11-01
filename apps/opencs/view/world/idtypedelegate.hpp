@@ -20,7 +20,7 @@ namespace CSVWorld
 
             IdTypeDelegateFactory();
 
-            virtual CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const;
+            CommandDelegate *makeDelegate (CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document, QObject *parent) const override;
             ///< The ownership of the returned CommandDelegate is transferred to the caller.
     };
 }

@@ -5,7 +5,7 @@
 #include <components/resource/resourcemanager.hpp>
 #include <components/esm/loadcell.hpp>
 
-#include <OpenThreads/Mutex>
+#include <mutex>
 
 namespace Resource
 {
@@ -31,13 +31,13 @@ namespace MWRender
 
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, bool activeGrid, const osg::Vec3f& viewPoint, bool compile);
 
-        virtual unsigned int getNodeMask() override;
+        unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
-        bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, bool enabled);
+        bool enableObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
 
         /// @return true if view needs rebuild
-        bool blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos);
+        bool blacklistObject(int type, const ESM::RefNum & refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
 
         void clear();
 
@@ -58,7 +58,7 @@ namespace MWRender
         float mMinSizeMergeFactor;
         float mMinSizeCostMultiplier;
 
-        OpenThreads::Mutex mRefTrackerMutex;
+        std::mutex mRefTrackerMutex;
         struct RefTracker
         {
             std::set<ESM::RefNum> mDisabled;
@@ -72,7 +72,7 @@ namespace MWRender
         const RefTracker& getRefTracker() const { return mRefTracker; }
         RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
 
-        OpenThreads::Mutex mSizeCacheMutex;
+        std::mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;
         SizeCache mSizeCache;
     };

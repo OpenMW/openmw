@@ -3,7 +3,7 @@
 #include <QTextStream>
 #include <QString>
 #include <QRegExp>
-#include <QMap>
+#include <QMultiMap>
 
 #include <QDebug>
 
@@ -12,17 +12,13 @@ const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
 const char Config::LauncherSettings::sContentListsSectionPrefix[] = "Profiles/";
 const char Config::LauncherSettings::sContentListSuffix[] = "/content";
 
-Config::LauncherSettings::LauncherSettings()
-{
-}
+Config::LauncherSettings::LauncherSettings() = default;
 
-Config::LauncherSettings::~LauncherSettings()
-{
-}
+Config::LauncherSettings::~LauncherSettings() = default;
 
 QStringList Config::LauncherSettings::subKeys(const QString &key)
 {
-    QMap<QString, QString> settings = SettingsBase::getSettings();
+    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
 
     QRegExp keyRe("(.+)/");
@@ -54,7 +50,7 @@ bool Config::LauncherSettings::writeFile(QTextStream &stream)
 {
     QString sectionPrefix;
     QRegExp sectionRe("([^/]+)/(.+)$");
-    QMap<QString, QString> settings = SettingsBase::getSettings();
+    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
 
     QMapIterator<QString, QString> i(settings);
     i.toBack();

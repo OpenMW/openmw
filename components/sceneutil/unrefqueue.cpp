@@ -18,7 +18,7 @@ namespace SceneUtil
 
     void UnrefQueue::push(const osg::Referenced *obj)
     {
-        mWorkItem->mObjects.push_back(obj);
+        mWorkItem->mObjects.emplace_back(obj);
     }
 
     void UnrefQueue::flush(SceneUtil::WorkQueue *workQueue)

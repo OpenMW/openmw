@@ -15,7 +15,7 @@ namespace CSVWorld
 
         protected:
 
-            virtual void configureCreateCommand(CSMWorld::CreateCommand& command) const;
+            void configureCreateCommand(CSMWorld::CreateCommand& command) const override;
     };
 }
 

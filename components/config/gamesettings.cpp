@@ -2,31 +2,10 @@
 #include "launchersettings.hpp"
 
 #include <QTextCodec>
-#include <QTextStream>
 #include <QDir>
-#include <QString>
 #include <QRegExp>
-#include <QMap>
 
 #include <components/files/configurationmanager.hpp>
-
-#include <boost/version.hpp>
-
-/**
- * Workaround for problems with whitespaces in paths in older versions of Boost library
- */
-#if (BOOST_VERSION <= 104600)
-namespace boost
-{
-
-    template<>
-    inline boost::filesystem::path lexical_cast<boost::filesystem::path, std::string>(const std::string& arg)
-    {
-        return boost::filesystem::path(arg);
-    }
-
-} /* namespace boost */
-#endif /* (BOOST_VERSION <= 104600) */
 
 const char Config::GameSettings::sContentKey[] = "content";
 
@@ -35,9 +14,7 @@ Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
 {
 }
 
-Config::GameSettings::~GameSettings()
-{
-}
+Config::GameSettings::~GameSettings() = default;
 
 void Config::GameSettings::validatePaths()
 {
@@ -54,8 +31,8 @@ void Config::GameSettings::validatePaths()
     mCfgMgr.processPaths(dataDirs);
     mDataDirs.clear();
 
-    for (Files::PathContainer::iterator it = dataDirs.begin(); it != dataDirs.end(); ++it) {
-        QString path = QString::fromUtf8(it->string().c_str());
+    for (auto & dataDir : dataDirs) {
+        QString path = QString::fromUtf8(dataDir.string().c_str());
 
         QDir dir(path);
         if (dir.exists())
@@ -105,9 +82,9 @@ bool Config::GameSettings::readUserFile(QTextStream &stream)
     return readFile(stream, mUserSettings);
 }
 
-bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> &settings)
+bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QString> &settings)
 {
-    QMap<QString, QString> cache;
+    QMultiMap<QString, QString> cache;
     QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
     while (!stream.atEnd()) {
@@ -121,12 +98,19 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> 
             QString key = keyRe.cap(1).trimmed();
             QString value = keyRe.cap(2).trimmed();
 
-            // Don't remove existing data entries
-            if (key != QLatin1String("data"))
+            // Don't remove composing entries
+            if (key != QLatin1String("data")
+                && key != QLatin1String("fallback-archive")
+                && key != QLatin1String("content")
+                && key != QLatin1String("script-blacklist"))
                 settings.remove(key);
-            else
+
+            if (key == QLatin1String("data")
+                || key == QLatin1String("data-local")
+                || key == QLatin1String("resources")
+                || key == QLatin1String("load-savegame"))
             {
-                // 'data=...' line, so needs processing to deal with ampersands and quotes
+                // Path line (e.g. 'data=...'), so needs processing to deal with ampersands and quotes
                 // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work as there are too may QStrings involved
                 QChar delim = '\"';
                 QChar escape = '&';
@@ -151,7 +135,7 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMap<QString, QString> 
             values.append(settings.values(key));
 
             if (!values.contains(value)) {
-                cache.insertMulti(key, value);
+                cache.insert(key, value);
             }
         }
     }
@@ -178,8 +162,11 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     while (i.hasPrevious()) {
         i.previous();
 
-        // 'data=...' lines need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
-        if (i.key() == QLatin1String("data"))
+        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses boost::io::quoted
+        if (i.key() == QLatin1String("data")
+            || i.key() == QLatin1String("data-local")
+            || i.key() == QLatin1String("resources")
+            || i.key() == QLatin1String("load-savegame"))
         {
             stream << i.key() << "=";
 
@@ -189,30 +176,16 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
             QString string = i.value();
 
             stream << delim;
-            for (QString::const_iterator it = string.begin(); it != string.end(); ++it)
+            for (auto it : string)
             {
-                if (*it == delim || *it == escape)
+                if (it == delim || it == escape)
                     stream << escape;
-                stream << *it;
+                stream << it;
             }
             stream << delim;
 
             stream << '\n';
             continue;
-        }
-
-        // Quote paths with spaces
-        if (i.key() == QLatin1String("data-local")
-            || i.key() == QLatin1String("resources"))
-        {
-            if (i.value().contains(QChar(' ')))
-            {
-                QString stripped = i.value();
-                stripped.remove(QChar('\"')); // Remove quotes
-
-                stream << i.key() << "=\"" << stripped << "\"\n";
-                continue;
-            }
         }
 
         stream << i.key() << "=" << i.value() << "\n";
@@ -222,7 +195,7 @@ bool Config::GameSettings::writeFile(QTextStream &stream)
     return true;
 }
 
-bool Config::GameSettings::isOrderedLine(const QString& line) const
+bool Config::GameSettings::isOrderedLine(const QString& line)
 {
     return line.contains(QRegExp("^\\s*fallback-archive\\s*="))
            || line.contains(QRegExp("^\\s*fallback\\s*="))
@@ -290,9 +263,9 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     //
     QRegExp settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
     std::vector<QString> comments;
-    std::vector<QString>::iterator commentStart = fileCopy.end();
+    auto commentStart = fileCopy.end();
     std::map<QString, std::vector<QString> > commentsMap;
-    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    for (auto iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
     {
         if (isOrderedLine(*iter))
         {
@@ -342,9 +315,9 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
                 if (commentStart == fileCopy.end())
                     throw std::runtime_error("Config::GameSettings: failed to parse settings - iterator is past of end of settings file");
 
-                for (std::vector<QString>::const_iterator it = comments.begin(); it != comments.end(); ++it)
+                for (const auto & comment : comments)
                 {
-                    *commentStart = *it;
+                    *commentStart = comment;
                     ++commentStart;
                 }
                 comments.clear();
@@ -368,7 +341,7 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             *iter = QString(); // assume no match
             QString key = settingRegex.cap(1);
             QString keyVal = settingRegex.cap(1)+"="+settingRegex.cap(2);
-            QMap<QString, QString>::const_iterator i = mUserSettings.find(key);
+            QMultiMap<QString, QString>::const_iterator i = mUserSettings.find(key);
             while (i != mUserSettings.end() && i.key() == key)
             {
                 QString settingLine = i.key() + "=" + i.value();
@@ -386,16 +359,16 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     }
 
     // comments at top of file
-    for (std::vector<QString>::iterator iter = fileCopy.begin(); iter != fileCopy.end(); ++iter)
+    for (auto & iter : fileCopy)
     {
-        if ((*iter).isNull())
+        if (iter.isNull())
             continue;
 
         // Below is based on readFile() code, if that changes corresponding change may be
         // required (for example duplicates may be inserted if the rules don't match)
-        if (/*(*iter).isEmpty() ||*/ (*iter).contains(QRegExp("^\\s*#")))
+        if (/*(*iter).isEmpty() ||*/ iter.contains(QRegExp("^\\s*#")))
         {
-            stream << *iter << "\n";
+            stream << iter << "\n";
             continue;
         }
     }
@@ -409,7 +382,10 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     {
         it.previous();
 
-        if (it.key() == QLatin1String("data"))
+        if (it.key() == QLatin1String("data")
+            || it.key() == QLatin1String("data-local")
+            || it.key() == QLatin1String("resources")
+            || it.key() == QLatin1String("load-savegame"))
         {
             settingLine = it.key() + "=";
 
@@ -419,30 +395,20 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             QString string = it.value();
 
             settingLine += delim;
-            for (QString::const_iterator iter = string.begin(); iter != string.end(); ++iter)
+            for (auto iter : string)
             {
-                if (*iter == delim || *iter == escape)
+                if (iter == delim || iter == escape)
                     settingLine += escape;
-                settingLine += *iter;
+                settingLine += iter;
             }
             settingLine += delim;
-        }
-        // Quote paths with spaces
-        else if ((it.key() == QLatin1String("data-local")
-             || it.key() == QLatin1String("resources")) && it.value().contains(QChar(' ')))
-        {
-            QString stripped = it.value();
-            stripped.remove(QChar('\"')); // Remove quotes
-
-            settingLine = it.key() + "=\"" + stripped + "\"";
         }
         else
             settingLine = it.key() + "=" + it.value();
 
         if (settingRegex.indexIn(settingLine) != -1)
         {
-            std::map<QString, std::vector<QString> >::iterator i =
-                commentsMap.find(settingRegex.cap(1)+"="+settingRegex.cap(2));
+            auto i = commentsMap.find(settingRegex.cap(1)+"="+settingRegex.cap(2));
 
             // check if previous removed content item with comments
             if (i == commentsMap.end())
@@ -451,8 +417,8 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
             if (i != commentsMap.end())
             {
                 std::vector<QString> cLines = i->second;
-                for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
-                    stream << *ci << "\n";
+                for (const auto & cLine : cLines)
+                    stream << cLine << "\n";
 
                 commentsMap.erase(i);
             }
@@ -464,14 +430,14 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     // flush any removed settings
     if (!commentsMap.empty())
     {
-        std::map<QString, std::vector<QString> >::const_iterator i = commentsMap.begin();
+        auto i = commentsMap.begin();
         for (; i != commentsMap.end(); ++i)
         {
             if (i->first.contains(QRegExp("^\\s*content\\s*=")))
             {
                 std::vector<QString> cLines = i->second;
-                for (std::vector<QString>::const_iterator ci = cLines.begin(); ci != cLines.end(); ++ci)
-                    stream << *ci << "\n";
+                for (const auto & cLine : cLines)
+                    stream << cLine << "\n";
 
                 // mark the content line entry for future preocessing
                 stream << "##" << i->first << "\n";
@@ -484,8 +450,8 @@ bool Config::GameSettings::writeFileWithComments(QFile &file)
     // flush any end comments
     if (!comments.empty())
     {
-        for (std::vector<QString>::const_iterator ci = comments.begin(); ci != comments.end(); ++ci)
-            stream << *ci << "\n";
+        for (const auto & comment : comments)
+            stream << comment << "\n";
     }
 
     file.resize(file.pos());

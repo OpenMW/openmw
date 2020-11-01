@@ -17,6 +17,7 @@
 #include <LinearMath/btAabbUtil2.h>
 
 #include <algorithm>
+#include <cassert>
 #include <tuple>
 
 namespace DetourNavigator

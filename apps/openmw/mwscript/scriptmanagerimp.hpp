@@ -41,7 +41,20 @@ namespace MWScript
             Interpreter::Interpreter mInterpreter;
             bool mOpcodesInstalled;
 
-            typedef std::pair<std::vector<Interpreter::Type_Code>, Compiler::Locals> CompiledScript;
+            struct CompiledScript
+            {
+                std::vector<Interpreter::Type_Code> mByteCode;
+                Compiler::Locals mLocals;
+                bool mActive;
+
+                CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
+                {
+                    mByteCode = code;
+                    mLocals = locals;
+                    mActive = true;
+                }
+            };
+
             typedef std::map<std::string, CompiledScript> ScriptCollection;
 
             ScriptCollection mScripts;
@@ -55,21 +68,23 @@ namespace MWScript
                 Compiler::Context& compilerContext, int warningsMode,
                 const std::vector<std::string>& scriptBlacklist);
 
-            virtual bool run (const std::string& name, Interpreter::Context& interpreterContext);
+            void clear() override;
+
+            bool run (const std::string& name, Interpreter::Context& interpreterContext) override;
             ///< Run the script with the given name (compile first, if not compiled yet)
 
-            virtual bool compile (const std::string& name);
+            bool compile (const std::string& name) override;
             ///< Compile script with the given namen
             /// \return Success?
 
-            virtual std::pair<int, int> compileAll();
+            std::pair<int, int> compileAll() override;
             ///< Compile all scripts
             /// \return count, success
 
-            virtual const Compiler::Locals& getLocals (const std::string& name);
+            const Compiler::Locals& getLocals (const std::string& name) override;
             ///< Return locals for script \a name.
 
-            virtual GlobalScripts& getGlobalScripts();
+            GlobalScripts& getGlobalScripts() override;
     };
 }
 

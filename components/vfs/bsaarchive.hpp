@@ -12,7 +12,7 @@ namespace VFS
     public:
         BsaArchiveFile(const Bsa::BSAFile::FileStruct* info, Bsa::BSAFile* bsa);
 
-        virtual Files::IStreamPtr open();
+        Files::IStreamPtr open() override;
 
         const Bsa::BSAFile::FileStruct* mInfo;
         Bsa::BSAFile* mFile;
@@ -23,7 +23,7 @@ namespace VFS
     public:
         BsaArchive(const std::string& filename);
         virtual ~BsaArchive();
-        virtual void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char));
+        void listResources(std::map<std::string, File*>& out, char (*normalize_function) (char)) override;
 
     private:
         std::unique_ptr<Bsa::BSAFile> mFile;

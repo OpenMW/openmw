@@ -12,7 +12,7 @@ namespace MWPhysics
     public:
         ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot, const btCollisionWorld * world);
 
-        virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace);
+        btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace) override;
 
     protected:
         const btCollisionObject *mMe;

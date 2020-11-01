@@ -12,8 +12,8 @@ namespace MWGui
     {
         mSoulgem = soulgem;
         std::vector<std::string> buttons;
-        buttons.push_back("#{sRechargeEnchantment}");
-        buttons.push_back("#{sMake Enchantment}");
+        buttons.emplace_back("#{sRechargeEnchantment}");
+        buttons.emplace_back("#{sMake Enchantment}");
         mManager->createInteractiveMessageBox("#{sDoYouWantTo}", buttons);
         mManager->eventButtonPressed += MyGUI::newDelegate(this, &SoulgemDialog::onButtonPressed);
     }

@@ -20,8 +20,8 @@ namespace Wizard
     public:
         InstallationTargetPage(QWidget *parent, const Files::ConfigurationManager &cfg);
 
-        int nextId() const;
-        virtual bool validatePage();
+        int nextId() const override;
+        bool validatePage() override;
 
     private slots:
         void on_browseButton_clicked();
@@ -31,7 +31,7 @@ namespace Wizard
         const Files::ConfigurationManager &mCfgMgr;
 
     protected:
-        void initializePage();
+        void initializePage() override;
 
     };
 

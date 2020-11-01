@@ -45,7 +45,7 @@ class EffectAnimationTime : public SceneUtil::ControllerSource
 private:
     float mTime;
 public:
-    virtual float getValue(osg::NodeVisitor* nv);
+    float getValue(osg::NodeVisitor* nv) override;
 
     void addTime(float duration);
     void resetTime(float time);
@@ -173,13 +173,13 @@ protected:
         std::shared_ptr<float> getTimePtr() const
         { return mTimePtr; }
 
-        virtual float getValue(osg::NodeVisitor* nv);
+        float getValue(osg::NodeVisitor* nv) override;
     };
 
     class NullAnimationTime : public SceneUtil::ControllerSource
     {
     public:
-        virtual float getValue(osg::NodeVisitor *nv)
+        float getValue(osg::NodeVisitor *nv) override
         {
             return 0.f;
         }
@@ -273,6 +273,7 @@ protected:
     float mHeadPitchRadians;
     float mUpperBodyYawRadians;
     float mLegsYawRadians;
+    float mBodyPitchRadians;
 
     RotateController* addRotateController(std::string bone);
 
@@ -473,6 +474,7 @@ public:
     void setAlpha(float alpha);
     virtual void setPitchFactor(float factor) {}
     virtual void attachArrow() {}
+    virtual void detachArrow() {}
     virtual void releaseArrow(float attackStrength) {}
     virtual void enableHeadAnimation(bool enable) {}
     // TODO: move outside of this class
@@ -489,6 +491,8 @@ public:
     virtual void setLegsYawRadians(float v) { mLegsYawRadians = v; }
     virtual float getUpperBodyYawRadians() const { return mUpperBodyYawRadians; }
     virtual float getLegsYawRadians() const { return mLegsYawRadians; }
+    virtual void setBodyPitchRadians(float v) { mBodyPitchRadians = v; }
+    virtual float getBodyPitchRadians() const { return mBodyPitchRadians; }
 
     virtual void setAccurateAiming(bool enabled) {}
     virtual bool canBeHarvested() const { return false; }
@@ -502,7 +506,7 @@ class ObjectAnimation : public Animation {
 public:
     ObjectAnimation(const MWWorld::Ptr& ptr, const std::string &model, Resource::ResourceSystem* resourceSystem, bool animated, bool allowLight);
 
-    bool canBeHarvested() const;
+    bool canBeHarvested() const override;
 };
 
 class UpdateVfxCallback : public osg::NodeCallback
@@ -518,7 +522,7 @@ public:
     bool mFinished;
     EffectParams mParams;
 
-    virtual void operator()(osg::Node* node, osg::NodeVisitor* nv);
+    void operator()(osg::Node* node, osg::NodeVisitor* nv) override;
 
 private:
     double mStartingTime;

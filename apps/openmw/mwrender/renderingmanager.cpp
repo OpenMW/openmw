@@ -2,6 +2,8 @@
 
 #include <limits>
 #include <cstdlib>
+#include <condition_variable>
+#include <mutex>
 
 #include <osg/Light>
 #include <osg/LightModel>
@@ -63,6 +65,7 @@
 #include "vismask.hpp"
 #include "pathgrid.hpp"
 #include "camera.hpp"
+#include "viewovershoulder.hpp"
 #include "water.hpp"
 #include "terrainstorage.hpp"
 #include "util.hpp"
@@ -86,7 +89,7 @@ namespace MWRender
         {
         }
 
-        virtual void setDefaults(osg::StateSet *stateset)
+        void setDefaults(osg::StateSet *stateset) override
         {
             osg::LightModel* lightModel = new osg::LightModel;
             stateset->setAttribute(lightModel, osg::StateAttribute::ON);
@@ -103,7 +106,7 @@ namespace MWRender
                 stateset->removeAttribute(osg::StateAttribute::POLYGONMODE);
         }
 
-        virtual void apply(osg::StateSet* stateset, osg::NodeVisitor*)
+        void apply(osg::StateSet* stateset, osg::NodeVisitor*) override
         {
             osg::LightModel* lightModel = static_cast<osg::LightModel*>(stateset->getAttribute(osg::StateAttribute::LIGHTMODEL));
             lightModel->setAmbientIntensity(mAmbientColor);
@@ -163,7 +166,7 @@ namespace MWRender
         {
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             try
             {
@@ -304,6 +307,8 @@ namespace MWRender
         mWater.reset(new Water(mRootNode, sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation(), resourcePath));
 
         mCamera.reset(new Camera(mViewer->getCamera()));
+        if (Settings::Manager::getBool("view over shoulder", "Camera"))
+            mViewOverShoulderController.reset(new ViewOverShoulderController(mCamera.get()));
 
         mViewer->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -364,10 +369,10 @@ namespace MWRender
         float firstPersonFov = Settings::Manager::getFloat("first person field of view", "Camera");
         mFirstPersonFieldOfView = std::min(std::max(1.f, firstPersonFov), 179.f);
         mStateUpdater->setFogEnd(mViewDistance);
-        updateThirdPersonViewMode();
 
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
@@ -378,19 +383,6 @@ namespace MWRender
     {
         // let background loading thread finish before we delete anything else
         mWorkQueue = nullptr;
-    }
-
-    void RenderingManager::updateThirdPersonViewMode()
-    {
-        if (Settings::Manager::getBool("view over shoulder", "Camera"))
-            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::OverShoulder);
-        else
-            mCamera->setThirdPersonViewMode(Camera::ThirdPersonViewMode::Standard);
-
-        std::stringstream offset(Settings::Manager::getString("view over shoulder offset", "Camera"));
-        float horizontal = 30.f, vertical = -10.f;
-        offset >> horizontal >> vertical;
-        mCamera->setOverShoulderOffset(horizontal, vertical);
     }
 
     osgUtil::IncrementalCompileOperation* RenderingManager::getIncrementalCompileOperation()
@@ -436,7 +428,7 @@ namespace MWRender
             workItem->mKeyframes.push_back(std::string("meshes/") + basemodels[i] + ".kf");
         }
 
-        workItem->mTextures.push_back("textures/_land_default.dds");
+        workItem->mTextures.emplace_back("textures/_land_default.dds");
 
         mWorkQueue->addWorkItem(workItem);
     }
@@ -628,6 +620,8 @@ namespace MWRender
         updateNavMesh();
         updateRecastMesh();
 
+        if (mViewOverShoulderController)
+            mViewOverShoulderController->update();
         mCamera->update(dt, paused);
 
         osg::Vec3d focal, cameraPos;
@@ -660,7 +654,7 @@ namespace MWRender
         if(ptr == mCamera->getTrackingPtr() &&
            !mCamera->isVanityOrPreviewModeEnabled())
         {
-            mCamera->rotateCamera(-ptr.getRefData().getPosition().rot[0], -ptr.getRefData().getPosition().rot[2], false);
+            mCamera->rotateCameraToTrackingPtr();
         }
 
         ptr.getRefData().getBaseNode()->setAttitude(rot);
@@ -707,26 +701,26 @@ namespace MWRender
         {
         }
 
-        virtual void operator () (osg::RenderInfo& renderInfo) const
+        void operator () (osg::RenderInfo& renderInfo) const override
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+            std::lock_guard<std::mutex> lock(mMutex);
             if (renderInfo.getState()->getFrameStamp()->getFrameNumber() >= mFrame)
             {
                 mDone = true;
-                mCondition.signal();
+                mCondition.notify_one();
             }
         }
 
         void waitTillDone()
         {
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+            std::unique_lock<std::mutex> lock(mMutex);
             if (mDone)
                 return;
-            mCondition.wait(&mMutex);
+            mCondition.wait(lock);
         }
 
-        mutable OpenThreads::Condition mCondition;
-        mutable OpenThreads::Mutex mMutex;
+        mutable std::condition_variable mCondition;
+        mutable std::mutex mMutex;
         mutable bool mDone;
         unsigned int mFrame;
     };
@@ -934,7 +928,7 @@ namespace MWRender
             : mWidth(width), mHeight(height), mImage(image)
         {
         }
-        virtual void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const
+        void drawImplementation(osg::RenderInfo& renderInfo,const osg::Drawable* /*drawable*/) const override
         {
             int screenW = renderInfo.getCurrentCamera()->getViewport()->width();
             int screenH = renderInfo.getCurrentCamera()->getViewport()->height();
@@ -1322,82 +1316,6 @@ namespace MWRender
         return mTerrain->getHeightAt(pos);
     }
 
-    bool RenderingManager::vanityRotateCamera(const float *rot)
-    {
-        if(!mCamera->isVanityOrPreviewModeEnabled())
-            return false;
-
-        mCamera->rotateCamera(rot[0], rot[2], true);
-        return true;
-    }
-
-    void RenderingManager::setCameraDistance(float dist, bool adjust, bool override)
-    {
-        if(!mCamera->isVanityOrPreviewModeEnabled() && !mCamera->isFirstPerson())
-        {
-            if(mCamera->isNearest() && dist > 0.f)
-                mCamera->toggleViewMode();
-            else if (override)
-                mCamera->setBaseCameraDistance(-dist / 120.f * 10, adjust);
-            else
-                mCamera->setCameraDistance(-dist / 120.f * 10, adjust);
-        }
-        else if(mCamera->isFirstPerson() && dist < 0.f)
-        {
-            mCamera->toggleViewMode();
-            if (override)
-                mCamera->setBaseCameraDistance(0.f, false);
-            else
-                mCamera->setCameraDistance(0.f, false);
-        }
-    }
-
-    void RenderingManager::resetCamera()
-    {
-        mCamera->reset();
-    }
-
-    float RenderingManager::getCameraDistance() const
-    {
-        return mCamera->getCameraDistance();
-    }
-
-    Camera* RenderingManager::getCamera()
-    {
-        return mCamera.get();
-    }
-
-    const osg::Vec3f &RenderingManager::getCameraPosition() const
-    {
-        return mCurrentCameraPos;
-    }
-
-    void RenderingManager::togglePOV(bool force)
-    {
-        mCamera->toggleViewMode(force);
-    }
-
-    void RenderingManager::togglePreviewMode(bool enable)
-    {
-        mCamera->togglePreviewMode(enable);
-    }
-
-    bool RenderingManager::toggleVanityMode(bool enable)
-    {
-        return mCamera->toggleVanityMode(enable);
-    }
-
-    void RenderingManager::allowVanityMode(bool allow)
-    {
-        mCamera->allowVanityMode(allow);
-    }
-
-    void RenderingManager::changeVanityModeScale(float factor)
-    {
-        if(mCamera->isVanityOrPreviewModeEnabled())
-            mCamera->setBaseCameraDistance(-factor/120.f*10, true);
-    }
-
     void RenderingManager::overrideFieldOfView(float val)
     {
         if (mFieldOfViewOverridden != true || mFieldOfViewOverride != val)
@@ -1515,7 +1433,7 @@ namespace MWRender
     {
         if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
             return false;
-        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), enabled))
+        if (mObjectPaging->enableObject(type, ptr.getCellRef().getRefNum(), ptr.getCellRef().getPosition().asVec3(), osg::Vec2i(ptr.getCell()->getCell()->getGridX(), ptr.getCell()->getCell()->getGridY()), enabled))
         {
             mTerrain->rebuildViews();
             return true;
@@ -1528,7 +1446,7 @@ namespace MWRender
             return;
         const ESM::RefNum & refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile()) return;
-        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3()))
+        if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3(), osg::Vec2i(ptr.getCell()->getCell()->getGridX(), ptr.getCell()->getCell()->getGridY())))
             mTerrain->rebuildViews();
     }
     bool RenderingManager::pagingUnlockCache()

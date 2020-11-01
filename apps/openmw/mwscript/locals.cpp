@@ -1,4 +1,5 @@
 #include "locals.hpp"
+#include "globalscripts.hpp"
 
 #include <components/esm/loadscpt.hpp>
 #include <components/esm/variant.hpp>
@@ -33,15 +34,25 @@ namespace MWScript
         if (mInitialised)
             return false;
 
-        const Compiler::Locals& locals =
-            MWBase::Environment::get().getScriptManager()->getLocals (script.mId);
+        const Locals* global = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocalsIfPresent(script.mId);
+        if(global)
+        {
+            mShorts = global->mShorts;
+            mLongs = global->mLongs;
+            mFloats = global->mFloats;
+        }
+        else
+        {
+            const Compiler::Locals& locals =
+                MWBase::Environment::get().getScriptManager()->getLocals (script.mId);
 
-        mShorts.clear();
-        mShorts.resize (locals.get ('s').size(), 0);
-        mLongs.clear();
-        mLongs.resize (locals.get ('l').size(), 0);
-        mFloats.clear();
-        mFloats.resize (locals.get ('f').size(), 0);
+            mShorts.clear();
+            mShorts.resize (locals.get ('s').size(), 0);
+            mLongs.clear();
+            mLongs.resize (locals.get ('l').size(), 0);
+            mFloats.clear();
+            mFloats.resize (locals.get ('f').size(), 0);
+        }
 
         mInitialised = true;
         return true;
@@ -180,7 +191,7 @@ namespace MWScript
                         case 2: value.setType (ESM::VT_Float); value.setFloat (mFloats.at (i2)); break;
                     }
 
-                    locals.mVariables.push_back (std::make_pair (names[i2], value));
+                    locals.mVariables.emplace_back (names[i2], value);
                 }
             }
         }

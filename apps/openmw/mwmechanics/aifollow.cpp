@@ -124,9 +124,9 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
         followDistance = 313;
         short i = 0;
         followers.sort();
-        for (std::list<int>::iterator it = followers.begin(); it != followers.end(); ++it)
+        for (int followIndex : followers)
         {
-            if (*it == mFollowIndex)
+            if (followIndex == mFollowIndex)
                 followDistance += 130 * i;
             ++i;
         }

@@ -20,10 +20,10 @@ namespace Compiler
             StreamErrorHandler (const StreamErrorHandler&);
             StreamErrorHandler& operator= (const StreamErrorHandler&);
 
-            virtual void report (const std::string& message, const TokenLoc& loc, Type type);
+            void report (const std::string& message, const TokenLoc& loc, Type type) override;
             ///< Report error to the user.
 
-            virtual void report (const std::string& message, Type type);
+            void report (const std::string& message, Type type) override;
             ///< Report a file related error
 
         public:

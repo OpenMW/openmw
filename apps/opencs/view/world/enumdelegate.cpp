@@ -181,5 +181,5 @@ void CSVWorld::EnumDelegateFactory::add (int value, const QString& name)
         }
     }
 
-    mValues.push_back(std::make_pair (value, name));
+    mValues.emplace_back (value, name);
 }

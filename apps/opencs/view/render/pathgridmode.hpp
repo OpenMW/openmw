@@ -17,31 +17,31 @@ namespace CSVRender
 
             PathgridMode(WorldspaceWidget* worldspace, QWidget* parent=0);
 
-            virtual void activate(CSVWidget::SceneToolbar* toolbar);
+            void activate(CSVWidget::SceneToolbar* toolbar) override;
 
-            virtual void deactivate(CSVWidget::SceneToolbar* toolbar);
+            void deactivate(CSVWidget::SceneToolbar* toolbar) override;
 
-            virtual void primaryOpenPressed(const WorldspaceHitResult& hit);
+            void primaryOpenPressed(const WorldspaceHitResult& hit) override;
 
-            virtual void primaryEditPressed(const WorldspaceHitResult& hit);
+            void primaryEditPressed(const WorldspaceHitResult& hit) override;
 
-            virtual void secondaryEditPressed(const WorldspaceHitResult& hit);
+            void secondaryEditPressed(const WorldspaceHitResult& hit) override;
 
-            virtual void primarySelectPressed(const WorldspaceHitResult& hit);
+            void primarySelectPressed(const WorldspaceHitResult& hit) override;
 
-            virtual void secondarySelectPressed(const WorldspaceHitResult& hit);
+            void secondarySelectPressed(const WorldspaceHitResult& hit) override;
 
-            virtual bool primaryEditStartDrag (const QPoint& pos);
+            bool primaryEditStartDrag (const QPoint& pos) override;
 
-            virtual bool secondaryEditStartDrag (const QPoint& pos);
+            bool secondaryEditStartDrag (const QPoint& pos) override;
 
-            virtual void drag (const QPoint& pos, int diffX, int diffY, double speedFactor);
+            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 
-            virtual void dragCompleted(const QPoint& pos);
+            void dragCompleted(const QPoint& pos) override;
 
             /// \note dragAborted will not be called, if the drag is aborted via changing
             /// editing mode
-            virtual void dragAborted();
+            void dragAborted() override;
 
         private:
 

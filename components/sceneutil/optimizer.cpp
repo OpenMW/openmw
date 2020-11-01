@@ -160,7 +160,7 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
             setTraversalMode(osg::NodeVisitor::TRAVERSE_PARENTS);
         }
 
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             if (node.getNumParents())
             {
@@ -173,7 +173,7 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
             }
         }
 
-        virtual void apply(osg::LOD& lod)
+        void apply(osg::LOD& lod) override
         {
             _currentObjectList.push_back(&lod);
 
@@ -182,22 +182,21 @@ class CollectLowestTransformsVisitor : public BaseOptimizerVisitor
             _currentObjectList.pop_back();
         }
 
-        virtual void apply(osg::Transform& transform)
+        void apply(osg::Transform& transform) override
         {
             // for all current objects associated this transform with them.
             registerWithCurrentObjects(&transform);
         }
 
-        virtual void apply(osg::Geode& geode)
+        void apply(osg::Geode& geode) override
         {
             traverse(geode);
         }
 
-        virtual void apply(osg::Billboard& geode)
+        void apply(osg::Billboard& geode) override
         {
             traverse(geode);
         }
-
 
         void collectDataFor(osg::Node* node)
         {
@@ -1605,41 +1604,40 @@ class MergeArrayVisitor : public osg::ArrayVisitor
             lhs->insert(lhs->end(),rhs.begin(),rhs.end());
         }
 
-        virtual void apply(osg::Array&) { OSG_WARN << "Warning: Optimizer's MergeArrayVisitor cannot merge Array type." << std::endl; }
+        void apply(osg::Array&) override { OSG_WARN << "Warning: Optimizer's MergeArrayVisitor cannot merge Array type." << std::endl; }
 
+        void apply(osg::ByteArray& rhs) override { _merge(rhs); }
+        void apply(osg::ShortArray& rhs) override { _merge(rhs); }
+        void apply(osg::IntArray& rhs) override { _merge(rhs); }
+        void apply(osg::UByteArray& rhs) override { _merge(rhs); }
+        void apply(osg::UShortArray& rhs) override { _merge(rhs); }
+        void apply(osg::UIntArray& rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::ByteArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::ShortArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::IntArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::UByteArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::UShortArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::UIntArray& rhs) { _merge(rhs); }
+        void apply(osg::Vec4ubArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec3ubArray& rhs) override{ _merge(rhs); }
+        void apply(osg::Vec2ubArray& rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::Vec4ubArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3ubArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec2ubArray& rhs) { _merge(rhs); }
+        void apply(osg::Vec4usArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec3usArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec2usArray& rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::Vec4usArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3usArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec2usArray& rhs) { _merge(rhs); }
+        void apply(osg::FloatArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec2Array& rhs) override { _merge(rhs); }
+        void apply(osg::Vec3Array& rhs) override { _merge(rhs); }
+        void apply(osg::Vec4Array& rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::FloatArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec2Array& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3Array& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec4Array& rhs) { _merge(rhs); }
+        void apply(osg::DoubleArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec2dArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec3dArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec4dArray& rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::DoubleArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec2dArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3dArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec4dArray& rhs) { _merge(rhs); }
+        void apply(osg::Vec2bArray&  rhs) override { _merge(rhs); }
+        void apply(osg::Vec3bArray&  rhs) override { _merge(rhs); }
+        void apply(osg::Vec4bArray&  rhs) override { _merge(rhs); }
 
-        virtual void apply(osg::Vec2bArray&  rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3bArray&  rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec4bArray&  rhs) { _merge(rhs); }
-
-        virtual void apply(osg::Vec2sArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec3sArray& rhs) { _merge(rhs); }
-        virtual void apply(osg::Vec4sArray& rhs) { _merge(rhs); }
+        void apply(osg::Vec2sArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec3sArray& rhs) override { _merge(rhs); }
+        void apply(osg::Vec4sArray& rhs) override { _merge(rhs); }
 };
 
 bool Optimizer::MergeGeometryVisitor::mergeGeometry(osg::Geometry& lhs,osg::Geometry& rhs)

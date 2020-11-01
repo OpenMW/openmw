@@ -27,13 +27,13 @@ namespace MWGui
         public:
             SpellBuyingWindow();
 
-            void setPtr(const MWWorld::Ptr& actor);
+            void setPtr(const MWWorld::Ptr& actor) override;
             void setPtr(const MWWorld::Ptr& actor, int startOffset);
 
-            void onFrame(float dt) { checkReferenceAvailable(); }
-            void clear() { resetReference(); }
+            void onFrame(float dt) override { checkReferenceAvailable(); }
+            void clear() override { resetReference(); }
 
-            void onResChange(int, int) { center(); }
+            void onResChange(int, int) override { center(); }
 
         protected:
             MyGUI::Button* mCancelButton;
@@ -52,7 +52,7 @@ namespace MWGui
 
             void updateLabels();
 
-            virtual void onReferenceUnavailable();
+            void onReferenceUnavailable() override;
 
             bool playerHasSpell (const std::string& id);
 

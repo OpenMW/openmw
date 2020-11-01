@@ -1,7 +1,12 @@
 #ifndef MWGUI_CONTAINER_ITEM_MODEL_H
 #define MWGUI_CONTAINER_ITEM_MODEL_H
 
+#include <utility>
+#include <vector>
+
 #include "itemmodel.hpp"
+
+#include "../mwworld/containerstore.hpp"
 
 namespace MWGui
 {
@@ -17,24 +22,24 @@ namespace MWGui
 
         ContainerItemModel (const MWWorld::Ptr& source);
 
-        virtual bool allowedToUseItems() const;
+        bool allowedToUseItems() const override;
 
-        virtual bool onDropItem(const MWWorld::Ptr &item, int count);
-        virtual bool onTakeItem(const MWWorld::Ptr &item, int count);
+        bool onDropItem(const MWWorld::Ptr &item, int count) override;
+        bool onTakeItem(const MWWorld::Ptr &item, int count) override;
 
-        virtual ItemStack getItem (ModelIndex index);
-        virtual ModelIndex getIndex (ItemStack item);
-        virtual size_t getItemCount();
+        ItemStack getItem (ModelIndex index) override;
+        ModelIndex getIndex (ItemStack item) override;
+        size_t getItemCount() override;
 
-        virtual MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true);
-        virtual void removeItem (const ItemStack& item, size_t count);
+        MWWorld::Ptr copyItem (const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        void removeItem (const ItemStack& item, size_t count) override;
 
-        virtual void update();
+        void update() override;
 
     private:
-        std::vector<MWWorld::Ptr> mItemSources;
+        std::vector<std::pair<MWWorld::Ptr, MWWorld::ResolutionHandle>> mItemSources;
         std::vector<MWWorld::Ptr> mWorldItems;
-
+        const bool mTrading;
         std::vector<ItemStack> mItems;
     };
 

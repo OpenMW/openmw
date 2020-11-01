@@ -36,13 +36,13 @@ namespace MWClass
     public:
         MWWorld::DoorState mDoorState = MWWorld::DoorState::Idle;
 
-        virtual MWWorld::CustomData *clone() const;
+        MWWorld::CustomData *clone() const override;
 
-        virtual DoorCustomData& asDoorCustomData()
+        DoorCustomData& asDoorCustomData() override
         {
             return *this;
         }
-        virtual const DoorCustomData& asDoorCustomData() const
+        const DoorCustomData& asDoorCustomData() const override
         {
             return *this;
         }

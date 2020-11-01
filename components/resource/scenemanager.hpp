@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
 
 #include <osg/ref_ptr>
 #include <osg/Node>
@@ -50,7 +51,7 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node);
+        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects");
 
         /// @see ShaderVisitor::setForceShaders
         void setForceShaders(bool force);
@@ -145,7 +146,7 @@ namespace Resource
 
     private:
 
-        Shader::ShaderVisitor* createShaderVisitor();
+        Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
@@ -159,7 +160,7 @@ namespace Resource
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
-        mutable OpenThreads::Mutex mSharedStateMutex;
+        mutable std::mutex mSharedStateMutex;
 
         Resource::ImageManager* mImageManager;
         Resource::NifFileManager* mNifFileManager;

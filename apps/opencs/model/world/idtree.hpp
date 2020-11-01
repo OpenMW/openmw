@@ -44,22 +44,21 @@ namespace CSMWorld
 
             virtual ~IdTree();
 
-            virtual int rowCount (const QModelIndex & parent = QModelIndex()) const;
+            int rowCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            virtual int columnCount (const QModelIndex & parent = QModelIndex()) const;
+            int columnCount (const QModelIndex & parent = QModelIndex()) const override;
 
-            virtual QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const;
+            QVariant data  (const QModelIndex & index, int role = Qt::DisplayRole) const override;
 
-            virtual bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+            bool setData ( const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-            virtual Qt::ItemFlags flags (const QModelIndex & index) const;
+            Qt::ItemFlags flags (const QModelIndex & index) const override;
 
-            virtual bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex());
+            bool removeRows (int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
-            virtual QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex())
-                const;
+            QModelIndex index (int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 
-            virtual QModelIndex parent (const QModelIndex& index) const;
+            QModelIndex parent (const QModelIndex& index) const override;
 
             QModelIndex getNestedModelIndex (const std::string& id, int column) const;
 
@@ -71,7 +70,7 @@ namespace CSMWorld
 
             void addNestedRow (const QModelIndex& parent, int position);
 
-            virtual bool hasChildren (const QModelIndex& index) const;
+            bool hasChildren (const QModelIndex& index) const override;
 
             virtual int searchNestedColumnIndex(int parentColumn, Columns::ColumnId id);
             ///< \return the column index or -1 if the requested column wasn't found.

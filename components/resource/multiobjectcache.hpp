@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 
 #include <osg/ref_ptr>
 #include <osg/Referenced>
@@ -43,7 +44,7 @@ namespace Resource
         typedef std::multimap<std::string, osg::ref_ptr<osg::Object> >             ObjectCacheMap;
 
         ObjectCacheMap                          _objectCache;
-        mutable OpenThreads::Mutex              _objectCacheMutex;
+        mutable std::mutex                      _objectCacheMutex;
 
     };
 

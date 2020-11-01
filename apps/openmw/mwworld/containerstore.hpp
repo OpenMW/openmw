@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <memory>
 #include <utility>
 
 #include <components/esm/loadalch.hpp>
@@ -18,6 +19,8 @@
 #include <components/esm/loadrepa.hpp>
 #include <components/esm/loadweap.hpp>
 
+#include <components/misc/rng.hpp>
+
 #include "ptr.hpp"
 #include "cellreflist.hpp"
 
@@ -25,6 +28,11 @@ namespace ESM
 {
     struct InventoryList;
     struct InventoryState;
+}
+
+namespace MWClass
+{
+    class Container;
 }
 
 namespace MWWorld
@@ -37,6 +45,21 @@ namespace MWWorld
     typedef ContainerStoreIteratorBase<Ptr> ContainerStoreIterator;
     typedef ContainerStoreIteratorBase<ConstPtr> ConstContainerStoreIterator;
 
+    class ResolutionListener
+    {
+            ContainerStore& mStore;
+        public:
+            ResolutionListener(ContainerStore& store) : mStore(store) {}
+            ~ResolutionListener();
+    };
+
+    class ResolutionHandle
+    {
+            std::shared_ptr<ResolutionListener> mListener;
+        public:
+            ResolutionHandle(std::shared_ptr<ResolutionListener> listener) : mListener(listener) {}
+            ResolutionHandle() {}
+    };
     
     class ContainerStoreListener
     {
@@ -93,15 +116,18 @@ namespace MWWorld
             MWWorld::CellRefList<ESM::Repair>            repairs;
             MWWorld::CellRefList<ESM::Weapon>            weapons;
 
-            std::map<std::pair<std::string, std::string>, int> mLevelledItemMap;
-            ///< Stores result of levelled item spawns. <(refId, spawningGroup), count>
-            /// This is used to restock levelled items(s) if the old item was sold.
-
             mutable float mCachedWeight;
             mutable bool mWeightUpToDate;
-            ContainerStoreIterator addImp (const Ptr& ptr, int count);
-            void addInitialItem (const std::string& id, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
-            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, bool topLevel=true, const std::string& levItem = "");
+
+            bool mModified;
+            bool mResolved;
+            unsigned int mSeed;
+            MWWorld::Ptr mPtr;
+            std::weak_ptr<ResolutionListener> mResolutionListener;
+
+            ContainerStoreIterator addImp (const Ptr& ptr, int count, bool markModified = true);
+            void addInitialItem (const std::string& id, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
+            void addInitialItemImp (const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Seed* seed, bool topLevel=true);
 
             template<typename T>
             ContainerStoreIterator getState (CellRefList<T>& collection,
@@ -139,7 +165,7 @@ namespace MWWorld
 
             bool hasVisibleItems() const;
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
+            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true);
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             ///
             /// \note The item pointed to is not required to exist beyond this function call.
@@ -152,12 +178,12 @@ namespace MWWorld
             ContainerStoreIterator add(const std::string& id, int count, const Ptr& actorPtr);
             ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-            int remove(const std::string& itemId, int count, const Ptr& actor);
+            int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
             ///< Remove \a count item(s) designated by \a itemId from this container.
             ///
             /// @return the number of items actually removed
 
-            virtual int remove(const Ptr& item, int count, const Ptr& actor);
+            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed
@@ -175,31 +201,31 @@ namespace MWWorld
             /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
             /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-            int count (const std::string& id);
+            int count (const std::string& id) const;
             ///< @return How many items with refID \a id are in this container?
-
-            int restockCount (const std::string& id);
-            ///< Item count with restock adjustments (such as ignoring filled soul gems).
-            ///  @return How many items with refID \a id are in this container?
 
             ContainerStoreListener* getContListener() const;
             void setContListener(ContainerStoreListener* listener);
-
         protected:
             ContainerStoreIterator addNewStack (const ConstPtr& ptr, int count);
             ///< Add the item to this container (do not try to stack it onto existing items)
 
             virtual void flagAsModified();
 
+            /// + and - operations that can deal with negative stacks
+            /// Note that negativity is infectious
+            static int addItems(int count1, int count2);
+            static int subtractItems(int count1, int count2);
         public:
 
             virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
             ///< @return true if the two specified objects can stack with each other
 
-            void fill (const ESM::InventoryList& items, const std::string& owner);
+            void fill (const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Seed& seed = Misc::Rng::getSeed());
             ///< Insert items into *this.
 
-            void restock (const ESM::InventoryList& items, const MWWorld::Ptr& ptr, const std::string& owner);
+            void fillNonRandom (const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
+            ///< Insert items into *this, excluding leveled items
 
             virtual void clear();
             ///< Empty container.
@@ -220,8 +246,15 @@ namespace MWWorld
 
             virtual void readState (const ESM::InventoryState& state);
 
+            bool isResolved() const;
+
+            void resolve();
+            ResolutionHandle resolveTemporarily();
+
             friend class ContainerStoreIteratorBase<Ptr>;
             friend class ContainerStoreIteratorBase<ConstPtr>;
+            friend class ResolutionListener;
+            friend class MWClass::Container;
     };
 
     

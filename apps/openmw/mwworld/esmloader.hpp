@@ -25,7 +25,7 @@ struct EsmLoader : public ContentLoader
     EsmLoader(MWWorld::ESMStore& store, std::vector<ESM::ESMReader>& readers,
       ToUTF8::Utf8Encoder* encoder, Loading::Listener& listener);
 
-    void load(const boost::filesystem::path& filepath, int& index);
+    void load(const boost::filesystem::path& filepath, int& index) override;
 
     private:
       std::vector<ESM::ESMReader>& mEsm;

@@ -35,6 +35,8 @@ namespace MWBase
 
             virtual ~ScriptManager() {}
 
+            virtual void clear() = 0;
+
             virtual bool run (const std::string& name, Interpreter::Context& interpreterContext) = 0;
             ///< Run the script with the given name (compile first, if not compiled yet)
 

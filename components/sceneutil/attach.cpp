@@ -30,20 +30,20 @@ namespace SceneUtil
             mFilter2 = "tri " + mFilter;
         }
 
-        virtual void apply(osg::MatrixTransform& node)
+        void apply(osg::MatrixTransform& node) override
         {
             traverse(node);
         }
-        virtual void apply(osg::Node& node)
+        void apply(osg::Node& node) override
         {
             traverse(node);
         }
-        virtual void apply(osg::Group& node)
+        void apply(osg::Group& node) override
         {
             traverse(node);
         }
 
-        virtual void apply(osg::Drawable& drawable)
+        void apply(osg::Drawable& drawable) override
         {
             if (!filterMatches(drawable.getName()))
                 return;
@@ -64,7 +64,7 @@ namespace SceneUtil
             for (const osg::ref_ptr<osg::Node>& node : mToCopy)
             {
                 if (node->getNumParents() > 1)
-                    Log(Debug::Error) << "Error CopyRigVisitor: node has multiple parents";
+                    Log(Debug::Error) << "Error CopyRigVisitor: node has " << node->getNumParents() << " parents";
                 while (node->getNumParents())
                     node->getParent(0)->removeChild(node);
 

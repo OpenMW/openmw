@@ -27,7 +27,7 @@ namespace MWRender
     class NoTraverseCallback : public osg::NodeCallback
     {
     public:
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             // no traverse()
         }

@@ -6,6 +6,11 @@
 #include "timeadvancer.hpp"
 #include "waitdialog.hpp"
 
+namespace MWMechanics
+{
+    class NpcStats;
+}
+
 namespace MWGui
 {
 
@@ -14,20 +19,20 @@ namespace MWGui
     public:
         TrainingWindow();
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        bool exit();
+        bool exit() override;
 
-        void setPtr(const MWWorld::Ptr& actor);
+        void setPtr(const MWWorld::Ptr& actor) override;
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
         WindowBase* getProgressBar() { return &mProgressBar; }
 
-        void clear() { resetReference(); }
+        void clear() override { resetReference(); }
 
     protected:
-        virtual void onReferenceUnavailable ();
+        void onReferenceUnavailable() override;
 
         void onCancelButtonClicked (MyGUI::Widget* sender);
         void onTrainingSelected(MyGUI::Widget* sender);
@@ -35,12 +40,17 @@ namespace MWGui
         void onTrainingProgressChanged(int cur, int total);
         void onTrainingFinished();
 
+        // Retrieve the base skill value if the setting 'training skills based on base skill' is set;
+        // otherwise returns the modified skill
+        float getSkillForTraining(const MWMechanics::NpcStats& stats, int skillId) const;
+
         MyGUI::Widget* mTrainingOptions;
         MyGUI::Button* mCancelButton;
         MyGUI::TextBox* mPlayerGold;
 
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;
+        bool mTrainingSkillBasedOnBaseSkill;    //corresponds to the setting 'training skills based on base skill'
     };
 
 }

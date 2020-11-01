@@ -36,6 +36,8 @@ namespace MWInput
 
         void setPlayerControlsEnabled(bool enabled);
 
+        void setJoystickDeadZone(float deadZone);
+
         bool isLeftOrRightButton(int action, bool joystick) const;
 
         bool actionIsActive(int id) const;

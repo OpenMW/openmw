@@ -21,7 +21,7 @@
 
 namespace Compiler
 {
-    int ExprParser::getPriority (char op) const
+    int ExprParser::getPriority (char op)
     {
         switch (op)
         {
@@ -654,28 +654,27 @@ namespace Compiler
 
         std::stack<std::vector<Interpreter::Type_Code> > stack;
 
-        for (std::string::const_iterator iter (arguments.begin()); iter!=arguments.end();
-            ++iter)
+        for (char argument : arguments)
         {
-            if (*iter=='/')
+            if (argument=='/')
             {
                 optional = true;
             }
-            else if (*iter=='S' || *iter=='c' || *iter=='x')
+            else if (argument=='S' || argument=='c' || argument=='x')
             {
                 stringParser.reset();
 
-                if (optional || *iter=='x')
+                if (optional || argument=='x')
                     stringParser.setOptional (true);
 
-                if (*iter=='c') stringParser.smashCase();
-                if (*iter=='x') stringParser.discard();
+                if (argument=='c') stringParser.smashCase();
+                if (argument=='x') stringParser.discard();
                 scanner.scan (stringParser);
 
-                if ((optional || *iter=='x') && stringParser.isEmpty())
+                if ((optional || argument=='x') && stringParser.isEmpty())
                     break;
 
-                if (*iter!='x')
+                if (argument!='x')
                 {
                     std::vector<Interpreter::Type_Code> tmp;
                     stringParser.append (tmp);
@@ -689,7 +688,7 @@ namespace Compiler
                     getErrorHandler().warning ("Extra argument",
                         stringParser.getTokenLoc());
             }
-            else if (*iter=='X')
+            else if (argument=='X')
             {
                 parser.reset();
 
@@ -702,7 +701,7 @@ namespace Compiler
                 else
                     getErrorHandler().warning("Extra argument", parser.getTokenLoc());
             }
-            else if (*iter=='z')
+            else if (argument=='z')
             {
                 discardParser.reset();
                 discardParser.setOptional (true);
@@ -714,7 +713,7 @@ namespace Compiler
                 else
                     getErrorHandler().warning("Extra argument", discardParser.getTokenLoc());
             }
-            else if (*iter=='j')
+            else if (argument=='j')
             {
                 /// \todo disable this when operating in strict mode
                 junkParser.reset();
@@ -737,8 +736,8 @@ namespace Compiler
 
                 char type = parser.append (tmp);
 
-                if (type!=*iter)
-                    Generator::convert (tmp, type, *iter);
+                if (type!=argument)
+                    Generator::convert (tmp, type, argument);
 
                 stack.push (tmp);
 

@@ -39,7 +39,7 @@ namespace CSMWorld
 
             virtual QModelIndex getModelIndex (const std::string& id, int column) const;
 
-            virtual void setSourceModel(QAbstractItemModel *model);
+            void setSourceModel(QAbstractItemModel *model) override;
 
             void setFilter (const std::shared_ptr<CSMFilter::Node>& filter);
 
@@ -47,9 +47,9 @@ namespace CSMWorld
 
         protected:
 
-            virtual bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+            bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
-            virtual bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const;
+            bool filterAcceptsRow (int sourceRow, const QModelIndex& sourceParent) const override;
 
             QString getRecordId(int sourceRow) const;
 

@@ -2,6 +2,8 @@
 
 #include <iomanip>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -12,6 +14,7 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/debug/gldebug.hpp>
 
 #include <components/misc/rng.hpp>
 
@@ -67,6 +70,140 @@ namespace
         if (ret != 0)
             Log(Debug::Error) << "SDL error: " << SDL_GetError();
     }
+
+    struct UserStats
+    {
+        const std::string mLabel;
+        const std::string mBegin;
+        const std::string mEnd;
+        const std::string mTaken;
+
+        UserStats(const std::string& label, const std::string& prefix)
+            : mLabel(label),
+              mBegin(prefix + "_time_begin"),
+              mEnd(prefix + "_time_end"),
+              mTaken(prefix + "_time_taken")
+        {}
+    };
+
+    enum class UserStatsType : std::size_t
+    {
+        Input,
+        Sound,
+        State,
+        Script,
+        Mechanics,
+        Physics,
+        World,
+        Gui,
+
+        Number,
+    };
+
+    template <UserStatsType type>
+    struct UserStatsValue
+    {
+        static const UserStats sValue;
+    };
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Input>::sValue {"Input", "input"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Sound>::sValue {"Sound", "sound"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::State>::sValue {"State", "state"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Script>::sValue {"Script", "script"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Mechanics>::sValue {"Mech", "mechanics"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Physics>::sValue {"Phys", "physics"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::World>::sValue {"World", "world"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Gui>::sValue {"Gui", "gui"};
+
+    template <UserStatsType type>
+    struct ForEachUserStatsValue
+    {
+        template <class F>
+        static void apply(F&& f)
+        {
+            f(UserStatsValue<type>::sValue);
+            using Next = ForEachUserStatsValue<static_cast<UserStatsType>(static_cast<std::size_t>(type) + 1)>;
+            Next::apply(std::forward<F>(f));
+        }
+    };
+
+    template <>
+    struct ForEachUserStatsValue<UserStatsType::Number>
+    {
+        template <class F>
+        static void apply(F&&) {}
+    };
+
+    template <class F>
+    void forEachUserStatsValue(F&& f)
+    {
+        ForEachUserStatsValue<static_cast<UserStatsType>(0)>::apply(std::forward<F>(f));
+    }
+
+    template <UserStatsType sType>
+    class ScopedProfile
+    {
+        public:
+            ScopedProfile(osg::Timer_t frameStart, unsigned int frameNumber, const osg::Timer& timer, osg::Stats& stats)
+                : mScopeStart(timer.tick()),
+                  mFrameStart(frameStart),
+                  mFrameNumber(frameNumber),
+                  mTimer(timer),
+                  mStats(stats)
+            {
+            }
+
+            ScopedProfile(const ScopedProfile&) = delete;
+            ScopedProfile& operator=(const ScopedProfile&) = delete;
+
+            ~ScopedProfile()
+            {
+                const osg::Timer_t end = mTimer.tick();
+                const UserStats& stats = UserStatsValue<sType>::sValue;
+
+                mStats.setAttribute(mFrameNumber, stats.mBegin, mTimer.delta_s(mFrameStart, mScopeStart));
+                mStats.setAttribute(mFrameNumber, stats.mTaken, mTimer.delta_s(mScopeStart, end));
+                mStats.setAttribute(mFrameNumber, stats.mEnd, mTimer.delta_s(mFrameStart, end));
+            }
+
+        private:
+            const osg::Timer_t mScopeStart;
+            const osg::Timer_t mFrameStart;
+            const unsigned int mFrameNumber;
+            const osg::Timer& mTimer;
+            osg::Stats& mStats;
+    };
+
+    void initStatsHandler(Resource::Profiler& profiler)
+    {
+        const osg::Vec4f textColor(1.f, 1.f, 1.f, 1.f);
+        const osg::Vec4f barColor(1.f, 1.f, 1.f, 1.f);
+        const float multiplier = 1000;
+        const bool average = true;
+        const bool averageInInverseSpace = false;
+        const float maxValue = 10000;
+
+        forEachUserStatsValue([&] (const UserStats& v)
+        {
+            profiler.addUserStatsLine(v.mLabel, textColor, barColor, v.mTaken, multiplier,
+                                      average, averageInInverseSpace, v.mBegin, v.mEnd, maxValue);
+        });
+    }
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -87,119 +224,119 @@ bool OMW::Engine::frame(float frametime)
 {
     try
     {
-        mStartTick = mViewer->getStartTick();
+        const osg::Timer_t frameStart = mViewer->getStartTick();
+        const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+        const osg::Timer* const timer = osg::Timer::instance();
+        osg::Stats* const stats = mViewer->getViewerStats();
 
         mEnvironment.setFrameDuration(frametime);
 
         // update input
-        mEnvironment.getInputManager()->update(frametime, false);
+        {
+            ScopedProfile<UserStatsType::Input> profile(frameStart, frameNumber, *timer, *stats);
+            mEnvironment.getInputManager()->update(frametime, false);
+        }
 
         // When the window is minimized, pause the game. Currently this *has* to be here to work around a MyGUI bug.
         // If we are not currently rendering, then RenderItems will not be reused resulting in a memory leak upon changing widget textures (fixed in MyGUI 3.3.2),
         // and destroyed widgets will not be deleted (not fixed yet, https://github.com/MyGUI/mygui/issues/21)
-        if (!mEnvironment.getWindowManager()->isWindowVisible())
         {
-            mEnvironment.getSoundManager()->pausePlayback();
-            return false;
-        }
-        else
-            mEnvironment.getSoundManager()->resumePlayback();
+            ScopedProfile<UserStatsType::Sound> profile(frameStart, frameNumber, *timer, *stats);
 
-        // sound
-        if (mUseSound)
-            mEnvironment.getSoundManager()->update(frametime);
+            if (!mEnvironment.getWindowManager()->isWindowVisible())
+            {
+                mEnvironment.getSoundManager()->pausePlayback();
+                return false;
+            }
+            else
+                mEnvironment.getSoundManager()->resumePlayback();
+
+            // sound
+            if (mUseSound)
+                mEnvironment.getSoundManager()->update(frametime);
+        }
 
         // Main menu opened? Then scripts are also paused.
         bool paused = mEnvironment.getWindowManager()->containsMode(MWGui::GM_MainMenu);
 
         // update game state
-        mEnvironment.getStateManager()->update (frametime);
+        {
+            ScopedProfile<UserStatsType::State> profile(frameStart, frameNumber, *timer, *stats);
+            mEnvironment.getStateManager()->update (frametime);
+        }
 
         bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
 
-        osg::Timer_t beforeScriptTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()!=
-            MWBase::StateManager::State_NoGame)
         {
-            if (!paused)
-            {
-                if (mEnvironment.getWorld()->getScriptsEnabled())
-                {
-                    // local scripts
-                    executeLocalScripts();
+            ScopedProfile<UserStatsType::Script> profile(frameStart, frameNumber, *timer, *stats);
 
-                    // global scripts
-                    mEnvironment.getScriptManager()->getGlobalScripts().run();
+            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            {
+                if (!paused)
+                {
+                    if (mEnvironment.getWorld()->getScriptsEnabled())
+                    {
+                        // local scripts
+                        executeLocalScripts();
+
+                        // global scripts
+                        mEnvironment.getScriptManager()->getGlobalScripts().run();
+                    }
+
+                    mEnvironment.getWorld()->markCellAsUnchanged();
                 }
 
-                mEnvironment.getWorld()->markCellAsUnchanged();
+                if (!guiActive)
+                {
+                    double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
+                    mEnvironment.getWorld()->advanceTime(hours, true);
+                    mEnvironment.getWorld()->rechargeItems(frametime, true);
+                }
             }
+        }
 
-            if (!guiActive)
+        // update mechanics
+        {
+            ScopedProfile<UserStatsType::Mechanics> profile(frameStart, frameNumber, *timer, *stats);
+
+            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
             {
-                double hours = (frametime * mEnvironment.getWorld()->getTimeScaleFactor()) / 3600.0;
-                mEnvironment.getWorld()->advanceTime(hours, true);
-                mEnvironment.getWorld()->rechargeItems(frametime, true);
+                mEnvironment.getMechanicsManager()->update(frametime, guiActive);
             }
-        }
-        osg::Timer_t afterScriptTick = osg::Timer::instance()->tick();
 
-        // update actors
-        osg::Timer_t beforeMechanicsTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()!=
-            MWBase::StateManager::State_NoGame)
-        {
-            mEnvironment.getMechanicsManager()->update(frametime,
-                guiActive);
-        }
-        osg::Timer_t afterMechanicsTick = osg::Timer::instance()->tick();
-
-        if (mEnvironment.getStateManager()->getState()==
-            MWBase::StateManager::State_Running)
-        {
-            MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
-            if(!guiActive && player.getClass().getCreatureStats(player).isDead())
-                mEnvironment.getStateManager()->endGame();
+            if (mEnvironment.getStateManager()->getState() == MWBase::StateManager::State_Running)
+            {
+                MWWorld::Ptr player = mEnvironment.getWorld()->getPlayerPtr();
+                if(!guiActive && player.getClass().getCreatureStats(player).isDead())
+                    mEnvironment.getStateManager()->endGame();
+            }
         }
 
         // update physics
-        osg::Timer_t beforePhysicsTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()!=
-            MWBase::StateManager::State_NoGame)
         {
-            mEnvironment.getWorld()->updatePhysics(frametime, guiActive);
+            ScopedProfile<UserStatsType::Physics> profile(frameStart, frameNumber, *timer, *stats);
+
+            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            {
+                mEnvironment.getWorld()->updatePhysics(frametime, guiActive);
+            }
         }
-        osg::Timer_t afterPhysicsTick = osg::Timer::instance()->tick();
 
         // update world
-        osg::Timer_t beforeWorldTick = osg::Timer::instance()->tick();
-        if (mEnvironment.getStateManager()->getState()!=
-            MWBase::StateManager::State_NoGame)
         {
-            mEnvironment.getWorld()->update(frametime, guiActive);
+            ScopedProfile<UserStatsType::World> profile(frameStart, frameNumber, *timer, *stats);
+
+            if (mEnvironment.getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+            {
+                mEnvironment.getWorld()->update(frametime, guiActive);
+            }
         }
-        osg::Timer_t afterWorldTick = osg::Timer::instance()->tick();
 
         // update GUI
-        mEnvironment.getWindowManager()->update(frametime);
-
-        unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-        osg::Stats* stats = mViewer->getViewerStats();
-        stats->setAttribute(frameNumber, "script_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeScriptTick));
-        stats->setAttribute(frameNumber, "script_time_taken", osg::Timer::instance()->delta_s(beforeScriptTick, afterScriptTick));
-        stats->setAttribute(frameNumber, "script_time_end", osg::Timer::instance()->delta_s(mStartTick, afterScriptTick));
-
-        stats->setAttribute(frameNumber, "mechanics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeMechanicsTick));
-        stats->setAttribute(frameNumber, "mechanics_time_taken", osg::Timer::instance()->delta_s(beforeMechanicsTick, afterMechanicsTick));
-        stats->setAttribute(frameNumber, "mechanics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterMechanicsTick));
-
-        stats->setAttribute(frameNumber, "physics_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforePhysicsTick));
-        stats->setAttribute(frameNumber, "physics_time_taken", osg::Timer::instance()->delta_s(beforePhysicsTick, afterPhysicsTick));
-        stats->setAttribute(frameNumber, "physics_time_end", osg::Timer::instance()->delta_s(mStartTick, afterPhysicsTick));
-
-        stats->setAttribute(frameNumber, "world_time_begin", osg::Timer::instance()->delta_s(mStartTick, beforeWorldTick));
-        stats->setAttribute(frameNumber, "world_time_taken", osg::Timer::instance()->delta_s(beforeWorldTick, afterWorldTick));
-        stats->setAttribute(frameNumber, "world_time_end", osg::Timer::instance()->delta_s(mStartTick, afterWorldTick));
+        {
+            ScopedProfile<UserStatsType::Gui> profile(frameStart, frameNumber, *timer, *stats);
+            mEnvironment.getWindowManager()->update(frametime);
+        }
 
         if (stats->collectStats("resource"))
         {
@@ -212,7 +349,6 @@ bool OMW::Engine::frame(float frametime)
 
             mEnvironment.reportStats(frameNumber, *stats);
         }
-
     }
     catch (const std::exception& e)
     {
@@ -255,8 +391,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
             throw std::runtime_error("Could not initialize SDL! " + std::string(SDL_GetError()));
         }
     }
-
-    mStartTick = osg::Timer::instance()->tick();
 }
 
 OMW::Engine::~Engine()
@@ -356,7 +490,7 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     bool fullscreen = settings.getBool("fullscreen", "Video");
     bool windowBorder = settings.getBool("window border", "Video");
     bool vsync = settings.getBool("vsync", "Video");
-    int antialiasing = settings.getInt("antialiasing", "Video");
+    unsigned int antialiasing = std::max(0, settings.getInt("antialiasing", "Video"));
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen),
         pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
@@ -382,6 +516,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24));
+    if (Debug::shouldDebugOpenGL())
+        checkSDLError(SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG));
 
     if (antialiasing > 0)
     {
@@ -389,62 +525,80 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
         checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
     }
 
-    while (!mWindow)
+    osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow;
+    while (!graphicsWindow || !graphicsWindow->valid())
     {
-        mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
-        if (!mWindow)
+        while (!mWindow)
         {
-            // Try with a lower AA
-            if (antialiasing > 0)
+            mWindow = SDL_CreateWindow("OpenMW", pos_x, pos_y, width, height, flags);
+            if (!mWindow)
             {
-                Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2;
-                antialiasing /= 2;
-                Settings::Manager::setInt("antialiasing", "Video", antialiasing);
-                checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
-                continue;
-            }
-            else
-            {
-                std::stringstream error;
-                error << "Failed to create SDL window: " << SDL_GetError();
-                throw std::runtime_error(error.str());
+                // Try with a lower AA
+                if (antialiasing > 0)
+                {
+                    Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying " << antialiasing/2;
+                    antialiasing /= 2;
+                    Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+                    checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
+                    continue;
+                }
+                else
+                {
+                    std::stringstream error;
+                    error << "Failed to create SDL window: " << SDL_GetError();
+                    throw std::runtime_error(error.str());
+                }
             }
         }
+
+        setWindowIcon();
+
+        osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+        SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
+        SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
+        traits->windowName = SDL_GetWindowTitle(mWindow);
+        traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
+        traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
+        traits->vsync = vsync;
+        traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
+
+        graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
+        if (!graphicsWindow->valid()) throw std::runtime_error("Failed to create GraphicsContext");
+
+        if (traits->samples < antialiasing)
+        {
+            Log(Debug::Warning) << "Warning: Framebuffer MSAA level is only " << traits->samples << "x instead of " << antialiasing << "x. Trying " << antialiasing / 2 << "x instead.";
+            graphicsWindow->closeImplementation();
+            SDL_DestroyWindow(mWindow);
+            mWindow = nullptr;
+            antialiasing /= 2;
+            Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+            checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
+            continue;
+        }
+
+        if (traits->red < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->red << " bit red channel.";
+        if (traits->green < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->green << " bit green channel.";
+        if (traits->blue < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->blue << " bit blue channel.";
+        if (traits->depth < 8)
+            Log(Debug::Warning) << "Warning: Framebuffer only has " << traits->red << " bits of depth precision.";
+
+        traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
     }
-
-    setWindowIcon();
-
-    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-    SDL_GetWindowPosition(mWindow, &traits->x, &traits->y);
-    SDL_GetWindowSize(mWindow, &traits->width, &traits->height);
-    traits->windowName = SDL_GetWindowTitle(mWindow);
-    traits->windowDecoration = !(SDL_GetWindowFlags(mWindow)&SDL_WINDOW_BORDERLESS);
-    traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-    // We tried to get rid of the hardcoding but failed: https://github.com/OpenMW/openmw/pull/1771
-    // Here goes kcat's quote:
-    // It's ultimately a chicken and egg problem, and the reason why the code is like it was in the first place.
-    // It needs a context to get the current attributes, but it needs the attributes to set up the context.
-    // So it just specifies the same values that were given to SDL in the hopes that it's good enough to what the window eventually gets.
-    traits->red = 8;
-    traits->green = 8;
-    traits->blue = 8;
-    traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
-    traits->depth = 24;
-    traits->stencil = 8;
-    traits->vsync = vsync;
-    traits->doubleBuffer = true;
-    traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
-
-    osg::ref_ptr<SDLUtil::GraphicsWindowSDL2> graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
-    if(!graphicsWindow->valid()) throw std::runtime_error("Failed to create GraphicsContext");
 
     osg::ref_ptr<osg::Camera> camera = mViewer->getCamera();
     camera->setGraphicsContext(graphicsWindow);
-    camera->setViewport(0, 0, traits->width, traits->height);
+    camera->setViewport(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
+
+    if (Debug::shouldDebugOpenGL())
+        mViewer->setRealizeOperation(new Debug::EnableGLDebugOperation());
 
     mViewer->realize();
 
-    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, traits->width, traits->height);
+    mViewer->getEventQueue()->getCurrentEventState()->setWindowRectangle(0, 0, graphicsWindow->getTraits()->width, graphicsWindow->getTraits()->height);
 }
 
 void OMW::Engine::setWindowIcon()
@@ -620,7 +774,7 @@ public:
     {
     }
 
-    virtual void operator()(const osg::Image& image, const unsigned int context_id)
+    void operator()(const osg::Image& image, const unsigned int context_id) override
     {
         // Count screenshots.
         int shotCount = 0;
@@ -703,14 +857,7 @@ void OMW::Engine::go()
     // Setup profiler
     osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler;
 
-    statshandler->addUserStatsLine("Script", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "script_time_taken", 1000.0, true, false, "script_time_begin", "script_time_end", 10000);
-    statshandler->addUserStatsLine("Mech", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "mechanics_time_taken", 1000.0, true, false, "mechanics_time_begin", "mechanics_time_end", 10000);
-    statshandler->addUserStatsLine("Phys", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "physics_time_taken", 1000.0, true, false, "physics_time_begin", "physics_time_end", 10000);
-    statshandler->addUserStatsLine("World", osg::Vec4f(1.f, 1.f, 1.f, 1.f), osg::Vec4f(1.f, 1.f, 1.f, 1.f),
-                                   "world_time_taken", 1000.0, true, false, "world_time_begin", "world_time_end", 10000);
+    initStatsHandler(*statshandler);
 
     mViewer->addEventHandler(statshandler);
 
@@ -762,7 +909,7 @@ void OMW::Engine::go()
 
         if (!frame(dt))
         {
-            OpenThreads::Thread::microSleep(5000);
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
         else
@@ -782,7 +929,14 @@ void OMW::Engine::go()
         if (stats)
         {
             const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-            mViewer->getViewerStats()->report(stats, frameNumber);
+            if (frameNumber >= 2)
+            {
+                mViewer->getViewerStats()->report(stats, frameNumber - 2);
+                osgViewer::Viewer::Cameras cameras;
+                mViewer->getCameras(cameras);
+                for (auto camera : cameras)
+                    camera->getStats()->report(stats, frameNumber - 2);
+            }
         }
 
         mEnvironment.limitFrameRate(frameTimer.time_s());

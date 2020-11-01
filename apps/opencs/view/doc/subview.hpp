@@ -34,7 +34,7 @@ namespace CSVDoc
 
             void setUniversalId(const CSMWorld::UniversalId& id);
 
-            bool event (QEvent *event);
+            bool event (QEvent *event) override;
 
         public:
 
@@ -54,7 +54,7 @@ namespace CSVDoc
 
         private:
 
-            void closeEvent (QCloseEvent *event);
+            void closeEvent (QCloseEvent *event) override;
 
         signals:
 

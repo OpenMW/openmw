@@ -38,8 +38,14 @@ namespace DetourNavigator
                 return stream << "failed";
             case UpdateNavMeshStatus::lost:
                 return stream << "lost";
+            case UpdateNavMeshStatus::cached:
+                return stream << "cached";
+            case UpdateNavMeshStatus::unchanged:
+                return stream << "unchanged";
+            case UpdateNavMeshStatus::restored:
+                return stream << "restored";
         }
-        return stream << "unknown";
+        return stream << "unknown(" << static_cast<unsigned>(value) << ")";
     }
 
     AsyncNavMeshUpdater::AsyncNavMeshUpdater(const Settings& settings, TileCachedRecastMeshManager& recastMeshManager,
@@ -126,7 +132,7 @@ namespace DetourNavigator
         mNavMeshTilesCache.reportStats(frameNumber, stats);
     }
 
-    void AsyncNavMeshUpdater::process() throw()
+    void AsyncNavMeshUpdater::process() noexcept
     {
         Log(Debug::Debug) << "Start process navigator jobs by thread=" << std::this_thread::get_id();
         while (!mShouldStop)
@@ -192,7 +198,7 @@ namespace DetourNavigator
         return isSuccess(status);
     }
 
-    boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
+    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getNextJob()
     {
         std::unique_lock<std::mutex> lock(mMutex);
 
@@ -211,7 +217,7 @@ namespace DetourNavigator
                 mFirstStart.lock()->reset();
                 if (mJobs.empty() && getTotalThreadJobsUnsafe() == 0)
                     mDone.notify_all();
-                return boost::none;
+                return std::nullopt;
             }
 
             Log(Debug::Debug) << "Got " << mJobs.size() << " navigator jobs and "
@@ -233,7 +239,7 @@ namespace DetourNavigator
         }
     }
 
-    boost::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
+    std::optional<AsyncNavMeshUpdater::Job> AsyncNavMeshUpdater::getJob(Jobs& jobs, Pushed& pushed, bool changeLastUpdate)
     {
         const auto now = std::chrono::steady_clock::now();
 

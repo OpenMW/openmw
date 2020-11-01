@@ -32,9 +32,9 @@ namespace CSMWorld
                          int flag = Flag_Table | Flag_Dialogue, bool editable = true,
                          bool userEditable = true);
 
-            virtual bool isEditable() const;
+            bool isEditable() const override;
 
-            virtual bool isUserEditable() const;
+            bool isUserEditable() const override;
     };
 
     class RefIdCollection : public CollectionBase, public NestedCollection
@@ -60,82 +60,82 @@ namespace CSMWorld
 
             virtual ~RefIdCollection();
 
-            virtual int getSize() const;
+            int getSize() const override;
 
-            virtual std::string getId (int index) const;
+            std::string getId (int index) const override;
 
-            virtual int getIndex (const std::string& id) const;
+            int getIndex (const std::string& id) const override;
 
-            virtual int getColumns() const;
+            int getColumns() const override;
 
-            virtual const ColumnBase& getColumn (int column) const;
+            const ColumnBase& getColumn (int column) const override;
 
-            virtual QVariant getData (int index, int column) const;
+            QVariant getData (int index, int column) const override;
 
-            virtual void setData (int index, int column, const QVariant& data);
+            void setData (int index, int column, const QVariant& data) override;
 
-            virtual void removeRows (int index, int count);
+            void removeRows (int index, int count) override;
 
-            virtual void cloneRecord(const std::string& origin,
+            void cloneRecord(const std::string& origin,
                                      const std::string& destination,
-                                     const UniversalId::Type type);
+                                     const UniversalId::Type type) override;
 
-            virtual bool touchRecord(const std::string& id);
+            bool touchRecord(const std::string& id) override;
 
-            virtual void appendBlankRecord (const std::string& id, UniversalId::Type type);
+            void appendBlankRecord (const std::string& id, UniversalId::Type type) override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual int searchId (const std::string& id) const;
+            int searchId (const std::string& id) const override;
             ////< Search record with \a id.
             /// \return index of record (if found) or -1 (not found)
 
-            virtual void replace (int index, const RecordBase& record);
+            void replace (int index, const RecordBase& record) override;
             ///< If the record type does not match, an exception is thrown.
             ///
             /// \attention \a record must not change the ID.
 
-            virtual void appendRecord (const RecordBase& record, UniversalId::Type type);
+            void appendRecord (const RecordBase& record, UniversalId::Type type) override;
             ///< If the record type does not match, an exception is thrown.
             ///
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual const RecordBase& getRecord (const std::string& id) const;
+            const RecordBase& getRecord (const std::string& id) const override;
 
-            virtual const RecordBase& getRecord (int index) const;
+            const RecordBase& getRecord (int index) const override;
 
             void load (ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-            virtual int getAppendIndex (const std::string& id, UniversalId::Type type) const;
+            int getAppendIndex (const std::string& id, UniversalId::Type type) const override;
             ///< \param type Will be ignored, unless the collection supports multiple record types
 
-            virtual std::vector<std::string> getIds (bool listDeleted) const;
+            std::vector<std::string> getIds (bool listDeleted) const override;
             ///< Return a sorted collection of all IDs
             ///
             /// \param listDeleted include deleted record in the list
 
-            virtual bool reorderRows (int baseIndex, const std::vector<int>& newOrder);
+            bool reorderRows (int baseIndex, const std::vector<int>& newOrder) override;
             ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
             /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
             ///
             /// \return Success?
 
-            virtual QVariant getNestedData(int row, int column, int subRow, int subColumn) const;
+            QVariant getNestedData(int row, int column, int subRow, int subColumn) const override;
 
-            virtual NestedTableWrapperBase* nestedTable(int row, int column) const;
+            NestedTableWrapperBase* nestedTable(int row, int column) const override;
 
-            virtual void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable);
+            void setNestedTable(int row, int column, const NestedTableWrapperBase& nestedTable) override;
 
-            virtual int getNestedRowsCount(int row, int column) const;
+            int getNestedRowsCount(int row, int column) const override;
 
-            virtual int getNestedColumnsCount(int row, int column) const;
+            int getNestedColumnsCount(int row, int column) const override;
 
-            NestableColumn *getNestableColumn(int column);
+            NestableColumn *getNestableColumn(int column) override;
 
-            virtual void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn);
+            void setNestedData(int row, int column, const QVariant& data, int subRow, int subColumn) override;
 
-            virtual void removeNestedRows(int row, int column, int subRow);
+            void removeNestedRows(int row, int column, int subRow) override;
 
-            virtual void addNestedRow(int row, int col, int position);
+            void addNestedRow(int row, int col, int position) override;
 
             void save (int index, ESM::ESMWriter& writer) const;
 

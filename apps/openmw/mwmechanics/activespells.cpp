@@ -210,9 +210,8 @@ namespace MWMechanics
                 std::string name = it->second.mDisplayName;
 
                 float magnitude = effectIt->mMagnitude;
-
                 if (magnitude)
-                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), name, it->first, it->second.mCasterActorId, magnitude, effectIt->mTimeLeft, effectIt->mDuration);
+                    visitor.visit(MWMechanics::EffectKey(effectIt->mEffectId, effectIt->mArg), effectIt->mEffectIndex, name, it->first, it->second.mCasterActorId, magnitude, effectIt->mTimeLeft, effectIt->mDuration);
             }
         }
     }
@@ -258,14 +257,14 @@ namespace MWMechanics
         mSpellsChanged = true;
     }
 
-    void ActiveSpells::purgeEffect(short effectId, const std::string& sourceId)
+    void ActiveSpells::purgeEffect(short effectId, const std::string& sourceId, int effectIndex)
     {
         for (TContainer::iterator it = mSpells.begin(); it != mSpells.end(); ++it)
         {
             for (std::vector<ActiveEffect>::iterator effectIt = it->second.mEffects.begin();
                  effectIt != it->second.mEffects.end();)
             {
-                if (effectIt->mEffectId == effectId && it->first == sourceId)
+                if (effectIt->mEffectId == effectId && it->first == sourceId && (effectIndex < 0 || effectIndex == effectIt->mEffectIndex))
                     effectIt = it->second.mEffects.erase(effectIt);
                 else
                     ++effectIt;

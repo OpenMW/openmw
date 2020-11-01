@@ -10,10 +10,10 @@
 #include <SDL_video.h>
 
 #include <iomanip>
+#include <numeric>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
-#include <components/misc/gcd.hpp>
 #include <components/misc/constants.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
@@ -60,7 +60,7 @@ namespace
 
     std::string getAspect (int x, int y)
     {
-        int gcd = Misc::gcd (x, y);
+        int gcd = std::gcd (x, y);
         int xaspect = x / gcd;
         int yaspect = y / gcd;
         // special case: 8 : 5 is usually referred to as 16:10
@@ -244,7 +244,7 @@ namespace MWGui
         {
             SDL_DisplayMode mode;
             SDL_GetDisplayMode(screen, i, &mode);
-            resolutions.push_back(std::make_pair(mode.w, mode.h));
+            resolutions.emplace_back(mode.w, mode.h);
         }
         std::sort(resolutions.begin(), resolutions.end(), sortResolutions);
         for (std::pair<int, int>& resolution : resolutions)

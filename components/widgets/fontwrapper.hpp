@@ -11,14 +11,14 @@ namespace Gui
     class FontWrapper : public T
     {
     public:
-        virtual void setFontName(const std::string& name)
+        void setFontName(const std::string& name) override
         {
             T::setFontName(name);
             T::setPropertyOverride ("FontHeight", getFontSize());
         }
 
     protected:
-        virtual void setPropertyOverride(const std::string& _key, const std::string& _value)
+        void setPropertyOverride(const std::string& _key, const std::string& _value) override
         {
             T::setPropertyOverride (_key, _value);
 

@@ -44,7 +44,7 @@ namespace CSVDoc
 
             void create();
 
-            void reject();
+            void reject() override;
     };
 }
 

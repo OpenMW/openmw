@@ -30,7 +30,7 @@ namespace MWGui
 
             ConsoleInterpreterContext (Console& console, MWWorld::Ptr reference);
 
-            virtual void report (const std::string& message);
+            void report (const std::string& message) override;
     };
 
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
@@ -470,6 +470,12 @@ namespace MWGui
     void Console::onResChange(int width, int height)
     {
         setCoord(10,10, width-10, height/2);
+    }
+
+    void Console::updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
+    {
+        if (mPtr == currentPtr)
+            mPtr = newPtr;
     }
 
     void Console::setSelectedObject(const MWWorld::Ptr& object)

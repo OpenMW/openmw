@@ -14,7 +14,7 @@ namespace MWClass
     {
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
-            virtual MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const;
+            MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
             struct GMST
             {
@@ -44,134 +44,133 @@ namespace MWClass
 
         public:
 
-            virtual void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const;
+            void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            virtual std::string getName (const MWWorld::ConstPtr& ptr) const;
+            std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
 
-            virtual MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const;
+            MWMechanics::CreatureStats& getCreatureStats (const MWWorld::Ptr& ptr) const override;
             ///< Return creature stats
 
-            virtual MWMechanics::NpcStats& getNpcStats (const MWWorld::Ptr& ptr) const;
+            MWMechanics::NpcStats& getNpcStats (const MWWorld::Ptr& ptr) const override;
             ///< Return NPC stats
 
-            virtual MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const;
+            MWWorld::ContainerStore& getContainerStore (const MWWorld::Ptr& ptr) const override;
             ///< Return container store
 
-            virtual bool hasToolTip(const MWWorld::ConstPtr& ptr) const;
+            bool hasToolTip(const MWWorld::ConstPtr& ptr) const override;
             ///< @return true if this object has a tooltip when focused (default implementation: true)
 
-            virtual MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const;
+            MWGui::ToolTipInfo getToolTipInfo (const MWWorld::ConstPtr& ptr, int count) const override;
             ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-            virtual MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const;
+            MWWorld::InventoryStore& getInventoryStore (const MWWorld::Ptr& ptr) const override;
             ///< Return inventory store
 
-            virtual bool hasInventoryStore(const MWWorld::Ptr &ptr) const { return true; }
+            bool hasInventoryStore(const MWWorld::Ptr &ptr) const override { return true; }
 
-            virtual void hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const;
+            void hit(const MWWorld::Ptr& ptr, float attackStrength, int type) const override;
 
-            virtual void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const;
+            void onHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object, const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) const override;
 
-            virtual void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const;
+            void getModelsToPreload(const MWWorld::Ptr& ptr, std::vector<std::string>& models) const override;
             ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation: list getModel().
 
-            virtual std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
-                const MWWorld::Ptr& actor) const;
+            std::shared_ptr<MWWorld::Action> activate (const MWWorld::Ptr& ptr,
+                const MWWorld::Ptr& actor) const override;
             ///< Generate action for activation
 
-            virtual std::string getScript (const MWWorld::ConstPtr& ptr) const;
+            std::string getScript (const MWWorld::ConstPtr& ptr) const override;
             ///< Return name of the script attached to ptr
 
-            virtual float getSpeed (const MWWorld::Ptr& ptr) const;
-            ///< Return movement speed.
+            float getMaxSpeed (const MWWorld::Ptr& ptr) const override;
+            ///< Return maximal movement speed.
 
-            virtual float getJump(const MWWorld::Ptr &ptr) const;
+            float getJump(const MWWorld::Ptr &ptr) const override;
             ///< Return jump velocity (not accounting for movement)
 
-            virtual MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const;
+            MWMechanics::Movement& getMovementSettings (const MWWorld::Ptr& ptr) const override;
             ///< Return desired movement.
 
-            virtual float getCapacity (const MWWorld::Ptr& ptr) const;
+            float getCapacity (const MWWorld::Ptr& ptr) const override;
             ///< Return total weight that fits into the object. Throws an exception, if the object can't
             /// hold other objects.
 
-            virtual float getEncumbrance (const MWWorld::Ptr& ptr) const;
+            float getEncumbrance (const MWWorld::Ptr& ptr) const override;
             ///< Returns total weight of objects inside this object (including modifications from magic
             /// effects). Throws an exception, if the object can't hold other objects.
 
-            virtual float getArmorRating (const MWWorld::Ptr& ptr) const;
+            float getArmorRating (const MWWorld::Ptr& ptr) const override;
             ///< @return combined armor rating of this actor
 
-            virtual bool apply (const MWWorld::Ptr& ptr, const std::string& id,
-                const MWWorld::Ptr& actor) const;
+            bool apply (const MWWorld::Ptr& ptr, const std::string& id,
+                const MWWorld::Ptr& actor) const override;
             ///< Apply \a id on \a ptr.
             /// \param actor Actor that is resposible for the ID being applied to \a ptr.
             /// \return Any effect?
 
-            virtual void adjustScale (const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool rendering) const;
+            void adjustScale (const MWWorld::ConstPtr &ptr, osg::Vec3f &scale, bool rendering) const override;
             /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
-            virtual void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const;
+            void skillUsageSucceeded (const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor=1.f) const override;
             ///< Inform actor \a ptr that a skill use has succeeded.
 
-            virtual bool isEssential (const MWWorld::ConstPtr& ptr) const;
+            bool isEssential (const MWWorld::ConstPtr& ptr) const override;
             ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
 
-            virtual int getServices (const MWWorld::ConstPtr& actor) const;
+            int getServices (const MWWorld::ConstPtr& actor) const override;
 
-            virtual bool isPersistent (const MWWorld::ConstPtr& ptr) const;
+            bool isPersistent (const MWWorld::ConstPtr& ptr) const override;
 
-            virtual std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const;
+            std::string getSoundIdFromSndGen(const MWWorld::Ptr &ptr, const std::string &name) const override;
 
             static void registerSelf();
 
-            virtual std::string getModel(const MWWorld::ConstPtr &ptr) const;
+            std::string getModel(const MWWorld::ConstPtr &ptr) const override;
 
-            virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
+            float getSkill(const MWWorld::Ptr& ptr, int skill) const override;
 
             /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
-            virtual int getBloodTexture (const MWWorld::ConstPtr& ptr) const;
+            int getBloodTexture (const MWWorld::ConstPtr& ptr) const override;
 
-            virtual bool isNpc() const {
+            bool isNpc() const override
+            {
                 return true;
             }
 
-            virtual void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state)
-                const;
+            void readAdditionalState (const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const override;
             ///< Read additional state from \a state into \a ptr.
 
-            virtual void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state)
-                const;
+            void writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const override;
             ///< Write additional state from \a ptr into \a state.
 
-            virtual int getBaseGold(const MWWorld::ConstPtr& ptr) const;
+            int getBaseGold(const MWWorld::ConstPtr& ptr) const override;
 
-            virtual bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const;
+            bool isClass(const MWWorld::ConstPtr& ptr, const std::string &className) const override;
 
-            virtual bool canSwim (const MWWorld::ConstPtr &ptr) const;
+            bool canSwim (const MWWorld::ConstPtr &ptr) const override;
 
-            virtual bool canWalk (const MWWorld::ConstPtr &ptr) const;
+            bool canWalk (const MWWorld::ConstPtr &ptr) const override;
 
-            virtual bool isBipedal (const MWWorld::ConstPtr &ptr) const;
+            bool isBipedal (const MWWorld::ConstPtr &ptr) const override;
 
-            virtual void respawn (const MWWorld::Ptr& ptr) const;
+            void respawn (const MWWorld::Ptr& ptr) const override;
 
-            virtual void restock (const MWWorld::Ptr& ptr) const;
+            int getBaseFightRating (const MWWorld::ConstPtr& ptr) const override;
 
-            virtual int getBaseFightRating (const MWWorld::ConstPtr& ptr) const;
+            std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const override;
+            int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const override;
 
-            virtual std::string getPrimaryFaction(const MWWorld::ConstPtr &ptr) const;
-            virtual int getPrimaryFactionRank(const MWWorld::ConstPtr &ptr) const;
+            void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const override;
 
-            virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
+            void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const override;
 
-            float getWalkSpeed(const MWWorld::Ptr& ptr) const final;
+            float getWalkSpeed(const MWWorld::Ptr& ptr) const override;
 
-            float getRunSpeed(const MWWorld::Ptr& ptr) const final;
+            float getRunSpeed(const MWWorld::Ptr& ptr) const override;
 
-            float getSwimSpeed(const MWWorld::Ptr& ptr) const final;
+            float getSwimSpeed(const MWWorld::Ptr& ptr) const override;
     };
 }
 

@@ -121,6 +121,7 @@ namespace MWDialogue
         mTalkedTo = creatureStats.hasTalkedToPlayer();
 
         mActorKnownTopics.clear();
+        mActorKnownTopicsFlag.clear();
 
         //greeting
         const MWWorld::Store<ESM::Dialogue> &dialogs =
@@ -300,11 +301,11 @@ namespace MWDialogue
                 }
             }
 
+            mLastTopic = topic;
+
             executeScript (info->mResultScript, mActor);
 
             parseText (info->mResponse);
-
-            mLastTopic = topic;
         }
     }
 
@@ -323,6 +324,7 @@ namespace MWDialogue
         updateGlobals();
 
         mActorKnownTopics.clear();
+        mActorKnownTopicsFlag.clear();
 
         const auto& dialogs = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
 
@@ -466,7 +468,7 @@ namespace MWDialogue
     void DialogueManager::addChoice (const std::string& text, int choice)
     {
         mIsInChoice = true;
-        mChoices.push_back(std::make_pair(text, choice));
+        mChoices.emplace_back(text, choice);
     }
 
     const std::vector<std::pair<std::string, int> >& DialogueManager::getChoices()
@@ -549,9 +551,9 @@ namespace MWDialogue
             mPermanentDispositionChange += delta;
     }
 
-    bool DialogueManager::checkServiceRefused(ResponseCallback* callback)
+    bool DialogueManager::checkServiceRefused(ResponseCallback* callback, ServiceType service)
     {
-        Filter filter (mActor, mChoice, mTalkedTo);
+        Filter filter (mActor, service, mTalkedTo);
 
         const MWWorld::Store<ESM::Dialogue> &dialogues =
             MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();

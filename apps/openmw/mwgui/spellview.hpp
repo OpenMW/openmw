@@ -47,10 +47,10 @@ namespace MWGui
         /// Fired when a spell was clicked
         EventHandle_ModelIndex eventSpellClicked;
 
-        void initialiseOverride() final;
+        void initialiseOverride() override;
 
-        void setSize(const MyGUI::IntSize& _value) final;
-        void setCoord(const MyGUI::IntCoord& _value) final;
+        void setSize(const MyGUI::IntSize& _value) override;
+        void setCoord(const MyGUI::IntCoord& _value) override;
 
         void resetScrollbars();
 

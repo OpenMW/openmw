@@ -18,7 +18,7 @@ namespace MWMechanics
         TypedAiPackage(Derived*) :
             AiPackage(Derived::getTypeId(), Derived::makeDefaultOptions()) {}
 
-        virtual std::unique_ptr<AiPackage> clone() const override
+        std::unique_ptr<AiPackage> clone() const override
         {
             return std::make_unique<T>(*static_cast<const T*>(this));
         }

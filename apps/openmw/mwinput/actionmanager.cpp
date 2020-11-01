@@ -26,7 +26,7 @@
 
 namespace MWInput
 {
-    const float ZOOM_SCALE = 120.f; /// Used for scrolling camera in and out
+    const float ZOOM_SCALE = 10.f; /// Used for scrolling camera in and out
 
     ActionManager::ActionManager(BindingsManager* bindingsManager,
             osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
@@ -110,23 +110,21 @@ namespace MWInput
 
             if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch"))
             {
+                const float switchLimit = 0.25;
+                MWBase::World* world = MWBase::Environment::get().getWorld();
                 if (mBindingsManager->actionIsActive(A_TogglePOV))
                 {
-                    if (mPreviewPOVDelay <= 0.5 &&
-                        (mPreviewPOVDelay += dt) > 0.5)
-                    {
-                        mPreviewPOVDelay = 1.f;
-                        MWBase::Environment::get().getWorld()->togglePreviewMode(true);
-                    }
+                    if (world->isFirstPerson() ? mPreviewPOVDelay > switchLimit : mPreviewPOVDelay == 0)
+                        world->togglePreviewMode(true);
+                    mPreviewPOVDelay += dt;
                 }
                 else
                 {
                     //disable preview mode
-                    MWBase::Environment::get().getWorld()->togglePreviewMode(false);
-                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= 0.5)
-                    {
-                        MWBase::Environment::get().getWorld()->togglePOV();
-                    }
+                    if (mPreviewPOVDelay > 0)
+                        world->togglePreviewMode(false);
+                    if (mPreviewPOVDelay > 0.f && mPreviewPOVDelay <= switchLimit)
+                        world->togglePOV();
                     mPreviewPOVDelay = 0.f;
                 }
             }
@@ -143,7 +141,7 @@ namespace MWInput
 
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight);
             float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward);
-            bool isRunning = xAxis > .75 || xAxis < .25 || yAxis > .75 || yAxis < .25;
+            bool isRunning = osg::Vec2f(xAxis * 2 - 1, yAxis * 2 - 1).length2() > 0.25f;
             if ((mAlwaysRunActive && alwaysRunAllowed) || isRunning)
                 player.setRunState(!mBindingsManager->actionIsActive(A_Run));
             else
@@ -169,6 +167,11 @@ namespace MWInput
 
         mAttemptJump = false;
     }
+    
+    bool ActionManager::isPreviewModeEnabled()
+    {
+        return MWBase::Environment::get().getWorld()->isPreviewModeEnabled();
+    }
 
     void ActionManager::resetIdleTime()
     {
@@ -192,6 +195,8 @@ namespace MWInput
 
     void ActionManager::executeAction(int action)
     {
+        auto* inputManager = MWBase::Environment::get().getInputManager();
+        auto* windowManager = MWBase::Environment::get().getWindowManager();
         // trigger action activated
         switch (action)
         {
@@ -208,7 +213,7 @@ namespace MWInput
             toggleConsole ();
             break;
         case A_Activate:
-            MWBase::Environment::get().getInputManager()->resetIdleTime();
+            inputManager->resetIdleTime();
             activate();
             break;
         case A_MoveLeft:
@@ -269,18 +274,18 @@ namespace MWInput
             showQuickKeysMenu();
             break;
         case A_ToggleHUD:
-            MWBase::Environment::get().getWindowManager()->toggleHud();
+            windowManager->toggleHud();
             break;
         case A_ToggleDebug:
-            MWBase::Environment::get().getWindowManager()->toggleDebugWindow();
+            windowManager->toggleDebugWindow();
             break;
         case A_ZoomIn:
-            if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch") && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols") && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                MWBase::Environment::get().getWorld()->setCameraDistance(ZOOM_SCALE, true, true);
+            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
+                MWBase::Environment::get().getWorld()->adjustCameraDistance(-ZOOM_SCALE);
             break;
         case A_ZoomOut:
-            if (MWBase::Environment::get().getInputManager()->getControlSwitch("playerviewswitch") && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols") && !MWBase::Environment::get().getWindowManager()->isGuiMode())
-                MWBase::Environment::get().getWorld()->setCameraDistance(-ZOOM_SCALE, true, true);
+            if (inputManager->getControlSwitch("playerviewswitch") && inputManager->getControlSwitch("playercontrols") && !windowManager->isGuiMode())
+                MWBase::Environment::get().getWorld()->adjustCameraDistance(ZOOM_SCALE);
             break;
         case A_QuickSave:
             quickSave();
@@ -289,19 +294,19 @@ namespace MWInput
             quickLoad();
             break;
         case A_CycleSpellLeft:
-            if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
+            if (checkAllowedToUseItems() && windowManager->isAllowed(MWGui::GW_Magic))
                 MWBase::Environment::get().getWindowManager()->cycleSpell(false);
             break;
         case A_CycleSpellRight:
-            if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Magic))
+            if (checkAllowedToUseItems() && windowManager->isAllowed(MWGui::GW_Magic))
                 MWBase::Environment::get().getWindowManager()->cycleSpell(true);
             break;
         case A_CycleWeaponLeft:
-            if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            if (checkAllowedToUseItems() && windowManager->isAllowed(MWGui::GW_Inventory))
                 MWBase::Environment::get().getWindowManager()->cycleWeapon(false);
             break;
         case A_CycleWeaponRight:
-            if (checkAllowedToUseItems() && MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
+            if (checkAllowedToUseItems() && windowManager->isAllowed(MWGui::GW_Inventory))
                 MWBase::Environment::get().getWindowManager()->cycleWeapon(true);
             break;
         case A_Sneak:

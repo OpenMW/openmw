@@ -22,26 +22,26 @@ namespace CSVWorld
 
             CSVWidget::DropLineEdit *mTopic;
 
-            virtual std::string getId() const;
+            std::string getId() const override;
 
-            virtual void configureCreateCommand (CSMWorld::CreateCommand& command) const;
+            void configureCreateCommand (CSMWorld::CreateCommand& command) const override;
 
         public:
 
             InfoCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id, CSMWorld::IdCompletionManager& completionManager);
 
-            virtual void cloneMode (const std::string& originId,
-                const CSMWorld::UniversalId::Type type);
+            void cloneMode (const std::string& originId,
+                const CSMWorld::UniversalId::Type type) override;
 
-            virtual void reset();
+            void reset() override;
 
-            virtual std::string getErrors() const;
+            std::string getErrors() const override;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
             
             /// Focus main input widget
-            virtual void focus();
+            void focus() override;
             
         private slots:
 
@@ -52,7 +52,7 @@ namespace CSVWorld
     {
         public:
 
-            virtual Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const;
+            Creator *makeCreator (CSMDoc::Document& document, const CSMWorld::UniversalId& id) const override;
             ///< The ownership of the returned Creator is transferred to the caller.
     };
 }

@@ -172,8 +172,15 @@ namespace MWWorld
             ///< Return name of the script attached to ptr (default implementation: return an empty
             /// string).
 
-            virtual float getSpeed (const Ptr& ptr) const;
-            ///< Return movement speed.
+            virtual float getWalkSpeed(const Ptr& ptr) const;
+            virtual float getRunSpeed(const Ptr& ptr) const;
+            virtual float getSwimSpeed(const Ptr& ptr) const;
+
+            /// Return maximal movement speed for the current state.
+            virtual float getMaxSpeed(const Ptr& ptr) const;
+
+            /// Return current movement speed.
+            virtual float getCurrentSpeed(const Ptr& ptr) const;
 
             virtual float getJump(const MWWorld::Ptr &ptr) const;
             ///< Return jump velocity (not accounting for movement)
@@ -182,7 +189,7 @@ namespace MWWorld
             ///< Return desired movement.
 
             virtual osg::Vec3f getRotationVector (const Ptr& ptr) const;
-            ///< Return desired rotations, as euler angles.
+            ///< Return desired rotations, as euler angles. Sets getMovementSettings(ptr).mRotation to zero.
 
             virtual std::pair<std::vector<int>, bool> getEquipmentSlots (const ConstPtr& ptr) const;
             ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
@@ -346,8 +353,6 @@ namespace MWWorld
 
             virtual void respawn (const MWWorld::Ptr& ptr) const {}
 
-            virtual void restock (const MWWorld::Ptr& ptr) const {}
-
             /// Returns sound id
             virtual std::string getSound(const MWWorld::ConstPtr& ptr) const;
 
@@ -363,11 +368,7 @@ namespace MWWorld
 
             virtual void setBaseAISetting(const std::string& id, MWMechanics::CreatureStats::AiSetting setting, int value) const;
 
-            virtual float getWalkSpeed(const Ptr& ptr) const;
-
-            virtual float getRunSpeed(const Ptr& ptr) const;
-
-            virtual float getSwimSpeed(const Ptr& ptr) const;
+            virtual void modifyBaseInventory(const std::string& actorId, const std::string& itemId, int amount) const;
     };
 }
 

@@ -22,22 +22,22 @@ namespace osgMyGUI
         {
         }
 
-        virtual void begin()
+        void begin() override
         {
             mTarget->begin();
         }
 
-        virtual void end()
+        void end() override
         {
             mTarget->end();
         }
 
-        virtual void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count)
+        void doRender(MyGUI::IVertexBuffer* _buffer, MyGUI::ITexture* _texture, size_t _count) override
         {
             mTarget->doRender(_buffer, _texture, _count);
         }
 
-        virtual const MyGUI::RenderTargetInfo& getInfo()
+        const MyGUI::RenderTargetInfo& getInfo() override
         {
             mInfo = mTarget->getInfo();
             mInfo.hOffset = mHOffset;

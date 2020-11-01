@@ -33,7 +33,7 @@ namespace Compiler
                 // store code for if-cascade
                 Codes codes;
 
-                for (IfCodes::reverse_iterator iter (mIfCode.rbegin());
+                for (auto iter (mIfCode.rbegin());
                     iter!=mIfCode.rend(); ++iter)
                 {
                     Codes block;

@@ -62,14 +62,19 @@ namespace MWGui
         {
             ESM::Position PlayerPos = player.getRefData().getPosition();
             float d = sqrt(pow(pos.pos[0] - PlayerPos.pos[0], 2) + pow(pos.pos[1] - PlayerPos.pos[1], 2) + pow(pos.pos[2] - PlayerPos.pos[2], 2));
-            price = static_cast<int>(d / gmst.find("fTravelMult")->mValue.getFloat());
+            float fTravelMult = gmst.find("fTravelMult")->mValue.getFloat();
+            if (fTravelMult != 0)
+                price = static_cast<int>(d / fTravelMult);
+            else
+                price = static_cast<int>(d);
         }
 
+        price = std::max(1, price);
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         // Add price for the travelling followers
         std::set<MWWorld::Ptr> followers;
-        MWWorld::ActionTeleport::getFollowersToTeleport(player, followers);
+        MWWorld::ActionTeleport::getFollowers(player, followers);
 
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());

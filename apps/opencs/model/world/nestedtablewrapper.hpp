@@ -22,7 +22,7 @@ namespace CSMWorld
 
         virtual ~NestedTableWrapper() {}
 
-        virtual int size() const
+        int size() const override
         {
             return mNestedTable.size(); //i hope that this will be enough
         }

@@ -19,7 +19,7 @@ namespace CSVRender
         void setAlteredHeight(int inCellX, int inCellY, float heightMap);
         void resetHeights();
 
-        virtual bool useAlteration() const { return true; }
+        bool useAlteration() const override { return true; }
         float getSumOfAlteredAndTrueHeight(int cellX, int cellY, int inCellX, int inCellY);
         float* getAlteredHeight(int inCellX, int inCellY);
 
@@ -27,10 +27,10 @@ namespace CSVRender
         const CSMWorld::Data& mData;
         std::array<float, ESM::Land::LAND_SIZE * ESM::Land::LAND_SIZE> mAlteredHeight;
 
-        osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY) final;
-        const ESM::LandTexture* getLandTexture(int index, short plugin) final;
+        osg::ref_ptr<const ESMTerrain::LandObject> getLand (int cellX, int cellY) override;
+        const ESM::LandTexture* getLandTexture(int index, short plugin) override;
 
-        void getBounds(float& minX, float& maxX, float& minY, float& maxY) final;
+        void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
 
         int getThisHeight(int col, int row, const ESM::Land::LandData *heightData) const;
         int getLeftHeight(int col, int row, const ESM::Land::LandData *heightData) const;
@@ -44,8 +44,8 @@ namespace CSVRender
         bool leftOrUpIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
         bool rightOrDownIsOverTheLimit(int col, int row, int heightWarningLimit, const ESM::Land::LandData *heightData) const;
 
-        void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const final;
-        float getAlteredHeight(int col, int row) const final;
+        void adjustColor(int col, int row, const ESM::Land::LandData *heightData, osg::Vec4ub& color) const override;
+        float getAlteredHeight(int col, int row) const override;
     };
 
 }

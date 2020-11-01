@@ -72,6 +72,10 @@ namespace MWInput
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         if (uiScale != 0.f)
             mInvUiScalingFactor = 1.f / uiScale;
+
+        float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
+        deadZoneRadius = std::min(std::max(deadZoneRadius, 0.0f), 0.5f);
+        mBindingsManager->setJoystickDeadZone(deadZoneRadius);
     }
 
     void ControllerManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -85,7 +89,7 @@ namespace MWInput
 
     bool ControllerManager::update(float dt)
     {
-        mGamepadPreviewMode = mActionManager->getPreviewDelay() == 1.f;
+        mGamepadPreviewMode = mActionManager->isPreviewModeEnabled();
 
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
@@ -100,10 +104,9 @@ namespace MWInput
             // game mode does not move the position of the GUI cursor
             float xMove = xAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
             float yMove = yAxis * dt * 1500.0f * mInvUiScalingFactor * mGamepadCursorSpeed;
-            if (xMove != 0 || yMove != 0 || zAxis != 0)
+            float mouseWheelMove = -zAxis * dt * 1500.0f;
+            if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
             {
-                int mouseWheelMove = static_cast<int>(-zAxis * dt * 1500.0f);
-
                 mMouseManager->injectMouseMove(xMove, yMove, mouseWheelMove);
                 mMouseManager->warpMouse();
                 MWBase::Environment::get().getWindowManager()->setCursorActive(true);
@@ -187,10 +190,7 @@ namespace MWInput
                 mGamepadZoom = 0;
 
             if (mGamepadZoom)
-            {
-                MWBase::Environment::get().getWorld()->changeVanityModeScale(mGamepadZoom);
-                MWBase::Environment::get().getWorld()->setCameraDistance(mGamepadZoom, true, true);
-            }
+                MWBase::Environment::get().getWorld()->adjustCameraDistance(-mGamepadZoom);
         }
 
         return triedToMove;
@@ -284,16 +284,16 @@ namespace MWInput
         }
         else
         {
-            if (mGamepadPreviewMode && arg.value) // Preview Mode Gamepad Zooming
+            if (mGamepadPreviewMode) // Preview Mode Gamepad Zooming
             {
                 if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
                 {
-                    mGamepadZoom = arg.value * 0.85f / 1000.f;
+                    mGamepadZoom = arg.value * 0.85f / 1000.f / 12.f;
                     return; // Do not propagate event.
                 }
                 else if (arg.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
                 {
-                    mGamepadZoom = -arg.value * 0.85f / 1000.f;
+                    mGamepadZoom = -arg.value * 0.85f / 1000.f / 12.f;
                     return; // Do not propagate event.
                 }
             }

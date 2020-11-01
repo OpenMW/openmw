@@ -96,25 +96,25 @@ namespace CSVWorld
             GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
                 const CSMWorld::UniversalId& id, bool relaxedIdRules = false);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
-            virtual void reset();
+            void reset() override;
 
-            virtual void toggleWidgets (bool active = true);
+            void toggleWidgets (bool active = true) override;
 
-            virtual void cloneMode(const std::string& originId,
-                                   const CSMWorld::UniversalId::Type type);
+            void cloneMode(const std::string& originId,
+                                   const CSMWorld::UniversalId::Type type) override;
 
-            virtual void touch(const std::vector<CSMWorld::UniversalId>& ids);
+            void touch(const std::vector<CSMWorld::UniversalId>& ids) override;
 
             virtual std::string getErrors() const;
             ///< Return formatted error descriptions for the current state of the creator. if an empty
             /// string is returned, there is no error.
 
-            virtual void setScope (unsigned int scope);
+            void setScope (unsigned int scope) override;
 
             /// Focus main input widget
-            virtual void focus();
+            void focus() override;
 
         private slots:
 

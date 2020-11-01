@@ -5,8 +5,8 @@ Copyright 2020 Bret Curtis <psi29a@gmail.com>
 -->
 <component type="desktop">
  <id>org.openmw.launcher.desktop</id>
- <metadata_license>CC0-1.0</metadata_license>
- <project_license>GPL-3.0 and MIT</project_license>
+ <metadata_license>GPL-3+</metadata_license>
+ <project_license>GPL-3+</project_license>
  <name>OpenMW</name>
  <summary>Unofficial open source engine re-implementation of the game Morrowind</summary>
  <description>

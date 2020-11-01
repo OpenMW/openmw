@@ -6,8 +6,6 @@
 #include <osgParticle/ParticleSystemUpdater>
 #include <osgParticle/Emitter>
 
-#include <components/nifosg/userdata.hpp>
-
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 
@@ -20,15 +18,6 @@ namespace SceneUtil
                      // Controller might need different inputs per scene instance
                      | osg::CopyOp::DEEP_COPY_CALLBACKS
                      | osg::CopyOp::DEEP_COPY_USERDATA);
-    }
-
-    osg::Object* CopyOp::operator ()(const osg::Object* node) const
-    {
-        // We should copy node transformations when we copy node
-        if (dynamic_cast<const NifOsg::NodeUserData*>(node))
-            return static_cast<NifOsg::NodeUserData*>(node->clone(*this));
-
-        return osg::CopyOp::operator()(node);
     }
 
     osg::Node* CopyOp::operator ()(const osg::Node* node) const

@@ -217,7 +217,7 @@ namespace MWGui
             if (store.get<ESM::Class>().isDynamic(classInfo.mId))
                 continue; // custom-made class not relevant for this dialog
 
-            items.push_back(std::make_pair(classInfo.mId, classInfo.mName));
+            items.emplace_back(classInfo.mId, classInfo.mName);
         }
         std::sort(items.begin(), items.end(), sortClasses);
 

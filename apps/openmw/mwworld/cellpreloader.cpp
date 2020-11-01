@@ -69,13 +69,13 @@ namespace MWWorld
             cell->forEach(visitor);
         }
 
-        virtual void abort()
+        void abort() override
         {
             mAbort = true;
         }
 
         /// Preload work to be called from the worker thread.
-        virtual void doWork()
+        void doWork() override
         {
             if (mIsExterior)
             {
@@ -177,7 +177,7 @@ namespace MWWorld
             return true;
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             for (unsigned int i=0; i<mTerrainViews.size() && i<mPreloadPositions.size() && !mAbort; ++i)
             {
@@ -186,7 +186,7 @@ namespace MWWorld
             }
         }
 
-        virtual void abort()
+        void abort() override
         {
             mAbort = true;
         }
@@ -213,7 +213,7 @@ namespace MWWorld
         {
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             mResourceSystem->updateCache(mReferenceTime);
         }
@@ -496,7 +496,7 @@ namespace MWWorld
             else if (mTerrainViews.size() < positions.size())
             {
                 for (unsigned int i=mTerrainViews.size(); i<positions.size(); ++i)
-                    mTerrainViews.push_back(mTerrain->createView());
+                    mTerrainViews.emplace_back(mTerrain->createView());
             }
 
             mTerrainPreloadPositions = positions;

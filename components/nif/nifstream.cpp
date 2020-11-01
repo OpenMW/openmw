@@ -25,17 +25,18 @@ namespace Nif
         return t;
     }
 
-    ///Currently specific for 4.0.0.2 and earlier
+    ///Booleans in 4.0.0.2 (Morrowind format) and earlier are 4 byte, while in 4.1.0.0+ they're 1 byte.
     bool NIFStream::getBoolean()
     {
-        return getInt() != 0;
+        return getVersion() < generateVersion(4,1,0,0) ? getInt() != 0 : getChar() != 0;
     }
 
-    ///Read in a string, either from the string table using the index (currently absent) or from the stream using the specified length
+    ///Read in a string, either from the string table using the index or from the stream using the specified length
     std::string NIFStream::getString()
     {
-        return getSizedString();
+        return getVersion() < generateVersion(20,1,0,1) ? getSizedString() : file->getString(getUInt());
     }
+
 
     // Convenience utility functions: get the versions of the currently read file
     unsigned int NIFStream::getVersion() const { return file->getVersion(); }

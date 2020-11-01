@@ -42,7 +42,7 @@ namespace Terrain
         void setMaxCompositeGeometrySize(float maxCompGeometrySize) { mMaxCompGeometrySize = maxCompGeometrySize; }
 
         void setNodeMask(unsigned int mask) { mNodeMask = mask; }
-        virtual unsigned int getNodeMask() override { return mNodeMask; }
+        unsigned int getNodeMask() override { return mNodeMask; }
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

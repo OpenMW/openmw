@@ -6,6 +6,7 @@
 #include "../mwbase/world.hpp"
 #include "../mwbase/soundmanager.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/movement.hpp"
 #include "../mwmechanics/magiceffects.hpp"
@@ -79,7 +80,8 @@ namespace MWClass
         float weight = getContainerStore(ptr).getWeight();
         const MWMechanics::MagicEffects& effects = getCreatureStats(ptr).getMagicEffects();
         weight -= effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Feather)).getMagnitude();
-        weight += effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).getMagnitude();
+        if (ptr != MWMechanics::getPlayer() || !MWBase::Environment::get().getWorld()->getGodModeState())
+            weight += effects.get(MWMechanics::EffectKey(ESM::MagicEffect::Burden)).getMagnitude();
         return (weight < 0) ? 0.0f : weight;
     }
 
@@ -90,5 +92,14 @@ namespace MWClass
     bool Actor::isActor() const
     {
         return true;
+    }
+
+    float Actor::getCurrentSpeed(const MWWorld::Ptr& ptr) const
+    {
+        const MWMechanics::Movement& movementSettings = ptr.getClass().getMovementSettings(ptr);
+        float moveSpeed = this->getMaxSpeed(ptr) * movementSettings.mSpeedFactor;
+        if (movementSettings.mIsStrafing)
+            moveSpeed *= 0.75f;
+        return moveSpeed;
     }
 }

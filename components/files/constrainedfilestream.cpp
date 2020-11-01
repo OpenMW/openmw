@@ -37,7 +37,7 @@ namespace Files
             mOrigin = start;
         }
 
-        virtual int_type underflow()
+        int_type underflow() override
         {
             if(gptr() == egptr())
             {
@@ -53,7 +53,7 @@ namespace Files
             return traits_type::to_int_type(*gptr());
         }
 
-        virtual pos_type seekoff(off_type offset, std::ios_base::seekdir whence, std::ios_base::openmode mode)
+        pos_type seekoff(off_type offset, std::ios_base::seekdir whence, std::ios_base::openmode mode) override
         {
             if((mode&std::ios_base::out) || !(mode&std::ios_base::in))
                 return traits_type::eof();
@@ -86,7 +86,7 @@ namespace Files
             return newPos;
         }
 
-        virtual pos_type seekpos(pos_type pos, std::ios_base::openmode mode)
+        pos_type seekpos(pos_type pos, std::ios_base::openmode mode) override
         {
             if((mode&std::ios_base::out) || !(mode&std::ios_base::in))
                 return traits_type::eof();

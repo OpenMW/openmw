@@ -20,9 +20,9 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::Group& group);
-        virtual void apply(osg::MatrixTransform& node);
-        virtual void apply(osg::Geometry& node);
+        void apply(osg::Group& group) override;
+        void apply(osg::MatrixTransform& node) override;
+        void apply(osg::Geometry& node) override;
 
         bool checkGroup(osg::Group& group);
 
@@ -39,7 +39,7 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::Node &node);
+        void apply(osg::Node &node) override;
 
         std::string mNameToFind;
         std::vector<osg::Node *> mFoundNodes;
@@ -54,9 +54,9 @@ namespace SceneUtil
         {
         }
 
-        virtual void apply(osg::MatrixTransform& node);
+        void apply(osg::MatrixTransform& node) override;
 
-        virtual void apply(osg::Drawable& drw);
+        void apply(osg::Drawable& drw) override;
     };
 
     /// Maps names to nodes
@@ -71,7 +71,7 @@ namespace SceneUtil
         {
         }
 
-        void apply(osg::MatrixTransform& trans);
+        void apply(osg::MatrixTransform& trans) override;
 
     private:
         NodeMap& mMap;
@@ -100,10 +100,10 @@ namespace SceneUtil
     class CleanObjectRootVisitor : public RemoveVisitor
     {
     public:
-        virtual void apply(osg::Drawable& drw);
-        virtual void apply(osg::Group& node);
-        virtual void apply(osg::MatrixTransform& node);
-        virtual void apply(osg::Node& node);
+        void apply(osg::Drawable& drw) override;
+        void apply(osg::Group& node) override;
+        void apply(osg::MatrixTransform& node) override;
+        void apply(osg::Node& node) override;
 
         void applyNode(osg::Node& node);
         void applyDrawable(osg::Node& node);
@@ -112,9 +112,9 @@ namespace SceneUtil
     class RemoveTriBipVisitor : public RemoveVisitor
     {
     public:
-        virtual void apply(osg::Drawable& drw);
-        virtual void apply(osg::Group& node);
-        virtual void apply(osg::MatrixTransform& node);
+        void apply(osg::Drawable& drw) override;
+        void apply(osg::Group& node) override;
+        void apply(osg::MatrixTransform& node) override;
 
         void applyImpl(osg::Node& node);
     };

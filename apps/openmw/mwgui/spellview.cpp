@@ -128,10 +128,10 @@ namespace MWGui
                 group.push_back(costChance);
                 Gui::SharedStateButton::createButtonGroup(group);
 
-                mLines.push_back(LineInfo(t, costChance, i));
+                mLines.emplace_back(t, costChance, i);
             }
             else
-                mLines.push_back(LineInfo(t, (MyGUI::Widget*)nullptr, i));
+                mLines.emplace_back(t, (MyGUI::Widget*)nullptr, i);
 
             t->setStateSelected(spell.mSelected);
         }
@@ -236,7 +236,7 @@ namespace MWGui
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 18),
                 MyGUI::Align::Left | MyGUI::Align::Top);
             separator->setNeedMouseFocus(false);
-            mLines.push_back(LineInfo(separator, (MyGUI::Widget*)nullptr, NoSpellIndex));
+            mLines.emplace_back(separator, (MyGUI::Widget*)nullptr, NoSpellIndex);
         }
 
         MyGUI::TextBox* groupWidget = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
@@ -255,10 +255,10 @@ namespace MWGui
             groupWidget2->setTextAlign(MyGUI::Align::Right);
             groupWidget2->setNeedMouseFocus(false);
 
-            mLines.push_back(LineInfo(groupWidget, groupWidget2, NoSpellIndex));
+            mLines.emplace_back(groupWidget, groupWidget2, NoSpellIndex);
         }
         else
-            mLines.push_back(LineInfo(groupWidget, (MyGUI::Widget*)nullptr, NoSpellIndex));
+            mLines.emplace_back(groupWidget, (MyGUI::Widget*)nullptr, NoSpellIndex);
     }
 
 

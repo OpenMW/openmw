@@ -33,27 +33,27 @@ namespace MWState
 
             StateManager (const boost::filesystem::path& saves, const std::string& game);
 
-            virtual void requestQuit();
+            void requestQuit() override;
 
-            virtual bool hasQuitRequest() const;
+            bool hasQuitRequest() const override;
 
-            virtual void askLoadRecent();
+            void askLoadRecent() override;
 
-            virtual State getState() const;
+            State getState() const override;
 
-            virtual void newGame (bool bypass = false);
+            void newGame (bool bypass = false) override;
             ///< Start a new game.
             ///
             /// \param bypass Skip new game mechanics.
 
-            virtual void endGame();
+            void endGame() override;
 
-            virtual void resumeGame();
+            void resumeGame() override;
 
-            virtual void deleteGame (const MWState::Character *character, const MWState::Slot *slot);
+            void deleteGame (const MWState::Character *character, const MWState::Slot *slot) override;
             ///< Delete a saved game slot from this character. If all save slots are deleted, the character will be deleted too.
 
-            virtual void saveGame (const std::string& description, const Slot *slot = 0);
+            void saveGame (const std::string& description, const Slot *slot = 0) override;
             ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
             ///
             /// \note Slot must belong to the current character.
@@ -61,30 +61,30 @@ namespace MWState
             ///Saves a file, using supplied filename, overwritting if needed
             /** This is mostly used for quicksaving and autosaving, for they use the same name over and over again
                 \param name Name of save, defaults to "Quicksave"**/
-            virtual void quickSave(std::string name = "Quicksave");
+            void quickSave(std::string name = "Quicksave") override;
 
             ///Loads the last saved file
             /** Used for quickload **/
-            virtual void quickLoad();
+            void quickLoad() override;
 
-            virtual void loadGame (const std::string& filepath);
+            void loadGame (const std::string& filepath) override;
             ///< Load a saved game directly from the given file path. This will search the CharacterManager
             /// for a Character containing this save file, and set this Character current if one was found.
             /// Otherwise, a new Character will be created.
 
-            virtual void loadGame (const Character *character, const std::string &filepath);
+            void loadGame (const Character *character, const std::string &filepath) override;
             ///< Load a saved game file belonging to the given character.
 
-            virtual Character *getCurrentCharacter ();
+            Character *getCurrentCharacter () override;
             ///< @note May return null.
 
-            virtual CharacterIterator characterBegin();
+            CharacterIterator characterBegin() override;
             ///< Any call to SaveGame and getCurrentCharacter can invalidate the returned
             /// iterator.
 
-            virtual CharacterIterator characterEnd();
+            CharacterIterator characterEnd() override;
 
-            virtual void update (float duration);
+            void update (float duration) override;
     };
 }
 

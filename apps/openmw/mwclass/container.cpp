@@ -27,48 +27,46 @@
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
 
 namespace MWClass
 {
-    class ContainerCustomData : public MWWorld::CustomData
+    ContainerCustomData::ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell)
     {
-    public:
-        MWWorld::ContainerStore mContainerStore;
+        unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max());
+        // setting ownership not needed, since taking items from a container inherits the
+        // container's owner automatically
+        mStore.fillNonRandom(container.mInventory, "", seed);
+    }
 
-        virtual MWWorld::CustomData *clone() const;
-
-        virtual ContainerCustomData& asContainerCustomData()
-        {
-            return *this;
-        }
-        virtual const ContainerCustomData& asContainerCustomData() const
-        {
-            return *this;
-        }
-    };
+    ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
+    {
+        mStore.readState(inventory);
+    }
 
     MWWorld::CustomData *ContainerCustomData::clone() const
     {
         return new ContainerCustomData (*this);
     }
 
+    ContainerCustomData& ContainerCustomData::asContainerCustomData()
+    {
+        return *this;
+    }
+    const ContainerCustomData& ContainerCustomData::asContainerCustomData() const
+    {
+        return *this;
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-
-            MWWorld::LiveCellRef<ESM::Container> *ref =
-                ptr.get<ESM::Container>();
-
-            // setting ownership not needed, since taking items from a container inherits the
-            // container's owner automatically
-            data->mContainerStore.fill(
-                ref->mBase->mInventory, "");
+            MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
             // store
-            ptr.getRefData().setCustomData (data.release());
+            ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()).release());
 
             MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
@@ -96,17 +94,6 @@ namespace MWClass
             MWBase::Environment::get().getWorld()->removeContainerScripts(ptr);
             ptr.getRefData().setCustomData(nullptr);
         }
-    }
-
-    void Container::restock(const MWWorld::Ptr& ptr) const
-    {
-        MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
-        const ESM::InventoryList& list = ref->mBase->mInventory;
-        MWWorld::ContainerStore& store = getContainerStore(ptr);
-
-        // setting ownership not needed, since taking items from a container inherits the
-        // container's owner automatically
-        store.restock(list, ptr, "");
     }
 
     void Container::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -228,12 +215,12 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId;
     }
 
-    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr)
-        const
+    MWWorld::ContainerStore& Container::getContainerStore (const MWWorld::Ptr& ptr) const
     {
         ensureCustomData (ptr);
-
-        return ptr.getRefData().getCustomData()->asContainerCustomData().mContainerStore;
+        auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
+        data.mStore.mPtr = ptr;
+        return data.mStore;
     }
 
     std::string Container::getScript (const MWWorld::ConstPtr& ptr) const
@@ -253,8 +240,7 @@ namespace MWClass
     bool Container::hasToolTip (const MWWorld::ConstPtr& ptr) const
     {
         if (const MWWorld::CustomData* data = ptr.getRefData().getCustomData())
-            return !canBeHarvested(ptr) || data->asContainerCustomData().mContainerStore.hasVisibleItems();
-
+            return !canBeHarvested(ptr) || data->asContainerCustomData().mStore.hasVisibleItems();
         return true;
     }
 
@@ -305,6 +291,11 @@ namespace MWClass
         return !(ref->mBase->mFlags & ESM::Container::Organic);
     }
 
+    void Container::modifyBaseInventory(const std::string& containerId, const std::string& itemId, int amount) const
+    {
+        MWMechanics::modifyBaseInventory<ESM::Container>(containerId, itemId, amount);
+    }
+
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const
     {
         const MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
@@ -317,16 +308,8 @@ namespace MWClass
         if (!state.mHasCustomState)
             return;
 
-        if (!ptr.getRefData().getCustomData())
-        {
-            // Create a CustomData, but don't fill it from ESM records (not needed)
-            std::unique_ptr<ContainerCustomData> data (new ContainerCustomData);
-            ptr.getRefData().setCustomData (data.release());
-        }
-
-        ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
         const ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.readState (containerState.mInventory);
+        ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory).release());
     }
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
@@ -338,7 +321,13 @@ namespace MWClass
         }
 
         const ContainerCustomData& customData = ptr.getRefData().getCustomData()->asContainerCustomData();
+        if (!customData.mStore.isResolved())
+        {
+            state.mHasCustomState = false;
+            return;
+        }
+
         ESM::ContainerState& containerState = state.asContainerState();
-        customData.mContainerStore.writeState (containerState.mInventory);
+        customData.mStore.writeState (containerState.mInventory);
     }
 }

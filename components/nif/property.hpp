@@ -29,18 +29,13 @@
 namespace Nif
 {
 
-class Property : public Named
-{
-public:
-    // The meaning of these depends on the actual property type.
-    unsigned int flags;
-
-    void read(NIFStream *nif);
-};
+class Property : public Named { };
 
 class NiTexturingProperty : public Property
 {
 public:
+    unsigned short flags{0u};
+
     // A sub-texture
     struct Texture
     {
@@ -92,39 +87,92 @@ public:
     };
 
     std::vector<Texture> textures;
+    std::vector<Texture> shaderTextures;
 
     osg::Vec2f envMapLumaBias;
     osg::Vec4f bumpMapMatrix;
 
-    void read(NIFStream *nif);
-    void post(NIFFile *nif);
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
 };
 
 class NiFogProperty : public Property
 {
 public:
+    unsigned short mFlags;
     float mFogDepth;
     osg::Vec3f mColour;
 
-    void read(NIFStream *nif);
+    void read(NIFStream *nif) override;
 };
 
-// These contain no other data than the 'flags' field in Property
-class NiShadeProperty : public Property { };
-class NiDitherProperty : public Property { };
-class NiZBufferProperty : public Property { };
-class NiSpecularProperty : public Property { };
-class NiWireframeProperty : public Property { };
+// These contain no other data than the 'flags' field
+struct NiShadeProperty : public Property
+{
+    unsigned short flags{0u};
+    void read(NIFStream *nif) override
+    {
+        Property::read(nif);
+        if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+            flags = nif->getUShort();
+    }
+};
+
+struct NiDitherProperty : public Property
+{
+    unsigned short flags;
+    void read(NIFStream* nif) override
+    {
+        Property::read(nif);
+        flags = nif->getUShort();
+    }
+};
+
+struct NiZBufferProperty : public Property
+{
+    unsigned short flags;
+    unsigned int testFunction;
+    void read(NIFStream *nif) override
+    {
+        Property::read(nif);
+        flags = nif->getUShort();
+        testFunction = (flags >> 2) & 0x7;
+        if (nif->getVersion() >= NIFStream::generateVersion(4,1,0,12) && nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+            testFunction = nif->getUInt();
+    }
+};
+
+struct NiSpecularProperty : public Property
+{
+    unsigned short flags;
+    void read(NIFStream* nif) override
+    {
+        Property::read(nif);
+        flags = nif->getUShort();
+    }
+};
+
+struct NiWireframeProperty : public Property
+{
+    unsigned short flags;
+    void read(NIFStream* nif) override
+    {
+        Property::read(nif);
+        flags = nif->getUShort();
+    }
+};
 
 // The rest are all struct-based
 template <typename T>
 struct StructPropT : Property
 {
     T data;
+    unsigned short flags;
 
-    void read(NIFStream *nif)
+    void read(NIFStream *nif) override
     {
         Property::read(nif);
+        flags = nif->getUShort();
         data.read(nif);
     }
 };
@@ -132,7 +180,8 @@ struct StructPropT : Property
 struct S_MaterialProperty
 {
     // The vector components are R,G,B
-    osg::Vec3f ambient, diffuse, specular, emissive;
+    osg::Vec3f ambient{1.f,1.f,1.f}, diffuse{1.f,1.f,1.f};
+    osg::Vec3f specular, emissive;
     float glossiness, alpha;
 
     void read(NIFStream *nif);
@@ -246,9 +295,35 @@ struct S_StencilProperty
 };
 
 class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
-class NiMaterialProperty : public StructPropT<S_MaterialProperty> { };
 class NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
-class NiStencilProperty : public StructPropT<S_StencilProperty> { };
+struct NiStencilProperty : public Property
+{
+    S_StencilProperty data;
+    unsigned short flags{0u};
+
+    void read(NIFStream *nif) override
+    {
+        Property::read(nif);
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
+            flags = nif->getUShort();
+        data.read(nif);
+    }
+};
+
+struct NiMaterialProperty : public Property
+{
+    S_MaterialProperty data;
+    unsigned short flags{0u};
+
+    void read(NIFStream *nif) override
+    {
+        Property::read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3,0,0,0)
+         && nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
+            flags = nif->getUShort();
+        data.read(nif);
+    }
+};
 
 } // Namespace
 #endif

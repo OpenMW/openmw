@@ -17,13 +17,13 @@ namespace MWClass
         int mSpawnActorId;
         bool mSpawn; // Should a new creature be spawned?
 
-        virtual MWWorld::CustomData *clone() const;
+        MWWorld::CustomData *clone() const override;
 
-        virtual CreatureLevListCustomData& asCreatureLevListCustomData()
+        CreatureLevListCustomData& asCreatureLevListCustomData() override
         {
             return *this;
         }
-        virtual const CreatureLevListCustomData& asCreatureLevListCustomData() const
+        const CreatureLevListCustomData& asCreatureLevListCustomData() const override
         {
             return *this;
         }

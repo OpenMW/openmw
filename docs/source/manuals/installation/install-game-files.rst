@@ -105,6 +105,19 @@ If you are running macOS, you can also download Morrowind through Steam:
 #.	Launch the Steam client and let it download. You can then find ``Morrowind.esm`` at
 	``~/Library/Application Support/Steam/steamapps/common/The Elder Scrolls III - Morrowind/Data Files/``
 
+Linux  
+----
+Debian/Ubuntu - using "Steam Proton" & "OpenMW launcher". 
+----
+#. Install Steam from "Ubuntu Software" Center  
+#. Enable Proton (basically WINE under the hood). This is done in the Steam client menu drop down. Select, "Steam | Settings" then in the "SteamPlay" section check the box next to "enable steam play for all other titles"  
+#. Now Morrowind should be selectable in your game list (as long as you own it). You can install it like any other game, choose to install it and remember the directory path of the location you pick.
+#. Once the game files are installed, we can now install the open OpenMW Engine. I used "OpenMW launcher" from "Ubuntu Software" Center this has a wizard to help with the basic setup of OpenMW.  
+#. Launch "OpenMW launcher" and follow the setup wizard, when asked, point it at the location you installed Morrowind to, we will be looking for the directory that contains the Morrowing.esm file, for example '/steam library/steamapps/common/Morrowind/Data Files/'.
+#. Everything should now be in place, click that big "PLAY" button and fire up OpenMW.
+
+Nb. Bloodmoon.esm needs to be below Tribunal.esm in your datafiles list, if you dont have the right order a red "!" will apear next to the filename in the datafiles section of the OpenMW launcher, just drag bloodmoon below tribunal to fix it.
+
 Wine
 ----
 

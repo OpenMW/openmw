@@ -11,7 +11,7 @@
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+   <item alignment="Qt::AlignTop">
     <widget class="QTabWidget" name="DisplayTabWidget">
      <property name="currentIndex">
       <number>0</number>

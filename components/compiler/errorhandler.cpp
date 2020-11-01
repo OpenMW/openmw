@@ -5,7 +5,7 @@ namespace Compiler
     ErrorHandler::ErrorHandler()
     : mWarnings (0), mErrors (0), mWarningsMode (1), mDowngradeErrors (false) {}
 
-    ErrorHandler::~ErrorHandler() {}
+    ErrorHandler::~ErrorHandler() = default;
 
     // Was compiling successful?
 

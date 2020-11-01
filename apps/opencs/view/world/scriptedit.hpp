@@ -61,7 +61,7 @@ namespace CSVWorld
 
         protected:
 
-            bool event (QEvent *event);
+            bool event (QEvent *event) override;
 
         public:
 
@@ -79,9 +79,9 @@ namespace CSVWorld
 
         protected:
 
-            virtual void resizeEvent(QResizeEvent *e);
+            void resizeEvent(QResizeEvent *e) override;
 
-            virtual void contextMenuEvent(QContextMenuEvent *event);
+            void contextMenuEvent(QContextMenuEvent *event) override;
 
         private:
 
@@ -89,11 +89,11 @@ namespace CSVWorld
             const CSMDoc::Document& mDocument;
             const QRegExp mWhiteListQoutes;
 
-            void dragEnterEvent (QDragEnterEvent* event);
+            void dragEnterEvent (QDragEnterEvent* event) override;
 
-            void dropEvent (QDropEvent* event);
+            void dropEvent (QDropEvent* event) override;
 
-            void dragMoveEvent (QDragMoveEvent* event);
+            void dragMoveEvent (QDragMoveEvent* event) override;
 
             bool stringNeedsQuote(const std::string& id) const;
 
@@ -133,11 +133,11 @@ namespace CSVWorld
         public:
 
             LineNumberArea(ScriptEdit *editor);
-            QSize sizeHint() const;
+            QSize sizeHint() const override;
 
         protected:
 
-            void paintEvent(QPaintEvent *event);
+            void paintEvent(QPaintEvent *event) override;
     };
 }
 #endif // SCRIPTEDIT_H

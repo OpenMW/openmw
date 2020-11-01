@@ -110,8 +110,8 @@ namespace MWWorld
 
             void fireEquipmentChangedEvent(const Ptr& actor);
 
-            virtual void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const;
-            virtual void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory);
+            void storeEquipmentState (const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const override;
+            void readEquipmentState (const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory) override;
 
             ContainerStoreIterator findSlot (int slot) const;
 
@@ -123,9 +123,9 @@ namespace MWWorld
 
             InventoryStore& operator= (const InventoryStore& store);
 
-            virtual InventoryStore* clone() { return new InventoryStore(*this); }
+            InventoryStore* clone() override { return new InventoryStore(*this); }
 
-            virtual ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true);
+            ContainerStoreIterator add (const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true) override;
             ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
             /// Auto-equip items if specific conditions are fulfilled and allowAutoEquip is true (see the implementation).
             ///
@@ -162,14 +162,11 @@ namespace MWWorld
             const MWMechanics::MagicEffects& getMagicEffects() const;
             ///< Return magic effects from worn items.
 
-            virtual bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const;
+            bool stacks (const ConstPtr& ptr1, const ConstPtr& ptr2) const override;
             ///< @return true if the two specified objects can stack with each other
 
-            virtual int remove(const std::string& itemId, int count, const Ptr& actor);
-            virtual int remove(const std::string& itemId, int count, const Ptr& actor, bool equipReplacement);
-
-            virtual int remove(const Ptr& item, int count, const Ptr& actor);
-            virtual int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement);
+            using ContainerStore::remove;
+            int remove(const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true) override;
             ///< Remove \a count item(s) designated by \a item from this inventory.
             ///
             /// @return the number of items actually removed
@@ -206,15 +203,15 @@ namespace MWWorld
             void purgeEffect (short effectId, bool wholeSpell = false);
             ///< Remove a magic effect
 
-            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false);
+            void purgeEffect (short effectId, const std::string& sourceId, bool wholeSpell = false, int effectIndex=-1);
             ///< Remove a magic effect
 
-            virtual void clear();
+            void clear() override;
             ///< Empty container.
 
-            virtual void writeState (ESM::InventoryState& state) const;
+            void writeState (ESM::InventoryState& state) const override;
 
-            virtual void readState (const ESM::InventoryState& state);
+            void readState (const ESM::InventoryState& state) override;
     };
 }
 

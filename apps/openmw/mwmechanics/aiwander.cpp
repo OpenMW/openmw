@@ -27,7 +27,7 @@
 namespace MWMechanics
 {
     static const int COUNT_BEFORE_RESET = 10;
-    static const float DOOR_CHECK_INTERVAL = 1.5f;
+    static const float IDLE_POSITION_CHECK_INTERVAL = 1.5f;
 
     // to prevent overcrowding
     static const int DESTINATION_TOLERANCE = 64;
@@ -96,6 +96,7 @@ namespace MWMechanics
 
         void stopMovement(const MWWorld::Ptr& actor)
         {
+            actor.getClass().getMovementSettings(actor).mPosition[0] = 0;
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
         }
 
@@ -424,15 +425,14 @@ namespace MWMechanics
 
     void AiWander::onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
     {
-        // Check if an idle actor is  too close to a door - if so start walking
-        storage.mDoorCheckDuration += duration;
+        // Check if an idle actor is too far from all allowed nodes or too close to a door - if so start walking.
+        storage.mCheckIdlePositionTimer += duration;
 
-        if (storage.mDoorCheckDuration >= DOOR_CHECK_INTERVAL)
+        if (storage.mCheckIdlePositionTimer >= IDLE_POSITION_CHECK_INTERVAL && !isStationary())
         {
-            storage.mDoorCheckDuration = 0;    // restart timer
-            static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
-            if (mDistance &&            // actor is not intended to be stationary
-                proximityToDoor(actor, distance*1.6f))
+            storage.mCheckIdlePositionTimer = 0;    // restart timer
+            static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance() * 1.6f;
+            if (proximityToDoor(actor, distance) || !isNearAllowedNode(actor, storage, distance))
             {
                 storage.setState(AiWanderStorage::Wander_MoveNow);
                 storage.mTrimCurrentNode = false; // just in case
@@ -449,6 +449,20 @@ namespace MWMechanics
             else
                 storage.setState(AiWanderStorage::Wander_ChooseAction);
         }
+    }
+
+    bool AiWander::isNearAllowedNode(const MWWorld::Ptr& actor, const AiWanderStorage& storage, float distance) const
+    {
+        const osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
+        auto cell = actor.getCell()->getCell();
+        for (const ESM::Pathgrid::Point& node : storage.mAllowedNodes)
+        {
+            osg::Vec3f point(node.mX, node.mY, node.mZ);
+            Misc::CoordinateConverter(cell).toWorld(point);
+            if ((actorPos - point).length2() < distance * distance)
+                return true;
+        }
+        return false;
     }
 
     void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
@@ -468,6 +482,9 @@ namespace MWMechanics
 
     void AiWander::onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
+        // Wait while fully stop before starting idle animation (important if "smooth movement" is enabled).
+        if (actor.getClass().getCurrentSpeed(actor) > 0)
+            return;
 
         unsigned short idleAnimation = getRandomIdle();
         storage.mIdleAnimation = idleAnimation;
@@ -809,11 +826,11 @@ namespace MWMechanics
     void AiWander::AddNonPathGridAllowedPoints(osg::Vec3f npcPos, const ESM::Pathgrid * pathGrid, int pointIndex, AiWanderStorage& storage)
     {
         storage.mAllowedNodes.push_back(PathFinder::makePathgridPoint(npcPos));
-        for (std::vector<ESM::Pathgrid::Edge>::const_iterator it = pathGrid->mEdges.begin(); it != pathGrid->mEdges.end(); ++it)
+        for (auto& edge : pathGrid->mEdges)
         {
-            if (it->mV0 == pointIndex)
+            if (edge.mV0 == pointIndex)
             {
-                AddPointBetweenPathGridPoints(pathGrid->mPoints[it->mV0], pathGrid->mPoints[it->mV1], storage);
+                AddPointBetweenPathGridPoints(pathGrid->mPoints[edge.mV0], pathGrid->mPoints[edge.mV1], storage);
             }
         }
     }

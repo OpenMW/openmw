@@ -53,7 +53,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point mCurrentNode;
         bool mTrimCurrentNode;
 
-        float mDoorCheckDuration;
+        float mCheckIdlePositionTimer;
         int mStuckCount;
 
         AiWanderStorage():
@@ -66,7 +66,7 @@ namespace MWMechanics
             mPopulateAvailableNodes(true),
             mAllowedNodes(),
             mTrimCurrentNode(false),
-            mDoorCheckDuration(0), // TODO: maybe no longer needed
+            mCheckIdlePositionTimer(0),
             mStuckCount(0)
             {};
 
@@ -89,9 +89,9 @@ namespace MWMechanics
                 \param repeat Repeat wander or not **/
             AiWander(int distance, int duration, int timeOfDay, const std::vector<unsigned char>& idle, bool repeat);
 
-            AiWander (const ESM::AiSequence::AiWander* wander);
+            explicit AiWander (const ESM::AiSequence::AiWander* wander);
 
-            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) final;
+            bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration) override;
 
             static constexpr AiPackageTypeId getTypeId() { return AiPackageTypeId::Wander; }
 
@@ -103,19 +103,21 @@ namespace MWMechanics
                 return options;
             }
 
-            void writeState(ESM::AiSequence::AiSequence &sequence) const final;
+            void writeState(ESM::AiSequence::AiSequence &sequence) const override;
 
-            void fastForward(const MWWorld::Ptr& actor, AiState& state) final;
+            void fastForward(const MWWorld::Ptr& actor, AiState& state) override;
 
-            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const final;
+            osg::Vec3f getDestination(const MWWorld::Ptr& actor) const override;
 
-            osg::Vec3f getDestination() const final
+            osg::Vec3f getDestination() const override
             {
                 if (!mHasDestination)
                     return osg::Vec3f(0, 0, 0);
 
                 return mDestination;
             }
+
+            bool isStationary() const { return mDistance == 0; }
 
         private:
             void stopWalking(const MWWorld::Ptr& actor);
@@ -137,6 +139,7 @@ namespace MWMechanics
             void wanderNearStart(const MWWorld::Ptr &actor, AiWanderStorage &storage, int wanderDistance);
             bool destinationIsAtWater(const MWWorld::Ptr &actor, const osg::Vec3f& destination);
             void completeManualWalking(const MWWorld::Ptr &actor, AiWanderStorage &storage);
+            bool isNearAllowedNode(const MWWorld::Ptr &actor, const AiWanderStorage& storage, float distance) const;
 
             const int mDistance; // how far the actor can wander from the spawn point
             const int mDuration;

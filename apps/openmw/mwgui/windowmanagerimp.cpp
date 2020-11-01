@@ -1,6 +1,8 @@
 #include "windowmanagerimp.hpp"
 
 #include <cassert>
+#include <chrono>
+#include <thread>
 
 #include <osgViewer/Viewer>
 
@@ -272,6 +274,8 @@ namespace MWGui
         mVideoWrapper = new SDLUtil::VideoWrapper(window, viewer);
         mVideoWrapper->setGammaContrast(Settings::Manager::getFloat("gamma", "Video"),
                                         Settings::Manager::getFloat("contrast", "Video"));
+
+        mStatsWatcher.reset(new StatsWatcher());
     }
 
     void WindowManager::loadUserFonts()
@@ -466,6 +470,10 @@ namespace MWGui
 
         // Set up visibility
         updateVisible();
+
+        mStatsWatcher->addListener(mHud);
+        mStatsWatcher->addListener(mStatsWindow);
+        mStatsWatcher->addListener(mCharGen);
     }
 
     int WindowManager::getFontHeight() const
@@ -478,8 +486,11 @@ namespace MWGui
         if (newgame)
         {
             disallowAll();
+
+            mStatsWatcher->removeListener(mCharGen);
             delete mCharGen;
             mCharGen = new CharacterCreation(mViewer->getSceneData()->asGroup(), mResourceSystem);
+            mStatsWatcher->addListener(mCharGen);
         }
         else
             allow(GW_ALL);
@@ -489,6 +500,8 @@ namespace MWGui
     {
         try
         {
+            mStatsWatcher.reset();
+
             mKeyboardNavigation.reset();
 
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
@@ -559,6 +572,11 @@ namespace MWGui
             mViewer->getUpdateVisitor()->setTraversalMask(mOldUpdateMask);
             mViewer->getCamera()->setCullMask(mOldCullMask);
         }
+    }
+
+    void WindowManager::updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr)
+    {
+        mConsole->updateSelectedObjectPtr(currentPtr, newPtr);
     }
 
     void WindowManager::updateVisible()
@@ -649,56 +667,9 @@ namespace MWGui
         }
     }
 
-    void WindowManager::setValue (const std::string& id, const MWMechanics::AttributeValue& value)
-    {
-        mStatsWindow->setValue (id, value);
-        mCharGen->setValue(id, value);
-    }
-
-    void WindowManager::setValue (int parSkill, const MWMechanics::SkillValue& value)
-    {
-        /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
-        /// allow custom skills.
-        mStatsWindow->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
-        mCharGen->setValue(static_cast<ESM::Skill::SkillEnum> (parSkill), value);
-    }
-
-    void WindowManager::setValue (const std::string& id, const MWMechanics::DynamicStat<float>& value)
-    {
-        mStatsWindow->setValue (id, value);
-        mHud->setValue (id, value);
-        mCharGen->setValue(id, value);
-    }
-
-    void WindowManager::setValue (const std::string& id, const std::string& value)
-    {
-        mStatsWindow->setValue (id, value);
-    }
-
-    void WindowManager::setValue (const std::string& id, int value)
-    {
-        mStatsWindow->setValue (id, value);
-    }
-
     void WindowManager::setDrowningTimeLeft (float time, float maxTime)
     {
         mHud->setDrowningTimeLeft(time, maxTime);
-    }
-
-    void WindowManager::setPlayerClass (const ESM::Class &class_)
-    {
-        mStatsWindow->setValue("class", class_.mName);
-    }
-
-    void WindowManager::configureSkills (const SkillList& major, const SkillList& minor)
-    {
-        mStatsWindow->configureSkills (major, minor);
-        mCharGen->configureSkills(major, minor);
-    }
-
-    void WindowManager::updateSkillArea()
-    {
-        mStatsWindow->updateSkillArea();
     }
 
     void WindowManager::removeDialog(Layout*dialog)
@@ -751,7 +722,7 @@ namespace MWGui
                 MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
                 if (!mWindowVisible)
-                    OpenThreads::Thread::microSleep(5000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
                 else
                 {
                     mViewer->eventTraversal();
@@ -904,7 +875,9 @@ namespace MWGui
         if (mCharGen)
             mCharGen->onFrame(frameDuration);
 
-        updateActivatedQuickKey ();
+        updateActivatedQuickKey();
+
+        mStatsWatcher->update();
 
         cleanupGarbage();
     }
@@ -1788,7 +1761,7 @@ namespace MWGui
             if (!mWindowVisible)
             {
                 mVideoWidget->pause();
-                OpenThreads::Thread::microSleep(5000);
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
             }
             else
             {
@@ -2209,5 +2182,15 @@ namespace MWGui
     {
         for (unsigned int i=0; i<mWindows.size(); ++i)
             mWindows[i]->setVisible(visible);
+    }
+
+    void WindowManager::watchActor(const MWWorld::Ptr& ptr)
+    {
+        mStatsWatcher->watchActor(ptr);
+    }
+
+    MWWorld::Ptr WindowManager::getWatchedActor() const
+    {
+        return mStatsWatcher->getWatchedActor();
     }
 }

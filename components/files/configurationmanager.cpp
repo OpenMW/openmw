@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/escape.hpp>
+#include <components/fallback/validate.hpp>
 
 #include <boost/filesystem/fstream.hpp>
 /**
@@ -58,21 +59,94 @@ void ConfigurationManager::readConfiguration(boost::program_options::variables_m
 {
     bool silent = mSilent;
     mSilent = quiet;
+    
+    // User config has the highest priority.
+    auto composingVariables = separateComposingVariables(variables, description);
+    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
+    mergeComposingVariables(variables, composingVariables, description);
+    boost::program_options::notify(variables);
 
     // read either local or global config depending on type of installation
+    composingVariables = separateComposingVariables(variables, description);
     bool loaded = loadConfig(mFixedPath.getLocalPath(), variables, description);
+    mergeComposingVariables(variables, composingVariables, description);
     boost::program_options::notify(variables);
     if (!loaded)
     {
+        composingVariables = separateComposingVariables(variables, description);
         loadConfig(mFixedPath.getGlobalConfigPath(), variables, description);
+        mergeComposingVariables(variables, composingVariables, description);
         boost::program_options::notify(variables);
     }
 
-    // User config has the highest priority.
-    loadConfig(mFixedPath.getUserConfigPath(), variables, description);
-    boost::program_options::notify(variables);
-
     mSilent = silent;
+}
+
+boost::program_options::variables_map ConfigurationManager::separateComposingVariables(boost::program_options::variables_map & variables, boost::program_options::options_description& description)
+{
+    boost::program_options::variables_map composingVariables;
+    for (auto itr = variables.begin(); itr != variables.end();)
+    {
+        if (description.find(itr->first, false).semantic()->is_composing())
+        {
+            composingVariables.emplace(*itr);
+            itr = variables.erase(itr);
+        }
+        else
+            ++itr;
+    }
+    return composingVariables;
+}
+
+void ConfigurationManager::mergeComposingVariables(boost::program_options::variables_map & first, boost::program_options::variables_map & second, boost::program_options::options_description& description)
+{
+    for (const auto& option : description.options())
+    {
+        if (option->semantic()->is_composing())
+        {
+            std::string name = option->canonical_display_name();
+
+            auto firstPosition = first.find(name);
+            if (firstPosition == first.end())
+            {
+                first.emplace(name, second[name]);
+                continue;
+            }
+
+            if (second[name].defaulted() || second[name].empty())
+                continue;
+
+            boost::any& firstValue = firstPosition->second.value();
+            const boost::any& secondValue = second[name].value();
+            
+            if (firstValue.type() == typeid(Files::EscapePathContainer))
+            {
+                auto& firstPathContainer = boost::any_cast<Files::EscapePathContainer&>(firstValue);
+                const auto& secondPathContainer = boost::any_cast<const Files::EscapePathContainer&>(secondValue);
+
+                firstPathContainer.insert(firstPathContainer.end(), secondPathContainer.begin(), secondPathContainer.end());
+            }
+            else if (firstValue.type() == typeid(Files::EscapeStringVector))
+            {
+                auto& firstVector = boost::any_cast<Files::EscapeStringVector&>(firstValue);
+                const auto& secondVector = boost::any_cast<const Files::EscapeStringVector&>(secondValue);
+
+                firstVector.mVector.insert(firstVector.mVector.end(), secondVector.mVector.begin(), secondVector.mVector.end());
+            }
+            else if (firstValue.type() == typeid(Fallback::FallbackMap))
+            {
+                auto& firstMap = boost::any_cast<Fallback::FallbackMap&>(firstValue);
+                const auto& secondMap = boost::any_cast<const Fallback::FallbackMap&>(secondValue);
+
+                std::map<std::string, std::string> tempMap(secondMap.mMap);
+                tempMap.merge(firstMap.mMap);
+                firstMap.mMap.swap(tempMap);
+            }
+            else
+                Log(Debug::Error) << "Unexpected composing variable type. Curse boost and their blasted arcane templates.";
+        }
+    }
+
 }
 
 void ConfigurationManager::processPaths(Files::PathContainer& dataDirs, bool create)

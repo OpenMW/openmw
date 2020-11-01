@@ -83,7 +83,7 @@ namespace Compiler
 
         public:
 
-            ErrorDowngrade (ErrorHandler& handler);
+            explicit ErrorDowngrade (ErrorHandler& handler);
 
             ~ErrorDowngrade();
     };

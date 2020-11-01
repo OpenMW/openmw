@@ -10,6 +10,7 @@
 #include <components/esm/projectilestate.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/convert.hpp>
 
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -81,7 +82,7 @@ namespace
                 continue;
 
             if (magicEffect->mBolt.empty())
-                projectileIDs.push_back("VFX_DefaultBolt");
+                projectileIDs.emplace_back("VFX_DefaultBolt");
             else
                 projectileIDs.push_back(magicEffect->mBolt);
 
@@ -166,7 +167,7 @@ namespace MWWorld
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osg::PositionAttitudeTransform* transform = static_cast<osg::PositionAttitudeTransform*>(node);
 
@@ -424,7 +425,7 @@ namespace MWWorld
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::RayCastingResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool hit = false;
             if (result.mHit)
@@ -442,6 +443,7 @@ namespace MWWorld
                     cast.mSourceName = it->mSourceName;
                     cast.mStack = false;
                     cast.inflict(result.mHitObject, caster, it->mEffects, ESM::RT_Target, false, true);
+                    mPhysics->reportCollision(Misc::Convert::toBullet(result.mHitPos), Misc::Convert::toBullet(result.mHitNormal));
                 }
             }
 
@@ -500,7 +502,7 @@ namespace MWWorld
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+            MWPhysics::RayCastingResult result = mPhysics->castRay(pos, newPos, caster, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
 
             bool underwater = MWBase::Environment::get().getWorld()->isUnderwater(MWMechanics::getPlayer().getCell(), newPos);
 
@@ -522,6 +524,7 @@ namespace MWWorld
                     caster = result.mHitObject;
 
                 MWMechanics::projectileHit(caster, result.mHitObject, bow, projectileRef.getPtr(), result.mHit ? result.mHitPos : newPos, it->mAttackStrength);
+                mPhysics->reportCollision(Misc::Convert::toBullet(result.mHitPos), Misc::Convert::toBullet(result.mHitNormal));
 
                 if (underwater)
                     mRendering->emitWaterRipple(newPos);

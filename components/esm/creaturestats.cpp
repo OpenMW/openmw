@@ -115,9 +115,11 @@ void ESM::CreatureStats::load (ESMReader &esm)
         int magicEffect;
         esm.getHT(magicEffect);
         std::string source = esm.getHNOString("SOUR");
+        int effectIndex = -1;
+        esm.getHNOT (effectIndex, "EIND");
         int actorId;
         esm.getHNT (actorId, "ACID");
-        mSummonedCreatureMap[std::make_pair(magicEffect, source)] = actorId;
+        mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
     }
 
     while (esm.isNextSub("GRAV"))
@@ -212,16 +214,19 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
     mAiSequence.save(esm);
     mMagicEffects.save(esm);
 
-    for (std::map<std::pair<int, std::string>, int>::const_iterator it = mSummonedCreatureMap.begin(); it != mSummonedCreatureMap.end(); ++it)
+    for (const auto& summon : mSummonedCreatureMap)
     {
-        esm.writeHNT ("SUMM", it->first.first);
-        esm.writeHNString ("SOUR", it->first.second);
-        esm.writeHNT ("ACID", it->second);
+        esm.writeHNT ("SUMM", summon.first.mEffectId);
+        esm.writeHNString ("SOUR", summon.first.mSourceId);
+        int effectIndex = summon.first.mEffectIndex;
+        if (effectIndex != -1)
+            esm.writeHNT ("EIND", effectIndex);
+        esm.writeHNT ("ACID", summon.second);
     }
 
-    for (std::vector<int>::const_iterator it = mSummonGraveyard.begin(); it != mSummonGraveyard.end(); ++it)
+    for (int key : mSummonGraveyard)
     {
-        esm.writeHNT ("GRAV", *it);
+        esm.writeHNT ("GRAV", key);
     }
 
     esm.writeHNT("AISE", mHasAiSettings);
@@ -231,11 +236,11 @@ void ESM::CreatureStats::save (ESMWriter &esm) const
             mAiSettings[i].save(esm);
     }
 
-    for (std::map<std::string, CorprusStats>::const_iterator it = mCorprusSpells.begin(); it != mCorprusSpells.end(); ++it)
+    for (const auto& corprusSpell : mCorprusSpells)
     {
-        esm.writeHNString("CORP", it->first);
+        esm.writeHNString("CORP", corprusSpell.first);
 
-        const CorprusStats & stats = it->second;
+        const CorprusStats & stats = corprusSpell.second;
         esm.writeHNT("WORS", stats.mWorsenings);
         esm.writeHNT("TIME", stats.mNextWorsening);
     }

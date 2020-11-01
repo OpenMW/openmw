@@ -24,7 +24,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime)
+                void execute (Interpreter::Runtime& runtime) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -37,7 +37,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                void execute (Interpreter::Runtime& runtime, unsigned int arg0) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 
@@ -67,7 +67,7 @@ namespace MWScript
         {
             public:
 
-                virtual void execute (Interpreter::Runtime& runtime, unsigned int arg0)
+                void execute (Interpreter::Runtime& runtime, unsigned int arg0) override
                 {
                     MWWorld::Ptr ptr = R()(runtime);
 

@@ -21,7 +21,7 @@ namespace Terrain
 
         void add(QuadTreeNode* node);
 
-        void reset();
+        void reset() override;
 
         bool suitableToUse(const osg::Vec4i& activeGrid) const;
 

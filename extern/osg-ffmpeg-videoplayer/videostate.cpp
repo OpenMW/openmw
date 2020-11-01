@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 #include <osg/Texture2D>
 
@@ -95,14 +97,14 @@ void PacketQueue::put(AVPacket *pkt)
     this->last_pkt = pkt1;
     this->nb_packets++;
     this->size += pkt1->pkt.size;
-    this->cond.signal();
+    this->cond.notify_one();
 
     this->mutex.unlock();
 }
 
 int PacketQueue::get(AVPacket *pkt, VideoState *is)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(this->mutex);
+    std::unique_lock<std::mutex> lock(this->mutex);
     while(!is->mQuit)
     {
         AVPacketList *pkt1 = this->first_pkt;
@@ -122,7 +124,7 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
 
         if(this->flushing)
             break;
-        this->cond.wait(&this->mutex);
+        this->cond.wait(lock);
     }
 
     return -1;
@@ -131,7 +133,7 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
 void PacketQueue::flush()
 {
     this->flushing = true;
-    this->cond.signal();
+    this->cond.notify_one();
 }
 
 void PacketQueue::clear()
@@ -226,7 +228,7 @@ void VideoState::video_display(VideoPicture *vp)
 
 void VideoState::video_refresh()
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(this->pictq_mutex);
+    std::lock_guard<std::mutex> lock(this->pictq_mutex);
     if(this->pictq_size == 0)
         return;
 
@@ -238,7 +240,7 @@ void VideoState::video_refresh()
         this->pictq_rindex = (pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
         this->frame_last_pts = vp->pts;
         this->pictq_size--;
-        this->pictq_cond.signal();
+        this->pictq_cond.notify_one();
     }
     else
     {
@@ -268,7 +270,7 @@ void VideoState::video_refresh()
         // update queue for next picture
         this->pictq_size--;
         this->pictq_rindex = (this->pictq_rindex+1) % VIDEO_PICTURE_ARRAY_SIZE;
-        this->pictq_cond.signal();
+        this->pictq_cond.notify_one();
     }
 }
 
@@ -279,9 +281,9 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     /* wait until we have a new pic */
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(this->pictq_mutex);
+        std::unique_lock<std::mutex> lock(this->pictq_mutex);
         while(this->pictq_size >= VIDEO_PICTURE_QUEUE_SIZE && !this->mQuit)
-            this->pictq_cond.wait(&this->pictq_mutex, 1);
+            this->pictq_cond.wait_for(lock, std::chrono::milliseconds(1));
     }
     if(this->mQuit)
         return -1;
@@ -340,16 +342,21 @@ double VideoState::synchronize_video(AVFrame *src_frame, double pts)
     return pts;
 }
 
-class VideoThread : public OpenThreads::Thread
+class VideoThread
 {
 public:
     VideoThread(VideoState* self)
         : mVideoState(self)
+        , mThread([this] { run(); })
     {
-        start();
     }
 
-    virtual void run()
+    ~VideoThread()
+    {
+        mThread.join();
+    }
+
+    void run()
     {
         VideoState* self = mVideoState;
         AVPacket pkt1, *packet = &pkt1;
@@ -408,18 +415,24 @@ public:
 
 private:
     VideoState* mVideoState;
+    std::thread mThread;
 };
 
-class ParseThread : public OpenThreads::Thread
+class ParseThread
 {
 public:
     ParseThread(VideoState* self)
         : mVideoState(self)
+        , mThread([this] { run(); })
     {
-        start();
     }
 
-    virtual void run()
+    ~ParseThread()
+    {
+        mThread.join();
+    }
+
+    void run()
     {
         VideoState* self = mVideoState;
 
@@ -503,7 +516,7 @@ public:
                 if((self->audio_st && self->audioq.size > MAX_AUDIOQ_SIZE) ||
                    (self->video_st && self->videoq.size > MAX_VIDEOQ_SIZE))
                 {
-                    OpenThreads::Thread::microSleep(10 * 1000);
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
                     continue;
                 }
 
@@ -534,6 +547,7 @@ public:
 
 private:
     VideoState* mVideoState;
+    std::thread mThread;
 };
 
 
@@ -712,12 +726,10 @@ void VideoState::deinit()
 
     if (this->parse_thread.get())
     {
-        this->parse_thread->join();
         this->parse_thread.reset();
     }
     if (this->video_thread.get())
     {
-        this->video_thread->join();
         this->video_thread.reset();
     }
 
@@ -816,7 +828,7 @@ ExternalClock::ExternalClock()
 
 void ExternalClock::setPaused(bool paused)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     if (mPaused == paused)
         return;
     if (paused)
@@ -830,7 +842,7 @@ void ExternalClock::setPaused(bool paused)
 
 uint64_t ExternalClock::get()
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     if (mPaused)
         return mPausedAt;
     else
@@ -839,7 +851,7 @@ uint64_t ExternalClock::get()
 
 void ExternalClock::set(uint64_t time)
 {
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+    std::lock_guard<std::mutex> lock(mMutex);
     mTimeBase = av_gettime() - time;
     mPausedAt = time;
 }

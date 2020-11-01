@@ -19,13 +19,13 @@ namespace CSMPrefs
             ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
                 const std::string& label);
 
-            virtual std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent);
+            std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 
-            virtual void updateWidget();
+            void updateWidget() override;
 
         protected:
 
-            bool eventFilter(QObject* target, QEvent* event);
+            bool eventFilter(QObject* target, QEvent* event) override;
 
         private:
 

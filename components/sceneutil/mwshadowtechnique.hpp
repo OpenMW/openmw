@@ -19,6 +19,9 @@
 #ifndef COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H
 #define COMPONENTS_SCENEUTIL_MWSHADOWTECHNIQUE_H 1
 
+#include <array>
+#include <mutex>
+
 #include <osg/Camera>
 #include <osg/Material>
 #include <osg/MatrixTransform>
@@ -43,24 +46,24 @@ namespace SceneUtil {
         META_Object(SceneUtil, MWShadowTechnique);
 
         /** initialize the ShadowedScene and local cached data structures.*/
-        virtual void init();
+        void init() override;
 
         /** run the update traversal of the ShadowedScene and update any loca chached data structures.*/
-        virtual void update(osg::NodeVisitor& nv);
+        void update(osg::NodeVisitor& nv) override;
 
         /** run the cull traversal of the ShadowedScene and set up the rendering for this ShadowTechnique.*/
-        virtual void cull(osgUtil::CullVisitor& cv);
+        void cull(osgUtil::CullVisitor& cv) override;
 
         /** Resize any per context GLObject buffers to specified size. */
-        virtual void resizeGLObjectBuffers(unsigned int maxSize);
+        void resizeGLObjectBuffers(unsigned int maxSize) override;
 
         /** If State is non-zero, this function releases any associated OpenGL objects for
         * the specified graphics context. Otherwise, releases OpenGL objects
         * for all graphics contexts. */
-        virtual void releaseGLObjects(osg::State* = 0) const;
+        void releaseGLObjects(osg::State* = 0) const override;
 
         /** Clean scene graph from any shadow technique specific nodes, state and drawables.*/
-        virtual void cleanSceneGraph();
+        void cleanSceneGraph() override;
 
         virtual void enableShadows();
 
@@ -89,19 +92,19 @@ namespace SceneUtil {
         public:
             ComputeLightSpaceBounds(osg::Viewport* viewport, const osg::Matrixd& projectionMatrix, osg::Matrixd& viewMatrix);
 
-            void apply(osg::Node& node);
+            void apply(osg::Node& node) override;
 
-            void apply(osg::Drawable& drawable);
+            void apply(osg::Drawable& drawable) override;
 
             void apply(Terrain::QuadTreeWorld& quadTreeWorld);
 
-            void apply(osg::Billboard&);
+            void apply(osg::Billboard&) override;
 
-            void apply(osg::Projection&);
+            void apply(osg::Projection&) override;
 
-            void apply(osg::Transform& transform);
+            void apply(osg::Transform& transform) override;
 
-            void apply(osg::Camera&);
+            void apply(osg::Camera&) override;
 
             using osg::NodeVisitor::apply;
 
@@ -189,7 +192,7 @@ namespace SceneUtil {
 
             ShadowDataList& getShadowDataList() { return _shadowDataList; }
 
-            osg::StateSet* getStateSet() { return _stateset.get(); }
+            osg::StateSet* getStateSet(unsigned int traversalNumber) { return _stateset[traversalNumber % 2].get(); }
 
             virtual void releaseGLObjects(osg::State* = 0) const;
 
@@ -198,7 +201,7 @@ namespace SceneUtil {
 
             MWShadowTechnique*          _viewDependentShadowMap;
 
-            osg::ref_ptr<osg::StateSet> _stateset;
+            std::array<osg::ref_ptr<osg::StateSet>, 2> _stateset;
 
             LightDataList               _lightDataList;
             ShadowDataList              _shadowDataList;
@@ -228,13 +231,13 @@ namespace SceneUtil {
 
         virtual void cullShadowCastingScene(osgUtil::CullVisitor* cv, osg::Camera* camera) const;
 
-        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd) const;
+        virtual osg::StateSet* selectStateSetForRenderingShadow(ViewDependentData& vdd, unsigned int traversalNumber) const;
 
     protected:
         virtual ~MWShadowTechnique();
 
         typedef std::map< osgUtil::CullVisitor*, osg::ref_ptr<ViewDependentData> >  ViewDependentDataMap;
-        mutable OpenThreads::Mutex              _viewDependentDataMapMutex;
+        mutable std::mutex                      _viewDependentDataMapMutex;
         ViewDependentDataMap                    _viewDependentDataMap;
 
         osg::ref_ptr<osg::StateSet>             _shadowRecievingPlaceholderStateSet;
@@ -245,8 +248,7 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Texture2D>            _fallbackShadowMapTexture;
 
         typedef std::vector< osg::ref_ptr<osg::Uniform> > Uniforms;
-        mutable OpenThreads::Mutex              _accessUniformsAndProgramMutex;
-        Uniforms                                _uniforms;
+        std::array<Uniforms, 2>                 _uniforms;
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
@@ -280,8 +282,8 @@ namespace SceneUtil {
             osg::ref_ptr<osg::Program> mDebugProgram;
             std::vector<osg::ref_ptr<osg::Node>> mDebugGeometry;
             std::vector<osg::ref_ptr<osg::Group>> mFrustumTransforms;
-            std::vector<osg::ref_ptr<osg::Uniform>> mFrustumUniforms;
-            std::vector<osg::ref_ptr<osg::Geometry>> mFrustumGeometries;
+            std::array<std::vector<osg::ref_ptr<osg::Uniform>>, 2> mFrustumUniforms;
+            std::array<osg::ref_ptr<osg::Geometry>, 2> mFrustumGeometries;
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;

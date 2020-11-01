@@ -102,7 +102,7 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index)
+        void load(const boost::filesystem::path& filepath, int& index) override
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
@@ -144,7 +144,7 @@ namespace MWWorld
         const std::string& resourcePath, const std::string& userDataPath)
     : mResourceSystem(resourceSystem), mLocalScripts (mStore),
       mCells (mStore, mEsm), mSky (true),
-      mGodMode(false), mScriptsEnabled(true), mContentFiles (contentFiles),
+      mGodMode(false), mScriptsEnabled(true), mDiscardMovements(true), mContentFiles (contentFiles),
       mUserDataPath(userDataPath), mShouldUpdateNavigator(false),
       mActivationDistanceOverride (activationDistanceOverride),
       mStartCell(startCell), mDistanceToFacedObject(-1.f), mTeleportEnabled(true),
@@ -225,7 +225,7 @@ namespace MWWorld
         setupPlayer();
 
         renderPlayer();
-        mRendering->resetCamera();
+        mRendering->getCamera()->reset();
 
         // we don't want old weather to persist on a new game
         // Note that if reset later, the initial ChangeWeather that the chargen script calls will be lost.
@@ -932,6 +932,7 @@ namespace MWWorld
     void World::changeToInteriorCell (const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
+        mDiscardMovements = true;
 
         if (changeEvent && mCurrentWorldSpace != cellName)
         {
@@ -945,11 +946,13 @@ namespace MWWorld
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToInteriorCell(cellName, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
+        mRendering->getCamera()->instantTransition();
     }
 
     void World::changeToExteriorCell (const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
+        mDiscardMovements = true;
 
         if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
         {
@@ -960,6 +963,7 @@ namespace MWWorld
         removeContainerScripts(getPlayerPtr());
         mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
+        mRendering->getCamera()->instantTransition();
     }
 
     void World::changeToCell (const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
@@ -1185,7 +1189,6 @@ namespace MWWorld
                     mRendering->updatePtr(ptr, newPtr);
                     MWBase::Environment::get().getSoundManager()->updatePtr (ptr, newPtr);
                     mPhysics->updatePtr(ptr, newPtr);
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
 
                     MWBase::MechanicsManager *mechMgr = MWBase::Environment::get().getMechanicsManager();
                     mechMgr->updateCell(ptr, newPtr);
@@ -1201,6 +1204,9 @@ namespace MWWorld
                     }
                 }
             }
+
+            MWBase::Environment::get().getWindowManager()->updateConsoleObjectPtr(ptr, newPtr);
+            MWBase::Environment::get().getScriptManager()->getGlobalScripts().updatePtrs(ptr, newPtr);
         }
         if (haveToMove && newPtr.getRefData().getBaseNode())
         {
@@ -1390,6 +1396,9 @@ namespace MWWorld
     {
         if(ptr.getRefData().getBaseNode() != 0)
         {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+
             mRendering->rotateObject(ptr, rotate);
             mPhysics->updateRotation(ptr);
 
@@ -1487,24 +1496,23 @@ namespace MWWorld
 
     void World::doPhysics(float duration)
     {
-        mPhysics->stepSimulation(duration);
+        mPhysics->stepSimulation();
         processDoors(duration);
 
         mProjectileManager->update(duration);
 
-        const MWPhysics::PtrVelocityList &results = mPhysics->applyQueuedMovement(duration);
-        MWPhysics::PtrVelocityList::const_iterator player(results.end());
-        for(MWPhysics::PtrVelocityList::const_iterator iter(results.begin());iter != results.end();++iter)
+        const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements);
+        mDiscardMovements = false;
+
+        for(const auto& result : results)
         {
-            if(iter->first == getPlayerPtr())
-            {
-                // Handle player last, in case a cell transition occurs
-                player = iter;
-                continue;
-            }
-            moveObjectImp(iter->first, iter->second.x(), iter->second.y(), iter->second.z(), false);
+            // Handle player last, in case a cell transition occurs
+            if(result.first != getPlayerPtr())
+                moveObjectImp(result.first, result.second.x(), result.second.y(), result.second.z(), false);
         }
-        if(player != results.end())
+
+        const auto player = results.find(getPlayerPtr());
+        if (player != results.end())
             moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
     }
 
@@ -1532,7 +1540,12 @@ namespace MWWorld
             *object->getShapeInstance()->getCollisionShape(),
             object->getShapeInstance()->getAvoidCollisionShape()
         };
-        return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getCollisionObject()->getWorldTransform());
+        return mNavigator->updateObject(DetourNavigator::ObjectId(object), shapes, object->getTransform());
+    }
+
+    const MWPhysics::RayCastingInterface* World::getRayCasting() const
+    {
+        return mPhysics.get();
     }
 
     bool World::castRay (float x1, float y1, float z1, float x2, float y2, float z2)
@@ -1547,7 +1560,7 @@ namespace MWWorld
         osg::Vec3f a(x1,y1,z1);
         osg::Vec3f b(x2,y2,z2);
 
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(a, b, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), mask);
         return result.mHit;
     }
 
@@ -1722,6 +1735,11 @@ namespace MWWorld
         return mStore.overrideRecord(record);
     }
 
+    const ESM::Container *World::createOverrideRecord(const ESM::Container &record)
+    {
+        return mStore.overrideRecord(record);
+    }
+
     const ESM::NPC *World::createRecord(const ESM::NPC &record)
     {
         bool update = false;
@@ -1851,42 +1869,14 @@ namespace MWWorld
         else
             mRendering->getCamera()->setSneakOffset(0.f);
 
-        int blind = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude());
+        int blind = 0;
+        auto& magicEffects = player.getClass().getCreatureStats(player).getMagicEffects();
+        if (!mGodMode)
+            blind = static_cast<int>(magicEffects.get(ESM::MagicEffect::Blind).getMagnitude());
         MWBase::Environment::get().getWindowManager()->setBlindness(std::max(0, std::min(100, blind)));
 
-        int nightEye = static_cast<int>(player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye).getMagnitude());
+        int nightEye = static_cast<int>(magicEffects.get(ESM::MagicEffect::NightEye).getMagnitude());
         mRendering->setNightEyeFactor(std::min(1.f, (nightEye/100.f)));
-
-        auto* camera = mRendering->getCamera();
-        camera->setCameraDistance();
-        if(!mRendering->getCamera()->isFirstPerson())
-        {
-            float cameraObstacleLimit = mRendering->getNearClipDistance() * 2.5f;
-            float focalObstacleLimit = std::max(cameraObstacleLimit, 10.0f);
-
-            // Adjust focal point.
-            osg::Vec3d focal = camera->getFocalPoint();
-            osg::Vec3d focalOffset = camera->getFocalPointOffset();
-            float offsetLen = focalOffset.length();
-            if (offsetLen > 0)
-            {
-                MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal - focalOffset, focal, focalObstacleLimit);
-                if (result.mHit)
-                {
-                    double adjustmentCoef = -(result.mHitPos + result.mHitNormal * focalObstacleLimit - focal).length() / offsetLen;
-                    if (adjustmentCoef < -1)
-                        adjustmentCoef = -1;
-                    camera->adjustFocalPoint(focalOffset * adjustmentCoef);
-                }
-            }
-
-            // Adjust camera position.
-            osg::Vec3d cameraPos;
-            camera->getPosition(focal, cameraPos);
-            MWPhysics::PhysicsSystem::RayResult result = mPhysics->castSphere(focal, cameraPos, cameraObstacleLimit);
-            if (result.mHit)
-                mRendering->getCamera()->setCameraDistance((result.mHitPos + result.mHitNormal * cameraObstacleLimit - focal).length(), false);
-        }
     }
 
     void World::preloadSpells()
@@ -1904,7 +1894,7 @@ namespace MWWorld
             std::string enchantId = selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem);
             if (!enchantId.empty())
             {
-                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(selectedEnchantItem.getClass().getEnchantment(selectedEnchantItem));
+                const ESM::Enchantment* ench = mStore.get<ESM::Enchantment>().search(enchantId);
                 if (ench)
                     preloadEffects(&ench->mEffects);
             }
@@ -1977,7 +1967,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::getFacedObject(float maxDistance, bool ignorePlayer)
     {
-        const float camDist = mRendering->getCameraDistance();
+        const float camDist = mRendering->getCamera()->getCameraDistance();
         maxDistance += camDist;
         MWWorld::Ptr facedObject;
         MWRender::RenderingManager::RayResult rayToObject;
@@ -2197,6 +2187,8 @@ namespace MWWorld
 
     Ptr World::copyObjectToCell(const ConstPtr &object, CellStore* cell, ESM::Position pos, int count, bool adjustPos)
     {
+        if (!cell)
+            throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
             int cellX, cellY;
@@ -2380,42 +2372,56 @@ namespace MWWorld
 
     void World::togglePOV(bool force)
     {
-        mRendering->togglePOV(force);
+        mRendering->getCamera()->toggleViewMode(force);
     }
 
     bool World::isFirstPerson() const
     {
         return mRendering->getCamera()->isFirstPerson();
     }
+    
+    bool World::isPreviewModeEnabled() const
+    {
+        return mRendering->getCamera()->getMode() == MWRender::Camera::Mode::Preview;
+    }
 
     void World::togglePreviewMode(bool enable)
     {
-        mRendering->togglePreviewMode(enable);
+        mRendering->getCamera()->togglePreviewMode(enable);
     }
 
     bool World::toggleVanityMode(bool enable)
     {
-        return mRendering->toggleVanityMode(enable);
+        return mRendering->getCamera()->toggleVanityMode(enable);
+    }
+
+    void World::disableDeferredPreviewRotation()
+    {
+        mRendering->getCamera()->disableDeferredPreviewRotation();
+    }
+
+    void World::applyDeferredPreviewRotationToPlayer(float dt)
+    {
+        mRendering->getCamera()->applyDeferredPreviewRotationToPlayer(dt);
     }
 
     void World::allowVanityMode(bool allow)
     {
-        mRendering->allowVanityMode(allow);
-    }
-
-    void World::changeVanityModeScale(float factor)
-    {
-        mRendering->changeVanityModeScale(factor);
+        mRendering->getCamera()->allowVanityMode(allow);
     }
 
     bool World::vanityRotateCamera(float * rot)
     {
-        return mRendering->vanityRotateCamera(rot);
+        if(!mRendering->getCamera()->isVanityOrPreviewModeEnabled())
+            return false;
+
+        mRendering->getCamera()->rotateCamera(rot[0], rot[2], true);
+        return true;
     }
 
-    void World::setCameraDistance(float dist, bool adjust, bool override_)
+    void World::adjustCameraDistance(float dist)
     {
-        mRendering->setCameraDistance(dist, adjust, override_);
+        mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
     void World::setupPlayer()
@@ -2453,7 +2459,7 @@ namespace MWWorld
         rotateObject(player, 0.f, 0.f, 0.f, MWBase::RotationFlag_inverseOrder | MWBase::RotationFlag_adjust);
 
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
-        MWBase::Environment::get().getMechanicsManager()->watchActor(getPlayerPtr());
+        MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
         std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
         model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
@@ -2738,7 +2744,7 @@ namespace MWWorld
         if (includeWater) {
             collisionTypes |= MWPhysics::CollisionType_Water;
         }
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(from, to, MWWorld::Ptr(), std::vector<MWWorld::Ptr>(), collisionTypes);
 
         if (!result.mHit)
             return maxDist;
@@ -3101,7 +3107,7 @@ namespace MWWorld
             actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targetActors);
 
         // Check for impact, if yes, handle hit, if not, launch projectile
-        MWPhysics::PhysicsSystem::RayResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
+        MWPhysics::RayCastingResult result = mPhysics->castRay(sourcePos, worldPos, actor, targetActors, 0xff, MWPhysics::CollisionType_Projectile);
         if (result.mHit)
             MWMechanics::projectileHit(actor, result.mHitObject, bow, projectile, result.mHitPos, attackStrength);
         else
@@ -3124,9 +3130,9 @@ namespace MWWorld
         {
         }
 
-        virtual void visit (MWMechanics::EffectKey key,
+        void visit (MWMechanics::EffectKey key, int /*effectIndex*/,
                             const std::string& /*sourceName*/, const std::string& /*sourceId*/, int /*casterActorId*/,
-                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1)
+                            float /*magnitude*/, float /*remainingTime*/ = -1, float /*totalTime*/ = -1) override
         {
             const ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
             const auto magicEffect = store.get<ESM::MagicEffect>().find(key.mId);
@@ -3611,8 +3617,11 @@ namespace MWWorld
     std::string World::exportSceneGraph(const Ptr &ptr)
     {
         std::string file = mUserDataPath + "/openmw.osgt";
-        mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
-        mWorldScene->removeFromPagedRefs(ptr);
+        if (!ptr.isEmpty())
+        {
+            mRendering->pagingBlacklistObject(mStore.find(ptr.getCellRef().getRefId()), ptr);
+            mWorldScene->removeFromPagedRefs(ptr);
+        }
         mRendering->exportSceneGraph(ptr, file, "Ascii");
         return file;
     }
@@ -3881,7 +3890,7 @@ namespace MWWorld
         btVector3 aabbMax;
         object->getShapeInstance()->getCollisionShape()->getAabb(btTransform::getIdentity(), aabbMin, aabbMax);
 
-        const auto toLocal = object->getCollisionObject()->getWorldTransform().inverse();
+        const auto toLocal = object->getTransform().inverse();
         const auto localFrom = toLocal(Misc::Convert::toBullet(position));
         const auto localTo = toLocal(Misc::Convert::toBullet(destination));
 
@@ -3905,5 +3914,10 @@ namespace MWWorld
     {
         ESM::EpochTimeStamp currentDate = mCurrentDate->getEpochTimeStamp();
         mRendering->skySetDate(currentDate.mDay, currentDate.mMonth);
+    }
+
+    std::vector<MWWorld::Ptr> World::getAll(const std::string& id)
+    {
+        return mCells.getAll(id);
     }
 }

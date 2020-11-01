@@ -23,7 +23,7 @@ namespace Resource
         /// @note Throws an exception if the resource is not found.
         osg::ref_ptr<const NifOsg::KeyframeHolder> get(const std::string& name);
 
-        void reportStats(unsigned int frameNumber, osg::Stats* stats) const;
+        void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
     };
 
 }

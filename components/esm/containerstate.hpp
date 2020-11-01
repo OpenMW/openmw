@@ -12,14 +12,14 @@ namespace ESM
     {
         InventoryState mInventory;
 
-        void load (ESMReader &esm) final;
-        void save (ESMWriter &esm, bool inInventory = false) const final;
+        void load (ESMReader &esm) override;
+        void save (ESMWriter &esm, bool inInventory = false) const override;
 
-        ContainerState& asContainerState() final
+        ContainerState& asContainerState() override
         {
             return *this;
         }
-        const ContainerState& asContainerState() const final
+        const ContainerState& asContainerState() const override
         {
             return *this;
         }

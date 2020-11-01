@@ -59,38 +59,38 @@ namespace CSVRender
             /// Editmode for terrain shape grid
             TerrainShapeMode(WorldspaceWidget*, osg::Group* parentNode, QWidget* parent = nullptr);
 
-            void primaryOpenPressed (const WorldspaceHitResult& hit) final;
+            void primaryOpenPressed (const WorldspaceHitResult& hit) override;
 
             /// Create single command for one-click shape editing
-            void primaryEditPressed (const WorldspaceHitResult& hit) final;
+            void primaryEditPressed (const WorldspaceHitResult& hit) override;
 
             /// Open brush settings window
-            void primarySelectPressed(const WorldspaceHitResult&) final;
+            void primarySelectPressed(const WorldspaceHitResult&) override;
 
-            void secondarySelectPressed(const WorldspaceHitResult&) final;
+            void secondarySelectPressed(const WorldspaceHitResult&) override;
 
-            void activate(CSVWidget::SceneToolbar*) final;
-            void deactivate(CSVWidget::SceneToolbar*) final;
+            void activate(CSVWidget::SceneToolbar*) override;
+            void deactivate(CSVWidget::SceneToolbar*) override;
 
             /// Start shape editing command macro
-            bool primaryEditStartDrag (const QPoint& pos) final;
+            bool primaryEditStartDrag (const QPoint& pos) override;
 
-            bool secondaryEditStartDrag (const QPoint& pos) final;
-            bool primarySelectStartDrag (const QPoint& pos) final;
-            bool secondarySelectStartDrag (const QPoint& pos) final;
+            bool secondaryEditStartDrag (const QPoint& pos) override;
+            bool primarySelectStartDrag (const QPoint& pos) override;
+            bool secondarySelectStartDrag (const QPoint& pos) override;
 
             /// Handle shape edit behavior during dragging
-            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) final;
+            void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 
             /// End shape editing command macro
-            void dragCompleted(const QPoint& pos) final;
+            void dragCompleted(const QPoint& pos) override;
 
             /// Cancel shape editing, and reset all pending changes
-            void dragAborted() final;
+            void dragAborted() override;
 
-            void dragWheel (int diff, double speedFactor) final;
-            void dragMoveEvent (QDragMoveEvent *event) final;
-            void mouseMoveEvent (QMouseEvent *event) final;
+            void dragWheel (int diff, double speedFactor) override;
+            void dragMoveEvent (QDragMoveEvent *event) override;
+            void mouseMoveEvent (QMouseEvent *event) override;
 
         private:
 

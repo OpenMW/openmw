@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include <components/misc/mathutil.hpp>
 #include <components/misc/rng.hpp>
 
 #include <components/settings/settings.hpp>
@@ -50,15 +51,6 @@
 
 namespace
 {
-
-// Wraps a value to (-PI, PI]
-void wrap(float& rad)
-{
-    if (rad>0)
-        rad = std::fmod(rad+osg::PI, 2.0f*osg::PI)-osg::PI;
-    else
-        rad = std::fmod(rad-osg::PI, 2.0f*osg::PI)+osg::PI;
-}
 
 std::string getBestAttack (const ESM::Weapon* weapon)
 {
@@ -278,6 +270,7 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
             mCurrentHit = "shield";
             MWRender::Animation::AnimPriority priorityBlock (Priority_Hit);
             priorityBlock[MWRender::Animation::BoneGroup_LeftArm] = Priority_Block;
+            priorityBlock[MWRender::Animation::BoneGroup_LowerBody] = Priority_WeaponLowerBody;
             mAnimation->play(mCurrentHit, priorityBlock, MWRender::Animation::BlendMask_All, true, 1, "block start", "block stop", 0.0f, 0);
         }
 
@@ -297,6 +290,8 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
                 mUpperBodyState = UpperCharState_Nothing;
             }
         }
+        if (mHitState != CharState_None)
+            idle = CharState_None;
     }
     else if(!mAnimation->isPlaying(mCurrentHit))
     {
@@ -316,8 +311,6 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
         mAnimation->disable(mCurrentHit);
         mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "loop stop", "stop", 0.0f, 0);
     }
-    if (mHitState != CharState_None)
-        idle = CharState_None;
 }
 
 void CharacterController::refreshJumpAnims(const std::string& weapShortGroup, JumpingState jump, CharacterState& idle, bool force)
@@ -853,6 +846,7 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
     , mAttackingOrSpell(false)
     , mCastingManualSpell(false)
     , mTimeUntilWake(0.f)
+    , mIsMovingBackward(false)
 {
     if(!mAnimation)
         return;
@@ -1312,6 +1306,8 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                 mAnimation->play(weapgroup, priorityWeapon, unequipMask, false,
                                 1.0f, "unequip start", "unequip stop", 0.0f, 0);
                 mUpperBodyState = UpperCharState_UnEquipingWeap;
+
+                mAnimation->detachArrow();
 
                 // If we do not have the "unequip detach" key, hide weapon manually.
                 if (mAnimation->getTextKeyTime(weapgroup+": unequip detach") < 0)
@@ -1795,7 +1791,9 @@ bool CharacterController::updateWeaponState(CharacterState& idle)
                         mUpperBodyState = UpperCharState_MinAttackToMaxAttack;
                         break;
                     }
-                    playSwishSound(0.0f);
+
+                    if(weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+                        playSwishSound(0.0f);
                 }
 
                 if(mAttackType == "shoot")
@@ -1913,6 +1911,7 @@ void CharacterController::update(float duration, bool animationOnly)
         mTimeUntilWake -= duration;
 
     bool isPlayer = mPtr == MWMechanics::getPlayer();
+    bool isFirstPersonPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
     bool godmode = isPlayer && MWBase::Environment::get().getWorld()->getGodModeState();
 
     float scale = mPtr.getCellRef().getScale();
@@ -1931,7 +1930,7 @@ void CharacterController::update(float duration, bool animationOnly)
     else if(!cls.getCreatureStats(mPtr).isDead())
     {
         bool onground = world->isOnGround(mPtr);
-        bool incapacitated = (cls.getCreatureStats(mPtr).isParalyzed() || cls.getCreatureStats(mPtr).getKnockedDown());
+        bool incapacitated = ((!godmode && cls.getCreatureStats(mPtr).isParalyzed()) || cls.getCreatureStats(mPtr).getKnockedDown());
         bool inwater = world->isSwimming(mPtr);
         bool flying = world->isFlying(mPtr);
         bool solid = world->isActorCollisionEnabled(mPtr);
@@ -1956,28 +1955,66 @@ void CharacterController::update(float duration, bool animationOnly)
 
         osg::Vec3f rot = cls.getRotationVector(mPtr);
         osg::Vec3f vec(movementSettings.asVec3());
+        movementSettings.mSpeedFactor = std::min(vec.length(), 1.f);
         vec.normalize();
 
-        float analogueMult = 1.0f;
-        if (isPlayer)
+        // TODO: Move this check to mwinput.
+        // Joystick analogue movement.
+        // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
+        if (isPlayer && !isrunning && !sneak && !flying && movementSettings.mSpeedFactor <= 0.5f)
+            movementSettings.mSpeedFactor *= 2.f;
+
+        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+        if (smoothMovement && !isFirstPersonPlayer)
         {
-            // TODO: Move this code to mwinput.
-            // Joystick analogue movement.
-            float xAxis = std::abs(movementSettings.mPosition[0]);
-            float yAxis = std::abs(movementSettings.mPosition[1]);
-            analogueMult = std::max(xAxis, yAxis);
+            static const float playerTurningCoef = 1.0 / std::max(0.01f, Settings::Manager::getFloat("smooth movement player turning delay", "Game"));
+            float angle = mPtr.getRefData().getPosition().rot[2];
+            osg::Vec2f targetSpeed = Misc::rotateVec2f(osg::Vec2f(vec.x(), vec.y()), -angle) * movementSettings.mSpeedFactor;
+            osg::Vec2f delta = targetSpeed - mSmoothedSpeed;
+            float speedDelta = movementSettings.mSpeedFactor - mSmoothedSpeed.length();
+            float deltaLen = delta.length();
 
-            // Due to the half way split between walking/running, we multiply speed by 2 while walking, unless a keyboard was used.
-            if(!isrunning && !sneak && !flying && analogueMult <= 0.5f)
-                analogueMult *= 2.f;
+            float maxDelta;
+            if (std::abs(speedDelta) < deltaLen / 2)
+                // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
+                maxDelta = duration * (isPlayer ? playerTurningCoef : 6.f);
+            else if (isPlayer && speedDelta < -deltaLen / 2)
+                // As soon as controls are released, mwinput switches player from running to walking.
+                // So stopping should be instant for player, otherwise it causes a small twitch.
+                maxDelta = 1;
+            else // In all other cases speeding up and stopping are smooth.
+                maxDelta = duration * 3.f;
 
-            movementSettings.mSpeedFactor = analogueMult;
+            if (deltaLen > maxDelta)
+                delta *= maxDelta / deltaLen;
+            mSmoothedSpeed += delta;
+
+            osg::Vec2f newSpeed = Misc::rotateVec2f(mSmoothedSpeed, angle);
+            movementSettings.mSpeedFactor = newSpeed.normalize();
+            vec.x() = newSpeed.x();
+            vec.y() = newSpeed.y();
+
+            const float eps = 0.001f;
+            if (movementSettings.mSpeedFactor < eps)
+            {
+                movementSettings.mSpeedFactor = 0;
+                vec.x() = 0;
+                vec.y() = 1;
+            }
+            else if ((vec.y() < 0) != mIsMovingBackward)
+            {
+                if (targetSpeed.length() < eps || (movementSettings.mPosition[1] < 0) == mIsMovingBackward)
+                    vec.y() = mIsMovingBackward ? -eps : eps;
+            }
+            vec.normalize();
         }
 
         float effectiveRotation = rot.z();
+        bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
-        static const float turnToMovementDirectionSpeedCoef = Settings::Manager::getFloat("turn to movement direction speed coef", "Game");
-        if (turnToMovementDirection && !(isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson()))
+        if (!turnToMovementDirection || isFirstPersonPlayer)
+            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
+        else if (canMove)
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
             movementSettings.mIsStrafing = (stats.getDrawState() != MWMechanics::DrawState_Nothing || inwater)
@@ -1986,23 +2023,27 @@ void CharacterController::update(float duration, bool animationOnly)
                 targetMovementAngle = 0;
             float delta = targetMovementAngle - stats.getSideMovementAngle();
             float cosDelta = cosf(delta);
-            movementSettings.mSpeedFactor *= std::min(std::max(cosDelta, 0.f) + 0.3f, 1.f); // slow down when turn
-            float maxDelta = turnToMovementDirectionSpeedCoef * osg::PI * duration * (2.5f - cosDelta);
-            delta = std::min(delta, maxDelta);
-            delta = std::max(delta, -maxDelta);
+
+            if ((vec.y() < 0) == mIsMovingBackward)
+                movementSettings.mSpeedFactor *= std::min(std::max(cosDelta, 0.f) + 0.3f, 1.f); // slow down when turn
+            if (std::abs(delta) < osg::DegreesToRadians(20.0f))
+                mIsMovingBackward = vec.y() < 0;
+
+            float maxDelta = osg::PI * duration * (2.5f - cosDelta);
+            delta = osg::clampBetween(delta, -maxDelta, maxDelta);
             stats.setSideMovementAngle(stats.getSideMovementAngle() + delta);
             effectiveRotation += delta;
         }
-        else
-            movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
 
         mAnimation->setLegsYawRadians(stats.getSideMovementAngle());
         if (stats.getDrawState() == MWMechanics::DrawState_Nothing || inwater)
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 2);
         else
             mAnimation->setUpperBodyYawRadians(stats.getSideMovementAngle() / 4);
+        if (smoothMovement && !isPlayer && !inwater)
+            mAnimation->setUpperBodyYawRadians(mAnimation->getUpperBodyYawRadians() + mAnimation->getHeadYaw() / 2);
 
-        speed = cls.getSpeed(mPtr);
+        speed = cls.getCurrentSpeed(mPtr);
         vec.x() *= speed;
         vec.y() *= speed;
 
@@ -2072,7 +2113,7 @@ void CharacterController::update(float duration, bool animationOnly)
             }
         }
         fatigueLoss *= duration;
-        fatigueLoss *= analogueMult;
+        fatigueLoss *= movementSettings.mSpeedFactor;
         DynamicStat<float> fatigue = cls.getCreatureStats(mPtr).getFatigue();
 
         if (!godmode)
@@ -2192,18 +2233,15 @@ void CharacterController::update(float duration, bool animationOnly)
                                          : (sneak ? CharState_SneakBack
                                                   : (isrunning ? CharState_RunBack : CharState_WalkBack)));
             }
-            else if (effectiveRotation != 0.0f)
+            else
             {
                 // Do not play turning animation for player if rotation speed is very slow.
                 // Actual threshold should take framerate in account.
-                float rotationThreshold = 0.f;
-                if (isPlayer)
-                    rotationThreshold = 0.015 * 60 * duration;
+                float rotationThreshold = (isPlayer ? 0.015f : 0.001f) * 60 * duration;
 
                 // It seems only bipedal actors use turning animations.
                 // Also do not use turning animations in the first-person view and when sneaking.
-                bool isFirstPlayer = isPlayer && MWBase::Environment::get().getWorld()->isFirstPerson();
-                if (!sneak && jumpstate == JumpState_None && !isFirstPlayer && mPtr.getClass().isBipedal(mPtr))
+                if (!sneak && jumpstate == JumpState_None && !isFirstPersonPlayer && mPtr.getClass().isBipedal(mPtr))
                 {
                     if(effectiveRotation > rotationThreshold)
                         movestate = inwater ? CharState_SwimTurnRight : CharState_TurnRight;
@@ -2225,6 +2263,27 @@ void CharacterController::update(float duration, bool animationOnly)
 
             if (!sound.empty())
                 sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+        }
+
+        if (turnToMovementDirection)
+        {
+            float targetSwimmingPitch;
+            if (inwater && vec.y() != 0 && !isFirstPersonPlayer && !movementSettings.mIsStrafing)
+                targetSwimmingPitch = -mPtr.getRefData().getPosition().rot[0];
+            else
+                targetSwimmingPitch = 0;
+            float maxSwimPitchDelta = 3.0f * duration;
+            float swimmingPitch = mAnimation->getBodyPitchRadians();
+            swimmingPitch += osg::clampBetween(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
+            mAnimation->setBodyPitchRadians(swimmingPitch);
+        }
+        static const bool swimUpwardCorrection = Settings::Manager::getBool("swim upward correction", "Game");
+        if (inwater && isPlayer && !isFirstPersonPlayer && swimUpwardCorrection)
+        {
+            static const float swimUpwardCoef = Settings::Manager::getFloat("swim upward coef", "Game");
+            static const float swimForwardCoef = sqrtf(1.0f - swimUpwardCoef * swimUpwardCoef);
+            vec.z() = std::abs(vec.y()) * swimUpwardCoef;
+            vec.y() *= swimForwardCoef;
         }
 
         // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
@@ -2367,16 +2426,17 @@ void CharacterController::update(float duration, bool animationOnly)
     if(speed > 0.f)
     {
         float l = moved.length();
-        if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2)
-            moved.x() = movement.x();
-        if (std::abs(movement.y() - moved.y()) > std::abs(moved.y()) / 2)
-            moved.y() = movement.y();
-        if (std::abs(movement.z() - moved.z()) > std::abs(moved.z()) / 2)
-            moved.z() = movement.z();
-        // but keep the original speed
-        float newLength = moved.length();
-        if (newLength > 0)
-            moved *= (l / newLength);
+        if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2 ||
+            std::abs(movement.y() - moved.y()) > std::abs(moved.y()) / 2 ||
+            std::abs(movement.z() - moved.z()) > std::abs(moved.z()) / 2)
+        {
+            moved = movement;
+            // For some creatures getSpeed doesn't work, so we adjust speed to the animation.
+            // TODO: Fix Creature::getSpeed.
+            float newLength = moved.length();
+            if (newLength > 0 && !cls.isNpc())
+                moved *= (l / newLength);
+        }
     }
 
     if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
@@ -2628,11 +2688,11 @@ void CharacterController::updateContinuousVfx()
     std::vector<int> effects;
     mAnimation->getLoopingEffects(effects);
 
-    for (std::vector<int>::iterator it = effects.begin(); it != effects.end(); ++it)
+    for (int effectId : effects)
     {
         if (mPtr.getClass().getCreatureStats(mPtr).isDeathAnimationFinished()
-            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(*it)).getMagnitude() <= 0)
-            mAnimation->removeEffect(*it);
+            || mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(MWMechanics::EffectKey(effectId)).getMagnitude() <= 0)
+            mAnimation->removeEffect(effectId);
     }
 }
 
@@ -2681,10 +2741,9 @@ void CharacterController::setVisibility(float visibility)
 void CharacterController::setAttackTypeBasedOnMovement()
 {
     float *move = mPtr.getClass().getMovementSettings(mPtr).mPosition;
-
-    if (move[1] && !move[0]) // forward-backward
+    if (std::abs(move[1]) > std::abs(move[0]) + 0.2f) // forward-backward
         mAttackType = "thrust";
-    else if (move[0] && !move[1]) //sideway
+    else if (std::abs(move[0]) > std::abs(move[1]) + 0.2f) // sideway
         mAttackType = "slash";
     else
         mAttackType = "chop";
@@ -2879,22 +2938,21 @@ void CharacterController::updateHeadTracking(float duration)
             return;
         const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
-        zAngleRadians = std::atan2(direction.x(), direction.y()) - std::atan2(actorDirection.x(), actorDirection.y());
-        xAngleRadians = -std::asin(direction.z());
-
-        wrap(zAngleRadians);
-        wrap(xAngleRadians);
-
-        xAngleRadians = std::min(xAngleRadians, osg::DegreesToRadians(40.f));
-        xAngleRadians = std::max(xAngleRadians, osg::DegreesToRadians(-40.f));
-        zAngleRadians = std::min(zAngleRadians, osg::DegreesToRadians(30.f));
-        zAngleRadians = std::max(zAngleRadians, osg::DegreesToRadians(-30.f));
+        zAngleRadians = std::atan2(actorDirection.x(), actorDirection.y()) - std::atan2(direction.x(), direction.y());
+        xAngleRadians = std::asin(direction.z());
     }
+
+    const double xLimit = osg::DegreesToRadians(40.0);
+    const double zLimit = osg::DegreesToRadians(30.0);
+    double zLimitOffset = mAnimation->getUpperBodyYawRadians();
+    xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -xLimit, xLimit);
+    zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians),
+                                      -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);
-    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * (-xAngleRadians);
-    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * (-zAngleRadians);
+    xAngleRadians = (1.f-factor) * mAnimation->getHeadPitch() + factor * xAngleRadians;
+    zAngleRadians = (1.f-factor) * mAnimation->getHeadYaw() + factor * zAngleRadians;
 
     mAnimation->setHeadPitch(xAngleRadians);
     mAnimation->setHeadYaw(zAngleRadians);

@@ -163,11 +163,16 @@ namespace MWGui
     {
         WindowBase::onClose();
 
+        // Make sure the window was actually closed and not temporarily hidden.
+        if (MWBase::Environment::get().getWindowManager()->containsMode(GM_Container))
+            return;
+
         if (mModel)
             mModel->onClose();
 
         if (!mPtr.isEmpty())
             MWBase::Environment::get().getMechanicsManager()->onClose(mPtr);
+        resetReference();
     }
 
     void ContainerWindow::onCloseButtonClicked(MyGUI::Widget* _sender)
@@ -184,6 +189,7 @@ namespace MWGui
 
         // transfer everything into the player's inventory
         ItemModel* playerModel = MWBase::Environment::get().getWindowManager()->getInventoryWindow()->getModel();
+        assert(mModel);
         mModel->update();
 
         // unequip all items to avoid unequipping/reequipping
@@ -229,36 +235,38 @@ namespace MWGui
         {
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mCloseButton);
 
+            // Copy mPtr because onTakeAllButtonClicked closes the window which resets the reference
+            MWWorld::Ptr ptr = mPtr;
             onTakeAllButtonClicked(mTakeButton);
 
-            if (mPtr.getClass().isPersistent(mPtr))
+            if (ptr.getClass().isPersistent(ptr))
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sDisposeCorpseFail}");
             else
             {
-                MWMechanics::CreatureStats& creatureStats = mPtr.getClass().getCreatureStats(mPtr);
+                MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
 
                 // If we dispose corpse before end of death animation, we should update death counter counter manually.
                 // Also we should run actor's script - it may react on actor's death.
                 if (creatureStats.isDead() && !creatureStats.isDeathAnimationFinished())
                 {
                     creatureStats.setDeathAnimationFinished(true);
-                    MWBase::Environment::get().getMechanicsManager()->notifyDied(mPtr);
+                    MWBase::Environment::get().getMechanicsManager()->notifyDied(ptr);
 
-                    const std::string script = mPtr.getClass().getScript(mPtr);
+                    const std::string script = ptr.getClass().getScript(ptr);
                     if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
                     {
-                        MWScript::InterpreterContext interpreterContext (&mPtr.getRefData().getLocals(), mPtr);
+                        MWScript::InterpreterContext interpreterContext (&ptr.getRefData().getLocals(), ptr);
                         MWBase::Environment::get().getScriptManager()->run (script, interpreterContext);
                     }
 
                     // Clean up summoned creatures as well
-                    std::map<MWMechanics::CreatureStats::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
+                    std::map<ESM::SummonKey, int>& creatureMap = creatureStats.getSummonedCreatureMap();
                     for (const auto& creature : creatureMap)
-                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(mPtr, creature.second);
+                        MWBase::Environment::get().getMechanicsManager()->cleanupSummonedCreature(ptr, creature.second);
                     creatureMap.clear();
                 }
 
-                MWBase::Environment::get().getWorld()->deleteObject(mPtr);
+                MWBase::Environment::get().getWorld()->deleteObject(ptr);
             }
 
             mPtr = MWWorld::Ptr();

@@ -283,9 +283,7 @@ namespace
     }
 }
 
-namespace Compiler
-{
-    namespace Generator
+namespace Compiler::Generator
     {
         void pushInt (CodeContainer& code, Literals& literals, int value)
         {
@@ -732,4 +730,3 @@ namespace Compiler
             }
         }
     }
-}

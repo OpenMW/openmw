@@ -4,14 +4,13 @@
 #include <osg/TexMat>
 #include <osg/Material>
 #include <osg/Texture2D>
-#include <osg/UserDataContainer>
 
 #include <osgParticle/Emitter>
 
 #include <components/nif/data.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
-#include "userdata.hpp"
+#include "matrixtransform.hpp"
 
 namespace NifOsg
 {
@@ -119,13 +118,12 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 {
     if (hasInput())
     {
-        osg::MatrixTransform* trans = static_cast<osg::MatrixTransform*>(node);
+        NifOsg::MatrixTransform* trans = static_cast<NifOsg::MatrixTransform*>(node);
         osg::Matrix mat = trans->getMatrix();
 
         float time = getInputValue(nv);
 
-        NodeUserData* userdata = static_cast<NodeUserData*>(trans->getUserDataContainer()->getUserObject(0));
-        Nif::Matrix3& rot = userdata->mRotationScale;
+        Nif::Matrix3& rot = trans->mRotationScale;
 
         bool setRot = false;
         if(!mRotations.empty())
@@ -140,18 +138,18 @@ void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
         }
         else
         {
-            // no rotation specified, use the previous value from the UserData
+            // no rotation specified, use the previous value
             for (int i=0;i<3;++i)
                 for (int j=0;j<3;++j)
                     mat(j,i) = rot.mValues[i][j]; // NB column/row major difference
         }
 
-        if (setRot) // copy the new values back to the UserData
+        if (setRot) // copy the new values back
             for (int i=0;i<3;++i)
                 for (int j=0;j<3;++j)
                     rot.mValues[i][j] = mat(j,i); // NB column/row major difference
 
-        float& scale = userdata->mScale;
+        float& scale = trans->mScale;
         if(!mScales.empty())
             scale = mScales.interpKey(time);
 
@@ -182,7 +180,7 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
 GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
 {
     for (unsigned int i=0; i<data->mMorphs.size(); ++i)
-        mKeyFrames.push_back(FloatInterpolator(data->mMorphs[i].mKeyFrames));
+        mKeyFrames.emplace_back(data->mMorphs[i].mKeyFrames);
 }
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)
@@ -199,7 +197,6 @@ void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable
             float val = 0;
             if (!(*it).empty())
                 val = it->interpKey(input);
-            val = std::max(0.f, std::min(1.f, val));
 
             SceneUtil::MorphGeometry::MorphTarget& target = morphGeom->getMorphTarget(i);
             if (target.getWeight() != val)
@@ -313,11 +310,6 @@ void VisController::operator() (osg::Node* node, osg::NodeVisitor* nv)
 
 RollController::RollController(const Nif::NiFloatData *data)
     : mData(data->mKeyList, 1.f)
-    , mStartingTime(0)
-{
-}
-
-RollController::RollController() : mStartingTime(0)
 {
 }
 
@@ -325,7 +317,7 @@ RollController::RollController(const RollController &copy, const osg::CopyOp &co
     : osg::NodeCallback(copy, copyop)
     , Controller(copy)
     , mData(copy.mData)
-    , mStartingTime(0)
+    , mStartingTime(copy.mStartingTime)
 {
 }
 
@@ -452,7 +444,7 @@ void MaterialColorController::apply(osg::StateSet *stateset, osg::NodeVisitor *n
 }
 
 FlipController::FlipController(const Nif::NiFlipController *ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
-    : mTexSlot(ctrl->mTexSlot)
+    : mTexSlot(0) // always affects diffuse
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
 {
@@ -462,12 +454,6 @@ FlipController::FlipController(int texSlot, float delta, const std::vector<osg::
     : mTexSlot(texSlot)
     , mDelta(delta)
     , mTextures(textures)
-{
-}
-
-FlipController::FlipController()
-    : mTexSlot(0)
-    , mDelta(0.f)
 {
 }
 

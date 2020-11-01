@@ -70,7 +70,7 @@ namespace
         {
         }
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             if (mRendered)
             {
@@ -105,7 +105,7 @@ namespace MWRender
         {
         }
 
-        virtual void doWork()
+        void doWork() override
         {
             osg::ref_ptr<osg::Image> image = new osg::Image;
             image->allocateImage(mWidth, mHeight, 1, GL_RGB, GL_UNSIGNED_BYTE);

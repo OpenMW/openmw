@@ -80,6 +80,8 @@ namespace MWWorld
             /// @note name must be lower case
             void getInteriorPtrs (const std::string& name, std::vector<MWWorld::Ptr>& out);
 
+            std::vector<MWWorld::Ptr> getAll(const std::string& id);
+
             int countSavedGameRecords() const;
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;

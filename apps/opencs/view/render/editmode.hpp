@@ -34,7 +34,7 @@ namespace CSVRender
 
             unsigned int getInteractionMask() const;
 
-            virtual void activate (CSVWidget::SceneToolbar *toolbar);
+            void activate (CSVWidget::SceneToolbar *toolbar) override;
 
             /// Default-implementation: Ignored.
             virtual void setEditLock (bool locked);
@@ -90,15 +90,15 @@ namespace CSVRender
             virtual void dragWheel (int diff, double speedFactor);
 
             /// Default-implementation: ignored
-            virtual void dragEnterEvent (QDragEnterEvent *event);
+            void dragEnterEvent (QDragEnterEvent *event) override;
 
             /// Default-implementation: ignored
-            virtual void dropEvent (QDropEvent *event);
+            void dropEvent (QDropEvent *event) override;
 
             /// Default-implementation: ignored
-            virtual void dragMoveEvent (QDragMoveEvent *event);
+            void dragMoveEvent (QDragMoveEvent *event) override;
 
-            virtual void mouseMoveEvent (QMouseEvent *event);
+            void mouseMoveEvent (QMouseEvent *event) override;
 
             /// Default: return -1
             virtual int getSubMode() const;

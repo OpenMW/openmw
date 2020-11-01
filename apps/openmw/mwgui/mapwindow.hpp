@@ -179,7 +179,7 @@ namespace MWGui
     public:
         EditNoteDialog();
 
-        virtual void onOpen();
+        void onOpen() override;
 
         void showDeleteButton(bool show);
         bool getDeleteButtonShown();
@@ -210,8 +210,8 @@ namespace MWGui
 
         void setCellName(const std::string& cellName);
 
-        virtual void setAlpha(float alpha);
-        void setVisible(bool visible);
+        void setAlpha(float alpha) override;
+        void setVisible(bool visible) override;
 
         void renderGlobalMap();
 
@@ -227,14 +227,14 @@ namespace MWGui
 
         void ensureGlobalMapLoaded();
 
-        virtual void onOpen();
+        void onOpen() override;
 
-        void onFrame(float dt);
+        void onFrame(float dt) override;
 
-        virtual void updateCustomMarkers();
+        void updateCustomMarkers() override;
 
         /// Clear all savegame-specific data
-        void clear();
+        void clear() override;
 
         void write (ESM::ESMWriter& writer, Loading::Listener& progress);
         void readRecord (ESM::ESMReader& reader, uint32_t type);
@@ -280,13 +280,13 @@ namespace MWGui
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
 
-        virtual void onPinToggled();
-        virtual void onTitleDoubleClicked();
+        void onPinToggled() override;
+        void onTitleDoubleClicked() override;
 
-        virtual void doorMarkerCreated(MyGUI::Widget* marker);
-        virtual void customMarkerCreated(MyGUI::Widget *marker);
+        void doorMarkerCreated(MyGUI::Widget* marker) override;
+        void customMarkerCreated(MyGUI::Widget *marker) override;
 
-        virtual void notifyPlayerUpdate();
+        void notifyPlayerUpdate() override;
 
     };
 }

@@ -142,9 +142,9 @@ namespace CSMWorld
             ModifyCommand (QAbstractItemModel& model, const QModelIndex& index, const QVariant& new_,
                 QUndoCommand *parent = 0);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class CreateCommand : public QUndoCommand
@@ -175,9 +175,9 @@ namespace CSMWorld
 
             void addNestedValue(int parentColumn, int nestedColumn, const QVariant &value);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class CloneCommand : public CreateCommand
@@ -191,9 +191,9 @@ namespace CSMWorld
                           const UniversalId::Type type,
                           QUndoCommand* parent = 0);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class RevertCommand : public QUndoCommand
@@ -212,9 +212,9 @@ namespace CSMWorld
 
             virtual ~RevertCommand();
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class DeleteCommand : public QUndoCommand
@@ -235,9 +235,9 @@ namespace CSMWorld
 
             virtual ~DeleteCommand();
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class ReorderRowsCommand : public QUndoCommand
@@ -250,9 +250,9 @@ namespace CSMWorld
 
             ReorderRowsCommand (IdTable& model, int baseIndex, const std::vector<int>& newOrder);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class CreatePathgridCommand : public CreateCommand
@@ -261,7 +261,7 @@ namespace CSMWorld
 
             CreatePathgridCommand(IdTable& model, const std::string& id, QUndoCommand *parent = 0);
 
-            virtual void redo();
+            void redo() override;
     };
 
     /// \brief Update cell ID according to x/y-coordinates
@@ -281,9 +281,9 @@ namespace CSMWorld
 
             UpdateCellCommand (IdTable& model, int row, QUndoCommand *parent = 0);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
 
@@ -318,9 +318,9 @@ namespace CSMWorld
 
             DeleteNestedCommand (IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 
     class AddNestedCommand : public QUndoCommand, private NestedTableStoring
@@ -340,9 +340,9 @@ namespace CSMWorld
 
             AddNestedCommand(IdTree& model, const std::string& id, int nestedRow, int parentColumn, QUndoCommand* parent = 0);
 
-            virtual void redo();
+            void redo() override;
 
-            virtual void undo();
+            void undo() override;
     };
 }
 

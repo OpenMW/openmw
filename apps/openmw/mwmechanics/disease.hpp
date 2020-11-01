@@ -40,7 +40,7 @@ namespace MWMechanics
                 continue;
 
             float resist = 0.f;
-            if (spells.hasCorprusEffect(spell))
+            if (Spells::hasCorprusEffect(spell))
                 resist = 1.f - 0.01f * (actorEffects.get(ESM::MagicEffect::ResistCorprusDisease).getMagnitude()
                                         - actorEffects.get(ESM::MagicEffect::WeaknessToCorprusDisease).getMagnitude());
             else if (spell->mData.mType == ESM::Spell::ST_Disease)

@@ -48,7 +48,7 @@ namespace Shader
         , mDefaultVsTemplate(defaultVsTemplate)
         , mDefaultFsTemplate(defaultFsTemplate)
     {
-        mRequirements.push_back(ShaderRequirements());
+        mRequirements.emplace_back();
     }
 
     void ShaderVisitor::setForceShaders(bool force)

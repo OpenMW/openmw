@@ -52,22 +52,22 @@ namespace CSVWorld
         NotEditableSubDelegate(const CSMWorld::IdTable* table,
                                QObject * parent = 0);
 
-        virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
+        void setEditorData (QWidget* editor, const QModelIndex& index) const override;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const;
+        void setModelData (QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
 
-        virtual void paint (QPainter* painter,
+        void paint (QPainter* painter,
                             const QStyleOptionViewItem& option,
-                            const QModelIndex& index) const;
+                            const QModelIndex& index) const override;
         ///< does nothing
 
-        virtual QSize sizeHint (const QStyleOptionViewItem& option,
-                                const QModelIndex& index) const;
+        QSize sizeHint (const QStyleOptionViewItem& option,
+                                const QModelIndex& index) const override;
         ///< does nothing
 
-        virtual QWidget *createEditor (QWidget *parent,
+        QWidget *createEditor (QWidget *parent,
                                 const QStyleOptionViewItem& option,
-                                const QModelIndex& index) const;
+                                const QModelIndex& index) const override;
     };
 
     //this can't be nested into the DialogueDelegateDispatcher, because it needs to emit signals
@@ -136,22 +136,22 @@ namespace CSVWorld
         ///< will return null if delegate is not present, parent of the widget is
         //same as for dispatcher itself
 
-        virtual void setEditorData (QWidget* editor, const QModelIndex& index) const;
+        void setEditorData (QWidget* editor, const QModelIndex& index) const override;
 
-        virtual void setModelData (QWidget* editor, QAbstractItemModel* model,
-                                   const QModelIndex& index) const;
+        void setModelData (QWidget* editor, QAbstractItemModel* model,
+                                   const QModelIndex& index) const override;
 
         virtual void setModelData (QWidget* editor,
                                    QAbstractItemModel* model, const QModelIndex& index,
                                    CSMWorld::ColumnBase::Display display) const;
 
-        virtual void paint (QPainter* painter,
+        void paint (QPainter* painter,
                             const QStyleOptionViewItem& option,
-                            const QModelIndex& index) const;
+                            const QModelIndex& index) const override;
         ///< does nothing
 
-        virtual QSize sizeHint (const QStyleOptionViewItem& option,
-                                const QModelIndex& index) const;
+        QSize sizeHint (const QStyleOptionViewItem& option,
+                                const QModelIndex& index) const override;
         ///< does nothing
 
     private slots:
@@ -248,7 +248,7 @@ namespace CSVWorld
 
             SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
         private slots:
 
@@ -276,7 +276,7 @@ namespace CSVWorld
             DialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document,
                 const CreatorFactoryBase& creatorFactory, bool sorting = false);
 
-            virtual void setEditLock (bool locked);
+            void setEditLock (bool locked) override;
 
         private slots:
 

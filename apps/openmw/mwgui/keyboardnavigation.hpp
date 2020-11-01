@@ -19,7 +19,7 @@ namespace MWGui
         void saveFocus(int mode);
         void restoreFocus(int mode);
 
-        void _unlinkWidget(MyGUI::Widget* widget);
+        void _unlinkWidget(MyGUI::Widget* widget) override;
 
         void onFrame();
 

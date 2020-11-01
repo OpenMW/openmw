@@ -10,8 +10,8 @@ namespace Compiler
     class SourceException : public std::exception
     {
         public:
-        
-            virtual const char *what() const throw() { return "Compile error";} 
+
+            const char *what() const noexcept override { return "Compile error";} 
             ///< Return error message
     };
 
@@ -20,18 +20,18 @@ namespace Compiler
     class FileException : public SourceException
     {
         public:
-        
-            virtual const char *what() const throw() { return "Can't read file"; }
+
+            const char *what() const noexcept override { return "Can't read file"; }
             ///< Return error message
     };
 
     /// \brief Exception: EOF condition encountered
 
     class EOFException : public SourceException
-    {       
+    {
         public:
-        
-            virtual const char *what() const throw() { return "End of file"; }
+
+            const char *what() const noexcept override { return "End of file"; }
             ///< Return error message
     };
 }

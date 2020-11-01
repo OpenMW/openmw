@@ -115,9 +115,9 @@ struct TypesetBookImpl : TypesetBook
         return Range (i->data(), i->data() + i->size());
     }
 
-    size_t pageCount () const { return mPages.size (); }
+    size_t pageCount () const override { return mPages.size (); }
 
-    std::pair <unsigned int, unsigned int> getSize () const
+    std::pair <unsigned int, unsigned int> getSize () const override
     {
         return std::make_pair (mRect.width (), mRect.height ());
     }
@@ -261,7 +261,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     {
     }
 
-    Style * createStyle (const std::string& fontName, const Colour& fontColour, bool useBookFont)
+    Style * createStyle (const std::string& fontName, const Colour& fontColour, bool useBookFont) override
     {
         std::string fullFontName;
         if (fontName.empty())
@@ -291,7 +291,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
     }
 
     Style* createHotStyle (Style* baseStyle, const Colour& normalColour, const Colour& hoverColour,
-                           const Colour& activeColour, InteractiveId id, bool unique)
+                           const Colour& activeColour, InteractiveId id, bool unique) override
     {
         StyleImpl* BaseStyle = static_cast <StyleImpl*> (baseStyle);
 
@@ -311,14 +311,14 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return &style;
     }
 
-    void write (Style * style, Utf8Span text)
+    void write (Style * style, Utf8Span text) override
     {
         Range range = mBook->addContent (text);
 
         writeImpl (static_cast <StyleImpl*> (style), range.first, range.second);
     }
 
-    intptr_t addContent (Utf8Span text, bool select)
+    intptr_t addContent (Utf8Span text, bool select) override
     {
         add_partial_text();
 
@@ -330,14 +330,14 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         return reinterpret_cast <intptr_t> (&(*i));
     }
 
-    void selectContent (intptr_t contentHandle)
+    void selectContent (intptr_t contentHandle) override
     {
         add_partial_text();
 
         mCurrentContent = reinterpret_cast <Content const *> (contentHandle);
     }
 
-    void write (Style * style, size_t begin, size_t end)
+    void write (Style * style, size_t begin, size_t end) override
     {
         assert (mCurrentContent != nullptr);
         assert (end <= mCurrentContent->size ());
@@ -349,7 +349,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         writeImpl (static_cast <StyleImpl*> (style), begin_, end_);
     }
 
-    void lineBreak (float margin)
+    void lineBreak (float margin) override
     {
         assert (margin == 0); //TODO: figure out proper behavior here...
 
@@ -359,7 +359,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mLine = nullptr;
     }
 
-    void sectionBreak (int margin)
+    void sectionBreak (int margin) override
     {
         add_partial_text();
 
@@ -374,7 +374,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         }
     }
 
-    void setSectionAlignment (Alignment sectionAlignment)
+    void setSectionAlignment (Alignment sectionAlignment) override
     {
         add_partial_text();
 
@@ -383,7 +383,7 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
         mCurrentAlignment = sectionAlignment;
     }
 
-    TypesetBook::Ptr complete ()
+    TypesetBook::Ptr complete () override
     {
         int curPageStart = 0;
         int curPageStop  = 0;
@@ -524,9 +524,9 @@ struct TypesetBookImpl::Typesetter : BookTypesetter
                 break;
 
             if ( lead != origin )
-                mPartialWhitespace.push_back (PartialText (style, lead, origin, space_width));
+                mPartialWhitespace.emplace_back(style, lead, origin, space_width);
             if ( origin != extent )
-                mPartialWord.push_back (PartialText (style, origin, extent, word_width));
+                mPartialWord.emplace_back(style, origin, extent, word_width);
         }
     }
 
@@ -869,12 +869,12 @@ protected:
             }
         }
 
-        void doRender() { mDisplay->doRender (*this); }
+        void doRender() override { mDisplay->doRender (*this); }
 
         // this isn't really a sub-widget, its just a "drawitem" which
         // should have its own interface
-        void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) {}
-        void destroyDrawItem() {};
+        void createDrawItem(MyGUI::ITexture* _texture, MyGUI::ILayerNode* _node) override {}
+        void destroyDrawItem() override {}
     };
 
     void resetPage()
@@ -941,6 +941,9 @@ public:
         if (!mBook)
             return;
 
+        if (mPage >= mBook->mPages.size())
+            return;
+
         dirtyFocusItem ();
 
         mFocusItem = 0;
@@ -950,6 +953,9 @@ public:
     void onMouseMove (int left, int top)
     {
         if (!mBook)
+            return;
+
+        if (mPage >= mBook->mPages.size())
             return;
 
         left -= mCroppedParent->getAbsoluteLeft ();
@@ -988,6 +994,9 @@ public:
         if (!mBook)
             return;
 
+        if (mPage >= mBook->mPages.size())
+            return;
+
         // work around inconsistency in MyGUI where the mouse press coordinates aren't
         // transformed by the current Layer (even though mouse *move* events are).
         MyGUI::IntPoint pos (left, top);
@@ -1011,6 +1020,9 @@ public:
     void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id)
     {
         if (!mBook)
+            return;
+
+        if (mPage >= mBook->mPages.size())
             return;
 
         // work around inconsistency in MyGUI where the mouse release coordinates aren't
@@ -1140,7 +1152,7 @@ public:
                 i->second->createDrawItem (mNode);
     }
 
-    void setVisible (bool newVisible) final
+    void setVisible (bool newVisible) override
     {
         if (mVisible == newVisible)
             return;
@@ -1162,7 +1174,7 @@ public:
         }
     }
 
-    void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node) final
+    void createDrawItem(MyGUI::ITexture* texture, MyGUI::ILayerNode* node) override
     {
         mNode = node;
 
@@ -1230,9 +1242,9 @@ public:
 
     // ISubWidget should not necessarily be a drawitem
     // in this case, it is not...
-    void doRender() final { }
+    void doRender() override { }
 
-    void _updateView () final
+    void _updateView () override
     {
         _checkMargin();
 
@@ -1241,7 +1253,7 @@ public:
                 mNode->outOfDate (i->second->mRenderItem);
     }
 
-    void _correctView() final
+    void _correctView() override
     {
         _checkMargin ();
 
@@ -1251,7 +1263,7 @@ public:
 
     }
 
-    void destroyDrawItem() final
+    void destroyDrawItem() override
     {
         for (ActiveTextFormats::iterator i = mActiveTextFormats.begin (); i != mActiveTextFormats.end (); ++i)
             i->second->destroyDrawItem (mNode);
@@ -1271,24 +1283,24 @@ public:
     {
     }
 
-    void showPage (TypesetBook::Ptr book, size_t page) final
+    void showPage (TypesetBook::Ptr book, size_t page) override
     {
         mPageDisplay->showPage (book, page);
     }
 
-    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked) final
+    void adviseLinkClicked (std::function <void (InteractiveId)> linkClicked) override
     {
         mPageDisplay->mLinkClicked = linkClicked;
     }
 
-    void unadviseLinkClicked () final
+    void unadviseLinkClicked () override
     {
         mPageDisplay->mLinkClicked = std::function <void (InteractiveId)> ();
     }
 
 protected:
 
-    void initialiseOverride() final
+    void initialiseOverride() override
     {
         Base::initialiseOverride();
 
@@ -1302,24 +1314,24 @@ protected:
         }
     }
 
-    void onMouseLostFocus(Widget* _new) final
+    void onMouseLostFocus(Widget* _new) override
     {
         // NOTE: MyGUI also fires eventMouseLostFocus for widgets that are about to be destroyed (if they had focus).
         // Child widgets may already be destroyed! So be careful.
         mPageDisplay->onMouseLostFocus ();
     }
 
-    void onMouseMove(int left, int top) final
+    void onMouseMove(int left, int top) override
     {
         mPageDisplay->onMouseMove (left, top);
     }
 
-    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id) final
+    void onMouseButtonPressed (int left, int top, MyGUI::MouseButton id) override
     {
         mPageDisplay->onMouseButtonPressed (left, top, id);
     }
 
-    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id) final
+    void onMouseButtonReleased(int left, int top, MyGUI::MouseButton id) override
     {
         mPageDisplay->onMouseButtonReleased (left, top, id);
     }

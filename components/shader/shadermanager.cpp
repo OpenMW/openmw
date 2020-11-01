@@ -34,6 +34,9 @@ namespace Shader
             foundPos = source.find_first_of("\n\r", foundPos);
             foundPos = source.find_first_not_of("\n\r", foundPos);
 
+            if (foundPos == std::string::npos)
+                break;
+
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
             int lineNumber;
             if (lineDirectivePosition != std::string::npos)
@@ -58,45 +61,39 @@ namespace Shader
         return true;
     }
 
-    bool parseIncludes(boost::filesystem::path shaderPath, std::string& source, const std::string& templateName)
+    // Recursively replaces include statements with the actual source of the included files.
+    // Adjusts #line statements accordingly and detects cyclic includes.
+    // includingFiles is the set of files that include this file directly or indirectly, and is intentionally not a reference to allow automatic cleanup.
+    static bool parseIncludes(boost::filesystem::path shaderPath, std::string& source, const std::string& fileName, int& fileNumber, std::set<boost::filesystem::path> includingFiles)
     {
+        // An include is cyclic if it is being included by itself
+        if (includingFiles.insert(shaderPath/fileName).second == false)
+        {
+            Log(Debug::Error) << "Shader " << fileName << " error: Detected cyclic #includes";
+            return false;
+        }
+
         Misc::StringUtils::replaceAll(source, "\r\n", "\n");
 
-        std::set<boost::filesystem::path> includedFiles;
         size_t foundPos = 0;
-        int fileNumber = 1;
         while ((foundPos = source.find("#include")) != std::string::npos)
         {
             size_t start = source.find('"', foundPos);
-            if (start == std::string::npos || start == source.size()-1)
+            if (start == std::string::npos || start == source.size() - 1)
             {
-                Log(Debug::Error) << "Shader " << templateName << " error: Invalid #include";
+                Log(Debug::Error) << "Shader " << fileName << " error: Invalid #include";
                 return false;
             }
-            size_t end = source.find('"', start+1);
+            size_t end = source.find('"', start + 1);
             if (end == std::string::npos)
             {
-                Log(Debug::Error) << "Shader " << templateName << " error: Invalid #include";
+                Log(Debug::Error) << "Shader " << fileName << " error: Invalid #include";
                 return false;
             }
-            std::string includeFilename = source.substr(start+1, end-(start+1));
+            std::string includeFilename = source.substr(start + 1, end - (start + 1));
             boost::filesystem::path includePath = shaderPath / includeFilename;
-            boost::filesystem::ifstream includeFstream;
-            includeFstream.open(includePath);
-            if (includeFstream.fail())
-            {
-                Log(Debug::Error) << "Shader " << templateName << " error: Failed to open include " << includePath.string();
-                return false;
-            }
 
-            std::stringstream buffer;
-            buffer << includeFstream.rdbuf();
-            std::string stringRepresentation = buffer.str();
-            addLineDirectivesAfterConditionalBlocks(stringRepresentation);
-
-            // insert #line directives so we get correct line numbers in compiler errors
-            int includedFileNumber = fileNumber++;
-
+            // Determine the line number that will be used for the #line directive following the included source
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
             int lineNumber;
             if (lineDirectivePosition != std::string::npos)
@@ -109,20 +106,34 @@ namespace Shader
             else
             {
                 lineDirectivePosition = 0;
-                lineNumber = 1;
+                lineNumber = 0;
             }
             lineNumber += std::count(source.begin() + lineDirectivePosition, source.begin() + foundPos, '\n');
+
+            // Include the file recursively
+            boost::filesystem::ifstream includeFstream;
+            includeFstream.open(includePath);
+            if (includeFstream.fail())
+            {
+                Log(Debug::Error) << "Shader " << fileName << " error: Failed to open include " << includePath.string();
+                return false;
+            }
+            int includedFileNumber = fileNumber++;
+
+            std::stringstream buffer;
+            buffer << includeFstream.rdbuf();
+            std::string stringRepresentation = buffer.str();
+            if (!addLineDirectivesAfterConditionalBlocks(stringRepresentation)
+                || !parseIncludes(shaderPath, stringRepresentation, includeFilename, fileNumber, includingFiles))
+            {
+                Log(Debug::Error) << "In file included from " << fileName << "." << lineNumber;
+                return false;
+            }
 
             std::stringstream toInsert;
             toInsert << "#line 0 " << includedFileNumber << "\n" << stringRepresentation << "\n#line " << lineNumber << " 0\n";
 
-            source.replace(foundPos, (end-foundPos+1), toInsert.str());
-
-            if (includedFiles.insert(includePath).second == false)
-            {
-                Log(Debug::Error) << "Shader " << templateName << " error: Detected cyclic #includes";
-                return false;
-            }
+            source.replace(foundPos, (end - foundPos + 1), toInsert.str());
         }
         return true;
     }
@@ -273,27 +284,28 @@ namespace Shader
 
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(const std::string &templateName, const ShaderManager::DefineMap &defines, osg::Shader::Type shaderType)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
         if (templateIt == mShaderTemplates.end())
         {
-            boost::filesystem::path p = (boost::filesystem::path(mPath) / templateName);
+            boost::filesystem::path path = (boost::filesystem::path(mPath) / templateName);
             boost::filesystem::ifstream stream;
-            stream.open(p);
+            stream.open(path);
             if (stream.fail())
             {
-                Log(Debug::Error) << "Failed to open " << p.string();
+                Log(Debug::Error) << "Failed to open " << path.string();
                 return nullptr;
             }
             std::stringstream buffer;
             buffer << stream.rdbuf();
 
             // parse includes
+            int fileNumber = 1;
             std::string source = buffer.str();
             if (!addLineDirectivesAfterConditionalBlocks(source)
-                    || !parseIncludes(boost::filesystem::path(mPath), source, templateName))
+                || !parseIncludes(boost::filesystem::path(mPath), source, templateName, fileNumber, {}))
                 return nullptr;
 
             templateIt = mShaderTemplates.insert(std::make_pair(templateName, source)).first;
@@ -323,7 +335,7 @@ namespace Shader
 
     osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader, osg::ref_ptr<osg::Shader> fragmentShader)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         ProgramMap::iterator found = mPrograms.find(std::make_pair(vertexShader, fragmentShader));
         if (found == mPrograms.end())
         {
@@ -362,7 +374,7 @@ namespace Shader
 
     void ShaderManager::releaseGLObjects(osg::State *state)
     {
-        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        std::lock_guard<std::mutex> lock(mMutex);
         for (auto shader : mShaders)
         {
             if (shader.second != nullptr)

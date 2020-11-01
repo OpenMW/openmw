@@ -10,7 +10,7 @@ namespace MWGui
         public:
             ConfirmationDialog();
             void askForConfirmation(const std::string& message);
-            virtual bool exit();
+            bool exit() override;
 
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
 

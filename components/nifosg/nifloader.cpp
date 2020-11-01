@@ -1,7 +1,8 @@
 #include "nifloader.hpp"
 
+#include <mutex>
+
 #include <osg/Matrixf>
-#include <osg/MatrixTransform>
 #include <osg/Geometry>
 #include <osg/Array>
 #include <osg/LOD>
@@ -41,8 +42,8 @@
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 
+#include "matrixtransform.hpp"
 #include "particle.hpp"
-#include "userdata.hpp"
 
 namespace
 {
@@ -100,7 +101,7 @@ namespace
 
         META_Object(NifOsg, BillboardCallback)
 
-        virtual void operator()(osg::Node* node, osg::NodeVisitor* nv)
+        void operator()(osg::Node* node, osg::NodeVisitor* nv) override
         {
             osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(nv);
 
@@ -168,31 +169,6 @@ namespace
 
 namespace NifOsg
 {
-    class CollisionSwitch : public osg::MatrixTransform
-    {
-    public:
-        CollisionSwitch() : osg::MatrixTransform()
-        {
-        }
-
-        CollisionSwitch(const CollisionSwitch& copy, const osg::CopyOp& copyop)
-            : osg::MatrixTransform(copy, copyop)
-        {
-        }
-
-        META_Node(NifOsg, CollisionSwitch)
-
-        CollisionSwitch(const osg::Matrixf& transformations, bool enabled) : osg::MatrixTransform(transformations)
-        {
-            setEnabled(enabled);
-        }
-
-        void setEnabled(bool enabled)
-        {
-            setNodeMask(enabled ? ~0 : Loader::getIntersectionDisabledNodeMask());
-        }
-    };
-
     bool Loader::sShowMarkers = false;
 
     void Loader::setShowMarkers(bool show)
@@ -499,14 +475,6 @@ namespace NifOsg
             case Nif::RC_NiBillboardNode:
                 dataVariance = osg::Object::DYNAMIC;
                 break;
-            case Nif::RC_NiCollisionSwitch:
-            {
-                bool enabled = nifNode->flags & Nif::NiNode::Flag_ActiveCollision;
-                node = new CollisionSwitch(nifNode->trafo.toMatrix(), enabled);
-                // This matrix transform must not be combined with another matrix transform.
-                dataVariance = osg::Object::DYNAMIC;
-                break;
-            }
             default:
                 // The Root node can be created as a Group if no transformation is required.
                 // This takes advantage of the fact root nodes can't have additional controllers
@@ -519,7 +487,14 @@ namespace NifOsg
                 break;
             }
             if (!node)
-                node = new osg::MatrixTransform(nifNode->trafo.toMatrix());
+                node = new NifOsg::MatrixTransform(nifNode->trafo);
+
+            if (nifNode->recType == Nif::RC_NiCollisionSwitch && !(nifNode->flags & Nif::NiNode::Flag_ActiveCollision))
+            {
+                node->setNodeMask(Loader::getIntersectionDisabledNodeMask());
+                // This node must not be combined with another node.
+                dataVariance = osg::Object::DYNAMIC;
+            }
 
             node->setDataVariance(dataVariance);
 
@@ -547,14 +522,11 @@ namespace NifOsg
             if (!rootNode)
                 rootNode = node;
 
-            // UserData used for a variety of features:
+            // The original NIF record index is used for a variety of features:
             // - finding the correct emitter node for a particle system
             // - establishing connections to the animated collision shapes, which are handled in a separate loader
             // - finding a random child NiNode in NiBspArrayController
-            // - storing the previous 3x3 rotation and scale values for when a KeyframeController wants to
-            //   change only certain elements of the 4x4 transform
-            node->getOrCreateUserDataContainer()->addUserObject(
-                new NodeUserData(nifNode->recIndex, nifNode->trafo.scale, nifNode->trafo.rotation));
+            node->setUserValue("recIndex", nifNode->recIndex);
 
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
             {
@@ -652,8 +624,8 @@ namespace NifOsg
             bool isAnimated = false;
             handleNodeControllers(nifNode, node, animflags, isAnimated);
             hasAnimatedParents |= isAnimated;
-            // Make sure empty nodes are not optimized away so the physics system can find them.
-            if (isAnimated || (hasAnimatedParents && (skipMeshes || hasMarkers)))
+            // Make sure empty nodes and animated shapes are not optimized away so the physics system can find them.
+            if (isAnimated || (hasAnimatedParents && ((skipMeshes || hasMarkers) || isGeometry)))
                 node->setDataVariance(osg::Object::DYNAMIC);
 
             // LOD and Switch nodes must be wrapped by a transform (the current node) to support transformations properly
@@ -826,21 +798,22 @@ namespace NifOsg
                 {
                     const Nif::NiFlipController* flipctrl = static_cast<const Nif::NiFlipController*>(ctrl.getPtr());
                     std::vector<osg::ref_ptr<osg::Texture2D> > textures;
+
+                    // inherit wrap settings from the target slot
+                    osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
+                    osg::Texture2D::WrapMode wrapS = osg::Texture2D::REPEAT;
+                    osg::Texture2D::WrapMode wrapT = osg::Texture2D::REPEAT;
+                    if (inherit)
+                    {
+                        wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
+                        wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
+                    }
+
                     for (unsigned int i=0; i<flipctrl->mSources.length(); ++i)
                     {
                         Nif::NiSourceTexturePtr st = flipctrl->mSources[i];
                         if (st.empty())
                             continue;
-
-                        // inherit wrap settings from the target slot
-                        osg::Texture2D* inherit = dynamic_cast<osg::Texture2D*>(stateset->getTextureAttribute(flipctrl->mTexSlot, osg::StateAttribute::TEXTURE));
-                        osg::Texture2D::WrapMode wrapS = osg::Texture2D::CLAMP_TO_EDGE;
-                        osg::Texture2D::WrapMode wrapT = osg::Texture2D::CLAMP_TO_EDGE;
-                        if (inherit)
-                        {
-                            wrapS = inherit->getWrap(osg::Texture2D::WRAP_S);
-                            wrapT = inherit->getWrap(osg::Texture2D::WRAP_T);
-                        }
 
                         osg::ref_ptr<osg::Image> image (handleSourceTexture(st.getPtr(), imageManager));
                         osg::ref_ptr<osg::Texture2D> texture (new osg::Texture2D(image));
@@ -923,15 +896,18 @@ namespace NifOsg
             osg::BoundingBox box;
 
             int i=0;
-            for (std::vector<Nif::NiParticleSystemController::Particle>::const_iterator it = partctrl->particles.begin();
-                 i<particledata->activeCount && it != partctrl->particles.end(); ++it, ++i)
+            for (const auto& particle : partctrl->particles)
             {
-                const Nif::NiParticleSystemController::Particle& particle = *it;
+                if (i++ >= particledata->activeCount)
+                    break;
+
+                if (particle.lifespan <= 0)
+                    continue;
 
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
-                created->setLifeTime(std::max(0.f, particle.lifespan));
+                created->setLifeTime(particle.lifespan);
 
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
@@ -970,6 +946,8 @@ namespace NifOsg
             osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
             if (partctrl->emitFlags & Nif::NiParticleSystemController::NoAutoAdjust)
                 counter->setNumberOfParticlesPerSecondToCreate(partctrl->emitRate);
+            else if (partctrl->lifetime == 0 && partctrl->lifetimeRandom == 0)
+                counter->setNumberOfParticlesPerSecondToCreate(0);
             else
                 counter->setNumberOfParticlesPerSecondToCreate(partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom/2));
 
@@ -1422,32 +1400,16 @@ namespace NifOsg
                 }
                 // We're going to convert the indices that pixel data contains
                 // into real colors using the palette.
-                const std::vector<unsigned int>& palette = pixelData->palette->colors;
-                if (pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8)
+                const auto& palette = pixelData->palette->colors;
+                const int numChannels = pixelformat == GL_RGBA ? 4 : 3;
+                unsigned char* data = new unsigned char[pixels.size() * numChannels];
+                unsigned char* pixel = data;
+                for (unsigned char index : pixels)
                 {
-                    unsigned char* data = new unsigned char[pixels.size() * 3];
-                    for (size_t i = 0; i < pixels.size(); i++)
-                    {
-                        unsigned int color = palette[pixels[i]];
-                        data[i * 3 + 0] = (color >>  0) & 0xFF;
-                        data[i * 3 + 1] = (color >>  8) & 0xFF;
-                        data[i * 3 + 2] = (color >> 16) & 0xFF;
-                    }
-                    image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
+                    memcpy(pixel, &palette[index], sizeof(unsigned char) * numChannels);
+                    pixel += numChannels;
                 }
-                else // if (fmt = NIPXFMT_PALA8)
-                {
-                    unsigned char* data = new unsigned char[pixels.size() * 4];
-                    for (size_t i = 0; i < pixels.size(); i++)
-                    {
-                        unsigned int color = palette[pixels[i]];
-                        data[i * 4 + 0] = (color >>  0) & 0xFF;
-                        data[i * 4 + 1] = (color >>  8) & 0xFF;
-                        data[i * 4 + 2] = (color >> 16) & 0xFF;
-                        data[i * 4 + 3] = (color >> 24) & 0xFF;
-                    }
-                    image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
-                }
+                image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data, osg::Image::USE_NEW_DELETE);
                 break;
             }
             default:
@@ -1473,7 +1435,7 @@ namespace NifOsg
             // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the shadow casting shader will need to be updated accordingly.
             for (size_t i=0; i<texprop->textures.size(); ++i)
             {
-                if (texprop->textures[i].inUse)
+                if (texprop->textures[i].inUse || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->controller.empty()))
                 {
                     switch(i)
                     {
@@ -1499,32 +1461,46 @@ namespace NifOsg
                         }
                     }
 
-                    const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                    if(tex.texture.empty() && texprop->controller.empty())
-                    {
-                        if (i == 0)
-                            Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
-                        continue;
-                    }
-
+                    unsigned int uvSet = 0;
                     // create a new texture, will later attempt to share using the SharedStateManager
                     osg::ref_ptr<osg::Texture2D> texture2d;
-                    if (!tex.texture.empty())
+                    if (texprop->textures[i].inUse)
                     {
-                        const Nif::NiSourceTexture *st = tex.texture.getPtr();
-                        osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
-                        texture2d = new osg::Texture2D(image);
-                        if (image)
-                            texture2d->setTextureSize(image->s(), image->t());
+                        const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
+                        if(tex.texture.empty() && texprop->controller.empty())
+                        {
+                            if (i == 0)
+                                Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName << "\" in " << mFilename;
+                            continue;
+                        }
+
+                        if (!tex.texture.empty())
+                        {
+                            const Nif::NiSourceTexture *st = tex.texture.getPtr();
+                            osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
+                            texture2d = new osg::Texture2D(image);
+                            if (image)
+                                texture2d->setTextureSize(image->s(), image->t());
+                        }
+                        else
+                            texture2d = new osg::Texture2D;
+
+                        bool wrapT = tex.clamp & 0x1;
+                        bool wrapS = (tex.clamp >> 1) & 0x1;
+
+                        texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+
+                        uvSet = tex.uvSet;
                     }
                     else
+                    {
+                        // Texture only comes from NiFlipController, so tex is ignored, set defaults
                         texture2d = new osg::Texture2D;
-
-                    bool wrapT = tex.clamp & 0x1;
-                    bool wrapS = (tex.clamp >> 1) & 0x1;
-
-                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+                        texture2d->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                        uvSet = 0;
+                    }
 
                     unsigned int texUnit = boundTextures.size();
 
@@ -1612,7 +1588,7 @@ namespace NifOsg
                         break;
                     }
 
-                    boundTextures.push_back(tex.uvSet);
+                    boundTextures.push_back(uvSet);
                 }
             }
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
@@ -1725,8 +1701,8 @@ namespace NifOsg
         {
             typedef std::set<osg::ref_ptr<Attribute>, CompareStateAttribute> Cache;
             static Cache sCache;
-            static OpenThreads::Mutex sMutex;
-            OpenThreads::ScopedLock<OpenThreads::Mutex> lock(sMutex);
+            static std::mutex sMutex;
+            std::lock_guard<std::mutex> lock(sMutex);
             typename Cache::iterator found = sCache.find(attr);
             if (found == sCache.end())
                 found = sCache.insert(attr).first;
@@ -1739,7 +1715,7 @@ namespace NifOsg
             osg::StateSet* stateset = node->getOrCreateStateSet();
 
             // Specular lighting is enabled by default, but there's a quirk...
-            int specFlags = 1;
+            bool specEnabled = true;
             osg::ref_ptr<osg::Material> mat (new osg::Material);
             mat->setColorMode(hasVertexColors ? osg::Material::AMBIENT_AND_DIFFUSE : osg::Material::OFF);
 
@@ -1758,7 +1734,8 @@ namespace NifOsg
                 case Nif::RC_NiSpecularProperty:
                 {
                     // Specular property can turn specular lighting off.
-                    specFlags = property->flags;
+                    auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
+                    specEnabled = specprop->flags & 1;
                     break;
                 }
                 case Nif::RC_NiMaterialProperty:
@@ -1842,7 +1819,7 @@ namespace NifOsg
             }
 
             // While NetImmerse and Gamebryo support specular lighting, Morrowind has its support disabled.
-            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || specFlags == 0)
+            if (mVersion <= Nif::NIFFile::NIFVersion::VER_MW || !specEnabled)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f,0.f,0.f,0.f));
 
             if (lightmode == 0)

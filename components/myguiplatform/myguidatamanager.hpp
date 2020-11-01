@@ -18,28 +18,28 @@ public:
     /** Get data stream from specified resource name.
         @param _name Resource name (usually file name).
     */
-    virtual MyGUI::IDataStream* getData(const std::string& _name);
+    MyGUI::IDataStream* getData(const std::string& _name) override;
 
     /** Free data stream.
         @param _data Data stream.
     */
-    virtual void freeData(MyGUI::IDataStream* _data);
+    void freeData(MyGUI::IDataStream* _data) override;
 
     /** Is data with specified name exist.
         @param _name Resource name.
     */
-    virtual bool isDataExist(const std::string& _name);
+    bool isDataExist(const std::string& _name) override;
 
     /** Get all data names with names that matches pattern.
         @param _pattern Pattern to match (for example "*.layout").
     */
-    virtual const MyGUI::VectorString& getDataListNames(const std::string& _pattern);
+    const MyGUI::VectorString& getDataListNames(const std::string& _pattern) override;
 
     /** Get full path to data.
         @param _name Resource name.
         @return Return full path to specified data.
     */
-    virtual const std::string& getDataPath(const std::string& _name);
+    const std::string& getDataPath(const std::string& _name) override;
 
 private:
     std::string mResourcePath;

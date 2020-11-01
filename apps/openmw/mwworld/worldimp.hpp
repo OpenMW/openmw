@@ -102,6 +102,7 @@ namespace MWWorld
             bool mSky;
             bool mGodMode;
             bool mScriptsEnabled;
+            bool mDiscardMovements;
             std::vector<std::string> mContentFiles;
 
             std::string mUserDataPath;
@@ -287,9 +288,9 @@ namespace MWWorld
             ///< Return a pointer to a liveCellRef with the given name.
             /// \param activeOnly do non search inactive cells.
 
-            Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = true) override;
+            Ptr searchPtr (const std::string& name, bool activeOnly, bool searchInContainers = false) override;
             ///< Return a pointer to a liveCellRef with the given name.
-            /// \param activeOnly do non search inactive cells.
+            /// \param activeOnly do not search inactive cells.
 
             Ptr searchPtrViaActorId (int actorId) override;
             ///< Search is limited to the active cells.
@@ -410,6 +411,8 @@ namespace MWWorld
 
             void updateAnimatedCollisionShape(const Ptr &ptr) override;
 
+            const MWPhysics::RayCastingInterface* getRayCasting() const override;
+
             bool castRay (float x1, float y1, float z1, float x2, float y2, float z2, int mask) override;
             ///< cast a Ray and return true if there is an object in the ray path.
 
@@ -485,6 +488,10 @@ namespace MWWorld
             ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
             /// \return pointer to created record
 
+            const ESM::Container *createOverrideRecord (const ESM::Container& record) override;
+            ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
+            /// \return pointer to created record
+
             void update (float duration, bool paused) override;
             void updatePhysics (float duration, bool paused) override;
 
@@ -524,17 +531,18 @@ namespace MWWorld
             void togglePOV(bool force = false) override;
 
             bool isFirstPerson() const override;
+            bool isPreviewModeEnabled() const override;
 
             void togglePreviewMode(bool enable) override;
 
             bool toggleVanityMode(bool enable) override;
 
             void allowVanityMode(bool allow) override;
-
-            void changeVanityModeScale(float factor) override;
-
             bool vanityRotateCamera(float * rot) override;
-            void setCameraDistance(float dist, bool adjust = false, bool override = true) override;
+            void adjustCameraDistance(float dist) override;
+
+            void applyDeferredPreviewRotationToPlayer(float dt) override;
+            void disableDeferredPreviewRotation() override;
 
             void setupPlayer() override;
             void renderPlayer() override;
@@ -729,6 +737,8 @@ namespace MWWorld
             bool isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const override;
 
             void reportStats(unsigned int frameNumber, osg::Stats& stats) const override;
+
+            std::vector<MWWorld::Ptr> getAll(const std::string& id) override;
     };
 }
 

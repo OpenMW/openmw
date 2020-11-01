@@ -93,6 +93,8 @@ namespace MWInput
 
         if (mMouseLookEnabled && !input->controlsDisabled())
         {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+
             float x = arg.xrel * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
             float y = arg.yrel * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
 
@@ -102,17 +104,14 @@ namespace MWInput
             rot[2] = -x;
 
             // Only actually turn player when we're not in vanity mode
-            if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && input->getControlSwitch("playerlooking"))
+            if (!world->vanityRotateCamera(rot) && input->getControlSwitch("playerlooking"))
             {
-                MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
+                MWWorld::Player& player = world->getPlayer();
                 player.yaw(x);
                 player.pitch(y);
             }
-
-            if (arg.zrel && input->getControlSwitch("playerviewswitch") && input->getControlSwitch("playercontrols")) //Check to make sure you are allowed to zoomout and there is a change
-            {
-                MWBase::Environment::get().getWorld()->changeVanityModeScale(static_cast<float>(arg.zrel));
-            }
+            else if (!input->getControlSwitch("playerlooking"))
+                MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
         }
     }
 
@@ -207,17 +206,20 @@ namespace MWInput
             return;
 
         float rot[3];
-        rot[0] = yAxis * dt * 1000.0f * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
+        rot[0] = -yAxis * dt * 1000.0f * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
         rot[1] = 0.0f;
-        rot[2] = xAxis * dt * 1000.0f * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
+        rot[2] = -xAxis * dt * 1000.0f * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
 
         // Only actually turn player when we're not in vanity mode
-        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
+        bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");
+        if (!MWBase::Environment::get().getWorld()->vanityRotateCamera(rot) && controls)
         {
             MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-            player.yaw(rot[2]);
-            player.pitch(rot[0]);
+            player.yaw(-rot[2]);
+            player.pitch(-rot[0]);
         }
+        else if (!controls)
+            MWBase::Environment::get().getWorld()->disableDeferredPreviewRotation();
 
         MWBase::Environment::get().getInputManager()->resetIdleTime();
     }
@@ -229,10 +231,10 @@ namespace MWInput
 
     bool MouseManager::injectMouseButtonRelease(Uint8 button)
     {
-        return MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
+        return MyGUI::InputManager::getInstance().injectMouseRelease(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(button));
     }
 
-    void MouseManager::injectMouseMove(int xMove, int yMove, int mouseWheelMove)
+    void MouseManager::injectMouseMove(float xMove, float yMove, float mouseWheelMove)
     {
         mGuiCursorX += xMove;
         mGuiCursorY += yMove;
@@ -242,7 +244,7 @@ namespace MWInput
         mGuiCursorX = std::max(0.f, std::min(mGuiCursorX, float(viewSize.width - 1)));
         mGuiCursorY = std::max(0.f, std::min(mGuiCursorY, float(viewSize.height - 1)));
 
-        MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), mMouseWheel);
+        MyGUI::InputManager::getInstance().injectMouseMove(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), static_cast<int>(mMouseWheel));
     }
 
     void MouseManager::warpMouse()

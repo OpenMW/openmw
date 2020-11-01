@@ -39,7 +39,7 @@ namespace CSVWorld
 
         private:
 
-            void contextMenuEvent (QContextMenuEvent *event);
+            void contextMenuEvent (QContextMenuEvent *event) override;
 
             QModelIndexList getUnselectedCells() const;
             ///< \note Non-existent cells are not listed.
@@ -54,16 +54,16 @@ namespace CSVWorld
             void setRegion (const std::string& regionId);
             ///< Set region Id of selected cells.
 
-            void mouseMoveEvent(QMouseEvent *event);
+            void mouseMoveEvent(QMouseEvent *event) override;
 
-            void dropEvent(QDropEvent* event);
+            void dropEvent(QDropEvent* event) override;
 
         public:
 
             RegionMap (const CSMWorld::UniversalId& universalId, CSMDoc::Document& document,
                 QWidget *parent = 0);
 
-            virtual std::vector<CSMWorld::UniversalId> getDraggedRecords() const;
+            std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;
 
         signals:
 
@@ -71,7 +71,7 @@ namespace CSVWorld
 
         private slots:
 
-            void selectAll();
+            void selectAll() override;
 
             void clearSelection();
 
