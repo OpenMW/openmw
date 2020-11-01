@@ -10,9 +10,9 @@
 #include <components/esm/esmreader.hpp>
 #include <utility>
 
-ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon warningIcon) :
+ContentSelectorModel::ContentModel::ContentModel(QObject *parent, QIcon&& warningIcon) :
     QAbstractTableModel(parent),
-    mWarningIcon(std::move(warningIcon)),
+    mWarningIcon(warningIcon),
     mMimeType ("application/omwcontent"),
     mMimeTypes (QStringList() << mMimeType),
     mColumnCount (1),

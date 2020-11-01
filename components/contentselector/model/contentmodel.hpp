@@ -23,7 +23,7 @@ namespace ContentSelectorModel
     {
         Q_OBJECT
     public:
-        explicit ContentModel(QObject *parent, QIcon warningIcon);
+        explicit ContentModel(QObject *parent, QIcon&& warningIcon);
         ~ContentModel() override;
 
         void setEncoding(const QString &encoding);
