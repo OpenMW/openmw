@@ -83,6 +83,7 @@
     Feature #5610: Actors movement should be smoother
     Feature #5642: Ability to attach arrows to actor skeleton instead of bow mesh
     Feature #5649: Skyrim SE compressed BSA format support
+    Feature #5672: Make stretch menu background configuration more accessible
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

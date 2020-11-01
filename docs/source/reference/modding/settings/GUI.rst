@@ -72,7 +72,7 @@ The Bethesda provided assets have a 4:3 aspect ratio, but other assets are permi
 If this setting is false, the assets will be centered in their correct aspect ratio,
 with black bars filling the remainder of the screen.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be configured in the Interface section of Advanced tab of the launcher.
 
 subtitles
 ---------
