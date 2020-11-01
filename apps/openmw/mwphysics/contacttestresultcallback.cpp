@@ -2,6 +2,8 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
+#include "components/misc/convert.hpp"
+
 #include "ptrholder.hpp"
 
 namespace MWPhysics
@@ -20,7 +22,7 @@ namespace MWPhysics
             collisionObject = col1Wrap->m_collisionObject;
         PtrHolder* holder = static_cast<PtrHolder*>(collisionObject->getUserPointer());
         if (holder)
-            mResult.push_back(holder->getPtr());
+            mResult.emplace_back(ContactPoint{holder->getPtr(), Misc::Convert::toOsg(cp.m_positionWorldOnB), Misc::Convert::toOsg(cp.m_normalWorldOnB)});
         return 0.f;
     }
 

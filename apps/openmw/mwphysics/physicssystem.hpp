@@ -57,6 +57,13 @@ namespace MWPhysics
     class Actor;
     class PhysicsTaskScheduler;
 
+    struct ContactPoint
+    {
+        MWWorld::Ptr mObject;
+        osg::Vec3f mPoint;
+        osg::Vec3f mNormal;
+    };
+
     struct LOSRequest
     {
         LOSRequest(const std::weak_ptr<Actor>& a1, const std::weak_ptr<Actor>& a2);
@@ -145,6 +152,7 @@ namespace MWPhysics
             void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
+            std::vector<ContactPoint> getCollisionsPoints(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const;
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,

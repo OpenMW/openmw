@@ -403,21 +403,29 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
+    std::vector<ContactPoint> PhysicsSystem::getCollisionsPoints(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
         btCollisionObject* me = nullptr;
 
-        ObjectMap::const_iterator found = mObjects.find(ptr);
+        auto found = mObjects.find(ptr);
         if (found != mObjects.end())
             me = found->second->getCollisionObject();
         else
-            return std::vector<MWWorld::Ptr>();
+            return {};
 
         ContactTestResultCallback resultCallback (me);
         resultCallback.m_collisionFilterGroup = collisionGroup;
         resultCallback.m_collisionFilterMask = collisionMask;
         mTaskScheduler->contactTest(me, resultCallback);
         return resultCallback.mResult;
+    }
+
+    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
+    {
+        std::vector<MWWorld::Ptr> actors;
+        for (auto& [actor, point, normal] : getCollisionsPoints(ptr, collisionGroup, collisionMask))
+            actors.emplace_back(actor);
+        return actors;
     }
 
     osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight)

@@ -7,6 +7,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "physicssystem.hpp"
+
 class btCollisionObject;
 struct btCollisionObjectWrapper;
 
@@ -23,7 +25,7 @@ namespace MWPhysics
                                          const btCollisionObjectWrapper* col0Wrap,int partId0,int index0,
                                          const btCollisionObjectWrapper* col1Wrap,int partId1,int index1) override;
 
-        std::vector<MWWorld::Ptr> mResult;
+        std::vector<ContactPoint> mResult;
     };
 }
 
