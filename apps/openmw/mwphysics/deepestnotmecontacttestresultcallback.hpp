@@ -20,6 +20,7 @@ namespace MWPhysics
     public:
         const btCollisionObject *mObject{nullptr};
         btVector3 mContactPoint{0,0,0};
+        btVector3 mContactNormal{0,0,0};
         btScalar mLeastDistSqr;
 
         DeepestNotMeContactTestResultCallback(const btCollisionObject* me, const std::vector<const btCollisionObject*>& targets, const btVector3 &origin);
