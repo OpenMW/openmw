@@ -214,6 +214,14 @@ namespace MWPhysics
 
         std::unique_lock lock(mSimulationMutex);
 
+        // move actors outside of the world if they're inside of it (must be done synchronously because of how bullet works)
+        {
+            std::unique_lock lk(mCollisionWorldMutex);
+            for (auto& data : actorsData)
+                for (int i = 0; i < numSteps && data.mIsStuck; ++i)
+                    MovementSolver::unstuck(data, mCollisionWorld.get());
+        }
+
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {

@@ -170,48 +170,6 @@ namespace MWPhysics
             static const float fStromWalkMult = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fStromWalkMult")->mValue.getFloat();
             velocity *= 1.f-(fStromWalkMult * (angleDegrees/180.f));
         }
-        
-        /*
-        auto tempPosition = physicActor->getPosition();
-        // the way we're using contactTest takes into account local collision shape position
-        auto refPosition = position - meshTranslation;
-        physicActor->setPosition(refPosition);
-        // try to pop outside of the world before doing anything else if we're inside of it
-        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject(), velocity};
-        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
-        if(contactCallback.mDistance < -sAllowedPenetration)
-        {
-            bool giveup = false;
-            auto positionDelta = contactCallback.mDelta;
-            physicActor->setPosition(refPosition + Misc::Convert::toOsg(positionDelta));
-
-            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject(), velocity};
-            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
-            // try again but only upwards (fixes some bad coc floors)
-            if(contactCallback2.mDistance < contactCallback.mDistance)
-            {
-                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, std::fabs(positionDelta.z())));
-
-                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject(), velocity};
-                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                // try again but fixed distance
-                if(contactCallback3.mDistance < contactCallback.mDistance)
-                {
-                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 10));
-
-                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject(), velocity};
-                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
-                    // give up
-                    if(contactCallback4.mDistance < contactCallback.mDistance)
-                        giveup = true;
-                }
-            }
-            if(!giveup)
-                position = physicActor->getPosition() + meshTranslation;
-            
-        }
-        physicActor->setPosition(tempPosition);
-        */
 
         Stepper stepper(collisionWorld, colobj);
         osg::Vec3f origVelocity = velocity;
@@ -438,5 +396,59 @@ namespace MWPhysics
 
         actor.mPosition = newPosition;
         actor.mPosition -= meshTranslation; // remove what was added earlier in compensating for doTrace not taking interior transformation into account
+    }
+
+    void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
+    {
+        const auto& ptr = actor.mPtr;
+        if (!ptr.getClass().isMobile(ptr))
+            return;
+
+        auto* physicActor = actor.mActorRaw;
+        auto tempPosition = physicActor->getPosition();
+        const auto& meshTranslation = physicActor->getScaledMeshTranslation();
+        const auto& refPosition = tempPosition - meshTranslation;
+        // use a 3d approximation of the movement vector to better judge player intent
+        const ESM::Position& refpos = ptr.getRefData().getPosition();
+        auto velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
+        // try to pop outside of the world before doing anything else if we're inside of it
+        if (!physicActor->getOnGround() || physicActor->getOnSlope())
+                velocity += physicActor->getInertialForce();
+
+        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject(), velocity};
+        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
+        if(contactCallback.mDistance < -sAllowedPenetration)
+        {
+            bool giveup = false;
+            const auto positionDelta = contactCallback.mDelta;
+            physicActor->setPosition(refPosition + Misc::Convert::toOsg(positionDelta));
+
+            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject(), velocity};
+            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
+            // try again but only upwards (fixes some bad coc floors)
+            if(contactCallback2.mDistance < contactCallback.mDistance)
+            {
+                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, std::abs(positionDelta.z())));
+
+                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject(), velocity};
+                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
+                // try again but fixed distance
+                if(contactCallback3.mDistance < contactCallback.mDistance)
+                {
+                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 10));
+
+                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject(), velocity};
+                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
+                    // give up
+                    if(contactCallback4.mDistance < contactCallback.mDistance)
+                        giveup = true;
+                }
+            }
+            if(!giveup)
+                tempPosition = physicActor->getPosition() + meshTranslation;
+        }
+        else
+            actor.mIsStuck = false;
+        physicActor->setPosition(tempPosition);
     }
 }
