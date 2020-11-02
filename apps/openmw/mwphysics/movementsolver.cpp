@@ -405,6 +405,9 @@ namespace MWPhysics
             return;
 
         auto* physicActor = actor.mActorRaw;
+        if(!physicActor->getCollisionMode()) // noclipping/tcl
+            return;
+
         auto tempPosition = physicActor->getPosition();
         const auto& meshTranslation = physicActor->getScaledMeshTranslation();
         const auto& refPosition = tempPosition - meshTranslation;
