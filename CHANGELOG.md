@@ -10,6 +10,7 @@
     Bug #2976 [reopened]: Issues combining settings from the command line and both config files
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
+    Bug #3789: Crash in visitEffectSources while in battle
     Bug #3862: Random container contents behave differently than vanilla
     Bug #3929: Leveled list merchant containers respawn on barter
     Bug #4021: Attributes and skills are not stored as floats
