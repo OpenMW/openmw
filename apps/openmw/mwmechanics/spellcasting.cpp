@@ -381,6 +381,37 @@ namespace MWMechanics
             target.getClass().getCreatureStats(target).getActiveSpells().purgeAll(magnitude, true);
             return true;
         }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::CurePoison)
+        {
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
+            return true;
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::CureParalyzation)
+        {
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
+            return true;
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::CureCommonDisease)
+        {
+            target.getClass().getCreatureStats(target).getSpells().purgeCommonDisease();
+            return true;
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::CureBlightDisease)
+        {
+            target.getClass().getCreatureStats(target).getSpells().purgeBlightDisease();
+            return true;
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::CureCorprusDisease)
+        {
+            target.getClass().getCreatureStats(target).getActiveSpells().purgeCorprusDisease();
+            target.getClass().getCreatureStats(target).getSpells().purgeCorprusDisease();
+            return true;
+        }
+        else if (target.getClass().isActor() && effectId == ESM::MagicEffect::RemoveCurse)
+        {
+            target.getClass().getCreatureStats(target).getSpells().purgeCurses();
+            return true;
+        }
         else if (target.getClass().isActor() && target == getPlayer())
         {
             MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(mCaster);
