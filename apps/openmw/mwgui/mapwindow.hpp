@@ -9,6 +9,7 @@
 #include <components/esm/cellid.hpp>
 
 #include <components/esm/custommarkerstate.hpp>
+#include <components/misc/constants.hpp>
 
 namespace MWRender
 {
@@ -72,7 +73,7 @@ namespace MWGui
     public:
         LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
         virtual ~LocalMapBase();
-        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass);
+        void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
         void setCellPrefix(const std::string& prefix);
         void setActiveCell(const int x, const int y, bool interior=false);
@@ -113,7 +114,9 @@ namespace MWGui
         MWRender::LocalMap* mLocalMapRender;
 
         int mCurX, mCurY;   //the position of the active cell on the global map (in cell coords)
+        bool mHasALastActiveCell = false;
         osg::Vec2f mCurPos;   //the position of the player in the world (in cell coords)
+
         bool mInterior;
         MyGUI::ScrollView* mLocalMap;
         MyGUI::ImageBox* mCompass;
@@ -145,9 +148,14 @@ namespace MWGui
         std::vector<MapEntry> mMaps;
 
         // Keep track of created marker widgets, just to easily remove them later.
-        std::vector<MyGUI::Widget*> mDoorMarkerWidgets;
+        std::vector<MyGUI::Widget*> mExteriorDoorMarkerWidgets;
+        std::map<std::pair<int, int>, std::vector<MyGUI::Widget*>> mExteriorDoorsByCell;
+        std::vector<MyGUI::Widget*> mInteriorDoorMarkerWidgets;
         std::vector<MyGUI::Widget*> mMagicMarkerWidgets;
         std::vector<MyGUI::Widget*> mCustomMarkerWidgets;
+        std::vector<MyGUI::Widget*> mDoorMarkersToRecycle;
+
+        std::vector<MyGUI::Widget*>& currentDoorMarkersWidgets();
 
         virtual void updateCustomMarkers();
 
@@ -181,7 +189,6 @@ namespace MWGui
 
     private:
         void updateDoorMarkers();
-        bool mNeedDoorMarkersUpdate;
     };
 
     class EditNoteDialog : public MWGui::WindowModal
