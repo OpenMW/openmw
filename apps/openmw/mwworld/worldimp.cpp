@@ -1590,8 +1590,10 @@ namespace MWWorld
 
             if (ptr.getClass().isActor())
             {
-                osg::Vec3f direction = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * point - point;
+                auto localPoint = objPos.asVec3() - point;
+                osg::Vec3f direction = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * localPoint - localPoint;
                 direction.normalize();
+                mPhysics->reportCollision(Misc::Convert::toBullet(point), Misc::Convert::toBullet(normal));
                 if (direction * normal < 0) // door is turning away from actor
                     continue;
 
