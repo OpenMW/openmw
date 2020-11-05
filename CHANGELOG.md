@@ -15,6 +15,7 @@
     Bug #3929: Leveled list merchant containers respawn on barter
     Bug #4021: Attributes and skills are not stored as floats
     Bug #4055: Local scripts don't inherit variables from their base record
+    Bug #4083: Door animation freezes when colliding with actors
     Bug #4623: Corprus implementation is incorrect
     Bug #4631: Setting MSAA level too high doesn't fall back to highest supported level
     Bug #4764: Data race in osg ParticleSystem
