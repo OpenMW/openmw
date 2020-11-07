@@ -174,6 +174,7 @@ class NiSkinInstance : public Record
 {
 public:
     NiSkinDataPtr data;
+    NiSkinPartitionPtr partitions;
     NodePtr root;
     NodeList bones;
 
@@ -200,6 +201,25 @@ public:
 
     Transformation trafo;
     std::vector<BoneInfo> bones;
+    NiSkinPartitionPtr partitions;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiSkinPartition : public Record
+{
+    struct Partition
+    {
+        std::vector<unsigned short> bones;
+        std::vector<unsigned short> vertexMap;
+        std::vector<float> weights;
+        std::vector<std::vector<unsigned short>> strips;
+        std::vector<unsigned short> triangles;
+        std::vector<char> boneIndices;
+        void read(NIFStream *nif);
+    };
+    std::vector<Partition> data;
 
     void read(NIFStream *nif) override;
 };
