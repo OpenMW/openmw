@@ -19,7 +19,7 @@ namespace MWPhysics
 
 
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler)
-  : mCanWaterWalk(false), mWalkingOnWater(false)
+  : mStandingOnPtr(nullptr), mCanWaterWalk(false), mWalkingOnWater(false)
   , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBoxTranslate), mHalfExtents(shape->mCollisionBoxHalfExtents)
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
@@ -266,6 +266,18 @@ void Actor::setCanWaterWalk(bool waterWalk)
         mCanWaterWalk = waterWalk;
         updateCollisionMask();
     }
+}
+
+MWWorld::Ptr Actor::getStandingOnPtr() const
+{
+    std::scoped_lock lock(mPositionMutex);
+    return mStandingOnPtr;
+}
+
+void Actor::setStandingOnPtr(const MWWorld::Ptr& ptr)
+{
+    std::scoped_lock lock(mPositionMutex);
+    mStandingOnPtr = ptr;
 }
 
 }

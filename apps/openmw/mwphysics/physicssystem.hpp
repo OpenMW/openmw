@@ -50,7 +50,6 @@ class btVector3;
 namespace MWPhysics
 {
     using PtrPositionList = std::map<MWWorld::Ptr, osg::Vec3f>;
-    using CollisionMap = std::map<MWWorld::Ptr, MWWorld::Ptr>;
 
     class HeightField;
     class Object;
@@ -271,13 +270,6 @@ namespace MWPhysics
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
-
-            // Tracks standing collisions happening during a single frame. <actor handle, collided handle>
-            // This will detect standing on an object, but won't detect running e.g. against a wall.
-            CollisionMap mStandingCollisions;
-
-            // replaces all occurrences of 'old' in the map by 'updated', no matter if it's a key or value
-            void updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated);
 
             using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
             PtrVelocityList mMovementQueue;
