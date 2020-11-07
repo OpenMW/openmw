@@ -60,6 +60,18 @@ namespace
         }
     }
 
+    bool isTypeGeometry(int type)
+    {
+        switch (type)
+        {
+            case Nif::RC_NiTriShape:
+            case Nif::RC_NiTriStrips:
+            case Nif::RC_NiLines:
+                return true;
+        }
+        return false;
+    }
+
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the node hierarchy above it.
     void collectDrawableProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
     {
@@ -528,7 +540,19 @@ namespace NifOsg
             // - finding a random child NiNode in NiBspArrayController
             node->setUserValue("recIndex", nifNode->recIndex);
 
+            std::vector<Nif::ExtraPtr> extraCollection;
+
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
+                extraCollection.emplace_back(e);
+
+            for (size_t i = 0; i < nifNode->extralist.length(); ++i)
+            {
+                Nif::ExtraPtr e = nifNode->extralist[i];
+                if (!e.empty())
+                    extraCollection.emplace_back(e);
+            }
+
+            for (const auto& e : extraCollection)
             {
                 if(e->recType == Nif::RC_NiTextKeyExtraData && textKeys)
                 {
@@ -584,7 +608,7 @@ namespace NifOsg
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
 
-            const bool isGeometry = nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines;
+            const bool isGeometry = isTypeGeometry(nifNode->recType);
 
             if (isGeometry && !skipMeshes)
             {
@@ -1175,7 +1199,7 @@ namespace NifOsg
 
         void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines);
+            assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             handleNiGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
@@ -1220,7 +1244,7 @@ namespace NifOsg
         void handleSkinnedGeometry(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines);
+            assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             handleNiGeometry(nifNode, geometry, parentNode, composite, boundTextures, animflags);
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
