@@ -116,6 +116,8 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiColorExtraData"]             = {&construct <NiVectorExtraData>           , RC_NiColorExtraData           };
     factory["NiFloatExtraData"]             = {&construct <NiFloatExtraData>            , RC_NiFloatExtraData           };
     factory["NiFloatsExtraData"]            = {&construct <NiFloatsExtraData>           , RC_NiFloatsExtraData          };
+    factory["NiStringPalette"]              = {&construct <NiStringPalette>             , RC_NiStringPalette            };
+    factory["NiBoolData"]                   = {&construct <NiBoolData>                  , RC_NiBoolData                 };
     return factory;
 }
 

@@ -240,5 +240,17 @@ public:
     void read(NIFStream *nif) override;
 };
 
+struct NiStringPalette : public Record
+{
+    std::vector<std::string> palette;
+    void read(NIFStream *nif) override;
+};
+
+struct NiBoolData : public Record
+{
+    ByteKeyMapPtr mKeyList;
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif
