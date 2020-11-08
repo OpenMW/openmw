@@ -8,20 +8,24 @@ load unsupported nif files
 :Range:		True/False
 :Default:	False
 
-At the moment OpenMW's NIF loader is only tailored to load models
-that can also load in Morrowind.
+Allow the engine to load arbitrary NIF files as long as they appear to be valid.
 
-However, you can enable its limited and experimental support for updates in
-the definitions of record types from later NIF revisions by toggling on
-this setting.
+OpenMW has limited and **experimental** support for NIF files
+that Morrowind itself cannot load, which normally goes unused.
 
-You must keep in mind that loading unsupported NIF files may fail,
-and the degree of this failure may vary. In milder cases, OpenMW will reject
-the file anyway because it lacks a definition for a certain record type
-that the file may use. In more severe cases OpenMW's
-incomplete understanding of a record type can lead to memory corruption,
-crashes or even freezes. Don't enable this if you're not sure that
-you know what you're doing.
+If enabled, this setting allows the NIF loader to make use of that functionality.
+
+.. warning::
+	You must keep in mind that since the mentioned support is experimental,
+	loading unsupported NIF files may fail, and the degree of this failure may vary.
+	
+	In milder cases, OpenMW will reject the file anyway because
+	it lacks a definition for a certain record type that the file may use.
+	
+	In more severe cases OpenMW's incomplete understanding of a record type
+	can lead to memory corruption, freezes or even crashes.
+	
+	**Do not enable** this if you're not so sure that you know what you're doing.
 
 To help debug possible issues OpenMW will log its progress in loading
 every file that uses an unsupported NIF version.
