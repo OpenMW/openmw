@@ -143,6 +143,8 @@ class NiAutoNormalParticlesData;
 class NiPalette;
 struct NiParticleModifier;
 struct NiLinesData;
+struct NiBoolData;
+struct NiSkinPartition;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -166,6 +168,8 @@ using NiRotatingParticlesDataPtr = RecordPtrT<NiRotatingParticlesData>;
 using NiAutoNormalParticlesDataPtr = RecordPtrT<NiAutoNormalParticlesData>;
 using NiPalettePtr = RecordPtrT<NiPalette>;
 using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
+using NiBoolDataPtr = RecordPtrT<NiBoolData>;
+using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;

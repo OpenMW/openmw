@@ -109,7 +109,10 @@ enum RecordType
   RC_NiVectorExtraData,
   RC_NiColorExtraData,
   RC_NiFloatExtraData,
-  RC_NiFloatsExtraData
+  RC_NiFloatsExtraData,
+  RC_NiStringPalette,
+  RC_NiBoolData,
+  RC_NiSkinPartition
 };
 
 /// Base class for all records
