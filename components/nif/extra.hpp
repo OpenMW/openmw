@@ -109,5 +109,12 @@ struct NiFloatsExtraData : public Extra
     void read(NIFStream *nif) override;
 };
 
+struct BSBound : public Extra
+{
+    osg::Vec3f center, halfExtents;
+
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif

@@ -183,5 +183,10 @@ public:
     void post(NIFFile *nif) override;
 };
 
+struct bhkBlendController : public Controller
+{
+    void read(NIFStream *nif) override;
+};
+
 } // Namespace
 #endif
