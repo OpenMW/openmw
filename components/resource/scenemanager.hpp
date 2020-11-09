@@ -73,6 +73,8 @@ namespace Resource
 
         void setSpecularMapPattern(const std::string& pattern);
 
+        void setApplyLightingToEnvMaps(bool apply);
+
         void setShaderPath(const std::string& path);
 
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
@@ -156,6 +158,7 @@ namespace Resource
         std::string mNormalHeightMapPattern;
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
+        bool mApplyLightingToEnvMaps;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 
