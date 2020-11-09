@@ -80,5 +80,11 @@ void NiFloatsExtraData::read(NIFStream *nif)
         nif->getFloats(data, num);
 }
 
+void BSBound::read(NIFStream *nif)
+{
+    Extra::read(nif);
+    center = nif->getVector3();
+    halfExtents = nif->getVector3();
+}
 
 }

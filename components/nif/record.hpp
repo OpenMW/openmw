@@ -112,7 +112,10 @@ enum RecordType
   RC_NiFloatsExtraData,
   RC_NiStringPalette,
   RC_NiBoolData,
-  RC_NiSkinPartition
+  RC_NiSkinPartition,
+  RC_BSXFlags,
+  RC_BSBound,
+  RC_bhkBlendController
 };
 
 /// Base class for all records

@@ -228,4 +228,10 @@ namespace Nif
         mSources.post(nif);
     }
 
+    void bhkBlendController::read(NIFStream *nif)
+    {
+        Controller::read(nif);
+        nif->getUInt(); // Zero
+    }
+
 }

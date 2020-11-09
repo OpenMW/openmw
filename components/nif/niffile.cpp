@@ -119,6 +119,11 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiStringPalette"]              = {&construct <NiStringPalette>             , RC_NiStringPalette            };
     factory["NiBoolData"]                   = {&construct <NiBoolData>                  , RC_NiBoolData                 };
     factory["NiSkinPartition"]              = {&construct <NiSkinPartition>             , RC_NiSkinPartition            };
+    factory["BSXFlags"]                     = {&construct <NiIntegerExtraData>          , RC_BSXFlags                   };
+    factory["BSBound"]                      = {&construct <BSBound>                     , RC_BSBound                    };
+    factory["NiTransformData"]              = {&construct <NiKeyframeData>              , RC_NiKeyframeData             };
+    factory["BSFadeNode"]                   = {&construct <NiNode>                      , RC_NiNode                     };
+    factory["bhkBlendController"]           = {&construct <bhkBlendController>          , RC_bhkBlendController         };
     return factory;
 }
 
