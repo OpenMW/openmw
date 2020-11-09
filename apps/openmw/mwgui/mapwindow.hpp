@@ -149,9 +149,13 @@ namespace MWGui
 
         void applyFogOfWar();
 
-        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos);
+        MyGUI::IntPoint getPosition(int cellX, int cellY, float nx, float ny) const;
+        MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos) const;
+        MyGUI::IntCoord getMarkerCoordinates(float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
+        MyGUI::Widget* createDoorMarker(const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
 
         virtual void notifyPlayerUpdate() {}
+        void centerView();
         virtual void notifyMapChanged() {}
 
         virtual void customMarkerCreated(MyGUI::Widget* marker) {}
@@ -163,6 +167,7 @@ namespace MWGui
         void addDetectionMarkers(int type);
 
         void redraw();
+        float getWidgetSize() const;
 
         float mMarkerUpdateTimer;
 
@@ -252,6 +257,9 @@ namespace MWGui
         void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
         void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
+        float getMarkerSize() const;
+        MyGUI::IntCoord createMarkerCoords(float x, float y) const;
+        MyGUI::Widget* createMarker(const std::string& name, float x, float y);
 
         MyGUI::ScrollView* mGlobalMap;
         std::unique_ptr<MyGUI::ITexture> mGlobalMapTexture;
@@ -288,6 +296,7 @@ namespace MWGui
 
         void notifyPlayerUpdate() override;
 
+        void centerView();
     };
 }
 #endif
