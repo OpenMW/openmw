@@ -5,8 +5,6 @@
 #include <map>
 #include <sstream>
 
-#include <components/settings/settings.hpp>
-
 namespace Nif
 {
 
@@ -182,8 +180,7 @@ void NIFFile::parse(Files::IStreamPtr stream)
     }
     if (!supported)
     {
-        static const bool ignoreUnsupported = Settings::Manager::getBool("load unsupported nif files", "Models");
-        if (ignoreUnsupported)
+        if (sLoadUnsupportedFiles)
             warn("Unsupported NIF version: " + printVersion(ver) + ". Proceed with caution!");
         else
             fail("Unsupported NIF version: " + printVersion(ver));
@@ -329,6 +326,13 @@ void NIFFile::setUseSkinning(bool skinning)
 bool NIFFile::getUseSkinning() const
 {
     return mUseSkinning;
+}
+
+bool NIFFile::sLoadUnsupportedFiles = false;
+
+void NIFFile::setLoadUnsupportedFiles(bool load)
+{
+    sLoadUnsupportedFiles = load;
 }
 
 }
