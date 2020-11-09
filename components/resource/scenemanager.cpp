@@ -220,6 +220,7 @@ namespace Resource
         , mClampLighting(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
+        , mApplyLightingToEnvMaps(false)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -282,6 +283,11 @@ namespace Resource
     void SceneManager::setSpecularMapPattern(const std::string &pattern)
     {
         mSpecularMapPattern = pattern;
+    }
+
+    void SceneManager::setApplyLightingToEnvMaps(bool apply)
+    {
+        mApplyLightingToEnvMaps = apply;
     }
 
     SceneManager::~SceneManager()
@@ -770,6 +776,7 @@ namespace Resource
         shaderVisitor->setNormalHeightMapPattern(mNormalHeightMapPattern);
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
+        shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
         return shaderVisitor;
     }
 

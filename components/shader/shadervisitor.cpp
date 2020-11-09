@@ -14,7 +14,6 @@
 #include <components/vfs/manager.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
-#include <components/settings/settings.hpp>
 
 #include "shadermanager.hpp"
 
@@ -43,6 +42,7 @@ namespace Shader
         , mAllowedToModifyStateSets(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
+        , mApplyLightingToEnvMaps(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultVsTemplate(defaultVsTemplate)
@@ -144,11 +144,9 @@ namespace Shader
                                 // Bump maps are off by default as well
                                 writableStateSet->setTextureMode(unit, GL_TEXTURE_2D, osg::StateAttribute::ON);
                             }
-                            else if (texName == "envMap")
+                            else if (texName == "envMap" && mApplyLightingToEnvMaps)
                             {
-                                static const bool preLightEnv = Settings::Manager::getBool("apply lighting to environment maps", "Shaders");
-                                if (preLightEnv)
-                                    mRequirements.back().mShaderRequired = true;
+                                mRequirements.back().mShaderRequired = true;
                             }
                         }
                         else
@@ -475,6 +473,11 @@ namespace Shader
     void ShaderVisitor::setSpecularMapPattern(const std::string &pattern)
     {
         mSpecularMapPattern = pattern;
+    }
+
+    void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
+    {
+        mApplyLightingToEnvMaps = apply;
     }
 
 }
