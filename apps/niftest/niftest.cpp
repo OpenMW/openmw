@@ -132,6 +132,7 @@ int main(int argc, char **argv)
     if(!parseOptions (argc, argv, files))
         return 1;
 
+    Nif::NIFFile::setLoadUnsupportedFiles(true);
 //     std::cout << "Reading Files" << std::endl;
     for(std::vector<std::string>::const_iterator it=files.begin(); it!=files.end(); ++it)
     {
