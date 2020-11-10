@@ -115,7 +115,11 @@ enum RecordType
   RC_NiSkinPartition,
   RC_BSXFlags,
   RC_BSBound,
-  RC_bhkBlendController
+  RC_bhkBlendController,
+  RC_NiFloatInterpolator,
+  RC_NiPoint3Interpolator,
+  RC_NiBoolInterpolator,
+  RC_NiTransformInterpolator,
 };
 
 /// Base class for all records
