@@ -218,7 +218,7 @@ namespace NifOsg
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
     {
     public:
-        GeomMorpherController(const Nif::NiMorphData* data);
+        GeomMorpherController(const Nif::NiGeomMorpherController* ctrl);
         GeomMorpherController();
         GeomMorpherController(const GeomMorpherController& copy, const osg::CopyOp& copyop);
 

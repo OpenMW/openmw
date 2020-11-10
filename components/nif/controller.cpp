@@ -216,6 +216,7 @@ namespace Nif
                 }
                 else
                 {
+                    // TODO: handle weighted interpolators
                     unsigned int numInterps = nif->getUInt();
                     nif->skip(8 * numInterps);
                 }

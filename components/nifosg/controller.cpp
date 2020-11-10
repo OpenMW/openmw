@@ -197,10 +197,25 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
 {
 }
 
-GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
+GeomMorpherController::GeomMorpherController(const Nif::NiGeomMorpherController* ctrl)
 {
-    for (unsigned int i=0; i<data->mMorphs.size(); ++i)
-        mKeyFrames.emplace_back(data->mMorphs[i].mKeyFrames);
+    if (ctrl->interpolators.length() == 0)
+    {
+        if (ctrl->data.empty())
+            return;
+        for (const auto& morph : ctrl->data->mMorphs)
+           mKeyFrames.emplace_back(morph.mKeyFrames);
+    }
+    else
+    {
+        for (size_t i = 0; i < ctrl->interpolators.length(); ++i)
+        {
+            if (!ctrl->interpolators[i].empty())
+                mKeyFrames.emplace_back(ctrl->interpolators[i].getPtr());
+            else
+                mKeyFrames.emplace_back();
+        }
+    }
 }
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)

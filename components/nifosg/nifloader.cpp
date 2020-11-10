@@ -1244,7 +1244,7 @@ namespace NifOsg
                         continue;
                     drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
 
-                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl->data.getPtr());
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl);
                     setupController(ctrl.getPtr(), morphctrl, animflags);
                     drawable->setUpdateCallback(morphctrl);
                     break;
