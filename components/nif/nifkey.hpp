@@ -52,15 +52,26 @@ struct KeyMapT {
     MapType mKeys;
 
     //Read in a KeyGroup (see http://niftools.sourceforge.net/doc/nif/NiKeyframeData.html)
-    void read(NIFStream *nif, bool force=false)
+    void read(NIFStream *nif, bool force = false, bool morph = false)
     {
         assert(nif);
 
         mInterpolationType = InterpolationType_Unknown;
 
+        if (morph && nif->getVersion() >= NIFStream::generateVersion(10,1,0,106))
+            nif->getString(); // Frame name
+
         size_t count = nif->getUInt();
-        if(count == 0 && !force)
+        if (count == 0 && !force && !morph)
             return;
+
+        if (morph && nif->getVersion() > NIFStream::generateVersion(10,1,0,0))
+        {
+            if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,104) &&
+                nif->getVersion() <= NIFStream::generateVersion(20,1,0,2) && nif->getBethVersion() < 10)
+                nif->getFloat(); // Legacy weight
+            return;
+        }
 
         mKeys.clear();
 

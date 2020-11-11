@@ -6,6 +6,8 @@ namespace Nif
 void NiSkinInstance::read(NIFStream *nif)
 {
     data.read(nif);
+    if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,101))
+        partitions.read(nif);
     root.read(nif);
     bones.read(nif);
 }
@@ -13,6 +15,7 @@ void NiSkinInstance::read(NIFStream *nif)
 void NiSkinInstance::post(NIFFile *nif)
 {
     data.post(nif);
+    partitions.post(nif);
     root.post(nif);
     bones.post(nif);
 
@@ -418,7 +421,7 @@ void NiMorphData::read(NIFStream *nif)
     for(int i = 0;i < morphCount;i++)
     {
         mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
-        mMorphs[i].mKeyFrames->read(nif, true);
+        mMorphs[i].mKeyFrames->read(nif, true, /*morph*/true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }

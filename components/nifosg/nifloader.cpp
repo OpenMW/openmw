@@ -281,10 +281,10 @@ namespace NifOsg
                 const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
 
-                if(key->data.empty())
+                if (key->data.empty() && key->interpolator.empty())
                     continue;
 
-                osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
+                osg::ref_ptr<NifOsg::KeyframeController> callback(handleKeyframeController(key));
                 callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
@@ -725,6 +725,24 @@ namespace NifOsg
             }
         }
 
+        static osg::ref_ptr<KeyframeController> handleKeyframeController(const Nif::NiKeyframeController* keyctrl)
+        {
+            osg::ref_ptr<NifOsg::KeyframeController> ctrl;
+            if (!keyctrl->interpolator.empty())
+            {
+                const Nif::NiTransformInterpolator* interp = keyctrl->interpolator.getPtr();
+                if (!interp->data.empty())
+                    ctrl = new NifOsg::KeyframeController(interp);
+                else
+                    ctrl = new NifOsg::KeyframeController(interp->defaultScale, interp->defaultPos, interp->defaultRot);
+            }
+            else if (!keyctrl->data.empty())
+            {
+                ctrl = new NifOsg::KeyframeController(keyctrl->data.getPtr());
+            }
+            return ctrl;
+        }
+
         void handleNodeControllers(const Nif::Node* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -734,9 +752,9 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiKeyframeController)
                 {
                     const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                    if (key->data.empty())
+                    if (key->data.empty() && key->interpolator.empty())
                         continue;
-                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
+                    osg::ref_ptr<KeyframeController> callback(handleKeyframeController(key));
                     setupController(key, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -763,9 +781,13 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiRollController)
                 {
                     const Nif::NiRollController *rollctrl = static_cast<const Nif::NiRollController*>(ctrl.getPtr());
-                    if (rollctrl->data.empty())
+                    if (rollctrl->data.empty() && rollctrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
+                    osg::ref_ptr<RollController> callback;
+                    if (!rollctrl->interpolator.empty())
+                        callback = new RollController(rollctrl->interpolator.getPtr());
+                    else // if (!rollctrl->data.empty())
+                        callback = new RollController(rollctrl->data.getPtr());
                     setupController(rollctrl, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -791,19 +813,27 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                    if (alphactrl->data.empty())
+                    if (alphactrl->data.empty() && alphactrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr(), baseMaterial));
+                    osg::ref_ptr<AlphaController> osgctrl;
+                    if (!alphactrl->interpolator.empty())
+                        osgctrl = new AlphaController(alphactrl->interpolator.getPtr(), baseMaterial);
+                    else // if (!alphactrl->data.empty())
+                        osgctrl = new AlphaController(alphactrl->data.getPtr(), baseMaterial);
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    if (matctrl->data.empty())
+                    if (matctrl->data.empty() && matctrl->interpolator.empty())
                         continue;
+                    osg::ref_ptr<MaterialColorController> osgctrl;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
-                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial));
+                    if (!matctrl->interpolator.empty())
+                        osgctrl = new MaterialColorController(matctrl->interpolator.getPtr(), targetColor, baseMaterial);
+                    else // if (!matctrl->data.empty())
+                        osgctrl = new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial);
                     setupController(matctrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -1214,7 +1244,7 @@ namespace NifOsg
                         continue;
                     drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
 
-                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl->data.getPtr());
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl);
                     setupController(ctrl.getPtr(), morphctrl, animflags);
                     drawable->setUpdateCallback(morphctrl);
                     break;
