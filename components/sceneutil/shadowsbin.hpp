@@ -21,7 +21,7 @@ namespace SceneUtil
         ShadowsBin();
         ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop) : osgUtil::RenderBin(rhs, copyop), mStateSet(rhs.mStateSet) {}
 
-        virtual void sortImplementation();
+        void sortImplementation() override;
 
         struct State
         {
