@@ -885,15 +885,6 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
 
     _castingProgram->addShader(shaderManager.getShader("shadowcasting_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::VERTEX));
     _castingProgram->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::FRAGMENT));
-
-    _shadowMapAlphaTestDisableUniform = shaderManager.getShadowMapAlphaTestDisableUniform();
-    _shadowMapAlphaTestDisableUniform->setName("alphaTestShadows");
-    _shadowMapAlphaTestDisableUniform->setType(osg::Uniform::BOOL);
-    _shadowMapAlphaTestDisableUniform->set(false);
-
-    shaderManager.getShadowMapAlphaTestEnableUniform()->setName("alphaTestShadows");
-    shaderManager.getShadowMapAlphaTestEnableUniform()->setType(osg::Uniform::BOOL);
-    shaderManager.getShadowMapAlphaTestEnableUniform()->set(true);
 }
 
 MWShadowTechnique::ViewDependentData* MWShadowTechnique::createViewDependentData(osgUtil::CullVisitor* /*cv*/)
@@ -1595,7 +1586,7 @@ void MWShadowTechnique::createShaders()
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
     _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
-    _shadowCastingStateSet->addUniform(_shadowMapAlphaTestDisableUniform);
+    _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
     depth->setWriteMask(true);
     _shadowCastingStateSet->setAttribute(depth, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);

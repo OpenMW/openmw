@@ -42,11 +42,16 @@ namespace SceneUtil
 
 ShadowsBin::ShadowsBin()
 {
-    mStateSet = new osg::StateSet;
-    mStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+    mNoTestStateSet = new osg::StateSet;
+    mNoTestStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", false));
+    mNoTestStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
+
+    mShaderAlphaTestStateSet = new osg::StateSet;
+    mShaderAlphaTestStateSet->addUniform(new osg::Uniform("alphaTestShadows", true));
+    mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
 }
 
-bool ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
+StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
 {
     std::vector<StateGraph*> return_path;
     State state;
@@ -88,7 +93,7 @@ bool ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered
     }
 
     if (!state.needShadows())
-        return true;
+        return nullptr;
 
     if (!state.needTexture() && !state.mImportantState)
     {
@@ -97,9 +102,12 @@ bool ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered
             leaf->_parent = root;
             root->_leaves.push_back(leaf);
         }
-        return true;
+        return nullptr;
     }
-    return false;
+
+    if (state.mAlphaBlend)
+        return sg->find_or_insert(mShaderAlphaTestStateSet);
+    return sg;
 }
 
 bool ShadowsBin::State::needShadows() const
@@ -128,9 +136,9 @@ void ShadowsBin::sortImplementation()
         if (!root->_parent)
             return;
     }
-    root = root->find_or_insert(mStateSet.get());
+    StateGraph* noTestRoot = root->find_or_insert(mNoTestStateSet.get());
     // root is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
-    root->_leaves.reserve(_stateGraphList.size());
+    noTestRoot->_leaves.reserve(_stateGraphList.size());
     StateGraphList newList;
     std::unordered_set<StateGraph*> uninterestingCache;
     for (StateGraph* graph : _stateGraphList)
@@ -138,11 +146,12 @@ void ShadowsBin::sortImplementation()
         // Render leaves which shouldn't use the diffuse map for shadow alpha but do cast shadows become children of root, so graph is now empty. Don't add to newList.
         // Graphs containing just render leaves which don't cast shadows are discarded. Don't add to newList.
         // Graphs containing other leaves need to be in newList.
-        if (!cullStateGraph(graph, root, uninterestingCache))
-            newList.push_back(graph);
+        StateGraph* graphToAdd = cullStateGraph(graph, noTestRoot, uninterestingCache);
+        if (graphToAdd)
+            newList.push_back(graphToAdd);
     }
-    if (!root->_leaves.empty())
-        newList.push_back(root);
+    if (!noTestRoot->_leaves.empty())
+        newList.push_back(noTestRoot);
     _stateGraphList = newList;
 }
 

@@ -15,11 +15,12 @@ namespace SceneUtil
     class ShadowsBin : public osgUtil::RenderBin
     {
     private:
-        osg::ref_ptr<osg::StateSet> mStateSet;
+        osg::ref_ptr<osg::StateSet> mNoTestStateSet;
+        osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
     public:
         META_Object(SceneUtil, ShadowsBin)
         ShadowsBin();
-        ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop) : osgUtil::RenderBin(rhs, copyop), mStateSet(rhs.mStateSet) {}
+        ShadowsBin(const ShadowsBin& rhs, const osg::CopyOp& copyop) : osgUtil::RenderBin(rhs, copyop), mNoTestStateSet(rhs.mNoTestStateSet), mShaderAlphaTestStateSet(rhs.mShaderAlphaTestStateSet) {}
 
         void sortImplementation() override;
 
@@ -39,7 +40,7 @@ namespace SceneUtil
             bool interesting() const { return !needShadows() || needTexture() || mAlphaBlendOverride || mAlphaTestOverride || mMaterialOverride || mImportantState; }
         };
 
-        bool cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting);
+        osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting);
 
         static void addPrototype(const std::string& name)
         {
