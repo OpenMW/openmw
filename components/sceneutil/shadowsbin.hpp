@@ -11,7 +11,7 @@ namespace osg
 namespace SceneUtil
 {
 
-    /// renderbin which culls redundent state for shadows rendering
+    /// renderbin which culls redundant state for shadow map rendering
     class ShadowsBin : public osgUtil::RenderBin
     {
     private:
