@@ -61,10 +61,10 @@ namespace NifOsg
         ValueInterpolator() = default;
 
         template<class T = MapT>
-        inline ValueInterpolator(typename std::enable_if<
+        ValueInterpolator(typename std::enable_if_t<
             std::is_same<T, Nif::FloatKeyMap>::value,
             const Nif::NiFloatInterpolator
-        >::type * interpolator) : mDefaultVal(interpolator->defaultVal)
+        > * interpolator) : mDefaultVal(interpolator->defaultVal)
         {
             if (interpolator->data.empty())
                 return;
@@ -77,10 +77,10 @@ namespace NifOsg
         };
 
         template<class T = MapT>
-        inline ValueInterpolator(typename std::enable_if<
+        ValueInterpolator(typename std::enable_if_t<
             std::is_same<T, Nif::Vector3KeyMap>::value,
             const Nif::NiPoint3Interpolator
-        >::type * interpolator) : mDefaultVal(interpolator->defaultVal)
+        > * interpolator) : mDefaultVal(interpolator->defaultVal)
         {
             if (interpolator->data.empty())
                 return;
