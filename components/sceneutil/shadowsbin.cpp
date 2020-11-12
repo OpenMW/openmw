@@ -106,7 +106,15 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     }
 
     if (state.mAlphaBlend)
-        return sg->find_or_insert(mShaderAlphaTestStateSet);
+    {
+        sg_new = sg->find_or_insert(mShaderAlphaTestStateSet);
+        for (RenderLeaf* leaf : sg->_leaves)
+        {
+            leaf->_parent = sg_new;
+            sg_new->_leaves.push_back(leaf);
+        }
+        return sg_new;
+    }
     return sg;
 }
 
