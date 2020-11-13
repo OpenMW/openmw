@@ -1,4 +1,5 @@
 language: cpp
+os: [ linux, osx ]
 dist: focal
 branches:
   only:
@@ -17,7 +18,7 @@ addons:
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswresample-dev, libswscale-dev,
       # Audio, Video and Misc. deps
-      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev, liblz4-dev
+      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev, liblz4-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libopenscenegraph-dev, libmygui-dev
     ]
@@ -44,17 +45,17 @@ matrix:
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_install.${TRAVIS_OS_NAME}.sh; fi
+    - ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script:
     - ccache -z
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_script.${TRAVIS_OS_NAME}.sh; fi
+    -  ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ${ANALYZE} make -j3; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${BUILD_TESTS_ONLY}" ]; then ./openmw_test_suite; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
+ - ${ANALYZE} make -j3;
+ - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
+ - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
+ - if [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${BUILD_TESTS_ONLY}" ]; then ./openmw_test_suite; fi
+ - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
  - cd "${TRAVIS_BUILD_DIR}"
  - ccache -s
 deploy:
