@@ -83,7 +83,7 @@ namespace NifOsg
                 mLastLowKey = mKeys->mKeys.end();
                 mLastHighKey = mKeys->mKeys.end();
             }
-        };
+        }
 
         ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
