@@ -14,7 +14,7 @@
 
 CSMPrefs::ColourSetting::ColourSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, QColor default_)
-: Setting (parent, values, mutex, key, label), mDefault (default_), mWidget(0)
+: Setting (parent, values, mutex, key, label), mDefault (default_), mWidget(nullptr)
 {}
 
 CSMPrefs::ColourSetting& CSMPrefs::ColourSetting::setTooltip (const std::string& tooltip)

@@ -33,7 +33,7 @@ void ProfilesComboBox::setEditEnabled(bool editable)
     ComboBoxLineEdit *edit = new ComboBoxLineEdit(this);
 
     setLineEdit(edit);
-    setCompleter(0);
+    setCompleter(nullptr);
 
     connect(lineEdit(), SIGNAL(editingFinished()), this,
                 SLOT(slotEditingFinished()));

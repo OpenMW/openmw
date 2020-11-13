@@ -32,7 +32,7 @@ namespace Launcher
 
     public:
         explicit DataFilesPage (Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                                Config::LauncherSettings &launcherSettings, QWidget *parent = 0);
+                                Config::LauncherSettings &launcherSettings, QWidget *parent = nullptr);
 
         QAbstractItemModel* profilesModel() const;
 

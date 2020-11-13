@@ -12,7 +12,7 @@
 #include "shortcutsetting.hpp"
 #include "modifiersetting.hpp"
 
-CSMPrefs::State *CSMPrefs::State::sThis = 0;
+CSMPrefs::State *CSMPrefs::State::sThis = nullptr;
 
 void CSMPrefs::State::load()
 {
@@ -599,7 +599,7 @@ CSMPrefs::State::State (const Files::ConfigurationManager& configurationManager)
 
 CSMPrefs::State::~State()
 {
-    sThis = 0;
+    sThis = nullptr;
 }
 
 void CSMPrefs::State::save()

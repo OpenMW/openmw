@@ -787,7 +787,7 @@ CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const osg::Vec3d& poi
     if (searchResult != mCells.end())
         return searchResult->second;
     else
-        return 0;
+        return nullptr;
 }
 
 CSVRender::Cell* CSVRender::PagedWorldspaceWidget::getCell(const CSMWorld::CellCoordinates& coords) const

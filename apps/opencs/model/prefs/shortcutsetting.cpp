@@ -18,7 +18,7 @@ namespace CSMPrefs
     ShortcutSetting::ShortcutSetting(Category* parent, Settings::Manager* values, QMutex* mutex, const std::string& key,
         const std::string& label)
         : Setting(parent, values, mutex, key, label)
-        , mButton(0)
+        , mButton(nullptr)
         , mEditorActive(false)
         , mEditorPos(0)
     {

@@ -57,7 +57,7 @@ namespace CSVWidget
         Q_OBJECT
 
         public:
-            TextureBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
+            TextureBrushWindow(CSMDoc::Document& document, QWidget *parent = nullptr);
             void configureButtonInitialSettings(QPushButton *button);
 
             const QString toolTipPoint = "Paint single point";

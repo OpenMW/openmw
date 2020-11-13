@@ -48,11 +48,11 @@ namespace CSVWidget
 
             /// \param push Do not maintain a toggle state
             PushButton (const QIcon& icon, Type type, const QString& tooltip = "",
-                QWidget *parent = 0);
+                QWidget *parent = nullptr);
 
             /// \param push Do not maintain a toggle state
             PushButton (Type type, const QString& tooltip = "",
-                QWidget *parent = 0);
+                QWidget *parent = nullptr);
 
             bool hasKeepOpen() const;
 

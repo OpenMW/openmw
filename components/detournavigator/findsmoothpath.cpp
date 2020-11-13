@@ -58,8 +58,8 @@ namespace DetourNavigator
             return path;
 
         // Get connected polygons
-        const dtMeshTile* tile = 0;
-        const dtPoly* poly = 0;
+        const dtMeshTile* tile = nullptr;
+        const dtPoly* poly = nullptr;
         if (dtStatusFailed(navQuery.getAttachedNavMesh()->getTileAndPolyByRef(path[0], &tile, &poly)))
             return path;
 

@@ -10,7 +10,7 @@ class ComponentListWidget : public QListWidget
     Q_PROPERTY(QStringList mCheckedItems READ checkedItems)
 
 public:
-    ComponentListWidget(QWidget *parent = 0);
+    ComponentListWidget(QWidget *parent = nullptr);
 
     QStringList mCheckedItems;
     QStringList checkedItems();

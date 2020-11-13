@@ -30,7 +30,7 @@ void CSVTools::SearchSubView::replace (bool selection)
     bool autoDelete = CSMPrefs::get()["Search & Replace"]["auto-delete"].isTrue();
 
     CSMTools::Search search (mSearch);
-    CSMWorld::IdTableBase *currentTable = 0;
+    CSMWorld::IdTableBase *currentTable = nullptr;
 
     // We are running through the indices in reverse order to avoid messing up multiple results
     // in a single string.

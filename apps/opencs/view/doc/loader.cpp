@@ -17,7 +17,7 @@ void CSVDoc::LoadingDocument::closeEvent (QCloseEvent *event)
 }
 
 CSVDoc::LoadingDocument::LoadingDocument (CSMDoc::Document *document)
-: mDocument (document), mAborted (false), mMessages (0), mTotalRecords (0)
+: mDocument (document), mAborted (false), mMessages (nullptr), mTotalRecords (0)
 {
     setWindowTitle (QString::fromUtf8((std::string("Opening ") + document->getSavePath().filename().string()).c_str()));
 

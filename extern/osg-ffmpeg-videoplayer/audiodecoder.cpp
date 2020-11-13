@@ -30,7 +30,7 @@ namespace Video
 struct AudioResampler
 {
     AudioResampler()
-        : mSwr(NULL)
+        : mSwr(nullptr)
     {
     }
 
@@ -51,8 +51,8 @@ MovieAudioDecoder::MovieAudioDecoder(VideoState* videoState)
     , mFramePos(0)
     , mFrameSize(0)
     , mAudioClock(0.0)
-    , mDataBuf(NULL)
-    , mFrameData(NULL)
+    , mDataBuf(nullptr)
+    , mFrameData(nullptr)
     , mDataBufLen(0)
     , mFrame(av_frame_alloc())
     , mGetNextPacket(true)
@@ -125,7 +125,7 @@ void MovieAudioDecoder::setupFormat()
                           inputSampleFormat,
                           inputSampleRate,
                           0,                             // logging level offset
-                          NULL);                         // log context
+                          nullptr);                      // log context
         if(!mAudioResampler->mSwr)
             fail(std::string("Couldn't allocate SwrContext"));
         if(swr_init(mAudioResampler->mSwr) < 0)

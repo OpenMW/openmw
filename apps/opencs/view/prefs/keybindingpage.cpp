@@ -16,9 +16,9 @@ namespace CSVPrefs
 {
     KeyBindingPage::KeyBindingPage(CSMPrefs::Category& category, QWidget* parent)
         : PageBase(category, parent)
-        , mStackedLayout(0)
-        , mPageLayout(0)
-        , mPageSelector(0)
+        , mStackedLayout(nullptr)
+        , mPageLayout(nullptr)
+        , mPageSelector(nullptr)
     {
         // Need one widget for scroll area
         QWidget* topWidget = new QWidget();

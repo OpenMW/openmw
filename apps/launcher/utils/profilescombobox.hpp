@@ -16,12 +16,12 @@ public:
     class ComboBoxLineEdit : public LineEdit
     {
     public:
-        explicit ComboBoxLineEdit (QWidget *parent = 0);
+        explicit ComboBoxLineEdit (QWidget *parent = nullptr);
     };
 
 public:
 
-    explicit ProfilesComboBox(QWidget *parent = 0);
+    explicit ProfilesComboBox(QWidget *parent = nullptr);
     void setEditEnabled(bool editable);
     void setCurrentProfile(int index)
     {

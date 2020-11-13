@@ -67,7 +67,7 @@ namespace
         {
             if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2) && iter->mData.getCount())
             {
-                MWWorld::Ptr ptr (&*iter, 0);
+                MWWorld::Ptr ptr (&*iter, nullptr);
                 ptr.setContainerStore (store);
                 return ptr;
             }
@@ -326,7 +326,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add (const Ptr& itemPtr
         if (actorPtr == player)
         {
             // Items in player's inventory have cell set to 0, so their scripts will never be removed
-            item.mCell = 0;
+            item.mCell = nullptr;
         }
         else
         {
@@ -1138,18 +1138,18 @@ PtrType MWWorld::ContainerStoreIteratorBase<PtrType>::operator*() const
 
     switch (mType)
     {
-        case ContainerStore::Type_Potion: ptr = PtrType (&*mPotion, 0); break;
-        case ContainerStore::Type_Apparatus: ptr = PtrType (&*mApparatus, 0); break;
-        case ContainerStore::Type_Armor: ptr = PtrType (&*mArmor, 0); break;
-        case ContainerStore::Type_Book: ptr = PtrType (&*mBook, 0); break;
-        case ContainerStore::Type_Clothing: ptr = PtrType (&*mClothing, 0); break;
-        case ContainerStore::Type_Ingredient: ptr = PtrType (&*mIngredient, 0); break;
-        case ContainerStore::Type_Light: ptr = PtrType (&*mLight, 0); break;
-        case ContainerStore::Type_Lockpick: ptr = PtrType (&*mLockpick, 0); break;
-        case ContainerStore::Type_Miscellaneous: ptr = PtrType (&*mMiscellaneous, 0); break;
-        case ContainerStore::Type_Probe: ptr = PtrType (&*mProbe, 0); break;
-        case ContainerStore::Type_Repair: ptr = PtrType (&*mRepair, 0); break;
-        case ContainerStore::Type_Weapon: ptr = PtrType (&*mWeapon, 0); break;
+        case ContainerStore::Type_Potion: ptr = PtrType (&*mPotion, nullptr); break;
+        case ContainerStore::Type_Apparatus: ptr = PtrType (&*mApparatus, nullptr); break;
+        case ContainerStore::Type_Armor: ptr = PtrType (&*mArmor, nullptr); break;
+        case ContainerStore::Type_Book: ptr = PtrType (&*mBook, nullptr); break;
+        case ContainerStore::Type_Clothing: ptr = PtrType (&*mClothing, nullptr); break;
+        case ContainerStore::Type_Ingredient: ptr = PtrType (&*mIngredient, nullptr); break;
+        case ContainerStore::Type_Light: ptr = PtrType (&*mLight, nullptr); break;
+        case ContainerStore::Type_Lockpick: ptr = PtrType (&*mLockpick, nullptr); break;
+        case ContainerStore::Type_Miscellaneous: ptr = PtrType (&*mMiscellaneous, nullptr); break;
+        case ContainerStore::Type_Probe: ptr = PtrType (&*mProbe, nullptr); break;
+        case ContainerStore::Type_Repair: ptr = PtrType (&*mRepair, nullptr); break;
+        case ContainerStore::Type_Weapon: ptr = PtrType (&*mWeapon, nullptr); break;
     }
 
     if (ptr.isEmpty())

@@ -27,7 +27,7 @@ void CSVTools::Merge::keyPressEvent (QKeyEvent *event)
 }
 
 CSVTools::Merge::Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent)
-: QWidget (parent), mDocument (0), mDocumentManager (documentManager)
+: QWidget (parent), mDocument (nullptr), mDocumentManager (documentManager)
 {
     setWindowTitle ("Merge Content Files into a new Game File");
 
@@ -117,7 +117,7 @@ CSMDoc::Document *CSVTools::Merge::getDocument() const
 
 void CSVTools::Merge::cancel()
 {
-    mDocument = 0;
+    mDocument = nullptr;
     hide();
 }
 

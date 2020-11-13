@@ -148,8 +148,8 @@ void CSVWorld::GenericCreator::addScope (const QString& name, CSMWorld::Scope sc
 CSVWorld::GenericCreator::GenericCreator (CSMWorld::Data& data, QUndoStack& undoStack,
     const CSMWorld::UniversalId& id, bool relaxedIdRules)
 : mData (data), mUndoStack (undoStack), mListId (id), mLocked (false),
-  mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (0),
-  mScopeLabel (0), mCloneMode (false)
+  mClonedType (CSMWorld::UniversalId::Type_None), mScopes (CSMWorld::Scope_Content), mScope (nullptr),
+  mScopeLabel (nullptr), mCloneMode (false)
 {
     // If the collection ID has a parent type, use it instead.
     // It will change IDs with Record/SubRecord class (used for creators in Dialogue subviews)
@@ -322,10 +322,10 @@ void CSVWorld::GenericCreator::setScope (unsigned int scope)
     else
     {
         delete mScope;
-        mScope = 0;
+        mScope = nullptr;
 
         delete mScopeLabel;
-        mScopeLabel = 0;
+        mScopeLabel = nullptr;
     }
 
     updateNamespace();

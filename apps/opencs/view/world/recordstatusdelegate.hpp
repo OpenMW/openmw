@@ -19,7 +19,7 @@ namespace CSVWorld
 
         RecordStatusDelegate (const ValueList& values, const IconList& icons,
             CSMWorld::CommandDispatcher *dispatcher, CSMDoc::Document& document,
-            QObject *parent = 0);
+            QObject *parent = nullptr);
     };
 
     class RecordStatusDelegateFactory : public DataDisplayDelegateFactory

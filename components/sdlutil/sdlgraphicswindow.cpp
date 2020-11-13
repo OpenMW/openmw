@@ -11,8 +11,8 @@ GraphicsWindowSDL2::~GraphicsWindowSDL2()
 }
 
 GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits *traits)
-    : mWindow(0)
-    , mContext(0)
+    : mWindow(nullptr)
+    , mContext(nullptr)
     , mValid(false)
     , mRealized(false)
     , mOwnsWindow(false)
@@ -79,7 +79,7 @@ void GraphicsWindowSDL2::init()
     WindowData *inheritedWindowData = dynamic_cast<WindowData*>(_traits->inheritedWindowData.get());
     mWindow = inheritedWindowData ? inheritedWindowData->mWindow : nullptr;
 
-    mOwnsWindow = (mWindow == 0);
+    mOwnsWindow = (mWindow == nullptr);
     if(mOwnsWindow)
     {
         OSG_FATAL<<"Error: No SDL window provided."<<std::endl;

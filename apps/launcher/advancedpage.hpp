@@ -20,7 +20,7 @@ namespace Launcher
 
     public:
         AdvancedPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                     Settings::Manager &engineSettings, QWidget *parent = 0);
+                     Settings::Manager &engineSettings, QWidget *parent = nullptr);
 
         bool loadSettings();
         void saveSettings();

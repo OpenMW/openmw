@@ -196,7 +196,7 @@ namespace MWWorld
             const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
 
             Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != 0)
+            if (store.search(id) != nullptr)
             {
                 const std::string msg = "Try to override existing record '" + id + "'";
                 throw std::runtime_error(msg);
@@ -234,7 +234,7 @@ namespace MWWorld
             const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
 
             Store<T> &store = const_cast<Store<T> &>(get<T>());
-            if (store.search(id) != 0)
+            if (store.search(id) != nullptr)
             {
                 const std::string msg = "Try to override existing record '" + id + "'";
                 throw std::runtime_error(msg);
@@ -286,7 +286,7 @@ namespace MWWorld
         {
             return mNpcs.insert(npc);
         }
-        else if (mNpcs.search(id) != 0)
+        else if (mNpcs.search(id) != nullptr)
         {
             const std::string msg = "Try to override existing record '" + id + "'";
             throw std::runtime_error(msg);

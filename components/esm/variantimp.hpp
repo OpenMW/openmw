@@ -71,7 +71,7 @@ namespace ESM
 
         public:
 
-            VariantStringData (const VariantDataBase *data = 0);
+            VariantStringData (const VariantDataBase *data = nullptr);
             ///< Calling the constructor with an incompatible data type will result in a silent
             /// default initialisation.
 
@@ -103,7 +103,7 @@ namespace ESM
 
         public:
 
-            VariantIntegerData (const VariantDataBase *data = 0);
+            VariantIntegerData (const VariantDataBase *data = nullptr);
             ///< Calling the constructor with an incompatible data type will result in a silent
             /// default initialisation.
 
@@ -142,7 +142,7 @@ namespace ESM
 
         public:
 
-            VariantFloatData (const VariantDataBase *data = 0);
+            VariantFloatData (const VariantDataBase *data = nullptr);
             ///< Calling the constructor with an incompatible data type will result in a silent
             /// default initialisation.
 

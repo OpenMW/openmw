@@ -451,7 +451,7 @@ static void getExecPath(char **argv)
 
     if(argv[0][0] == '/')
         snprintf(argv0, sizeof(argv0), "%s", argv[0]);
-    else if (getcwd(argv0, sizeof(argv0)) != NULL)
+    else if (getcwd(argv0, sizeof(argv0)) != nullptr)
     {
         cwdlen = strlen(argv0);
         snprintf(argv0+cwdlen, sizeof(argv0)-cwdlen, "/%s", argv[0]);

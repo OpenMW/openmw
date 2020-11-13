@@ -101,7 +101,7 @@ namespace MWWorld
     const T *IndexedStore<T>::find(int index) const
     {
         const T *ptr = search(index);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = T::getRecordType() + " with index " + std::to_string(index) + " not found";
             throw std::runtime_error(msg);
@@ -146,7 +146,7 @@ namespace MWWorld
         if (it != mStatic.end())
             return &(it->second);
 
-        return 0;
+        return nullptr;
     }
     template<typename T>
     const T *Store<T>::searchStatic(const std::string &id) const
@@ -156,7 +156,7 @@ namespace MWWorld
         if (it != mStatic.end())
             return &(it->second);
 
-        return 0;
+        return nullptr;
     }
 
     template<typename T>
@@ -178,7 +178,7 @@ namespace MWWorld
     const T *Store<T>::find(const std::string &id) const
     {
         const T *ptr = search(id);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = T::getRecordType() + " '" + id + "' not found";
             throw std::runtime_error(msg);
@@ -189,7 +189,7 @@ namespace MWWorld
     const T *Store<T>::findRandom(const std::string &id) const
     {
         const T *ptr = searchRandom(id);
-        if(ptr == 0)
+        if(ptr == nullptr)
         {
             const std::string msg = T::getRecordType() + " starting with '" + id + "' not found";
             throw std::runtime_error(msg);
@@ -370,7 +370,7 @@ namespace MWWorld
     const ESM::LandTexture *Store<ESM::LandTexture>::find(size_t index, size_t plugin) const
     {
         const ESM::LandTexture *ptr = search(index, plugin);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = "Land texture with index " + std::to_string(index) + " not found";
             throw std::runtime_error(msg);
@@ -471,12 +471,12 @@ namespace MWWorld
         if (it != mStatic.end() && (*it)->mX == x && (*it)->mY == y) {
             return *it;
         }
-        return 0;
+        return nullptr;
     }
     const ESM::Land *Store<ESM::Land>::find(int x, int y) const
     {
         const ESM::Land *ptr = search(x, y);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = "Land at (" + std::to_string(x) + ", " + std::to_string(y) + ") not found";
             throw std::runtime_error(msg);
@@ -570,7 +570,7 @@ namespace MWWorld
             return &dit->second;
         }
 
-        return 0;
+        return nullptr;
     }
     const ESM::Cell *Store<ESM::Cell>::search(int x, int y) const
     {
@@ -588,7 +588,7 @@ namespace MWWorld
             return &dit->second;
         }
 
-        return 0;
+        return nullptr;
     }
     const ESM::Cell *Store<ESM::Cell>::searchStatic(int x, int y) const
     {
@@ -600,7 +600,7 @@ namespace MWWorld
         if (it != mExt.end()) {
             return &(it->second);
         }
-        return 0;
+        return nullptr;
     }
     const ESM::Cell *Store<ESM::Cell>::searchOrCreate(int x, int y)
     {
@@ -628,7 +628,7 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::find(const std::string &id) const
     {
         const ESM::Cell *ptr = search(id);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = "Cell '" + id + "' not found";
             throw std::runtime_error(msg);
@@ -638,7 +638,7 @@ namespace MWWorld
     const ESM::Cell *Store<ESM::Cell>::find(int x, int y) const
     {
         const ESM::Cell *ptr = search(x, y);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = "Exterior at (" + std::to_string(x) + ", " + std::to_string(y) + ") not found";
             throw std::runtime_error(msg);
@@ -781,7 +781,7 @@ namespace MWWorld
         {
             if (Misc::StringUtils::ciEqual(sharedCell->mName, id))
             {
-                if (cell == 0 ||
+                if (cell == nullptr ||
                     (sharedCell->mData.mX > cell->mData.mX) ||
                     (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
                 {
@@ -831,7 +831,7 @@ namespace MWWorld
     }
     ESM::Cell *Store<ESM::Cell>::insert(const ESM::Cell &cell)
     {
-        if (search(cell) != 0)
+        if (search(cell) != nullptr)
         {
             const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
             throw std::runtime_error("Failed to create " + cellType + " cell");
@@ -1032,7 +1032,7 @@ namespace MWWorld
     const ESM::Attribute *Store<ESM::Attribute>::search(size_t index) const
     {
         if (index >= mStatic.size()) {
-            return 0;
+            return nullptr;
         }
         return &mStatic.at(index);
     }
@@ -1040,7 +1040,7 @@ namespace MWWorld
     const ESM::Attribute *Store<ESM::Attribute>::find(size_t index) const
     {
         const ESM::Attribute *ptr = search(index);
-        if (ptr == 0)
+        if (ptr == nullptr)
         {
             const std::string msg = "Attribute with index " + std::to_string(index) + " not found";
             throw std::runtime_error(msg);

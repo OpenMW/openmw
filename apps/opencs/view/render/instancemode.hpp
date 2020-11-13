@@ -62,7 +62,7 @@ namespace CSVRender
 
         public:
 
-            InstanceMode (WorldspaceWidget *worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget *parent = 0);
+            InstanceMode (WorldspaceWidget *worldspaceWidget, osg::ref_ptr<osg::Group> parentNode, QWidget *parent = nullptr);
 
             void activate (CSVWidget::SceneToolbar *toolbar) override;
 

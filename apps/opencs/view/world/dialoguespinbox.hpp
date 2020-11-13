@@ -12,7 +12,7 @@ namespace CSVWorld
 
         public:
 
-            DialogueSpinBox (QWidget *parent = 0);
+            DialogueSpinBox (QWidget *parent = nullptr);
 
         protected:
 
@@ -27,7 +27,7 @@ namespace CSVWorld
 
         public:
 
-            DialogueDoubleSpinBox (QWidget *parent = 0);
+            DialogueDoubleSpinBox (QWidget *parent = nullptr);
 
         protected:
 

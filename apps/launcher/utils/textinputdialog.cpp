@@ -23,7 +23,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString &
     QValidator *validator = new QRegExpValidator(QRegExp("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
     mLineEdit = new LineEdit(this);
     mLineEdit->setValidator(validator);
-    mLineEdit->setCompleter(0);
+    mLineEdit->setCompleter(nullptr);
 
     QVBoxLayout *dialogLayout = new QVBoxLayout(this);
     dialogLayout->addWidget(label);

@@ -115,7 +115,7 @@ QRect CSVWidget::SceneToolToggle::getIconBox (int index) const
 CSVWidget::SceneToolToggle::SceneToolToggle (SceneToolbar *parent, const QString& toolTip,
     const std::string& emptyIcon)
 : SceneTool (parent), mEmptyIcon (emptyIcon), mButtonSize (parent->getButtonSize()),
-  mIconSize (parent->getIconSize()), mToolTip (toolTip), mFirst (0)
+  mIconSize (parent->getIconSize()), mToolTip (toolTip), mFirst (nullptr)
 {
     mPanel = new QFrame (this, Qt::Popup);
 

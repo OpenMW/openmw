@@ -32,7 +32,7 @@ namespace Files
             if (start != 0)
                 mFile.seek(start);
 
-            setg(0,0,0);
+            setg(nullptr,nullptr,nullptr);
 
             mOrigin = start;
         }
@@ -81,7 +81,7 @@ namespace Files
             mFile.seek(mOrigin+newPos);
 
             // Clear read pointers so underflow() gets called on the next read attempt.
-            setg(0, 0, 0);
+            setg(nullptr, nullptr, nullptr);
 
             return newPos;
         }
@@ -97,7 +97,7 @@ namespace Files
             mFile.seek(mOrigin + pos);
 
             // Clear read pointers so underflow() gets called on the next read attempt.
-            setg(0, 0, 0);
+            setg(nullptr, nullptr, nullptr);
             return pos;
         }
 

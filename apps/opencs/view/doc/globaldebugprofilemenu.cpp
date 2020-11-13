@@ -13,7 +13,7 @@ void CSVDoc::GlobalDebugProfileMenu::rebuild()
     clear();
 
     delete mActions;
-    mActions = 0;
+    mActions = nullptr;
 
     int idColumn = mDebugProfiles->findColumnIndex (CSMWorld::Columns::ColumnId_Id);
     int stateColumn = mDebugProfiles->findColumnIndex (CSMWorld::Columns::ColumnId_Modification);
@@ -48,7 +48,7 @@ void CSVDoc::GlobalDebugProfileMenu::rebuild()
 
 CSVDoc::GlobalDebugProfileMenu::GlobalDebugProfileMenu (CSMWorld::IdTable *debugProfiles,
     QWidget *parent)
-: QMenu (parent), mDebugProfiles (debugProfiles), mActions (0)
+: QMenu (parent), mDebugProfiles (debugProfiles), mActions (nullptr)
 {
     rebuild();
 

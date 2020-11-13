@@ -111,11 +111,11 @@ namespace SceneUtil
     {
     public:
         CollectLightCallback()
-            : mLightManager(0) { }
+            : mLightManager(nullptr) { }
 
         CollectLightCallback(const CollectLightCallback& copy, const osg::CopyOp& copyop)
             : osg::NodeCallback(copy, copyop)
-            , mLightManager(0) { }
+            , mLightManager(nullptr) { }
 
         META_Object(SceneUtil, SceneUtil::CollectLightCallback)
 

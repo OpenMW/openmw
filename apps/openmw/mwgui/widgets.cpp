@@ -101,7 +101,7 @@ namespace MWGui
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWSkill::onClicked);
             }
 
-            button = 0;
+            button = nullptr;
             assignWidget(button, "StatValueButton");
             if (button)
             {
@@ -192,7 +192,7 @@ namespace MWGui
                 button->eventMouseButtonClick += MyGUI::newDelegate(this, &MWAttribute::onClicked);
             }
 
-            button = 0;
+            button = nullptr;
             assignWidget(button, "StatValueButton");
             if (button)
             {

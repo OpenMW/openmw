@@ -550,16 +550,16 @@ namespace MWGui
     void CreateClassDialog::onDialogCancel()
     {
         MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = 0;
+        mSpecDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = 0;
+        mAttribDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = 0;
+        mSkillDialog = nullptr;
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = 0;
+        mDescDialog = nullptr;
     }
 
     void CreateClassDialog::onSpecializationClicked(MyGUI::Widget* _sender)
@@ -577,7 +577,7 @@ namespace MWGui
         setSpecialization(mSpecializationId);
 
         MWBase::Environment::get().getWindowManager()->removeDialog(mSpecDialog);
-        mSpecDialog = 0;
+        mSpecDialog = nullptr;
     }
 
     void CreateClassDialog::setSpecialization(int id)
@@ -618,7 +618,7 @@ namespace MWGui
         }
         mAffectedAttribute->setAttributeId(id);
         MWBase::Environment::get().getWindowManager()->removeDialog(mAttribDialog);
-        mAttribDialog = 0;
+        mAttribDialog = nullptr;
 
         update();
     }
@@ -651,7 +651,7 @@ namespace MWGui
 
         mAffectedSkill->setSkillId(mSkillDialog->getSkillId());
         MWBase::Environment::get().getWindowManager()->removeDialog(mSkillDialog);
-        mSkillDialog = 0;
+        mSkillDialog = nullptr;
         update();
     }
 
@@ -667,7 +667,7 @@ namespace MWGui
     {
         mDescription = mDescDialog->getTextInput();
         MWBase::Environment::get().getWindowManager()->removeDialog(mDescDialog);
-        mDescDialog = 0;
+        mDescDialog = nullptr;
     }
 
     void CreateClassDialog::onOkClicked(MyGUI::Widget* _sender)

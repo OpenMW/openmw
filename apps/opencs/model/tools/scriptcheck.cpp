@@ -50,7 +50,7 @@ void CSMTools::ScriptCheckStage::report (const std::string& message, Type type)
 }
 
 CSMTools::ScriptCheckStage::ScriptCheckStage (const CSMDoc::Document& document)
-: mDocument (document), mContext (document.getData()), mMessages (0), mWarningMode (Mode_Ignore)
+: mDocument (document), mContext (document.getData()), mMessages (nullptr), mWarningMode (Mode_Ignore)
 {
     /// \todo add an option to configure warning mode
     setWarningsMode (0);
@@ -73,7 +73,7 @@ int CSMTools::ScriptCheckStage::setup()
         mWarningMode = Mode_Strict;
 
     mContext.clear();
-    mMessages = 0;
+    mMessages = nullptr;
     mId.clear();
     Compiler::ErrorHandler::reset();
 
@@ -130,5 +130,5 @@ void CSMTools::ScriptCheckStage::perform (int stage, CSMDoc::Messages& messages)
         messages.add (id, stream.str(), "", CSMDoc::Message::Severity_SeriousError);
     }
 
-    mMessages = 0;
+    mMessages = nullptr;
 }

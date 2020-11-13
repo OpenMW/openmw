@@ -34,19 +34,19 @@ namespace MWWorld
 
         mAnimationState = refData.mAnimationState;
 
-        mCustomData = refData.mCustomData ? refData.mCustomData->clone() : 0;
+        mCustomData = refData.mCustomData ? refData.mCustomData->clone() : nullptr;
     }
 
     void RefData::cleanup()
     {
-        mBaseNode = 0;
+        mBaseNode = nullptr;
 
         delete mCustomData;
-        mCustomData = 0;
+        mCustomData = nullptr;
     }
 
     RefData::RefData()
-    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (0), mChanged(false), mFlags(0)
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true), mCount (1), mCustomData (nullptr), mChanged(false), mFlags(0)
     {
         for (int i=0; i<3; ++i)
         {
@@ -56,20 +56,20 @@ namespace MWWorld
     }
 
     RefData::RefData (const ESM::CellRef& cellRef)
-    : mBaseNode(0), mDeletedByContentFile(false), mEnabled (true),
+    : mBaseNode(nullptr), mDeletedByContentFile(false), mEnabled (true),
       mCount (1), mPosition (cellRef.mPos),
-      mCustomData (0),
+      mCustomData (nullptr),
       mChanged(false), mFlags(0) // Loading from ESM/ESP files -> assume unchanged
     {
     }
 
     RefData::RefData (const ESM::ObjectState& objectState, bool deletedByContentFile)
-    : mBaseNode(0), mDeletedByContentFile(deletedByContentFile),
+    : mBaseNode(nullptr), mDeletedByContentFile(deletedByContentFile),
       mEnabled (objectState.mEnabled != 0),
       mCount (objectState.mCount),
       mPosition (objectState.mPosition),
       mAnimationState(objectState.mAnimationState),
-      mCustomData (0),
+      mCustomData (nullptr),
       mChanged(true), mFlags(objectState.mFlags) // Loading from a savegame -> assume changed
     {
         // "Note that the ActivationFlag_UseEnabled is saved to the reference,
@@ -79,7 +79,7 @@ namespace MWWorld
     }
 
     RefData::RefData (const RefData& refData)
-    : mBaseNode(0), mCustomData (0)
+    : mBaseNode(nullptr), mCustomData (nullptr)
     {
         try
         {

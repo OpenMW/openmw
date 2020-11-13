@@ -587,7 +587,7 @@ namespace MWGui
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setAttribute (mSelectAttributeDialog->getAttributeId());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
-        mSelectAttributeDialog = 0;
+        mSelectAttributeDialog = nullptr;
     }
 
     void EffectEditorBase::onSelectSkill ()
@@ -598,7 +598,7 @@ namespace MWGui
         mAddEffectDialog.newEffect(effect);
         mAddEffectDialog.setSkill (mSelectSkillDialog->getSkillId());
         MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectSkillDialog);
-        mSelectSkillDialog = 0;
+        mSelectSkillDialog = nullptr;
     }
 
     void EffectEditorBase::onAttributeOrSkillCancel ()
@@ -608,8 +608,8 @@ namespace MWGui
         if (mSelectAttributeDialog)
             MWBase::Environment::get().getWindowManager ()->removeDialog (mSelectAttributeDialog);
 
-        mSelectSkillDialog = 0;
-        mSelectAttributeDialog = 0;
+        mSelectSkillDialog = nullptr;
+        mSelectAttributeDialog = nullptr;
     }
 
     void EffectEditorBase::onAvailableEffectClicked (MyGUI::Widget* sender)
