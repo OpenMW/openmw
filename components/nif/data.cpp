@@ -460,21 +460,9 @@ void NiPalette::read(NIFStream *nif)
 
 void NiStringPalette::read(NIFStream *nif)
 {
-    unsigned int size = nif->getUInt();
-    if (!size)
-        return;
-    std::vector<char> source;
-    nif->getChars(source, size);
-    if (nif->getUInt() != size)
+    palette = nif->getString();
+    if (nif->getUInt() != palette.size())
         nif->file->warn("Failed size check in NiStringPalette");
-    if (source[source.size()-1] != '\0')
-        source.emplace_back('\0');
-    const char* buffer = source.data();
-    while (static_cast<size_t>(buffer - source.data()) < source.size())
-    {
-        palette.emplace_back(buffer);
-        buffer += palette.back().size() + 1;
-    }
 }
 
 void NiBoolData::read(NIFStream *nif)

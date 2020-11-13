@@ -262,7 +262,7 @@ public:
 
 struct NiStringPalette : public Record
 {
-    std::vector<std::string> palette;
+    std::string palette;
     void read(NIFStream *nif) override;
 };
 
