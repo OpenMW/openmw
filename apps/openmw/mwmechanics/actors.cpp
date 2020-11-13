@@ -1731,6 +1731,9 @@ namespace MWMechanics
 
     void Actors::predictAndAvoidCollisions()
     {
+        if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
+            return;
+
         const float minGap = 10.f;
         const float maxDistForPartialAvoiding = 200.f;
         const float maxDistForStrictAvoiding = 100.f;
