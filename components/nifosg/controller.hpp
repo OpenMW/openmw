@@ -10,6 +10,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <set>
+#include <type_traits>
 
 #include <osg/Texture2D>
 
@@ -58,8 +59,31 @@ namespace NifOsg
         using ValueT = typename MapT::ValueType;
 
         ValueInterpolator() = default;
-        ValueInterpolator(const Nif::NiFloatInterpolator* interpolator) = delete;
-        ValueInterpolator(const Nif::NiPoint3Interpolator* interpolator) = delete;
+
+        template<
+            class T,
+            typename = std::enable_if_t<
+                std::conjunction_v<
+                    std::disjunction<
+                        std::is_same<ValueT, float>,
+                        std::is_same<ValueT, osg::Vec3f>
+                    >,
+                    std::is_same<decltype(T::defaultVal), ValueT>
+                >,
+                T
+            >
+        >
+        ValueInterpolator(const T* interpolator) : mDefaultVal(interpolator->defaultVal)
+        {
+            if (interpolator->data.empty())
+                return;
+            mKeys = interpolator->data->mKeyList;
+            if (mKeys)
+            {
+                mLastLowKey = mKeys->mKeys.end();
+                mLastHighKey = mKeys->mKeys.end();
+            }
+        };
 
         ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
@@ -162,34 +186,6 @@ namespace NifOsg
     using FloatInterpolator = ValueInterpolator<Nif::FloatKeyMap>;
     using Vec3Interpolator = ValueInterpolator<Nif::Vector3KeyMap>;
     using Vec4Interpolator = ValueInterpolator<Nif::Vector4KeyMap>;
-
-    template<>
-    inline FloatInterpolator::ValueInterpolator(const Nif::NiFloatInterpolator* interpolator)
-        : mDefaultVal(interpolator->defaultVal)
-    {
-        if (interpolator->data.empty())
-            return;
-        mKeys = interpolator->data->mKeyList;
-        if (mKeys)
-        {
-            mLastLowKey = mKeys->mKeys.end();
-            mLastHighKey = mKeys->mKeys.end();
-        }
-    }
-
-    template<>
-    inline Vec3Interpolator::ValueInterpolator(const Nif::NiPoint3Interpolator* interpolator)
-        : mDefaultVal(interpolator->defaultVal)
-    {
-        if (interpolator->data.empty())
-            return;
-        mKeys = interpolator->data->mKeyList;
-        if (mKeys)
-        {
-            mLastLowKey = mKeys->mKeys.end();
-            mLastHighKey = mKeys->mKeys.end();
-        }
-    }
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {
