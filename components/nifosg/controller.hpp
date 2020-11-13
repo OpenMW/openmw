@@ -60,11 +60,20 @@ namespace NifOsg
 
         ValueInterpolator() = default;
 
-        template<class T = MapT>
-        ValueInterpolator(typename std::enable_if_t<
-            std::is_same<T, Nif::FloatKeyMap>::value,
-            const Nif::NiFloatInterpolator
-        > * interpolator) : mDefaultVal(interpolator->defaultVal)
+        template<
+            class T,
+            typename = std::enable_if_t<
+                std::conjunction_v<
+                    std::disjunction<
+                        std::is_same<ValueT, float>,
+                        std::is_same<ValueT, osg::Vec3f>
+                    >,
+                    std::is_same<decltype(T::defaultVal), ValueT>
+                >,
+                T
+            >
+        >
+        ValueInterpolator(const T* interpolator) : mDefaultVal(interpolator->defaultVal)
         {
             if (interpolator->data.empty())
                 return;
@@ -75,22 +84,6 @@ namespace NifOsg
                 mLastHighKey = mKeys->mKeys.end();
             }
         };
-
-        template<class T = MapT>
-        ValueInterpolator(typename std::enable_if_t<
-            std::is_same<T, Nif::Vector3KeyMap>::value,
-            const Nif::NiPoint3Interpolator
-        > * interpolator) : mDefaultVal(interpolator->defaultVal)
-        {
-            if (interpolator->data.empty())
-                return;
-            mKeys = interpolator->data->mKeyList;
-            if (mKeys)
-            {
-                mLastLowKey = mKeys->mKeys.end();
-                mLastHighKey = mKeys->mKeys.end();
-            }
-        }
 
         ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
