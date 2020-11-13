@@ -1,4 +1,5 @@
 language: cpp
+dist: focal
 branches:
   only:
     - master
@@ -8,7 +9,6 @@ addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
-      # - ubuntu-toolchain-r-test  # for GCC-10
     packages: [
       # Dev
       build-essential, cmake, clang-tools, ccache,
