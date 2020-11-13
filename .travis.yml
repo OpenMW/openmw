@@ -48,7 +48,7 @@ before_install:
     - ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script:
     - ccache -z
-    -  ./CI/before_script.${TRAVIS_OS_NAME}.sh
+    - ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
  - ${ANALYZE} make -j3;
