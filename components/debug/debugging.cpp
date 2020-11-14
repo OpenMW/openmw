@@ -11,10 +11,21 @@
 namespace Debug
 {
 #ifdef _WIN32
+    bool isRedirected(DWORD nStdHandle)
+    {
+        DWORD fileType = GetFileType(GetStdHandle(nStdHandle));
+
+        return (fileType == FILE_TYPE_DISK) || (fileType == FILE_TYPE_PIPE);
+    }
+
     bool attachParentConsole()
     {
         if (GetConsoleWindow() != nullptr)
             return true;
+
+        bool inRedirected = isRedirected(STD_INPUT_HANDLE);
+        bool outRedirected = isRedirected(STD_OUTPUT_HANDLE);
+        bool errRedirected = isRedirected(STD_ERROR_HANDLE);
 
         if (AttachConsole(ATTACH_PARENT_PROCESS))
         {
@@ -24,12 +35,21 @@ namespace Debug
             std::cerr.flush();
 
             // this looks dubious but is really the right way
-            _wfreopen(L"CON", L"w", stdout);
-            _wfreopen(L"CON", L"w", stderr);
-            _wfreopen(L"CON", L"r", stdin);
-            freopen("CON", "w", stdout);
-            freopen("CON", "w", stderr);
-            freopen("CON", "r", stdin);
+            if (!inRedirected)
+            {
+                _wfreopen(L"CON", L"r", stdin);
+                freopen("CON", "r", stdin);
+            }
+            if (!outRedirected)
+            {
+                _wfreopen(L"CON", L"w", stdout);
+                freopen("CON", "w", stdout);
+            }
+            if (!errRedirected)
+            {
+                _wfreopen(L"CON", L"w", stderr);
+                freopen("CON", "w", stderr);
+            }
 
             return true;
         }
