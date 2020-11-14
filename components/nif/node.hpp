@@ -16,6 +16,117 @@ namespace Nif
 
 struct NiNode;
 
+struct NiBoundingVolume
+{
+    enum Type
+    {
+        SPHERE_BV = 0,
+        BOX_BV = 1,
+        CAPSULE_BV = 2,
+        LOZENGE_BV = 3,
+        UNION_BV = 4,
+        HALFSPACE_BV = 5
+    };
+
+    struct NiSphereBV
+    {
+        osg::Vec3f center;
+        float radius{0.f};
+    };
+
+    struct NiBoxBV
+    {
+        osg::Vec3f center;
+        Matrix3 axis;
+        osg::Vec3f extents;
+    };
+
+    struct NiCapsuleBV
+    {
+        osg::Vec3f center, axis;
+        float extent{0.f}, radius{0.f};
+    };
+
+    struct NiLozengeBV
+    {
+        float radius{0.f}, extent0{0.f}, extent1{0.f};
+        osg::Vec3f center, axis0, axis1;
+    };
+
+    struct NiHalfSpaceBV
+    {
+        osg::Vec3f center, normal;
+    };
+
+    unsigned int type;
+    NiSphereBV sphere;
+    NiBoxBV box;
+    NiCapsuleBV capsule;
+    NiLozengeBV lozenge;
+    std::vector<NiBoundingVolume> children;
+    NiHalfSpaceBV plane;
+    void read(NIFStream* nif)
+    {
+        type = nif->getUInt();
+        switch (type)
+        {
+            case SPHERE_BV:
+            {
+                sphere.center = nif->getVector3();
+                sphere.radius = nif->getFloat();
+                break;
+            }
+            case BOX_BV:
+            {
+                box.center = nif->getVector3();
+                box.axis = nif->getMatrix3();
+                box.extents = nif->getVector3();
+                break;
+            }
+            case CAPSULE_BV:
+            {
+                capsule.center = nif->getVector3();
+                capsule.axis = nif->getVector3();
+                capsule.extent = nif->getFloat();
+                capsule.radius = nif->getFloat();
+                break;
+            }
+            case LOZENGE_BV:
+            {
+                lozenge.radius = nif->getFloat();
+                lozenge.extent0 = nif->getFloat();
+                lozenge.extent1 = nif->getFloat();
+                lozenge.center = nif->getVector3();
+                lozenge.axis0 = nif->getVector3();
+                lozenge.axis1 = nif->getVector3();
+                break;
+            }
+            case UNION_BV:
+            {
+                unsigned int numChildren = nif->getUInt();
+                if (numChildren == 0)
+                    break;
+                children.resize(numChildren);
+                for (NiBoundingVolume& child : children)
+                    child.read(nif);
+                break;
+            }
+            case HALFSPACE_BV:
+            {
+                plane.center = nif->getVector3();
+                plane.normal = nif->getVector3();
+                break;
+            }
+            default:
+            {
+                std::stringstream error;
+                error << "Unhandled NiBoundingVolume type: " << type;
+                nif->file->fail(error.str());
+            }
+        }
+    }
+};
+
 /** A Node is an object that's part of the main NIF tree. It has
     parent node (unless it's the root), and transformation (location
     and rotation) relative to it's parent.
@@ -31,9 +142,7 @@ public:
 
     // Bounding box info
     bool hasBounds{false};
-    osg::Vec3f boundPos;
-    Matrix3 boundRot;
-    osg::Vec3f boundXYZ; // Box size
+    NiBoundingVolume bounds;
 
     void read(NIFStream *nif) override
     {
@@ -48,13 +157,8 @@ public:
 
         if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0))
             hasBounds = nif->getBoolean();
-        if(hasBounds)
-        {
-            nif->getInt(); // always 1
-            boundPos = nif->getVector3();
-            boundRot = nif->getMatrix3();
-            boundXYZ = nif->getVector3();
-        }
+        if (hasBounds)
+            bounds.read(nif);
         // Reference to the collision object in Gamebryo files.
         if (nif->getVersion() >= NIFStream::generateVersion(10,0,1,0))
             nif->skip(4);
