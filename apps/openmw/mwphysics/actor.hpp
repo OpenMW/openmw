@@ -144,7 +144,11 @@ namespace MWPhysics
         void setWalkingOnWater(bool walkingOnWater);
         bool isWalkingOnWater() const;
 
+        MWWorld::Ptr getStandingOnPtr() const;
+        void setStandingOnPtr(const MWWorld::Ptr& ptr);
+
     private:
+        MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);

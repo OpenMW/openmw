@@ -82,14 +82,6 @@ namespace
         ptr.getClass().getMovementSettings(ptr).mPosition[2] = 0;
     }
 
-    void updateStandingCollision(MWPhysics::ActorFrameData& actorData, MWPhysics::CollisionMap& standingCollisions)
-    {
-        if (!actorData.mStandingOn.isEmpty())
-            standingCollisions[actorData.mPtr] = actorData.mStandingOn;
-        else
-            standingCollisions.erase(actorData.mPtr);
-    }
-
     void updateMechanics(MWPhysics::ActorFrameData& actorData)
     {
         if (actorData.mDidJump)
@@ -215,7 +207,7 @@ namespace MWPhysics
             thread.join();
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, CollisionMap& standingCollisions, bool skipSimulation)
+    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skipSimulation)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
@@ -225,9 +217,6 @@ namespace MWPhysics
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {
-            if (mAdvanceSimulation)
-                standingCollisions.clear();
-
             for (auto& data : mActorsFrameData)
             {
                 // Ignore actors that were deleted while the background thread was running
@@ -236,7 +225,7 @@ namespace MWPhysics
 
                 updateMechanics(data);
                 if (mAdvanceSimulation)
-                    updateStandingCollision(data, standingCollisions);
+                    data.mActorRaw->setStandingOnPtr(data.mStandingOn);
 
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
                     data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
@@ -260,10 +249,10 @@ namespace MWPhysics
         // just return the actors' reference position without applying the movements
         if (skipSimulation)
         {
-            standingCollisions.clear();
             mMovementResults.clear();
             for (const auto& m : mActorsFrameData)
             {
+                m.mActorRaw->setStandingOnPtr(nullptr);
                 m.mActorRaw->setPosition(m.mActorRaw->getWorldPosition(), true);
                 mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
             }
@@ -275,14 +264,10 @@ namespace MWPhysics
             mMovementResults.clear();
             syncComputation();
 
-            if (mAdvanceSimulation)
-            {
-                standingCollisions.clear();
-                for (auto& data : mActorsFrameData)
-                    updateStandingCollision(data, standingCollisions);
-            }
             for (auto& data : mActorsFrameData)
             {
+                if (mAdvanceSimulation)
+                    data.mActorRaw->setStandingOnPtr(data.mStandingOn);
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
                     data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
             }
