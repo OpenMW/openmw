@@ -883,7 +883,7 @@ namespace MWPhysics
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn,
             bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
-        mPositionChanged(false), mDidJump(false), mNeedLand(false), mMoveToWaterSurface(moveToWaterSurface),
+        mDidJump(false), mNeedLand(false), mMoveToWaterSurface(moveToWaterSurface),
         mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -893,10 +893,9 @@ namespace MWPhysics
         mWantJump = mPtr.getClass().getMovementSettings(mPtr).mPosition[2] != 0;
         mIsDead = mPtr.getClass().getCreatureStats(mPtr).isDead();
         mWasOnGround = actor->getOnGround();
-    }
 
-    void ActorFrameData::updatePosition()
-    {
+        mActorRaw->updatePosition();
+        mOrigin = mActorRaw->getNextPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {

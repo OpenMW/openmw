@@ -102,9 +102,18 @@ namespace
             stats.addToFallHeight(-actorData.mFallHeight);
     }
 
-    osg::Vec3f interpolateMovements(const MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
+    osg::Vec3f interpolateMovements(MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = timeAccum / physicsDt;
+
+        // account for force change of actor's position in the main thread
+        const auto correction = actorData.mActorRaw->getWorldPosition() - actorData.mOrigin;
+        if (correction.length() != 0)
+        {
+            actorData.mActorRaw->adjustPosition(correction);
+            actorData.mPosition = actorData.mActorRaw->getPosition();
+        }
+
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
@@ -182,7 +191,6 @@ namespace MWPhysics
 
         mPostSimBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
             {
-                udpateActorsAabbs();
                 mNewFrame = false;
                 if (mLOSCacheExpiry >= 0)
                 {
@@ -229,6 +237,9 @@ namespace MWPhysics
                 updateMechanics(data);
                 if (mAdvanceSimulation)
                     updateStandingCollision(data, standingCollisions);
+
+                if (mMovementResults.find(data.mPtr) != mMovementResults.end())
+                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
             }
         }
 
@@ -245,10 +256,6 @@ namespace MWPhysics
         if (mAdvanceSimulation)
             mWorldFrameData = std::make_unique<WorldFrameData>();
 
-        // update each actor position based on latest data
-        for (auto& data : mActorsFrameData)
-            data.updatePosition();
-
         // we are asked to skip the simulation (load a savegame for instance)
         // just return the actors' reference position without applying the movements
         if (skipSimulation)
@@ -256,7 +263,10 @@ namespace MWPhysics
             standingCollisions.clear();
             mMovementResults.clear();
             for (const auto& m : mActorsFrameData)
-                mMovementResults[m.mPtr] = m.mPosition;
+            {
+                m.mActorRaw->setPosition(m.mActorRaw->getWorldPosition(), true);
+                mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
+            }
             return mMovementResults;
         }
 
@@ -270,6 +280,11 @@ namespace MWPhysics
                 standingCollisions.clear();
                 for (auto& data : mActorsFrameData)
                     updateStandingCollision(data, standingCollisions);
+            }
+            for (auto& data : mActorsFrameData)
+            {
+                if (mMovementResults.find(data.mPtr) != mMovementResults.end())
+                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
             }
             return mMovementResults;
         }
@@ -427,7 +442,7 @@ namespace MWPhysics
         {
             if (const auto actor = std::dynamic_pointer_cast<Actor>(p))
             {
-                actor->commitPositionChange();
+                actor->updateCollisionObjectPosition();
                 mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
             }
             else if (const auto object = std::dynamic_pointer_cast<Object>(p))
@@ -485,26 +500,15 @@ namespace MWPhysics
         {
             if(const auto actor = actorData.mActor.lock())
             {
-                if (actorData.mPosition == actor->getPosition())
-                    actor->setPosition(actorData.mPosition, false); // update previous position to make sure interpolation is correct
-                else
+                bool positionChanged = actorData.mPosition != actorData.mActorRaw->getPosition();
+                actorData.mActorRaw->setPosition(actorData.mPosition);
+                if (positionChanged)
                 {
-                    actorData.mPositionChanged = true;
-                    actor->setPosition(actorData.mPosition);
+                    actor->updateCollisionObjectPosition();
+                    mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
                 }
             }
         }
-    }
-
-    void PhysicsTaskScheduler::udpateActorsAabbs()
-    {
-        std::unique_lock lock(mCollisionWorldMutex);
-        for (const auto& actorData : mActorsFrameData)
-            if (actorData.mPositionChanged)
-            {
-                if(const auto actor = actorData.mActor.lock())
-                    mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
-            }
     }
 
     bool PhysicsTaskScheduler::hasLineOfSight(const Actor* actor1, const Actor* actor2)
@@ -538,6 +542,5 @@ namespace MWPhysics
             mMovementResults[actorData.mPtr] = interpolateMovements(actorData, mTimeAccum, mPhysicsDt);
             updateMechanics(actorData);
         }
-        udpateActorsAabbs();
     }
 }

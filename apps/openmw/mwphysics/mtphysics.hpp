@@ -49,7 +49,6 @@ namespace MWPhysics
             void syncComputation();
             void worker();
             void updateActorsPositions();
-            void udpateActorsAabbs();
             bool hasLineOfSight(const Actor* actor1, const Actor* actor2);
             void refreshLOSCache();
             void updateAabbs();
