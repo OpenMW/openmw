@@ -65,6 +65,7 @@
     Bug #5644: Summon effects running on the player during game initialization cause crashes
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
+    Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
