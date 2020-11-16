@@ -168,7 +168,7 @@ namespace SceneUtil
         if (Settings::Manager::getBool("enable indoor shadows", "Shadows"))
             mShadowSettings->setCastsShadowTraversalMask(mIndoorShadowCastingMask);
         else
-            mShadowTechnique->disableShadows();
+            mShadowTechnique->disableShadows(true);
     }
 
     void ShadowManager::enableOutdoorMode()

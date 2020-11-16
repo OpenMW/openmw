@@ -820,9 +820,10 @@ void MWShadowTechnique::enableShadows()
     _enableShadows = true;
 }
 
-void MWShadowTechnique::disableShadows()
+void MWShadowTechnique::disableShadows(bool setDummyState)
 {
     _enableShadows = false;
+    mSetDummyStateWhenDisabled = setDummyState;
 }
 
 void SceneUtil::MWShadowTechnique::enableDebugHUD()
@@ -914,7 +915,28 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 {
     if (!_enableShadows)
     {
+        if (mSetDummyStateWhenDisabled)
+        {
+            osg::ref_ptr<osg::StateSet> dummyState = new osg::StateSet();
+
+            ShadowSettings* settings = getShadowedScene()->getShadowSettings();
+            int baseUnit = settings->getBaseShadowTextureUnit();
+            int endUnit = baseUnit + settings->getNumShadowMapsPerLight();
+            for (int i = baseUnit; i < endUnit; ++i)
+            {
+                dummyState->setTextureAttributeAndModes(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
+                dummyState->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseUnit)).c_str(), i));
+                dummyState->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseUnit)).c_str(), i));
+            }
+
+            cv.pushStateSet(dummyState);
+        }
+
         _shadowedScene->osg::Group::traverse(cv);
+
+        if (mSetDummyStateWhenDisabled)
+            cv.popStateSet();
+
         return;
     }
 
@@ -1577,6 +1599,8 @@ void MWShadowTechnique::createShaders()
         _fallbackShadowMapTexture->setWrap(osg::Texture2D::WRAP_T,osg::Texture2D::REPEAT);
         _fallbackShadowMapTexture->setFilter(osg::Texture2D::MIN_FILTER,osg::Texture2D::NEAREST);
         _fallbackShadowMapTexture->setFilter(osg::Texture2D::MAG_FILTER,osg::Texture2D::NEAREST);
+        _fallbackShadowMapTexture->setShadowComparison(true);
+        _fallbackShadowMapTexture->setShadowCompareFunc(osg::Texture::ShadowCompareFunc::ALWAYS);
 
     }
 
