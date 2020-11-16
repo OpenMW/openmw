@@ -91,7 +91,8 @@ namespace MWPhysics
         /**
           * Store the current position into mPreviousPosition, then move to this position.
           */
-        void setPosition(const osg::Vec3f& position, bool reset=false);
+        void setPosition(const osg::Vec3f& position);
+        void resetPosition();
         void adjustPosition(const osg::Vec3f& offset);
 
         osg::Vec3f getPosition() const;

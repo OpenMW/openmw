@@ -74,11 +74,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
 
     updateRotation();
     updateScale();
-    updatePosition();
-    setPosition(mWorldPosition, true);
-
+    resetPosition();
     addCollisionMask(getCollisionMask());
-    updateCollisionObjectPosition();
 }
 
 Actor::~Actor()
@@ -160,15 +157,9 @@ osg::Vec3f Actor::getCollisionObjectPosition() const
     return Misc::Convert::toOsg(mLocalTransform.getOrigin());
 }
 
-void Actor::setPosition(const osg::Vec3f& position, bool reset)
+void Actor::setPosition(const osg::Vec3f& position)
 {
-    if (reset)
-    {
-        mPreviousPosition = position;
-        mNextPosition = position;
-    }
-    else
-        mPreviousPosition = mPosition;
+    mPreviousPosition = mPosition;
     mPosition = position;
 }
 
@@ -176,6 +167,15 @@ void Actor::adjustPosition(const osg::Vec3f& offset)
 {
     mPosition += offset;
     mPreviousPosition += offset;
+}
+
+void Actor::resetPosition()
+{
+    updatePosition();
+    mPreviousPosition = mWorldPosition;
+    mPosition = mWorldPosition;
+    mNextPosition = mWorldPosition;
+    updateCollisionObjectPosition();
 }
 
 osg::Vec3f Actor::getPosition() const

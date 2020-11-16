@@ -253,7 +253,7 @@ namespace MWPhysics
             for (const auto& m : mActorsFrameData)
             {
                 m.mActorRaw->setStandingOnPtr(nullptr);
-                m.mActorRaw->setPosition(m.mActorRaw->getWorldPosition(), true);
+                m.mActorRaw->resetPosition();
                 mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
             }
             return mMovementResults;
