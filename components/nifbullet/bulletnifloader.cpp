@@ -145,12 +145,12 @@ osg::ref_ptr<Resource::BulletShape> BulletNifLoader::load(const Nif::File& nif)
     {
         if (findBoundingBox(node, filename))
         {
-            const btVector3 halfExtents = Misc::Convert::toBullet(mShape->mCollisionBoxHalfExtents);
-            const btVector3 origin = Misc::Convert::toBullet(mShape->mCollisionBoxTranslate);
+            const btVector3 extents = Misc::Convert::toBullet(mShape->mCollisionBox.extents);
+            const btVector3 center = Misc::Convert::toBullet(mShape->mCollisionBox.center);
             std::unique_ptr<btCompoundShape> compound (new btCompoundShape);
-            std::unique_ptr<btBoxShape> boxShape(new btBoxShape(halfExtents));
+            std::unique_ptr<btBoxShape> boxShape(new btBoxShape(extents));
             btTransform transform = btTransform::getIdentity();
-            transform.setOrigin(origin);
+            transform.setOrigin(center);
             compound->addChildShape(transform, boxShape.get());
             boxShape.release();
 
@@ -208,8 +208,8 @@ bool BulletNifLoader::findBoundingBox(const Nif::Node* node, const std::string& 
         switch (type)
         {
             case Nif::NiBoundingVolume::Type::BOX_BV:
-                mShape->mCollisionBoxHalfExtents = node->bounds.box.extents;
-                mShape->mCollisionBoxTranslate = node->bounds.box.center;
+                mShape->mCollisionBox.extents = node->bounds.box.extents;
+                mShape->mCollisionBox.center = node->bounds.box.center;
                 break;
             default:
             {
