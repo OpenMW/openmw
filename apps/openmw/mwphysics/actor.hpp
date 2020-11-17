@@ -57,13 +57,20 @@ namespace MWPhysics
         bool isRotationallyInvariant() const;
 
         /**
-         * Set mPosition and mPreviousPosition to the position in the Ptr's RefData. This should be used
+         * Set mWorldPosition to the position in the Ptr's RefData. This is used by the physics simulation to account for 
          * when an object is "instantly" moved/teleported as opposed to being moved by the physics simulation.
          */
         void updatePosition();
+        osg::Vec3f getWorldPosition() const;
+
+        /**
+        * Used by the physics simulation to store the simulation result. Used in conjunction with mWorldPosition
+        * to account for e.g. scripted movements
+        */
+        void setNextPosition(const osg::Vec3f& position);
+        osg::Vec3f getNextPosition() const;
 
         void updateCollisionObjectPosition();
-        void commitPositionChange();
 
         /**
          * Returns the half extents of the collision body (scaled according to collision scale)
@@ -86,9 +93,10 @@ namespace MWPhysics
 
         /**
           * Store the current position into mPreviousPosition, then move to this position.
-          * Optionally, inform the physics engine about the change of position.
           */
-        void setPosition(const osg::Vec3f& position, bool updateCollisionObject=true);
+        void setPosition(const osg::Vec3f& position);
+        void resetPosition();
+        void adjustPosition(const osg::Vec3f& offset);
 
         osg::Vec3f getPosition() const;
 
@@ -140,7 +148,11 @@ namespace MWPhysics
         void setWalkingOnWater(bool walkingOnWater);
         bool isWalkingOnWater() const;
 
+        MWWorld::Ptr getStandingOnPtr() const;
+        void setStandingOnPtr(const MWWorld::Ptr& ptr);
+
     private:
+        MWWorld::Ptr mStandingOnPtr;
         /// Removes then re-adds the collision object to the dynamics world
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);
@@ -162,11 +174,11 @@ namespace MWPhysics
 
         osg::Vec3f mScale;
         osg::Vec3f mRenderingScale;
+        osg::Vec3f mWorldPosition;
+        osg::Vec3f mNextPosition;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
         btTransform mLocalTransform;
-        bool mScaleUpdatePending;
-        bool mTransformUpdatePending;
         mutable std::mutex mPositionMutex;
 
         osg::Vec3f mForce;

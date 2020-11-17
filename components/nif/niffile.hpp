@@ -62,6 +62,8 @@ class NIFFile final : public File
 
     bool mUseSkinning = false;
 
+    static bool sLoadUnsupportedFiles;
+
     /// Parse the file
     void parse(Files::IStreamPtr stream);
 
@@ -149,6 +151,8 @@ public:
 
     /// Get the Bethesda version of the NIF format used
     unsigned int getBethVersion() const override { return bethVer; }
+
+    static void setLoadUnsupportedFiles(bool load);
 };
 using NIFFilePtr = std::shared_ptr<const Nif::NIFFile>;
 

@@ -92,6 +92,26 @@ KeyframeController::KeyframeController(const Nif::NiKeyframeData *data)
 {
 }
 
+KeyframeController::KeyframeController(const Nif::NiTransformInterpolator* interpolator)
+    : mRotations(interpolator->data->mRotations, interpolator->defaultRot)
+    , mXRotations(interpolator->data->mXRotations, 0.f)
+    , mYRotations(interpolator->data->mYRotations, 0.f)
+    , mZRotations(interpolator->data->mZRotations, 0.f)
+    , mTranslations(interpolator->data->mTranslations, interpolator->defaultPos)
+    , mScales(interpolator->data->mScales, interpolator->defaultScale)
+{
+}
+
+KeyframeController::KeyframeController(const float scale, const osg::Vec3f& pos, const osg::Quat& rot)
+    : mRotations(Nif::QuaternionKeyMapPtr(), rot)
+    , mXRotations(Nif::FloatKeyMapPtr(), 0.f)
+    , mYRotations(Nif::FloatKeyMapPtr(), 0.f)
+    , mZRotations(Nif::FloatKeyMapPtr(), 0.f)
+    , mTranslations(Nif::Vector3KeyMapPtr(), pos)
+    , mScales(Nif::FloatKeyMapPtr(), scale)
+{
+}
+
 osg::Quat KeyframeController::getXYZRotation(float time) const
 {
     float xrot = 0, yrot = 0, zrot = 0;
@@ -177,10 +197,25 @@ GeomMorpherController::GeomMorpherController(const GeomMorpherController &copy, 
 {
 }
 
-GeomMorpherController::GeomMorpherController(const Nif::NiMorphData *data)
+GeomMorpherController::GeomMorpherController(const Nif::NiGeomMorpherController* ctrl)
 {
-    for (unsigned int i=0; i<data->mMorphs.size(); ++i)
-        mKeyFrames.emplace_back(data->mMorphs[i].mKeyFrames);
+    if (ctrl->interpolators.length() == 0)
+    {
+        if (ctrl->data.empty())
+            return;
+        for (const auto& morph : ctrl->data->mMorphs)
+           mKeyFrames.emplace_back(morph.mKeyFrames);
+    }
+    else
+    {
+        for (size_t i = 0; i < ctrl->interpolators.length(); ++i)
+        {
+            if (!ctrl->interpolators[i].empty())
+                mKeyFrames.emplace_back(ctrl->interpolators[i].getPtr());
+            else
+                mKeyFrames.emplace_back();
+        }
+    }
 }
 
 void GeomMorpherController::update(osg::NodeVisitor *nv, osg::Drawable *drawable)
@@ -313,6 +348,11 @@ RollController::RollController(const Nif::NiFloatData *data)
 {
 }
 
+RollController::RollController(const Nif::NiFloatInterpolator* interpolator)
+    : mData(interpolator)
+{
+}
+
 RollController::RollController(const RollController &copy, const osg::CopyOp &copyop)
     : osg::NodeCallback(copy, copyop)
     , Controller(copy)
@@ -344,6 +384,10 @@ void RollController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     }
 }
 
+AlphaController::AlphaController()
+{
+}
+
 AlphaController::AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial)
     : mData(data->mKeyList, 1.f)
     , mBaseMaterial(baseMaterial)
@@ -351,7 +395,9 @@ AlphaController::AlphaController(const Nif::NiFloatData *data, const osg::Materi
 
 }
 
-AlphaController::AlphaController()
+AlphaController::AlphaController(const Nif::NiFloatInterpolator* interpolator, const osg::Material* baseMaterial)
+    : mData(interpolator)
+    , mBaseMaterial(baseMaterial)
 {
 }
 
@@ -379,6 +425,10 @@ void AlphaController::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
     }
 }
 
+MaterialColorController::MaterialColorController()
+{
+}
+
 MaterialColorController::MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial)
     : mData(data->mKeyList, osg::Vec3f(1,1,1))
     , mTargetColor(color)
@@ -386,7 +436,10 @@ MaterialColorController::MaterialColorController(const Nif::NiPosData *data, Tar
 {
 }
 
-MaterialColorController::MaterialColorController()
+MaterialColorController::MaterialColorController(const Nif::NiPoint3Interpolator* interpolator, TargetColor color, const osg::Material* baseMaterial)
+    : mData(interpolator)
+    , mTargetColor(color)
+    , mBaseMaterial(baseMaterial)
 {
 }
 
@@ -448,6 +501,8 @@ FlipController::FlipController(const Nif::NiFlipController *ctrl, const std::vec
     , mDelta(ctrl->mDelta)
     , mTextures(textures)
 {
+    if (!ctrl->mInterpolator.empty())
+        mData = ctrl->mInterpolator.getPtr();
 }
 
 FlipController::FlipController(int texSlot, float delta, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures)
@@ -463,14 +518,19 @@ FlipController::FlipController(const FlipController &copy, const osg::CopyOp &co
     , mTexSlot(copy.mTexSlot)
     , mDelta(copy.mDelta)
     , mTextures(copy.mTextures)
+    , mData(copy.mData)
 {
 }
 
 void FlipController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)
 {
-    if (hasInput() && mDelta != 0 && !mTextures.empty())
+    if (hasInput() && !mTextures.empty())
     {
-        int curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
+        int curTexture = 0;
+        if (mDelta != 0)
+            curTexture = int(getInputValue(nv) / mDelta) % mTextures.size();
+        else
+            curTexture = int(mData.interpKey(getInputValue(nv))) % mTextures.size();
         stateset->setTextureAttribute(mTexSlot, mTextures[curTexture]);
     }
 }

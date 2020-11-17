@@ -205,24 +205,6 @@ namespace MWMechanics
             break;
         }
 
-        case ESM::MagicEffect::CurePoison:
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Poison);
-            break;
-        case ESM::MagicEffect::CureParalyzation:
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
-            break;
-        case ESM::MagicEffect::CureCommonDisease:
-            actor.getClass().getCreatureStats(actor).getSpells().purgeCommonDisease();
-            break;
-        case ESM::MagicEffect::CureBlightDisease:
-            actor.getClass().getCreatureStats(actor).getSpells().purgeBlightDisease();
-            break;
-        case ESM::MagicEffect::CureCorprusDisease:
-            actor.getClass().getCreatureStats(actor).getSpells().purgeCorprusDisease();
-            break;
-        case ESM::MagicEffect::RemoveCurse:
-            actor.getClass().getCreatureStats(actor).getSpells().purgeCurses();
-            break;
         default:
             return false;
         }

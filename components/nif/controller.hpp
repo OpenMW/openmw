@@ -83,6 +83,7 @@ using NiBSPArrayController = NiParticleSystemController;
 class NiMaterialColorController : public Controller
 {
 public:
+    NiPoint3InterpolatorPtr interpolator;
     NiPosDataPtr data;
     unsigned int targetColor;
 
@@ -138,6 +139,7 @@ class NiKeyframeController : public Controller
 {
 public:
     NiKeyframeDataPtr data;
+    NiTransformInterpolatorPtr interpolator;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
@@ -146,6 +148,7 @@ public:
 struct NiFloatInterpController : public Controller
 {
     NiFloatDataPtr data;
+    NiFloatInterpolatorPtr interpolator;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
@@ -158,6 +161,7 @@ class NiGeomMorpherController : public Controller
 {
 public:
     NiMorphDataPtr data;
+    NiFloatInterpolatorList interpolators;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
@@ -175,9 +179,52 @@ public:
 class NiFlipController : public Controller
 {
 public:
+    NiFloatInterpolatorPtr mInterpolator;
     int mTexSlot; // NiTexturingProperty::TextureType
     float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
     NiSourceTextureList mSources;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct bhkBlendController : public Controller
+{
+    void read(NIFStream *nif) override;
+};
+
+struct Interpolator : public Record { };
+
+struct NiPoint3Interpolator : public Interpolator
+{
+    osg::Vec3f defaultVal;
+    NiPosDataPtr data;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiBoolInterpolator : public Interpolator
+{
+    bool defaultVal;
+    NiBoolDataPtr data;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiFloatInterpolator : public Interpolator
+{
+    float defaultVal;
+    NiFloatDataPtr data;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiTransformInterpolator : public Interpolator
+{
+    osg::Vec3f defaultPos;
+    osg::Quat defaultRot;
+    float defaultScale;
+    NiKeyframeDataPtr data;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;

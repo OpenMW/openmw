@@ -10,6 +10,7 @@
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <set>
+#include <type_traits>
 
 #include <osg/Texture2D>
 
@@ -58,6 +59,31 @@ namespace NifOsg
         using ValueT = typename MapT::ValueType;
 
         ValueInterpolator() = default;
+
+        template<
+            class T,
+            typename = std::enable_if_t<
+                std::conjunction_v<
+                    std::disjunction<
+                        std::is_same<ValueT, float>,
+                        std::is_same<ValueT, osg::Vec3f>
+                    >,
+                    std::is_same<decltype(T::defaultVal), ValueT>
+                >,
+                T
+            >
+        >
+        ValueInterpolator(const T* interpolator) : mDefaultVal(interpolator->defaultVal)
+        {
+            if (interpolator->data.empty())
+                return;
+            mKeys = interpolator->data->mKeyList;
+            if (mKeys)
+            {
+                mLastLowKey = mKeys->mKeys.end();
+                mLastHighKey = mKeys->mKeys.end();
+            }
+        }
 
         ValueInterpolator(std::shared_ptr<const MapT> keys, ValueT defaultVal = ValueT())
             : mKeys(keys)
@@ -188,7 +214,7 @@ namespace NifOsg
     class GeomMorpherController : public osg::Drawable::UpdateCallback, public SceneUtil::Controller
     {
     public:
-        GeomMorpherController(const Nif::NiMorphData* data);
+        GeomMorpherController(const Nif::NiGeomMorpherController* ctrl);
         GeomMorpherController();
         GeomMorpherController(const GeomMorpherController& copy, const osg::CopyOp& copyop);
 
@@ -203,7 +229,14 @@ namespace NifOsg
     class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller
     {
     public:
+        // This is used if there's no interpolator but there is data (Morrowind meshes).
         KeyframeController(const Nif::NiKeyframeData *data);
+        // This is used if the interpolator has data.
+        KeyframeController(const Nif::NiTransformInterpolator* interpolator);
+        // This is used if there are default values available (e.g. from a data-less interpolator).
+        // If there's neither keyframe data nor an interpolator a KeyframeController must not be created.
+        KeyframeController(const float scale, const osg::Vec3f& pos, const osg::Quat& rot);
+
         KeyframeController();
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
 
@@ -272,6 +305,7 @@ namespace NifOsg
 
     public:
         RollController(const Nif::NiFloatData *data);
+        RollController(const Nif::NiFloatInterpolator* interpolator);
         RollController() = default;
         RollController(const RollController& copy, const osg::CopyOp& copyop);
 
@@ -287,6 +321,7 @@ namespace NifOsg
         osg::ref_ptr<const osg::Material> mBaseMaterial;
     public:
         AlphaController(const Nif::NiFloatData *data, const osg::Material* baseMaterial);
+        AlphaController(const Nif::NiFloatInterpolator* interpolator, const osg::Material* baseMaterial);
         AlphaController();
         AlphaController(const AlphaController& copy, const osg::CopyOp& copyop);
 
@@ -308,6 +343,7 @@ namespace NifOsg
             Emissive = 3
         };
         MaterialColorController(const Nif::NiPosData *data, TargetColor color, const osg::Material* baseMaterial);
+        MaterialColorController(const Nif::NiPoint3Interpolator* interpolator, TargetColor color, const osg::Material* baseMaterial);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
 
@@ -329,6 +365,7 @@ namespace NifOsg
         int mTexSlot{0};
         float mDelta{0.f};
         std::vector<osg::ref_ptr<osg::Texture2D> > mTextures;
+        FloatInterpolator mData;
 
     public:
         FlipController(const Nif::NiFlipController* ctrl, const std::vector<osg::ref_ptr<osg::Texture2D> >& textures);

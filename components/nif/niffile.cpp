@@ -1,6 +1,7 @@
 #include "niffile.hpp"
 #include "effect.hpp"
 
+#include <array>
 #include <map>
 #include <sstream>
 
@@ -113,6 +114,19 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiColorExtraData"]             = {&construct <NiVectorExtraData>           , RC_NiColorExtraData           };
     factory["NiFloatExtraData"]             = {&construct <NiFloatExtraData>            , RC_NiFloatExtraData           };
     factory["NiFloatsExtraData"]            = {&construct <NiFloatsExtraData>           , RC_NiFloatsExtraData          };
+    factory["NiStringPalette"]              = {&construct <NiStringPalette>             , RC_NiStringPalette            };
+    factory["NiBoolData"]                   = {&construct <NiBoolData>                  , RC_NiBoolData                 };
+    factory["NiSkinPartition"]              = {&construct <NiSkinPartition>             , RC_NiSkinPartition            };
+    factory["BSXFlags"]                     = {&construct <NiIntegerExtraData>          , RC_BSXFlags                   };
+    factory["BSBound"]                      = {&construct <BSBound>                     , RC_BSBound                    };
+    factory["NiTransformData"]              = {&construct <NiKeyframeData>              , RC_NiKeyframeData             };
+    factory["BSFadeNode"]                   = {&construct <NiNode>                      , RC_NiNode                     };
+    factory["bhkBlendController"]           = {&construct <bhkBlendController>          , RC_bhkBlendController         };
+    factory["NiFloatInterpolator"]          = {&construct <NiFloatInterpolator>         , RC_NiFloatInterpolator        };
+    factory["NiBoolInterpolator"]           = {&construct <NiBoolInterpolator>          , RC_NiBoolInterpolator         };
+    factory["NiPoint3Interpolator"]         = {&construct <NiPoint3Interpolator>        , RC_NiPoint3Interpolator       };
+    factory["NiTransformController"]        = {&construct <NiKeyframeController>        , RC_NiKeyframeController       };
+    factory["NiTransformInterpolator"]      = {&construct <NiTransformInterpolator>     , RC_NiTransformInterpolator    };
     return factory;
 }
 
@@ -137,15 +151,45 @@ void NIFFile::parse(Files::IStreamPtr stream)
 
     // Check the header string
     std::string head = nif.getVersionString();
-    if(head.compare(0, 22, "NetImmerse File Format") != 0)
+    static const std::array<std::string, 2> verStrings =
+    {
+        "NetImmerse File Format",
+        "Gamebryo File Format"
+    };
+    bool supported = false;
+    for (const std::string& verString : verStrings)
+    {
+        supported = (head.compare(0, verString.size(), verString) == 0);
+        if (supported)
+            break;
+    }
+    if (!supported)
         fail("Invalid NIF header: " + head);
+
+    supported = false;
 
     // Get BCD version
     ver = nif.getUInt();
     // 4.0.0.0 is an older, practically identical version of the format.
     // It's not used by Morrowind assets but Morrowind supports it.
-    if(ver != NIFStream::generateVersion(4,0,0,0) && ver != VER_MW)
-        fail("Unsupported NIF version: " + printVersion(ver));
+    static const std::array<uint32_t, 2> supportedVers =
+    {
+        NIFStream::generateVersion(4,0,0,0),
+        VER_MW
+    };
+    for (uint32_t supportedVer : supportedVers)
+    {
+        supported = (ver == supportedVer);
+        if (supported)
+            break;
+    }
+    if (!supported)
+    {
+        if (sLoadUnsupportedFiles)
+            warn("Unsupported NIF version: " + printVersion(ver) + ". Proceed with caution!");
+        else
+            fail("Unsupported NIF version: " + printVersion(ver));
+    }
 
     // NIF data endianness
     if (ver >= NIFStream::generateVersion(20,0,0,4))
@@ -245,6 +289,9 @@ void NIFFile::parse(Files::IStreamPtr stream)
         else
             fail("Unknown record type " + rec);
 
+        if (!supported)
+            Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " (" << filename << ")";
+
         assert(r != nullptr);
         assert(r->recType != RC_MISSING);
         r->recName = rec;
@@ -284,6 +331,13 @@ void NIFFile::setUseSkinning(bool skinning)
 bool NIFFile::getUseSkinning() const
 {
     return mUseSkinning;
+}
+
+bool NIFFile::sLoadUnsupportedFiles = false;
+
+void NIFFile::setLoadUnsupportedFiles(bool load)
+{
+    sLoadUnsupportedFiles = load;
 }
 
 }

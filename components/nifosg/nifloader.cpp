@@ -60,6 +60,18 @@ namespace
         }
     }
 
+    bool isTypeGeometry(int type)
+    {
+        switch (type)
+        {
+            case Nif::RC_NiTriShape:
+            case Nif::RC_NiTriStrips:
+            case Nif::RC_NiLines:
+                return true;
+        }
+        return false;
+    }
+
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the node hierarchy above it.
     void collectDrawableProperties(const Nif::Node* nifNode, std::vector<const Nif::Property*>& out)
     {
@@ -269,10 +281,10 @@ namespace NifOsg
                 const Nif::NiStringExtraData *strdata = static_cast<const Nif::NiStringExtraData*>(extra.getPtr());
                 const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
 
-                if(key->data.empty())
+                if (key->data.empty() && key->interpolator.empty())
                     continue;
 
-                osg::ref_ptr<NifOsg::KeyframeController> callback(new NifOsg::KeyframeController(key->data.getPtr()));
+                osg::ref_ptr<NifOsg::KeyframeController> callback(handleKeyframeController(key));
                 callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
@@ -528,7 +540,19 @@ namespace NifOsg
             // - finding a random child NiNode in NiBspArrayController
             node->setUserValue("recIndex", nifNode->recIndex);
 
+            std::vector<Nif::ExtraPtr> extraCollection;
+
             for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
+                extraCollection.emplace_back(e);
+
+            for (size_t i = 0; i < nifNode->extralist.length(); ++i)
+            {
+                Nif::ExtraPtr e = nifNode->extralist[i];
+                if (!e.empty())
+                    extraCollection.emplace_back(e);
+            }
+
+            for (const auto& e : extraCollection)
             {
                 if(e->recType == Nif::RC_NiTextKeyExtraData && textKeys)
                 {
@@ -584,7 +608,7 @@ namespace NifOsg
 
             applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
 
-            const bool isGeometry = nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines;
+            const bool isGeometry = isTypeGeometry(nifNode->recType);
 
             if (isGeometry && !skipMeshes)
             {
@@ -701,6 +725,24 @@ namespace NifOsg
             }
         }
 
+        static osg::ref_ptr<KeyframeController> handleKeyframeController(const Nif::NiKeyframeController* keyctrl)
+        {
+            osg::ref_ptr<NifOsg::KeyframeController> ctrl;
+            if (!keyctrl->interpolator.empty())
+            {
+                const Nif::NiTransformInterpolator* interp = keyctrl->interpolator.getPtr();
+                if (!interp->data.empty())
+                    ctrl = new NifOsg::KeyframeController(interp);
+                else
+                    ctrl = new NifOsg::KeyframeController(interp->defaultScale, interp->defaultPos, interp->defaultRot);
+            }
+            else if (!keyctrl->data.empty())
+            {
+                ctrl = new NifOsg::KeyframeController(keyctrl->data.getPtr());
+            }
+            return ctrl;
+        }
+
         void handleNodeControllers(const Nif::Node* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
@@ -710,9 +752,9 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiKeyframeController)
                 {
                     const Nif::NiKeyframeController *key = static_cast<const Nif::NiKeyframeController*>(ctrl.getPtr());
-                    if (key->data.empty())
+                    if (key->data.empty() && key->interpolator.empty())
                         continue;
-                    osg::ref_ptr<KeyframeController> callback(new KeyframeController(key->data.getPtr()));
+                    osg::ref_ptr<KeyframeController> callback(handleKeyframeController(key));
                     setupController(key, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -739,9 +781,13 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiRollController)
                 {
                     const Nif::NiRollController *rollctrl = static_cast<const Nif::NiRollController*>(ctrl.getPtr());
-                    if (rollctrl->data.empty())
+                    if (rollctrl->data.empty() && rollctrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<RollController> callback(new RollController(rollctrl->data.getPtr()));
+                    osg::ref_ptr<RollController> callback;
+                    if (!rollctrl->interpolator.empty())
+                        callback = new RollController(rollctrl->interpolator.getPtr());
+                    else // if (!rollctrl->data.empty())
+                        callback = new RollController(rollctrl->data.getPtr());
                     setupController(rollctrl, callback, animflags);
                     node->addUpdateCallback(callback);
                     isAnimated = true;
@@ -767,19 +813,27 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiAlphaController)
                 {
                     const Nif::NiAlphaController* alphactrl = static_cast<const Nif::NiAlphaController*>(ctrl.getPtr());
-                    if (alphactrl->data.empty())
+                    if (alphactrl->data.empty() && alphactrl->interpolator.empty())
                         continue;
-                    osg::ref_ptr<AlphaController> osgctrl(new AlphaController(alphactrl->data.getPtr(), baseMaterial));
+                    osg::ref_ptr<AlphaController> osgctrl;
+                    if (!alphactrl->interpolator.empty())
+                        osgctrl = new AlphaController(alphactrl->interpolator.getPtr(), baseMaterial);
+                    else // if (!alphactrl->data.empty())
+                        osgctrl = new AlphaController(alphactrl->data.getPtr(), baseMaterial);
                     setupController(alphactrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
                 else if (ctrl->recType == Nif::RC_NiMaterialColorController)
                 {
                     const Nif::NiMaterialColorController* matctrl = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    if (matctrl->data.empty())
+                    if (matctrl->data.empty() && matctrl->interpolator.empty())
                         continue;
+                    osg::ref_ptr<MaterialColorController> osgctrl;
                     auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->targetColor);
-                    osg::ref_ptr<MaterialColorController> osgctrl(new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial));
+                    if (!matctrl->interpolator.empty())
+                        osgctrl = new MaterialColorController(matctrl->interpolator.getPtr(), targetColor, baseMaterial);
+                    else // if (!matctrl->data.empty())
+                        osgctrl = new MaterialColorController(matctrl->data.getPtr(), targetColor, baseMaterial);
                     setupController(matctrl, osgctrl, animflags);
                     composite->addController(osgctrl);
                 }
@@ -1175,7 +1229,7 @@ namespace NifOsg
 
         void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines);
+            assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             handleNiGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
@@ -1190,7 +1244,7 @@ namespace NifOsg
                         continue;
                     drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
 
-                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl->data.getPtr());
+                    osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl);
                     setupController(ctrl.getPtr(), morphctrl, animflags);
                     drawable->setUpdateCallback(morphctrl);
                     break;
@@ -1220,7 +1274,7 @@ namespace NifOsg
         void handleSkinnedGeometry(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite,
                                           const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            assert(nifNode->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_NiTriStrips || nifNode->recType == Nif::RC_NiLines);
+            assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             handleNiGeometry(nifNode, geometry, parentNode, composite, boundTextures, animflags);
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);

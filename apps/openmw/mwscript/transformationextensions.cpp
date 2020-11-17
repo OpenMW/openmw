@@ -32,7 +32,11 @@ namespace MWScript
             std::vector<MWWorld::Ptr> actors;
             MWBase::Environment::get().getWorld()->getActorsStandingOn (ptr, actors);
             for (auto& actor : actors)
-                MWBase::Environment::get().getWorld()->queueMovement(actor, diff);
+            {
+                osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+                actorPos += diff;
+                MWBase::Environment::get().getWorld()->moveObject(actor, actorPos.x(), actorPos.y(), actorPos.z());
+            }
         }
 
         template<class R>

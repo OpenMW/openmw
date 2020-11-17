@@ -38,6 +38,8 @@ namespace Shader
 
         void setSpecularMapPattern(const std::string& pattern);
 
+        void setApplyLightingToEnvMaps(bool apply);
+
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -59,6 +61,8 @@ namespace Shader
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
 
+        bool mApplyLightingToEnvMaps;
+
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;
 
@@ -75,7 +79,6 @@ namespace Shader
             int mColorMode;
             
             bool mMaterialOverridden;
-            bool mBlendFuncOverridden;
 
             bool mNormalHeight; // true if normal map has height info in alpha channel
 

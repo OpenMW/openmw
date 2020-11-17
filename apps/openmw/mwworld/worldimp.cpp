@@ -1504,11 +1504,11 @@ namespace MWWorld
         const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements);
         mDiscardMovements = false;
 
-        for(const auto& result : results)
+        for(const auto& [actor, position]: results)
         {
             // Handle player last, in case a cell transition occurs
-            if(result.first != getPlayerPtr())
-                moveObjectImp(result.first, result.second.x(), result.second.y(), result.second.z(), false);
+            if(actor != getPlayerPtr())
+                moveObjectImp(actor, position.x(), position.y(), position.z(), false);
         }
 
         const auto player = results.find(getPlayerPtr());
@@ -1577,21 +1577,28 @@ namespace MWWorld
         float minRot = door.getCellRef().getPosition().rot[2];
         float maxRot = minRot + osg::DegreesToRadians(90.f);
 
-        float diff = duration * osg::DegreesToRadians(90.f);
-        float targetRot = std::min(std::max(minRot, oldRot + diff * (state == MWWorld::DoorState::Opening ? 1 : -1)), maxRot);
+        float diff = duration * osg::DegreesToRadians(90.f) * (state == MWWorld::DoorState::Opening ? 1 : -1);
+        float targetRot = std::min(std::max(minRot, oldRot + diff), maxRot);
         rotateObject(door, objPos.rot[0], objPos.rot[1], targetRot, MWBase::RotationFlag_none);
 
         bool reached = (targetRot == maxRot && state != MWWorld::DoorState::Idle) || targetRot == minRot;
 
         /// \todo should use convexSweepTest here
         bool collisionWithActor = false;
-        std::vector<MWWorld::Ptr> collisions = mPhysics->getCollisions(door, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor);
-        for (MWWorld::Ptr& ptr : collisions)
+        for (auto& [ptr, point, normal] : mPhysics->getCollisionsPoints(door, MWPhysics::CollisionType_Door, MWPhysics::CollisionType_Actor))
         {
+
             if (ptr.getClass().isActor())
             {
+                auto localPoint = objPos.asVec3() - point;
+                osg::Vec3f direction = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * localPoint - localPoint;
+                direction.normalize();
+                mPhysics->reportCollision(Misc::Convert::toBullet(point), Misc::Convert::toBullet(normal));
+                if (direction * normal < 0) // door is turning away from actor
+                    continue;
+
                 collisionWithActor = true;
-                
+
                 // Collided with actor, ask actor to try to avoid door
                 if(ptr != getPlayerPtr() )
                 {

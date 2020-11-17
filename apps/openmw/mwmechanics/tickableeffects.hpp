@@ -12,6 +12,7 @@ namespace MWMechanics
     struct EffectKey;
 
     /// Apply a magic effect that is applied in tick intervals until its remaining time ends or it is removed
+    /// Note: this function works in loop, so magic effects should not be removed here to avoid iterator invalidation.
     /// @return Was the effect a tickable effect with a magnitude?
     bool effectTick(CreatureStats& creatureStats, const MWWorld::Ptr& actor, const EffectKey& effectKey, float magnitude);
 }

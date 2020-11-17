@@ -67,7 +67,7 @@ namespace SceneUtil {
 
         virtual void enableShadows();
 
-        virtual void disableShadows();
+        virtual void disableShadows(bool setDummyState = false);
 
         virtual void enableDebugHUD();
 
@@ -252,6 +252,7 @@ namespace SceneUtil {
         osg::ref_ptr<osg::Program>              _program;
 
         bool                                    _enableShadows;
+        bool                                    mSetDummyStateWhenDisabled;
 
         double                                  _splitPointUniformLogRatio = 0.5;
         double                                  _splitPointDeltaBias = 0.0;
@@ -288,7 +289,6 @@ namespace SceneUtil {
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
         osg::ref_ptr<osg::Program>              _castingProgram;
-        osg::ref_ptr<osg::Uniform>              _shadowMapAlphaTestDisableUniform;
     };
 
 }

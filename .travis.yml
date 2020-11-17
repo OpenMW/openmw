@@ -2,19 +2,12 @@ language: cpp
 branches:
   only:
     - master
-    - coverity_scan
     - /openmw-.*$/
-env:
-  global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "jybGzAdUbqt9vWR/GEnRd96BgAi/7Zd1+2HK68j/i/8+/1YH2XxLOy4Jv/DUBhBlJIkxs/Xv8dRcUlFOclZDHX1d/9Qnsqd3oUVkD7k1y7cTOWy9TBQaE/v/kZo3LpzA3xPwwthrb0BvqIbOfIELi5fS5s8ba85WFRg3AX70wWE="
 cache: ccache
 addons:
   apt:
     sources:
       - sourceline: 'ppa:openmw/openmw'
-      # - ubuntu-toolchain-r-test  # for GCC-10
     packages: [
       # Dev
       build-essential, cmake, clang-tools, ccache,
@@ -23,32 +16,21 @@ addons:
       # FFmpeg
       libavcodec-dev, libavformat-dev, libavutil-dev, libswresample-dev, libswscale-dev,
       # Audio, Video and Misc. deps
-      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev, liblz4-dev
+      libsdl2-dev, libqt5opengl5-dev, libopenal-dev, libunshield-dev, libtinyxml-dev, liblz4-dev,
       # The other ones from OpenMW ppa
       libbullet-dev, libopenscenegraph-dev, libmygui-dev
     ]
-  coverity_scan:  # TODO: currently takes too long, disabled openmw/openmw-cs for now.
-    project:
-      name: "OpenMW/openmw"
-      description: "<Your project description here>"
-    branch_pattern: coverity_scan
-    notification_email: 1122069+psi29a@users.noreply.github.com
-    build_command_prepend: "cov-configure --comptype gcc --compiler gcc-5 --template; cmake . -DBUILD_OPENMW=FALSE -DBUILD_OPENCS=FALSE"
-    build_command: "make VERBOSE=1 -j3"
 matrix:
   include:
     - name: OpenMW (all) on MacOS 10.15 with Xcode 11.6
       os: osx
       osx_image: xcode11.6
-      if: branch != coverity_scan
     - name: OpenMW (all) on Ubuntu Focal with GCC
       os: linux
       dist: focal
-      if: branch != coverity_scan
     - name: OpenMW (tests only) on Ubuntu Focal with GCC
       os: linux
       dist: focal
-      if: branch != coverity_scan
       env:
         - BUILD_TESTS_ONLY: 1
     - name: OpenMW (openmw) on Ubuntu Focal with Clang's Static Analysis
@@ -57,30 +39,21 @@ matrix:
       env:
         - MATRIX_EVAL="CC=clang && CXX=clang++"
         - ANALYZE="scan-build --force-analyze-debug-code --use-cc clang --use-c++ clang++"
-      if: branch != coverity_scan
       compiler: clang
-    - name: OpenMW Components Coverity Scan
-      os: linux
-      dist: focal
-      if: branch = coverity_scan
-#   allow_failures:
-#    - name: OpenMW (openmw) on Ubuntu Focal with GCC-10
-#      env:
-#        - MATRIX_EVAL="CC=gcc-10 && CXX=g++-10"
 
 before_install:
     - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then eval "${MATRIX_EVAL}"; fi
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_install.${TRAVIS_OS_NAME}.sh; fi
+    - ./CI/before_install.${TRAVIS_OS_NAME}.sh
 before_script:
     - ccache -z
-    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ./CI/before_script.${TRAVIS_OS_NAME}.sh; fi
+    - ./CI/before_script.${TRAVIS_OS_NAME}.sh
 script:
  - cd ./build
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then ${ANALYZE} make -j3; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${BUILD_TESTS_ONLY}" ]; then ./openmw_test_suite; fi
- - if [ "${COVERITY_SCAN_BRANCH}" != 1 ] && [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
+ - ${ANALYZE} make -j3;
+ - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then make package; fi
+ - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then ../CI/check_package.osx.sh; fi
+ - if [ "${TRAVIS_OS_NAME}" = "linux" ] && [ "${BUILD_TESTS_ONLY}" ]; then ./openmw_test_suite; fi
+ - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then cd .. && ./CI/check_tabs.sh; fi
  - cd "${TRAVIS_BUILD_DIR}"
  - ccache -s
 deploy:

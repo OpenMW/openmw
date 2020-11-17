@@ -6,6 +6,8 @@ namespace Nif
 void NiSkinInstance::read(NIFStream *nif)
 {
     data.read(nif);
+    if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,101))
+        partitions.read(nif);
     root.read(nif);
     bones.read(nif);
 }
@@ -13,6 +15,7 @@ void NiSkinInstance::read(NIFStream *nif)
 void NiSkinInstance::post(NIFFile *nif)
 {
     data.post(nif);
+    partitions.post(nif);
     root.post(nif);
     bones.post(nif);
 
@@ -320,7 +323,7 @@ void NiSkinData::read(NIFStream *nif)
 
     int boneNum = nif->getInt();
     if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW && nif->getVersion() <= NIFStream::generateVersion(10,1,0,0))
-        nif->skip(4); // NiSkinPartition link
+        partitions.read(nif);
 
     // Has vertex weights flag
     if (nif->getVersion() > NIFStream::generateVersion(4,2,1,0) && !nif->getBoolean())
@@ -345,6 +348,69 @@ void NiSkinData::read(NIFStream *nif)
     }
 }
 
+void NiSkinData::post(NIFFile *nif)
+{
+    partitions.post(nif);
+}
+
+void NiSkinPartition::read(NIFStream *nif)
+{
+    unsigned int num = nif->getUInt();
+    data.resize(num);
+    for (auto& partition : data)
+        partition.read(nif);
+}
+
+void NiSkinPartition::Partition::read(NIFStream *nif)
+{
+    unsigned short numVertices = nif->getUShort();
+    unsigned short numTriangles = nif->getUShort();
+    unsigned short numBones = nif->getUShort();
+    unsigned short numStrips = nif->getUShort();
+    unsigned short bonesPerVertex = nif->getUShort();
+    if (numBones)
+        nif->getUShorts(bones, numBones);
+
+    bool hasVertexMap = true;
+    if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        hasVertexMap = nif->getBoolean();
+    if (hasVertexMap && numVertices)
+        nif->getUShorts(vertexMap, numVertices);
+
+    bool hasVertexWeights = true;
+    if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        hasVertexWeights = nif->getBoolean();
+    if (hasVertexWeights && numVertices && bonesPerVertex)
+        nif->getFloats(weights, numVertices * bonesPerVertex);
+
+    std::vector<unsigned short> stripLengths;
+    if (numStrips)
+        nif->getUShorts(stripLengths, numStrips);
+
+    bool hasFaces = true;
+    if (nif->getVersion() >= NIFStream::generateVersion(10,1,0,0))
+        hasFaces = nif->getBoolean();
+    if (hasFaces)
+    {
+        if (numStrips)
+        {
+            strips.resize(numStrips);
+            for (unsigned short i = 0; i < numStrips; i++)
+                nif->getUShorts(strips[i], stripLengths[i]);
+        }
+        else if (numTriangles)
+            nif->getUShorts(triangles, numTriangles * 3);
+    }
+    bool hasBoneIndices = nif->getChar() != 0;
+    if (hasBoneIndices && numVertices && bonesPerVertex)
+        nif->getChars(boneIndices, numVertices * bonesPerVertex);
+    if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+    {
+        nif->getChar(); // LOD level
+        nif->getBoolean(); // Global VB
+    }
+}
+
 void NiMorphData::read(NIFStream *nif)
 {
     int morphCount = nif->getInt();
@@ -355,7 +421,7 @@ void NiMorphData::read(NIFStream *nif)
     for(int i = 0;i < morphCount;i++)
     {
         mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
-        mMorphs[i].mKeyFrames->read(nif, true);
+        mMorphs[i].mKeyFrames->read(nif, true, /*morph*/true);
         nif->getVector3s(mMorphs[i].mVertices, vertCount);
     }
 }
@@ -390,6 +456,19 @@ void NiPalette::read(NIFStream *nif)
     unsigned int numEntries = nif->getUInt();
     for (unsigned int i = 0; i < numEntries; i++)
         colors[i] = nif->getUInt() | alphaMask;
+}
+
+void NiStringPalette::read(NIFStream *nif)
+{
+    palette = nif->getString();
+    if (nif->getUInt() != palette.size())
+        nif->file->warn("Failed size check in NiStringPalette");
+}
+
+void NiBoolData::read(NIFStream *nif)
+{
+    mKeyList = std::make_shared<ByteKeyMap>();
+    mKeyList->read(nif);
 }
 
 } // Namespace

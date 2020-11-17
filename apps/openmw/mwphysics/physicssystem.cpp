@@ -148,11 +148,11 @@ namespace MWPhysics
         if (!physactor || !physactor->getOnGround())
             return false;
 
-        CollisionMap::const_iterator found = mStandingCollisions.find(actor);
-        if (found == mStandingCollisions.end())
+        const auto obj = physactor->getStandingOnPtr();
+        if (obj.isEmpty())
             return true; // assume standing on terrain (which is a non-object, so not collision tracked)
 
-        ObjectMap::const_iterator foundObj = mObjects.find(found->second);
+        ObjectMap::const_iterator foundObj = mObjects.find(obj);
         if (foundObj == mObjects.end())
             return false;
 
@@ -403,15 +403,15 @@ namespace MWPhysics
             return osg::Vec3f();
     }
 
-    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
+    std::vector<ContactPoint> PhysicsSystem::getCollisionsPoints(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
     {
         btCollisionObject* me = nullptr;
 
-        ObjectMap::const_iterator found = mObjects.find(ptr);
+        auto found = mObjects.find(ptr);
         if (found != mObjects.end())
             me = found->second->getCollisionObject();
         else
-            return std::vector<MWWorld::Ptr>();
+            return {};
 
         ContactTestResultCallback resultCallback (me);
         resultCallback.m_collisionFilterGroup = collisionGroup;
@@ -420,13 +420,21 @@ namespace MWPhysics
         return resultCallback.mResult;
     }
 
+    std::vector<MWWorld::Ptr> PhysicsSystem::getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const
+    {
+        std::vector<MWWorld::Ptr> actors;
+        for (auto& [actor, point, normal] : getCollisionsPoints(ptr, collisionGroup, collisionMask))
+            actors.emplace_back(actor);
+        return actors;
+    }
+
     osg::Vec3f PhysicsSystem::traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight)
     {
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
-        else
-            return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
+        found->second->resetPosition();
+        return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
     }
 
     void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
@@ -493,22 +501,6 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
-    {
-        CollisionMap::iterator found = map.find(old);
-        if (found != map.end())
-        {
-            map[updated] = found->second;
-            map.erase(found);
-        }
-
-        for (auto& collision : map)
-        {
-            if (collision.second == old)
-                collision.second = updated;
-        }
-    }
-
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         ObjectMap::iterator found = mObjects.find(old);
@@ -529,7 +521,11 @@ namespace MWPhysics
             mActors.emplace(updated, std::move(actor));
         }
 
-        updateCollisionMapPtr(mStandingCollisions, old, updated);
+        for (auto& [_, actor] : mActors)
+        {
+            if (actor->getStandingOnPtr() == old)
+                actor->setStandingOnPtr(updated);
+        }
     }
 
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
@@ -667,7 +663,6 @@ namespace MWPhysics
     void PhysicsSystem::clearQueuedMovement()
     {
         mMovementQueue.clear();
-        mStandingCollisions.clear();
     }
 
     const PtrPositionList& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation)
@@ -680,7 +675,7 @@ namespace MWPhysics
 
         mTimeAccum -= numSteps * mPhysicsDt;
 
-        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), mStandingCollisions, skipSimulation);
+        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), skipSimulation);
     }
 
     std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(int numSteps)
@@ -692,10 +687,8 @@ namespace MWPhysics
         {
             const auto foundActor = mActors.find(character);
             if (foundActor == mActors.end()) // actor was already removed from the scene
-            {
-                mStandingCollisions.erase(character);
                 continue;
-            }
+
             auto physicActor = foundActor->second;
 
             float waterlevel = -std::numeric_limits<float>::max();
@@ -726,7 +719,7 @@ namespace MWPhysics
             // Ue current value only if we don't advance the simulation. Otherwise we might get a stale value.
             MWWorld::Ptr standingOn;
             if (numSteps == 0)
-                standingOn = mStandingCollisions[character];
+                standingOn = physicActor->getStandingOnPtr();
 
             actorsFrameData.emplace_back(std::move(physicActor), character, standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
         }
@@ -766,20 +759,18 @@ namespace MWPhysics
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
     {
-        for (const auto& standingActor : mStandingCollisions)
-        {
-            if (standingActor.first == actor && standingActor.second == object)
-                return true;
-        }
+        const auto physActor = mActors.find(actor);
+        if (physActor != mActors.end())
+            return physActor->second->getStandingOnPtr() == object;
         return false;
     }
 
     void PhysicsSystem::getActorsStandingOn(const MWWorld::ConstPtr &object, std::vector<MWWorld::Ptr> &out) const
     {
-        for (const auto& standingActor : mStandingCollisions)
+        for (const auto& [_, actor] : mActors)
         {
-            if (standingActor.second == object)
-                out.push_back(standingActor.first);
+            if (actor->getStandingOnPtr() == object)
+                out.emplace_back(actor->getPtr());
         }
     }
 
@@ -875,7 +866,7 @@ namespace MWPhysics
     ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn,
             bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
-        mPositionChanged(false), mDidJump(false), mNeedLand(false), mIsStuck(true), mMoveToWaterSurface(moveToWaterSurface),
+        mDidJump(false), mNeedLand(false), mIsStuck(true), mMoveToWaterSurface(moveToWaterSurface),
         mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
@@ -885,10 +876,9 @@ namespace MWPhysics
         mWantJump = mPtr.getClass().getMovementSettings(mPtr).mPosition[2] != 0;
         mIsDead = mPtr.getClass().getCreatureStats(mPtr).isDead();
         mWasOnGround = actor->getOnGround();
-    }
 
-    void ActorFrameData::updatePosition()
-    {
+        mActorRaw->updatePosition();
+        mOrigin = mActorRaw->getNextPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {

@@ -50,12 +50,18 @@ class btVector3;
 namespace MWPhysics
 {
     using PtrPositionList = std::map<MWWorld::Ptr, osg::Vec3f>;
-    using CollisionMap = std::map<MWWorld::Ptr, MWWorld::Ptr>;
 
     class HeightField;
     class Object;
     class Actor;
     class PhysicsTaskScheduler;
+
+    struct ContactPoint
+    {
+        MWWorld::Ptr mObject;
+        osg::Vec3f mPoint;
+        osg::Vec3f mNormal;
+    };
 
     struct LOSRequest
     {
@@ -71,14 +77,12 @@ namespace MWPhysics
     struct ActorFrameData
     {
         ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
-        void updatePosition();
         std::weak_ptr<Actor> mActor;
         Actor* mActorRaw;
         MWWorld::Ptr mPtr;
         MWWorld::Ptr mStandingOn;
         bool mFlying;
         bool mSwimming;
-        bool mPositionChanged;
         bool mWasOnGround;
         bool mWantJump;
         bool mDidJump;
@@ -91,6 +95,7 @@ namespace MWPhysics
         float mOldHeight;
         float mFallHeight;
         osg::Vec3f mMovement;
+        osg::Vec3f mOrigin;
         osg::Vec3f mPosition;
         ESM::Position mRefpos;
     };
@@ -146,6 +151,7 @@ namespace MWPhysics
             void debugDraw();
 
             std::vector<MWWorld::Ptr> getCollisions(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const; ///< get handles this object collides with
+            std::vector<ContactPoint> getCollisionsPoints(const MWWorld::ConstPtr &ptr, int collisionGroup, int collisionMask) const;
             osg::Vec3f traceDown(const MWWorld::Ptr &ptr, const osg::Vec3f& position, float maxHeight);
 
             std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::ConstPtr& actor,
@@ -265,13 +271,6 @@ namespace MWPhysics
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
-
-            // Tracks standing collisions happening during a single frame. <actor handle, collided handle>
-            // This will detect standing on an object, but won't detect running e.g. against a wall.
-            CollisionMap mStandingCollisions;
-
-            // replaces all occurrences of 'old' in the map by 'updated', no matter if it's a key or value
-            void updateCollisionMapPtr(CollisionMap& map, const MWWorld::Ptr &old, const MWWorld::Ptr &updated);
 
             using PtrVelocityList = std::vector<std::pair<MWWorld::Ptr, osg::Vec3f>>;
             PtrVelocityList mMovementQueue;

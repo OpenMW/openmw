@@ -373,6 +373,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_zero_num_roots_should_return_default)
     {
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(0));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -422,11 +423,13 @@ namespace
     {
         mNode.hasBounds = true;
         mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -444,12 +447,14 @@ namespace
     {
         mNode.hasBounds = true;
         mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNode)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -467,16 +472,19 @@ namespace
     {
         mNode.hasBounds = true;
         mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         mNiNode.hasBounds = true;
-        mNiNode.boundXYZ = osg::Vec3f(4, 5, 6);
-        mNiNode.boundPos = osg::Vec3f(-4, -5, -6);
+        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.bounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNiNode.bounds.box.center = osg::Vec3f(-4, -5, -6);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNode)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -494,20 +502,24 @@ namespace
     {
         mNode.hasBounds = true;
         mNode.flags |= Nif::NiNode::Flag_BBoxCollision;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         mNode2.hasBounds = true;
-        mNode2.boundXYZ = osg::Vec3f(4, 5, 6);
-        mNode2.boundPos = osg::Vec3f(-4, -5, -6);
+        mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
 
         mNiNode.hasBounds = true;
-        mNiNode.boundXYZ = osg::Vec3f(7, 8, 9);
-        mNiNode.boundPos = osg::Vec3f(-7, -8, -9);
+        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.bounds.box.extents = osg::Vec3f(7, 8, 9);
+        mNiNode.bounds.box.center = osg::Vec3f(-7, -8, -9);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNode), Nif::NodePtr(&mNode2)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -524,21 +536,25 @@ namespace
     TEST_F(TestBulletNifLoader, for_root_and_two_children_where_both_with_bounds_but_only_second_with_flag_should_use_second_bounds)
     {
         mNode.hasBounds = true;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         mNode2.hasBounds = true;
         mNode2.flags |= Nif::NiNode::Flag_BBoxCollision;
-        mNode2.boundXYZ = osg::Vec3f(4, 5, 6);
-        mNode2.boundPos = osg::Vec3f(-4, -5, -6);
+        mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
 
         mNiNode.hasBounds = true;
-        mNiNode.boundXYZ = osg::Vec3f(7, 8, 9);
-        mNiNode.boundPos = osg::Vec3f(-7, -8, -9);
+        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.bounds.box.extents = osg::Vec3f(7, 8, 9);
+        mNiNode.bounds.box.center = osg::Vec3f(-7, -8, -9);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({Nif::NodePtr(&mNode), Nif::NodePtr(&mNode2)}));
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiNode));
+        EXPECT_CALL(mNifFile, getFilename()).WillOnce(Return("test.nif"));
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
@@ -555,8 +571,9 @@ namespace
     TEST_F(TestBulletNifLoader, for_root_nif_node_with_bounds_but_without_flag_should_return_shape_with_bounds_but_with_null_collision_shape)
     {
         mNode.hasBounds = true;
-        mNode.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNode.boundPos = osg::Vec3f(-1, -2, -3);
+        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNode));
@@ -588,8 +605,9 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_root_node_with_bounds_should_return_shape_with_bounds_but_with_null_collision_shape)
     {
         mNiTriShape.hasBounds = true;
-        mNiTriShape.boundXYZ = osg::Vec3f(1, 2, 3);
-        mNiTriShape.boundPos = osg::Vec3f(-1, -2, -3);
+        mNiTriShape.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiTriShape.bounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNiTriShape.bounds.box.center = osg::Vec3f(-1, -2, -3);
 
         EXPECT_CALL(mNifFile, numRoots()).WillOnce(Return(1));
         EXPECT_CALL(mNifFile, getRoot(0)).WillOnce(Return(&mNiTriShape));
