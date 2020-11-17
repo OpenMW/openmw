@@ -182,12 +182,12 @@ namespace MWPhysics
         */
         float remainingTime = time;
         bool seenGround = physicActor->getOnGround() && !physicActor->getOnSlope() && !actor.mFlying;
-        
+
         int numTimesSlid = 0;
         osg::Vec3f lastSlideNormal(0,0,1);
         osg::Vec3f lastSlideNormalFallback(0,0,1);
         bool forceGroundTest = false;
-        
+
         for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
         {
             osg::Vec3f nextpos = newPosition + velocity * remainingTime;
@@ -290,19 +290,19 @@ namespace MWPhysics
                             bestNormal = lastSlideNormalFallback;
                             lastSlideNormal = lastSlideNormalFallback;
                         }
-                        
+
                         auto constraintVector = bestNormal ^ planeNormal; // cross product
                         if(constraintVector.length2() > 0) // only if it's not zero length
                         {
                             constraintVector.normalize();
                             newVelocity = project(velocity, constraintVector);
-                            
+
                             // version of surface rejection for acute crevices/seams
                             auto averageNormal = bestNormal + planeNormal;
                             averageNormal.normalize();
                             tracer.doTrace(colobj, newPosition, newPosition + averageNormal*(sCollisionMargin*2.0), collisionWorld);
                             newPosition = (newPosition + tracer.mEndPos)/2.0;
-                            
+
                             usedSeamLogic = true;
                         }
                     }
@@ -348,7 +348,7 @@ namespace MWPhysics
                 {
                     isOnGround = true;
                     isOnSlope = !isWalkableSlope(tracer.mPlaneNormal);
-                    
+
                     const btCollisionObject* standingOn = tracer.mHitObject;
                     PtrHolder* ptrHolder = static_cast<PtrHolder*>(standingOn->getUserPointer());
                     if (ptrHolder)
@@ -413,15 +413,15 @@ namespace MWPhysics
 
         //auto tempPosition = physicActor->getPosition();
         auto tempPosition = actor.mPosition;
-        
+
         // "correct"
         //const auto& meshTranslation = physicActor->getScaledMeshTranslation();
-        
+
         // vanila-accurate
         osg::Vec3f verticalHalfExtent = physicActor->getHalfExtents();
         verticalHalfExtent.x() = 0.0;
         verticalHalfExtent.y() = 0.0;
-        
+
         osg::Vec3f refPosition = tempPosition - verticalHalfExtent;
         // use a 3d approximation of the movement vector to better judge player intent
         const ESM::Position& refpos = ptr.getRefData().getPosition();
@@ -464,7 +464,7 @@ namespace MWPhysics
         }
         else
             actor.mIsStuck = false;
-        
+
         actor.mPosition = tempPosition;
     }
 }

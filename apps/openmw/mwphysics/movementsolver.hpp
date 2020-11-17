@@ -35,7 +35,7 @@ namespace MWPhysics
         static const float sMaxSlopeCos = std::cos(osg::DegreesToRadians(sMaxSlope));
         return (normal.z() > sMaxSlopeCos);
     }
-    
+
     class Actor;
     struct ActorFrameData;
     struct WorldFrameData;

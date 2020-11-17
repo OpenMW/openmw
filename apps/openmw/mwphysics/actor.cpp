@@ -65,7 +65,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
 
     updateScale();
-    
+
     if(!mRotationallyInvariant)
         updateRotation();
 

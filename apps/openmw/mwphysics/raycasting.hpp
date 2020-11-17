@@ -16,7 +16,7 @@ namespace MWPhysics
         osg::Vec3f mHitNormal;
         MWWorld::Ptr mHitObject;
     };
-    
+
     class RayCastingInterface
     {
         public:

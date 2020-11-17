@@ -222,7 +222,7 @@ namespace MWPhysics
                 // Ignore actors that were deleted while the background thread was running
                 if (!data.mActor.lock())
                     continue;
-                
+
                 updateMechanics(data);
                 if (mAdvanceSimulation)
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
@@ -258,7 +258,7 @@ namespace MWPhysics
             }
             return mMovementResults;
         }
-        
+
         if (mNumThreads != 0)
         {
             std::unique_lock lk(mCollisionWorldMutex);

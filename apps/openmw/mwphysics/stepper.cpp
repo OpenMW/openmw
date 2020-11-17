@@ -47,7 +47,7 @@ namespace MWPhysics
         {
             return false;
         }
-        
+
         auto toMove = velocity * remainingTime;
 
         osg::Vec3f tracerPos = position + osg::Vec3f(0.0f, 0.0f, upDistance);
