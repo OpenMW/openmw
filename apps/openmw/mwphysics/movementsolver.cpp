@@ -130,7 +130,8 @@ namespace MWPhysics
 
         // Adjust for collision mesh offset relative to actor's "location"
         // (doTrace doesn't take local/interior collision shape translation into account)
-        actor.mPosition += meshTranslation;
+        //actor.mPosition += meshTranslation; // "correct"
+        actor.mPosition.z() += halfExtents.z(); // vanilla-accurate
 
         static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
         float swimlevel = actor.mWaterlevel + halfExtents.z() - (physicActor->getRenderingHalfExtents().z() * 2 * fSwimHeightScale);
@@ -395,7 +396,9 @@ namespace MWPhysics
         physicActor->setOnSlope(isOnSlope);
 
         actor.mPosition = newPosition;
-        actor.mPosition -= meshTranslation; // remove what was added earlier in compensating for doTrace not taking interior transformation into account
+        // remove what was added earlier in compensating for doTrace not taking interior transformation into account
+        //actor.mPosition -= meshTranslation; // "correct"
+        actor.mPosition.z() -= halfExtents.z(); // vanilla-accurate
     }
 
     void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
@@ -409,8 +412,16 @@ namespace MWPhysics
             return;
 
         auto tempPosition = physicActor->getPosition();
-        const auto& meshTranslation = physicActor->getScaledMeshTranslation();
-        const auto& refPosition = tempPosition - meshTranslation;
+        
+        // "correct"
+        //const auto& meshTranslation = physicActor->getScaledMeshTranslation();
+        
+        // vanila-accurate
+        osg::Vec3f verticalHalfExtent = physicActor->getHalfExtents();
+        verticalHalfExtent.x() = 0.0;
+        verticalHalfExtent.y() = 0.0;
+        
+        osg::Vec3f refPosition = tempPosition - verticalHalfExtent;
         // use a 3d approximation of the movement vector to better judge player intent
         const ESM::Position& refpos = ptr.getRefData().getPosition();
         auto velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
@@ -448,7 +459,7 @@ namespace MWPhysics
                 }
             }
             if(!giveup)
-                tempPosition = physicActor->getPosition() + meshTranslation;
+                tempPosition = physicActor->getPosition() + verticalHalfExtent;
         }
         else
             actor.mIsStuck = false;
