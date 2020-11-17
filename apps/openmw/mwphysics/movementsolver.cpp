@@ -411,7 +411,8 @@ namespace MWPhysics
         if(!physicActor->getCollisionMode()) // noclipping/tcl
             return;
 
-        auto tempPosition = physicActor->getPosition();
+        //auto tempPosition = physicActor->getPosition();
+        auto tempPosition = actor.mPosition;
         
         // "correct"
         //const auto& meshTranslation = physicActor->getScaledMeshTranslation();
@@ -463,6 +464,7 @@ namespace MWPhysics
         }
         else
             actor.mIsStuck = false;
-        physicActor->setPosition(tempPosition);
+        
+        actor.mPosition = tempPosition;
     }
 }

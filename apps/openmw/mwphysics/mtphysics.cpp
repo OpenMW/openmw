@@ -214,14 +214,6 @@ namespace MWPhysics
 
         std::unique_lock lock(mSimulationMutex);
 
-        // move actors outside of the world if they're inside of it (must be done synchronously because of how bullet works)
-        //{
-        //    std::unique_lock lk(mCollisionWorldMutex);
-        //    for (auto& data : actorsData)
-        //        for (int i = 0; i < numSteps && data.mIsStuck; ++i)
-        //            MovementSolver::unstuck(data, mCollisionWorld.get());
-        //}
-
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {
@@ -230,7 +222,7 @@ namespace MWPhysics
                 // Ignore actors that were deleted while the background thread was running
                 if (!data.mActor.lock())
                     continue;
-
+                
                 updateMechanics(data);
                 if (mAdvanceSimulation)
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
@@ -265,6 +257,15 @@ namespace MWPhysics
                 mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
             }
             return mMovementResults;
+        }
+        
+        if (mNumThreads != 0)
+        {
+            std::unique_lock lk(mCollisionWorldMutex);
+            for (auto& data : mActorsFrameData)
+                if (data.mActor.lock())
+                    for (int i = 0; i < numSteps && data.mIsStuck; ++i)
+                        MovementSolver::unstuck(data, mCollisionWorld.get());
         }
 
         if (mNumThreads == 0)
@@ -524,7 +525,10 @@ namespace MWPhysics
         while (mRemainingSteps--)
         {
             for (auto& actorData : mActorsFrameData)
+            {
+                MovementSolver::unstuck(actorData, mCollisionWorld.get());
                 MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+            }
 
             updateActorsPositions();
         }
