@@ -13,6 +13,12 @@ SET(VERSION 1.0.0)
 
 option(RECASTNAVIGATION_STATIC "Build static libraries" ON)
 
+if(MSVC AND BUILD_SHARED_LIBS)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+endif()
+
+include(GNUInstallDirs)
+
 add_subdirectory(DebugUtils)
 add_subdirectory(Detour)
 add_subdirectory(DetourCrowd)
