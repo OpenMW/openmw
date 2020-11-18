@@ -936,7 +936,7 @@ void split(const std::string &s, char delim, std::vector<std::string> &elems) {
     }
 }
 
-void CharacterController::handleTextKey(const std::string &groupname, NifOsg::TextKeyMap::ConstIterator key, const NifOsg::TextKeyMap& map)
+void CharacterController::handleTextKey(const std::string &groupname, SceneUtil::TextKeyMap::ConstIterator key, const SceneUtil::TextKeyMap& map)
 {
     const std::string &evt = key->second;
 

@@ -6,7 +6,7 @@
 #include <components/nif/controller.hpp>
 #include <components/nif/data.hpp>
 
-#include <components/sceneutil/controller.hpp>
+#include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
 #include <set>
@@ -226,7 +226,7 @@ namespace NifOsg
         std::vector<FloatInterpolator> mKeyFrames;
     };
 
-    class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller
+    class KeyframeController : public SceneUtil::KeyframeController
     {
     public:
         // This is used if there's no interpolator but there is data (Morrowind meshes).
@@ -242,7 +242,7 @@ namespace NifOsg
 
         META_Object(NifOsg, KeyframeController)
 
-        virtual osg::Vec3f getTranslation(float time) const;
+        osg::Vec3f getTranslation(float time) const override;
 
         void operator() (osg::Node*, osg::NodeVisitor*) override;
 
