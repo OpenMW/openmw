@@ -2,29 +2,86 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/nifosg/nifloader.hpp>
+#include <osgAnimation/Animation>
+#include <osgAnimation/BasicAnimationManager>
+#include <osgAnimation/Channel>
 
+#include <components/nifosg/nifloader.hpp>
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/osgacontroller.hpp>
+
+#include "animation.hpp"
 #include "objectcache.hpp"
 #include "scenemanager.hpp"
 
-namespace
+namespace OsgAOpenMW
 {
-    class RetrieveAnimationsVisitor : public osg::NodeVisitor
+
+    RetrieveAnimationsVisitor::RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mTarget(target), mAnimationManager(animationManager) {}
+
+    void RetrieveAnimationsVisitor::apply(osg::Node& node)
     {
-    public:
-        RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mTarget(target) {}
+        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("root"))
+            {
+                if (!mAnimationManager)
+                {
+                    traverse(node);
+                    return;
+                }
 
+                osg::ref_ptr<OsgaController::KeyframeController> callback = new OsgaController::KeyframeController();
 
-        virtual void apply(osg::Node& node)
-        {
-            if (node.libraryName() == std::string("osgAnimation"))
-                std::cout << "found an " << node.className() << std::endl;
-            traverse(node);
-        }
+                std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations;
 
-    private:
-        SceneUtil::KeyframeHolder& mTarget;
-    };
+                for (auto animation : mAnimationManager->getAnimationList())
+                {
+                    if (animation)
+                    {
+                        if (animation->getName() == "Default") //"Default" is osg dae plugin's default naming scheme for unnamed animations
+                        {
+                            animation->setName(std::string("idle")); // animation naming scheme "idle: start" and "idle: stop" is the default idle animation that OpenMW seems to want to play
+                        }
+
+                        osg::ref_ptr<Resource::Animation> mergedAnimationTrack = new Resource::Animation;
+                        std::string animationName = animation->getName();
+                        std::string start = animationName + std::string(": start");
+                        std::string stop = animationName + std::string(": stop");
+                        std::string loopstart = animationName + std::string(": loop start");
+                        std::string loopstop = animationName + std::string(": loop stop");
+
+                        const osgAnimation::ChannelList& channels = animation->getChannels();
+                        for (const osg::ref_ptr<osgAnimation::Channel> channel: channels)
+                        {
+                            mergedAnimationTrack->addChannel(channel.get()->clone()); // is ->clone needed?
+                        }
+                        mergedAnimationTrack->setName(animation->getName());
+                        callback->addMergedAnimationTrack(mergedAnimationTrack);
+
+                        float startTime = animation->getStartTime();
+                        float stopTime = startTime + animation->getDuration();
+
+                        // mTextKeys is a nif-thing, used by OpenMW's animation system
+                        // Format is likely "AnimationName: [Keyword_optional] [Start OR Stop]"
+                        // AnimationNames are keywords like idle2, idle3... AiPackages and various mechanics control which animations are played
+                        // Keywords can be stuff like Loop, Equip, Unequip, Block, InventoryHandtoHand, InventoryWeaponOneHand, PickProbe, Slash, Thrust, Chop... even "Slash Small Follow"
+                        mTarget.mTextKeys.emplace(startTime, std::move(start));
+                        mTarget.mTextKeys.emplace(stopTime, std::move(stop));
+                        mTarget.mTextKeys.emplace(startTime, std::move(loopstart));
+                        mTarget.mTextKeys.emplace(stopTime, std::move(loopstop));
+
+                        SceneUtil::EmulatedAnimation emulatedAnimation;
+                        emulatedAnimation.mStartTime = startTime;
+                        emulatedAnimation.mStopTime = stopTime;
+                        emulatedAnimation.mName = animationName;
+                        emulatedAnimations.emplace_back(emulatedAnimation);
+                    }
+                }
+                callback->setEmulatedAnimations(emulatedAnimations);
+                mTarget.mKeyframeControllers.emplace(node.getName(), callback);
+            }
+
+        traverse(node);
+    }
 
     std::string getFileExtension(const std::string& file)
     {
@@ -59,16 +116,17 @@ namespace Resource
         else
         {
             osg::ref_ptr<SceneUtil::KeyframeHolder> loaded (new SceneUtil::KeyframeHolder);
-            std::string ext = getFileExtension(normalized);
+            std::string ext = OsgAOpenMW::getFileExtension(normalized);
             if (ext == "kf")
             {
                 NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
             }
             else
             {
-                osg::ref_ptr<const osg::Node> scene = mSceneManager->getTemplate(normalized);
-                RetrieveAnimationsVisitor rav(*loaded.get());
-                const_cast<osg::Node*>(scene.get())->accept(rav); // const_cast required because there is no const version of osg::NodeVisitor
+                osg::ref_ptr<osg::Node> scene = const_cast<osg::Node*> ( mSceneManager->getTemplate(normalized).get() );
+                osg::ref_ptr<osgAnimation::BasicAnimationManager> bam = dynamic_cast<osgAnimation::BasicAnimationManager*> (scene->getUpdateCallback());
+                OsgAOpenMW::RetrieveAnimationsVisitor rav(*loaded.get(), bam);
+                scene->accept(rav);
             }
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;

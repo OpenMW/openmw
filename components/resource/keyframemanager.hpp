@@ -2,11 +2,31 @@
 #define OPENMW_COMPONENTS_KEYFRAMEMANAGER_H
 
 #include <osg/ref_ptr>
+#include <osgAnimation/BasicAnimationManager>
 #include <string>
 
 #include <components/sceneutil/keyframe.hpp>
 
 #include "resourcemanager.hpp"
+
+namespace OsgAOpenMW
+{
+    /// @brief extract animations to OpenMW's animation system
+    class RetrieveAnimationsVisitor : public osg::NodeVisitor
+    {
+        public:
+            RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager);
+
+            virtual void apply(osg::Node& node);
+
+        private:
+            SceneUtil::KeyframeHolder& mTarget;
+            osg::ref_ptr<osgAnimation::BasicAnimationManager> mAnimationManager;
+
+    };
+
+    std::string getFileExtension(const std::string& file);
+}
 
 namespace Resource
 {

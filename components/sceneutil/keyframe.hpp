@@ -7,9 +7,16 @@
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/textkeymap.hpp>
+#include <components/resource/animation.hpp>
 
 namespace SceneUtil
 {
+    struct EmulatedAnimation
+    {
+        float mStartTime;
+        float mStopTime;
+        std::string mName;
+    };
 
     class KeyframeController : public osg::NodeCallback, public SceneUtil::Controller
     {
@@ -19,12 +26,18 @@ namespace SceneUtil
         KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop)
             : osg::NodeCallback(copy, copyop)
             , SceneUtil::Controller(copy)
+            , mMergedAnimationTracks(copy.mMergedAnimationTracks)
+            , mEmulatedAnimations(copy.mEmulatedAnimations)
         {}
         META_Object(SceneUtil, KeyframeController)
 
         virtual osg::Vec3f getTranslation(float time) const  { return osg::Vec3f(); }
 
         virtual void operator() (osg::Node* node, osg::NodeVisitor* nodeVisitor) { traverse(node, nodeVisitor); }
+
+    protected:
+        std::vector<osg::ref_ptr<Resource::Animation>> mMergedAnimationTracks; // Used only by osgAnimation-based formats (e.g. dae)
+        std::vector<EmulatedAnimation> mEmulatedAnimations;
     };
 
     /// Wrapper object containing an animation track as a ref-countable osg::Object.
