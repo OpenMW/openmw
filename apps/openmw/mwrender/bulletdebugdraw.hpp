@@ -48,7 +48,7 @@ protected:
 
 public:
 
-    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world);
+    DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world, int debugMode = 1);
     ~DebugDrawer();
 
     void step();

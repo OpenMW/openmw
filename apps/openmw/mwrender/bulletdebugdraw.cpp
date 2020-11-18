@@ -14,13 +14,11 @@
 namespace MWRender
 {
 
-DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world)
+DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld *world, int debugMode)
     : mParentNode(parentNode),
-      mWorld(world),
-      mDebugOn(true)
+      mWorld(world)
 {
-
-    createGeometry();
+    setDebugMode(debugMode);
 }
 
 void DebugDrawer::createGeometry()
