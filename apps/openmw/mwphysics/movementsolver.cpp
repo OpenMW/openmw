@@ -411,18 +411,14 @@ namespace MWPhysics
         if(!physicActor->getCollisionMode()) // noclipping/tcl
             return;
 
-        //auto tempPosition = physicActor->getPosition();
+        auto* collisionObject = physicActor->getCollisionObject();
         auto tempPosition = actor.mPosition;
 
         // "correct"
         //const auto& meshTranslation = physicActor->getScaledMeshTranslation();
+        // vanilla-accurate (do same hitbox offset hack as movement solver)
+        const auto verticalHalfExtent = osg::Vec3f(0.0, 0.0, physicActor->getHalfExtents().z());
 
-        // vanila-accurate
-        osg::Vec3f verticalHalfExtent = physicActor->getHalfExtents();
-        verticalHalfExtent.x() = 0.0;
-        verticalHalfExtent.y() = 0.0;
-
-        osg::Vec3f refPosition = tempPosition - verticalHalfExtent;
         // use a 3d approximation of the movement vector to better judge player intent
         const ESM::Position& refpos = ptr.getRefData().getPosition();
         auto velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
@@ -430,41 +426,59 @@ namespace MWPhysics
         if (!physicActor->getOnGround() || physicActor->getOnSlope())
                 velocity += physicActor->getInertialForce();
 
-        DeepestContactResultCallback contactCallback{physicActor->getCollisionObject(), velocity};
-        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback);
+        osg::Vec3f refPosition = tempPosition + verticalHalfExtent;
+        osg::Vec3f goodPosition = refPosition;
+        const btTransform oldTransform = collisionObject->getWorldTransform();
+        btTransform newTransform = oldTransform;
+        newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
+        collisionObject->setWorldTransform(newTransform);
+
+        DeepestContactResultCallback contactCallback{collisionObject, velocity};
+        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback);
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
-            bool giveup = false;
             const auto positionDelta = contactCallback.mDelta;
-            physicActor->setPosition(refPosition + Misc::Convert::toOsg(positionDelta));
+            goodPosition = refPosition + Misc::Convert::toOsg(positionDelta);
+            newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
+            collisionObject->setWorldTransform(newTransform);
 
-            DeepestContactResultCallback contactCallback2{physicActor->getCollisionObject(), velocity};
-            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback2);
+            DeepestContactResultCallback contactCallback2{collisionObject, velocity};
+            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback2);
+            // successfully moved further out from contact
+            if(contactCallback2.mDistance > contactCallback.mDistance)
+                tempPosition = goodPosition - verticalHalfExtent;
             // try again but only upwards (fixes some bad coc floors)
-            if(contactCallback2.mDistance < contactCallback.mDistance)
+            else
             {
-                physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, std::abs(positionDelta.z())));
+                goodPosition = refPosition + osg::Vec3f(0.0, 0.0, std::abs(positionDelta.z()));
+                newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
+                collisionObject->setWorldTransform(newTransform);
 
-                DeepestContactResultCallback contactCallback3{physicActor->getCollisionObject(), velocity};
-                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback3);
-                // try again but fixed distance
-                if(contactCallback3.mDistance < contactCallback.mDistance)
+                DeepestContactResultCallback contactCallback3{collisionObject, velocity};
+                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback3);
+                // success
+                if(contactCallback3.mDistance > contactCallback.mDistance)
                 {
-                    physicActor->setPosition(refPosition + osg::Vec3f(0.0, 0.0, 10));
+                    tempPosition = goodPosition - verticalHalfExtent;
+                }
+                // try again but fixed distance up
+                {
+                    goodPosition = refPosition + osg::Vec3f(0.0, 0.0, 10.0);
+                    newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
+                    collisionObject->setWorldTransform(newTransform);
 
-                    DeepestContactResultCallback contactCallback4{physicActor->getCollisionObject(), velocity};
-                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(physicActor->getCollisionObject(), contactCallback4);
-                    // give up
-                    if(contactCallback4.mDistance < contactCallback.mDistance)
-                        giveup = true;
+                    DeepestContactResultCallback contactCallback4{collisionObject, velocity};
+                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback4);
+                    // success
+                    if(contactCallback4.mDistance > contactCallback.mDistance)
+                        tempPosition = goodPosition - verticalHalfExtent;
                 }
             }
-            if(!giveup)
-                tempPosition = physicActor->getPosition() + verticalHalfExtent;
         }
         else
             actor.mIsStuck = false;
 
+        collisionObject->setWorldTransform(oldTransform);
         actor.mPosition = tempPosition;
     }
 }

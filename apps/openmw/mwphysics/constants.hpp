@@ -19,7 +19,7 @@ namespace MWPhysics
     // Allows for more precise movement solving without getting stuck too easily.
     static const float sCollisionMargin = 0.01;
     // Allow for a small amount of penetration to prevent numerical precision issues from causing the unsucking code to run unnecessarily
-    static const float sAllowedPenetration = 4.0;
+    static const float sAllowedPenetration = 0.1;
 }
 
 #endif
