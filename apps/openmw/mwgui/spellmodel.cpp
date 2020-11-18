@@ -51,11 +51,11 @@ namespace MWGui
         for (unsigned int i = 0; i < effects.mList.size(); ++i)
         {
             short effectId = effects.mList[i].mEffectID;
-            const ESM::MagicEffect *magicEffect =
-                store.get<ESM::MagicEffect>().search(effectId);
 
             if (effectId != -1)
             {
+                const ESM::MagicEffect *magicEffect =
+                    store.get<ESM::MagicEffect>().search(effectId);
                 std::string effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
                 std::string fullEffectName = wm->getGameSettingString(effectIDStr, "");
 

@@ -96,6 +96,7 @@ Programmers
     Jan Borsodi (am0s)
     Jason Hooks (jhooks)
     jeaye
+    jefetienne
     Jeffrey Haines (Jyby)
     Jengerer
     Jiří Kuneš (kunesj)
