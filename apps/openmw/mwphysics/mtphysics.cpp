@@ -232,15 +232,6 @@ namespace MWPhysics
             }
         }
 
-        if (mNumThreads != 0)
-        {
-            std::unique_lock lk(mCollisionWorldMutex);
-            for (auto& data : mActorsFrameData)
-                if (data.mActor.lock())
-                    for (int i = 0; i < numSteps && data.mIsStuck; ++i)
-                        MovementSolver::unstuck(data, mCollisionWorld.get());
-        }
-
         // init
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;
@@ -266,6 +257,15 @@ namespace MWPhysics
                 mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
             }
             return mMovementResults;
+        }
+
+        if (mNumThreads != 0)
+        {
+            std::unique_lock lk(mCollisionWorldMutex);
+            for (auto& data : mActorsFrameData)
+                if (data.mActor.lock())
+                    for (int i = 0; i < numSteps && data.mIsStuck; ++i)
+                        MovementSolver::unstuck(data, mCollisionWorld.get());
         }
 
         if (mNumThreads == 0)
