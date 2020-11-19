@@ -426,6 +426,8 @@ namespace MWPhysics
         if (!physicActor->getOnGround() || physicActor->getOnSlope())
                 velocity += physicActor->getInertialForce();
 
+        // because of the internal collision box offset hack, and the fact that we're moving the collision box manually,
+        // we need to replicate part of the collision box's transform proecss from scratch
         osg::Vec3f refPosition = tempPosition + verticalHalfExtent;
         osg::Vec3f goodPosition = refPosition;
         const btTransform oldTransform = collisionObject->getWorldTransform();
@@ -433,27 +435,32 @@ namespace MWPhysics
         newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
         collisionObject->setWorldTransform(newTransform);
 
+        // check whether we're inside the world with our collision box with manually-derived offset
         DeepestContactResultCallback contactCallback{collisionObject, velocity};
         const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback);
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
+            // we are; try moving it out of the world
             const auto positionDelta = contactCallback.mDelta;
             goodPosition = refPosition + Misc::Convert::toOsg(positionDelta);
             newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
             collisionObject->setWorldTransform(newTransform);
 
+            // test for contact
             DeepestContactResultCallback contactCallback2{collisionObject, velocity};
             const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback2);
-            // successfully moved further out from contact
+            // successfully moved further out from contact (does not have to be in open space, just less inside of things)
             if(contactCallback2.mDistance > contactCallback.mDistance)
                 tempPosition = goodPosition - verticalHalfExtent;
             // try again but only upwards (fixes some bad coc floors)
             else
             {
+                // upwards-only offset
                 goodPosition = refPosition + osg::Vec3f(0.0, 0.0, std::abs(positionDelta.z()));
                 newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
                 collisionObject->setWorldTransform(newTransform);
 
+                // contact test
                 DeepestContactResultCallback contactCallback3{collisionObject, velocity};
                 const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback3);
                 // success

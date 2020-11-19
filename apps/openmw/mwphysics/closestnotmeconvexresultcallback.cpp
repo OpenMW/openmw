@@ -1,3 +1,5 @@
+#include <mutex>
+
 #include "closestnotmeconvexresultcallback.hpp"
 #include "collisiontype.hpp"
 #include "collisiontype.hpp"
@@ -43,8 +45,13 @@ namespace MWPhysics
         if(convexResult.m_hitCollisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor)
         {
             ActorOverlapTester isOverlapping;
-            // FIXME: This is absolutely terrible and bullet should feel terrible for not making contactPairTest const-correct.
-            const_cast<btCollisionWorld*>(mWorld)->contactPairTest(const_cast<btCollisionObject*>(mMe), const_cast<btCollisionObject*>(convexResult.m_hitCollisionObject), isOverlapping);
+            {
+                static std::mutex mutex; // We need to serialize calls to contactPairTest()
+                std::scoped_lock lock(mutex);
+                // FIXME: This is absolutely terrible and bullet should feel terrible for not making contactPairTest const-correct.
+                const_cast<btCollisionWorld*>(mWorld)->contactPairTest(const_cast<btCollisionObject*>(mMe), const_cast<btCollisionObject*>(convexResult.m_hitCollisionObject), isOverlapping);
+            }
+
             if(isOverlapping.overlapping)
             {
                 auto originA = Misc::Convert::toOsg(mMe->getWorldTransform().getOrigin());
