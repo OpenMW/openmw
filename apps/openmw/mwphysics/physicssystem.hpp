@@ -10,6 +10,7 @@
 #include <osg/Quat>
 #include <osg/BoundingBox>
 #include <osg/ref_ptr>
+#include <osg/Timer>
 
 #include "../mwworld/ptr.hpp"
 
@@ -200,7 +201,7 @@ namespace MWPhysics
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
-            const PtrPositionList& applyQueuedMovement(float dt, bool skipSimulation);
+            const PtrPositionList& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();
