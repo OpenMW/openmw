@@ -23,12 +23,6 @@ namespace OsgAOpenMW
     {
         if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("root"))
             {
-                if (!mAnimationManager)
-                {
-                    traverse(node);
-                    return;
-                }
-
                 osg::ref_ptr<OsgaController::KeyframeController> callback = new OsgaController::KeyframeController();
 
                 std::vector<OsgaController::EmulatedAnimation> emulatedAnimations;
@@ -125,8 +119,11 @@ namespace Resource
             {
                 osg::ref_ptr<osg::Node> scene = const_cast<osg::Node*> ( mSceneManager->getTemplate(normalized).get() );
                 osg::ref_ptr<osgAnimation::BasicAnimationManager> bam = dynamic_cast<osgAnimation::BasicAnimationManager*> (scene->getUpdateCallback());
-                OsgAOpenMW::RetrieveAnimationsVisitor rav(*loaded.get(), bam);
-                scene->accept(rav);
+                if (bam)
+                {
+                    OsgAOpenMW::RetrieveAnimationsVisitor rav(*loaded.get(), bam);
+                    scene->accept(rav);
+                }
             }
             mCache->addEntryToObjectCache(normalized, loaded);
             return loaded;
