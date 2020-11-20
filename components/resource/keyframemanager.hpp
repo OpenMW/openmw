@@ -17,7 +17,7 @@ namespace OsgAOpenMW
         public:
             RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager);
 
-            virtual void apply(osg::Node& node);
+            virtual void apply(osg::Node& node) override;
 
         private:
             SceneUtil::KeyframeHolder& mTarget;

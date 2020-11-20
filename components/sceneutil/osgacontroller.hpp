@@ -18,6 +18,13 @@
 
 namespace OsgaController
 {
+    struct EmulatedAnimation
+    {
+        float mStartTime;
+        float mStopTime;
+        std::string mName;
+    };
+
     class LinkVisitor : public osg::NodeVisitor
     {
         public:
@@ -29,9 +36,9 @@ namespace OsgaController
 
             virtual void setAnimation(Resource::Animation* animation);
 
-            virtual void apply(osg::Node& node);
+            virtual void apply(osg::Node& node) override;
 
-            virtual void apply(osg::Geode& node);
+            virtual void apply(osg::Geode& node) override;
 
         protected:
             Resource::Animation* mAnimation;
@@ -57,13 +64,16 @@ namespace OsgaController
         void operator() (osg::Node*, osg::NodeVisitor*) override;
 
         /// @brief Sets details of the animations
-        void setEmulatedAnimations(std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations);
+        void setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations);
 
         /// @brief Adds an animation track to a model
         void addMergedAnimationTrack(osg::ref_ptr<Resource::Animation> animationTrack);
+
     private:
         bool mNeedToLink = true;
         osg::ref_ptr<LinkVisitor> mLinker;
+        std::vector<osg::ref_ptr<Resource::Animation>> mMergedAnimationTracks; // Used only by osgAnimation-based formats (e.g. dae)
+        std::vector<EmulatedAnimation> mEmulatedAnimations;
     };
 }
 

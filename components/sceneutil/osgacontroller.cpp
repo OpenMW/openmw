@@ -102,6 +102,8 @@ namespace OsgaController
     }
 
     KeyframeController::KeyframeController(const KeyframeController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
+    , mMergedAnimationTracks(copy.mMergedAnimationTracks)
+    , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
     }
@@ -183,7 +185,7 @@ namespace OsgaController
         traverse(node, nv);
     }
 
-    void KeyframeController::setEmulatedAnimations(std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations)
+    void KeyframeController::setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations)
     {
         mEmulatedAnimations = emulatedAnimations;
     }

@@ -31,7 +31,7 @@ namespace OsgAOpenMW
 
                 osg::ref_ptr<OsgaController::KeyframeController> callback = new OsgaController::KeyframeController();
 
-                std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations;
+                std::vector<OsgaController::EmulatedAnimation> emulatedAnimations;
 
                 for (auto animation : mAnimationManager->getAnimationList())
                 {
@@ -69,7 +69,7 @@ namespace OsgAOpenMW
                         mTarget.mTextKeys.emplace(startTime, std::move(loopstart));
                         mTarget.mTextKeys.emplace(stopTime, std::move(loopstop));
 
-                        SceneUtil::EmulatedAnimation emulatedAnimation;
+                        OsgaController::EmulatedAnimation emulatedAnimation;
                         emulatedAnimation.mStartTime = startTime;
                         emulatedAnimation.mStopTime = stopTime;
                         emulatedAnimation.mName = animationName;
