@@ -115,7 +115,7 @@ namespace OsgaController
         float newTime = time;
 
         //Find the correct animation based on time
-        for (auto emulatedAnimation : mEmulatedAnimations)
+        for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
         {
             if (time > emulatedAnimation.mStartTime && time < emulatedAnimation.mStopTime)
             {
@@ -125,7 +125,7 @@ namespace OsgaController
         }
 
         //Find the root transform track in animation
-        for (auto mergedAnimationTrack : mMergedAnimationTracks)
+        for (const osg::ref_ptr<Resource::Animation> mergedAnimationTrack : mMergedAnimationTracks)
         {
             if (mergedAnimationTrack->getName() != animationName) continue;
 
@@ -150,7 +150,7 @@ namespace OsgaController
 
     void KeyframeController::update(float time, std::string animationName)
     {
-        for (auto mergedAnimationTrack : mMergedAnimationTracks)
+        for (const osg::ref_ptr<Resource::Animation> mergedAnimationTrack : mMergedAnimationTracks)
         {
             if (mergedAnimationTrack->getName() == animationName) mergedAnimationTrack->update(time);
         }
@@ -162,7 +162,7 @@ namespace OsgaController
         {
             if (mNeedToLink)
             {
-                for (auto mergedAnimationTrack : mMergedAnimationTracks)
+                for (const osg::ref_ptr<Resource::Animation> mergedAnimationTrack : mMergedAnimationTracks)
                 {
                     if (!mLinker.valid()) mLinker = new LinkVisitor();
                     mLinker->setAnimation(mergedAnimationTrack);
@@ -173,7 +173,7 @@ namespace OsgaController
 
             float time = getInputValue(nv);
 
-            for (auto emulatedAnimation : mEmulatedAnimations)
+            for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
             {
                 if (time > emulatedAnimation.mStartTime && time < emulatedAnimation.mStopTime)
                 {
