@@ -9,6 +9,8 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
+#include <osg/Timer>
+
 #include "physicssystem.hpp"
 #include "ptrholder.hpp"
 
@@ -30,7 +32,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skip);
+            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skip, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             // Thread safe wrappers
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;
@@ -87,6 +89,12 @@ namespace MWPhysics
             mutable std::shared_mutex mLOSCacheMutex;
             mutable std::mutex mUpdateAabbMutex;
             std::condition_variable_any mHasJob;
+
+            unsigned int mFrameNumber;
+            const osg::Timer* mTimer;
+            osg::Timer_t mTimeBegin;
+            osg::Timer_t mTimeEnd;
+            osg::Timer_t mFrameStart;
     };
 
 }
