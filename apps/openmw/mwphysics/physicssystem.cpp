@@ -661,10 +661,10 @@ namespace MWPhysics
         mActors.emplace(ptr, std::move(actor));
     }
 
-    int PhysicsSystem::addProjectile (const osg::Vec3f& position)
+    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position)
     {
         mProjectileId++;
-        auto projectile = std::make_shared<Projectile>(mProjectileId, position, mTaskScheduler.get(), this);
+        auto projectile = std::make_shared<Projectile>(mProjectileId, caster, position, mTaskScheduler.get(), this);
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;

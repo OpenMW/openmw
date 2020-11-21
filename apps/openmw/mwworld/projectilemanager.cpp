@@ -316,7 +316,7 @@ namespace MWWorld
                 state.mSounds.push_back(sound);
         }
 
-        state.mProjectileId = mPhysics->addProjectile(pos);
+        state.mProjectileId = mPhysics->addProjectile(caster, pos);
         state.mToDelete = false;
         mMagicBolts.push_back(state);
     }
@@ -340,7 +340,7 @@ namespace MWWorld
         if (!ptr.getClass().getEnchantment(ptr).empty())
             SceneUtil::addEnchantedGlow(state.mNode, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
 
-        state.mProjectileId = mPhysics->addProjectile(pos);
+        state.mProjectileId = mPhysics->addProjectile(actor, pos);
         state.mToDelete = false;
         mProjectiles.push_back(state);
     }
@@ -546,7 +546,8 @@ namespace MWWorld
             const auto target = projectile->getTarget();
             const auto pos = projectile->getHitPos();
             MWWorld::Ptr caster = projectileState.getCaster();
-            if (caster == target || !isValidTarget(caster, target))
+            assert(target != caster);
+            if (!isValidTarget(caster, target))
             {
                 projectile->activate();
                 continue;
@@ -581,7 +582,8 @@ namespace MWWorld
             const auto target = projectile->getTarget();
             const auto pos = projectile->getHitPos();
             MWWorld::Ptr caster = magicBoltState.getCaster();
-            if (caster == target || !isValidTarget(caster, target))
+            assert(target != caster);
+            if (!isValidTarget(caster, target))
             {
                 projectile->activate();
                 continue;
@@ -724,7 +726,7 @@ namespace MWWorld
                 int weaponType = ptr.get<ESM::Weapon>()->mBase->mData.mType;
                 state.mThrown = MWMechanics::getWeaponType(weaponType)->mWeaponClass == ESM::WeaponType::Thrown;
 
-                state.mProjectileId = mPhysics->addProjectile(osg::Vec3f(esm.mPosition));
+                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition));
             }
             catch(...)
             {
@@ -769,7 +771,7 @@ namespace MWWorld
                 MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), state.mIdMagic.at(0));
                 MWWorld::Ptr ptr = ref.getPtr();
                 model = ptr.getClass().getModel(ptr);
-                state.mProjectileId = mPhysics->addProjectile(osg::Vec3f(esm.mPosition));
+                state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition));
             }
             catch(...)
             {

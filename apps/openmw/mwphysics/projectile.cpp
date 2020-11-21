@@ -18,8 +18,9 @@
 
 namespace MWPhysics
 {
-Projectile::Projectile(int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
+Projectile::Projectile(int projectileId, const MWWorld::Ptr& caster, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
     : mActive(true)
+    , mCaster(caster)
     , mPhysics(physicssystem)
     , mTaskScheduler(scheduler)
     , mProjectileId(projectileId)

@@ -32,7 +32,7 @@ namespace MWPhysics
     class Projectile final : public PtrHolder
     {
     public:
-        Projectile(const int projectileId, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
+        Projectile(const int projectileId, const MWWorld::Ptr& caster, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
         ~Projectile() override;
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -62,6 +62,8 @@ namespace MWPhysics
             return mHitTarget;
         }
 
+        MWWorld::Ptr getCaster() const { return mCaster; }
+
         osg::Vec3f getHitPos() const
         {
             assert(!mActive);
@@ -80,6 +82,7 @@ namespace MWPhysics
         btTransform mLocalTransform;
         bool mTransformUpdatePending;
         std::atomic<bool> mActive;
+        MWWorld::Ptr mCaster;
         MWWorld::Ptr mHitTarget;
         btVector3 mHitPosition;
         btVector3 mHitNormal;
