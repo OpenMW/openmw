@@ -249,6 +249,9 @@ namespace MWGui
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onWorldButtonClicked(MyGUI::Widget* _sender);
         void onMapDoubleClicked(MyGUI::Widget* sender);
+        void onMapZoomed(MyGUI::Widget* sender, int rel);
+        void zoomOnCursor(float speedDiff);
+        void updateGlobalMap();
         void onCustomMarkerDoubleClicked(MyGUI::Widget* sender);
         void onNoteEditOk();
         void onNoteEditDelete();
@@ -258,6 +261,8 @@ namespace MWGui
         void globalMapUpdatePlayer();
         void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
         float getMarkerSize() const;
+        void resizeGlobalMap();
+        void worldPosToGlobalMapImageSpace(float x, float z, float& imageX, float& imageY) const;
         MyGUI::IntCoord createMarkerCoords(float x, float y) const;
         MyGUI::Widget* createMarker(const std::string& name, float x, float y);
 
@@ -281,6 +286,7 @@ namespace MWGui
         MyGUI::Button* mEventBoxGlobal;
         MyGUI::Button* mEventBoxLocal;
 
+        float mGlobalMapZoom = 1.0f;
         MWRender::GlobalMap* mGlobalMapRender;
 
         std::map<std::pair<int, int>, MyGUI::Widget*> mGlobalMapMarkers;

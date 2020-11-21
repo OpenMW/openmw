@@ -34,6 +34,7 @@ namespace
 {
 
     const int cellSize = Constants::CellSizeInUnits;
+    constexpr float speed = 1.08;   //the zoom speed, it should be greater than 1
 
     enum LocalMapWidgetDepth
     {
@@ -676,6 +677,7 @@ namespace MWGui
         getWidget(mEventBoxGlobal, "EventBoxGlobal");
         mEventBoxGlobal->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
         mEventBoxGlobal->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
+        mEventBoxGlobal->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         mEventBoxGlobal->setDepth(Global_ExploreOverlayLayer);
 
         getWidget(mEventBoxLocal, "EventBoxLocal");
@@ -768,6 +770,57 @@ namespace MWGui
         mEditNoteDialog.setText("");
     }
 
+    void MapWindow::onMapZoomed(MyGUI::Widget* sender, int rel)
+    {
+        const bool zoomOut = rel < 0;
+        const bool zoomIn = !zoomOut;
+        const double speedDiff = zoomOut ? 1.0 / speed : speed;
+
+        if (mGlobal)
+        {
+            const float currentGlobalZoom = mGlobalMapZoom;
+            const float currentMinGlobalMapZoom = std::min(
+                float(mGlobalMap->getWidth()) / float(mGlobalMapRender->getWidth()),
+                float(mGlobalMap->getHeight()) / float(mGlobalMapRender->getHeight())
+            );
+
+            mGlobalMapZoom *= speedDiff;
+
+            if (zoomIn && mGlobalMapZoom > 4.f)
+            {
+                mGlobalMapZoom = currentGlobalZoom;
+                return; //the zoom in is too big
+            }
+
+            if (zoomOut && mGlobalMapZoom < currentMinGlobalMapZoom)
+            {
+                mGlobalMapZoom = currentGlobalZoom;
+                return; //the zoom out is too big, we have reach the borders of the widget
+            }
+            zoomOnCursor(speedDiff);
+        }
+    }
+
+    void MapWindow::zoomOnCursor(float speedDiff)
+    {
+        auto cursor = MyGUI::InputManager::getInstance().getMousePosition() - mGlobalMap->getAbsolutePosition();
+        auto centerView = mGlobalMap->getViewOffset() - cursor;
+        updateGlobalMap();
+        mGlobalMap->setViewOffset(MyGUI::IntPoint(
+            std::round(centerView.left * speedDiff) + cursor.left,
+            std::round(centerView.top * speedDiff) + cursor.top
+        ));
+    }
+
+    void MapWindow::updateGlobalMap()
+    {
+        resizeGlobalMap();
+        notifyPlayerUpdate();
+
+        for (auto& marker : mGlobalMapMarkers)
+            marker.second->setCoord(createMarkerCoords(marker.first.first, marker.first.second));
+    }
+
     void MapWindow::onChangeScrollWindowCoord(MyGUI::Widget* sender)
     {
         MyGUI::IntCoord currentCoordinates = sender->getCoord();
@@ -791,8 +844,7 @@ namespace MWGui
     void MapWindow::renderGlobalMap()
     {
         mGlobalMapRender->render();
-        mGlobalMap->setCanvasSize (mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
-        mGlobalMapImage->setSize(mGlobalMapRender->getWidth(), mGlobalMapRender->getHeight());
+        resizeGlobalMap();
     }
 
     MapWindow::~MapWindow()
@@ -808,7 +860,7 @@ namespace MWGui
     MyGUI::IntCoord MapWindow::createMarkerCoords(float x, float y) const
     {
         float worldX, worldY;
-        mGlobalMapRender->worldPosToImageSpace((x + 0.5f) * Constants::CellSizeInUnits, (y + 0.5f)* Constants::CellSizeInUnits, worldX, worldY);
+        worldPosToGlobalMapImageSpace((x + 0.5f) * Constants::CellSizeInUnits, (y + 0.5f)* Constants::CellSizeInUnits, worldX, worldY);
 
         const float markerSize = getMarkerSize();
         const float halfMarkerSize = markerSize / 2.0f;
@@ -833,6 +885,7 @@ namespace MWGui
         markerWidget->setColour(MyGUI::Colour::parse(MyGUI::LanguageManager::getInstance().replaceTags("#{fontcolour=normal}")));
         markerWidget->setDepth(Global_MarkerLayer);
         markerWidget->eventMouseDrag += MyGUI::newDelegate(this, &MapWindow::onMouseDrag);
+        markerWidget->eventMouseWheel += MyGUI::newDelegate(this, &MapWindow::onMapZoomed);
         markerWidget->eventMouseButtonPressed += MyGUI::newDelegate(this, &MapWindow::onDragStart);
 
         return markerWidget;
@@ -889,7 +942,19 @@ namespace MWGui
 
     float MapWindow::getMarkerSize() const
     {
-        return 12.0f;
+        return 12.0f * mGlobalMapZoom;
+    }
+
+    void MapWindow::resizeGlobalMap()
+    {
+        mGlobalMap->setCanvasSize(mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
+        mGlobalMapImage->setSize(mGlobalMapRender->getWidth() * mGlobalMapZoom, mGlobalMapRender->getHeight() * mGlobalMapZoom);
+    }
+
+    void MapWindow::worldPosToGlobalMapImageSpace(float x, float y, float& imageX, float& imageY) const
+    {
+        mGlobalMapRender->worldPosToImageSpace(x, y, imageX, imageY);
+        imageX *= mGlobalMapZoom, imageY *= mGlobalMapZoom;
     }
 
     void MapWindow::updateCustomMarkers()
@@ -935,9 +1000,6 @@ namespace MWGui
 
         mButton->setCaptionWithReplacing( mGlobal ? "#{sLocal}" :
                 "#{sWorld}");
-
-        if (mGlobal)
-            globalMapUpdatePlayer ();
     }
 
     void MapWindow::onPinToggled()
@@ -991,7 +1053,7 @@ namespace MWGui
     void MapWindow::setGlobalMapPlayerPosition(float worldX, float worldY)
     {
         float x, y;
-        mGlobalMapRender->worldPosToImageSpace (worldX, worldY, x, y);
+        worldPosToGlobalMapImageSpace(worldX, worldY, x, y);
         mPlayerArrowGlobal->setPosition(MyGUI::IntPoint(static_cast<int>(x - 16), static_cast<int>(y - 16)));
 
         centerView();
