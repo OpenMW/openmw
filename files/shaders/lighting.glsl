@@ -14,11 +14,20 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     lambert = max(lambert, 0.0);
 #else
     {
-        // might need to be < 0 depending on direction of viewPos
-        if (dot(viewPos, viewNormal.xyz) > 0)
-            lambert = -lambert;
-        if (lambert < 0)
-            lambert *= -0.3;
+        float cosine = dot(normalize(viewPos), normalize(viewNormal.xyz));
+        if (lambert >= 0.0)
+            cosine = -cosine;
+
+        float mult = 1.0;
+        float divisor = 8.0;
+
+        if (cosine < 0.0 && cosine >= -1.0/divisor)
+            mult = mix(1.0, 0.3, -cosine*divisor);
+        else if (cosine < -1.0/divisor)
+            mult = 0.3;
+
+        lambert *= mult;
+        lambert = abs(lambert);
     }
 #endif
     diffuseOut = gl_LightSource[lightIndex].diffuse.xyz * lambert;
