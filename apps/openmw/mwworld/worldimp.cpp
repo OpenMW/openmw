@@ -890,6 +890,7 @@ namespace MWWorld
         {
             mRendering->notifyWorldSpaceChanged();
             mProjectileManager->clear();
+            mDiscardMovements = true;
         }
     }
 
