@@ -2,7 +2,6 @@
 
 #include "closestnotmeconvexresultcallback.hpp"
 #include "collisiontype.hpp"
-#include "collisiontype.hpp"
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 #include <components/misc/convert.hpp>

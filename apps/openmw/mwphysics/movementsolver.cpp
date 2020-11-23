@@ -427,7 +427,7 @@ namespace MWPhysics
                 velocity += physicActor->getInertialForce();
 
         // because of the internal collision box offset hack, and the fact that we're moving the collision box manually,
-        // we need to replicate part of the collision box's transform proecss from scratch
+        // we need to replicate part of the collision box's transform process from scratch
         osg::Vec3f refPosition = tempPosition + verticalHalfExtent;
         osg::Vec3f goodPosition = refPosition;
         const btTransform oldTransform = collisionObject->getWorldTransform();
