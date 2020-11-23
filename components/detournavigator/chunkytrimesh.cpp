@@ -51,7 +51,7 @@ namespace DetourNavigator
             const auto inum = imax - imin;
             const auto icur = curNode;
 
-            if (curNode > nodes.size())
+            if (curNode >= nodes.size())
                 return;
 
             ChunkyTriMeshNode& node = nodes[curNode++];

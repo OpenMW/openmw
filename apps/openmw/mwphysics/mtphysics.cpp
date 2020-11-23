@@ -1,6 +1,8 @@
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
 
+#include <osg/Stats>
+
 #include "components/debug/debuglog.hpp"
 #include <components/misc/barrier.hpp>
 #include "components/misc/convert.hpp"
@@ -154,6 +156,8 @@ namespace MWPhysics
           , mQuit(false)
           , mNextJob(0)
           , mNextLOS(0)
+          , mFrameNumber(0)
+          , mTimer(osg::Timer::instance())
     {
         mNumThreads = Config::computeNumThreads(mThreadSafeBullet);
 
@@ -192,6 +196,7 @@ namespace MWPhysics
                                 [](const LOSRequest& req) { return req.mStale; }),
                             mLOSCache.end());
                 }
+                mTimeEnd = mTimer->tick();
             });
     }
 
@@ -207,7 +212,7 @@ namespace MWPhysics
             thread.join();
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skipSimulation)
+    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
@@ -230,6 +235,16 @@ namespace MWPhysics
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
                     data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
             }
+
+            if (mFrameNumber == frameNumber - 1)
+            {
+                stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
+                stats.setAttribute(mFrameNumber, "physicsworker_time_taken", mTimer->delta_s(mTimeBegin, mTimeEnd));
+                stats.setAttribute(mFrameNumber, "physicsworker_time_end", mTimer->delta_s(mFrameStart, mTimeEnd));
+            }
+            mFrameStart = frameStart;
+            mTimeBegin = mTimer->tick();
+            mFrameNumber = frameNumber;
         }
 
         // init

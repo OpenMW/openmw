@@ -157,7 +157,7 @@ namespace MWWorld
             void processDoors(float duration);
             ///< Run physics simulation and modify \a world accordingly.
 
-            void doPhysics(float duration);
+            void doPhysics(float duration, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
             ///< Run physics simulation and modify \a world accordingly.
 
             void updateNavigator();
@@ -493,7 +493,7 @@ namespace MWWorld
             /// \return pointer to created record
 
             void update (float duration, bool paused) override;
-            void updatePhysics (float duration, bool paused) override;
+            void updatePhysics (float duration, bool paused, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats) override;
 
             void updateWindowManager () override;
 

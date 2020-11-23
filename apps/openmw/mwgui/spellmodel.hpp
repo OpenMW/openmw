@@ -2,6 +2,7 @@
 #define OPENMW_GUI_SPELLMODEL_H
 
 #include "../mwworld/ptr.hpp"
+#include <components/esm/effectlist.hpp>
 
 namespace MWGui
 {
@@ -57,6 +58,8 @@ namespace MWGui
         std::vector<Spell> mSpells;
 
         std::string mFilter;
+
+        bool matchingEffectExists(std::string filter, const ESM::EffectList &effects);
     };
 
 }
