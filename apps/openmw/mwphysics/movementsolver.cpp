@@ -126,7 +126,7 @@ namespace MWPhysics
 
         const btCollisionObject *colobj = physicActor->getCollisionObject();
         osg::Vec3f halfExtents = physicActor->getHalfExtents();
-        osg::Vec3f meshTranslation = physicActor->getScaledMeshTranslation();
+        //osg::Vec3f meshTranslation = physicActor->getScaledMeshTranslation();
 
         // Adjust for collision mesh offset relative to actor's "location"
         // (doTrace doesn't take local/interior collision shape translation into account)
