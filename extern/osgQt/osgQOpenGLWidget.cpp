@@ -33,7 +33,8 @@ osgQOpenGLWidget::~osgQOpenGLWidget()
 
 osgViewer::View* osgQOpenGLWidget::getOsgView(unsigned i)
 {
-    return m_renderer->getView(i);
+    if (m_renderer) return m_renderer->getView(i);
+    else return nullptr;
 }
 
 OpenThreads::ReadWriteMutex* osgQOpenGLWidget::mutex()
