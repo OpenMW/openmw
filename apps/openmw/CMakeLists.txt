@@ -146,6 +146,7 @@ target_link_libraries(openmw
     "osg-ffmpeg-videoplayer"
     "oics"
     components
+    ${LUA_LIBRARIES}
 )
 
 if(OSG_STATIC)
