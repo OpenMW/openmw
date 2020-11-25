@@ -147,7 +147,7 @@ RenderWidget::~RenderWidget()
 {
     try
     {
-        CompositeViewer::get().removeView(mView);
+        CompositeOsgRenderer::get().removeView(mView);
 
 #if OSG_VERSION_LESS_THAN(3,6,5)
         // before OSG 3.6.4, the default font was a static object, and if it wasn't attached to the scene when a graphics context was destroyed, it's program wouldn't be released.
@@ -186,59 +186,6 @@ void RenderWidget::toggleRenderStats()
     window->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_S);
     window->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_S);
 }
-
-
-// --------------------------------------------------
-
-CompositeViewer::CompositeViewer()
-    : mSimulationTime(0.0)
-{
-    // TODO: Upgrade osgQt to support osgViewer::ViewerBase::DrawThreadPerContext
-    // https://gitlab.com/OpenMW/openmw/-/issues/5481
-    setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-
-#if OSG_VERSION_GREATER_OR_EQUAL(3,5,5)
-    setUseConfigureAffinity(false);
-#endif
-
-    // disable the default setting of viewer.done() by pressing Escape.
-    setKeyEventSetsDone(0);
-
-    // Only render when the camera position changed, or content flagged dirty
-    //setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
-    setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
-
-    connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
-    mTimer.start( 10 );
-
-    int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
-    setRunMaxFrameRate(frameRateLimit);
-}
-
-CompositeViewer &CompositeViewer::get()
-{
-    static CompositeViewer sThis;
-    return sThis;
-}
-
-void CompositeViewer::update()
-{
-    double dt = mFrameTimer.time_s();
-    mFrameTimer.setStartTick();
-
-    emit simulationUpdated(dt);
-
-    mSimulationTime += dt;
-    frame(mSimulationTime);
-
-    double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
-    if (dt < minFrameTime)
-    {
-        std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
-    }
-}
-
-// ---------------------------------------------------
 
 SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget *parent, Qt::WindowFlags f,
     bool retrieveInput)
@@ -280,7 +227,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
         CSMPrefs::get()["Tooltips"].update();
     }
 
-    connect (&CompositeViewer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
+    connect (&CompositeOsgRenderer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
 
     // Shortcuts
     CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
@@ -452,7 +399,7 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     }
     else if (*setting=="Rendering/framerate-limit")
     {
-        CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
+        CompositeOsgRenderer::get().setRunMaxFrameRate(setting->toInt());
     }
     else if (*setting=="Rendering/camera-fov" ||
              *setting=="Rendering/camera-ortho" ||

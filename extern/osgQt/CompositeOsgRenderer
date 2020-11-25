@@ -18,17 +18,9 @@
 #define COMPOSITEOSGRENDERER_H
 
 #include <QObject>
+#include <QTimer>
 
 #include <osgViewer/CompositeViewer>
-
-class QInputEvent;
-class QKeyEvent;
-class QMouseEvent;
-class QWheelEvent;
-namespace eveBIM
-{
-    class ViewerWidget;
-}
 
 class CompositeOsgRenderer : public QObject, public osgViewer::CompositeViewer
 {
@@ -38,8 +30,10 @@ class CompositeOsgRenderer : public QObject, public osgViewer::CompositeViewer
 
     int                                        _timerId{0};
     osg::Timer                                 _lastFrameStartTime;
+    osg::Timer                                 mFrameTimer;
     bool                                       _applicationAboutToQuit {false};
     bool                                       _osgWantsToRenderFrame{true};
+    double                                     mSimulationTime;
 
     Q_OBJECT
 
@@ -75,11 +69,19 @@ public:
     //void requestRedraw() override;
     // overrided from osgViewer::CompositeViewer
     bool checkEvents() override;
-    void update();
+
+    static CompositeOsgRenderer& get();
+
+    QTimer mTimer;
 
 protected:
     void timerEvent(QTimerEvent* event) override; // which one does this override?
 
+public slots:
+    void update();
+
+signals:
+    void simulationUpdated(double dt);
 };
 
 #endif // COMPOSITEOSGRENDERER_H

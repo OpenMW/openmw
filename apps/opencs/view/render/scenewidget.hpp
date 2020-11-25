@@ -112,7 +112,7 @@ namespace CSVRender
             LightingBright mLightingBright;
 
             int mPrevMouseX, mPrevMouseY;
-            
+
             /// Tells update that camera isn't set
             bool mCamPositionSet;
 
@@ -137,30 +137,6 @@ namespace CSVRender
 
             void focusToolbarRequest();
     };
-
-
-    // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with multiple views
-    class CompositeViewer : public QObject, public osgViewer::CompositeViewer
-    {
-            Q_OBJECT
-        public:
-            CompositeViewer();
-
-            static CompositeViewer& get();
-
-            QTimer mTimer;
-
-        private:
-            osg::Timer mFrameTimer;
-            double mSimulationTime;
-
-        public slots:
-            void update();
-
-        signals:
-            void simulationUpdated(double dt);
-    };
-
 }
 
 #endif
