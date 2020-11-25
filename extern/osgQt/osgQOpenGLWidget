@@ -8,7 +8,7 @@
 #   include <QtGui/qopenglext.h>
 #endif
 
-#include <OpenThreads/ReadWriteMutex>
+#include <mutex>
 
 #ifdef WIN32
 //#define __gl_h_
@@ -37,7 +37,7 @@ class osgQOpenGLWidget : public QOpenGLWidget,
 protected:
     CompositeOsgRenderer* m_renderer {nullptr};
     bool _osgWantsToRenderFrame{true};
-    OpenThreads::ReadWriteMutex _osgMutex;
+    std::mutex _osgMutex;
     osg::ArgumentParser* _arguments {nullptr};
 	bool _isFirstFrame {true};
 
@@ -52,7 +52,7 @@ public:
     virtual osgViewer::View* getOsgView(unsigned i);
 
     //! get mutex
-    virtual OpenThreads::ReadWriteMutex* mutex();
+    virtual std::mutex* mutex();
 
     CompositeOsgRenderer* getCompositeViewer();
 

@@ -2,6 +2,7 @@
 #include "CompositeOsgRenderer"
 
 #include <iostream>
+#include <mutex>
 
 #include <osgViewer/View>
 #include <osgViewer/CompositeViewer>
@@ -38,7 +39,7 @@ osgViewer::View* osgQOpenGLWidget::getOsgView(unsigned i)
     else return nullptr;
 }
 
-OpenThreads::ReadWriteMutex* osgQOpenGLWidget::mutex()
+std::mutex* osgQOpenGLWidget::mutex()
 {
     return &_osgMutex;
 }
@@ -61,7 +62,7 @@ void osgQOpenGLWidget::resizeGL(int w, int h)
 
 void osgQOpenGLWidget::paintGL()
 {
-    OpenThreads::ScopedReadLock locker(_osgMutex);
+    std::scoped_lock locker(_osgMutex);
 	if (_isFirstFrame) {
 		_isFirstFrame = false;
 		//m_renderer->getView(?)->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
