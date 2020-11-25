@@ -1,5 +1,5 @@
 #include "osgQOpenGLWidget"
-#include "OSGRenderer"
+#include "CompositeOsgRenderer"
 
 #include <iostream>
 
@@ -31,9 +31,9 @@ osgQOpenGLWidget::~osgQOpenGLWidget()
 {
 }
 
-osgViewer::Viewer* osgQOpenGLWidget::getOsgViewer()
+osgViewer::View* osgQOpenGLWidget::getOsgView(unsigned i)
 {
-    return m_renderer;
+    return m_renderer->getView(i);
 }
 
 OpenThreads::ReadWriteMutex* osgQOpenGLWidget::mutex()
@@ -62,7 +62,7 @@ void osgQOpenGLWidget::paintGL()
     OpenThreads::ScopedReadLock locker(_osgMutex);
 	if (_isFirstFrame) {
 		_isFirstFrame = false;
-		m_renderer->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
+		//m_renderer->getView(?)->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
 	}
 	m_renderer->frame();
 }
@@ -79,9 +79,9 @@ void osgQOpenGLWidget::createRenderer()
     // call this before creating a View...
     setDefaultDisplaySettings();
 	if (!_arguments) {
-		m_renderer = new OSGRenderer(this);
+		m_renderer = new CompositeOsgRenderer(this);
 	} else {
-		m_renderer = new OSGRenderer(_arguments, this);
+		m_renderer = new CompositeOsgRenderer(_arguments, this);
 	}
     int width = 640;
     int height = 480;

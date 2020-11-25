@@ -14,12 +14,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#ifndef OSGRENDERER_H
-#define OSGRENDERER_H
+#ifndef COMPOSITEOSGRENDERER_H
+#define COMPOSITEOSGRENDERER_H
 
 #include <QObject>
 
-#include <osgViewer/Viewer>
+#include <osgViewer/CompositeViewer>
 
 class QInputEvent;
 class QKeyEvent;
@@ -30,7 +30,7 @@ namespace eveBIM
     class ViewerWidget;
 }
 
-class OSGRenderer : public QObject, public osgViewer::Viewer
+class CompositeOsgRenderer : public QObject, public osgViewer::CompositeViewer
 {
     bool                                       m_osgInitialized {false};
     osg::ref_ptr<osgViewer::GraphicsWindow>    m_osgWinEmb;
@@ -43,14 +43,12 @@ class OSGRenderer : public QObject, public osgViewer::Viewer
 
     Q_OBJECT
 
-    friend class eveBIM::ViewerWidget;
-
 public:
 
-    explicit OSGRenderer(QObject* parent = nullptr);
-    explicit OSGRenderer(osg::ArgumentParser* arguments, QObject* parent = nullptr);
+    explicit CompositeOsgRenderer(QObject* parent = nullptr);
+    explicit CompositeOsgRenderer(osg::ArgumentParser* arguments, QObject* parent = nullptr);
 
-    ~OSGRenderer() override;
+    ~CompositeOsgRenderer() override;
 
     bool continuousUpdate() const
     {
@@ -65,21 +63,21 @@ public:
 
     void setupOSG(int windowWidth, int windowHeight);
 
-    // overrided from osgViewer::Viewer
+    // overrided from osgViewer::CompositeViewer
     virtual bool checkNeedToDoFrame() override;
 
     // overrided from osgViewer::ViewerBase
     void frame(double simulationTime = USE_REFERENCE_TIME) override;
 
-    // overrided from osgViewer::Viewer
-    void requestRedraw() override;
-    // overrided from osgViewer::Viewer
+    // overrided from osgViewer::View
+    //void requestRedraw() override;
+    // overrided from osgViewer::CompositeViewer
     bool checkEvents() override;
     void update();
 
 protected:
-    void timerEvent(QTimerEvent* event) override;
+    void timerEvent(QTimerEvent* event) override; // which one does this override?
 
 };
 
-#endif // OSGRENDERER_H
+#endif // COMPOSITEOSGRENDERER_H

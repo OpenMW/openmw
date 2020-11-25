@@ -21,11 +21,11 @@
 #include <QOpenGLFunctions>
 #include <QReadWriteLock>
 
-class OSGRenderer;
+class CompositeOsgRenderer;
 
 namespace osgViewer
 {
-    class Viewer;
+    class View;
 }
 
 class osgQOpenGLWidget : public QOpenGLWidget,
@@ -34,13 +34,13 @@ class osgQOpenGLWidget : public QOpenGLWidget,
     Q_OBJECT
 
 protected:
-    OSGRenderer* m_renderer {nullptr};
+    CompositeOsgRenderer* m_renderer {nullptr};
     bool _osgWantsToRenderFrame{true};
     OpenThreads::ReadWriteMutex _osgMutex;
     osg::ArgumentParser* _arguments {nullptr};
 	bool _isFirstFrame {true};
 
-    friend class OSGRenderer;
+    friend class CompositeOsgRenderer;
 
 public:
     osgQOpenGLWidget(QWidget* parent = nullptr);
@@ -48,7 +48,7 @@ public:
     virtual ~osgQOpenGLWidget();
 
     /** Get osgViewer View */
-    virtual osgViewer::Viewer* getOsgViewer();
+    virtual osgViewer::View* getOsgView(unsigned i);
 
     //! get mutex
     virtual OpenThreads::ReadWriteMutex* mutex();

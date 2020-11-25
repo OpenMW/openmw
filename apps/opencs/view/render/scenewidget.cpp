@@ -15,7 +15,7 @@
 #include <osg/Material>
 #include <osg/Version>
 #include <QSurfaceFormat>
-#include <extern/osgQt/OSGRenderer>
+#include <extern/osgQt/CompositeOsgRenderer>
 #include <extern/osgQt/osgQOpenGLWidget>
 
 #include <components/debug/debuglog.hpp>
@@ -114,7 +114,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     setLayout(layout);
 
-    if (OSGRenderer *osgRenderer = dynamic_cast<OSGRenderer*> (widget->getOsgViewer()) )
+    if (CompositeOsgRenderer *osgRenderer = dynamic_cast<CompositeOsgRenderer*> (widget->getOsgView(0)) )
     {
         Log(Debug::Warning) << "osgRenderer cast success ";
         //mView->getCamera()->setGraphicsContext(osgRenderer->getGraphicsContext());
