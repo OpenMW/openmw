@@ -3,7 +3,8 @@
 
 #include <iostream>
 
-#include <osgViewer/Viewer>
+#include <osgViewer/View>
+#include <osgViewer/CompositeViewer>
 #include <osg/GL>
 
 #include <QApplication>
@@ -75,15 +76,27 @@ void osgQOpenGLWidget::setDefaultDisplaySettings()
     ds->setStereo(false);
 }
 
+CompositeOsgRenderer* osgQOpenGLWidget::getCompositeViewer()
+{
+    return m_renderer;
+}
+
+void osgQOpenGLWidget::setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb)
+{
+    if (!m_renderer)
+    {
+        std::cout << "osgQOpenGLWidget::setGraphicsWindowEmbedded creating m_renderer " << std::endl;
+        m_renderer = new CompositeOsgRenderer(this);
+    }
+    if (m_renderer) m_renderer->setGraphicsWindowEmbedded(osgWinEmb);
+}
+
 void osgQOpenGLWidget::createRenderer()
 {
     // call this before creating a View...
     setDefaultDisplaySettings();
-	if (!_arguments) {
-		m_renderer = new CompositeOsgRenderer(this);
-	} else {
-		m_renderer = new CompositeOsgRenderer(_arguments, this);
-	}
+	if (!m_renderer) m_renderer = new CompositeOsgRenderer(this);
+
     int width = 640;
     int height = 480;
     if ( QWidget* widget = dynamic_cast<QWidget*> (parent()) )

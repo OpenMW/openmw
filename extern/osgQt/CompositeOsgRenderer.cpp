@@ -98,6 +98,10 @@ void CompositeOsgRenderer::resize(int windowWidth, int windowHeight)
     update();
 }
 
+void CompositeOsgRenderer::setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb)
+{
+    m_osgWinEmb = osgWinEmb;
+}
 
 void CompositeOsgRenderer::setupOSG(int windowWidth, int windowHeight)
 {
@@ -109,7 +113,7 @@ void CompositeOsgRenderer::setupOSG(int windowWidth, int windowHeight)
         if(view)
         {
             m_osgInitialized = true;
-            m_osgWinEmb = new osgViewer::GraphicsWindowEmbedded(0, 0, windowWidth, windowHeight);
+            //m_osgWinEmb = new osgViewer::GraphicsWindowEmbedded(0, 0, windowWidth, windowHeight);
 
             // make sure the event queue has the correct window rectangle size and input range
             m_osgWinEmb->getEventQueue()->syncWindowRectangleWithGraphicsContext();
@@ -120,7 +124,7 @@ void CompositeOsgRenderer::setupOSG(int windowWidth, int windowHeight)
             // frame to see
             // if the viewer's done flag should be set to signal end of viewers main
             // loop.
-            setKeyEventSetsDone(0);
+            //setKeyEventSetsDone(0);
             setReleaseContextAtEndOfFrameHint(false);
             setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 

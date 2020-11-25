@@ -61,6 +61,8 @@ public:
 
     virtual void resize(int windowWidth, int windowHeight);
 
+    void setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb);
+
     void setupOSG(int windowWidth, int windowHeight);
 
     // overrided from osgViewer::CompositeViewer

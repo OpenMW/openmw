@@ -41,8 +41,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     , mRootNode(0)
 {
 
-    osgViewer::CompositeViewer& viewer = CompositeViewer::get();
-
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
@@ -86,7 +84,9 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     updateCameraParameters( width() / static_cast<double>(height()) );
 
     osgQOpenGLWidget* widget = new osgQOpenGLWidget(this);
-    //widget->resizeGL(width(), height());
+    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
+    widget->setGraphicsWindowEmbedded(window);
+    CompositeOsgRenderer* viewer = widget->getCompositeViewer();
 
     /*
     // add the thread model handler
@@ -114,13 +114,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
 
     setLayout(layout);
 
-    if (CompositeOsgRenderer *osgRenderer = dynamic_cast<CompositeOsgRenderer*> (widget->getOsgView(0)) )
-    {
-        Log(Debug::Warning) << "osgRenderer cast success ";
-        //mView->getCamera()->setGraphicsContext(osgRenderer->getGraphicsContext());
-    }
-    else
-        Log(Debug::Warning) << "osgRenderer cast fail ";
+    mView->getCamera()->setGraphicsContext(window);
 
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, width(), height()) );
@@ -144,9 +138,9 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     // Add ability to signal osg to show its statistics for debugging purposes
     mView->addEventHandler(new osgViewer::StatsHandler);
 
-    viewer.addView(mView);
-    viewer.setDone(false);
-    viewer.realize();
+    viewer->addView(mView);
+    viewer->setDone(false);
+    viewer->realize();
 }
 
 RenderWidget::~RenderWidget()

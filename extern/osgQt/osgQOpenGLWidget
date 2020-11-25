@@ -26,6 +26,7 @@ class CompositeOsgRenderer;
 namespace osgViewer
 {
     class View;
+    class GraphicsWindowEmbedded;
 }
 
 class osgQOpenGLWidget : public QOpenGLWidget,
@@ -52,6 +53,10 @@ public:
 
     //! get mutex
     virtual OpenThreads::ReadWriteMutex* mutex();
+
+    CompositeOsgRenderer* getCompositeViewer();
+
+    void setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb);
 
 signals:
     void initialized();
