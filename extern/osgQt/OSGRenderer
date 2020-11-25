@@ -80,8 +80,6 @@ public:
 protected:
     void timerEvent(QTimerEvent* event) override;
 
-    void setKeyboardModifiers(QInputEvent* event);
-
 };
 
 #endif // OSGRENDERER_H

@@ -111,22 +111,6 @@ void OSGRenderer::setupOSG(int windowWidth, int windowHeight)
     _lastFrameStartTime.setStartTick(0);
 }
 
-void OSGRenderer::setKeyboardModifiers(QInputEvent* event)
-{
-    unsigned int modkey = event->modifiers() & (Qt::ShiftModifier |
-                                                Qt::ControlModifier |
-                                                Qt::AltModifier);
-    unsigned int mask = 0;
-
-    if(modkey & Qt::ShiftModifier) mask |= osgGA::GUIEventAdapter::MODKEY_SHIFT;
-
-    if(modkey & Qt::ControlModifier) mask |= osgGA::GUIEventAdapter::MODKEY_CTRL;
-
-    if(modkey & Qt::AltModifier) mask |= osgGA::GUIEventAdapter::MODKEY_ALT;
-
-    m_osgWinEmb->getEventQueue()->getCurrentEventState()->setModKeyMask(mask);
-}
-
 bool OSGRenderer::checkEvents()
 {
     // check events from any attached sources
