@@ -99,7 +99,7 @@ CSVWorld::TableBottomBox::TableBottomBox (const CreatorFactoryBase& creatorFacto
 
     mStatusBar->addWidget (mStatus);
 
-    mLayout->addWidget (mStatusBar);
+    //mLayout->addWidget (mStatusBar);
 
     setLayout (mLayout);
 

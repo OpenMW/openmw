@@ -14,11 +14,9 @@
 #include <osg/LightModel>
 #include <osg/Material>
 #include <osg/Version>
-#if OSG_VERSION_LESS_THAN(3,5,4)
-#include <extern/osgQt/GraphicsWindowQt>
-#else
-#include <extern/osgQt/osgQOpenGLWindow>
-#endif
+#include <QSurfaceFormat>
+#include <extern/osgQt/OSGRenderer>
+#include <extern/osgQt/osgQOpenGLWidget>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -46,9 +44,30 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     osgViewer::CompositeViewer& viewer = CompositeViewer::get();
 
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+
+    QSurfaceFormat format = QSurfaceFormat::defaultFormat();
+
+#ifdef OSG_GL3_AVAILABLE
+    format.setVersion(3, 2);
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setOption(QSurfaceFormat::DebugContext);
+#else
+    format.setVersion(2, 0);
+    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+    format.setRenderableType(QSurfaceFormat::OpenGL);
+    format.setOption(QSurfaceFormat::DebugContext);
+#endif
+    format.setDepthBufferSize(24);
+    //format.setAlphaBufferSize(8);
+    format.setSamples(ds->getMultiSamples());
+    format.setStencilBufferSize(ds->getMinimumNumStencilBits());
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    QSurfaceFormat::setDefaultFormat(format);
+
     //ds->setNumMultiSamples(8);
 
-    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    /*osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     traits->windowName = "";
     traits->windowDecoration = true;
     traits->x = 0;
@@ -61,34 +80,50 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     traits->sampleBuffers = ds->getMultiSamples();
     traits->samples = ds->getNumMultiSamples();
     // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate when running multiple QGLWidgets
-    traits->vsync = false;
+    traits->vsync = false;*/
 
     mView = new osgViewer::View;
-    updateCameraParameters( traits->width / static_cast<double>(traits->height) );
+    updateCameraParameters( width() / static_cast<double>(height()) );
 
-#if OSG_VERSION_LESS_THAN(3,5,4)
-    osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
-#else
-    osgQOpenGLWindow window(this);
-#endif
+    osgQOpenGLWidget* widget = new osgQOpenGLWidget(this);
+    //widget->resizeGL(width(), height());
+
+    /*
+    // add the thread model handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::ThreadingHandler);
+
+     // add the window size toggle handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::WindowSizeHandler);
+
+     // add the stats handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::StatsHandler);
+
+     // add the record camera path handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::RecordCameraPathHandler);
+
+     // add the LOD Scale handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::LODScaleHandler);
+
+     // add the screen capture handler
+     widget->getOsgViewer()->addEventHandler(new osgViewer::ScreenCaptureHandler);*/
+
     QLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-#if OSG_VERSION_LESS_THAN(3,5,4)
-    layout->addWidget(window->getGLWidget());
-#else
-    layout->addWidget(window.asWidget());
-#endif
+    layout->addWidget(widget);
 
     setLayout(layout);
 
-#if OSG_VERSION_LESS_THAN(3,5,4)
-    mView->getCamera()->setGraphicsContext(window);
-#else
-    //mView->getCamera()->setGraphicsContext(window);
-#endif
+    if (OSGRenderer *osgRenderer = dynamic_cast<OSGRenderer*> (widget->getOsgViewer()) )
+    {
+        Log(Debug::Warning) << "osgRenderer cast success ";
+        //mView->getCamera()->setGraphicsContext(osgRenderer->getGraphicsContext());
+    }
+    else
+        Log(Debug::Warning) << "osgRenderer cast fail ";
+
     mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
-    mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
+    mView->getCamera()->setViewport( new osg::Viewport(0, 0, width(), height()) );
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
     lightMgr->setStartLight(1);
@@ -449,7 +484,7 @@ void RenderWidget::updateCameraParameters(double overrideAspect)
             -halfW, halfW, -halfH, halfH, nearDist, farDist);
     }
     else
-    { 
+    {
         mView->getCamera()->setProjectionMatrixAsPerspective(
             CSMPrefs::get()["Rendering"]["camera-fov"].toInt(),
             static_cast<double>(width())/static_cast<double>(height()),

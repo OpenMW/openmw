@@ -4,7 +4,6 @@ set(OSGQT_LIBRARY "osgQt")
 
 set(SOURCE_H
         osgQOpenGLWidget
-        osgQOpenGLWindow
         OSGRenderer
 )
 
@@ -13,7 +12,6 @@ qt5_wrap_cpp(SOURCES_H_MOC ${SOURCE_H} )
 set(OSGQT_SOURCE_FILES
     GraphicsWindowQt.cpp
     osgQOpenGLWidget.cpp
-    osgQOpenGLWindow.cpp
     OSGRenderer.cpp
     ${SOURCES_H_MOC}
 )
