@@ -638,7 +638,7 @@ namespace NifOsg
                 }
             }
 
-            if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
+            if (nifNode->recType == Nif::RC_NiParticles)
                 handleParticleSystem(nifNode, node, composite, animflags);
 
             if (composite->getNumControllers() > 0)
@@ -946,13 +946,11 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
         void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            const Nif::NiAutoNormalParticlesData *particledata = nullptr;
-            if(nifNode->recType == Nif::RC_NiAutoNormalParticles)
-                particledata = static_cast<const Nif::NiAutoNormalParticles*>(nifNode)->data.getPtr();
-            else if(nifNode->recType == Nif::RC_NiRotatingParticles)
-                particledata = static_cast<const Nif::NiRotatingParticles*>(nifNode)->data.getPtr();
-            else
+            const auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
+            if (particleNode->data.empty())
                 return;
+
+            const Nif::NiParticlesData* particledata = particleNode->data.getPtr();
 
             osg::BoundingBox box;
 

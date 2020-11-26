@@ -401,39 +401,22 @@ struct NiCamera : Node
     }
 };
 
-struct NiAutoNormalParticles : Node
+struct NiParticles : NiGeometry
 {
-    NiAutoNormalParticlesDataPtr data;
-
+    NiParticlesDataPtr data;
     void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
-        nif->getInt(); // -1
+        skin.read(nif);
+        materialData.read(nif);
     }
 
     void post(NIFFile *nif) override
     {
         Node::post(nif);
         data.post(nif);
-    }
-};
-
-struct NiRotatingParticles : Node
-{
-    NiRotatingParticlesDataPtr data;
-
-    void read(NIFStream *nif) override
-    {
-        Node::read(nif);
-        data.read(nif);
-        nif->getInt(); // -1
-    }
-
-    void post(NIFFile *nif) override
-    {
-        Node::post(nif);
-        data.post(nif);
+        skin.post(nif);
     }
 };
 
