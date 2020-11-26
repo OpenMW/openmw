@@ -3,7 +3,22 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 
+#ifdef __APPLE__
+#   define __glext_h_
+#   include <QtGui/qopengl.h>
+#   undef __glext_h_
+#   include <QtGui/qopenglext.h>
+#endif
+
+#ifdef WIN32
+//#define __gl_h_
+#include <osg/GL>
+#endif
+
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 #include <QWidget>
 #include <QTimer>
 
@@ -14,7 +29,6 @@
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
-class osgQOpenGLWidget;
 class CompositeOsgRenderer;
 
 namespace Resource
@@ -46,13 +60,15 @@ namespace CSVRender
     class OrbitCameraController;
     class Lighting;
 
-    class RenderWidget : public QWidget
+    class RenderWidget : public QOpenGLWidget, protected QOpenGLFunctions
     {
             Q_OBJECT
 
         public:
             RenderWidget(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
             virtual ~RenderWidget();
+
+            virtual std::mutex* mutex();
 
             /// Initiates a request to redraw the view
             void flagAsModified();
@@ -63,10 +79,17 @@ namespace CSVRender
 
         protected:
 
-            osgQOpenGLWidget* mWidget;
             CompositeOsgRenderer* mRenderer;
             osg::ref_ptr<osgViewer::View> mView;
             osg::ref_ptr<osg::Group> mRootNode;
+            std::mutex _osgMutex;
+            bool _isFirstFrame {true};
+
+            void initializeGL() override;
+            void resizeGL(int w, int h) override;
+
+            //! lock scene graph and call osgViewer::frame()
+            void paintGL() override;
 
             void updateCameraParameters(double overrideAspect = -1.0);
 
@@ -75,6 +98,9 @@ namespace CSVRender
         protected slots:
 
             void toggleRenderStats();
+
+        signals:
+             void initialized();
     };
 
     /// Extension of RenderWidget to support lighting mode selection & toolbar

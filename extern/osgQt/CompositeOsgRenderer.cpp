@@ -16,14 +16,9 @@
 
 #include "CompositeOsgRenderer"
 
-#include "osgQOpenGLWidget"
-
-//#include <osgQOpenGL/CullVisitorEx>
-//#include <osgQOpenGL/GraphicsWindowEx>
 
 #include <mutex>
 #include <osgViewer/View>
-//#include <osgViewer/CompositeViewer>
 
 #include <QApplication>
 #include <QScreen>
@@ -31,6 +26,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
+#include <QOpenGLWidget>
 
 #include <QKeyEvent>
 #include <QMouseEvent>
@@ -68,10 +64,9 @@ void CompositeOsgRenderer::update()
         std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
     }
 
-    osgQOpenGLWidget* osgWidget = dynamic_cast<osgQOpenGLWidget*>(parent());
+    QOpenGLWidget* osgWidget = dynamic_cast<QOpenGLWidget*>(parent());
     if (osgWidget)
     {
-        osgWidget->_osgWantsToRenderFrame = true;
         osgWidget->update();
     }
 }

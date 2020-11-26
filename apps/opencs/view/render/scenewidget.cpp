@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <thread>
+#include <mutex>
 
 #include <QEvent>
 #include <QResizeEvent>
@@ -16,7 +17,8 @@
 #include <osg/Version>
 #include <QSurfaceFormat>
 #include <extern/osgQt/CompositeOsgRenderer>
-#include <extern/osgQt/osgQOpenGLWidget>
+#include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -37,11 +39,13 @@ namespace CSVRender
 {
 
 RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
-    : QWidget(parent, f)
+    : QOpenGLWidget(parent, f)
     , mRootNode(0)
 {
-
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+    ds->setNvOptimusEnablement(1);
+    ds->setStereo(false);
+    ds->setNumMultiSamples(8);
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
@@ -63,9 +67,7 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
     QSurfaceFormat::setDefaultFormat(format);
 
-    //ds->setNumMultiSamples(8);
-
-    /*osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+    osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
     traits->windowName = "";
     traits->windowDecoration = true;
     traits->x = 0;
@@ -78,43 +80,13 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     traits->sampleBuffers = ds->getMultiSamples();
     traits->samples = ds->getNumMultiSamples();
     // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate when running multiple QGLWidgets
-    traits->vsync = false;*/
+    traits->vsync = false;
 
     mView = new osgViewer::View;
     updateCameraParameters( width() / static_cast<double>(height()) );
-
-    mWidget = new osgQOpenGLWidget(this);
-
-    mRenderer = mWidget->getCompositeViewer();
-    //osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(traits);
-    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
-    mWidget->setGraphicsWindowEmbedded(window);
-
-    /*
-    // add the thread model handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::ThreadingHandler);
-
-     // add the window size toggle handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::WindowSizeHandler);
-
-     // add the stats handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::StatsHandler);
-
-     // add the record camera path handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::RecordCameraPathHandler);
-
-     // add the LOD Scale handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::LODScaleHandler);
-
-     // add the screen capture handler
-     widget->getCompositeViewer()->addEventHandler(new osgViewer::ScreenCaptureHandler);*/
-
-    QLayout* layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    layout->addWidget(mWidget);
-
-    setLayout(layout);
+    mRenderer = new CompositeOsgRenderer(this);
+    osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(traits);
+    mRenderer->setGraphicsWindowEmbedded(window);
 
     mView->getCamera()->setGraphicsContext(window);
 
@@ -140,6 +112,8 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     // Add ability to signal osg to show its statistics for debugging purposes
     mView->addEventHandler(new osgViewer::StatsHandler);
 
+    mView->addEventHandler(new osgViewer::ThreadingHandler);
+
     mRenderer->addView(mView);
     mRenderer->setDone(false);
 }
@@ -162,7 +136,41 @@ RenderWidget::~RenderWidget()
     {
         Log(Debug::Error) << "Error in the destructor: " << e.what();
     }
-    delete mWidget;
+    delete mRenderer;
+}
+
+std::mutex* RenderWidget::mutex()
+{
+    return &_osgMutex;
+}
+
+void RenderWidget::initializeGL()
+{
+    // Initializes OpenGL function resolution for the current context.
+    initializeOpenGLFunctions();
+    int width = this->width();
+    int height = this->height();
+    mRenderer->setupOSG(width, height);
+    emit initialized();
+}
+
+void RenderWidget::resizeGL(int w, int h)
+{
+    Q_ASSERT(mRenderer);
+    mRenderer->resize(w, h);
+}
+
+void RenderWidget::paintGL()
+{
+    std::scoped_lock locker(_osgMutex);
+	if (_isFirstFrame) {
+		_isFirstFrame = false;
+        for (unsigned int i = 0; i < mRenderer->getNumViews(); ++i)
+        {
+		    mRenderer->getView(i)->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
+        }
+	}
+	mRenderer->frame();
 }
 
 void RenderWidget::flagAsModified()
@@ -461,9 +469,3 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
 }
 
 }
-
-/* */
-
-
-
-/* */
