@@ -83,34 +83,36 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView = new osgViewer::View;
     updateCameraParameters( width() / static_cast<double>(height()) );
 
-    osgQOpenGLWidget* widget = new osgQOpenGLWidget(this);
+    mWidget = new osgQOpenGLWidget(this);
+
+    mRenderer = mWidget->getCompositeViewer();
+    //osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(traits);
     osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
-    widget->setGraphicsWindowEmbedded(window);
-    CompositeOsgRenderer* viewer = widget->getCompositeViewer();
+    mWidget->setGraphicsWindowEmbedded(window);
 
     /*
     // add the thread model handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::ThreadingHandler);
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::ThreadingHandler);
 
      // add the window size toggle handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::WindowSizeHandler);
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::WindowSizeHandler);
 
      // add the stats handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::StatsHandler);
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::StatsHandler);
 
      // add the record camera path handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::RecordCameraPathHandler);
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::RecordCameraPathHandler);
 
      // add the LOD Scale handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::LODScaleHandler);
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::LODScaleHandler);
 
      // add the screen capture handler
-     widget->getOsgViewer()->addEventHandler(new osgViewer::ScreenCaptureHandler);*/
+     widget->getCompositeViewer()->addEventHandler(new osgViewer::ScreenCaptureHandler);*/
 
     QLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
-    layout->addWidget(widget);
+    layout->addWidget(mWidget);
 
     setLayout(layout);
 
@@ -138,16 +140,15 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     // Add ability to signal osg to show its statistics for debugging purposes
     mView->addEventHandler(new osgViewer::StatsHandler);
 
-    viewer->addView(mView);
-    viewer->setDone(false);
-    viewer->realize();
+    mRenderer->addView(mView);
+    mRenderer->setDone(false);
 }
 
 RenderWidget::~RenderWidget()
 {
     try
     {
-        CompositeOsgRenderer::get().removeView(mView);
+        mRenderer->removeView(mView);
 
 #if OSG_VERSION_LESS_THAN(3,6,5)
         // before OSG 3.6.4, the default font was a static object, and if it wasn't attached to the scene when a graphics context was destroyed, it's program wouldn't be released.
@@ -161,6 +162,7 @@ RenderWidget::~RenderWidget()
     {
         Log(Debug::Error) << "Error in the destructor: " << e.what();
     }
+    delete mWidget;
 }
 
 void RenderWidget::flagAsModified()
@@ -227,7 +229,7 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
         CSMPrefs::get()["Tooltips"].update();
     }
 
-    connect (&CompositeOsgRenderer::get(), SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
+    connect (mRenderer, SIGNAL (simulationUpdated(double)), this, SLOT (update(double)));
 
     // Shortcuts
     CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
@@ -399,7 +401,7 @@ void SceneWidget::settingChanged (const CSMPrefs::Setting *setting)
     }
     else if (*setting=="Rendering/framerate-limit")
     {
-        CompositeOsgRenderer::get().setRunMaxFrameRate(setting->toInt());
+        mRenderer->setRunMaxFrameRate(setting->toInt());
     }
     else if (*setting=="Rendering/camera-fov" ||
              *setting=="Rendering/camera-ortho" ||
@@ -459,3 +461,9 @@ void SceneWidget::selectNavigationMode (const std::string& mode)
 }
 
 }
+
+/* */
+
+
+
+/* */

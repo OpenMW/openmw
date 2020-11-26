@@ -14,6 +14,8 @@
 #include "lightingnight.hpp"
 #include "lightingbright.hpp"
 
+class osgQOpenGLWidget;
+class CompositeOsgRenderer;
 
 namespace Resource
 {
@@ -61,6 +63,8 @@ namespace CSVRender
 
         protected:
 
+            osgQOpenGLWidget* mWidget;
+            CompositeOsgRenderer* mRenderer;
             osg::ref_ptr<osgViewer::View> mView;
             osg::ref_ptr<osg::Group> mRootNode;
 

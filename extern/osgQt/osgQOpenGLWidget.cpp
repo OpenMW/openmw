@@ -1,7 +1,6 @@
 #include "osgQOpenGLWidget"
 #include "CompositeOsgRenderer"
 
-#include <iostream>
 #include <mutex>
 
 #include <osgViewer/View>
@@ -19,6 +18,8 @@
 osgQOpenGLWidget::osgQOpenGLWidget(QWidget* parent)
     : QOpenGLWidget(parent)
 {
+    m_renderer = new CompositeOsgRenderer(this);
+    setMouseTracking(true);
 }
 
 osgQOpenGLWidget::osgQOpenGLWidget(osg::ArgumentParser* arguments,
@@ -26,11 +27,12 @@ osgQOpenGLWidget::osgQOpenGLWidget(osg::ArgumentParser* arguments,
     QOpenGLWidget(parent),
     _arguments(arguments)
 {
-
+    m_renderer = new CompositeOsgRenderer(this);
 }
 
 osgQOpenGLWidget::~osgQOpenGLWidget()
 {
+    if (m_renderer) delete m_renderer;
 }
 
 osgViewer::View* osgQOpenGLWidget::getOsgView(unsigned i)
@@ -48,7 +50,6 @@ std::mutex* osgQOpenGLWidget::mutex()
 void osgQOpenGLWidget::initializeGL()
 {
     // Initializes OpenGL function resolution for the current context.
-    std::cout << "osgQOpenGLWidget::initializeGL" << std::endl;
     initializeOpenGLFunctions();
     createRenderer();
     emit initialized();
@@ -65,7 +66,10 @@ void osgQOpenGLWidget::paintGL()
     std::scoped_lock locker(_osgMutex);
 	if (_isFirstFrame) {
 		_isFirstFrame = false;
-		//m_renderer->getView(?)->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
+        for (unsigned int i = 0; i < m_renderer->getNumViews(); ++i)
+        {
+		    m_renderer->getView(i)->getCamera()->getGraphicsContext()->setDefaultFboId(defaultFramebufferObject());
+        }
 	}
 	m_renderer->frame();
 }
@@ -79,16 +83,12 @@ void osgQOpenGLWidget::setDefaultDisplaySettings()
 
 CompositeOsgRenderer* osgQOpenGLWidget::getCompositeViewer()
 {
-    return m_renderer;
+    if (m_renderer) return m_renderer;
+    return nullptr;
 }
 
 void osgQOpenGLWidget::setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb)
 {
-    if (!m_renderer)
-    {
-        std::cout << "osgQOpenGLWidget::setGraphicsWindowEmbedded creating m_renderer " << std::endl;
-        m_renderer = new CompositeOsgRenderer(this);
-    }
     if (m_renderer) m_renderer->setGraphicsWindowEmbedded(osgWinEmb);
 }
 
@@ -100,11 +100,7 @@ void osgQOpenGLWidget::createRenderer()
 
     int width = 640;
     int height = 480;
-    if ( QWidget* widget = dynamic_cast<QWidget*> (parent()) )
-    {
-        width = widget->width();
-        height = widget->height();
-    }
-    std::cout << "osgQOpenGLWidget::createRenderer() width " << width << " height " << height << std::endl;
+    width = this->width();
+    height = this->height();
     m_renderer->setupOSG(width, height);
 }

@@ -41,25 +41,11 @@
 CompositeOsgRenderer::CompositeOsgRenderer(QObject* parent)
     : QObject(parent), osgViewer::CompositeViewer(), mSimulationTime(0.0)
 {
-    //    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
-    //                     [this]()
-    //    {
-    //        _applicationAboutToQuit = true;
-    //        killTimer(_timerId);
-    //        _timerId = 0;
-    //    });
 }
 
 CompositeOsgRenderer::CompositeOsgRenderer(osg::ArgumentParser* arguments, QObject* parent)
     : QObject(parent), osgViewer::CompositeViewer(*arguments), mSimulationTime(0.0)
 {
-    //    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
-    //                     [this]()
-    //    {
-    //        _applicationAboutToQuit = true;
-    //        killTimer(_timerId);
-    //        _timerId = 0;
-    //    });
 }
 
 CompositeOsgRenderer::~CompositeOsgRenderer()
@@ -120,140 +106,30 @@ void CompositeOsgRenderer::setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::Gra
 
 void CompositeOsgRenderer::setupOSG(int windowWidth, int windowHeight)
 {
-    for(RefViews::iterator itr = _views.begin();
-        itr != _views.end();
-        ++itr)
-    {
-        osgViewer::View* view = itr->get();
-        if(view)
-        {
-            m_osgInitialized = true;
-            //m_osgWinEmb = new osgViewer::GraphicsWindowEmbedded(0, 0, windowWidth, windowHeight);
+    m_osgInitialized = true;
 
-            // make sure the event queue has the correct window rectangle size and input range
-            m_osgWinEmb->getEventQueue()->syncWindowRectangleWithGraphicsContext();
-            view->getCamera()->setViewport(new osg::Viewport(0, 0, windowWidth, windowHeight));
-            view->getCamera()->setGraphicsContext(m_osgWinEmb.get());
+    m_osgWinEmb->getEventQueue()->syncWindowRectangleWithGraphicsContext();
+    // disable key event (default is Escape key) that the viewer checks on each
+    // frame to see
+    // if the viewer's done flag should be set to signal end of viewers main
+    // loop.
+    setKeyEventSetsDone(0);
+    setReleaseContextAtEndOfFrameHint(false);
+    setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
 
-            // disable key event (default is Escape key) that the viewer checks on each
-            // frame to see
-            // if the viewer's done flag should be set to signal end of viewers main
-            // loop.
-            setKeyEventSetsDone(0);
-            setReleaseContextAtEndOfFrameHint(false);
-            setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+    setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
-            setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
+    connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
+    mTimer.start( 10 );
 
-            connect( &mTimer, SIGNAL(timeout()), this, SLOT(update()) );
-            mTimer.start( 10 );
+    /*int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
+    setRunMaxFrameRate(frameRateLimit);*/
 
-            /*int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
-            setRunMaxFrameRate(frameRateLimit);*/
-
-            osgViewer::CompositeViewer::Windows windows;
-            getWindows(windows);
-
-            _timerId = startTimer(10, Qt::PreciseTimer);
-            _lastFrameStartTime.setStartTick(0);
-        }
-    }
-}
-
-bool CompositeOsgRenderer::checkEvents()
-{
-    for(RefViews::iterator itr = _views.begin();
-        itr != _views.end();
-        ++itr)
-    {
-        osgViewer::View* view = itr->get();
-        if(view)
-        {
-            // check events from any attached sources
-            for(osgViewer::View::Devices::iterator eitr = view->getDevices().begin();
-                eitr != view->getDevices().end();
-                ++eitr)
-            {
-                osgGA::Device* es = eitr->get();
-
-                if(es->getCapabilities() & osgGA::Device::RECEIVE_EVENTS)
-                {
-                    if(es->checkEvents()) return true;
-                }
-
-            }
-        }
-    }
-
-    // get events from all windows attached to Viewer.
-    Windows windows;
+    osgViewer::CompositeViewer::Windows windows;
     getWindows(windows);
 
-    for(Windows::iterator witr = windows.begin();
-        witr != windows.end();
-        ++witr)
-    {
-        if((*witr)->checkEvents())
-            return true;
-    }
-
-    return false;
-}
-
-CompositeOsgRenderer &CompositeOsgRenderer::get()
-{
-    static CompositeOsgRenderer sThis;
-    return sThis;
-}
-
-bool CompositeOsgRenderer::checkNeedToDoFrame()
-{
-    // check if any event handler has prompted a redraw
-    if(_requestRedraw)
-        return true;
-
-    if(_requestContinousUpdate)
-        return true;
-
-    for(RefViews::iterator itr = _views.begin();
-        itr != _views.end();
-        ++itr)
-    {
-        osgViewer::View* view = itr->get();
-        if(view)
-        {
-            // check if the view needs to update the scene graph
-            // this check if camera has update callback and if scene requires to update scene graph
-            if(view->requiresUpdateSceneGraph())
-                return true;
-
-            // check if the database pager needs to update the scene
-            if(view->getDatabasePager()->requiresUpdateSceneGraph())
-                return true;
-
-            // check if the image pager needs to update the scene
-            if(view->getImagePager()->requiresUpdateSceneGraph())
-                return true;
-
-
-            // check if the scene needs to be redrawn
-            if(view->requiresRedraw())
-                return true;
-        }
-    }
-
-    // check if events are available and need processing
-    if(checkEvents())
-        return true;
-
-    // and check again if any event handler has prompted a redraw
-    if(_requestRedraw)
-        return true;
-
-    if(_requestContinousUpdate)
-        return true;
-
-    return false;
+    _timerId = startTimer(10, Qt::PreciseTimer);
+    _lastFrameStartTime.setStartTick(0);
 }
 
 // called from ViewerWidget paintGL() method
@@ -308,34 +184,4 @@ void CompositeOsgRenderer::frame(double simulationTime)
     updateTraversal();
     //    renderingTraversals();
 #endif
-}
-
-/*void CompositeOsgRenderer::requestRedraw()
-{
-    for(RefViews::iterator itr = _views.begin();
-        itr != _views.end();
-        ++itr)
-    {
-        osgViewer::View* view = itr->get();
-        if(view)
-        {
-            view->requestRedraw();
-        }
-    }
-}*/
-
-void CompositeOsgRenderer::timerEvent(QTimerEvent* /*event*/)
-{
-    // application is about to quit, just return
-    if(_applicationAboutToQuit)
-    {
-        return;
-    }
-
-    // ask ViewerWidget to update 3D view
-    if(getRunFrameScheme() != osgViewer::ViewerBase::ON_DEMAND ||
-       checkNeedToDoFrame())
-    {
-        update();
-    }
 }

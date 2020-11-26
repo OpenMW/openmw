@@ -26,7 +26,6 @@ class CompositeOsgRenderer : public QObject, public osgViewer::CompositeViewer
 {
     bool                                       m_osgInitialized {false};
     osg::ref_ptr<osgViewer::GraphicsWindow>    m_osgWinEmb;
-    bool                                       m_continuousUpdate {true};
 
     int                                        _timerId{0};
     osg::Timer                                 _lastFrameStartTime;
@@ -44,38 +43,18 @@ public:
 
     ~CompositeOsgRenderer() override;
 
-    bool continuousUpdate() const
-    {
-        return m_continuousUpdate;
-    }
-    void setContinuousUpdate(bool continuousUpdate)
-    {
-        m_continuousUpdate = continuousUpdate;
-    }
-
     virtual void resize(int windowWidth, int windowHeight);
 
     void setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb);
 
     void setupOSG(int windowWidth, int windowHeight);
 
-    // overrided from osgViewer::CompositeViewer
-    virtual bool checkNeedToDoFrame() override;
-
     // overrided from osgViewer::ViewerBase
     void frame(double simulationTime = USE_REFERENCE_TIME) override;
-
-    // overrided from osgViewer::View
-    //void requestRedraw() override;
-    // overrided from osgViewer::CompositeViewer
-    bool checkEvents() override;
-
-    static CompositeOsgRenderer& get();
 
     QTimer mTimer;
 
 protected:
-    void timerEvent(QTimerEvent* event) override; // which one does this override?
 
 public slots:
     void update();
