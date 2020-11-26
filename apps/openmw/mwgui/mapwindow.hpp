@@ -107,9 +107,13 @@ namespace MWGui
         };
 
     protected:
+        void updateLocalMap();
+
+        float mLocalMapZoom = 1.f;
         MWRender::LocalMap* mLocalMapRender;
 
-        int mCurX, mCurY;
+        int mCurX, mCurY;   //the position of the active cell on the global map (in cell coords)
+        osg::Vec2f mCurPos;   //the position of the player in the world (in cell coords)
         bool mInterior;
         MyGUI::ScrollView* mLocalMap;
         MyGUI::ImageBox* mCompass;
@@ -153,9 +157,10 @@ namespace MWGui
         MyGUI::IntPoint getMarkerPosition (float worldX, float worldY, MarkerUserData& markerPos) const;
         MyGUI::IntCoord getMarkerCoordinates(float worldX, float worldY, MarkerUserData& markerPos, size_t markerSize) const;
         MyGUI::Widget* createDoorMarker(const std::string& name, const MyGUI::VectorString& notes, float x, float y) const;
+        MyGUI::IntCoord getMarkerCoordinates(MyGUI::Widget* widget, size_t markerSize) const;
 
         virtual void notifyPlayerUpdate() {}
-        void centerView();
+        virtual void centerView();
         virtual void notifyMapChanged() {}
 
         virtual void customMarkerCreated(MyGUI::Widget* marker) {}
@@ -302,7 +307,7 @@ namespace MWGui
 
         void notifyPlayerUpdate() override;
 
-        void centerView();
+        void centerView() override;
     };
 }
 #endif
