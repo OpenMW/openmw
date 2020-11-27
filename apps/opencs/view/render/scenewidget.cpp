@@ -45,21 +45,12 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
     ds->setNvOptimusEnablement(1);
     ds->setStereo(false);
-    ds->setNumMultiSamples(8);
+    //ds->setNumMultiSamples(8);
 
     QSurfaceFormat format = QSurfaceFormat::defaultFormat();
 
-#ifdef OSG_GL3_AVAILABLE
-    format.setVersion(3, 2);
-    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(2, 1);
     format.setRenderableType(QSurfaceFormat::OpenGL);
-    format.setOption(QSurfaceFormat::DebugContext);
-#else
-    format.setVersion(2, 0);
-    format.setProfile(QSurfaceFormat::CompatibilityProfile);
-    format.setRenderableType(QSurfaceFormat::OpenGL);
-    format.setOption(QSurfaceFormat::DebugContext);
-#endif
     format.setDepthBufferSize(24);
     //format.setAlphaBufferSize(8);
     format.setSamples(ds->getMultiSamples());

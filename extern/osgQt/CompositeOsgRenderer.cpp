@@ -111,6 +111,7 @@ void CompositeOsgRenderer::setupOSG(int windowWidth, int windowHeight)
     setKeyEventSetsDone(0);
     setReleaseContextAtEndOfFrameHint(false);
     setThreadingModel(osgViewer::CompositeViewer::SingleThreaded);
+    setUseConfigureAffinity(false);
 
     setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
 
