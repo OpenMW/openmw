@@ -14,7 +14,7 @@
 #include "objectcache.hpp"
 #include "scenemanager.hpp"
 
-namespace OsgAOpenMW
+namespace Resource
 {
 
     RetrieveAnimationsVisitor::RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager) : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mTarget(target), mAnimationManager(animationManager) {}
@@ -23,9 +23,9 @@ namespace OsgAOpenMW
     {
         if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("root"))
             {
-                osg::ref_ptr<OsgaController::KeyframeController> callback = new OsgaController::KeyframeController();
+                osg::ref_ptr<SceneUtil::OsgAnimationController> callback = new SceneUtil::OsgAnimationController();
 
-                std::vector<OsgaController::EmulatedAnimation> emulatedAnimations;
+                std::vector<SceneUtil::EmulatedAnimation> emulatedAnimations;
 
                 for (auto animation : mAnimationManager->getAnimationList())
                 {
@@ -63,7 +63,7 @@ namespace OsgAOpenMW
                         mTarget.mTextKeys.emplace(startTime, std::move(loopstart));
                         mTarget.mTextKeys.emplace(stopTime, std::move(loopstop));
 
-                        OsgaController::EmulatedAnimation emulatedAnimation;
+                        SceneUtil::EmulatedAnimation emulatedAnimation;
                         emulatedAnimation.mStartTime = startTime;
                         emulatedAnimation.mStopTime = stopTime;
                         emulatedAnimation.mName = animationName;
@@ -75,14 +75,6 @@ namespace OsgAOpenMW
             }
 
         traverse(node);
-    }
-
-    std::string getFileExtension(const std::string& file)
-    {
-        size_t extPos = file.find_last_of('.');
-        if (extPos != std::string::npos && extPos+1 < file.size())
-            return file.substr(extPos+1);
-        return std::string();
     }
 }
 
@@ -110,7 +102,7 @@ namespace Resource
         else
         {
             osg::ref_ptr<SceneUtil::KeyframeHolder> loaded (new SceneUtil::KeyframeHolder);
-            std::string ext = OsgAOpenMW::getFileExtension(normalized);
+            std::string ext = Resource::getFileExtension(normalized);
             if (ext == "kf")
             {
                 NifOsg::Loader::loadKf(Nif::NIFFilePtr(new Nif::NIFFile(mVFS->getNormalized(normalized), normalized)), *loaded.get());
@@ -121,7 +113,7 @@ namespace Resource
                 osg::ref_ptr<osgAnimation::BasicAnimationManager> bam = dynamic_cast<osgAnimation::BasicAnimationManager*> (scene->getUpdateCallback());
                 if (bam)
                 {
-                    OsgAOpenMW::RetrieveAnimationsVisitor rav(*loaded.get(), bam);
+                    Resource::RetrieveAnimationsVisitor rav(*loaded.get(), bam);
                     scene->accept(rav);
                 }
             }

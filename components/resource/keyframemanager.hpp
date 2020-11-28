@@ -9,7 +9,7 @@
 
 #include "resourcemanager.hpp"
 
-namespace OsgAOpenMW
+namespace Resource
 {
     /// @brief extract animations to OpenMW's animation system
     class RetrieveAnimationsVisitor : public osg::NodeVisitor
@@ -24,8 +24,6 @@ namespace OsgAOpenMW
             osg::ref_ptr<osgAnimation::BasicAnimationManager> mAnimationManager;
 
     };
-
-    std::string getFileExtension(const std::string& file);
 }
 
 namespace Resource

@@ -21,7 +21,7 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>
 
-namespace OsgaController
+namespace SceneUtil
 {
     LinkVisitor::LinkVisitor() : osg::NodeVisitor( TRAVERSE_ALL_CHILDREN )
     {
@@ -101,14 +101,14 @@ namespace OsgaController
         apply(static_cast<osg::Node&>(node));
     }
 
-    KeyframeController::KeyframeController(const KeyframeController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
+    OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
     , mMergedAnimationTracks(copy.mMergedAnimationTracks)
     , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
     }
 
-    osg::Vec3f KeyframeController::getTranslation(float time) const
+    osg::Vec3f OsgAnimationController::getTranslation(float time) const
     {
         osg::Vec3f translationValue;
         std::string animationName;
@@ -148,7 +148,7 @@ namespace OsgaController
         return osg::Vec3f();
     }
 
-    void KeyframeController::update(float time, std::string animationName)
+    void OsgAnimationController::update(float time, std::string animationName)
     {
         for (const osg::ref_ptr<Resource::Animation> mergedAnimationTrack : mMergedAnimationTracks)
         {
@@ -156,7 +156,7 @@ namespace OsgaController
         }
     }
 
-    void KeyframeController::operator() (osg::Node* node, osg::NodeVisitor* nv)
+    void OsgAnimationController::operator() (osg::Node* node, osg::NodeVisitor* nv)
     {
         if (hasInput())
         {
@@ -185,12 +185,12 @@ namespace OsgaController
         traverse(node, nv);
     }
 
-    void KeyframeController::setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations)
+    void OsgAnimationController::setEmulatedAnimations(std::vector<EmulatedAnimation> emulatedAnimations)
     {
         mEmulatedAnimations = emulatedAnimations;
     }
 
-    void KeyframeController::addMergedAnimationTrack(osg::ref_ptr<Resource::Animation> animationTrack)
+    void OsgAnimationController::addMergedAnimationTrack(osg::ref_ptr<Resource::Animation> animationTrack)
     {
         mMergedAnimationTracks.emplace_back(animationTrack);
     }

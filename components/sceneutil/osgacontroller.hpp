@@ -16,7 +16,7 @@
 #include <components/sceneutil/keyframe.hpp>
 #include <components/resource/animation.hpp>
 
-namespace OsgaController
+namespace SceneUtil
 {
     struct EmulatedAnimation
     {
@@ -44,15 +44,15 @@ namespace OsgaController
             Resource::Animation* mAnimation;
     };
 
-    class KeyframeController : public SceneUtil::KeyframeController
+    class OsgAnimationController : public SceneUtil::KeyframeController
     {
     public:
         /// @brief Handles the animation for osgAnimation formats
-        KeyframeController() {};
+        OsgAnimationController() {};
 
-        KeyframeController(const KeyframeController& copy, const osg::CopyOp& copyop);
+        OsgAnimationController(const OsgAnimationController& copy, const osg::CopyOp& copyop);
 
-        META_Object(OsgaController, KeyframeController)
+        META_Object(SceneUtil, OsgAnimationController)
 
         /// @brief Handles the location of the instance
         osg::Vec3f getTranslation(float time) const override;
