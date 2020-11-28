@@ -139,7 +139,7 @@ namespace
         }
     };
 
-    void extractTextKeys(const Nif::NiTextKeyExtraData *tk, NifOsg::TextKeyMap &textkeys)
+    void extractTextKeys(const Nif::NiTextKeyExtraData *tk, SceneUtil::TextKeyMap &textkeys)
     {
         for(size_t i = 0;i < tk->list.size();i++)
         {
@@ -234,7 +234,7 @@ namespace NifOsg
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
-        static void loadKf(Nif::NIFFilePtr nif, KeyframeHolder& target)
+        static void loadKf(Nif::NIFFilePtr nif, SceneUtil::KeyframeHolder& target)
         {
             const Nif::NiSequenceStreamHelper *seq = nullptr;
             const size_t numRoots = nif->numRoots();
@@ -284,7 +284,7 @@ namespace NifOsg
                 if (key->data.empty() && key->interpolator.empty())
                     continue;
 
-                osg::ref_ptr<NifOsg::KeyframeController> callback(handleKeyframeController(key));
+                osg::ref_ptr<SceneUtil::KeyframeController> callback(handleKeyframeController(key));
                 callback->setFunction(std::shared_ptr<NifOsg::ControllerFunction>(new NifOsg::ControllerFunction(key)));
 
                 if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
@@ -305,7 +305,7 @@ namespace NifOsg
             if (!nifNode)
                 nif->fail("Found no root nodes");
 
-            osg::ref_ptr<TextKeyMapHolder> textkeys (new TextKeyMapHolder);
+            osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys (new SceneUtil::TextKeyMapHolder);
 
             osg::ref_ptr<osg::Node> created = handleNode(nifNode, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
 
@@ -353,10 +353,10 @@ namespace NifOsg
                     else if (props[i].getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         if (props[i].getPtr()->recIndex == mFirstRootTextureIndex)
-                            applyTo->setUserValue("overrideFx", 1);                
+                            applyTo->setUserValue("overrideFx", 1);
                     }
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
-                }              
+                }
             }
         }
 
@@ -514,7 +514,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, osg::Group* parentNode, Resource::ImageManager* imageManager,
-                                std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
+                                std::vector<unsigned int> boundTextures, int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys, osg::Node* rootNode=nullptr)
         {
             if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return nullptr;
@@ -1197,7 +1197,7 @@ namespace NifOsg
                         for (const auto& strip : data->strips)
                         {
                             if (strip.size() >= 3)
-                                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), 
+                                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
                                                                                     (unsigned short*)strip.data()));
                         }
                     }
@@ -1929,7 +1929,7 @@ namespace NifOsg
         return impl.load(file, imageManager);
     }
 
-    void Loader::loadKf(Nif::NIFFilePtr kf, KeyframeHolder& target)
+    void Loader::loadKf(Nif::NIFFilePtr kf, SceneUtil::KeyframeHolder& target)
     {
         LoaderImpl impl(kf->getFilename(), kf->getVersion(), kf->getUserVersion(), kf->getBethVersion());
         impl.loadKf(kf, target);

@@ -259,7 +259,7 @@ if(NOT HAVE_STDINT_H)
 endif()
 
 
-find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX osgShadow)
+find_package(OpenSceneGraph 3.3.4 REQUIRED osgDB osgViewer osgText osgGA osgParticle osgUtil osgFX osgShadow osgAnimation)
 include_directories(SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS})
 
 set(USED_OSG_PLUGINS
