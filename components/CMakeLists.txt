@@ -239,6 +239,10 @@ target_link_libraries(components
     RecastNavigation::Recast
     )
 
+if (BULLET_USE_DOUBLES AND UNIX AND NOT APPLE)
+    target_link_libraries(components BulletCollision-float64 LinearMath-float64)
+endif()
+
 if (WIN32)
     target_link_libraries(components
     ${Boost_LOCALE_LIBRARY}
