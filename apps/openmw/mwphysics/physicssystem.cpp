@@ -877,9 +877,12 @@ namespace MWPhysics
         mWantJump = mPtr.getClass().getMovementSettings(mPtr).mPosition[2] != 0;
         mIsDead = mPtr.getClass().getCreatureStats(mPtr).isDead();
         mWasOnGround = actor->getOnGround();
+    }
 
+    void ActorFrameData::updatePosition()
+    {
         mActorRaw->updatePosition();
-        mOrigin = mActorRaw->getNextPosition();
+        mOrigin = mActorRaw->getSimulationPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {
