@@ -231,6 +231,9 @@ namespace NifOsg
         size_t mFirstRootTextureIndex = -1;
         bool mFoundFirstRootTexturingProperty = false;
 
+        bool mHasNightDayLabel = false;
+        bool mHasHerbalismLabel = false;
+
         // This is used to queue emitters that weren't attached to their node yet.
         std::vector<std::pair<size_t, osg::ref_ptr<Emitter>>> mEmitterQueue;
 
@@ -294,20 +297,31 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Node> load(Nif::NIFFilePtr nif, Resource::ImageManager* imageManager)
         {
-            const Nif::Node* nifNode = nullptr;
             const size_t numRoots = nif->numRoots();
+            std::vector<const Nif::Node*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record* r = nif->getRoot(i);
+                const Nif::Node* nifNode = nullptr;
                 if ((nifNode = dynamic_cast<const Nif::Node*>(r)))
-                    break;
+                    roots.emplace_back(nifNode);
             }
-            if (!nifNode)
+            if (roots.empty())
                 nif->fail("Found no root nodes");
 
             osg::ref_ptr<SceneUtil::TextKeyMapHolder> textkeys (new SceneUtil::TextKeyMapHolder);
 
-            osg::ref_ptr<osg::Node> created = handleNode(nifNode, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
+            osg::ref_ptr<osg::Group> created(new osg::Group);
+            created->setDataVariance(osg::Object::STATIC);
+            for (const Nif::Node* root : roots)
+            {
+                auto node = handleNode(root, nullptr, imageManager, std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
+                created->addChild(node);
+            }
+            if (mHasNightDayLabel)
+                created->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
+            if (mHasHerbalismLabel)
+                created->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
 
             // Attach particle emitters to their nodes which should all be loaded by now.
             handleQueuedParticleEmitters(created, nif);
@@ -315,18 +329,11 @@ namespace NifOsg
             if (nif->getUseSkinning())
             {
                 osg::ref_ptr<SceneUtil::Skeleton> skel = new SceneUtil::Skeleton;
-
-                osg::Group* root = created->asGroup();
-                if (root && root->getDataVariance() == osg::Object::STATIC && !root->asTransform())
-                {
-                    skel->setStateSet(root->getStateSet());
-                    skel->setName(root->getName());
-                    for (unsigned int i=0; i<root->getNumChildren(); ++i)
-                        skel->addChild(root->getChild(i));
-                    root->removeChildren(0, root->getNumChildren());
-                }
-                else
-                    skel->addChild(created);
+                skel->setStateSet(created->getStateSet());
+                skel->setName(created->getName());
+                for (unsigned int i=0; i < created->getNumChildren(); ++i)
+                    skel->addChild(created->getChild(i));
+                created->removeChildren(0, created->getNumChildren());
                 created = skel;
             }
 
@@ -632,7 +639,7 @@ namespace NifOsg
             }
 
             if(nifNode->recType == Nif::RC_NiAutoNormalParticles || nifNode->recType == Nif::RC_NiRotatingParticles)
-                handleParticleSystem(nifNode, node, composite, animflags, rootNode);
+                handleParticleSystem(nifNode, node, composite, animflags);
 
             if (composite->getNumControllers() > 0)
             {
@@ -662,10 +669,10 @@ namespace NifOsg
                 const Nif::NiSwitchNode* niSwitchNode = static_cast<const Nif::NiSwitchNode*>(nifNode);
                 osg::ref_ptr<osg::Switch> switchNode = handleSwitchNode(niSwitchNode);
                 node->addChild(switchNode);
-                if (niSwitchNode->name == Constants::NightDayLabel && !SceneUtil::hasUserDescription(rootNode, Constants::NightDayLabel))
-                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::NightDayLabel);
-                else if (niSwitchNode->name == Constants::HerbalismLabel && !SceneUtil::hasUserDescription(rootNode, Constants::HerbalismLabel))
-                    rootNode->getOrCreateUserDataContainer()->addDescription(Constants::HerbalismLabel);
+                if (niSwitchNode->name == Constants::NightDayLabel)
+                    mHasNightDayLabel = true;
+                else if (niSwitchNode->name == Constants::HerbalismLabel)
+                    mHasHerbalismLabel = true;
 
                 currentNode = switchNode;
             }
@@ -1023,7 +1030,7 @@ namespace NifOsg
             return emitter;
         }
 
-        void handleQueuedParticleEmitters(osg::Node* rootNode, Nif::NIFFilePtr nif)
+        void handleQueuedParticleEmitters(osg::Group* rootNode, Nif::NIFFilePtr nif)
         {
             for (const auto& emitterPair : mEmitterQueue)
             {
@@ -1044,7 +1051,7 @@ namespace NifOsg
             mEmitterQueue.clear();
         }
 
-        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags, osg::Node* rootNode)
+        void handleParticleSystem(const Nif::Node *nifNode, osg::Group *parentNode, SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             osg::ref_ptr<ParticleSystem> partsys (new ParticleSystem);
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);

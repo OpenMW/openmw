@@ -58,6 +58,7 @@
     Bug #5557: Diagonal movement is noticeably slower with analogue stick
     Bug #5588: Randomly clicking on the journal's right-side page when it's empty shows random topics
     Bug #5603: Setting constant effect cast style doesn't correct effects view
+    Bug #5604: Only one valid NIF root node is loaded from a single file
     Bug #5611: Usable items with "0 Uses" should be used only once
     Bug #5622: Can't properly interact with the console when in pause menu
     Bug #5633: Damage Spells in effect before god mode is enabled continue to hurt the player character and can kill them
