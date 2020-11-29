@@ -37,9 +37,9 @@ namespace MWGui
         , mKey(std::vector<keyData>(10))
         , mSelected(nullptr)
         , mActivated(nullptr)
-        , mAssignDialog(0)
-        , mItemSelectionDialog(0)
-        , mMagicSelectionDialog(0)
+        , mAssignDialog(nullptr)
+        , mItemSelectionDialog(nullptr)
+        , mMagicSelectionDialog(nullptr)
 
     {
         getWidget(mOkButton, "OKButton");

@@ -24,7 +24,7 @@ class LineEdit : public QLineEdit
     QString mPlaceholderText;
 
 public:
-    LineEdit(QWidget *parent = 0);
+    LineEdit(QWidget *parent = nullptr);
 
 protected:
     void resizeEvent(QResizeEvent *) override;

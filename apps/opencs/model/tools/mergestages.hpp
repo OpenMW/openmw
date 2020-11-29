@@ -82,7 +82,7 @@ namespace CSMTools
         const CSMWorld::Record<RecordType>& record = source.getRecord (stage);
 
         if (!record.isDeleted())
-            target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_ModifiedOnly, 0, &record.get()));
+            target.appendRecord (CSMWorld::Record<RecordType> (CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &record.get()));
     }
 
     class MergeRefIdsStage : public CSMDoc::Stage

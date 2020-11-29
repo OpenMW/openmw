@@ -413,7 +413,7 @@ osg::Vec3f CSVRender::Object::getMarkerPosition (float x, float y, float z, int 
 
 CSVRender::Object::Object (CSMWorld::Data& data, osg::Group* parentNode,
     const std::string& id, bool referenceable, bool forceBaseToZero)
-: mData (data), mBaseNode(0), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
+: mData (data), mBaseNode(nullptr), mSelected(false), mParentNode(parentNode), mResourceSystem(data.getResourceSystem().get()), mForceBaseToZero (forceBaseToZero),
   mScaleOverride (1), mOverrideFlags (0), mSubMode (-1), mMarkerTransparency(0.5f)
 {
     mRootNode = new osg::PositionAttitudeTransform;

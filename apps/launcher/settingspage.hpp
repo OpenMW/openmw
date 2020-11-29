@@ -24,7 +24,7 @@ namespace Launcher
 
     public:
         SettingsPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
-                      Config::LauncherSettings &launcherSettings, MainDialog *parent = 0);
+                      Config::LauncherSettings &launcherSettings, MainDialog *parent = nullptr);
         ~SettingsPage();
 
         void saveSettings();

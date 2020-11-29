@@ -27,9 +27,9 @@ namespace CSVRender
         : mData(data)
         , mId(id)
         , mParentNode(cellNode)
-        , mWaterTransform(0)
-        , mWaterNode(0)
-        , mWaterGeometry(0)
+        , mWaterTransform(nullptr)
+        , mWaterNode(nullptr)
+        , mWaterGeometry(nullptr)
         , mDeleted(false)
         , mExterior(false)
         , mHasWater(false)
@@ -137,7 +137,7 @@ namespace CSVRender
         if (mWaterGeometry)
         {
             mWaterNode->removeDrawable(mWaterGeometry);
-            mWaterGeometry = 0;
+            mWaterGeometry = nullptr;
         }
 
         if (mDeleted || !mHasWater)

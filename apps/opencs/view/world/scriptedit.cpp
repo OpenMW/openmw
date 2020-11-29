@@ -47,7 +47,7 @@ CSVWorld::ScriptEdit::ScriptEdit(
 ) : QPlainTextEdit(parent),
     mChangeLocked(0),
     mShowLineNum(false),
-    mLineNumberArea(0),
+    mLineNumberArea(nullptr),
     mDefaultFont(font()),
     mMonoFont(QFont("Monospace")),
     mTabCharCount(4),
@@ -314,7 +314,7 @@ void CSVWorld::ScriptEdit::markOccurrences()
         // prevent infinite recursion with cursor.select(),
         // which ends up calling this function again
         // could be fixed with blockSignals, but mDocument is const
-        disconnect(this, SIGNAL(cursorPositionChanged()), this, 0);
+        disconnect(this, SIGNAL(cursorPositionChanged()), this, nullptr);
         cursor.select(QTextCursor::WordUnderCursor);
         connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(markOccurrences()));
 

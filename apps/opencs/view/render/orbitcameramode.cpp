@@ -13,7 +13,7 @@ namespace CSVRender
         QWidget* parent)
         : ModeButton(icon, tooltip, parent)
         , mWorldspaceWidget(worldspaceWidget)
-        , mCenterOnSelection(0)
+        , mCenterOnSelection(nullptr)
     {
         mCenterShortcut = new CSMPrefs::Shortcut("orbit-center-selection", worldspaceWidget);
         mCenterShortcut->enable(false);
@@ -35,7 +35,7 @@ namespace CSVRender
 
     void OrbitCameraMode::deactivate(CSVWidget::SceneToolbar* toolbar)
     {
-        mCenterShortcut->associateAction(0);
+        mCenterShortcut->associateAction(nullptr);
         mCenterShortcut->enable(false);
     }
 

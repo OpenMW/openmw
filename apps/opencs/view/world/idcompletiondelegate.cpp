@@ -74,7 +74,7 @@ QWidget *CSVWorld::IdCompletionDelegate::createEditor(QWidget *parent,
             {
                 return new CSVWidget::DropLineEdit(display, parent);
             }
-            default: return 0; // The rest of them can't be edited anyway
+            default: return nullptr; // The rest of them can't be edited anyway
         }
     }
 

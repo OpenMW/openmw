@@ -33,7 +33,7 @@ void CSVWidget::SceneToolMode::adjustToolTip (const ModeButton *activeMode)
 
     toolTip += "<p>(left click to change mode)";
 
-    if (createContextMenu (0))
+    if (createContextMenu (nullptr))
         toolTip += "<br>(right click to access context menu)";
 
     setToolTip (toolTip);
@@ -62,7 +62,7 @@ void CSVWidget::SceneToolMode::setButton (std::map<ModeButton *, std::string>::i
 
 CSVWidget::SceneToolMode::SceneToolMode (SceneToolbar *parent, const QString& toolTip)
 : SceneTool (parent), mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()),
-  mToolTip (toolTip), mFirst (0), mCurrent (0), mToolbar (parent)
+  mToolTip (toolTip), mFirst (nullptr), mCurrent (nullptr), mToolbar (parent)
 {
     mPanel = new QFrame (this, Qt::Popup);
 

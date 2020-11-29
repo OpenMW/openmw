@@ -63,7 +63,7 @@ QuadTreeNode::QuadTreeNode(QuadTreeNode* parent, ChildDirection direction, float
     , mCenter(center)
 {
     for (unsigned int i=0; i<4; ++i)
-        mNeighbours[i] = 0;
+        mNeighbours[i] = nullptr;
 }
 
 QuadTreeNode::~QuadTreeNode()

@@ -54,7 +54,7 @@ namespace CSVWidget
 
         public:
 
-            ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = 0);
+            ShapeBrushWindow(CSMDoc::Document& document, QWidget *parent = nullptr);
             void configureButtonInitialSettings(QPushButton *button);
 
             const QString toolTipPoint = "Paint single point";

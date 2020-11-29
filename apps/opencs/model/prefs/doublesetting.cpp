@@ -16,7 +16,7 @@ CSMPrefs::DoubleSetting::DoubleSetting (Category *parent, Settings::Manager *val
   QMutex *mutex, const std::string& key, const std::string& label, double default_)
 : Setting (parent, values, mutex, key, label),
   mPrecision(2), mMin (0), mMax (std::numeric_limits<double>::max()),
-  mDefault (default_), mWidget(0)
+  mDefault (default_), mWidget(nullptr)
 {}
 
 CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setPrecision(int precision)

@@ -71,7 +71,7 @@ struct ExternalClock
 
 struct PacketQueue {
     PacketQueue()
-      : first_pkt(NULL), last_pkt(NULL), flushing(false), nb_packets(0), size(0)
+      : first_pkt(nullptr), last_pkt(nullptr), flushing(false), nb_packets(0), size(0)
     { }
     ~PacketQueue()
     { clear(); }

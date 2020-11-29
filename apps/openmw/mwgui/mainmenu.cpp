@@ -24,7 +24,7 @@ namespace MWGui
     MainMenu::MainMenu(int w, int h, const VFS::Manager* vfs, const std::string& versionDescription)
         : WindowBase("openmw_mainmenu.layout")
         , mWidth (w), mHeight (h)
-        , mVFS(vfs), mButtonBox(0)
+        , mVFS(vfs), mButtonBox(nullptr)
         , mBackground(nullptr)
         , mVideoBackground(nullptr)
         , mVideo(nullptr)

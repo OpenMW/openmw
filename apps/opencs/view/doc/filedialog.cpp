@@ -18,7 +18,7 @@
 #include "adjusterwidget.hpp"
 
 CSVDoc::FileDialog::FileDialog(QWidget *parent) :
-    QDialog(parent), mSelector (0), mAction(ContentAction_Undefined), mFileWidget (0), mAdjusterWidget (0), mDialogBuilt(false)
+    QDialog(parent), mSelector (nullptr), mAction(ContentAction_Undefined), mFileWidget (nullptr), mAdjusterWidget (nullptr), mDialogBuilt(false)
 {
     ui.setupUi (this);
     resize(400, 400);

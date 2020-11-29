@@ -41,7 +41,7 @@ namespace CSVWorld
 
         public:
 
-            ScriptErrorTable (const CSMDoc::Document& document, QWidget *parent = 0);
+            ScriptErrorTable (const CSMDoc::Document& document, QWidget *parent = nullptr);
 
             void update (const std::string& source);
 

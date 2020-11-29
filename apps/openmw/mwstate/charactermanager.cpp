@@ -7,7 +7,7 @@
 
 MWState::CharacterManager::CharacterManager (const boost::filesystem::path& saves,
     const std::string& game)
-: mPath (saves), mCurrent (0), mGame (game)
+: mPath (saves), mCurrent (nullptr), mGame (game)
 {
     if (!boost::filesystem::is_directory (mPath))
     {

@@ -36,7 +36,7 @@ namespace MWGui
     ConsoleInterpreterContext::ConsoleInterpreterContext (Console& console,
         MWWorld::Ptr reference)
     : MWScript::InterpreterContext (
-        reference.isEmpty() ? 0 : &reference.getRefData().getLocals(), reference),
+        reference.isEmpty() ? nullptr : &reference.getRefData().getLocals(), reference),
       mConsole (console)
     {}
 

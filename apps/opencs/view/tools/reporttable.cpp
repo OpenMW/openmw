@@ -25,7 +25,7 @@ namespace CSVTools
     {
         public:
 
-            RichTextDelegate (QObject *parent = 0);
+            RichTextDelegate (QObject *parent = nullptr);
 
             void paint(QPainter *painter, const QStyleOptionViewItem& option,
                 const QModelIndex& index) const override;
@@ -142,7 +142,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     const CSMWorld::UniversalId& id, bool richTextDescription, int refreshState,
     QWidget *parent)
 : CSVWorld::DragRecordTable (document, parent), mModel (document.getReport (id)),
-  mRefreshAction (0), mRefreshState (refreshState)
+  mRefreshAction (nullptr), mRefreshState (refreshState)
 {
     horizontalHeader()->setSectionResizeMode (QHeaderView::Interactive);
     horizontalHeader()->setStretchLastSection (true);
@@ -159,7 +159,7 @@ CSVTools::ReportTable::ReportTable (CSMDoc::Document& document,
     setModel (mProxyModel);
     setColumnHidden (2, true);
 
-    mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (0,
+    mIdTypeDelegate = CSVWorld::IdTypeDelegateFactory().makeDelegate (nullptr,
         mDocument, this);
 
     setItemDelegateForColumn (0, mIdTypeDelegate);

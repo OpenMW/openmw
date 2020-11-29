@@ -290,7 +290,7 @@ void CSMWorld::CreateCommand::undo()
 }
 
 CSMWorld::RevertCommand::RevertCommand (IdTable& model, const std::string& id, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (nullptr)
 {
     setText (("Revert record " + id).c_str());
 
@@ -326,7 +326,7 @@ void CSMWorld::RevertCommand::undo()
 
 CSMWorld::DeleteCommand::DeleteCommand (IdTable& model,
         const std::string& id, CSMWorld::UniversalId::Type type, QUndoCommand* parent)
-: QUndoCommand (parent), mModel (model), mId (id), mOld (0), mType(type)
+: QUndoCommand (parent), mModel (model), mId (id), mOld (nullptr), mType(type)
 {
     setText (("Delete record " + id).c_str());
 

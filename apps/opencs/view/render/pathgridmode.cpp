@@ -27,7 +27,7 @@ namespace CSVRender
             getTooltip(), parent)
         , mDragMode(DragMode_None)
         , mFromNode(0)
-        , mSelectionMode(0)
+        , mSelectionMode(nullptr)
     {
     }
 
@@ -59,7 +59,7 @@ namespace CSVRender
         {
             toolbar->removeTool (mSelectionMode);
             delete mSelectionMode;
-            mSelectionMode = 0;
+            mSelectionMode = nullptr;
         }
     }
 
@@ -214,7 +214,7 @@ namespace CSVRender
             Cell* cell = getWorldspaceWidget().getCell(hit.worldPos);
             if (cell && cell->getPathgrid())
             {
-                PathgridTag* tag = 0;
+                PathgridTag* tag = nullptr;
                 if (hit.tag && (tag = dynamic_cast<PathgridTag*>(hit.tag.get())) && tag->getPathgrid()->getId() == mEdgeId)
                 {
                     unsigned short node = SceneUtil::getPathgridNode(static_cast<unsigned short>(hit.index0));

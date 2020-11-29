@@ -41,7 +41,7 @@ namespace Wizard
             Page_Conclusion
         };
 
-        MainWizard(QWidget *parent = 0);
+        MainWizard(QWidget *parent = nullptr);
         ~MainWizard();
 
         bool findFiles(const QString &name, const QString &path);

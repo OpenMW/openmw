@@ -504,12 +504,12 @@ void CSVRender::Cell::setCellArrows (int mask)
 
         bool enable = mask & direction;
 
-        if (enable!=(mCellArrows[i].get()!=0))
+        if (enable!=(mCellArrows[i].get()!=nullptr))
         {
             if (enable)
                 mCellArrows[i].reset (new CellArrow (mCellNode, direction, mCoordinates));
             else
-                mCellArrows[i].reset (0);
+                mCellArrows[i].reset (nullptr);
         }
     }
 }

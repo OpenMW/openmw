@@ -344,7 +344,7 @@ void Emitter::emitParticles(double dt)
 
     for (int i=0; i<n; ++i)
     {
-        osgParticle::Particle* P = getParticleSystem()->createParticle(0);
+        osgParticle::Particle* P = getParticleSystem()->createParticle(nullptr);
         if (P)
         {
             mPlacer->place(P);

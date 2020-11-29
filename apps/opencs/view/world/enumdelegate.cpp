@@ -71,7 +71,7 @@ QWidget *CSVWorld::EnumDelegate::createEditor(QWidget *parent, const QStyleOptio
     const QModelIndex& index, CSMWorld::ColumnBase::Display display) const
 {
     if (!index.data(Qt::EditRole).isValid() && !index.data(Qt::DisplayRole).isValid())
-        return 0;
+        return nullptr;
 
     QComboBox *comboBox = new QComboBox (parent);
 

@@ -8,7 +8,7 @@
 
 const std::string& MWWorld::Ptr::getTypeName() const
 {
-    if(mRef != 0)
+    if(mRef != nullptr)
         return mRef->mClass->getTypeName();
     throw std::runtime_error("Can't get type name from an empty object.");
 }
@@ -57,7 +57,7 @@ MWWorld::Ptr::operator const void *()
 
 const std::string &MWWorld::ConstPtr::getTypeName() const
 {
-    if(mRef != 0)
+    if(mRef != nullptr)
         return mRef->mClass->getTypeName();
     throw std::runtime_error("Can't get type name from an empty object.");
 }

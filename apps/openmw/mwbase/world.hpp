@@ -180,7 +180,7 @@ namespace MWBase
             virtual char getGlobalVariableType (const std::string& name) const = 0;
             ///< Return ' ', if there is no global variable with this name.
 
-            virtual std::string getCellName (const MWWorld::CellStore *cell = 0) const = 0;
+            virtual std::string getCellName (const MWWorld::CellStore *cell = nullptr) const = 0;
             ///< Return name of the cell.
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to

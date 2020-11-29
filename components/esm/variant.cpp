@@ -16,11 +16,11 @@ namespace
     const uint32_t STTV = ESM::FourCC<'S','T','T','V'>::value;
 }
 
-ESM::Variant::Variant() : mType (VT_None), mData (0) {}
+ESM::Variant::Variant() : mType (VT_None), mData (nullptr) {}
 
 ESM::Variant::Variant(const std::string &value)
 {
-    mData = 0;
+    mData = nullptr;
     mType = VT_None;
     setType(VT_String);
     setString(value);
@@ -28,7 +28,7 @@ ESM::Variant::Variant(const std::string &value)
 
 ESM::Variant::Variant(int value)
 {
-    mData = 0;
+    mData = nullptr;
     mType = VT_None;
     setType(VT_Long);
     setInteger(value);
@@ -36,7 +36,7 @@ ESM::Variant::Variant(int value)
 
 ESM::Variant::Variant(float value)
 {
-    mData = 0;
+    mData = nullptr;
     mType = VT_None;
     setType(VT_Float);
     setFloat(value);
@@ -51,7 +51,7 @@ ESM::Variant& ESM::Variant::operator= (const Variant& variant)
 {
     if (&variant!=this)
     {
-        VariantDataBase *newData = variant.mData ? variant.mData->clone() : 0;
+        VariantDataBase *newData = variant.mData ? variant.mData->clone() : nullptr;
 
         delete mData;
 
@@ -63,7 +63,7 @@ ESM::Variant& ESM::Variant::operator= (const Variant& variant)
 }
 
 ESM::Variant::Variant (const Variant& variant)
-: mType (variant.mType), mData (variant.mData ? variant.mData->clone() : 0)
+: mType (variant.mType), mData (variant.mData ? variant.mData->clone() : nullptr)
 {}
 
 ESM::VarType ESM::Variant::getType() const
@@ -254,7 +254,7 @@ void ESM::Variant::setType (VarType type)
 {
     if (type!=mType)
     {
-        VariantDataBase *newData = 0;
+        VariantDataBase *newData = nullptr;
 
         switch (type)
         {

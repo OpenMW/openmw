@@ -14,11 +14,11 @@
 #include "windowmanager.hpp"
 #include "statemanager.hpp"
 
-MWBase::Environment *MWBase::Environment::sThis = 0;
+MWBase::Environment *MWBase::Environment::sThis = nullptr;
 
 MWBase::Environment::Environment()
-: mWorld (0), mSoundManager (0), mScriptManager (0), mWindowManager (0),
-  mMechanicsManager (0),  mDialogueManager (0), mJournal (0), mInputManager (0), mStateManager (0),
+: mWorld (nullptr), mSoundManager (nullptr), mScriptManager (nullptr), mWindowManager (nullptr),
+  mMechanicsManager (nullptr),  mDialogueManager (nullptr), mJournal (nullptr), mInputManager (nullptr), mStateManager (nullptr),
   mFrameDuration (0), mFrameRateLimit(0.f)
 {
     assert (!sThis);
@@ -28,7 +28,7 @@ MWBase::Environment::Environment()
 MWBase::Environment::~Environment()
 {
     cleanup();
-    sThis = 0;
+    sThis = nullptr;
 }
 
 void MWBase::Environment::setWorld (World *world)
@@ -166,31 +166,31 @@ float MWBase::Environment::getFrameDuration() const
 void MWBase::Environment::cleanup()
 {
     delete mMechanicsManager;
-    mMechanicsManager = 0;
+    mMechanicsManager = nullptr;
 
     delete mDialogueManager;
-    mDialogueManager = 0;
+    mDialogueManager = nullptr;
 
     delete mJournal;
-    mJournal = 0;
+    mJournal = nullptr;
 
     delete mScriptManager;
-    mScriptManager = 0;
+    mScriptManager = nullptr;
 
     delete mWindowManager;
-    mWindowManager = 0;
+    mWindowManager = nullptr;
 
     delete mWorld;
-    mWorld = 0;
+    mWorld = nullptr;
 
     delete mSoundManager;
-    mSoundManager = 0;
+    mSoundManager = nullptr;
 
     delete mInputManager;
-    mInputManager = 0;
+    mInputManager = nullptr;
 
     delete mStateManager;
-    mStateManager = 0;
+    mStateManager = nullptr;
 }
 
 const MWBase::Environment& MWBase::Environment::get()

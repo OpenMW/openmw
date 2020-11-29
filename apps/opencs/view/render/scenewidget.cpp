@@ -36,7 +36,7 @@ namespace CSVRender
 
 RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     : QWidget(parent, f)
-    , mRootNode(0)
+    , mRootNode(nullptr)
 {
 
     osgViewer::CompositeViewer& viewer = CompositeViewer::get();
@@ -257,7 +257,7 @@ void SceneWidget::setLighting(Lighting *lighting)
     mLighting = lighting;
     mLighting->activate (mRootNode, mIsExterior);
 
-    osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : 0);
+    osg::Vec4f ambient = mLighting->getAmbientColour(mHasDefaultAmbient ? &mDefaultAmbient : nullptr);
     setAmbient(ambient);
 
     flagAsModified();

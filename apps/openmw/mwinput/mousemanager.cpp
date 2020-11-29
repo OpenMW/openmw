@@ -154,7 +154,7 @@ namespace MWInput
         {
             guiMode = MWBase::Environment::get().getWindowManager()->isGuiMode();
             guiMode = MyGUI::InputManager::getInstance().injectMousePress(static_cast<int>(mGuiCursorX), static_cast<int>(mGuiCursorY), sdlButtonToMyGUI(id)) && guiMode;
-            if (MyGUI::InputManager::getInstance().getMouseFocusWidget () != 0)
+            if (MyGUI::InputManager::getInstance().getMouseFocusWidget () != nullptr)
             {
                 MyGUI::Button* b = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                 if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)

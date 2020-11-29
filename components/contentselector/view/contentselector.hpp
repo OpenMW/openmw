@@ -23,7 +23,7 @@ namespace ContentSelectorView
 
     public:
 
-        explicit ContentSelector(QWidget *parent = 0);
+        explicit ContentSelector(QWidget *parent = nullptr);
 
         QString currentFile() const;
 
