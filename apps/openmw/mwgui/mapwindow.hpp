@@ -272,11 +272,12 @@ namespace MWGui
         void onChangeScrollWindowCoord(MyGUI::Widget* sender);
         void globalMapUpdatePlayer();
         void setGlobalMapMarkerTooltip(MyGUI::Widget* widget, int x, int y);
-        float getMarkerSize() const;
+        float getMarkerSize(size_t agregatedWeight) const;
         void resizeGlobalMap();
         void worldPosToGlobalMapImageSpace(float x, float z, float& imageX, float& imageY) const;
-        MyGUI::IntCoord createMarkerCoords(float x, float y) const;
-        MyGUI::Widget* createMarker(const std::string& name, float x, float y);
+        MyGUI::IntCoord createMarkerCoords(float x, float y, float agregatedWeight) const;
+        MyGUI::Widget* createMarker(const std::string& name, float x, float y, float agregatedWeight);
+
 
         MyGUI::ScrollView* mGlobalMap;
         std::unique_ptr<MyGUI::ITexture> mGlobalMapTexture;
@@ -301,7 +302,18 @@ namespace MWGui
         float mGlobalMapZoom = 1.0f;
         MWRender::GlobalMap* mGlobalMapRender;
 
-        std::map<std::pair<int, int>, MyGUI::Widget*> mGlobalMapMarkers;
+        struct MapMarkerType
+        {
+            osg::Vec2f position;
+            MyGUI::Widget* widget = nullptr;
+
+            bool operator<(const MapMarkerType& right) const {
+                return widget < right.widget;
+            }
+        };
+
+        std::map<std::string, MapMarkerType> mGlobalMapMarkersByName;
+        std::map<MapMarkerType, std::vector<MapMarkerType>> mGlobalMapMarkers;
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
