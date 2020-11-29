@@ -239,7 +239,7 @@ target_link_libraries(components
     RecastNavigation::Recast
     )
 
-if (BULLET_USE_DOUBLES AND UNIX AND NOT APPLE)
+if (BULLET_USE_DOUBLES AND UNIX AND NOT APPLE AND NOT ANDROID)
     target_link_libraries(components BulletCollision-float64 LinearMath-float64)
 endif()
 
