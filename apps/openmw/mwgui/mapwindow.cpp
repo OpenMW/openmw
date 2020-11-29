@@ -886,16 +886,18 @@ namespace MWGui
     void MapWindow::onMapZoomed(MyGUI::Widget* sender, int rel)
     {
         const static int localWidgetSize = Settings::Manager::getInt("local map widget size", "Map");
+        const static int globalCellSize = Settings::Manager::getInt("global map cell size", "Map");
 
         const bool zoomOut = rel < 0;
         const bool zoomIn = !zoomOut;
         const double speedDiff = zoomOut ? 1.0 / speed : speed;
         const float localMapSizeInUnits = localWidgetSize * mNumCells;
 
-        const float currentMinLocalMapZoom = std::max(
+        const float currentMinLocalMapZoom = std::max({
+            (float(globalCellSize) * 4.f) / float(localWidgetSize),
             float(mLocalMap->getWidth()) / localMapSizeInUnits,
             float(mLocalMap->getHeight()) / localMapSizeInUnits
-        );
+        });
 
         if (mGlobal)
         {
@@ -910,6 +912,9 @@ namespace MWGui
             if (zoomIn && mGlobalMapZoom > 4.f)
             {
                 mGlobalMapZoom = currentGlobalZoom;
+                mLocalMapZoom = currentMinLocalMapZoom;
+                onWorldButtonClicked(nullptr);
+                updateLocalMap();
                 return; //the zoom in is too big
             }
 
@@ -933,7 +938,13 @@ namespace MWGui
             if (zoomOut && mLocalMapZoom < currentMinLocalMapZoom)
             {
                 mLocalMapZoom = currentLocalZoom;
-                return; //the zoom out is too big
+
+                float zoomRatio = 4.f/ mGlobalMapZoom;
+                mGlobalMapZoom = 4.f;
+                onWorldButtonClicked(nullptr);
+
+                zoomOnCursor(zoomRatio);
+                return; //the zoom out is too big, we switch to the global map
             }
         }
         zoomOnCursor(speedDiff);
