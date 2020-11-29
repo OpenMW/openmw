@@ -219,6 +219,9 @@ namespace MWPhysics
 
         std::unique_lock lock(mSimulationMutex);
 
+        for (auto& data : actorsData)
+            data.updatePosition();
+
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {
@@ -233,7 +236,7 @@ namespace MWPhysics
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
 
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
+                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
             }
 
             if (mFrameNumber == frameNumber - 1)
@@ -284,7 +287,7 @@ namespace MWPhysics
                 if (mAdvanceSimulation)
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
+                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
             }
             return mMovementResults;
         }

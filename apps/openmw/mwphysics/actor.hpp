@@ -67,8 +67,8 @@ namespace MWPhysics
         * Used by the physics simulation to store the simulation result. Used in conjunction with mWorldPosition
         * to account for e.g. scripted movements
         */
-        void setNextPosition(const osg::Vec3f& position);
-        osg::Vec3f getNextPosition() const;
+        void setSimulationPosition(const osg::Vec3f& position);
+        osg::Vec3f getSimulationPosition() const;
 
         void updateCollisionObjectPosition();
 
@@ -154,6 +154,8 @@ namespace MWPhysics
         void updateCollisionMask();
         void addCollisionMask(int collisionMask);
         int getCollisionMask() const;
+        void updateCollisionObjectPositionUnsafe();
+        void updatePositionUnsafe();
 
         bool mCanWaterWalk;
         std::atomic<bool> mWalkingOnWater;
@@ -172,7 +174,7 @@ namespace MWPhysics
         osg::Vec3f mScale;
         osg::Vec3f mRenderingScale;
         osg::Vec3f mWorldPosition;
-        osg::Vec3f mNextPosition;
+        osg::Vec3f mSimulationPosition;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
         btTransform mLocalTransform;

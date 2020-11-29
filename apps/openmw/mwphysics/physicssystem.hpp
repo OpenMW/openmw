@@ -78,6 +78,7 @@ namespace MWPhysics
     struct ActorFrameData
     {
         ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
+        void  updatePosition();
         std::weak_ptr<Actor> mActor;
         Actor* mActorRaw;
         MWWorld::Ptr mPtr;

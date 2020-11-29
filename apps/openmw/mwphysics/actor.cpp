@@ -118,10 +118,15 @@ int Actor::getCollisionMask() const
     return collisionMask;
 }
 
+void Actor::updatePositionUnsafe()
+{
+    mWorldPosition = mPtr.getRefData().getPosition().asVec3();
+}
+
 void Actor::updatePosition()
 {
     std::scoped_lock lock(mPositionMutex);
-    mWorldPosition = mPtr.getRefData().getPosition().asVec3();
+    updatePositionUnsafe();
 }
 
 osg::Vec3f Actor::getWorldPosition() const
@@ -130,25 +135,30 @@ osg::Vec3f Actor::getWorldPosition() const
     return mWorldPosition;
 }
 
-void Actor::setNextPosition(const osg::Vec3f& position)
+void Actor::setSimulationPosition(const osg::Vec3f& position)
 {
-    mNextPosition = position;
+    mSimulationPosition = position;
 }
 
-osg::Vec3f Actor::getNextPosition() const
+osg::Vec3f Actor::getSimulationPosition() const
 {
-    return mNextPosition;
+    return mSimulationPosition;
 }
 
-void Actor::updateCollisionObjectPosition()
+void Actor::updateCollisionObjectPositionUnsafe()
 {
-    std::scoped_lock lock(mPositionMutex);
     mShape->setLocalScaling(Misc::Convert::toBullet(mScale));
     osg::Vec3f scaledTranslation = mRotation * osg::componentMultiply(mMeshTranslation, mScale);
     osg::Vec3f newPosition = scaledTranslation + mPosition;
     mLocalTransform.setOrigin(Misc::Convert::toBullet(newPosition));
     mLocalTransform.setRotation(Misc::Convert::toBullet(mRotation));
     mCollisionObject->setWorldTransform(mLocalTransform);
+}
+
+void Actor::updateCollisionObjectPosition()
+{
+    std::scoped_lock lock(mPositionMutex);
+    updateCollisionObjectPositionUnsafe();
 }
 
 osg::Vec3f Actor::getCollisionObjectPosition() const
@@ -159,23 +169,26 @@ osg::Vec3f Actor::getCollisionObjectPosition() const
 
 void Actor::setPosition(const osg::Vec3f& position)
 {
+    std::scoped_lock lock(mPositionMutex);
     mPreviousPosition = mPosition;
     mPosition = position;
 }
 
 void Actor::adjustPosition(const osg::Vec3f& offset)
 {
+    std::scoped_lock lock(mPositionMutex);
     mPosition += offset;
     mPreviousPosition += offset;
 }
 
 void Actor::resetPosition()
 {
-    updatePosition();
+    std::scoped_lock lock(mPositionMutex);
+    updatePositionUnsafe();
     mPreviousPosition = mWorldPosition;
     mPosition = mWorldPosition;
-    mNextPosition = mWorldPosition;
-    updateCollisionObjectPosition();
+    mSimulationPosition = mWorldPosition;
+    updateCollisionObjectPositionUnsafe();
 }
 
 osg::Vec3f Actor::getPosition() const
