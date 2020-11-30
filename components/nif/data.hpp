@@ -70,7 +70,7 @@ struct NiLinesData : public NiGeometryData
     void read(NIFStream *nif) override;
 };
 
-class NiAutoNormalParticlesData : public NiGeometryData
+class NiParticlesData : public NiGeometryData
 {
 public:
     int numParticles{0};
@@ -84,7 +84,7 @@ public:
     void read(NIFStream *nif) override;
 };
 
-class NiRotatingParticlesData : public NiAutoNormalParticlesData
+class NiRotatingParticlesData : public NiParticlesData
 {
 public:
     void read(NIFStream *nif) override;
