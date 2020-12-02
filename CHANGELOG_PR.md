@@ -18,6 +18,7 @@ Known Issues:
 
 New Features:
 - Dialogue to split item stacks now displays the name of the trapped soul for stacks of soul gems (#5362)
+- Basics of Collada animations are now supported via osgAnimation plugin (#5456)
 
 New Editor Features:
 - ?
@@ -34,6 +35,7 @@ Bug Fixes:
 
 Editor Bug Fixes:
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
+- Flicker and crashing on XFCE4 fixed (#5703)
 
 Miscellaneous:
 - Prevent save-game bloating by using an appropriate fog texture format (#5108)
