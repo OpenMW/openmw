@@ -239,10 +239,8 @@ target_link_libraries(components
     RecastNavigation::Recast
     )
 
-if (BULLET_USE_DOUBLES)
-    if(${CMAKE_OS_NAME} MATCHES "Debian")
-        target_link_libraries(components BulletCollision-float64 LinearMath-float64)
-    endif()
+if (BULLET_USE_DOUBLES AND (UBUNTU_FOUND OR DEBIAN_FOUND))
+    target_link_libraries(components BulletCollision-float64 LinearMath-float64)
 endif()
 
 if (WIN32)
