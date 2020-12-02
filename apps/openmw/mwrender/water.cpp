@@ -242,7 +242,7 @@ public:
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
         setName("RefractionCamera");
         setCullCallback(new InheritViewPointCallback);
-        setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR); // for shadows bugfix
+        setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
         setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
         setNodeMask(Mask_RenderToTexture);
@@ -285,7 +285,7 @@ public:
 
         attach(osg::Camera::DEPTH_BUFFER, mRefractionDepthTexture);
 
-        if (Settings::Manager::getFloat("refraction scale", "Water") != 1)
+        if (Settings::Manager::getFloat("refraction scale", "Water") != 1) // TODO: to be removed with issue #5709
             SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
     }
 
