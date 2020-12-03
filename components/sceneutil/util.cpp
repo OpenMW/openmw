@@ -112,6 +112,8 @@ void GlowUpdater::apply(osg::StateSet *stateset, osg::NodeVisitor *nv)
             removeTexture(stateset);
             this->reset();
             mDone = true;
+            // normally done in StateSetUpdater::operator(), but needs doing here so the shader visitor sees the right StateSet
+            mNode->setStateSet(stateset);
             mResourceSystem->getSceneManager()->recreateShaders(mNode);
         }
         if (mOriginalDuration < 0) // if this glowupdater was originally a permanent glow
