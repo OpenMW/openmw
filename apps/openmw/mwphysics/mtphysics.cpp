@@ -212,7 +212,7 @@ namespace MWPhysics
             thread.join();
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
@@ -263,20 +263,6 @@ namespace MWPhysics
         if (mAdvanceSimulation)
             mWorldFrameData = std::make_unique<WorldFrameData>();
 
-        // we are asked to skip the simulation (load a savegame for instance)
-        // just return the actors' reference position without applying the movements
-        if (skipSimulation)
-        {
-            mMovementResults.clear();
-            for (const auto& m : mActorsFrameData)
-            {
-                m.mActorRaw->setStandingOnPtr(nullptr);
-                m.mActorRaw->resetPosition();
-                mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
-            }
-            return mMovementResults;
-        }
-
         if (mNumThreads == 0)
         {
             mMovementResults.clear();
@@ -309,6 +295,15 @@ namespace MWPhysics
         lock.unlock();
         mHasJob.notify_all();
         return mPreviousMovementResults;
+    }
+
+    const PtrPositionList& PhysicsTaskScheduler::resetSimulation()
+    {
+        std::unique_lock lock(mSimulationMutex);
+        mMovementResults.clear();
+        mPreviousMovementResults.clear();
+        mActorsFrameData.clear();
+        return mMovementResults;
     }
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const

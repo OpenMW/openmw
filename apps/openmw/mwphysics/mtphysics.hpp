@@ -32,7 +32,9 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skip, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+
+            const PtrPositionList& resetSimulation();
 
             // Thread safe wrappers
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;
