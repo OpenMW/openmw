@@ -32,7 +32,7 @@ namespace Gui
 
     MyGUI::IntSize AutoSizedTextBox::getRequestedSize()
     {
-        return getTextSize();
+        return getCaption().empty() ? MyGUI::IntSize{0, 0} : getTextSize();
     }
 
     void AutoSizedTextBox::setCaption(const MyGUI::UString& _value)
