@@ -223,6 +223,42 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     return true;
 }
 
+namespace
+{
+    class OSGLogHandler : public osg::NotifyHandler
+    {
+        void notify(osg::NotifySeverity severity, const char* msg) override
+        {
+            // Copy, because osg logging is not thread safe.
+            std::string msgCopy(msg);
+            if (msgCopy.empty())
+                return;
+
+            Debug::Level level;
+            switch (severity)
+            {
+            case osg::ALWAYS:
+            case osg::FATAL:
+                level = Debug::Error;
+                break;
+            case osg::WARN:
+            case osg::NOTICE:
+                level = Debug::Warning;
+                break;
+            case osg::INFO:
+                level = Debug::Info;
+                break;
+            case osg::DEBUG_INFO:
+            case osg::DEBUG_FP:
+            default:
+                level = Debug::Debug;
+            }
+            std::string_view s(msgCopy);
+            Log(level) << (s.back() == '\n' ? s.substr(0, s.size() - 1) : s);
+        }
+    };
+}
+
 int runApplication(int argc, char *argv[])
 {
 #ifdef __APPLE__
@@ -231,6 +267,7 @@ int runApplication(int argc, char *argv[])
     setenv("OSG_GL_TEXTURE_STORAGE", "OFF", 0);
 #endif
 
+    osg::setNotifyHandler(new OSGLogHandler());
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine;
     engine.reset(new OMW::Engine(cfgMgr));
