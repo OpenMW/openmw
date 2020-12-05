@@ -297,12 +297,19 @@ namespace MWPhysics
         return mPreviousMovementResults;
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::resetSimulation()
+    const PtrPositionList& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
         std::unique_lock lock(mSimulationMutex);
         mMovementResults.clear();
         mPreviousMovementResults.clear();
         mActorsFrameData.clear();
+
+        for (const auto& [_, actor] : actors)
+        {
+            actor->resetPosition();
+            actor->setStandingOnPtr(nullptr);
+            mMovementResults[actor->getPtr()] = actor->getWorldPosition();
+        }
         return mMovementResults;
     }
 
