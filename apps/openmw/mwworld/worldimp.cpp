@@ -1332,22 +1332,15 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = -std::numeric_limits<float>::max();
-        if (ptr.getCell()->isExterior())
-            terrainHeight = getTerrainHeightAt(pos);
-
-        if (pos.z() < terrainHeight)
-            pos.z() = terrainHeight;
-
-        pos.z() += 20; // place slightly above. will snap down to ground with code below
+        const float terrainHeight = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
+        pos.z() = std::max(pos.z(), terrainHeight + 20); // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
-            if (traced.z() < pos.z())
-                pos.z() = traced.z();
+            pos.z() = std::min(pos.z(), traced.z());
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
