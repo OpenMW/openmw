@@ -69,6 +69,7 @@
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Feature #390: 3rd person look "over the shoulder"
+    Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #4894: Consider actors as obstacles for pathfinding
