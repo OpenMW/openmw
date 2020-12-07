@@ -677,14 +677,7 @@ namespace MWPhysics
         mTimeAccum -= numSteps * mPhysicsDt;
 
         if (skipSimulation)
-        {
-            for (auto& [_, actor] : mActors)
-            {
-                actor->resetPosition();
-                actor->setStandingOnPtr(nullptr);
-            }
-            return mTaskScheduler->resetSimulation();
-        }
+            return mTaskScheduler->resetSimulation(mActors);
 
         return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), frameStart, frameNumber, stats);
     }
