@@ -17,6 +17,7 @@
 #include "actor.hpp"
 #include "collisiontype.hpp"
 #include "constants.hpp"
+#include "contacttestwrapper.h"
 #include "physicssystem.hpp"
 #include "stepper.hpp"
 #include "trace.h"
@@ -437,7 +438,7 @@ namespace MWPhysics
 
         // check whether we're inside the world with our collision box with manually-derived offset
         DeepestContactResultCallback contactCallback{collisionObject, velocity};
-        const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback);
+        ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback);
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
             // we are; try moving it out of the world
@@ -448,7 +449,7 @@ namespace MWPhysics
 
             // test for contact
             DeepestContactResultCallback contactCallback2{collisionObject, velocity};
-            const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback2);
+            ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback2);
             // successfully moved further out from contact (does not have to be in open space, just less inside of things)
             if(contactCallback2.mDistance > contactCallback.mDistance)
                 tempPosition = goodPosition - verticalHalfExtent;
@@ -462,7 +463,7 @@ namespace MWPhysics
 
                 // contact test
                 DeepestContactResultCallback contactCallback3{collisionObject, velocity};
-                const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback3);
+                ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback3);
                 // success
                 if(contactCallback3.mDistance > contactCallback.mDistance)
                 {
@@ -475,7 +476,7 @@ namespace MWPhysics
                     collisionObject->setWorldTransform(newTransform);
 
                     DeepestContactResultCallback contactCallback4{collisionObject, velocity};
-                    const_cast<btCollisionWorld*>(collisionWorld)->contactTest(collisionObject, contactCallback4);
+                    ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback4);
                     // success
                     if(contactCallback4.mDistance > contactCallback.mDistance)
                         tempPosition = goodPosition - verticalHalfExtent;
