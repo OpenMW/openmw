@@ -46,26 +46,28 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
         {
             return false;
         }
-
-        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
-        if (target.getClass().isActor())
-        {
-            osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(target);
-            targetPos.z() += halfExtents.z() * 2 * 0.75f;
-        }
-
-        osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-        actorPos.z() += halfExtents.z() * 2 * 0.75f;
-
-        osg::Vec3f dir = targetPos - actorPos;
-
-        bool turned = smoothTurn(actor, getZAngleToDir(dir), 2, osg::DegreesToRadians(3.f));
-        turned &= smoothTurn(actor, getXAngleToDir(dir), 0, osg::DegreesToRadians(3.f));
-
-        if (!turned)
-            return false;
     }
+
+    osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
+    // If the target of an on-target spell is an actor that is not the caster
+    // the target position must be adjusted so that it's not casted at the actor's feet.
+    if (target != actor && target.getClass().isActor())
+    {
+        osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(target);
+        targetPos.z() += halfExtents.z() * 2 * 0.75f;
+    }
+
+    osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
+    osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+    actorPos.z() += halfExtents.z() * 2 * 0.75f;
+
+    osg::Vec3f dir = targetPos - actorPos;
+
+    bool turned = smoothTurn(actor, getZAngleToDir(dir), 2, osg::DegreesToRadians(3.f));
+    turned &= smoothTurn(actor, getXAngleToDir(dir), 0, osg::DegreesToRadians(3.f));
+
+    if (!turned)
+        return false;
 
     // Check if the actor is already casting another spell
     bool isCasting = MWBase::Environment::get().getMechanicsManager()->isCastingSpell(actor);

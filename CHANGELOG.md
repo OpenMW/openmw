@@ -67,6 +67,7 @@
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
+    Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
