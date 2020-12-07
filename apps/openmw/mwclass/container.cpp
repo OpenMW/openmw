@@ -62,7 +62,7 @@ namespace MWClass
 
     Container::Container()
     {
-        mHarvestEnabled = Settings::Manager::getBool("enable graphic herbalism", "Game");
+        mHarvestEnabled = Settings::Manager::getBool("graphic herbalism", "Game");
     }
 
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
