@@ -733,7 +733,7 @@ void CSVDoc::View::infoAbout()
 #endif
 
     // Get current year
-    time_t now = time(NULL);
+    time_t now = time(nullptr);
     struct tm tstruct;
     char copyrightInfo[40];
     tstruct = *localtime(&now);

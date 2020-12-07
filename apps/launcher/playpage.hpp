@@ -16,7 +16,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        PlayPage(QWidget *parent = 0);
+        PlayPage(QWidget *parent = nullptr);
         void setProfilesModel(QAbstractItemModel *model);
 
     signals:

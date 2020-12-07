@@ -41,7 +41,7 @@ namespace CSVTools
             
         public:
 
-            SearchBox (QWidget *parent = 0);
+            SearchBox (QWidget *parent = nullptr);
 
             void setSearchMode (bool enabled);
 

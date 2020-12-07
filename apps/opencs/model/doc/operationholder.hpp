@@ -25,7 +25,7 @@ namespace CSMDoc
 
         public:
 
-            OperationHolder (Operation *operation = 0);
+            OperationHolder (Operation *operation = nullptr);
 
             void setOperation (Operation *operation);
 

@@ -99,7 +99,7 @@ void CSVRender::TerrainShapeMode::primaryOpenPressed (const WorldspaceHitResult&
 
 void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& hit)
 {
-    if (hit.hit && hit.tag == 0)
+    if (hit.hit && hit.tag == nullptr)
     {
         if (mShapeEditTool == ShapeEditTool_Flatten)
             setFlattenToolTargetHeight(hit);
@@ -124,7 +124,7 @@ void CSVRender::TerrainShapeMode::primaryEditPressed(const WorldspaceHitResult& 
 
 void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit && hit.tag == 0)
+    if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, false);
     }
@@ -132,7 +132,7 @@ void CSVRender::TerrainShapeMode::primarySelectPressed(const WorldspaceHitResult
 
 void CSVRender::TerrainShapeMode::secondarySelectPressed(const WorldspaceHitResult& hit)
 {
-    if(hit.hit && hit.tag == 0)
+    if(hit.hit && hit.tag == nullptr)
     {
         selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, false);
     }
@@ -144,7 +144,7 @@ bool CSVRender::TerrainShapeMode::primaryEditStartDrag (const QPoint& pos)
 
     mDragMode = InteractionType_PrimaryEdit;
 
-    if (hit.hit && hit.tag == 0)
+    if (hit.hit && hit.tag == nullptr)
     {
         mEditingPos = hit.worldPos;
         mIsEditing = true;
@@ -164,7 +164,7 @@ bool CSVRender::TerrainShapeMode::primarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_PrimarySelect;
-    if (!hit.hit || hit.tag != 0)
+    if (!hit.hit || hit.tag != nullptr)
     {
         mDragMode = InteractionType_None;
         return false;
@@ -177,7 +177,7 @@ bool CSVRender::TerrainShapeMode::secondarySelectStartDrag (const QPoint& pos)
 {
     WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
     mDragMode = InteractionType_SecondarySelect;
-    if (!hit.hit || hit.tag != 0)
+    if (!hit.hit || hit.tag != nullptr)
     {
         mDragMode = InteractionType_None;
         return false;
@@ -202,13 +202,13 @@ void CSVRender::TerrainShapeMode::drag (const QPoint& pos, int diffX, int diffY,
     if (mDragMode == InteractionType_PrimarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
+        if (hit.hit && hit.tag == nullptr) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 0, true);
     }
 
     if (mDragMode == InteractionType_SecondarySelect)
     {
         WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
-        if (hit.hit && hit.tag == 0) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
+        if (hit.hit && hit.tag == nullptr) selectTerrainShapes(CSMWorld::CellCoordinates::toVertexCoords(hit.worldPos), 1, true);
     }
 }
 

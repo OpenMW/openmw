@@ -96,7 +96,7 @@ namespace CSVRender
                 InteractionType_None
             };
 
-            WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = 0);
+            WorldspaceWidget (CSMDoc::Document& document, QWidget *parent = nullptr);
             ~WorldspaceWidget ();
 
             CSVWidget::SceneToolMode *makeNavigationSelector (CSVWidget::SceneToolbar *parent);

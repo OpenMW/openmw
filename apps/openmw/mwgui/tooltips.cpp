@@ -153,7 +153,7 @@ namespace MWGui
                     return;
 
                 MyGUI::Widget* focus = MyGUI::InputManager::getInstance().getMouseFocusWidget();
-                if (focus == 0)
+                if (focus == nullptr)
                     return;
 
                 MyGUI::IntSize tooltipSize;
@@ -410,7 +410,7 @@ namespace MWGui
         if (text.size() > 0 && text[0] == '\n')
             text.erase(0, 1);
 
-        const ESM::Enchantment* enchant = 0;
+        const ESM::Enchantment* enchant = nullptr;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (info.enchant != "")
         {

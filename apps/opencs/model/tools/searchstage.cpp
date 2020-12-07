@@ -5,7 +5,7 @@
 #include "searchoperation.hpp"
 
 CSMTools::SearchStage::SearchStage (const CSMWorld::IdTableBase *model)
-: mModel (model), mOperation (0)
+: mModel (model), mOperation (nullptr)
 {}
 
 int CSMTools::SearchStage::setup()

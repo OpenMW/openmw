@@ -127,7 +127,7 @@ public:
             if(texture)
                 state->applyTextureAttribute(0, texture);
 
-            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : 0;
+            osg::GLBufferObject* bufferobject = state->isVertexBufferObjectSupported() ? vbo->getOrCreateGLBufferObject(state->getContextID()) : nullptr;
             if (bufferobject)
             {
                 state->bindVertexBufferObject(bufferobject);

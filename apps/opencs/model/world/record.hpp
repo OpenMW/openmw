@@ -87,7 +87,7 @@ namespace CSMWorld
     template <typename ESXRecordT>
     RecordBase *Record<ESXRecordT>::modifiedCopy() const
     {
-        return new Record<ESXRecordT> (State_ModifiedOnly, 0, &(this->get()));
+        return new Record<ESXRecordT> (State_ModifiedOnly, nullptr, &(this->get()));
     }
 
     template <typename ESXRecordT>

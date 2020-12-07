@@ -25,7 +25,7 @@ namespace CSVFilter
 
         public:
 
-            RecordFilterBox (CSMWorld::Data& data, QWidget *parent = 0);
+            RecordFilterBox (CSMWorld::Data& data, QWidget *parent = nullptr);
 
             void setFilter (const std::string& filter);
 

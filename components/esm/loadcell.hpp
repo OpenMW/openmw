@@ -185,7 +185,7 @@ struct Cell
                          CellRef &ref, 
                          bool &isDeleted, 
                          bool ignoreMoves = false, 
-                         MovedCellRef *mref = 0);
+                         MovedCellRef *mref = nullptr);
 
   /* This fetches an MVRF record, which is used to track moved references.
    * Since they are comparably rare, we use a separate method for this.

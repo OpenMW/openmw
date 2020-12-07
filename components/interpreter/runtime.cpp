@@ -6,7 +6,7 @@
 
 namespace Interpreter
 {
-    Runtime::Runtime() : mContext (0), mCode (0), mCodeSize(0), mPC (0) {}
+    Runtime::Runtime() : mContext (nullptr), mCode (nullptr), mCodeSize(0), mPC (0) {}
 
     int Runtime::getPC() const
     {
@@ -65,8 +65,8 @@ namespace Interpreter
 
     void Runtime::clear()
     {
-        mContext = 0;
-        mCode = 0;
+        mContext = nullptr;
+        mCode = nullptr;
         mCodeSize = 0;
         mStack.clear();
     }

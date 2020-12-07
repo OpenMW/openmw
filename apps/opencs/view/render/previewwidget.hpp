@@ -29,7 +29,7 @@ namespace CSVRender
         public:
 
             PreviewWidget (CSMWorld::Data& data, const std::string& id, bool referenceable,
-                QWidget *parent = 0);
+                QWidget *parent = nullptr);
 
         signals:
 

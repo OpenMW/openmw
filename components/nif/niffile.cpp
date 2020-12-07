@@ -47,8 +47,9 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiTriShape"]                   = {&construct <NiTriShape>                  , RC_NiTriShape                 };
     factory["NiTriStrips"]                  = {&construct <NiTriStrips>                 , RC_NiTriStrips                };
     factory["NiLines"]                      = {&construct <NiLines>                     , RC_NiLines                    };
-    factory["NiRotatingParticles"]          = {&construct <NiRotatingParticles>         , RC_NiRotatingParticles        };
-    factory["NiAutoNormalParticles"]        = {&construct <NiAutoNormalParticles>       , RC_NiAutoNormalParticles      };
+    factory["NiParticles"]                  = {&construct <NiParticles>                 , RC_NiParticles                };
+    factory["NiRotatingParticles"]          = {&construct <NiParticles>                 , RC_NiParticles                };
+    factory["NiAutoNormalParticles"]        = {&construct <NiParticles>                 , RC_NiParticles                };
     factory["NiCamera"]                     = {&construct <NiCamera>                    , RC_NiCamera                   };
     factory["RootCollisionNode"]            = {&construct <NiNode>                      , RC_RootCollisionNode          };
     factory["NiTexturingProperty"]          = {&construct <NiTexturingProperty>         , RC_NiTexturingProperty        };
@@ -99,8 +100,9 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiSkinData"]                   = {&construct <NiSkinData>                  , RC_NiSkinData                 };
     factory["NiUVData"]                     = {&construct <NiUVData>                    , RC_NiUVData                   };
     factory["NiPosData"]                    = {&construct <NiPosData>                   , RC_NiPosData                  };
-    factory["NiRotatingParticlesData"]      = {&construct <NiRotatingParticlesData>     , RC_NiRotatingParticlesData    };
-    factory["NiAutoNormalParticlesData"]    = {&construct <NiAutoNormalParticlesData>   , RC_NiAutoNormalParticlesData  };
+    factory["NiParticlesData"]              = {&construct <NiParticlesData>             , RC_NiParticlesData            };
+    factory["NiRotatingParticlesData"]      = {&construct <NiRotatingParticlesData>     , RC_NiParticlesData            };
+    factory["NiAutoNormalParticlesData"]    = {&construct <NiParticlesData>             , RC_NiParticlesData            };
     factory["NiSequenceStreamHelper"]       = {&construct <NiSequenceStreamHelper>      , RC_NiSequenceStreamHelper     };
     factory["NiSourceTexture"]              = {&construct <NiSourceTexture>             , RC_NiSourceTexture            };
     factory["NiSkinInstance"]               = {&construct <NiSkinInstance>              , RC_NiSkinInstance             };

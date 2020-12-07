@@ -98,7 +98,7 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
 
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg::ref_ptr<osg::Group> parentNode,  QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain, "Instance editing",
-  parent), mSubMode (0), mSubModeId ("move"), mSelectionMode (0), mDragMode (DragMode_None),
+  parent), mSubMode (nullptr), mSubModeId ("move"), mSelectionMode (nullptr), mDragMode (DragMode_None),
   mDragAxis (-1), mLocked (false), mUnitScaleDist(1), mParentNode (parentNode)
 {
     connect(this, SIGNAL(requestFocus(const std::string&)),
@@ -169,14 +169,14 @@ void CSVRender::InstanceMode::deactivate (CSVWidget::SceneToolbar *toolbar)
     {
         toolbar->removeTool (mSelectionMode);
         delete mSelectionMode;
-        mSelectionMode = 0;
+        mSelectionMode = nullptr;
     }
 
     if (mSubMode)
     {
         toolbar->removeTool (mSubMode);
         delete mSubMode;
-        mSubMode = 0;
+        mSubMode = nullptr;
     }
 
     EditMode::deactivate (toolbar);

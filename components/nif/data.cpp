@@ -184,7 +184,7 @@ void NiLinesData::read(NIFStream *nif)
     }
 }
 
-void NiAutoNormalParticlesData::read(NIFStream *nif)
+void NiParticlesData::read(NIFStream *nif)
 {
     NiGeometryData::read(nif);
 
@@ -216,7 +216,7 @@ void NiAutoNormalParticlesData::read(NIFStream *nif)
 
 void NiRotatingParticlesData::read(NIFStream *nif)
 {
-    NiAutoNormalParticlesData::read(nif);
+    NiParticlesData::read(nif);
 
     if (nif->getVersion() <= NIFStream::generateVersion(4,2,2,0) && nif->getBoolean())
         nif->getQuaternions(rotations, vertices.size());

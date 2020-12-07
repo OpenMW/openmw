@@ -644,7 +644,7 @@ namespace MWGui
         : WindowPinnableBase("openmw_map_window.layout")
         , LocalMapBase(customMarkers, localMapRender)
         , NoDrop(drag, mMainWidget)
-        , mGlobalMap(0)
+        , mGlobalMap(nullptr)
         , mGlobalMapImage(nullptr)
         , mGlobalMapOverlay(nullptr)
         , mGlobal(Settings::Manager::getBool("global", "Map"))

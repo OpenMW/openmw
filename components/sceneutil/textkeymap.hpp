@@ -1,12 +1,12 @@
-#ifndef OPENMW_COMPONENTS_NIFOSG_TEXTKEYMAP
-#define OPENMW_COMPONENTS_NIFOSG_TEXTKEYMAP
+#ifndef OPENMW_COMPONENTS_SCENEUTIL_TEXTKEYMAP
+#define OPENMW_COMPONENTS_SCENEUTIL_TEXTKEYMAP
 
 #include <algorithm>
 #include <map>
 #include <set>
 #include <string>
 
-namespace NifOsg
+namespace SceneUtil
 {
     class TextKeyMap
     {

@@ -42,14 +42,14 @@ namespace Video
 {
 
 VideoState::VideoState()
-    : mAudioFactory(NULL)
-    , format_ctx(NULL)
-    , video_ctx(NULL)
-    , audio_ctx(NULL)
+    : mAudioFactory(nullptr)
+    , format_ctx(nullptr)
+    , video_ctx(nullptr)
+    , audio_ctx(nullptr)
     , av_sync_type(AV_SYNC_DEFAULT)
-    , audio_st(NULL)
-    , video_st(NULL), frame_last_pts(0.0)
-    , video_clock(0.0), sws_context(NULL), rgbaFrame(NULL), pictq_size(0)
+    , audio_st(nullptr)
+    , video_st(nullptr), frame_last_pts(0.0)
+    , video_clock(0.0), sws_context(nullptr), rgbaFrame(nullptr), pictq_size(0)
     , pictq_rindex(0), pictq_windex(0)
     , mSeekRequested(false)
     , mSeekPos(0)
@@ -86,7 +86,7 @@ void PacketQueue::put(AVPacket *pkt)
         throw std::runtime_error("Failed to duplicate packet");
 
     pkt1->pkt = *pkt;
-    pkt1->next = NULL;
+    pkt1->next = nullptr;
 
     this->mutex.lock ();
 
@@ -112,7 +112,7 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
         {
             this->first_pkt = pkt1->next;
             if(!this->first_pkt)
-                this->last_pkt = NULL;
+                this->last_pkt = nullptr;
             this->nb_packets--;
             this->size -= pkt1->pkt.size;
 
@@ -141,15 +141,15 @@ void PacketQueue::clear()
     AVPacketList *pkt, *pkt1;
 
     this->mutex.lock();
-    for(pkt = this->first_pkt; pkt != NULL; pkt = pkt1)
+    for(pkt = this->first_pkt; pkt != nullptr; pkt = pkt1)
     {
         pkt1 = pkt->next;
         if (pkt->pkt.data != flush_pkt.data)
             av_packet_unref(&pkt->pkt);
         av_freep(&pkt);
     }
-    this->last_pkt = NULL;
-    this->first_pkt = NULL;
+    this->last_pkt = nullptr;
+    this->first_pkt = nullptr;
     this->nb_packets = 0;
     this->size = 0;
     this->mutex.unlock ();
@@ -296,14 +296,14 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
-    if(this->sws_context == NULL)
+    if(this->sws_context == nullptr)
     {
         int w = this->video_ctx->width;
         int h = this->video_ctx->height;
         this->sws_context = sws_getContext(w, h, this->video_ctx->pix_fmt,
                                            w, h, AV_PIX_FMT_RGBA, SWS_BICUBIC,
-                                           NULL, NULL, NULL);
-        if(this->sws_context == NULL)
+                                           nullptr, nullptr, nullptr);
+        if(this->sws_context == nullptr)
             throw std::runtime_error("Cannot initialize the conversion context!\n");
     }
 
@@ -587,7 +587,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         av_codec_set_pkt_timebase(this->audio_ctx, pFormatCtx->streams[stream_index]->time_base);
 #endif
 
-        if (avcodec_open2(this->audio_ctx, codec, NULL) < 0)
+        if (avcodec_open2(this->audio_ctx, codec, nullptr) < 0)
         {
             fprintf(stderr, "Unsupported codec!\n");
             return -1;
@@ -597,7 +597,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         {
             std::cerr << "No audio factory registered, can not play audio stream" << std::endl;
             avcodec_free_context(&this->audio_ctx);
-            this->audio_st = NULL;
+            this->audio_st = nullptr;
             return -1;
         }
 
@@ -606,7 +606,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         {
             std::cerr << "Failed to create audio decoder, can not play audio stream" << std::endl;
             avcodec_free_context(&this->audio_ctx);
-            this->audio_st = NULL;
+            this->audio_st = nullptr;
             return -1;
         }
         mAudioDecoder->setupFormat();
@@ -624,7 +624,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         av_codec_set_pkt_timebase(this->video_ctx, pFormatCtx->streams[stream_index]->time_base);
 #endif
 
-        if (avcodec_open2(this->video_ctx, codec, NULL) < 0)
+        if (avcodec_open2(this->video_ctx, codec, nullptr) < 0)
         {
             fprintf(stderr, "Unsupported codec!\n");
             return -1;
@@ -653,7 +653,7 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     if(!this->stream.get())
         throw std::runtime_error("Failed to open video resource");
 
-    AVIOContext *ioCtx = avio_alloc_context(NULL, 0, 0, this, istream_read, istream_write, istream_seek);
+    AVIOContext *ioCtx = avio_alloc_context(nullptr, 0, 0, this, istream_read, istream_write, istream_seek);
     if(!ioCtx) throw std::runtime_error("Failed to allocate AVIOContext");
 
     this->format_ctx = avformat_alloc_context();
@@ -667,27 +667,27 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
     ///
     /// https://trac.ffmpeg.org/ticket/1357
     ///
-    if(!this->format_ctx || avformat_open_input(&this->format_ctx, name.c_str(), NULL, NULL))
+    if(!this->format_ctx || avformat_open_input(&this->format_ctx, name.c_str(), nullptr, nullptr))
     {
-        if (this->format_ctx != NULL)
+        if (this->format_ctx != nullptr)
         {
-          if (this->format_ctx->pb != NULL)
+          if (this->format_ctx->pb != nullptr)
           {
               av_free(this->format_ctx->pb->buffer);
-              this->format_ctx->pb->buffer = NULL;
+              this->format_ctx->pb->buffer = nullptr;
 
               av_free(this->format_ctx->pb);
-              this->format_ctx->pb = NULL;
+              this->format_ctx->pb = nullptr;
           }
         }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
-        this->format_ctx = NULL;
+        this->format_ctx = nullptr;
         av_free(ioCtx);
         throw std::runtime_error("Failed to open video input");
     }
 
     // Retrieve stream information
-    if(avformat_find_stream_info(this->format_ctx, NULL) < 0)
+    if(avformat_find_stream_info(this->format_ctx, nullptr) < 0)
         throw std::runtime_error("Failed to retrieve stream information");
 
     // Dump information about file onto standard error
@@ -735,16 +735,16 @@ void VideoState::deinit()
 
     if(this->audio_ctx)
         avcodec_free_context(&this->audio_ctx);
-    this->audio_st = NULL;
-    this->audio_ctx = NULL;
+    this->audio_st = nullptr;
+    this->audio_ctx = nullptr;
     if(this->video_ctx)
         avcodec_free_context(&this->video_ctx);
-    this->video_st = NULL;
-    this->video_ctx = NULL;
+    this->video_st = nullptr;
+    this->video_ctx = nullptr;
 
     if(this->sws_context)
         sws_freeContext(this->sws_context);
-    this->sws_context = NULL;
+    this->sws_context = nullptr;
 
     if(this->format_ctx)
     {
@@ -754,13 +754,13 @@ void VideoState::deinit()
         ///
         /// https://trac.ffmpeg.org/ticket/1357
         ///
-        if (this->format_ctx->pb != NULL)
+        if (this->format_ctx->pb != nullptr)
         {
             av_free(this->format_ctx->pb->buffer);
-            this->format_ctx->pb->buffer = NULL;
+            this->format_ctx->pb->buffer = nullptr;
 
             av_free(this->format_ctx->pb);
-            this->format_ctx->pb = NULL;
+            this->format_ctx->pb = nullptr;
         }
         avformat_close_input(&this->format_ctx);
     }
@@ -768,8 +768,8 @@ void VideoState::deinit()
     if (mTexture)
     {
         // reset Image separately, it's pointing to *this and there might still be outside references to mTexture
-        mTexture->setImage(NULL);
-        mTexture = NULL;
+        mTexture->setImage(nullptr);
+        mTexture = nullptr;
     }
 }
 

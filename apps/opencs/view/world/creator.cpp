@@ -17,5 +17,5 @@ CSVWorld::CreatorFactoryBase::~CreatorFactoryBase() {}
 CSVWorld::Creator *CSVWorld::NullCreatorFactory::makeCreator (CSMDoc::Document& document, 
                                                               const CSMWorld::UniversalId& id) const
 {
-    return 0;
+    return nullptr;
 }

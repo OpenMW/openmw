@@ -11,7 +11,7 @@ namespace CSVDoc
             QSize mSize;
 
         public:
-            SizeHintWidget(QWidget *parent = 0);
+            SizeHintWidget(QWidget *parent = nullptr);
             ~SizeHintWidget();
 
             QSize sizeHint() const override;

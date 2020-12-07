@@ -50,7 +50,7 @@ namespace CSVWorld
         const CSMWorld::IdTable* mTable;
     public:
         NotEditableSubDelegate(const CSMWorld::IdTable* table,
-                               QObject * parent = 0);
+                               QObject * parent = nullptr);
 
         void setEditorData (QWidget* editor, const QModelIndex& index) const override;
 
@@ -126,7 +126,7 @@ namespace CSVWorld
                                    CSMWorld::IdTable* table,
                                    CSMWorld::CommandDispatcher& commandDispatcher,
                                    CSMDoc::Document& document,
-                                   QAbstractItemModel* model = 0);
+                                   QAbstractItemModel* model = nullptr);
 
         ~DialogueDelegateDispatcher();
 

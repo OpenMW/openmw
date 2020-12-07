@@ -151,7 +151,7 @@ namespace Resource
             image->setFileName(normalized);
             if (!checkSupported(image, filename))
             {
-                static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != 0);
+                static bool uncompress = (getenv("OPENMW_DECOMPRESS_TEXTURES") != nullptr);
                 if (!uncompress)
                 {
                     Log(Debug::Error) << "Error loading " << filename << ": no S3TC texture compression support installed";

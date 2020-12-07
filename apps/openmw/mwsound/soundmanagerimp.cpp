@@ -120,7 +120,7 @@ namespace MWSound
         {
             if(sfx.mHandle)
                 mOutput->unloadSound(sfx.mHandle);
-            sfx.mHandle = 0;
+            sfx.mHandle = nullptr;
         }
         mUnusedBuffers.clear();
         mOutput.reset();
@@ -229,7 +229,7 @@ namespace MWSound
 
                     size = mOutput->unloadSound(unused->mHandle);
                     mBufferCacheSize -= size;
-                    unused->mHandle = 0;
+                    unused->mHandle = nullptr;
 
                     mUnusedBuffers.pop_back();
                 } while(mBufferCacheSize > mBufferCacheMin);

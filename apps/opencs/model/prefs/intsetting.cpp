@@ -15,7 +15,7 @@
 CSMPrefs::IntSetting::IntSetting (Category *parent, Settings::Manager *values,
   QMutex *mutex, const std::string& key, const std::string& label, int default_)
 : Setting (parent, values, mutex, key, label), mMin (0), mMax (std::numeric_limits<int>::max()),
-  mDefault (default_), mWidget(0)
+  mDefault (default_), mWidget(nullptr)
 {}
 
 CSMPrefs::IntSetting& CSMPrefs::IntSetting::setRange (int min, int max)

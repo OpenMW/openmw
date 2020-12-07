@@ -53,7 +53,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(in
     if (row >= 0 && row < mFiles.size())
         return mFiles.at(row);
 
-    return 0;
+    return nullptr;
 }
 
 ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
@@ -61,7 +61,7 @@ ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(int row)
     if (row >= 0 && row < mFiles.count())
         return mFiles.at(row);
 
-    return 0;
+    return nullptr;
 }
 const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(const QString &name) const
 {
@@ -75,7 +75,7 @@ const ContentSelectorModel::EsmFile *ContentSelectorModel::ContentModel::item(co
         if (name.compare(file->fileProperty (fp).toString(), Qt::CaseInsensitive) == 0)
             return file;
     }
-    return 0;
+    return nullptr;
 }
 
 QModelIndex ContentSelectorModel::ContentModel::indexFromItem(const EsmFile *item) const

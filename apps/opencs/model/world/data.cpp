@@ -68,7 +68,7 @@ int CSMWorld::Data::count (RecordBase::State state, const CollectionBase& collec
 CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
     const std::vector<std::string>& archives, const boost::filesystem::path& resDir)
 : mEncoder (encoding), mPathgrids (mCells), mRefs (mCells),
-  mReader (0), mDialogue (0), mReaderIndex(1),
+  mReader (nullptr), mDialogue (nullptr), mReaderIndex(1),
   mFsStrict(fsStrict), mDataPaths(dataPaths), mArchives(archives)
 {
     mVFS.reset(new VFS::Manager(mFsStrict));
@@ -916,7 +916,7 @@ const CSMWorld::MetaData& CSMWorld::Data::getMetaData() const
 
 void CSMWorld::Data::setMetaData (const MetaData& metaData)
 {
-    Record<MetaData> record (RecordBase::State_ModifiedOnly, 0, &metaData);
+    Record<MetaData> record (RecordBase::State_ModifiedOnly, nullptr, &metaData);
     mMetaData.setRecord (0, record);
 }
 
@@ -932,7 +932,7 @@ QAbstractItemModel *CSMWorld::Data::getTableModel (const CSMWorld::UniversalId& 
         // construction of the ESX data where no update signals are available.
         if (id.getType()==UniversalId::Type_RegionMap)
         {
-            RegionMap *table = 0;
+            RegionMap *table = nullptr;
             addModel (table = new RegionMap (*this), UniversalId::Type_RegionMap, false);
             return table;
         }
@@ -962,9 +962,9 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
     std::shared_ptr<ESM::ESMReader> ptr(mReader);
     mReaders.push_back(ptr);
-    mReader = 0;
+    mReader = nullptr;
 
-    mDialogue = 0;
+    mDialogue = nullptr;
 
     mReader = new ESM::ESMReader;
     mReader->setEncoder (&mEncoder);
@@ -982,7 +982,7 @@ int CSMWorld::Data::startLoading (const boost::filesystem::path& path, bool base
         metaData.mId = "sys::meta";
         metaData.load (*mReader);
 
-        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, 0, &metaData));
+        mMetaData.setRecord (0, Record<MetaData> (RecordBase::State_ModifiedOnly, nullptr, &metaData));
     }
 
     // Fix uninitialized master data index
@@ -1064,9 +1064,9 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
         else
             delete mReader;
 
-        mReader = 0;
+        mReader = nullptr;
 
-        mDialogue = 0;
+        mDialogue = nullptr;
 
         loadFallbackEntries();
 
@@ -1151,7 +1151,7 @@ bool CSMWorld::Data::continueLoading (CSMDoc::Messages& messages)
             if (isDeleted)
             {
                 // record vector can be shuffled around which would make pointer to record invalid
-                mDialogue = 0;
+                mDialogue = nullptr;
 
                 if (mJournals.tryDelete (record.mId))
                 {

@@ -88,7 +88,7 @@ void CSVWorld::ScriptSubView::adjustSplitter()
 }
 
 CSVWorld::ScriptSubView::ScriptSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document)
-: SubView (id), mDocument (document), mColumn (-1), mBottom(0), mButtons (0),
+: SubView (id), mDocument (document), mColumn (-1), mBottom(nullptr), mButtons (nullptr),
   mCommandDispatcher (document, CSMWorld::UniversalId::getParentType (id.getType())),
   mErrorHeight (CSMPrefs::get()["Scripts"]["error-height"].toInt())
 {
@@ -177,7 +177,7 @@ void CSVWorld::ScriptSubView::settingChanged (const CSMPrefs::Setting *setting)
         {
             mLayout.removeWidget (mButtons);
             delete mButtons;
-            mButtons = 0;
+            mButtons = nullptr;
         }
     }
     else if (*setting=="Scripts/compile-delay")

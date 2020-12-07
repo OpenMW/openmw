@@ -43,7 +43,7 @@ namespace CSVDoc
             ViewManager& operator= (const ViewManager&);
 
             void updateIndices();
-            bool notifySaveOnClose (View *view = 0);
+            bool notifySaveOnClose (View *view = nullptr);
             bool showModifiedDocumentMessageBox (View *view);
             bool showSaveInProgressMessageBox (View *view);
             bool removeDocument(View *view);

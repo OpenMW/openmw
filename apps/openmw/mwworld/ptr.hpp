@@ -25,21 +25,21 @@ namespace MWWorld
             ContainerStore *mContainerStore;
 
         public:
-            Ptr(MWWorld::LiveCellRefBase *liveCellRef=0, CellStore *cell=0)
-              : mRef(liveCellRef), mCell(cell), mContainerStore(0)
+            Ptr(MWWorld::LiveCellRefBase *liveCellRef=nullptr, CellStore *cell=nullptr)
+              : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
             {
             }
 
             bool isEmpty() const
             {
-                return mRef == 0;
+                return mRef == nullptr;
             }
 
             const std::string& getTypeName() const;
 
             const Class& getClass() const
             {
-                if(mRef != 0)
+                if(mRef != nullptr)
                     return *(mRef->mClass);
                 throw std::runtime_error("Cannot get class of an empty object");
             }
@@ -52,7 +52,7 @@ namespace MWWorld
 
                 std::stringstream str;
                 str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
-                if(mRef != 0) str<< getTypeName();
+                if(mRef != nullptr) str<< getTypeName();
                 else str<< "an empty object";
 
                 throw std::runtime_error(str.str());
@@ -72,7 +72,7 @@ namespace MWWorld
 
             bool isInCell() const
             {
-                return (mContainerStore == 0) && (mCell != 0);
+                return (mContainerStore == nullptr) && (mCell != nullptr);
             }
 
             void setContainerStore (ContainerStore *store);
@@ -96,8 +96,8 @@ namespace MWWorld
         const ContainerStore *mContainerStore;
 
     public:
-        ConstPtr(const MWWorld::LiveCellRefBase *liveCellRef=0, const CellStore *cell=0)
-          : mRef(liveCellRef), mCell(cell), mContainerStore(0)
+        ConstPtr(const MWWorld::LiveCellRefBase *liveCellRef=nullptr, const CellStore *cell=nullptr)
+          : mRef(liveCellRef), mCell(cell), mContainerStore(nullptr)
         {
         }
 
@@ -108,14 +108,14 @@ namespace MWWorld
 
         bool isEmpty() const
         {
-            return mRef == 0;
+            return mRef == nullptr;
         }
 
         const std::string& getTypeName() const;
 
         const Class& getClass() const
         {
-            if(mRef != 0)
+            if(mRef != nullptr)
                 return *(mRef->mClass);
             throw std::runtime_error("Cannot get class of an empty object");
         }
@@ -128,7 +128,7 @@ namespace MWWorld
 
             std::stringstream str;
             str<< "Bad LiveCellRef cast to "<<typeid(T).name()<<" from ";
-            if(mRef != 0) str<< getTypeName();
+            if(mRef != nullptr) str<< getTypeName();
             else str<< "an empty object";
 
             throw std::runtime_error(str.str());
@@ -156,7 +156,7 @@ namespace MWWorld
 
         bool isInCell() const
         {
-            return (mContainerStore == 0) && (mCell != 0);
+            return (mContainerStore == nullptr) && (mCell != nullptr);
         }
         
         void setContainerStore (const ContainerStore *store);

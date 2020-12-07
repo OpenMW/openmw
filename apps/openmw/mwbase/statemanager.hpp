@@ -59,7 +59,7 @@ namespace MWBase
 
             virtual void deleteGame (const MWState::Character *character, const MWState::Slot *slot) = 0;
 
-            virtual void saveGame (const std::string& description, const MWState::Slot *slot = 0) = 0;
+            virtual void saveGame (const std::string& description, const MWState::Slot *slot = nullptr) = 0;
             ///< Write a saved game to \a slot or create a new slot if \a slot == 0.
             ///
             /// \note Slot must belong to the current character.

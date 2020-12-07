@@ -20,7 +20,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent = 0);
+        GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent = nullptr);
 
         void saveSettings();
         bool loadSettings();

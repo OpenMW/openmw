@@ -57,7 +57,7 @@ CSVWidget::SceneToolToggle2::SceneToolToggle2 (SceneToolbar *parent, const QStri
     const std::string& compositeIcon, const std::string& singleIcon)
 : SceneTool (parent), mCompositeIcon (compositeIcon), mSingleIcon (singleIcon),
   mButtonSize (parent->getButtonSize()), mIconSize (parent->getIconSize()), mToolTip (toolTip),
-  mFirst (0)
+  mFirst (nullptr)
 {
     mPanel = new QFrame (this, Qt::Popup);
 

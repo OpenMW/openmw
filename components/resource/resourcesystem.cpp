@@ -14,9 +14,9 @@ namespace Resource
         : mVFS(vfs)
     {
         mNifFileManager.reset(new NifFileManager(vfs));
-        mKeyframeManager.reset(new KeyframeManager(vfs));
         mImageManager.reset(new ImageManager(vfs));
         mSceneManager.reset(new SceneManager(vfs, mImageManager.get(), mNifFileManager.get()));
+        mKeyframeManager.reset(new KeyframeManager(vfs, mSceneManager.get()));
 
         addResourceManager(mNifFileManager.get());
         addResourceManager(mKeyframeManager.get());

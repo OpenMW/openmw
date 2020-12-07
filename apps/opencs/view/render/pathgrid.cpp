@@ -60,8 +60,8 @@ namespace CSVRender
         , mRemoveGeometry(false)
         , mUseOffset(true)
         , mParent(parent)
-        , mPathgridGeometry(0)
-        , mDragGeometry(0)
+        , mPathgridGeometry(nullptr)
+        , mDragGeometry(nullptr)
         , mTag(new PathgridTag(this))
     {
         const float CoordScalar = ESM::Land::REAL_SIZE;
@@ -219,7 +219,7 @@ namespace CSVRender
         mMoveOffset.set(0, 0, 0);
 
         mPathgridGeode->removeDrawable(mDragGeometry);
-        mDragGeometry = 0;
+        mDragGeometry = nullptr;
     }
 
     void Pathgrid::applyPoint(CSMWorld::CommandMacro& commands, const osg::Vec3d& worldPos)
@@ -557,7 +557,7 @@ namespace CSVRender
         if (mPathgridGeometry)
         {
             mPathgridGeode->removeDrawable(mPathgridGeometry);
-            mPathgridGeometry = 0;
+            mPathgridGeometry = nullptr;
         }
     }
 
@@ -566,7 +566,7 @@ namespace CSVRender
         if (mSelectedGeometry)
         {
             mPathgridGeode->removeDrawable(mSelectedGeometry);
-            mSelectedGeometry = 0;
+            mSelectedGeometry = nullptr;
         }
     }
 
@@ -612,7 +612,7 @@ namespace CSVRender
             return &mPathgridCollection.getRecord(index).get();
         }
 
-        return 0;
+        return nullptr;
     }
 
     int Pathgrid::edgeExists(const CSMWorld::Pathgrid& source, unsigned short node1, unsigned short node2)

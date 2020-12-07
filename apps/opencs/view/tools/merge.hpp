@@ -39,7 +39,7 @@ namespace CSVTools
 
         public:
 
-            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = 0);
+            Merge (CSMDoc::DocumentManager& documentManager, QWidget *parent = nullptr);
 
             /// Configure dialogue for a new merge
             void configure (CSMDoc::Document *document);

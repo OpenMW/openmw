@@ -220,12 +220,15 @@ namespace MWPhysics
             thread.join();
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
 
         std::unique_lock lock(mSimulationMutex);
+
+        for (auto& data : actorsData)
+            data.updatePosition();
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
@@ -241,7 +244,7 @@ namespace MWPhysics
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
 
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
+                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
             }
 
             if (mFrameNumber == frameNumber - 1)
@@ -268,20 +271,6 @@ namespace MWPhysics
         if (mAdvanceSimulation)
             mWorldFrameData = std::make_unique<WorldFrameData>();
 
-        // we are asked to skip the simulation (load a savegame for instance)
-        // just return the actors' reference position without applying the movements
-        if (skipSimulation)
-        {
-            mMovementResults.clear();
-            for (const auto& m : mActorsFrameData)
-            {
-                m.mActorRaw->setStandingOnPtr(nullptr);
-                m.mActorRaw->resetPosition();
-                mMovementResults[m.mPtr] = m.mActorRaw->getWorldPosition();
-            }
-            return mMovementResults;
-        }
-
         if (mNumThreads == 0)
         {
             mMovementResults.clear();
@@ -292,7 +281,7 @@ namespace MWPhysics
                 if (mAdvanceSimulation)
                     data.mActorRaw->setStandingOnPtr(data.mStandingOn);
                 if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setNextPosition(mMovementResults[data.mPtr]);
+                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
             }
             return mMovementResults;
         }
@@ -314,6 +303,22 @@ namespace MWPhysics
         lock.unlock();
         mHasJob.notify_all();
         return mPreviousMovementResults;
+    }
+
+    const PtrPositionList& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
+    {
+        std::unique_lock lock(mSimulationMutex);
+        mMovementResults.clear();
+        mPreviousMovementResults.clear();
+        mActorsFrameData.clear();
+
+        for (const auto& [_, actor] : actors)
+        {
+            actor->resetPosition();
+            actor->setStandingOnPtr(nullptr);
+            mMovementResults[actor->getPtr()] = actor->getWorldPosition();
+        }
+        return mMovementResults;
     }
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const

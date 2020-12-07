@@ -498,7 +498,7 @@ void CSVWorld::EditWidget::remake(int row)
 
     if (mDispatcher)
         delete mDispatcher;
-    mDispatcher = new DialogueDelegateDispatcher(0/*this*/, mTable, mCommandDispatcher, mDocument);
+    mDispatcher = new DialogueDelegateDispatcher(nullptr/*this*/, mTable, mCommandDispatcher, mDocument);
 
     if (mNestedTableDispatcher)
         delete mNestedTableDispatcher;
@@ -648,7 +648,7 @@ void CSVWorld::EditWidget::remake(int row)
                 mNestedTableMapper->setModel(tree);
                 // FIXME: lack MIME support?
                 mNestedTableDispatcher =
-                        new DialogueDelegateDispatcher (0/*this*/, mTable, mCommandDispatcher, mDocument, tree);
+                        new DialogueDelegateDispatcher (nullptr/*this*/, mTable, mCommandDispatcher, mDocument, tree);
                 mNestedTableMapper->setRootIndex (tree->index(row, i));
                 mNestedTableMapper->setItemDelegate(mNestedTableDispatcher);
 
@@ -732,7 +732,7 @@ bool CSVWorld::SimpleDialogueSubView::isLocked() const
 
 CSVWorld::SimpleDialogueSubView::SimpleDialogueSubView (const CSMWorld::UniversalId& id, CSMDoc::Document& document) :
     SubView (id),
-    mEditWidget(0),
+    mEditWidget(nullptr),
     mMainLayout(nullptr),
     mTable(dynamic_cast<CSMWorld::IdTable*>(document.getData().getTableModel(id))),
     mLocked(false),
@@ -834,7 +834,7 @@ void CSVWorld::SimpleDialogueSubView::rowsAboutToBeRemoved(const QModelIndex &pa
         if(mEditWidget)
         {
             delete mEditWidget;
-            mEditWidget = 0;
+            mEditWidget = nullptr;
         }
         emit closeRequest(this);
     }
@@ -869,7 +869,7 @@ void CSVWorld::DialogueSubView::addButtonBar()
 
 CSVWorld::DialogueSubView::DialogueSubView (const CSMWorld::UniversalId& id,
     CSMDoc::Document& document, const CreatorFactoryBase& creatorFactory, bool sorting)
-: SimpleDialogueSubView (id, document), mButtons (0)
+: SimpleDialogueSubView (id, document), mButtons (nullptr)
 {
     // bottom box
     mBottom = new TableBottomBox (creatorFactory, document, id, this);
@@ -905,7 +905,7 @@ void CSVWorld::DialogueSubView::settingChanged (const CSMPrefs::Setting *setting
         {
             getMainLayout().removeWidget (mButtons);
             delete mButtons;
-            mButtons = 0;
+            mButtons = nullptr;
         }
     }
 }

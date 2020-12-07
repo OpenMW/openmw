@@ -294,7 +294,10 @@ namespace Shader
     void ShaderVisitor::createProgram(const ShaderRequirements &reqs)
     {
         if (!reqs.mShaderRequired && !mForceShaders)
+        {
+            ensureFFP(*reqs.mNode);
             return;
+        }
 
         osg::Node& node = *reqs.mNode;
         osg::StateSet* writableStateSet = nullptr;
@@ -331,6 +334,19 @@ namespace Shader
                 writableStateSet->addUniform(new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
             }
         }
+    }
+
+    void ShaderVisitor::ensureFFP(osg::Node& node)
+    {
+        if (!node.getStateSet() || !node.getStateSet()->getAttribute(osg::StateAttribute::PROGRAM))
+            return;
+        osg::StateSet* writableStateSet = nullptr;
+        if (mAllowedToModifyStateSets)
+            writableStateSet = node.getStateSet();
+        else
+            writableStateSet = getWritableStateSet(node);
+
+        writableStateSet->removeAttribute(osg::StateAttribute::PROGRAM);
     }
 
     bool ShaderVisitor::adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs)
@@ -380,6 +396,8 @@ namespace Shader
 
             createProgram(reqs);
         }
+        else
+            ensureFFP(geometry);
 
         if (needPop)
             popRequirements();
@@ -414,6 +432,8 @@ namespace Shader
                     morph->setSourceGeometry(sourceGeometry);
             }
         }
+        else
+            ensureFFP(drawable);
 
         if (needPop)
             popRequirements();

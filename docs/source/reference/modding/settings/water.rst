@@ -59,7 +59,7 @@ This setting has no effect if the shader setting is false.
 This setting can be toggled with the 'Refraction' button in the Water tab of the Video panel of the Options menu.
 
 reflection detail
---------------
+-----------------
 
 :Type:		integer
 :Range:		0, 1, 2, 3, 4
@@ -111,3 +111,6 @@ This setting only applies if water shader is on and refractions are enabled. Not
 setting if off, there will still be small refractions caused by the water waves, which however do not cause such significant
 distortion.
 
+.. warning::
+    The `refraction scale` is currently mutually exclusive to underwater shadows. Setting this to any value except 1.0
+    will cause underwater shadows to be disabled. This will be addressed in issue https://gitlab.com/OpenMW/openmw/-/issues/5709

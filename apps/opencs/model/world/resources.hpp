@@ -25,9 +25,9 @@ namespace CSMWorld
 
             /// \param type Type of resources in this table.
             Resources (const VFS::Manager* vfs, const std::string& baseDirectory, UniversalId::Type type,
-                const char * const *extensions = 0);
+                const char * const *extensions = nullptr);
 
-            void recreate(const VFS::Manager* vfs, const char * const *extensions = 0);
+            void recreate(const VFS::Manager* vfs, const char * const *extensions = nullptr);
 
             int getSize() const;
 

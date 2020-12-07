@@ -925,7 +925,7 @@ public:
 
     void dirtyFocusItem ()
     {
-        if (mFocusItem != 0)
+        if (mFocusItem != nullptr)
         {
             MyGUI::IFont* Font = mBook->affectedFont (mFocusItem);
 
@@ -946,7 +946,7 @@ public:
 
         dirtyFocusItem ();
 
-        mFocusItem = 0;
+        mFocusItem = nullptr;
         mItemActive = false;
     }
 
@@ -976,7 +976,7 @@ public:
             }
         }
         else
-        if (mFocusItem != 0)
+        if (mFocusItem != nullptr)
         {
             bool newItemActive = hit == mFocusItem;
 

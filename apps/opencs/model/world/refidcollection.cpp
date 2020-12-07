@@ -350,7 +350,7 @@ CSMWorld::RefIdCollection::RefIdCollection()
     };
 
     // for re-use in NPC records
-    const RefIdColumn *essential = 0;
+    const RefIdColumn *essential = nullptr;
 
     for (int i=0; sCreatureFlagTable[i].mName!=-1; ++i)
     {

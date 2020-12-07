@@ -104,7 +104,7 @@ void CSMTools::MergeReferencesStage::perform (int stage, CSMDoc::Messages& messa
         ref.mNew = false;
 
         CSMWorld::Record<CSMWorld::CellRef> newRecord (
-            CSMWorld::RecordBase::State_ModifiedOnly, 0, &ref);
+            CSMWorld::RecordBase::State_ModifiedOnly, nullptr, &ref);
 
         mState.mTarget->getData().getReferences().appendRecord (newRecord);
     }

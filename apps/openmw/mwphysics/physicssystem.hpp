@@ -57,6 +57,8 @@ namespace MWPhysics
     class Actor;
     class PhysicsTaskScheduler;
 
+    using ActorMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Actor>>;
+
     struct ContactPoint
     {
         MWWorld::Ptr mObject;
@@ -78,6 +80,7 @@ namespace MWPhysics
     struct ActorFrameData
     {
         ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
+        void  updatePosition();
         std::weak_ptr<Actor> mActor;
         Actor* mActorRaw;
         MWWorld::Ptr mPtr;
@@ -264,7 +267,6 @@ namespace MWPhysics
 
             std::set<Object*> mAnimatedObjects; // stores pointers to elements in mObjects
 
-            using ActorMap = std::map<MWWorld::ConstPtr, std::shared_ptr<Actor>>;
             ActorMap mActors;
 
             using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;

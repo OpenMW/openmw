@@ -57,7 +57,7 @@ QVariant CSVWorld::NastyTableModelHack::getData() const
 CSVWorld::CommandDelegateFactory::~CommandDelegateFactory() {}
 
 
-CSVWorld::CommandDelegateFactoryCollection *CSVWorld::CommandDelegateFactoryCollection::sThis = 0;
+CSVWorld::CommandDelegateFactoryCollection *CSVWorld::CommandDelegateFactoryCollection::sThis = nullptr;
 
 CSVWorld::CommandDelegateFactoryCollection::CommandDelegateFactoryCollection()
 {
@@ -69,7 +69,7 @@ CSVWorld::CommandDelegateFactoryCollection::CommandDelegateFactoryCollection()
 
 CSVWorld::CommandDelegateFactoryCollection::~CommandDelegateFactoryCollection()
 {
-    sThis = 0;
+    sThis = nullptr;
 
     for (std::map<CSMWorld::ColumnBase::Display, CommandDelegateFactory *>::iterator iter (
         mFactories.begin());
@@ -193,7 +193,7 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
         variant = index.data(Qt::DisplayRole);
         if (!variant.isValid())
         {
-            return 0;
+            return nullptr;
         }
     }
 
@@ -362,7 +362,7 @@ void CSVWorld::CommandDelegate::setEditorData (QWidget *editor, const QModelInde
     if (!n.isEmpty())
     {
         if (!variant.isValid())
-            variant = QVariant(editor->property(n).userType(), (const void *)0);
+            variant = QVariant(editor->property(n).userType(), (const void *)nullptr);
         editor->setProperty(n, variant);
     }
 

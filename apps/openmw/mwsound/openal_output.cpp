@@ -624,7 +624,7 @@ bool OpenAL_Output::init(const std::string &devname, const std::string &hrtfname
     attrs.reserve(15);
     if(ALC.SOFT_HRTF)
     {
-        LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+        LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
         getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
         attrs.push_back(ALC_HRTF_SOFT);
@@ -850,13 +850,13 @@ void OpenAL_Output::deinit()
         alDeleteFilters(1, &mWaterFilter);
     mWaterFilter = 0;
 
-    alcMakeContextCurrent(0);
+    alcMakeContextCurrent(nullptr);
     if(mContext)
         alcDestroyContext(mContext);
-    mContext = 0;
+    mContext = nullptr;
     if(mDevice)
         alcCloseDevice(mDevice);
-    mDevice = 0;
+    mDevice = nullptr;
 
     mInitialized = false;
 }
@@ -869,7 +869,7 @@ std::vector<std::string> OpenAL_Output::enumerateHrtf()
     if(!mDevice || !ALC.SOFT_HRTF)
         return ret;
 
-    LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+    LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
     getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
     ALCint num_hrtf;
@@ -892,10 +892,10 @@ void OpenAL_Output::setHrtf(const std::string &hrtfname, HrtfMode hrtfmode)
         return;
     }
 
-    LPALCGETSTRINGISOFT alcGetStringiSOFT = 0;
+    LPALCGETSTRINGISOFT alcGetStringiSOFT = nullptr;
     getALCFunc(alcGetStringiSOFT, mDevice, "alcGetStringiSOFT");
 
-    LPALCRESETDEVICESOFT alcResetDeviceSOFT = 0;
+    LPALCRESETDEVICESOFT alcResetDeviceSOFT = nullptr;
     getALCFunc(alcResetDeviceSOFT, mDevice, "alcResetDeviceSOFT");
 
     std::vector<ALCint> attrs;
@@ -1213,7 +1213,7 @@ void OpenAL_Output::finishSound(Sound *sound)
 {
     if(!sound->mHandle) return;
     ALuint source = GET_PTRID(sound->mHandle);
-    sound->mHandle = 0;
+    sound->mHandle = nullptr;
 
     // Rewind the stream to put the source back into an AL_INITIAL state, for
     // the next time it's used.
@@ -1316,7 +1316,7 @@ void OpenAL_Output::finishStream(Stream *sound)
     OpenAL_SoundStream *stream = reinterpret_cast<OpenAL_SoundStream*>(sound->mHandle);
     ALuint source = stream->mSource;
 
-    sound->mHandle = 0;
+    sound->mHandle = nullptr;
     mStreamThread->remove(stream);
 
     // Rewind the stream to put the source back into an AL_INITIAL state, for
@@ -1462,7 +1462,7 @@ void OpenAL_Output::pauseActiveDevice()
 
     if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
     {
-        LPALCDEVICEPAUSESOFT alcDevicePauseSOFT = 0;
+        LPALCDEVICEPAUSESOFT alcDevicePauseSOFT = nullptr;
         getALCFunc(alcDevicePauseSOFT, mDevice, "alcDevicePauseSOFT");
         alcDevicePauseSOFT(mDevice);
         getALCError(mDevice);
@@ -1478,7 +1478,7 @@ void OpenAL_Output::resumeActiveDevice()
 
     if(alcIsExtensionPresent(mDevice, "ALC_SOFT_PAUSE_DEVICE"))
     {
-        LPALCDEVICERESUMESOFT alcDeviceResumeSOFT = 0;
+        LPALCDEVICERESUMESOFT alcDeviceResumeSOFT = nullptr;
         getALCFunc(alcDeviceResumeSOFT, mDevice, "alcDeviceResumeSOFT");
         alcDeviceResumeSOFT(mDevice);
         getALCError(mDevice);
@@ -1513,7 +1513,7 @@ void OpenAL_Output::resumeSounds(int types)
 
 OpenAL_Output::OpenAL_Output(SoundManager &mgr)
   : Sound_Output(mgr)
-  , mDevice(0), mContext(0)
+  , mDevice(nullptr), mContext(nullptr)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)
   , mStreamThread(new StreamThread)

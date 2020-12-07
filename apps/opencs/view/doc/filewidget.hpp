@@ -23,7 +23,7 @@ namespace CSVDoc
 
         public:
 
-            FileWidget (QWidget *parent = 0);
+            FileWidget (QWidget *parent = nullptr);
 
             void setType (bool addon);
 
