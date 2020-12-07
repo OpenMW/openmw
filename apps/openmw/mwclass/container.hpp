@@ -30,11 +30,16 @@ namespace MWClass
 
     class Container : public MWWorld::Class
     {
+            bool mHarvestEnabled;
+
             void ensureCustomData (const MWWorld::Ptr& ptr) const;
 
             MWWorld::Ptr copyToCellImpl(const MWWorld::ConstPtr &ptr, MWWorld::CellStore &cell) const override;
 
+            bool canBeHarvested(const MWWorld::ConstPtr& ptr) const;
+
         public:
+            Container();
 
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
