@@ -483,8 +483,6 @@ namespace MWPhysics
                 }
             }
         }
-        else
-            actor.mIsStuck = false;
 
         collisionObject->setWorldTransform(oldTransform);
         actor.mPosition = tempPosition;
