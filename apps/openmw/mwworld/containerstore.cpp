@@ -26,7 +26,7 @@ namespace
     void addScripts(MWWorld::ContainerStore& store, MWWorld::CellStore* cell)
     {
         auto& scripts = MWBase::Environment::get().getWorld()->getLocalScripts();
-        for(const MWWorld::Ptr& ptr : store)
+        for(const auto&& ptr : store)
         {
             const std::string& script = ptr.getClass().getScript(ptr);
             if(!script.empty())
@@ -43,13 +43,10 @@ namespace
     {
         float sum = 0;
 
-        for (typename MWWorld::CellRefList<T>::List::const_iterator iter (
-            cellRefList.mList.begin());
-            iter!=cellRefList.mList.end();
-            ++iter)
+        for (const auto& iter : cellRefList.mList)
         {
-            if (iter->mData.getCount()>0)
-                sum += iter->mData.getCount()*iter->mBase->mData.mWeight;
+            if (iter.mData.getCount()>0)
+                sum += iter.mData.getCount()*iter.mBase->mData.mWeight;
         }
 
         return sum;
@@ -62,12 +59,11 @@ namespace
         store->resolve();
         std::string id2 = Misc::StringUtils::lowerCase (id);
 
-        for (typename MWWorld::CellRefList<T>::List::iterator iter (list.mList.begin());
-             iter!=list.mList.end(); ++iter)
+        for (auto& iter : list.mList)
         {
-            if (Misc::StringUtils::ciEqual(iter->mBase->mId, id2) && iter->mData.getCount())
+            if (Misc::StringUtils::ciEqual(iter.mBase->mId, id2) && iter.mData.getCount())
             {
-                MWWorld::Ptr ptr (&*iter, nullptr);
+                MWWorld::Ptr ptr (&iter, nullptr);
                 ptr.setContainerStore (store);
                 return ptr;
             }
@@ -81,7 +77,7 @@ MWWorld::ResolutionListener::~ResolutionListener()
 {
     if(!mStore.mModified && mStore.mResolved && !mStore.mPtr.isEmpty())
     {
-        for(const MWWorld::Ptr& ptr : mStore)
+        for(const auto&& ptr : mStore)
             ptr.getRefData().setCount(0);
         mStore.fillNonRandom(mStore.mPtr.get<ESM::Container>()->mBase->mInventory, "", mStore.mSeed);
         addScripts(mStore, mStore.mPtr.mCell);
@@ -127,15 +123,14 @@ template<typename T>
 void MWWorld::ContainerStore::storeStates (const CellRefList<T>& collection,
     ESM::InventoryState& inventory, int& index, bool equipable) const
 {
-    for (typename CellRefList<T>::List::const_iterator iter (collection.mList.begin());
-        iter!=collection.mList.end(); ++iter)
+    for (const auto& iter : collection.mList)
     {
-        if (iter->mData.getCount() == 0)
+        if (iter.mData.getCount() == 0)
             continue;
         ESM::ObjectState state;
-        storeState (*iter, state);
+        storeState (iter, state);
         if (equipable)
-            storeEquipmentState(*iter, index, inventory);
+            storeEquipmentState(iter, index, inventory);
         inventory.mItems.push_back (state);
         ++index;
     }
@@ -188,7 +183,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::end()
 int MWWorld::ContainerStore::count(const std::string &id) const
 {
     int total=0;
-    for (const auto& iter : *this)
+    for (const auto&& iter : *this)
         if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
             total += iter.getRefData().getCount();
     return total;
@@ -430,14 +425,14 @@ void MWWorld::ContainerStore::rechargeItems(float duration)
         updateRechargingItems();
         mRechargingItemsUpToDate = true;
     }
-    for (TRechargingItems::iterator it = mRechargingItems.begin(); it != mRechargingItems.end(); ++it)
+    for (auto& it : mRechargingItems)
     {
-        if (!MWMechanics::rechargeItem(*it->first, it->second, duration))
+        if (!MWMechanics::rechargeItem(*it.first, it.second, duration))
             continue;
 
         // attempt to restack when fully recharged
-        if (it->first->getCellRef().getEnchantmentCharge() == it->second)
-            it->first = restack(*it->first);
+        if (it.first->getCellRef().getEnchantmentCharge() == it.second)
+            it.first = restack(*it.first);
     }
 }
 
@@ -481,9 +476,9 @@ int MWWorld::ContainerStore::remove(const std::string& itemId, int count, const 
 
 bool MWWorld::ContainerStore::hasVisibleItems() const
 {
-    for (auto iter(begin()); iter != end(); ++iter)
+    for (const auto&& iter : *this)
     {
-        if (iter->getClass().showsInInventory(*iter))
+        if (iter.getClass().showsInInventory(iter))
             return true;
     }
 
@@ -601,8 +596,8 @@ void MWWorld::ContainerStore::addInitialItemImp(const MWWorld::Ptr& ptr, const s
 
 void MWWorld::ContainerStore::clear()
 {
-    for (ContainerStoreIterator iter (begin()); iter!=end(); ++iter)
-        iter->getRefData().setCount (0);
+    for (auto&& iter : *this)
+        iter.getRefData().setCount (0);
 
     flagAsModified();
     mModified = true;
@@ -623,7 +618,7 @@ void MWWorld::ContainerStore::resolve()
 {
     if(!mResolved && !mPtr.isEmpty())
     {
-        for(const MWWorld::Ptr& ptr : *this)
+        for(const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Seed seed{mSeed};
         fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
@@ -644,7 +639,7 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
     }
     if(!mResolved && !mPtr.isEmpty())
     {
-        for(const MWWorld::Ptr& ptr : *this)
+        for(const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Seed seed{mSeed};
         fill(mPtr.get<ESM::Container>()->mBase->mInventory, "", seed);
@@ -727,10 +722,10 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
 {
     MWWorld::Ptr item;
     int itemHealth = 1;
-    for (MWWorld::ContainerStoreIterator iter = begin(); iter != end(); ++iter)
+    for (auto&& iter : *this)
     {
-        int iterHealth = iter->getClass().hasItemHealth(*iter) ? iter->getClass().getItemHealth(*iter) : 1;
-        if (Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), id))
+        int iterHealth = iter.getClass().hasItemHealth(iter) ? iter.getClass().getItemHealth(iter) : 1;
+        if (Misc::StringUtils::ciEqual(iter.getCellRef().getRefId(), id))
         {
             // Prefer the stack with the lowest remaining uses
             // Try to get item with zero durability only if there are no other items found
@@ -738,7 +733,7 @@ MWWorld::Ptr MWWorld::ContainerStore::findReplacement(const std::string& id)
                 (iterHealth > 0 && iterHealth < itemHealth) ||
                 (itemHealth <= 0 && iterHealth > 0))
             {
-                item = *iter;
+                item = iter;
                 itemHealth = iterHealth;
             }
         }
@@ -867,11 +862,8 @@ void MWWorld::ContainerStore::readState (const ESM::InventoryState& inventory)
     mResolved = true;
 
     int index = 0;
-    for (std::vector<ESM::ObjectState>::const_iterator
-        iter (inventory.mItems.begin()); iter!=inventory.mItems.end(); ++iter)
+    for (const ESM::ObjectState& state : inventory.mItems)
     {
-        const ESM::ObjectState& state = *iter;
-
         int type = MWBase::Environment::get().getWorld()->getStore().find(state.mRef.mRefID);
 
         int thisIndex = index++;

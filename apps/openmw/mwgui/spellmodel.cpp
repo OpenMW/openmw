@@ -48,9 +48,9 @@ namespace MWGui
         const MWWorld::ESMStore &store =
             MWBase::Environment::get().getWorld()->getStore();
 
-        for (unsigned int i = 0; i < effects.mList.size(); ++i)
+        for (const auto& effect : effects.mList)
         {
-            short effectId = effects.mList[i].mEffectID;
+            short effectId = effect.mEffectID;
 
             if (effectId != -1)
             {
@@ -59,14 +59,14 @@ namespace MWGui
                 std::string effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
                 std::string fullEffectName = wm->getGameSettingString(effectIDStr, "");
 
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effects.mList[i].mSkill != -1)
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effect.mSkill != -1)
                 {
-                    fullEffectName += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effects.mList[i].mSkill], "");
+                    fullEffectName += " " + wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.mSkill], "");
                 }
 
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effects.mList[i].mAttribute != -1)
+                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effect.mAttribute != -1)
                 {
-                    fullEffectName += " " + wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effects.mList[i].mAttribute], "");
+                    fullEffectName += " " + wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], "");
                 }
 
                 std::string convert = Misc::StringUtils::lowerCaseUtf8(fullEffectName);
