@@ -66,13 +66,13 @@ add_openmw_dir (mwworld
     cells localscripts customdata inventorystore ptr actionopen actionread actionharvest
     actionequip timestamp actionalchemy cellstore actionapply actioneat
     store esmstore recordcmp fallback actionrepair actionsoulgem livecellref actiondoor
-    contentloader esmloader actiontrap cellreflist cellref physicssystem weather projectilemanager
+    contentloader esmloader actiontrap cellreflist cellref weather projectilemanager
     cellpreloader datetimemanager
     )
 
 add_openmw_dir (mwphysics
     physicssystem trace collisiontype actor convert object heightfield closestnotmerayresultcallback
-    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver
+    contacttestresultcallback deepestnotmecontacttestresultcallback stepper movementsolver projectile
     closestnotmeconvexresultcallback raycasting mtphysics
     )
 

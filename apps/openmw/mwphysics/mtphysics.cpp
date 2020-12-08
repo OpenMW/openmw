@@ -17,6 +17,7 @@
 #include "mtphysics.hpp"
 #include "object.hpp"
 #include "physicssystem.hpp"
+#include "projectile.hpp"
 
 namespace
 {
@@ -454,6 +455,11 @@ namespace MWPhysics
             {
                 object->commitPositionChange();
                 mCollisionWorld->updateSingleAabb(object->getCollisionObject());
+            }
+            else if (const auto projectile = std::dynamic_pointer_cast<Projectile>(p))
+            {
+                projectile->commitPositionChange();
+                mCollisionWorld->updateSingleAabb(projectile->getCollisionObject());
             }
         };
     }

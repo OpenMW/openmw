@@ -2,6 +2,14 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
+#include <components/misc/convert.hpp>
+
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
+#include "collisiontype.hpp"
+#include "projectile.hpp"
+
 namespace MWPhysics
 {
     ClosestNotMeConvexResultCallback::ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot)
@@ -10,10 +18,25 @@ namespace MWPhysics
     {
     }
 
-    btScalar ClosestNotMeConvexResultCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult,bool normalInWorldSpace)
+    btScalar ClosestNotMeConvexResultCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
     {
         if (convexResult.m_hitCollisionObject == mMe)
             return btScalar(1);
+
+        if (convexResult.m_hitCollisionObject->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Projectile)
+        {
+            auto* projectileHolder = static_cast<Projectile*>(convexResult.m_hitCollisionObject->getUserPointer());
+            if (!projectileHolder->isActive())
+                return btScalar(1);
+            auto* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
+            const MWWorld::Ptr target = targetHolder->getPtr();
+            // do nothing if we hit the caster. Sometimes the launching origin is inside of caster collision shape
+            if (projectileHolder->getCaster() != target)
+            {
+                projectileHolder->hit(target, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
+                return btScalar(1);
+            }
+        }
 
         btVector3 hitNormalWorld;
         if (normalInWorldSpace)
