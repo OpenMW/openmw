@@ -24,7 +24,7 @@ namespace MWPhysics
         mCollisionObject.reset(new btCollisionObject);
         mCollisionObject->setCollisionShape(shapeInstance->getCollisionShape());
 
-        mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
+        mCollisionObject->setUserPointer(this);
 
         setScale(ptr.getCellRef().getScale());
         setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));

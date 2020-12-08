@@ -1493,6 +1493,7 @@ namespace MWWorld
         mProjectileManager->update(duration);
 
         const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        mProjectileManager->processHits();
         mDiscardMovements = false;
 
         for(const auto& [actor, position]: results)

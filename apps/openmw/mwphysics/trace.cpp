@@ -5,6 +5,9 @@
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 
+#include "../mwbase/world.hpp"
+#include "../mwbase/environment.hpp"
+
 #include "collisiontype.hpp"
 #include "actor.hpp"
 #include "closestnotmeconvexresultcallback.hpp"

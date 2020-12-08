@@ -8,6 +8,7 @@
     Bug #2473: Unable to overstock merchants
     Bug #2798: Mutable ESM records
     Bug #2976 [reopened]: Issues combining settings from the command line and both config files
+    Bug #3372: Projectiles and magic bolts go through moving targets
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
     Bug #3789: Crash in visitEffectSources while in battle
@@ -67,6 +68,7 @@
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
+    Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
