@@ -153,13 +153,13 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.mergeComposingVariables(variables, composingVariables, desc);
 
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
-    std::cout << v.describe() << std::endl;
+    Log(Debug::Info) << v.describe();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
 
     // Font encoding settings
     std::string encoding(variables["encoding"].as<Files::EscapeHashString>().toStdString());
-    std::cout << ToUTF8::encodingUsingMessage(encoding) << std::endl;
+    Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
     // directory settings
