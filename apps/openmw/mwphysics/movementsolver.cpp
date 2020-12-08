@@ -402,6 +402,11 @@ namespace MWPhysics
         actor.mPosition.z() -= halfExtents.z(); // vanilla-accurate
     }
 
+    btVector3 addMarginToDelta(btVector3 delta)
+    {
+        return delta + delta.normalized() * sCollisionMargin;
+    }
+
     void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
     {
         const auto& ptr = actor.mPtr;
@@ -443,7 +448,7 @@ namespace MWPhysics
         {
             // we are; try moving it out of the world
             const auto positionDelta = contactCallback.mDelta;
-            goodPosition = refPosition + Misc::Convert::toOsg(positionDelta);
+            goodPosition = refPosition + Misc::Convert::toOsg(addMarginToDelta(positionDelta));
             newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
             collisionObject->setWorldTransform(newTransform);
 
