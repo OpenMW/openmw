@@ -1,6 +1,7 @@
 #include "debugging.hpp"
 
 #include <chrono>
+#include <memory>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 
@@ -133,11 +134,19 @@ namespace Debug
     }
 }
 
+static std::unique_ptr<std::ostream> rawStdout = nullptr;
+
+std::ostream& getRawStdout()
+{
+    return rawStdout ? *rawStdout : std::cout;
+}
+
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName)
 {
 #if defined _WIN32
     (void)Debug::attachParentConsole();
 #endif
+    rawStdout = std::make_unique<std::ostream>(std::cout.rdbuf());
 
     // Some objects used to redirect cout and cerr
     // Scope must be here, so this still works inside the catch block for logging exceptions
