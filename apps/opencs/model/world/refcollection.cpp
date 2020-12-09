@@ -64,10 +64,12 @@ void CSMWorld::RefCollection::load (ESM::ESMReader& reader, int cellIndex, bool 
 
         // ignore content file number
         std::map<ESM::RefNum, std::string>::iterator iter = cache.begin();
-        ref.mRefNum.mIndex = ref.mRefNum.mIndex & 0x00ffffff;
+        unsigned int thisIndex = ref.mRefNum.mIndex & 0x00ffffff;
+        if (ref.mRefNum.mContentFile != -1 && !base) ref.mRefNum.mContentFile = ref.mRefNum.mIndex >> 24;
+
         for (; iter != cache.end(); ++iter)
         {
-            if (ref.mRefNum.mIndex == iter->first.mIndex)
+            if (thisIndex == iter->first.mIndex)
                 break;
         }
 
