@@ -3,6 +3,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/files/configurationmanager.hpp>
+#include <components/files/escape.hpp>
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -58,10 +59,10 @@ struct ContentFileTest : public ::testing::Test
 
         boost::program_options::options_description desc("Allowed options");
         desc.add_options()
-        ("data", boost::program_options::value<Files::PathContainer>()->default_value(Files::PathContainer(), "data")->multitoken()->composing())
-        ("content", boost::program_options::value<std::vector<std::string> >()->default_value(std::vector<std::string>(), "")
-            ->multitoken(), "content file(s): esm/esp, or omwgame/omwaddon")
-        ("data-local", boost::program_options::value<std::string>()->default_value(""));
+        ("data", boost::program_options::value<Files::EscapePathContainer>()->default_value(Files::EscapePathContainer(), "data")->multitoken()->composing())
+        ("content", boost::program_options::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
+        ("data-local", boost::program_options::value<Files::EscapePath>()->default_value(Files::EscapePath(), ""));
 
         boost::program_options::notify(variables);
 
@@ -69,12 +70,12 @@ struct ContentFileTest : public ::testing::Test
 
         Files::PathContainer dataDirs, dataLocal;
         if (!variables["data"].empty()) {
-            dataDirs = Files::PathContainer(variables["data"].as<Files::PathContainer>());
+            dataDirs = Files::EscapePath::toPathContainer(variables["data"].as<Files::EscapePathContainer>());
         }
 
-        std::string local = variables["data-local"].as<std::string>();
+        Files::PathContainer::value_type local(variables["data-local"].as<Files::EscapePath>().mPath);
         if (!local.empty()) {
-            dataLocal.push_back(Files::PathContainer::value_type(local));
+            dataLocal.push_back(local);
         }
 
         mConfigurationManager.processPaths (dataDirs);
@@ -85,7 +86,7 @@ struct ContentFileTest : public ::testing::Test
 
         Files::Collections collections (dataDirs, true);
 
-        std::vector<std::string> contentFiles = variables["content"].as<std::vector<std::string> >();
+        std::vector<std::string> contentFiles = variables["content"].as<Files::EscapeStringVector>().toStdStringVector();
         for (auto & contentFile : contentFiles)
             mContentFiles.push_back(collections.getPath(contentFile));
     }
