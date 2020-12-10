@@ -73,8 +73,10 @@
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
+    Feature #2686: Timestamps in openmw.log
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #5043: Head Bobbing
+    Feature #5199: Improve Scene Colors
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
@@ -93,6 +95,7 @@
     Feature #5649: Skyrim SE compressed BSA format support
     Feature #5672: Make stretch menu background configuration more accessible
     Feature #5692: Improve spell/magic item search to factor in magic effect names
+    Feature #5730: Add graphic herbalism option to the launcher and documents
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

@@ -135,7 +135,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
 
     if (variables.count ("help"))
     {
-        std::cout << desc << std::endl;
+        getRawStdout() << desc << std::endl;
         return false;
     }
 
@@ -144,7 +144,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         cfgMgr.readConfiguration(variables, desc, true);
 
         Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::EscapePath>().mPath.string());
-        std::cout << v.describe() << std::endl;
+        getRawStdout() << v.describe() << std::endl;
         return false;
     }
 
