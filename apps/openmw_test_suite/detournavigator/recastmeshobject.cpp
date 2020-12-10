@@ -15,7 +15,7 @@ namespace
     struct DetourNavigatorRecastMeshObjectTest : Test
     {
         btBoxShape mBoxShape {btVector3(1, 2, 3)};
-        btCompoundShape mCompoundShape {btVector3(1, 2, 3)};
+        btCompoundShape mCompoundShape {true};
         btTransform mTransform {btQuaternion(btVector3(1, 2, 3), 1), btVector3(1, 2, 3)};
 
         DetourNavigatorRecastMeshObjectTest()
