@@ -32,10 +32,10 @@ namespace MWPhysics
         return obj->getBroadphaseHandle()->m_collisionFilterGroup == CollisionType_Actor;
     }
 
-    class DeepestContactResultCallback : public btCollisionWorld::ContactResultCallback
+    class ContactCollectionCallback : public btCollisionWorld::ContactResultCallback
     {
     public:
-        DeepestContactResultCallback(const btCollisionObject * me, osg::Vec3f velocity) : mMe(me)
+        ContactCollectionCallback(const btCollisionObject * me, osg::Vec3f velocity) : mMe(me)
         {
             m_collisionFilterGroup = me->getBroadphaseHandle()->m_collisionFilterGroup;
             m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask;
@@ -53,10 +53,16 @@ namespace MWPhysics
                 mDistance = contact.m_distance1;
                 mNormal = contact.m_normalWorldOnB;
                 mDelta = mNormal*-mDistance;
+                mContactSum += contact.m_normalWorldOnB * -contact.m_distance1;
                 return mDistance;
             }
-            return 0.0;
+            else
+            {
+                mContactSum += contact.m_normalWorldOnB * -contact.m_distance1;
+                return 0.0;
+            }
         }
+        btVector3 mContactSum{0.0, 0.0, 0.0};
         btVector3 mNormal{0.0, 0.0, 0.0}; // points towards "me"
         btVector3 mDelta{0.0, 0.0, 0.0}; // points towards "me"
         btScalar mDistance = 0.0; // negative or zero
@@ -442,18 +448,24 @@ namespace MWPhysics
         collisionObject->setWorldTransform(newTransform);
 
         // check whether we're inside the world with our collision box with manually-derived offset
-        DeepestContactResultCallback contactCallback{collisionObject, velocity};
+        ContactCollectionCallback contactCallback{collisionObject, velocity};
         ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback);
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
             // we are; try moving it out of the world
-            const auto positionDelta = contactCallback.mDelta;
+            auto positionDelta = contactCallback.mContactSum;
+            const auto deltaLength = positionDelta.length();
+            const auto maxMotion = 2.0f * verticalHalfExtent.z();
+            if(deltaLength > maxMotion)
+                positionDelta = positionDelta / deltaLength * maxMotion;
+            //positionDelta.normalize();
+            //positionDelta *= contactCallback.mDistance;
             goodPosition = refPosition + Misc::Convert::toOsg(addMarginToDelta(positionDelta));
             newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
             collisionObject->setWorldTransform(newTransform);
 
             // test for contact
-            DeepestContactResultCallback contactCallback2{collisionObject, velocity};
+            ContactCollectionCallback contactCallback2{collisionObject, velocity};
             ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback2);
             // successfully moved further out from contact (does not have to be in open space, just less inside of things)
             if(contactCallback2.mDistance > contactCallback.mDistance)
@@ -467,7 +479,7 @@ namespace MWPhysics
                 collisionObject->setWorldTransform(newTransform);
 
                 // contact test
-                DeepestContactResultCallback contactCallback3{collisionObject, velocity};
+                ContactCollectionCallback contactCallback3{collisionObject, velocity};
                 ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback3);
                 // success
                 if(contactCallback3.mDistance > contactCallback.mDistance)
@@ -480,7 +492,7 @@ namespace MWPhysics
                     newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
                     collisionObject->setWorldTransform(newTransform);
 
-                    DeepestContactResultCallback contactCallback4{collisionObject, velocity};
+                    ContactCollectionCallback contactCallback4{collisionObject, velocity};
                     ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback4);
                     // success
                     if(contactCallback4.mDistance > contactCallback.mDistance)
