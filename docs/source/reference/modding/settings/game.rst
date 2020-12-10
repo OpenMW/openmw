@@ -428,3 +428,14 @@ even if the fighting NPC is knocked out.
 This setting allows the player to steal items from fighting NPCs that were knocked out if enabled.
 
 This setting can be controlled in Advanced tab of the launcher.
+
+graphic herbalism
+-----------------
+
+:Type:      boolean
+:Range:		True/False
+:Default:	True
+
+Some mods add harvestable container models. When this setting is enabled, activating a container using a harvestable model will visually harvest from it instead of opening the menu.
+
+When this setting is turned off or when activating a regular container, the menu will open as usual.

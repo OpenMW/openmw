@@ -94,6 +94,7 @@
     Feature #5649: Skyrim SE compressed BSA format support
     Feature #5672: Make stretch menu background configuration more accessible
     Feature #5692: Improve spell/magic item search to factor in magic effect names
+    Feature #5730: Add graphic herbalism option to the launcher and documents
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

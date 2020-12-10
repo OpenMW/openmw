@@ -153,6 +153,7 @@ bool Launcher::AdvancedPage::loadSettings()
         if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
             showOwnedComboBox->setCurrentIndex(showOwnedIndex);
         loadSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
     }
 
     // Bug fixes
@@ -279,6 +280,7 @@ void Launcher::AdvancedPage::saveSettings()
         if (showOwnedCurrentIndex != mEngineSettings.getInt("show owned", "Game"))
             mEngineSettings.setInt("show owned", "Game", showOwnedCurrentIndex);
         saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
+        saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
     }
 
     // Bug fixes
