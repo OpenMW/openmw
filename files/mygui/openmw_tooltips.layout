@@ -267,6 +267,12 @@
                     <Property key="TextAlign" value="HCenter Top"/>
                 </Widget>
             </Widget>
+
+            <Widget type="AutoSizedTextBox" skin="SandText" position="0 0 0 0" align="Left Top" name="LevelDetailText">
+                <Property key="AutoResize" value="true"/>
+                <Property key="MultiLine" value="true"/>
+                <Property key="Shrink" value="true"/>
+            </Widget>
         </Widget>
 
         <!-- Birthsign tooltip -->

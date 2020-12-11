@@ -72,6 +72,7 @@
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5731: Editor: skirts are invisible on characters
     Feature #390: 3rd person look "over the shoulder"
+    Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
