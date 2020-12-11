@@ -162,8 +162,8 @@ namespace Resource
     {
         return compareObjects(lhs.mCollisionShape, rhs.mCollisionShape)
             && compareObjects(lhs.mAvoidCollisionShape, rhs.mAvoidCollisionShape)
-            && lhs.mCollisionBoxHalfExtents == rhs.mCollisionBoxHalfExtents
-            && lhs.mCollisionBoxTranslate == rhs.mCollisionBoxTranslate
+            && lhs.mCollisionBox.extents == rhs.mCollisionBox.extents
+            && lhs.mCollisionBox.center == rhs.mCollisionBox.center
             && lhs.mAnimatedShapes == rhs.mAnimatedShapes;
     }
 
@@ -172,7 +172,8 @@ namespace Resource
         return stream << "Resource::BulletShape {"
             << value.mCollisionShape << ", "
             << value.mAvoidCollisionShape << ", "
-            << "osg::Vec3f {" << value.mCollisionBoxHalfExtents << "}" << ", "
+            << "osg::Vec3f {" << value.mCollisionBox.extents << "}" << ", "
+            << "osg::Vec3f {" << value.mCollisionBox.center << "}" << ", "
             << value.mAnimatedShapes
             << "}";
     }
@@ -433,8 +434,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
@@ -458,8 +459,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
@@ -488,8 +489,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
@@ -523,8 +524,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
@@ -558,8 +559,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(4, 5, 6);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-4, -5, -6);
+        expected.mCollisionBox.extents = osg::Vec3f(4, 5, 6);
+        expected.mCollisionBox.center = osg::Vec3f(-4, -5, -6);
         std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(4, 5, 6)));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
         shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-4, -5, -6)), box.release());
@@ -581,8 +582,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
 
         EXPECT_EQ(*result, expected);
     }
@@ -615,8 +616,8 @@ namespace
         const auto result = mLoader.load(mNifFile);
 
         Resource::BulletShape expected;
-        expected.mCollisionBoxHalfExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBoxTranslate = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionBox.extents = osg::Vec3f(1, 2, 3);
+        expected.mCollisionBox.center = osg::Vec3f(-1, -2, -3);
 
         EXPECT_EQ(*result, expected);
     }
