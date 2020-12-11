@@ -70,6 +70,7 @@
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
+    Bug #5731: Editor: skirts are invisible on characters
     Feature #390: 3rd person look "over the shoulder"
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
