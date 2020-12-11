@@ -16,10 +16,11 @@ namespace MWPhysics
 
     // Arbitrary number. To prevent infinite loops. They shouldn't happen but it's good to be prepared.
     static const int sMaxIterations = 8;
-    // Allows for more precise movement solving without getting stuck too easily.
-    static const float sCollisionMargin = 0.01;
-    // Allow for a small amount of penetration to prevent numerical precision issues from causing the unsucking code to run unnecessarily
-    static const float sAllowedPenetration = 0.1;
+    // Allows for more precise movement solving without getting stuck or snagging too easily.
+    static const float sCollisionMargin = 0.1;
+    // Allow for a small amount of penetration to prevent numerical precision issues from causing the "unstuck"ing code to run unnecessarily
+    // Currently set to 0 because having the "unstuck"ing code run whenever possible prevents some glitchy snagging issues
+    static const float sAllowedPenetration = 0.0;
 }
 
 #endif
