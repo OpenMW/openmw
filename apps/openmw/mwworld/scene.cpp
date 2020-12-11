@@ -253,7 +253,7 @@ namespace
         bool operator() (const MWWorld::Ptr& ptr)
         {
             if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
-                ptr.getClass().adjustPosition (ptr, false);
+                ptr.getClass().adjustPosition (ptr, true);
             return true;
         }
     };
