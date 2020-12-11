@@ -45,23 +45,29 @@ namespace MWPhysics
         {
             if (isActor(colObj0Wrap->getCollisionObject()) && isActor(colObj1Wrap->getCollisionObject()))
                 return 0.0;
+            // ignore overlap if we're moving in the same direction as it would push us out (don't change this to >=, that would break detection when not moving)
+            if (contact.m_normalWorldOnB.dot(mVelocity) > 0.0)
+                return 0.0;
+            auto delta = contact.m_normalWorldOnB * -contact.m_distance1;
+            mContactSum += delta;
+            mMaxX = std::max(std::abs(delta.x()), mMaxX);
+            mMaxY = std::max(std::abs(delta.y()), mMaxY);
+            mMaxZ = std::max(std::abs(delta.z()), mMaxZ);
             if (contact.m_distance1 < mDistance)
             {
-                // ignore overlap if we're moving in the same direction as it would push us out (don't change this to >=, that would break detection when not moving)
-                if (contact.m_normalWorldOnB.dot(mVelocity) > 0.0)
-                    return 0.0;
                 mDistance = contact.m_distance1;
                 mNormal = contact.m_normalWorldOnB;
-                mDelta = mNormal*-mDistance;
-                mContactSum += contact.m_normalWorldOnB * -contact.m_distance1;
+                mDelta = delta;
                 return mDistance;
             }
             else
             {
-                mContactSum += contact.m_normalWorldOnB * -contact.m_distance1;
                 return 0.0;
             }
         }
+        btScalar mMaxX = 0.0;
+        btScalar mMaxY = 0.0;
+        btScalar mMaxZ = 0.0;
         btVector3 mContactSum{0.0, 0.0, 0.0};
         btVector3 mNormal{0.0, 0.0, 0.0}; // points towards "me"
         btVector3 mDelta{0.0, 0.0, 0.0}; // points towards "me"
@@ -410,6 +416,8 @@ namespace MWPhysics
 
     btVector3 addMarginToDelta(btVector3 delta)
     {
+        if(delta.length2() == 0.0)
+            return delta;
         return delta + delta.normalized() * sCollisionMargin;
     }
 
@@ -444,29 +452,33 @@ namespace MWPhysics
         osg::Vec3f goodPosition = refPosition;
         const btTransform oldTransform = collisionObject->getWorldTransform();
         btTransform newTransform = oldTransform;
-        newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
-        collisionObject->setWorldTransform(newTransform);
+
+        auto gatherContacts = [&](btVector3 newOffset) -> ContactCollectionCallback
+        {
+            goodPosition = refPosition + Misc::Convert::toOsg(addMarginToDelta(newOffset));
+            newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
+            collisionObject->setWorldTransform(newTransform);
+
+            ContactCollectionCallback callback{collisionObject, velocity};
+            ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, callback);
+            return callback;
+        };
 
         // check whether we're inside the world with our collision box with manually-derived offset
-        ContactCollectionCallback contactCallback{collisionObject, velocity};
-        ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback);
+        auto contactCallback = gatherContacts({0.0, 0.0, 0.0});
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
             // we are; try moving it out of the world
             auto positionDelta = contactCallback.mContactSum;
-            const auto deltaLength = positionDelta.length();
-            const auto maxMotion = 2.0f * verticalHalfExtent.z();
-            if(deltaLength > maxMotion)
-                positionDelta = positionDelta / deltaLength * maxMotion;
-            //positionDelta.normalize();
-            //positionDelta *= contactCallback.mDistance;
-            goodPosition = refPosition + Misc::Convert::toOsg(addMarginToDelta(positionDelta));
-            newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
-            collisionObject->setWorldTransform(newTransform);
+            // limit rejection delta to the largest known individual rejections
+            if(std::abs(positionDelta.x()) > contactCallback.mMaxX)
+                positionDelta *= contactCallback.mMaxX / std::abs(positionDelta.x());
+            if(std::abs(positionDelta.y()) > contactCallback.mMaxY)
+                positionDelta *= contactCallback.mMaxY / std::abs(positionDelta.y());
+            if(std::abs(positionDelta.z()) > contactCallback.mMaxZ)
+                positionDelta *= contactCallback.mMaxZ / std::abs(positionDelta.z());
 
-            // test for contact
-            ContactCollectionCallback contactCallback2{collisionObject, velocity};
-            ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback2);
+            auto contactCallback2 = gatherContacts(positionDelta);
             // successfully moved further out from contact (does not have to be in open space, just less inside of things)
             if(contactCallback2.mDistance > contactCallback.mDistance)
                 tempPosition = goodPosition - verticalHalfExtent;
@@ -474,26 +486,14 @@ namespace MWPhysics
             else
             {
                 // upwards-only offset
-                goodPosition = refPosition + osg::Vec3f(0.0, 0.0, std::abs(positionDelta.z()));
-                newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
-                collisionObject->setWorldTransform(newTransform);
-
-                // contact test
-                ContactCollectionCallback contactCallback3{collisionObject, velocity};
-                ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback3);
+                auto contactCallback3 = gatherContacts({0.0, 0.0, std::abs(positionDelta.z())});
                 // success
                 if(contactCallback3.mDistance > contactCallback.mDistance)
-                {
                     tempPosition = goodPosition - verticalHalfExtent;
-                }
+                else
                 // try again but fixed distance up
                 {
-                    goodPosition = refPosition + osg::Vec3f(0.0, 0.0, 10.0);
-                    newTransform.setOrigin(Misc::Convert::toBullet(goodPosition));
-                    collisionObject->setWorldTransform(newTransform);
-
-                    ContactCollectionCallback contactCallback4{collisionObject, velocity};
-                    ContactTestWrapper::contactTest(const_cast<btCollisionWorld*>(collisionWorld), collisionObject, contactCallback4);
+                    auto contactCallback4 = gatherContacts({0.0, 0.0, 10.0});
                     // success
                     if(contactCallback4.mDistance > contactCallback.mDistance)
                         tempPosition = goodPosition - verticalHalfExtent;
