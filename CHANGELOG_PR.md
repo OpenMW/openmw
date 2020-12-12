@@ -34,7 +34,9 @@ Bug Fixes:
 - Morrowind legacy madness: Using a key on a trapped door/container now only disarms the trap if the door/container is locked (#5370)
 
 Editor Bug Fixes:
+- Deleted and moved objects within a cell are now saved properly (#832)
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
+- Loading mods now keeps the master index (#5675)
 - Flicker and crashing on XFCE4 fixed (#5703)
 
 Miscellaneous:
