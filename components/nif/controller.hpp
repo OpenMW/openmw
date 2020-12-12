@@ -230,5 +230,13 @@ struct NiTransformInterpolator : public Interpolator
     void post(NIFFile *nif) override;
 };
 
+struct NiColorInterpolator : public Interpolator
+{
+    osg::Vec4f defaultVal;
+    NiColorDataPtr data;
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
 } // Namespace
 #endif

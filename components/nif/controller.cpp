@@ -325,4 +325,15 @@ namespace Nif
         data.post(nif);
     }
 
+    void NiColorInterpolator::read(NIFStream *nif)
+    {
+        defaultVal = nif->getVector4();
+        data.read(nif);
+    }
+
+    void NiColorInterpolator::post(NIFFile *nif)
+    {
+        data.post(nif);
+    }
+
 }

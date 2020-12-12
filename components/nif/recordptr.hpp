@@ -147,6 +147,7 @@ struct NiSkinPartition;
 struct NiFloatInterpolator;
 struct NiPoint3Interpolator;
 struct NiTransformInterpolator;
+struct BSShaderTextureSet;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -174,6 +175,7 @@ using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
 using NiFloatInterpolatorPtr = RecordPtrT<NiFloatInterpolator>;
 using NiPoint3InterpolatorPtr = RecordPtrT<NiPoint3Interpolator>;
 using NiTransformInterpolatorPtr = RecordPtrT<NiTransformInterpolator>;
+using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;

@@ -66,6 +66,24 @@ public:
     void post(NIFFile *nif) override;
 };
 
+struct BSShaderTextureSet : public Record
+{
+    enum TextureType
+    {
+        TextureType_Base = 0,
+        TextureType_Normal = 1,
+        TextureType_Glow = 2,
+        TextureType_Parallax = 3,
+        TextureType_Env = 4,
+        TextureType_EnvMask = 5,
+        TextureType_Subsurface = 6,
+        TextureType_BackLighting = 7
+    };
+    std::vector<std::string> textures;
+
+    void read(NIFStream *nif) override;
+};
+
 struct NiParticleModifier : public Record
 {
     NiParticleModifierPtr next;
