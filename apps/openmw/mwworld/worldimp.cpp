@@ -1344,12 +1344,8 @@ namespace MWWorld
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
-        if (force) // force physics to use the new position
-        {
-            auto actor = mPhysics->getActor(ptr);
-            if(actor)
-                actor->resetPosition();
-        }
+        if (ptr.getClass().isActor())
+            mPhysics->getActor(ptr)->resetPosition();
     }
 
     void World::fixPosition()
