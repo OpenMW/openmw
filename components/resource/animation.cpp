@@ -10,7 +10,7 @@ namespace Resource
         mStartTime(0.0f)
     {
         const osgAnimation::ChannelList& channels = anim.getChannels();
-        for (const osg::ref_ptr<osgAnimation::Channel> channel: channels)
+        for (const auto& channel: channels)
             addChannel(channel.get()->clone());
     }
 
@@ -31,7 +31,7 @@ namespace Resource
 
     bool Animation::update (double time)
     {
-        for (const osg::ref_ptr<osgAnimation::Channel> channel: mChannels)
+        for (const auto& channel: mChannels)
         {
             channel->update(time, 1.0f, 0);
         }
