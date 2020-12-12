@@ -126,8 +126,13 @@ namespace Crash
 
     void CrashCatcher::startMonitorProcess(const std::string& crashLogPath)
     {
-        WCHAR executablePath[MAX_PATH + 1];
-        GetModuleFileNameW(NULL, executablePath, MAX_PATH + 1);
+        std::wstring executablePath;
+        DWORD copied = 0;
+        do {
+            executablePath.resize(executablePath.size() + MAX_PATH);
+            copied = GetModuleFileNameW(nullptr, &executablePath[0], executablePath.size());
+        } while (copied >= executablePath.size());
+        executablePath.resize(copied);
 
         memset(mShm->mStartup.mLogFilePath, 0, sizeof(mShm->mStartup.mLogFilePath));
         int length = crashLogPath.length();
@@ -152,7 +157,7 @@ namespace Crash
         PROCESS_INFORMATION pi;
         ZeroMemory(&pi, sizeof(pi));
 
-        if (!CreateProcessW(executablePath, &argumetns[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        if (!CreateProcessW(&executablePath[0], &argumetns[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
             throw std::runtime_error("Could not start crash monitor process");
 
         waitMonitor();
