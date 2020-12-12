@@ -466,19 +466,12 @@ namespace NifOsg
             texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
-            osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
-            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-
             int texUnit = 3; // FIXME
 
             osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(texUnit, texGen, osg::StateAttribute::ON);
-            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
 
             stateset->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
         }
@@ -1484,6 +1477,17 @@ namespace NifOsg
             return image;
         }
 
+        osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
+        {
+            osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
+            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            return texEnv;
+        }
+
         void handleTextureProperty(const Nif::NiTexturingProperty* texprop, const std::string& nodeName, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
             if (!boundTextures.empty())
@@ -1570,14 +1574,7 @@ namespace NifOsg
 
                     if (i == Nif::NiTexturingProperty::GlowTexture)
                     {
-                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-                        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-
-                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                        stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::DarkTexture)
                     {
