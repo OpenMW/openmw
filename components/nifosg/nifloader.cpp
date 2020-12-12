@@ -963,6 +963,9 @@ namespace NifOsg
                 if (particle.lifespan <= 0)
                     continue;
 
+                if (particle.vertex >= particledata->vertices.size())
+                    continue;
+
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
@@ -971,16 +974,16 @@ namespace NifOsg
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices.at(particle.vertex);
+                const osg::Vec3f& position = particledata->vertices[particle.vertex];
                 created->setPosition(position);
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
-                if (particle.vertex < int(particledata->colors.size()))
-                    partcolor = particledata->colors.at(particle.vertex);
+                if (particle.vertex < particledata->colors.size())
+                    partcolor = particledata->colors[particle.vertex];
 
                 float size = partctrl->size;
-                if (particle.vertex < int(particledata->sizes.size()))
-                    size *= particledata->sizes.at(particle.vertex);
+                if (particle.vertex < particledata->sizes.size())
+                    size *= particledata->sizes[particle.vertex];
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));

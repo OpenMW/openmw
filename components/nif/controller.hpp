@@ -37,7 +37,7 @@ public:
         float lifetime;
         float lifespan;
         float timestamp;
-        int vertex;
+        unsigned short vertex;
     };
 
     float velocity;
