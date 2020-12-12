@@ -138,12 +138,12 @@ namespace MWPhysics
         }
 
         const btCollisionObject *colobj = physicActor->getCollisionObject();
-        osg::Vec3f halfExtents = physicActor->getHalfExtents();
-        //osg::Vec3f meshTranslation = physicActor->getScaledMeshTranslation();
 
         // Adjust for collision mesh offset relative to actor's "location"
-        // (doTrace doesn't take local/interior collision shape translation into account)
-        //actor.mPosition += meshTranslation; // "correct"
+        // (doTrace doesn't take local/interior collision shape translation into account, so we have to do it on our own)
+        // for compatibility with vanilla assets, we have to derive this from the vertical half extent instead of from internal hull translation
+        // if not for this hack, the "correct" collision hull position would be physicActor->getScaledMeshTranslation()
+        osg::Vec3f halfExtents = physicActor->getHalfExtents();
         actor.mPosition.z() += halfExtents.z(); // vanilla-accurate
 
         static const float fSwimHeightScale = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
@@ -410,7 +410,6 @@ namespace MWPhysics
 
         actor.mPosition = newPosition;
         // remove what was added earlier in compensating for doTrace not taking interior transformation into account
-        //actor.mPosition -= meshTranslation; // "correct"
         actor.mPosition.z() -= halfExtents.z(); // vanilla-accurate
     }
 
@@ -434,9 +433,8 @@ namespace MWPhysics
         auto* collisionObject = physicActor->getCollisionObject();
         auto tempPosition = actor.mPosition;
 
-        // "correct"
-        //const auto& meshTranslation = physicActor->getScaledMeshTranslation();
-        // vanilla-accurate (do same hitbox offset hack as movement solver)
+        // use vanilla-accurate collision hull position hack (do same hitbox offset hack as movement solver)
+        // if vanilla compatibility didn't matter, the "correct" collision hull position would be physicActor->getScaledMeshTranslation()
         const auto verticalHalfExtent = osg::Vec3f(0.0, 0.0, physicActor->getHalfExtents().z());
 
         // use a 3d approximation of the movement vector to better judge player intent

@@ -8,7 +8,7 @@ namespace MWPhysics
 
     static const float sMinStep = 10.0f; // hack to skip over tiny unwalkable slopes
     static const float sMinStep2 = 20.0f; // hack to skip over shorter but longer/wider/further unwalkable slopes
-    // do extra stairstepping logic hacks to work around bad morrowind assets - disabling causes problems but improves performance
+    // whether to do the above stairstepping logic hacks to work around bad morrowind assets - disabling causes problems but improves performance
     static const bool sDoExtraStairHacks = true;
 
     static const float sGroundOffset = 1.0f;
