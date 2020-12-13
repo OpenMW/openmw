@@ -149,7 +149,7 @@ namespace Crash
 
         std::wstringstream ss;
         ss << "--crash-monitor " << std::hex << duplicateHandle(mShmHandle);
-        std::wstring argumetns(ss.str());
+        std::wstring arguments(ss.str());
 
         STARTUPINFOW si;
         ZeroMemory(&si, sizeof(si));
@@ -157,7 +157,7 @@ namespace Crash
         PROCESS_INFORMATION pi;
         ZeroMemory(&pi, sizeof(pi));
 
-        if (!CreateProcessW(&executablePath[0], &argumetns[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        if (!CreateProcessW(&executablePath[0], &arguments[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
             throw std::runtime_error("Could not start crash monitor process");
 
         waitMonitor();
