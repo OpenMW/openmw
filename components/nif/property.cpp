@@ -99,6 +99,18 @@ void NiTexturingProperty::post(NIFFile *nif)
         shaderTextures[i].post(nif);
 }
 
+void BSShaderProperty::read(NIFStream *nif)
+{
+    NiShadeProperty::read(nif);
+    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+    {
+        type = nif->getUInt();
+        flags1 = nif->getUInt();
+        flags2 = nif->getUInt();
+        envMapIntensity = nif->getFloat();
+    }
+}
+
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);

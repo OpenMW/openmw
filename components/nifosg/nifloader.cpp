@@ -96,6 +96,15 @@ namespace
                 }
             }
         }
+
+        auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
+        if (geometry)
+        {
+            if (!geometry->shaderprop.empty())
+                out.emplace_back(geometry->shaderprop.getPtr());
+            if (!geometry->alphaprop.empty())
+                out.emplace_back(geometry->alphaprop.getPtr());
+        }
     }
 
     // NodeCallback used to have a node always oriented towards the camera. The node can have translation and scale
@@ -366,6 +375,11 @@ namespace NifOsg
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
                 }
             }
+
+            auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
+            // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
+            if (geometry && !geometry->shaderprop.empty())
+                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
         }
 
         void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)

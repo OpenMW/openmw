@@ -278,6 +278,8 @@ struct NiGeometry : Node
     NiGeometryDataPtr data;
     NiSkinInstancePtr skin;
     MaterialData material;
+    BSShaderPropertyPtr shaderprop;
+    NiAlphaPropertyPtr alphaprop;
 
     void read(NIFStream *nif) override
     {
@@ -286,7 +288,10 @@ struct NiGeometry : Node
         skin.read(nif);
         material.read(nif);
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
-            nif->skip(8);
+        {
+            shaderprop.read(nif);
+            alphaprop.read(nif);
+        }
     }
 
     void post(NIFFile *nif) override
@@ -294,6 +299,8 @@ struct NiGeometry : Node
         Node::post(nif);
         data.post(nif);
         skin.post(nif);
+        shaderprop.post(nif);
+        alphaprop.post(nif);
         if (recType != RC_NiParticles && !skin.empty())
             nif->setUseSkinning(true);
     }

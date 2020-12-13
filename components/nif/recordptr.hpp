@@ -146,6 +146,8 @@ struct NiPoint3Interpolator;
 struct NiTransformInterpolator;
 struct BSShaderTextureSet;
 struct NiGeometryData;
+struct BSShaderProperty;
+class NiAlphaProperty;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -171,6 +173,8 @@ using NiPoint3InterpolatorPtr = RecordPtrT<NiPoint3Interpolator>;
 using NiTransformInterpolatorPtr = RecordPtrT<NiTransformInterpolator>;
 using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
 using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
+using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
+using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
