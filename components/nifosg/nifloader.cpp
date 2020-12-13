@@ -67,6 +67,7 @@ namespace
             case Nif::RC_NiTriShape:
             case Nif::RC_NiTriStrips:
             case Nif::RC_NiLines:
+            case Nif::RC_BSLODTriShape:
                 return true;
         }
         return false;
@@ -1178,7 +1179,7 @@ namespace NifOsg
                 return;
             const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
 
-            if (niGeometry->recType == Nif::RC_NiTriShape)
+            if (niGeometry->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_BSLODTriShape)
             {
                 if (niGeometryData->recType != Nif::RC_NiTriShapeData)
                     return;

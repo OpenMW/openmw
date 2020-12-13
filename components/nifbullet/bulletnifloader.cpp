@@ -101,7 +101,7 @@ void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, co
 
 void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiGeometry* geometry, const osg::Matrixf &transform = osg::Matrixf())
 {
-    if (geometry->recType == Nif::RC_NiTriShape)
+    if (geometry->recType == Nif::RC_NiTriShape || geometry->recType == Nif::RC_BSLODTriShape)
         fillTriangleMesh(mesh, static_cast<const Nif::NiTriShapeData&>(geometry->data.get()), transform);
     else if (geometry->recType == Nif::RC_NiTriStrips)
         fillTriangleMesh(mesh, static_cast<const Nif::NiTriStripsData&>(geometry->data.get()), transform);
@@ -309,7 +309,9 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         // NOTE: a trishape with hasBounds=true, but no BBoxCollision flag should NOT go through handleNiTriShape!
         // It must be ignored completely.
         // (occurs in tr_ex_imp_wall_arch_04.nif)
-        if(!node->hasBounds && (node->recType == Nif::RC_NiTriShape || node->recType == Nif::RC_NiTriStrips))
+        if(!node->hasBounds && (node->recType == Nif::RC_NiTriShape
+                             || node->recType == Nif::RC_NiTriStrips
+                             || node->recType == Nif::RC_BSLODTriShape))
         {
             handleNiTriShape(node, flags, getWorldTransform(node), isAnimated, avoid);
         }
@@ -342,7 +344,7 @@ void BulletNifLoader::handleNiTriShape(const Nif::Node *nifNode, int flags, cons
     if (niGeometry->data.empty() || niGeometry->data->vertices.empty())
         return;
 
-    if (niGeometry->recType == Nif::RC_NiTriShape)
+    if (niGeometry->recType == Nif::RC_NiTriShape || niGeometry->recType == Nif::RC_BSLODTriShape)
     {
         if (niGeometry->data->recType != Nif::RC_NiTriShapeData)
             return;

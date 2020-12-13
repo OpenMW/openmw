@@ -300,6 +300,17 @@ struct NiGeometry : Node
 };
 
 struct NiTriShape : NiGeometry {};
+struct BSLODTriShape : NiTriShape
+{
+    unsigned int lod0, lod1, lod2;
+    void read(NIFStream *nif) override
+    {
+        NiTriShape::read(nif);
+        lod0 = nif->getUInt();
+        lod1 = nif->getUInt();
+        lod2 = nif->getUInt();
+    }
+};
 struct NiTriStrips : NiGeometry {};
 struct NiLines : NiGeometry {};
 struct NiParticles : NiGeometry { };
