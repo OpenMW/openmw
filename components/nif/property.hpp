@@ -125,6 +125,12 @@ struct BSShaderProperty : public NiShadeProperty
     void read(NIFStream *nif) override;
 };
 
+struct BSShaderLightingProperty : public BSShaderProperty
+{
+    unsigned int clamp{0u};
+    void read(NIFStream *nif) override;
+};
+
 struct NiDitherProperty : public Property
 {
     unsigned short flags;

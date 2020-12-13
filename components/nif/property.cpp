@@ -111,6 +111,13 @@ void BSShaderProperty::read(NIFStream *nif)
     }
 }
 
+void BSShaderLightingProperty::read(NIFStream *nif)
+{
+    BSShaderProperty::read(nif);
+    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+        clamp = nif->getUInt();
+}
+
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);
