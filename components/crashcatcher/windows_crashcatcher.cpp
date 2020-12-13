@@ -130,7 +130,7 @@ namespace Crash
         DWORD copied = 0;
         do {
             executablePath.resize(executablePath.size() + MAX_PATH);
-            copied = GetModuleFileNameW(nullptr, &executablePath[0], executablePath.size());
+            copied = GetModuleFileNameW(nullptr, executablePath.data(), executablePath.size());
         } while (copied >= executablePath.size());
         executablePath.resize(copied);
 
@@ -157,7 +157,7 @@ namespace Crash
         PROCESS_INFORMATION pi;
         ZeroMemory(&pi, sizeof(pi));
 
-        if (!CreateProcessW(&executablePath[0], &arguments[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+        if (!CreateProcessW(executablePath.data(), arguments.data(), NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
             throw std::runtime_error("Could not start crash monitor process");
 
         waitMonitor();
