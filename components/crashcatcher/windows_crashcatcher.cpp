@@ -136,7 +136,7 @@ namespace Crash
 
         memset(mShm->mStartup.mLogFilePath, 0, sizeof(mShm->mStartup.mLogFilePath));
         int length = crashLogPath.length();
-        if (length > MAX_PATH) length = MAX_PATH;
+        if (length > MAX_LONG_PATH) length = MAX_LONG_PATH;
         strncpy(mShm->mStartup.mLogFilePath, crashLogPath.c_str(), length);
         mShm->mStartup.mLogFilePath[length] = '\0';
 
