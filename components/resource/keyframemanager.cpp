@@ -44,7 +44,7 @@ namespace Resource
                         std::string loopstop = animationName + std::string(": loop stop");
 
                         const osgAnimation::ChannelList& channels = animation->getChannels();
-                        for (const osg::ref_ptr<osgAnimation::Channel> channel: channels)
+                        for (const auto& channel: channels)
                         {
                             mergedAnimationTrack->addChannel(channel.get()->clone()); // is ->clone needed?
                         }
