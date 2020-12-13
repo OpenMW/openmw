@@ -939,11 +939,11 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
         void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            const auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
-            if (particleNode->data.empty())
+            auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
+            if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
                 return;
 
-            const Nif::NiParticlesData* particledata = particleNode->data.getPtr();
+            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
 
             osg::BoundingBox box;
 
@@ -1173,51 +1173,50 @@ namespace NifOsg
 
         void handleNiGeometry(const Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            const Nif::NiGeometryData* niGeometryData = nullptr;
-            if (nifNode->recType == Nif::RC_NiTriShape)
+            const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
+            if (niGeometry->data.empty())
+                return;
+            const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
+
+            if (niGeometry->recType == Nif::RC_NiTriShape)
             {
-                const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                if (!triShape->data.empty())
-                {
-                    const Nif::NiTriShapeData* data = triShape->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    if (!data->triangles.empty())
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, data->triangles.size(),
-                                                                                (unsigned short*)data->triangles.data()));
-                }
+                if (niGeometryData->recType != Nif::RC_NiTriShapeData)
+                    return;
+                auto triangles = static_cast<const Nif::NiTriShapeData*>(niGeometryData)->triangles;
+                if (triangles.empty())
+                    return;
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(),
+                                                                        (unsigned short*)triangles.data()));
             }
-            else if (nifNode->recType == Nif::RC_NiTriStrips)
+            else if (niGeometry->recType == Nif::RC_NiTriStrips)
             {
-                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                if (!triStrips->data.empty())
+                if (niGeometryData->recType != Nif::RC_NiTriStripsData)
+                    return;
+                auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
+                bool hasGeometry = false;
+                for (const auto& strip : data->strips)
                 {
-                    const Nif::NiTriStripsData* data = triStrips->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    if (!data->strips.empty())
-                    {
-                        for (const auto& strip : data->strips)
-                        {
-                            if (strip.size() >= 3)
-                                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
-                                                                                    (unsigned short*)strip.data()));
-                        }
-                    }
+                    if (strip.size() < 3)
+                        continue;
+                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
+                                                                            (unsigned short*)strip.data()));
+                    hasGeometry = true;
                 }
+                if (!hasGeometry)
+                    return;
             }
-            else if (nifNode->recType == Nif::RC_NiLines)
+            else if (niGeometry->recType == Nif::RC_NiLines)
             {
-                const Nif::NiLines* lines = static_cast<const Nif::NiLines*>(nifNode);
-                if (!lines->data.empty())
-                {
-                    const Nif::NiLinesData* data = lines->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    const auto& line = data->lines;
-                    if (!line.empty())
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(), (unsigned short*)line.data()));
-                }
+                if (niGeometryData->recType != Nif::RC_NiLinesData)
+                    return;
+                auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
+                const auto& line = data->lines;
+                if (line.empty())
+                    return;
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(),
+                                                                        (unsigned short*)line.data()));
             }
-            if (niGeometryData)
-                handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
+            handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
 
             // osg::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
@@ -1225,7 +1224,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, niGeometryData && !niGeometryData->colors.empty(), animflags);
+            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
         }
 
         void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
