@@ -310,8 +310,8 @@ void BulletNifLoader::handleNode(const std::string& fileName, const Nif::Node *n
         // It must be ignored completely.
         // (occurs in tr_ex_imp_wall_arch_04.nif)
         if(!node->hasBounds && (node->recType == Nif::RC_NiTriShape
-                             || node->recType == Nif::RC_NiTriStrips
-                             || node->recType == Nif::RC_BSLODTriShape))
+                                || node->recType == Nif::RC_NiTriStrips
+                                || node->recType == Nif::RC_BSLODTriShape))
         {
             handleNiTriShape(node, flags, getWorldTransform(node), isAnimated, avoid);
         }
