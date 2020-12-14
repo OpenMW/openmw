@@ -55,7 +55,7 @@ Projectile::~Projectile()
 
 void Projectile::commitPositionChange()
 {
-    std::unique_lock<std::mutex> lock(mPositionMutex);
+    std::scoped_lock lock(mMutex);
     if (mTransformUpdatePending)
     {
         mCollisionObject->setWorldTransform(mLocalTransform);
@@ -65,7 +65,7 @@ void Projectile::commitPositionChange()
 
 void Projectile::setPosition(const osg::Vec3f &position)
 {
-    std::unique_lock<std::mutex> lock(mPositionMutex);
+    std::scoped_lock lock(mMutex);
     mLocalTransform.setOrigin(Misc::Convert::toBullet(position));
     mTransformUpdatePending = true;
 }
@@ -74,7 +74,7 @@ void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
 {
     if (!mActive.load(std::memory_order_acquire))
         return;
-    std::unique_lock<std::mutex> lock(mPositionMutex);
+    std::scoped_lock lock(mMutex);
     mHitTarget = target;
     mHitPosition = pos;
     mHitNormal = normal;
@@ -86,4 +86,46 @@ void Projectile::activate()
     assert(!mActive);
     mActive.store(true, std::memory_order_release);
 }
+
+MWWorld::Ptr Projectile::getCaster() const
+{
+    std::scoped_lock lock(mMutex);
+    return mCaster;
+}
+
+void Projectile::setCaster(MWWorld::Ptr caster)
+{
+    std::scoped_lock lock(mMutex);
+    mCaster = caster;
+}
+
+void Projectile::setValidTargets(const std::vector<MWWorld::Ptr>& targets)
+{
+    std::scoped_lock lock(mMutex);
+    mValidTargets = targets;
+}
+
+bool Projectile::isValidTarget(const MWWorld::Ptr& target) const
+{
+    std::scoped_lock lock(mMutex);
+    if (mCaster == target)
+        return false;
+
+    if (!mValidTargets.empty())
+    {
+        bool validTarget = false;
+        for (const auto& targetActor : mValidTargets)
+        {
+            if (targetActor == target)
+            {
+                validTarget = true;
+                break;
+            }
+        }
+
+        return validTarget;
+    }
+    return true;
+}
+
 }

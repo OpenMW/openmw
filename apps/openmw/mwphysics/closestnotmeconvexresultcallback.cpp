@@ -30,12 +30,9 @@ namespace MWPhysics
                 return btScalar(1);
             auto* targetHolder = static_cast<PtrHolder*>(mMe->getUserPointer());
             const MWWorld::Ptr target = targetHolder->getPtr();
-            // do nothing if we hit the caster. Sometimes the launching origin is inside of caster collision shape
-            if (projectileHolder->getCaster() != target)
-            {
+            if (projectileHolder->isValidTarget(target))
                 projectileHolder->hit(target, convexResult.m_hitPointLocal, convexResult.m_hitNormalLocal);
-                return btScalar(1);
-            }
+            return btScalar(1);
         }
 
         btVector3 hitNormalWorld;
