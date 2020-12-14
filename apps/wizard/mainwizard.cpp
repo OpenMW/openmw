@@ -157,6 +157,8 @@ void Wizard::MainWizard::setupGameSettings()
         mGameSettings.readUserFile(stream);
     }
 
+    file.close();
+
     // Now the rest
     QStringList paths;
     paths.append(userPath + QLatin1String("openmw.cfg"));
