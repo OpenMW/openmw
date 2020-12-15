@@ -40,8 +40,6 @@ namespace Resource
                         std::string animationName = animation->getName();
                         std::string start = animationName + std::string(": start");
                         std::string stop = animationName + std::string(": stop");
-                        std::string loopstart = animationName + std::string(": loop start");
-                        std::string loopstop = animationName + std::string(": loop stop");
 
                         const osgAnimation::ChannelList& channels = animation->getChannels();
                         for (const auto& channel: channels)
@@ -60,8 +58,6 @@ namespace Resource
                         // Keywords can be stuff like Loop, Equip, Unequip, Block, InventoryHandtoHand, InventoryWeaponOneHand, PickProbe, Slash, Thrust, Chop... even "Slash Small Follow"
                         mTarget.mTextKeys.emplace(startTime, std::move(start));
                         mTarget.mTextKeys.emplace(stopTime, std::move(stop));
-                        mTarget.mTextKeys.emplace(startTime, std::move(loopstart));
-                        mTarget.mTextKeys.emplace(stopTime, std::move(loopstop));
 
                         SceneUtil::EmulatedAnimation emulatedAnimation;
                         emulatedAnimation.mStartTime = startTime;
