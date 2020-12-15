@@ -37,7 +37,7 @@ public:
         float lifetime;
         float lifespan;
         float timestamp;
-        int vertex;
+        unsigned short vertex;
     };
 
     float velocity;
@@ -226,6 +226,14 @@ struct NiTransformInterpolator : public Interpolator
     float defaultScale;
     NiKeyframeDataPtr data;
 
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiColorInterpolator : public Interpolator
+{
+    osg::Vec4f defaultVal;
+    NiColorDataPtr data;
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };

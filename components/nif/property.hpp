@@ -118,6 +118,19 @@ struct NiShadeProperty : public Property
     }
 };
 
+struct BSShaderProperty : public NiShadeProperty
+{
+    unsigned int type{0u}, flags1{0u}, flags2{0u};
+    float envMapIntensity{0.f};
+    void read(NIFStream *nif) override;
+};
+
+struct BSShaderLightingProperty : public BSShaderProperty
+{
+    unsigned int clamp{0u};
+    void read(NIFStream *nif) override;
+};
+
 struct NiDitherProperty : public Property
 {
     unsigned short flags;
