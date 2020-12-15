@@ -21,7 +21,7 @@ namespace Resource
 
     void RetrieveAnimationsVisitor::apply(osg::Node& node)
     {
-        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("root"))
+        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("bip01"))
             {
                 osg::ref_ptr<SceneUtil::OsgAnimationController> callback = new SceneUtil::OsgAnimationController();
 
