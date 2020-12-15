@@ -131,9 +131,8 @@ struct NiBoundingVolume
     parent node (unless it's the root), and transformation (location
     and rotation) relative to it's parent.
  */
-class Node : public Named
+struct Node : public Named
 {
-public:
     // Node flags. Interpretation depends somewhat on the type of node.
     unsigned int flags;
     Transformation trafo;
