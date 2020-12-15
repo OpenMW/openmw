@@ -24,6 +24,10 @@ namespace MWPhysics
     {
         if (rayResult.m_collisionObject == mMe)
             return 1.f;
+
+        if (mProjectile && rayResult.m_collisionObject == mProjectile->getCollisionObject())
+            return 1.f;
+
         if (!mTargets.empty())
         {
             if ((std::find(mTargets.begin(), mTargets.end(), rayResult.m_collisionObject) == mTargets.end()))
