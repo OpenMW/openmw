@@ -83,7 +83,7 @@ namespace SceneUtil
         {
             osgAnimation::UpdateMatrixTransform* umt = dynamic_cast<osgAnimation::UpdateMatrixTransform*>(cb);
             if (umt)
-                if (node.getName() != "root") link(umt);
+                if (node.getName() != "bip01") link(umt);
             cb = cb->getNestedCallback();
         }
 
@@ -117,7 +117,7 @@ namespace SceneUtil
         //Find the correct animation based on time
         for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
         {
-            if (time > emulatedAnimation.mStartTime && time < emulatedAnimation.mStopTime)
+            if (time >= emulatedAnimation.mStartTime && time <= emulatedAnimation.mStopTime)
             {
                 newTime = time - emulatedAnimation.mStartTime;
                 animationName = emulatedAnimation.mName;
@@ -133,7 +133,7 @@ namespace SceneUtil
 
             for (const auto& channel: channels)
             {
-                if (channel->getTargetName() != "root" || channel->getName() != "transform") continue;
+                if (channel->getTargetName() != "bip01" || channel->getName() != "transform") continue;
 
                 if ( osgAnimation::MatrixLinearSampler* templateSampler = dynamic_cast<osgAnimation::MatrixLinearSampler*> (channel->getSampler()) )
                 {
