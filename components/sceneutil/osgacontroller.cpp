@@ -117,7 +117,7 @@ namespace SceneUtil
         //Find the correct animation based on time
         for (const EmulatedAnimation& emulatedAnimation : mEmulatedAnimations)
         {
-            if (time > emulatedAnimation.mStartTime && time < emulatedAnimation.mStopTime)
+            if (time >= emulatedAnimation.mStartTime && time <= emulatedAnimation.mStopTime)
             {
                 newTime = time - emulatedAnimation.mStartTime;
                 animationName = emulatedAnimation.mName;
