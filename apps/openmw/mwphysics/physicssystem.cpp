@@ -537,6 +537,13 @@ namespace MWPhysics
             if (actor->getStandingOnPtr() == old)
                 actor->setStandingOnPtr(updated);
         }
+
+        for (auto& [_, projectile] : mProjectiles)
+        {
+            if (projectile->getCaster() == old)
+                projectile->setCaster(updated);
+        }
+
     }
 
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
