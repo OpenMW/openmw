@@ -365,8 +365,11 @@ namespace MWGui
         mViewer->renderingTraversals();
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-        if(mCopyFramebufferToTextureCallback)
+        if (mCopyFramebufferToTextureCallback)
+        {
             mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
+            mCopyFramebufferToTextureCallback = nullptr;
+        }
 
         mLastRenderTime = mTimer.time_m();
     }
