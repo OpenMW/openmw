@@ -29,11 +29,10 @@
 namespace Nif
 {
 
-class Property : public Named { };
+struct Property : public Named { };
 
-class NiTexturingProperty : public Property
+struct NiTexturingProperty : public Property
 {
-public:
     unsigned short flags{0u};
 
     // A sub-texture
@@ -96,9 +95,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiFogProperty : public Property
+struct NiFogProperty : public Property
 {
-public:
     unsigned short mFlags;
     float mFogDepth;
     osg::Vec3f mColour;
@@ -307,8 +305,8 @@ struct S_StencilProperty
     void read(NIFStream *nif);
 };
 
-class NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
-class NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
+struct NiAlphaProperty : public StructPropT<S_AlphaProperty> { };
+struct NiVertexColorProperty : public StructPropT<S_VertexColorProperty> { };
 struct NiStencilProperty : public Property
 {
     S_StencilProperty data;
