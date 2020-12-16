@@ -67,6 +67,7 @@ varying vec3 passNormal;
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
+#include "alpha.glsl"
 
 void main()
 {
@@ -108,6 +109,7 @@ void main()
 
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
+    alphaTest();
 #else
     gl_FragData[0] = vec4(1.0);
 #endif
@@ -163,6 +165,8 @@ void main()
 #else
     gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
 #endif
+
+    alphaTest();
 
 #if @envMap && !@preLightEnv
     gl_FragData[0].xyz += texture2D(envMap, envTexCoordGen).xyz * envMapColor.xyz * envLuma;

@@ -1,7 +1,9 @@
 #include "shadowsbin.hpp"
 #include <unordered_set>
 #include <osg/StateSet>
+#include <osg/AlphaFunc>
 #include <osg/Material>
+#include <osg/Program>
 #include <osgUtil/StateGraph>
 
 using namespace osgUtil;
@@ -40,6 +42,10 @@ namespace
 namespace SceneUtil
 {
 
+std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER> ShadowsBin::sCastingPrograms = {
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+};
+
 ShadowsBin::ShadowsBin()
 {
     mNoTestStateSet = new osg::StateSet;
@@ -49,6 +55,12 @@ ShadowsBin::ShadowsBin()
     mShaderAlphaTestStateSet = new osg::StateSet;
     mShaderAlphaTestStateSet->addUniform(new osg::Uniform("alphaTestShadows", true));
     mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+
+    for (size_t i = 0; i < sCastingPrograms.size(); ++i)
+    {
+        mAlphaFuncShaders[i] = new osg::StateSet;
+        mAlphaFuncShaders[i]->setAttribute(sCastingPrograms[i], osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+    }
 }
 
 StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
@@ -71,7 +83,6 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
             continue;
 
         accumulateModeState(ss, state.mAlphaBlend, state.mAlphaBlendOverride, GL_BLEND);
-        accumulateModeState(ss, state.mAlphaTest, state.mAlphaTestOverride, GL_ALPHA_TEST);
 
         const osg::StateSet::AttributeList& attributes = ss->getAttributeList();
         osg::StateSet::AttributeList::const_iterator found = attributes.find(std::make_pair(osg::StateAttribute::MATERIAL, 0));
@@ -81,6 +92,14 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
             accumulateState(state.mMaterial, static_cast<osg::Material*>(rap.first.get()), state.mMaterialOverride, rap.second);
             if (state.mMaterial && !materialNeedShadows(state.mMaterial))
                 state.mMaterial = nullptr;
+        }
+
+        found = attributes.find(std::make_pair(osg::StateAttribute::ALPHAFUNC, 0));
+        if (found != attributes.end())
+        {
+            // As force shaders is on, we know this is really a RemovedAlphaFunc
+            const osg::StateSet::RefAttributePair& rap = found->second;
+            accumulateState(state.mAlphaFunc, static_cast<osg::AlphaFunc*>(rap.first.get()), state.mAlphaFuncOverride, rap.second);
         }
 
         // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it.
@@ -113,16 +132,44 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
             leaf->_parent = sg_new;
             sg_new->_leaves.push_back(leaf);
         }
-        return sg_new;
+        sg = sg_new;
     }
+
+    // GL_ALWAYS is set by default by mwshadowtechnique
+    if (state.mAlphaFunc && state.mAlphaFunc->getFunction() != GL_ALWAYS)
+    {
+        sg_new = sg->find_or_insert(mAlphaFuncShaders[state.mAlphaFunc->getFunction() - GL_NEVER]);
+        for (RenderLeaf* leaf : sg->_leaves)
+        {
+            leaf->_parent = sg_new;
+            sg_new->_leaves.push_back(leaf);
+        }
+        sg = sg_new;
+    }
+
     return sg;
+}
+
+void ShadowsBin::addPrototype(const std::string & name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER>& castingPrograms)
+{
+    sCastingPrograms = castingPrograms;
+    osg::ref_ptr<osgUtil::RenderBin> bin(new ShadowsBin);
+    osgUtil::RenderBin::addRenderBinPrototype(name, bin);
+}
+
+inline bool ShadowsBin::State::needTexture() const
+{
+    return mAlphaBlend || (mAlphaFunc && mAlphaFunc->getFunction() != GL_ALWAYS);
 }
 
 bool ShadowsBin::State::needShadows() const
 {
-    if (!mMaterial)
-        return true;
-    return materialNeedShadows(mMaterial);
+    if (mAlphaFunc && mAlphaFunc->getFunction() == GL_NEVER)
+        return false;
+    // other alpha func + material combinations might be skippable
+    if (mAlphaBlend && mMaterial)
+        return materialNeedShadows(mMaterial);
+    return true;
 }
 
 void ShadowsBin::sortImplementation()

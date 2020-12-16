@@ -79,6 +79,10 @@ namespace Shader
             int mColorMode;
             
             bool mMaterialOverridden;
+            bool mAlphaTestOverridden;
+
+            GLenum mAlphaFunc;
+            float mAlphaRef;
 
             bool mNormalHeight; // true if normal map has height info in alpha channel
 
