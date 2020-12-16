@@ -118,6 +118,18 @@ struct NiShadeProperty : public Property
 
 struct BSShaderProperty : public NiShadeProperty
 {
+    enum BSShaderType
+    {
+        SHADER_TALL_GRASS = 0,
+        SHADER_DEFAULT = 1,
+        SHADER_SKY = 10,
+        SHADER_SKIN = 14,
+        SHADER_WATER = 17,
+        SHADER_LIGHTING30 = 29,
+        SHADER_TILE = 32,
+        SHADER_NOLIGHTING = 33
+    };
+
     unsigned int type{0u}, flags1{0u}, flags2{0u};
     float envMapIntensity{0.f};
     void read(NIFStream *nif) override;
@@ -126,6 +138,34 @@ struct BSShaderProperty : public NiShadeProperty
 struct BSShaderLightingProperty : public BSShaderProperty
 {
     unsigned int clamp{0u};
+    void read(NIFStream *nif) override;
+};
+
+struct BSShaderPPLightingProperty : public BSShaderLightingProperty
+{
+    BSShaderTextureSetPtr textureSet;
+    struct RefractionSettings
+    {
+        float strength{0.f};
+        int period{0};
+    };
+    struct ParallaxSettings
+    {
+        float passes{0.f};
+        float scale{0.f};
+    };
+    RefractionSettings refraction;
+    ParallaxSettings parallax;
+
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct BSShaderNoLightingProperty : public BSShaderLightingProperty
+{
+    std::string filename;
+    osg::Vec4f falloffParams;
+
     void read(NIFStream *nif) override;
 };
 
@@ -193,7 +233,7 @@ struct S_MaterialProperty
     // The vector components are R,G,B
     osg::Vec3f ambient{1.f,1.f,1.f}, diffuse{1.f,1.f,1.f};
     osg::Vec3f specular, emissive;
-    float glossiness{0.f}, alpha{0.f};
+    float glossiness{0.f}, alpha{0.f}, emissiveMult{1.f};
 
     void read(NIFStream *nif);
 };

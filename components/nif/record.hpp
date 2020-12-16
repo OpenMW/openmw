@@ -122,7 +122,9 @@ enum RecordType
   RC_NiColorInterpolator,
   RC_BSShaderTextureSet,
   RC_BSLODTriShape,
-  RC_BSShaderProperty
+  RC_BSShaderProperty,
+  RC_BSShaderPPLightingProperty,
+  RC_BSShaderNoLightingProperty
 };
 
 /// Base class for all records

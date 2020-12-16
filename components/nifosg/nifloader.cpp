@@ -1672,6 +1672,85 @@ namespace NifOsg
             handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
         }
 
+        void handleTextureSet(const Nif::BSShaderTextureSet* textureSet, unsigned int clamp, const std::string& nodeName, osg::StateSet* stateset, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures)
+        {
+            if (!boundTextures.empty())
+            {
+                for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                    stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                boundTextures.clear();
+            }
+
+            const unsigned int uvSet = 0;
+
+            for (size_t i = 0; i < textureSet->textures.size(); ++i)
+            {
+                if (textureSet->textures[i].empty())
+                    continue;
+                switch(i)
+                {
+                    case Nif::BSShaderTextureSet::TextureType_Base:
+                    case Nif::BSShaderTextureSet::TextureType_Normal:
+                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                        break;
+                    default:
+                    {
+                        Log(Debug::Info) << "Unhandled texture stage " << i << " on shape \"" << nodeName << "\" in " << mFilename;
+                        continue;
+                    }
+                }
+                std::string filename = Misc::ResourceHelpers::correctTexturePath(textureSet->textures[i], imageManager->getVFS());
+                osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                if (image)
+                    texture2d->setTextureSize(image->s(), image->t());
+                bool wrapT = clamp & 0x1;
+                bool wrapS = (clamp >> 1) & 0x1;
+                texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                unsigned int texUnit = boundTextures.size();
+                stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                // BSShaderTextureSet presence means there's no need for FFP support for the affected node
+                switch (i)
+                {
+                    case Nif::BSShaderTextureSet::TextureType_Base:
+                        texture2d->setName("diffuseMap");
+                        break;
+                    case Nif::BSShaderTextureSet::TextureType_Normal:
+                        texture2d->setName("normalMap");
+                        break;
+                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                        texture2d->setName("emissiveMap");
+                        break;
+                }
+                boundTextures.emplace_back(uvSet);
+            }
+        }
+
+        const std::string& getNVShaderPrefix(unsigned int type) const
+        {
+            static const std::map<unsigned int, std::string> mapping =
+            {
+                {Nif::BSShaderProperty::SHADER_TALL_GRASS, std::string()},
+                {Nif::BSShaderProperty::SHADER_DEFAULT,    "nv_default"},
+                {Nif::BSShaderProperty::SHADER_SKY,        std::string()},
+                {Nif::BSShaderProperty::SHADER_SKIN,       std::string()},
+                {Nif::BSShaderProperty::SHADER_WATER,      std::string()},
+                {Nif::BSShaderProperty::SHADER_LIGHTING30, std::string()},
+                {Nif::BSShaderProperty::SHADER_TILE,       std::string()},
+                {Nif::BSShaderProperty::SHADER_NOLIGHTING, "nv_nolighting"},
+            };
+            auto prefix = mapping.find(type);
+            if (prefix == mapping.end())
+                Log(Debug::Warning) << "Unknown shader type " << type << " in " << mFilename;
+            else if (prefix->second.empty())
+                Log(Debug::Warning) << "Unhandled shader type " << type << " in " << mFilename;
+            else
+                return prefix->second;
+
+            return mapping.at(Nif::BSShaderProperty::SHADER_DEFAULT);
+        }
+
         void handleProperty(const Nif::Property *property,
                             osg::Node *node, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
@@ -1757,6 +1836,63 @@ namespace NifOsg
                 handleTextureProperty(texprop, node->getName(), stateset, composite, imageManager, boundTextures, animflags);
                 break;
             }
+            case Nif::RC_BSShaderPPLightingProperty:
+            {
+                auto texprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
+                bool shaderRequired = true;
+                node->setUserValue("shaderPrefix", getNVShaderPrefix(texprop->type));
+                node->setUserValue("shaderRequired", shaderRequired);
+                osg::StateSet* stateset = node->getOrCreateStateSet();
+                if (!texprop->textureSet.empty())
+                {
+                    auto textureSet = texprop->textureSet.getPtr();
+                    handleTextureSet(textureSet, texprop->clamp, node->getName(), stateset, imageManager, boundTextures);
+                }
+                handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                break;
+            }
+            case Nif::RC_BSShaderNoLightingProperty:
+            {
+                auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
+                bool shaderRequired = true;
+                node->setUserValue("shaderPrefix", getNVShaderPrefix(texprop->type));
+                node->setUserValue("shaderRequired", shaderRequired);
+                osg::StateSet* stateset = node->getOrCreateStateSet();
+                if (!texprop->filename.empty())
+                {
+                    if (!boundTextures.empty())
+                    {
+                        for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                            stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                        boundTextures.clear();
+                    }
+                    std::string filename = Misc::ResourceHelpers::correctTexturePath(texprop->filename, imageManager->getVFS());
+                    osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                    osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                    texture2d->setName("diffuseMap");
+                    if (image)
+                        texture2d->setTextureSize(image->s(), image->t());
+                    bool wrapT = texprop->clamp & 0x1;
+                    bool wrapS = (texprop->clamp >> 1) & 0x1;
+                    texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                    texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                    const unsigned int texUnit = 0;
+                    const unsigned int uvSet = 0;
+                    stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                    boundTextures.push_back(uvSet);
+                }
+                if (mBethVersion >= 27)
+                {
+                    stateset->addUniform(new osg::Uniform("useFalloff", true));
+                    stateset->addUniform(new osg::Uniform("falloffParams", texprop->falloffParams));
+                }
+                else
+                {
+                    stateset->addUniform(new osg::Uniform("useFalloff", false));
+                }
+                handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                break;
+            }
             // unused by mw
             case Nif::RC_NiShadeProperty:
             case Nif::RC_NiDitherProperty:
@@ -1809,6 +1945,7 @@ namespace NifOsg
             bool hasMatCtrl = false;
 
             int lightmode = 1;
+            float emissiveMult = 1.f;
 
             for (const Nif::Property* property : properties)
             {
@@ -1828,6 +1965,7 @@ namespace NifOsg
                     mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.diffuse, matprop->data.alpha));
                     mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.ambient, 1.f));
                     mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.emissive, 1.f));
+                    emissiveMult = matprop->data.emissiveMult;
 
                     mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.specular, 1.f));
                     mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
@@ -1948,6 +2086,7 @@ namespace NifOsg
             mat = shareAttribute(mat);
 
             stateset->setAttributeAndModes(mat, osg::StateAttribute::ON);
+            stateset->addUniform(new osg::Uniform("emissiveMult", emissiveMult));
         }
 
     };
