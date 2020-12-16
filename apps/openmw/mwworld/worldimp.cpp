@@ -1332,25 +1332,24 @@ namespace MWWorld
             return;
         }
 
-        float terrainHeight = -std::numeric_limits<float>::max();
-        if (ptr.getCell()->isExterior())
-            terrainHeight = getTerrainHeightAt(pos);
-
-        if (pos.z() < terrainHeight)
-            pos.z() = terrainHeight;
-
-        pos.z() += 20; // place slightly above. will snap down to ground with code below
+        const float terrainHeight = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
+        pos.z() = std::max(pos.z(), terrainHeight + 20); // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
             osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
-            if (traced.z() < pos.z())
-                pos.z() = traced.z();
+            pos.z() = std::min(pos.z(), traced.z());
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
+        if (ptr.getClass().isActor())
+        {
+            MWPhysics::Actor* actor = mPhysics->getActor(ptr);
+            if (actor)
+                actor->resetPosition();
+        }
     }
 
     void World::fixPosition()
@@ -1449,17 +1448,11 @@ namespace MWWorld
         ipos.pos[1] = spawnPoint.y();
         ipos.pos[2] = spawnPoint.z();
 
-        if (!referenceObject.getClass().isActor())
-        {
-            ipos.rot[0] = referenceObject.getRefData().getPosition().rot[0];
-            ipos.rot[1] = referenceObject.getRefData().getPosition().rot[1];
-        }
-        else
+        if (referenceObject.getClass().isActor())
         {
             ipos.rot[0] = 0;
             ipos.rot[1] = 0;
         }
-        ipos.rot[2] = referenceObject.getRefData().getPosition().rot[2];
 
         MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
         adjustPosition(placed, true); // snap to ground
@@ -1503,7 +1496,8 @@ namespace MWWorld
 
         mProjectileManager->update(duration);
 
-        const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        const auto& results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        mProjectileManager->processHits();
         mDiscardMovements = false;
 
         for(const auto& [actor, position]: results)

@@ -322,6 +322,11 @@ void MWMechanics::NpcStats::updateHealth()
     setHealth(floor(0.5f * (strength + endurance)));
 }
 
+int MWMechanics::NpcStats::getLevelUpAttributeIncrease(int attribute) const
+{
+    return mSkillIncreases[attribute];
+}
+
 int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
 {
     int num = mSkillIncreases[attribute];

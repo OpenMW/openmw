@@ -2,6 +2,7 @@
 
 #include <components/esm/loadcont.hpp>
 #include <components/esm/containerstate.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -59,6 +60,11 @@ namespace MWClass
         return *this;
     }
 
+    Container::Container()
+    {
+        mHarvestEnabled = Settings::Manager::getBool("graphic herbalism", "Game");
+    }
+
     void Container::ensureCustomData (const MWWorld::Ptr& ptr) const
     {
         if (!ptr.getRefData().getCustomData())
@@ -72,8 +78,10 @@ namespace MWClass
         }
     }
 
-    bool canBeHarvested(const MWWorld::ConstPtr& ptr)
+    bool Container::canBeHarvested(const MWWorld::ConstPtr& ptr) const
     {
+        if (!mHarvestEnabled)
+            return false;
         const MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (animation == nullptr)
             return false;

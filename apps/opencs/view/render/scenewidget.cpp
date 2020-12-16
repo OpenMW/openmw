@@ -69,7 +69,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     setLayout(layout);
 
     mView->getCamera()->setGraphicsContext(window);
-    mView->getCamera()->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
@@ -212,6 +211,25 @@ SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSyste
 
     mOrbitCamControl->setConstRoll( CSMPrefs::get()["3D Scene Input"]["navi-orbit-const-roll"].isTrue() );
 
+    // set up gradient view or configured clear color
+    QColor bgColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
+
+    if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue()) {
+        QColor gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
+        mGradientCamera = createGradientCamera(bgColour, gradientColour);
+
+        mView->getCamera()->setClearMask(0);
+        mView->getCamera()->addChild(mGradientCamera.get());
+    }
+    else {
+        mView->getCamera()->setClearColor(osg::Vec4(
+            bgColour.redF(),
+            bgColour.greenF(),
+            bgColour.blueF(),
+            1.0f
+        ));
+    }
+
     // we handle lighting manually
     mView->setLightingMode(osgViewer::View::NO_LIGHT);
 
@@ -249,6 +267,79 @@ SceneWidget::~SceneWidget()
     mResourceSystem->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
 }
 
+
+osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor bgColour, QColor gradientColour)
+{
+    osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
+
+    osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
+
+    vertices->push_back(osg::Vec3(0.0f, 0.0f, -1.0f));
+    vertices->push_back(osg::Vec3(1.0f, 0.0f, -1.0f));
+    vertices->push_back(osg::Vec3(0.0f, 1.0f, -1.0f));
+    vertices->push_back(osg::Vec3(1.0f, 1.0f, -1.0f));
+
+    geometry->setVertexArray(vertices);
+
+    osg::ref_ptr<osg::DrawElementsUShort> primitives = new osg::DrawElementsUShort (osg::PrimitiveSet::TRIANGLES, 0);
+
+    // triangle 1
+    primitives->push_back (0);
+    primitives->push_back (1);
+    primitives->push_back (2);
+
+    // triangle 2
+    primitives->push_back (2);
+    primitives->push_back (1);
+    primitives->push_back (3);
+
+    geometry->addPrimitiveSet(primitives);
+
+    osg::ref_ptr <osg::Vec4ubArray> colours = new osg::Vec4ubArray;
+    colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
+    colours->push_back(osg::Vec4ub(gradientColour.red(), gradientColour.green(), gradientColour.blue(), 1.0f));
+    colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
+    colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
+
+    geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
+
+    geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+    geometry->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+    return geometry;
+}
+
+
+osg::ref_ptr<osg::Camera> SceneWidget::createGradientCamera(QColor bgColour, QColor gradientColour)
+{
+    osg::ref_ptr<osg::Camera> camera = new osg::Camera();
+    camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    camera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1.0f, 0, 1.0f));
+    camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+    camera->setViewMatrix(osg::Matrix::identity());
+
+    camera->setClearMask(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    camera->setAllowEventFocus(false);
+
+    // draw subgraph before main camera view.
+    camera->setRenderOrder(osg::Camera::PRE_RENDER);
+
+    camera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+
+    osg::ref_ptr<osg::Geometry> gradientQuad = createGradientRectangle(bgColour, gradientColour);
+
+    camera->addChild(gradientQuad);
+    return camera;
+}
+
+
+void SceneWidget::updateGradientCamera(QColor bgColour, QColor gradientColour)
+{
+    osg::ref_ptr<osg::Geometry> gradientRect = createGradientRectangle(bgColour, gradientColour);
+    // Replaces previous rectangle
+    mGradientCamera->setChild(0, gradientRect.get());
+}
+
 void SceneWidget::setLighting(Lighting *lighting)
 {
     if (mLighting)
@@ -276,12 +367,59 @@ void SceneWidget::setAmbient(const osg::Vec4f& ambient)
 
 void SceneWidget::selectLightingMode (const std::string& mode)
 {
-    if (mode=="day")
-        setLighting (&mLightingDay);
-    else if (mode=="night")
-        setLighting (&mLightingNight);
-    else if (mode=="bright")
-        setLighting (&mLightingBright);
+    QColor backgroundColour;
+    QColor gradientColour;
+    if (mode == "day")
+    {
+        backgroundColour = CSMPrefs::get()["Rendering"]["scene-day-background-colour"].toColor();
+        gradientColour = CSMPrefs::get()["Rendering"]["scene-day-gradient-colour"].toColor();
+        setLighting(&mLightingDay);
+    }
+    else if (mode == "night")
+    {
+        backgroundColour = CSMPrefs::get()["Rendering"]["scene-night-background-colour"].toColor();
+        gradientColour = CSMPrefs::get()["Rendering"]["scene-night-gradient-colour"].toColor();
+        setLighting(&mLightingNight);
+    }
+    else if (mode == "bright")
+    {
+        backgroundColour = CSMPrefs::get()["Rendering"]["scene-bright-background-colour"].toColor();
+        gradientColour = CSMPrefs::get()["Rendering"]["scene-bright-gradient-colour"].toColor();
+        setLighting(&mLightingBright);
+    }
+    if (CSMPrefs::get()["Rendering"]["scene-use-gradient"].isTrue()) {
+        if (mGradientCamera.get() != nullptr) {
+            // we can go ahead and update since this camera still exists
+            updateGradientCamera(backgroundColour, gradientColour);
+
+            if (!mView->getCamera()->containsNode(mGradientCamera.get()))
+            {
+                // need to re-attach the gradient camera
+                mView->getCamera()->setClearMask(0);
+                mView->getCamera()->addChild(mGradientCamera.get());
+            }
+        } 
+        else {
+            // need to create the gradient camera
+            mGradientCamera = createGradientCamera(backgroundColour, gradientColour);
+            mView->getCamera()->setClearMask(0);
+            mView->getCamera()->addChild(mGradientCamera.get());
+        }
+    }
+    else {
+        // Fall back to using the clear color for the camera
+        mView->getCamera()->setClearMask(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        mView->getCamera()->setClearColor(osg::Vec4(
+            backgroundColour.redF(),
+            backgroundColour.greenF(),
+            backgroundColour.blueF(),
+            1.0f
+        ));
+        if (mGradientCamera.get() != nullptr && mView->getCamera()->containsNode(mGradientCamera.get())) {
+            // Remove the child to prevent the gradient from rendering
+            mView->getCamera()->removeChild(mGradientCamera.get());
+        }
+    }
 }
 
 CSVWidget::SceneToolMode *SceneWidget::makeLightingSelector (CSVWidget::SceneToolbar *parent)

@@ -20,7 +20,7 @@ namespace MWPhysics
 
 Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, PhysicsTaskScheduler* scheduler)
   : mStandingOnPtr(nullptr), mCanWaterWalk(false), mWalkingOnWater(false)
-  , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBoxTranslate), mHalfExtents(shape->mCollisionBoxHalfExtents)
+  , mCollisionObject(nullptr), mMeshTranslation(shape->mCollisionBox.center), mHalfExtents(shape->mCollisionBox.extents)
   , mForce(0.f, 0.f, 0.f), mOnGround(true), mOnSlope(false)
   , mInternalCollisionMode(true)
   , mExternalCollisionMode(true)
@@ -70,7 +70,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     mCollisionObject->setActivationState(DISABLE_DEACTIVATION);
     mCollisionObject->setCollisionShape(mShape.get());
-    mCollisionObject->setUserPointer(static_cast<PtrHolder*>(this));
+    mCollisionObject->setUserPointer(this);
 
     updateRotation();
     updateScale();

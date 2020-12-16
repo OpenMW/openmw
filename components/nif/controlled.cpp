@@ -47,6 +47,11 @@ namespace Nif
         data.post(nif);
     }
 
+    void BSShaderTextureSet::read(NIFStream *nif)
+    {
+        nif->getSizedStrings(textures, nif->getUInt());
+    }
+
     void NiParticleModifier::read(NIFStream *nif)
     {
         next.read(nif);

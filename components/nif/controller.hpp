@@ -29,15 +29,14 @@
 namespace Nif
 {
 
-class NiParticleSystemController : public Controller
+struct NiParticleSystemController : public Controller
 {
-public:
     struct Particle {
         osg::Vec3f velocity;
         float lifetime;
         float lifespan;
         float timestamp;
-        int vertex;
+        unsigned short vertex;
     };
 
     float velocity;
@@ -80,9 +79,8 @@ public:
 };
 using NiBSPArrayController = NiParticleSystemController;
 
-class NiMaterialColorController : public Controller
+struct NiMaterialColorController : public Controller
 {
-public:
     NiPoint3InterpolatorPtr interpolator;
     NiPosDataPtr data;
     unsigned int targetColor;
@@ -91,9 +89,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiPathController : public Controller
+struct NiPathController : public Controller
 {
-public:
     NiPosDataPtr posData;
     NiFloatDataPtr floatData;
 
@@ -115,9 +112,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiLookAtController : public Controller
+struct NiLookAtController : public Controller
 {
-public:
     NodePtr target;
     unsigned short lookAtFlags{0};
 
@@ -125,9 +121,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiUVController : public Controller
+struct NiUVController : public Controller
 {
-public:
     NiUVDataPtr data;
     unsigned int uvSet;
 
@@ -135,9 +130,8 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiKeyframeController : public Controller
+struct NiKeyframeController : public Controller
 {
-public:
     NiKeyframeDataPtr data;
     NiTransformInterpolatorPtr interpolator;
 
@@ -154,12 +148,11 @@ struct NiFloatInterpController : public Controller
     void post(NIFFile *nif) override;
 };
 
-class NiAlphaController : public NiFloatInterpController { };
-class NiRollController : public NiFloatInterpController { };
+struct NiAlphaController : public NiFloatInterpController { };
+struct NiRollController : public NiFloatInterpController { };
 
-class NiGeomMorpherController : public Controller
+struct NiGeomMorpherController : public Controller
 {
-public:
     NiMorphDataPtr data;
     NiFloatInterpolatorList interpolators;
 
@@ -167,18 +160,16 @@ public:
     void post(NIFFile *nif) override;
 };
 
-class NiVisController : public Controller
+struct NiVisController : public Controller
 {
-public:
     NiVisDataPtr data;
 
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };
 
-class NiFlipController : public Controller
+struct NiFlipController : public Controller
 {
-public:
     NiFloatInterpolatorPtr mInterpolator;
     int mTexSlot; // NiTexturingProperty::TextureType
     float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
@@ -226,6 +217,14 @@ struct NiTransformInterpolator : public Interpolator
     float defaultScale;
     NiKeyframeDataPtr data;
 
+    void read(NIFStream *nif) override;
+    void post(NIFFile *nif) override;
+};
+
+struct NiColorInterpolator : public Interpolator
+{
+    osg::Vec4f defaultVal;
+    NiColorDataPtr data;
     void read(NIFStream *nif) override;
     void post(NIFFile *nif) override;
 };

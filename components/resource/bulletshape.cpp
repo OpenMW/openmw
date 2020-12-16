@@ -20,8 +20,7 @@ BulletShape::BulletShape()
 BulletShape::BulletShape(const BulletShape &copy, const osg::CopyOp &copyop)
     : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape))
     , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape))
-    , mCollisionBoxHalfExtents(copy.mCollisionBoxHalfExtents)
-    , mCollisionBoxTranslate(copy.mCollisionBoxTranslate)
+    , mCollisionBox(copy.mCollisionBox)
     , mAnimatedShapes(copy.mAnimatedShapes)
 {
 }
@@ -106,8 +105,7 @@ BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
     : BulletShape()
     , mSource(source)
 {
-    mCollisionBoxHalfExtents = source->mCollisionBoxHalfExtents;
-    mCollisionBoxTranslate = source->mCollisionBoxTranslate;
+    mCollisionBox = source->mCollisionBox;
 
     mAnimatedShapes = source->mAnimatedShapes;
 

@@ -34,7 +34,7 @@ namespace MWPhysics
             /// @return new position of each actor
             const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
-            const PtrPositionList& resetSimulation();
+            const PtrPositionList& resetSimulation(const ActorMap& actors);
 
             // Thread safe wrappers
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;

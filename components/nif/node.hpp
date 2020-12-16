@@ -131,9 +131,8 @@ struct NiBoundingVolume
     parent node (unless it's the root), and transformation (location
     and rotation) relative to it's parent.
  */
-class Node : public Named
+struct Node : public Named
 {
-public:
     // Node flags. Interpretation depends somewhat on the type of node.
     unsigned int flags;
     Transformation trafo;
@@ -241,43 +240,6 @@ struct NiNode : Node
 
 struct NiGeometry : Node
 {
-    struct MaterialData
-    {
-        std::vector<std::string> materialNames;
-        std::vector<int> materialExtraData;
-        unsigned int activeMaterial{0};
-        bool materialNeedsUpdate{false};
-        void read(NIFStream *nif)
-        {
-            if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
-                return;
-            unsigned int numMaterials = 0;
-            if (nif->getVersion() <= NIFStream::generateVersion(20,1,0,3))
-                numMaterials = nif->getBoolean(); // Has Shader
-            else if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
-                numMaterials = nif->getUInt();
-            if (numMaterials)
-            {
-                nif->getStrings(materialNames, numMaterials);
-                nif->getInts(materialExtraData, numMaterials);
-            }
-            if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
-                activeMaterial = nif->getUInt();
-            if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
-            {
-                materialNeedsUpdate = nif->getBoolean();
-                if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
-                    nif->skip(8);
-            }
-        }
-    };
-
-    NiSkinInstancePtr skin;
-    MaterialData materialData;
-};
-
-struct NiTriShape : NiGeometry
-{
     /* Possible flags:
         0x40 - mesh has no vertex normals ?
 
@@ -285,14 +247,50 @@ struct NiTriShape : NiGeometry
         been observed so far.
     */
 
-    NiTriShapeDataPtr data;
+    struct MaterialData
+    {
+        std::vector<std::string> names;
+        std::vector<int> extra;
+        unsigned int active{0};
+        bool needsUpdate{false};
+        void read(NIFStream *nif)
+        {
+            if (nif->getVersion() <= NIFStream::generateVersion(10,0,1,0))
+                return;
+            unsigned int num = 0;
+            if (nif->getVersion() <= NIFStream::generateVersion(20,1,0,3))
+                num = nif->getBoolean(); // Has Shader
+            else if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+                num = nif->getUInt();
+            if (num)
+            {
+                nif->getStrings(names, num);
+                nif->getInts(extra, num);
+            }
+            if (nif->getVersion() >= NIFStream::generateVersion(20,2,0,5))
+                active = nif->getUInt();
+            if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
+                needsUpdate = nif->getBoolean();
+        }
+    };
+
+    NiGeometryDataPtr data;
+    NiSkinInstancePtr skin;
+    MaterialData material;
+    BSShaderPropertyPtr shaderprop;
+    NiAlphaPropertyPtr alphaprop;
 
     void read(NIFStream *nif) override
     {
         Node::read(nif);
         data.read(nif);
         skin.read(nif);
-        materialData.read(nif);
+        material.read(nif);
+        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+        {
+            shaderprop.read(nif);
+            alphaprop.read(nif);
+        }
     }
 
     void post(NIFFile *nif) override
@@ -300,53 +298,28 @@ struct NiTriShape : NiGeometry
         Node::post(nif);
         data.post(nif);
         skin.post(nif);
-        if (!skin.empty())
+        shaderprop.post(nif);
+        alphaprop.post(nif);
+        if (recType != RC_NiParticles && !skin.empty())
             nif->setUseSkinning(true);
     }
 };
 
-struct NiTriStrips : NiGeometry
+struct NiTriShape : NiGeometry {};
+struct BSLODTriShape : NiTriShape
 {
-    NiTriStripsDataPtr data;
-
+    unsigned int lod0, lod1, lod2;
     void read(NIFStream *nif) override
     {
-        Node::read(nif);
-        data.read(nif);
-        skin.read(nif);
-        materialData.read(nif);
-    }
-
-    void post(NIFFile *nif) override
-    {
-        Node::post(nif);
-        data.post(nif);
-        skin.post(nif);
-        if (!skin.empty())
-            nif->setUseSkinning(true);
+        NiTriShape::read(nif);
+        lod0 = nif->getUInt();
+        lod1 = nif->getUInt();
+        lod2 = nif->getUInt();
     }
 };
-
-struct NiLines : NiGeometry
-{
-    NiLinesDataPtr data;
-
-    void read(NIFStream *nif) override
-    {
-        Node::read(nif);
-        data.read(nif);
-        skin.read(nif);
-    }
-
-    void post(NIFFile *nif) override
-    {
-        Node::post(nif);
-        data.post(nif);
-        skin.post(nif);
-        if (!skin.empty())
-            nif->setUseSkinning(true);
-    }
-};
+struct NiTriStrips : NiGeometry {};
+struct NiLines : NiGeometry {};
+struct NiParticles : NiGeometry { };
 
 struct NiCamera : Node
 {
@@ -398,25 +371,6 @@ struct NiCamera : Node
         nif->getInt(); // 0
         if (nif->getVersion() >= NIFStream::generateVersion(4,2,1,0))
             nif->getInt(); // 0
-    }
-};
-
-struct NiParticles : NiGeometry
-{
-    NiParticlesDataPtr data;
-    void read(NIFStream *nif) override
-    {
-        Node::read(nif);
-        data.read(nif);
-        skin.read(nif);
-        materialData.read(nif);
-    }
-
-    void post(NIFFile *nif) override
-    {
-        Node::post(nif);
-        data.post(nif);
-        skin.post(nif);
     }
 };
 

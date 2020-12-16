@@ -120,33 +120,34 @@ public:
 };
 
 
-class Node;
-class Extra;
-class Property;
-class NiUVData;
-class NiPosData;
-class NiVisData;
-class Controller;
-class Named;
-class NiSkinData;
-class NiFloatData;
+struct Node;
+struct Extra;
+struct Property;
+struct NiUVData;
+struct NiPosData;
+struct NiVisData;
+struct Controller;
+struct Named;
+struct NiSkinData;
+struct NiFloatData;
 struct NiMorphData;
-class NiPixelData;
-class NiColorData;
+struct NiPixelData;
+struct NiColorData;
 struct NiKeyframeData;
-class NiTriShapeData;
-class NiTriStripsData;
-class NiSkinInstance;
-class NiSourceTexture;
-class NiParticlesData;
-class NiPalette;
+struct NiTriStripsData;
+struct NiSkinInstance;
+struct NiSourceTexture;
+struct NiPalette;
 struct NiParticleModifier;
-struct NiLinesData;
 struct NiBoolData;
 struct NiSkinPartition;
 struct NiFloatInterpolator;
 struct NiPoint3Interpolator;
 struct NiTransformInterpolator;
+struct BSShaderTextureSet;
+struct NiGeometryData;
+struct BSShaderProperty;
+struct NiAlphaProperty;
 
 using NodePtr = RecordPtrT<Node>;
 using ExtraPtr = RecordPtrT<Extra>;
@@ -161,12 +162,8 @@ using NiPixelDataPtr = RecordPtrT<NiPixelData>;
 using NiFloatDataPtr = RecordPtrT<NiFloatData>;
 using NiColorDataPtr = RecordPtrT<NiColorData>;
 using NiKeyframeDataPtr = RecordPtrT<NiKeyframeData>;
-using NiTriShapeDataPtr = RecordPtrT<NiTriShapeData>;
-using NiTriStripsDataPtr = RecordPtrT<NiTriStripsData>;
-using NiLinesDataPtr = RecordPtrT<NiLinesData>;
 using NiSkinInstancePtr = RecordPtrT<NiSkinInstance>;
 using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
-using NiParticlesDataPtr = RecordPtrT<NiParticlesData>;
 using NiPalettePtr = RecordPtrT<NiPalette>;
 using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
 using NiBoolDataPtr = RecordPtrT<NiBoolData>;
@@ -174,12 +171,17 @@ using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
 using NiFloatInterpolatorPtr = RecordPtrT<NiFloatInterpolator>;
 using NiPoint3InterpolatorPtr = RecordPtrT<NiPoint3Interpolator>;
 using NiTransformInterpolatorPtr = RecordPtrT<NiTransformInterpolator>;
+using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
+using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
+using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
+using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
 
 using NodeList = RecordListT<Node>;
 using PropertyList = RecordListT<Property>;
 using ExtraList = RecordListT<Extra>;
 using NiSourceTextureList = RecordListT<NiSourceTexture>;
 using NiFloatInterpolatorList = RecordListT<NiFloatInterpolator>;
+using NiTriStripsDataList = RecordListT<NiTriStripsData>;
 
 } // Namespace
 #endif

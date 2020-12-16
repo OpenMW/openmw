@@ -11,9 +11,8 @@
 namespace Nif
 {
 // An extra data record. All the extra data connected to an object form a linked list.
-class Extra : public Record
+struct Extra : public Record
 {
-public:
     std::string name;
     ExtraPtr next; // Next extra data record in the list
 
@@ -31,9 +30,8 @@ public:
     void post(NIFFile *nif) override { next.post(nif); }
 };
 
-class Controller : public Record
+struct Controller : public Record
 {
-public:
     ControllerPtr next;
     int flags;
     float frequency, phase;
@@ -45,9 +43,8 @@ public:
 };
 
 /// Has name, extra-data and controller
-class Named : public Record
+struct Named : public Record
 {
-public:
     std::string name;
     ExtraPtr extra;
     ExtraList extralist;

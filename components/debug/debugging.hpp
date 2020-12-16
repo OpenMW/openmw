@@ -135,6 +135,9 @@ namespace Debug
 #endif
 }
 
+// Can be used to print messages without timestamps
+std::ostream& getRawStdout();
+
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[], const std::string& appName);
 
 #endif

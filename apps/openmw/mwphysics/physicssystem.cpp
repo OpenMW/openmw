@@ -46,6 +46,8 @@
 
 #include "collisiontype.hpp"
 #include "actor.hpp"
+
+#include "projectile.hpp"
 #include "trace.h"
 #include "object.hpp"
 #include "heightfield.hpp"
@@ -64,6 +66,7 @@ namespace MWPhysics
         , mResourceSystem(resourceSystem)
         , mDebugDrawEnabled(false)
         , mTimeAccum(0.0f)
+        , mProjectileId(0)
         , mWaterHeight(0)
         , mWaterEnabled(false)
         , mParentNode(parentNode)
@@ -112,7 +115,7 @@ namespace MWPhysics
 
         mObjects.clear();
         mActors.clear();
-
+        mProjectiles.clear();
     }
 
     void PhysicsSystem::setUnrefQueue(SceneUtil::UnrefQueue *unrefQueue)
@@ -248,7 +251,7 @@ namespace MWPhysics
         return 0.f;
     }
 
-    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
+    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
     {
         if (from == to)
         {
@@ -285,7 +288,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, getProjectile(projId));
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -502,6 +505,13 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::removeProjectile(const int projectileId)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+            mProjectiles.erase(foundProjectile);
+    }
+
     void PhysicsSystem::updatePtr(const MWWorld::Ptr &old, const MWWorld::Ptr &updated)
     {
         ObjectMap::iterator found = mObjects.find(old);
@@ -527,6 +537,13 @@ namespace MWPhysics
             if (actor->getStandingOnPtr() == old)
                 actor->setStandingOnPtr(updated);
         }
+
+        for (auto& [_, projectile] : mProjectiles)
+        {
+            if (projectile->getCaster() == old)
+                projectile->setCaster(updated);
+        }
+
     }
 
     Actor *PhysicsSystem::getActor(const MWWorld::Ptr &ptr)
@@ -553,6 +570,14 @@ namespace MWPhysics
         return nullptr;
     }
 
+    Projectile* PhysicsSystem::getProjectile(int projectileId) const
+    {
+        ProjectileMap::const_iterator found = mProjectiles.find(projectileId);
+        if (found != mProjectiles.end())
+            return found->second.get();
+        return nullptr;
+    }
+
     void PhysicsSystem::updateScale(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
@@ -568,6 +593,17 @@ namespace MWPhysics
         {
             foundActor->second->updateScale();
             mTaskScheduler->updateSingleAabb(foundActor->second);
+            return;
+        }
+    }
+
+    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position)
+    {
+        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
+        if (foundProjectile != mProjectiles.end())
+        {
+            foundProjectile->second->setPosition(position);
+            mTaskScheduler->updateSingleAabb(foundProjectile->second);
             return;
         }
     }
@@ -616,7 +652,7 @@ namespace MWPhysics
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
 
         // Try to get shape from basic model as fallback for creatures
-        if (!ptr.getClass().isNpc() && shape && shape->mCollisionBoxHalfExtents.length2() == 0)
+        if (!ptr.getClass().isNpc() && shape && shape->mCollisionBox.extents.length2() == 0)
         {
             const std::string fallbackModel = ptr.getClass().getModel(ptr);
             if (fallbackModel != mesh)
@@ -630,6 +666,15 @@ namespace MWPhysics
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get());
         mActors.emplace(ptr, std::move(actor));
+    }
+
+    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position)
+    {
+        mProjectileId++;
+        auto projectile = std::make_shared<Projectile>(mProjectileId, caster, position, mTaskScheduler.get(), this);
+        mProjectiles.emplace(mProjectileId, std::move(projectile));
+
+        return mProjectileId;
     }
 
     bool PhysicsSystem::toggleCollisionMode()
@@ -677,14 +722,7 @@ namespace MWPhysics
         mTimeAccum -= numSteps * mPhysicsDt;
 
         if (skipSimulation)
-        {
-            for (auto& [_, actor] : mActors)
-            {
-                actor->resetPosition();
-                actor->setStandingOnPtr(nullptr);
-            }
-            return mTaskScheduler->resetSimulation();
-        }
+            return mTaskScheduler->resetSimulation(mActors);
 
         return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), frameStart, frameNumber, stats);
     }
