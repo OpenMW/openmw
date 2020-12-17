@@ -299,22 +299,22 @@ namespace
 
     struct NifFileMock : Nif::File
     {
-        MOCK_CONST_METHOD1(getRecord, Nif::Record* (std::size_t));
-        MOCK_CONST_METHOD0(numRecords, std::size_t ());
-        MOCK_CONST_METHOD1(getRoot, Nif::Record* (std::size_t));
-        MOCK_CONST_METHOD0(numRoots, std::size_t ());
-        MOCK_CONST_METHOD1(getString, std::string (uint32_t));
-        MOCK_METHOD1(setUseSkinning, void (bool));
-        MOCK_CONST_METHOD0(getUseSkinning, bool ());
-        MOCK_CONST_METHOD0(getFilename, std::string ());
-        MOCK_CONST_METHOD0(getVersion, unsigned int ());
-        MOCK_CONST_METHOD0(getUserVersion, unsigned int ());
-        MOCK_CONST_METHOD0(getBethVersion, unsigned int ());
+        MOCK_METHOD(Nif::Record*, getRecord, (std::size_t), (const, override));
+        MOCK_METHOD(std::size_t, numRecords, (), (const, override));
+        MOCK_METHOD(Nif::Record*, getRoot, (std::size_t), (const, override));
+        MOCK_METHOD(std::size_t, numRoots, (), (const, override));
+        MOCK_METHOD(std::string, getString, (uint32_t), (const, override));
+        MOCK_METHOD(void, setUseSkinning, (bool), (override));
+        MOCK_METHOD(bool, getUseSkinning, (), (const, override));
+        MOCK_METHOD(std::string, getFilename, (), (const, override));
+        MOCK_METHOD(unsigned int, getVersion, (), (const, override));
+        MOCK_METHOD(unsigned int, getUserVersion, (), (const, override));
+        MOCK_METHOD(unsigned int, getBethVersion, (), (const, override));
     };
 
     struct RecordMock : Nif::Record
     {
-        MOCK_METHOD1(read, void (Nif::NIFStream *nif));
+        MOCK_METHOD(void, read, (Nif::NIFStream *nif), (override));
     };
 
     struct TestBulletNifLoader : Test
