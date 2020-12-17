@@ -53,18 +53,14 @@ vec2 groundcoverDisplacement(in vec3 worldpos, float h)
     harmonics += vec2((1.0 + 0.14*v) * sin(3.0*osg_SimulationTime + worldpos.xy / 500.0));
     harmonics += vec2((1.0 + 0.28*v) * sin(5.0*osg_SimulationTime + worldpos.xy / 200.0));
 
-    // FIXME: stomping function does not work well in MGE:
-    // 1. It does not take in account Z coordinate, so it works even when player levitates.
-    // 2. It works more-or-less well only for grass meshes, but not for other types of plants.
-    // So disable this function for now, until we find a better one.
-    vec2 stomp = vec2(0.0);
-    //float d = length(worldpos.xy - footPos.xy);
-    //if (d < 150.0 && d > 0.0)
-    //{
-    //    stomp = (60.0 / d - 0.4) * (worldpos.xy - footPos.xy);
-    //}
+    float d = length(worldpos - footPos.xyz);
+    vec3 stomp = vec3(0.0);
+    if (d < 150.0 && d > 0.0)
+    {
+        stomp = (60.0 / d - 0.4) * (worldpos - footPos.xyz);
+    }
 
-    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp);
+    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp.xy);
 }
 
 mat4 rotation(in vec3 angle)
