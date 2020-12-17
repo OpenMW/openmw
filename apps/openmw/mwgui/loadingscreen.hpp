@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <osg/Camera>
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
@@ -86,6 +87,7 @@ namespace MWGui
 
         osg::ref_ptr<osg::Texture2D> mTexture;
         osg::ref_ptr<CopyFramebufferToTextureCallback> mCopyFramebufferToTextureCallback;
+        osg::ref_ptr<osg::Camera::DrawCallback> mOldCallback;
         std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 
         void changeWallpaper();

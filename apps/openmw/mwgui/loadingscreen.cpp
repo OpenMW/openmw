@@ -5,6 +5,7 @@
 #include <osgViewer/Viewer>
 
 #include <osg/Texture2D>
+#include <osg/Version>
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
@@ -43,6 +44,7 @@ namespace MWGui
         , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
+        , mOldCallback(nullptr)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
@@ -322,7 +324,13 @@ namespace MWGui
             mCopyFramebufferToTextureCallback = new CopyFramebufferToTextureCallback(mTexture);
         }
 
+#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
         mViewer->getCamera()->addInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#else
+        // TODO: Remove once we officially end support for OSG versions pre 3.5.10
+        mOldCallback = mViewer->getCamera()->getInitialDrawCallback();
+        mViewer->getCamera()->setInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#endif
 
         mBackgroundImage->setBackgroundImage("");
         mBackgroundImage->setVisible(false);
@@ -367,7 +375,13 @@ namespace MWGui
 
         if (mCopyFramebufferToTextureCallback)
         {
+            
+#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
             mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#else
+            // TODO: Remove once we officially end support for OSG versions pre 3.5.10
+            mViewer->getCamera()->setInitialDrawCallback(mOldCallback);
+#endif
             mCopyFramebufferToTextureCallback = nullptr;
         }
 
