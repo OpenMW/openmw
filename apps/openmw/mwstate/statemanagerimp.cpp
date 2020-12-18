@@ -27,6 +27,7 @@
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwworld/player.hpp"
 #include "../mwworld/class.hpp"
@@ -59,6 +60,7 @@ void MWState::StateManager::cleanup (bool force)
 
         MWMechanics::CreatureStats::cleanup();
     }
+    MWBase::Environment::get().getLuaManager()->clear();
 }
 
 std::map<int, int> MWState::StateManager::buildContentFileIndexMap (const ESM::ESMReader& reader)
@@ -146,7 +148,7 @@ void MWState::StateManager::newGame (bool bypass)
     {
         Log(Debug::Info) << "Starting a new game";
         MWBase::Environment::get().getScriptManager()->getGlobalScripts().addStartup();
-
+        MWBase::Environment::get().getLuaManager()->newGameStarted();
         MWBase::Environment::get().getWorld()->startNewGame (bypass);
 
         mState = State_Running;

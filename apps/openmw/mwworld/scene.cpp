@@ -25,6 +25,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/landmanager.hpp"
@@ -138,6 +139,8 @@ namespace
 
         if (!physics.getObject(ptr))
             ptr.getClass().insertObject (ptr, model, rotation, physics);
+
+        MWBase::Environment::get().getLuaManager()->objectAddedToScene(ptr);
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWPhysics::PhysicsSystem& physics, DetourNavigator::Navigator& navigator)
@@ -385,6 +388,7 @@ namespace MWWorld
                 mRendering.removeActorPath(ptr);
                 mPhysics->remove(ptr);
             }
+            MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         }
 
         const auto cellX = cell->getCell()->getGridX();
@@ -1006,6 +1010,7 @@ namespace MWWorld
     {
         MWBase::Environment::get().getMechanicsManager()->remove (ptr);
         MWBase::Environment::get().getSoundManager()->stopSound3D (ptr);
+        MWBase::Environment::get().getLuaManager()->objectRemovedFromScene(ptr);
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         if (const auto object = mPhysics->getObject(ptr))
         {

@@ -6,6 +6,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/player.hpp"
@@ -57,6 +58,9 @@ namespace MWInput
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         if (!input->controlsDisabled() && !consumed)
             mBindingsManager->keyPressed(arg);
+
+        if (!consumed)
+            MWBase::Environment::get().getLuaManager()->keyPressed(arg);
 
         input->setJoystickLastUsed(false);
     }

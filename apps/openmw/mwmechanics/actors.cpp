@@ -24,6 +24,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/luamanager.hpp"
 
 #include "../mwmechanics/aibreathe.hpp"
 
@@ -2009,6 +2010,25 @@ namespace MWMechanics
                         return; // for now abort update of the old cell when cell changes by teleportation magic effect
                                 // a better solution might be to apply cell changes at the end of the frame
                     }
+                    bool controlledFromLua;
+                    {
+                        const MWBase::LuaManager::ActorControls* luaControls =
+                            MWBase::Environment::get().getLuaManager()->getActorControls(iter->first);
+                        controlledFromLua = luaControls && luaControls->controlledFromLua;
+                        if (controlledFromLua && isConscious(iter->first))
+                        {
+                            Movement& mov = iter->first.getClass().getMovementSettings(iter->first);
+                            mov.mPosition[0] = luaControls->sideMovement;
+                            mov.mPosition[1] = luaControls->movement;
+                            mov.mPosition[2] = luaControls->jump ? 1 : 0;
+                            mov.mRotation[0] = mov.mRotation[1] = 0;
+                            mov.mRotation[2] = luaControls->turn;
+                            mov.mSpeedFactor = osg::Vec2(luaControls->movement, luaControls->sideMovement).length();
+
+                            CreatureStats& stats = iter->first.getClass().getCreatureStats(iter->first);
+                            stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, luaControls->run);
+                        }
+                    }
                     if (aiActive && inProcessingRange)
                     {
                         if (engageCombatTimerStatus == Misc::TimerStatus::Elapsed)
@@ -2062,7 +2082,7 @@ namespace MWMechanics
                         if (iter->first != player)
                         {
                             CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
-                            if (isConscious(iter->first))
+                            if (isConscious(iter->first) && !controlledFromLua)
                             {
                                 stats.getAiSequence().execute(iter->first, *ctrl, duration);
                                 updateGreetingState(iter->first, *iter->second, timerUpdateHello > 0);
@@ -2071,7 +2091,7 @@ namespace MWMechanics
                             }
                         }
                     }
-                    else if (aiActive && iter->first != player && isConscious(iter->first))
+                    else if (aiActive && iter->first != player && isConscious(iter->first) && !controlledFromLua)
                     {
                         CreatureStats &stats = iter->first.getClass().getCreatureStats(iter->first);
                         stats.getAiSequence().execute(iter->first, *ctrl, duration, /*outOfRange*/true);
