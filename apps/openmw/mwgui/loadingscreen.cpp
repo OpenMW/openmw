@@ -1,6 +1,7 @@
 #include "loadingscreen.hpp"
 
 #include <array>
+#include <condition_variable>
 
 #include <osgViewer/Viewer>
 
@@ -139,6 +140,7 @@ namespace MWGui
     public:
         CopyFramebufferToTextureCallback(osg::Texture2D* texture)
             : mTexture(texture)
+            , mOneshot(true)
         {
         }
 
@@ -147,9 +149,25 @@ namespace MWGui
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
+
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                mOneshot = false;
+            }
+            mSignal.notify_all();
+        }
+
+        void wait()
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            while (mOneshot)
+                mSignal.wait(lock);
         }
 
     private:
+        mutable bool mOneshot;
+        mutable std::mutex mMutex;
+        mutable std::condition_variable mSignal;
         osg::ref_ptr<osg::Texture2D> mTexture;
     };
 
@@ -375,7 +393,7 @@ namespace MWGui
 
         if (mCopyFramebufferToTextureCallback)
         {
-            
+            mCopyFramebufferToTextureCallback->wait();
 #if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
             mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
 #else
