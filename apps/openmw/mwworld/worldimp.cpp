@@ -1356,12 +1356,7 @@ namespace MWWorld
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
-        if (ptr.getClass().isActor())
-        {
-            MWPhysics::Actor* actor = mPhysics->getActor(ptr);
-            if (actor)
-                actor->resetPosition();
-        }
+        mPhysics->resetPosition(ptr);
     }
 
     void World::fixPosition()
@@ -1512,16 +1507,26 @@ namespace MWWorld
         mProjectileManager->processHits();
         mDiscardMovements = false;
 
-        for(const auto& [actor, position]: results)
+        for(const auto& actor : results)
         {
             // Handle player last, in case a cell transition occurs
             if(actor != getPlayerPtr())
+            {
+                auto* physactor = mPhysics->getActor(actor);
+                assert(physactor);
+                const auto position = physactor->getSimulationPosition();
                 moveObjectImp(actor, position.x(), position.y(), position.z(), false);
+            }
         }
 
-        const auto player = results.find(getPlayerPtr());
+        const auto player = std::find(results.begin(), results.end(), getPlayerPtr());
         if (player != results.end())
-            moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
+        {
+            auto* physactor = mPhysics->getActor(*player);
+            assert(physactor);
+            const auto position = physactor->getSimulationPosition();
+            moveObjectImp(*player, position.x(), position.y(), position.z(), false);
+        }
     }
 
     void World::updateNavigator()

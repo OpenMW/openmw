@@ -32,9 +32,9 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            const PtrPositionList& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            const std::vector<MWWorld::Ptr>& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
-            const PtrPositionList& resetSimulation(const ActorMap& actors);
+            const std::vector<MWWorld::Ptr>& resetSimulation(const ActorMap& actors);
 
             // Thread safe wrappers
             void rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const;
@@ -46,7 +46,7 @@ namespace MWPhysics
             void setCollisionFilterMask(btCollisionObject* collisionObject, int collisionFilterMask);
             void addCollisionObject(btCollisionObject* collisionObject, int collisionFilterGroup, int collisionFilterMask);
             void removeCollisionObject(btCollisionObject* collisionObject);
-            void updateSingleAabb(std::weak_ptr<PtrHolder> ptr);
+            void updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate=false);
             bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
 
         private:
@@ -60,8 +60,7 @@ namespace MWPhysics
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<ActorFrameData> mActorsFrameData;
-            PtrPositionList mMovementResults;
-            PtrPositionList mPreviousMovementResults;
+            std::vector<MWWorld::Ptr> mMovedActors;
             const float mPhysicsDt;
             float mTimeAccum;
             std::shared_ptr<btCollisionWorld> mCollisionWorld;

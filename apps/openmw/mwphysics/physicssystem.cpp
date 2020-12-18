@@ -437,7 +437,7 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
-        found->second->resetPosition();
+        resetPosition(ptr);
         return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
     }
 
@@ -647,6 +647,17 @@ namespace MWPhysics
         }
     }
 
+    void PhysicsSystem::resetPosition(const MWWorld::ConstPtr &ptr)
+    {
+        ActorMap::iterator foundActor = mActors.find(ptr);
+        if (foundActor != mActors.end())
+        {
+            foundActor->second->resetPosition();
+            mTaskScheduler->updateSingleAabb(foundActor->second, true);
+            return;
+        }
+    }
+
     void PhysicsSystem::addActor (const MWWorld::Ptr& ptr, const std::string& mesh)
     {
         osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
@@ -683,6 +694,8 @@ namespace MWPhysics
         if (found != mActors.end())
         {
             bool cmode = found->second->getCollisionMode();
+            if (cmode)
+                resetPosition(found->first);
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
             // NB: Collision body isn't disabled for vanilla TCL compatibility
@@ -711,7 +724,7 @@ namespace MWPhysics
         mMovementQueue.clear();
     }
 
-    const PtrPositionList& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    const std::vector<MWWorld::Ptr>& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         mTimeAccum += dt;
 
@@ -930,7 +943,6 @@ namespace MWPhysics
     void ActorFrameData::updatePosition()
     {
         mActorRaw->updatePosition();
-        mOrigin = mActorRaw->getSimulationPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {

@@ -76,6 +76,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     updateScale();
     resetPosition();
     addCollisionMask(getCollisionMask());
+    updateCollisionObjectPosition();
 }
 
 Actor::~Actor()
@@ -139,7 +140,9 @@ osg::Vec3f Actor::getWorldPosition() const
 
 void Actor::setSimulationPosition(const osg::Vec3f& position)
 {
-    mSimulationPosition = position;
+    if (!mResetSimulation)
+        mSimulationPosition = position;
+    mResetSimulation = false;
 }
 
 osg::Vec3f Actor::getSimulationPosition() const
@@ -193,9 +196,9 @@ void Actor::resetPosition()
     mPreviousPosition = mWorldPosition;
     mPosition = mWorldPosition;
     mSimulationPosition = mWorldPosition;
-    updateCollisionObjectPositionUnsafe();
     mStandingOnPtr = nullptr;
     mWorldPositionChanged = false;
+    mResetSimulation = true;
 }
 
 osg::Vec3f Actor::getPosition() const
