@@ -127,11 +127,9 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     if (state.mAlphaBlend)
     {
         sg_new = sg->find_or_insert(mShaderAlphaTestStateSet);
-        for (RenderLeaf* leaf : sg->_leaves)
-        {
+        sg_new->_leaves = std::move(sg->_leaves);
+        for (RenderLeaf* leaf : sg_new->_leaves)
             leaf->_parent = sg_new;
-            sg_new->_leaves.push_back(leaf);
-        }
         sg = sg_new;
     }
 
@@ -139,11 +137,9 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     if (state.mAlphaFunc && state.mAlphaFunc->getFunction() != GL_ALWAYS)
     {
         sg_new = sg->find_or_insert(mAlphaFuncShaders[state.mAlphaFunc->getFunction() - GL_NEVER]);
-        for (RenderLeaf* leaf : sg->_leaves)
-        {
+        sg_new->_leaves = std::move(sg->_leaves);
+        for (RenderLeaf* leaf : sg_new->_leaves)
             leaf->_parent = sg_new;
-            sg_new->_leaves.push_back(leaf);
-        }
         sg = sg_new;
     }
 
