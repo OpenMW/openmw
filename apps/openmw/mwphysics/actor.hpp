@@ -90,8 +90,9 @@ namespace MWPhysics
 
         /**
           * Store the current position into mPreviousPosition, then move to this position.
+          * Returns true if the new position is different.
           */
-        void setPosition(const osg::Vec3f& position);
+        bool setPosition(const osg::Vec3f& position);
         void resetPosition();
         void adjustPosition(const osg::Vec3f& offset);
 
@@ -177,6 +178,8 @@ namespace MWPhysics
         osg::Vec3f mSimulationPosition;
         osg::Vec3f mPosition;
         osg::Vec3f mPreviousPosition;
+        osg::Vec3f mPositionOffset;
+        bool mWorldPositionChanged;
         btTransform mLocalTransform;
         mutable std::mutex mPositionMutex;
 

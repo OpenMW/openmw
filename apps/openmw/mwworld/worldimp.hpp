@@ -380,6 +380,9 @@ namespace MWWorld
             MWWorld::Ptr moveObject (const Ptr& ptr, CellStore* newCell, float x, float y, float z, bool movePhysics=true) override;
             ///< @return an updated Ptr
 
+            MWWorld::Ptr moveObjectBy(const Ptr& ptr, osg::Vec3f vec) override;
+            ///< @return an updated Ptr
+
             void scaleObject (const Ptr& ptr, float scale) override;
 
             /// World rotates object, uses radians

@@ -120,6 +120,8 @@ int Actor::getCollisionMask() const
 
 void Actor::updatePositionUnsafe()
 {
+    if (!mWorldPositionChanged && mWorldPosition != mPtr.getRefData().getPosition().asVec3())
+        mWorldPositionChanged = true;
     mWorldPosition = mPtr.getRefData().getPosition().asVec3();
 }
 
@@ -153,6 +155,7 @@ void Actor::updateCollisionObjectPositionUnsafe()
     mLocalTransform.setOrigin(Misc::Convert::toBullet(newPosition));
     mLocalTransform.setRotation(Misc::Convert::toBullet(mRotation));
     mCollisionObject->setWorldTransform(mLocalTransform);
+    mWorldPositionChanged = false;
 }
 
 void Actor::updateCollisionObjectPosition()
@@ -167,18 +170,20 @@ osg::Vec3f Actor::getCollisionObjectPosition() const
     return Misc::Convert::toOsg(mLocalTransform.getOrigin());
 }
 
-void Actor::setPosition(const osg::Vec3f& position)
+bool Actor::setPosition(const osg::Vec3f& position)
 {
     std::scoped_lock lock(mPositionMutex);
-    mPreviousPosition = mPosition;
-    mPosition = position;
+    bool hasChanged = mPosition != position || mPositionOffset.length() != 0 || mWorldPositionChanged;
+    mPreviousPosition = mPosition + mPositionOffset;
+    mPosition = position + mPositionOffset;
+    mPositionOffset = osg::Vec3f();
+    return hasChanged;
 }
 
 void Actor::adjustPosition(const osg::Vec3f& offset)
 {
     std::scoped_lock lock(mPositionMutex);
-    mPosition += offset;
-    mPreviousPosition += offset;
+    mPositionOffset += offset;
 }
 
 void Actor::resetPosition()
@@ -189,6 +194,8 @@ void Actor::resetPosition()
     mPosition = mWorldPosition;
     mSimulationPosition = mWorldPosition;
     updateCollisionObjectPositionUnsafe();
+    mStandingOnPtr = nullptr;
+    mWorldPositionChanged = false;
 }
 
 osg::Vec3f Actor::getPosition() const

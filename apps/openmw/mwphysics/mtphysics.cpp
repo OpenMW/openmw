@@ -100,15 +100,6 @@ namespace
     osg::Vec3f interpolateMovements(MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = timeAccum / physicsDt;
-
-        // account for force change of actor's position in the main thread
-        const auto correction = actorData.mActorRaw->getWorldPosition() - actorData.mOrigin;
-        if (correction.length() != 0)
-        {
-            actorData.mActorRaw->adjustPosition(correction);
-            actorData.mPosition = actorData.mActorRaw->getPosition();
-        }
-
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
@@ -511,9 +502,7 @@ namespace MWPhysics
         {
             if(const auto actor = actorData.mActor.lock())
             {
-                bool positionChanged = actorData.mPosition != actorData.mActorRaw->getPosition();
-                actorData.mActorRaw->setPosition(actorData.mPosition);
-                if (positionChanged)
+                if (actor->setPosition(actorData.mPosition))
                 {
                     actor->updateCollisionObjectPosition();
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
