@@ -87,12 +87,13 @@ namespace
 
     void updateMechanics(MWPhysics::ActorFrameData& actorData)
     {
+        auto ptr = actorData.mActorRaw->getPtr();
         if (actorData.mDidJump)
-            handleJump(actorData.mPtr);
+            handleJump(ptr);
 
-        MWMechanics::CreatureStats& stats = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr);
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (actorData.mNeedLand)
-            stats.land(actorData.mPtr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
+            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
         else if (actorData.mFallHeight < 0)
             stats.addToFallHeight(-actorData.mFallHeight);
     }
@@ -218,8 +219,13 @@ namespace MWPhysics
         {
             for (auto& data : mActorsFrameData)
             {
+                const auto actorActive = [&data](const auto& newFrameData) -> bool
+                {
+                    const auto actor = data.mActor.lock();
+                    return actor && actor->getPtr() == newFrameData.mActorRaw->getPtr();
+                };
                 // Only return actors that are still part of the scene
-                if (std::any_of(actorsData.begin(), actorsData.end(), [&data](const auto& newFrameData) { return data.mActorRaw->getPtr() == newFrameData.mActorRaw->getPtr(); }))
+                if (std::any_of(actorsData.begin(), actorsData.end(), actorActive))
                 {
                     updateMechanics(data);
 
