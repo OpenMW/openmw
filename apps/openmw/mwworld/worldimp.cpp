@@ -1251,6 +1251,18 @@ namespace MWWorld
         return moveObjectImp(ptr, x, y, z, true, moveToActive);
     }
 
+    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec)
+    {
+        auto* actor = mPhysics->getActor(ptr);
+        if (actor)
+        {
+            actor->adjustPosition(vec);
+            return ptr;
+        }
+        osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
+        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
+    }
+
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         if (mPhysics->getActor(ptr))

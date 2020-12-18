@@ -32,11 +32,7 @@ namespace MWScript
             std::vector<MWWorld::Ptr> actors;
             MWBase::Environment::get().getWorld()->getActorsStandingOn (ptr, actors);
             for (auto& actor : actors)
-            {
-                osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
-                actorPos += diff;
-                MWBase::Environment::get().getWorld()->moveObject(actor, actorPos.x(), actorPos.y(), actorPos.z());
-            }
+                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff);
         }
 
         template<class R>
@@ -727,14 +723,12 @@ namespace MWScript
                         return;
 
                     osg::Vec3f diff = ptr.getRefData().getBaseNode()->getAttitude() * posChange;
-                    osg::Vec3f worldPos(ptr.getRefData().getPosition().asVec3());
-                    worldPos += diff;
 
                     // We should move actors, standing on moving object, too.
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, worldPos.x(), worldPos.y(), worldPos.z()));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
                 }
         };
 
@@ -755,15 +749,14 @@ namespace MWScript
                     Interpreter::Type_Float movement = (runtime[0].mFloat*MWBase::Environment::get().getFrameDuration());
                     runtime.pop();
 
-                    const float *objPos = ptr.getRefData().getPosition().pos;
                     osg::Vec3f diff;
 
                     if (axis == "x")
-                        diff.x() += movement;
+                        diff.x() = movement;
                     else if (axis == "y")
-                        diff.y() += movement;
+                        diff.y() = movement;
                     else if (axis == "z")
-                        diff.z() += movement;
+                        diff.z() = movement;
                     else
                         return;
 
@@ -771,7 +764,7 @@ namespace MWScript
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, objPos[0]+diff.x(), objPos[1]+diff.y(), objPos[2]+diff.z()));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
                 }
         };
 
