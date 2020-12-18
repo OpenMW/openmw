@@ -151,7 +151,13 @@ add_component_dir (fallback
     fallback validate
     )
 
-if(NOT WIN32 AND NOT ANDROID)
+if(WIN32)
+    add_component_dir (crashcatcher
+        windows_crashcatcher
+        windows_crashmonitor
+        windows_crashshm
+    )
+elseif(NOT ANDROID)
     add_component_dir (crashcatcher
         crashcatcher
     )
