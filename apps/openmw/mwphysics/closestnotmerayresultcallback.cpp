@@ -41,15 +41,21 @@ namespace MWPhysics
         btCollisionWorld::ClosestRayResultCallback::addSingleResult(rayResult, normalInWorldSpace);
         if (mProjectile)
         {
-            auto* holder = static_cast<PtrHolder*>(rayResult.m_collisionObject->getUserPointer());
-            if (auto* target = dynamic_cast<Actor*>(holder))
+            switch (rayResult.m_collisionObject->getBroadphaseHandle()->m_collisionFilterGroup)
             {
-                mProjectile->hit(target->getPtr(), m_hitPointWorld, m_hitNormalWorld);
-            }
-            else if (auto* target = dynamic_cast<Projectile*>(holder))
-            {
-                target->hit(mProjectile->getPtr(), m_hitPointWorld, m_hitNormalWorld);
-                mProjectile->hit(target->getPtr(), m_hitPointWorld, m_hitNormalWorld);
+                case CollisionType_Actor:
+                {
+                    auto* target = static_cast<Actor*>(rayResult.m_collisionObject->getUserPointer());
+                    mProjectile->hit(target->getPtr(), m_hitPointWorld, m_hitNormalWorld);
+                    break;
+                }
+                case CollisionType_Projectile:
+                {
+                    auto* target = static_cast<Projectile*>(rayResult.m_collisionObject->getUserPointer());
+                    target->hit(mProjectile->getPtr(), m_hitPointWorld, m_hitNormalWorld);
+                    mProjectile->hit(target->getPtr(), m_hitPointWorld, m_hitNormalWorld);
+                    break;
+                }
             }
         }
 
