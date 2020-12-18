@@ -230,16 +230,7 @@ namespace MWPhysics
                     mMovedActors.emplace_back(data.mActorRaw->getPtr());
                 }
             }
-
-            if (mFrameNumber == frameNumber - 1)
-            {
-                stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
-                stats.setAttribute(mFrameNumber, "physicsworker_time_taken", mTimer->delta_s(mTimeBegin, mTimeEnd));
-                stats.setAttribute(mFrameNumber, "physicsworker_time_end", mTimer->delta_s(mFrameStart, mTimeEnd));
-            }
-            mFrameStart = frameStart;
-            mTimeBegin = mTimer->tick();
-            mFrameNumber = frameNumber;
+            updateStats(frameStart, frameNumber, stats);
         }
 
         // init
@@ -522,5 +513,18 @@ namespace MWPhysics
             if (mAdvanceSimulation)
                 actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
         }
+    }
+
+    void PhysicsTaskScheduler::updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    {
+        if (mFrameNumber == frameNumber - 1)
+        {
+            stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
+            stats.setAttribute(mFrameNumber, "physicsworker_time_taken", mTimer->delta_s(mTimeBegin, mTimeEnd));
+            stats.setAttribute(mFrameNumber, "physicsworker_time_end", mTimer->delta_s(mFrameStart, mTimeEnd));
+        }
+        mFrameStart = frameStart;
+        mTimeBegin = mTimer->tick();
+        mFrameNumber = frameNumber;
     }
 }
