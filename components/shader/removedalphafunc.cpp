@@ -17,11 +17,4 @@ namespace Shader
             sInstances[func - GL_NEVER] = new RemovedAlphaFunc(static_cast<osg::AlphaFunc::ComparisonFunction>(func), 1.0);
         return sInstances[func - GL_NEVER];
     }
-
-    void RemovedAlphaFunc::apply(osg::State & state) const
-    {
-        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
-        if (!state.getGlobalDefaultAttribute(ALPHAFUNC)->getType() != getType())
-            state.setGlobalDefaultAttribute(static_cast<const osg::StateAttribute*>(cloneType()));
-    }
 }
