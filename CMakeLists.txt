@@ -557,6 +557,7 @@ if (WIN32)
         # caused by MyGUI
         4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
         4297 # function assumed not to throw an exception but does
+        4866 # compiler may not enforce left-to-right evaluation order for call
 
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
