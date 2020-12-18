@@ -58,6 +58,7 @@ namespace MWRender
             osg::ref_ptr<osg::StateSet> ss = node.getStateSet();
             if (ss != nullptr)
             {
+                ss->removeAttribute(osg::StateAttribute::MATERIAL);
                 removeAlpha(ss);
             }
 
@@ -101,6 +102,7 @@ namespace MWRender
             ss->setAttribute(new osg::VertexAttribDivisor(6, 1));
             ss->setAttribute(new osg::VertexAttribDivisor(7, 1));
 
+            ss->removeAttribute(osg::StateAttribute::MATERIAL);
             removeAlpha(ss);
 
             traverse(geom);
