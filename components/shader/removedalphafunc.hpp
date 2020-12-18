@@ -34,7 +34,7 @@ namespace Shader
     protected:
         virtual ~RemovedAlphaFunc() = default;
 
-        static std::array<osg::ref_ptr<RemovedAlphaFunc>, GL_ALWAYS - GL_NEVER> sInstances;
+        static std::array<osg::ref_ptr<RemovedAlphaFunc>, GL_ALWAYS - GL_NEVER + 1> sInstances;
     };
 }
 #endif //OPENMW_COMPONENTS_REMOVEDALPHAFUNC_H

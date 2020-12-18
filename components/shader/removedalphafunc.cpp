@@ -6,8 +6,8 @@
 
 namespace Shader
 {
-    std::array<osg::ref_ptr<RemovedAlphaFunc>, GL_ALWAYS - GL_NEVER> RemovedAlphaFunc::sInstances{
-        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+    std::array<osg::ref_ptr<RemovedAlphaFunc>, GL_ALWAYS - GL_NEVER + 1> RemovedAlphaFunc::sInstances{
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
     };
 
     osg::ref_ptr<RemovedAlphaFunc> RemovedAlphaFunc::getInstance(GLenum func)

@@ -17,12 +17,12 @@ namespace SceneUtil
     class ShadowsBin : public osgUtil::RenderBin
     {
     private:
-        static std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER> sCastingPrograms;
+        static std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> sCastingPrograms;
 
         osg::ref_ptr<osg::StateSet> mNoTestStateSet;
         osg::ref_ptr<osg::StateSet> mShaderAlphaTestStateSet;
 
-        std::array<osg::ref_ptr<osg::StateSet>, GL_ALWAYS - GL_NEVER> mAlphaFuncShaders;
+        std::array<osg::ref_ptr<osg::StateSet>, GL_ALWAYS - GL_NEVER + 1> mAlphaFuncShaders;
     public:
         META_Object(SceneUtil, ShadowsBin)
         ShadowsBin();
@@ -65,13 +65,13 @@ namespace SceneUtil
 
         osgUtil::StateGraph* cullStateGraph(osgUtil::StateGraph* sg, osgUtil::StateGraph* root, std::unordered_set<osgUtil::StateGraph*>& uninteresting);
 
-        static void addPrototype(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER>& castingPrograms);
+        static void addPrototype(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms);
     };
 
     class ShadowsBinAdder
     {
         public:
-        ShadowsBinAdder(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER>& castingPrograms){ ShadowsBin::addPrototype(name, castingPrograms); }
+        ShadowsBinAdder(const std::string& name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms){ ShadowsBin::addPrototype(name, castingPrograms); }
     };
 
 }

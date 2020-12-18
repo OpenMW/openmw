@@ -42,8 +42,8 @@ namespace
 namespace SceneUtil
 {
 
-std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER> ShadowsBin::sCastingPrograms = {
-    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> ShadowsBin::sCastingPrograms = {
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
 };
 
 ShadowsBin::ShadowsBin()
@@ -150,7 +150,7 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     return sg;
 }
 
-void ShadowsBin::addPrototype(const std::string & name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER>& castingPrograms)
+void ShadowsBin::addPrototype(const std::string & name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms)
 {
     sCastingPrograms = castingPrograms;
     osg::ref_ptr<osgUtil::RenderBin> bin(new ShadowsBin);
