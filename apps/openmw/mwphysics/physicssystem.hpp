@@ -50,8 +50,6 @@ class btVector3;
 
 namespace MWPhysics
 {
-    using PtrPositionList = std::map<MWWorld::Ptr, osg::Vec3f>;
-
     class HeightField;
     class Object;
     class Actor;
@@ -99,7 +97,6 @@ namespace MWPhysics
         float mOldHeight;
         float mFallHeight;
         osg::Vec3f mMovement;
-        osg::Vec3f mOrigin;
         osg::Vec3f mPosition;
         ESM::Position mRefpos;
     };
@@ -147,6 +144,7 @@ namespace MWPhysics
             void updateScale (const MWWorld::Ptr& ptr);
             void updateRotation (const MWWorld::Ptr& ptr);
             void updatePosition (const MWWorld::Ptr& ptr);
+            void resetPosition(const MWWorld::ConstPtr &ptr);
 
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
@@ -210,7 +208,7 @@ namespace MWPhysics
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
-            const PtrPositionList& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            const std::vector<MWWorld::Ptr>& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();

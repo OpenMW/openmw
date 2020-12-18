@@ -180,6 +180,7 @@ namespace MWPhysics
         osg::Vec3f mPreviousPosition;
         osg::Vec3f mPositionOffset;
         bool mWorldPositionChanged;
+        bool mResetSimulation;
         btTransform mLocalTransform;
         mutable std::mutex mPositionMutex;
 
