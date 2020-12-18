@@ -46,6 +46,7 @@ namespace MWGui
         , mProgress(0)
         , mShowWallpaper(true)
         , mOldCallback(nullptr)
+        , mHasCallback(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
@@ -139,13 +140,19 @@ namespace MWGui
     {
     public:
         CopyFramebufferToTextureCallback(osg::Texture2D* texture)
-            : mTexture(texture)
-            , mOneshot(true)
+            : mOneshot(true)
+            , mTexture(texture)
         {
         }
 
         void operator () (osg::RenderInfo& renderInfo) const override
         {
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                mOneshot = false;
+            }
+            mSignal.notify_all();
+
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
@@ -162,6 +169,18 @@ namespace MWGui
             std::unique_lock<std::mutex> lock(mMutex);
             while (mOneshot)
                 mSignal.wait(lock);
+        }
+
+        void waitUntilInvoked()
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            while (mOneshot)
+                mSignal.wait(lock);
+        }
+
+        void reset()
+        {
+            mOneshot = true;
         }
 
     private:
@@ -349,6 +368,8 @@ namespace MWGui
         mOldCallback = mViewer->getCamera()->getInitialDrawCallback();
         mViewer->getCamera()->setInitialDrawCallback(mCopyFramebufferToTextureCallback);
 #endif
+        mCopyFramebufferToTextureCallback->reset();
+        mHasCallback = true;
 
         mBackgroundImage->setBackgroundImage("");
         mBackgroundImage->setVisible(false);
@@ -391,16 +412,19 @@ namespace MWGui
         mViewer->renderingTraversals();
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-        if (mCopyFramebufferToTextureCallback)
+        if (mHasCallback)
         {
-            mCopyFramebufferToTextureCallback->wait();
+            mCopyFramebufferToTextureCallback->waitUntilInvoked();
+
+            // Note that we are removing the callback before the draw thread has returned from it.
+            // This is OK as we are retaining the ref_ptr.
 #if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
             mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
 #else
             // TODO: Remove once we officially end support for OSG versions pre 3.5.10
             mViewer->getCamera()->setInitialDrawCallback(mOldCallback);
 #endif
-            mCopyFramebufferToTextureCallback = nullptr;
+            mHasCallback = false;
         }
 
         mLastRenderTime = mTimer.time_m();
