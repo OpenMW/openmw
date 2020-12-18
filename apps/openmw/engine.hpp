@@ -33,6 +33,11 @@ namespace Compiler
     class Context;
 }
 
+namespace MWLua
+{
+    class LuaManager;
+}
+
 namespace Files
 {
     struct ConfigurationManager;
@@ -84,6 +89,8 @@ namespace OMW
 
             Compiler::Extensions mExtensions;
             Compiler::Context *mScriptContext;
+
+            MWLua::LuaManager* mLuaManager;
 
             Files::Collections mFileCollections;
             bool mFSStrict;

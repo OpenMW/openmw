@@ -1,5 +1,6 @@
 #include "engine.hpp"
 
+#include <atomic>
 #include <iomanip>
 #include <fstream>
 #include <chrono>
@@ -45,6 +46,8 @@
 #include "mwinput/inputmanagerimp.hpp"
 
 #include "mwgui/windowmanagerimp.hpp"
+
+#include "mwlua/luamanagerimp.hpp"
 
 #include "mwscript/scriptmanagerimp.hpp"
 #include "mwscript/interpretercontext.hpp"
@@ -101,6 +104,7 @@ namespace
         PhysicsWorker,
         World,
         Gui,
+        Lua,
 
         Number,
     };
@@ -137,6 +141,9 @@ namespace
 
     template <>
     const UserStats UserStatsValue<UserStatsType::Gui>::sValue {"Gui", "gui"};
+
+    template <>
+    const UserStats UserStatsValue<UserStatsType::Lua>::sValue {"Lua", "lua"};
 
     template <UserStatsType type>
     struct ForEachUserStatsValue
@@ -700,6 +707,9 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
 
     mViewer->addEventHandler(mScreenCaptureHandler);
 
+    mLuaManager = new MWLua::LuaManager(mVFS.get());
+    mEnvironment.setLuaManager(mLuaManager);
+
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -811,6 +821,8 @@ void OMW::Engine::prepareEngine (Settings::Manager & settings)
                 << 100*static_cast<double> (result.second)/result.first
                 << "%)";
     }
+
+    mLuaManager->init();
 }
 
 // Initialise and enter main loop.
@@ -895,6 +907,28 @@ void OMW::Engine::go()
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
     }
 
+    // Start Lua scripting thread
+    std::atomic_bool luaUpdateRequest;
+    double luaDt = 0;
+    std::thread scriptingThread([&]() {
+        const osg::Timer* const timer = osg::Timer::instance();
+        osg::Stats* const stats = mViewer->getViewerStats();
+        while (!mViewer->done() && !mEnvironment.getStateManager()->hasQuitRequest())
+        {
+            while (!luaUpdateRequest)
+                std::this_thread::yield();
+
+            {
+                const osg::Timer_t frameStart = mViewer->getStartTick();
+                const unsigned int frameNumber = mViewer->getFrameStamp()->getFrameNumber();
+                ScopedProfile<UserStatsType::Lua> profile(frameStart, frameNumber, *timer, *stats);
+
+                mLuaManager->update(mEnvironment.getWindowManager()->isGuiMode(), luaDt);
+            }
+            luaUpdateRequest = false;
+        }
+    });
+
     // Start the main rendering loop
     double simulationTime = 0.0;
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
@@ -920,7 +954,16 @@ void OMW::Engine::go()
 
             mEnvironment.getWorld()->updateWindowManager();
 
+            // scriptingThread starts processing Lua scripts
+            luaDt = dt;
+            luaUpdateRequest = true;
+
             mViewer->renderingTraversals();
+
+            // wait for scriptingThread to finish
+            while (luaUpdateRequest)
+                std::this_thread::yield();
+            mLuaManager->applyQueuedChanges();
 
             bool guiActive = mEnvironment.getWindowManager()->isGuiMode();
             if (!guiActive)
@@ -942,6 +985,8 @@ void OMW::Engine::go()
 
         frameRateLimiter.limit();
     }
+
+    scriptingThread.join();
 
     // Save user settings
     settings.saveUser(settingspath);

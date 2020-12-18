@@ -22,6 +22,7 @@ namespace MWBase
     class InputManager;
     class WindowManager;
     class StateManager;
+    class LuaManager;
 
     /// \brief Central hub for mw-subsystems
     ///
@@ -42,6 +43,7 @@ namespace MWBase
             Journal *mJournal;
             InputManager *mInputManager;
             StateManager *mStateManager;
+            LuaManager *mLuaManager;
             Resource::ResourceSystem *mResourceSystem;
             float mFrameDuration;
             float mFrameRateLimit;
@@ -76,6 +78,8 @@ namespace MWBase
 
             void setStateManager (StateManager *stateManager);
 
+            void setLuaManager (LuaManager *luaManager);
+
             void setResourceSystem (Resource::ResourceSystem *resourceSystem);
 
             void setFrameDuration (float duration);
@@ -101,6 +105,8 @@ namespace MWBase
             InputManager *getInputManager() const;
 
             StateManager *getStateManager() const;
+
+            LuaManager *getLuaManager() const;
 
             Resource::ResourceSystem *getResourceSystem() const;
 

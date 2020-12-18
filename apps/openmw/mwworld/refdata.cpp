@@ -8,6 +8,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwlua/localscripts.hpp"
+
 namespace
 {
 enum RefDataFlags
@@ -20,6 +22,12 @@ enum RefDataFlags
 
 namespace MWWorld
 {
+
+    void RefData::setLuaScripts(std::unique_ptr<MWLua::LocalScripts>&& scripts)
+    {
+        mChanged = true;
+        mLuaScripts = std::move(scripts);
+    }
 
     void RefData::copy (const RefData& refData)
     {
@@ -36,12 +44,14 @@ namespace MWWorld
         mAnimationState = refData.mAnimationState;
 
         mCustomData = refData.mCustomData ? refData.mCustomData->clone() : nullptr;
+        mLuaScripts = refData.mLuaScripts;
     }
 
     void RefData::cleanup()
     {
         mBaseNode = nullptr;
         mCustomData = nullptr;
+        mLuaScripts = nullptr;
     }
 
     RefData::RefData()
