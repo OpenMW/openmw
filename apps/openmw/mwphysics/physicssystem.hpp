@@ -143,7 +143,6 @@ namespace MWPhysics
             void updateScale (const MWWorld::Ptr& ptr);
             void updateRotation (const MWWorld::Ptr& ptr);
             void updatePosition (const MWWorld::Ptr& ptr);
-            void resetPosition(const MWWorld::ConstPtr &ptr);
 
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);
 
