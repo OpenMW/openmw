@@ -584,6 +584,12 @@ if (WIN32)
             5031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file (config_begin.hpp, config_end.hpp)
         )
     endif()
+    
+    if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
+        4866 # compiler may not enforce left-to-right evaluation order for call
+        )
+    endif()
 
     foreach(d ${WARNINGS_DISABLE})
         set(WARNINGS "${WARNINGS} /wd${d}")
