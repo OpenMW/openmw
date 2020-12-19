@@ -557,7 +557,6 @@ if (WIN32)
         # caused by MyGUI
         4275 # non dll-interface class 'std::exception' used as base for dll-interface class 'MyGUI::Exception'
         4297 # function assumed not to throw an exception but does
-        4866 # compiler may not enforce left-to-right evaluation order for call
 
         # OpenMW specific warnings
         4099 # Type mismatch, declared class or struct is defined with other type
@@ -583,6 +582,12 @@ if (WIN32)
     if (MSVC_VERSION GREATER 1800)
         set(WARNINGS_DISABLE ${WARNINGS_DISABLE} 5026 5027
             5031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file (config_begin.hpp, config_end.hpp)
+        )
+    endif()
+    
+    if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
+        4866 # compiler may not enforce left-to-right evaluation order for call
         )
     endif()
 
