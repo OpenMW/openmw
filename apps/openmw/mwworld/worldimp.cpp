@@ -1345,7 +1345,7 @@ namespace MWWorld
         }
 
         const float terrainHeight = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
-        pos.z() = std::max(pos.z(), terrainHeight + 20); // place slightly above terrain. will snap down to ground with code below
+        pos.z() = std::max(pos.z(), terrainHeight) + 20; // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
