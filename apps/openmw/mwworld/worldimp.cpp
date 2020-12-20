@@ -1356,7 +1356,6 @@ namespace MWWorld
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
-        mPhysics->resetPosition(ptr);
     }
 
     void World::fixPosition()

@@ -437,7 +437,6 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
-        resetPosition(ptr);
         return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
     }
 
@@ -642,17 +641,6 @@ namespace MWPhysics
         if (foundActor != mActors.end())
         {
             foundActor->second->updatePosition();
-            mTaskScheduler->updateSingleAabb(foundActor->second);
-            return;
-        }
-    }
-
-    void PhysicsSystem::resetPosition(const MWWorld::ConstPtr &ptr)
-    {
-        ActorMap::iterator foundActor = mActors.find(ptr);
-        if (foundActor != mActors.end())
-        {
-            foundActor->second->resetPosition();
             mTaskScheduler->updateSingleAabb(foundActor->second, true);
             return;
         }
@@ -940,7 +928,7 @@ namespace MWPhysics
 
     void ActorFrameData::updatePosition()
     {
-        mActorRaw->updatePosition();
+        mActorRaw->updateWorldPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {
