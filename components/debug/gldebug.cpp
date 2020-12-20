@@ -32,6 +32,7 @@ either expressed or implied, of the FreeBSD Project.
 #include "gldebug.hpp"
 
 #include <cstdlib>
+#include <memory>
 
 #include <components/debug/debuglog.hpp>
 
