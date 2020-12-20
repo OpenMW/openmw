@@ -694,8 +694,6 @@ namespace MWPhysics
         if (found != mActors.end())
         {
             bool cmode = found->second->getCollisionMode();
-            if (cmode)
-                resetPosition(found->first);
             cmode = !cmode;
             found->second->enableCollisionMode(cmode);
             // NB: Collision body isn't disabled for vanilla TCL compatibility

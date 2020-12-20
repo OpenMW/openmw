@@ -2,11 +2,6 @@
 
 #include <BulletCollision/CollisionDispatch/btCollisionObject.h>
 
-#include <components/misc/convert.hpp>
-
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include "collisiontype.hpp"
 #include "projectile.hpp"
 

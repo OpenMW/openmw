@@ -57,6 +57,7 @@ namespace MWPhysics
             void refreshLOSCache();
             void updateAabbs();
             void updatePtrAabb(const std::weak_ptr<PtrHolder>& ptr);
+            void updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<ActorFrameData> mActorsFrameData;
