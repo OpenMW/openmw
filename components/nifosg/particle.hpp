@@ -14,10 +14,10 @@
 
 namespace Nif
 {
-    class NiGravity;
-    class NiPlanarCollider;
-    class NiSphericalCollider;
-    class NiColorData;
+    struct NiGravity;
+    struct NiPlanarCollider;
+    struct NiSphericalCollider;
+    struct NiColorData;
 }
 
 namespace NifOsg

@@ -67,6 +67,7 @@ namespace
             case Nif::RC_NiTriShape:
             case Nif::RC_NiTriStrips:
             case Nif::RC_NiLines:
+            case Nif::RC_BSLODTriShape:
                 return true;
         }
         return false;
@@ -94,6 +95,15 @@ namespace
                     break;
                 }
             }
+        }
+
+        auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
+        if (geometry)
+        {
+            if (!geometry->shaderprop.empty())
+                out.emplace_back(geometry->shaderprop.getPtr());
+            if (!geometry->alphaprop.empty())
+                out.emplace_back(geometry->alphaprop.getPtr());
         }
     }
 
@@ -365,6 +375,11 @@ namespace NifOsg
                     handleProperty(props[i].getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
                 }
             }
+
+            auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
+            // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
+            if (geometry && !geometry->shaderprop.empty())
+                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags);
         }
 
         void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -466,19 +481,12 @@ namespace NifOsg
             texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
             texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
 
-            osg::ref_ptr<osg::TexEnvCombine> texEnv = new osg::TexEnvCombine;
-            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-
             int texUnit = 3; // FIXME
 
             osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(texUnit, texGen, osg::StateAttribute::ON);
-            stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+            stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
 
             stateset->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1,1,1,1)));
         }
@@ -946,11 +954,11 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and colors.
         void handleParticleInitialState(const Nif::Node* nifNode, osgParticle::ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
-            const auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
-            if (particleNode->data.empty())
+            auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
+            if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
                 return;
 
-            const Nif::NiParticlesData* particledata = particleNode->data.getPtr();
+            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
 
             osg::BoundingBox box;
 
@@ -963,6 +971,9 @@ namespace NifOsg
                 if (particle.lifespan <= 0)
                     continue;
 
+                if (particle.vertex >= particledata->vertices.size())
+                    continue;
+
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
@@ -971,16 +982,16 @@ namespace NifOsg
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices.at(particle.vertex);
+                const osg::Vec3f& position = particledata->vertices[particle.vertex];
                 created->setPosition(position);
 
                 osg::Vec4f partcolor (1.f,1.f,1.f,1.f);
-                if (particle.vertex < int(particledata->colors.size()))
-                    partcolor = particledata->colors.at(particle.vertex);
+                if (particle.vertex < particledata->colors.size())
+                    partcolor = particledata->colors[particle.vertex];
 
                 float size = partctrl->size;
-                if (particle.vertex < int(particledata->sizes.size()))
-                    size *= particledata->sizes.at(particle.vertex);
+                if (particle.vertex < particledata->sizes.size())
+                    size *= particledata->sizes[particle.vertex];
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
@@ -1177,51 +1188,50 @@ namespace NifOsg
 
         void handleNiGeometry(const Nif::Node *nifNode, osg::Geometry *geometry, osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
-            const Nif::NiGeometryData* niGeometryData = nullptr;
-            if (nifNode->recType == Nif::RC_NiTriShape)
+            const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
+            if (niGeometry->data.empty())
+                return;
+            const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
+
+            if (niGeometry->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_BSLODTriShape)
             {
-                const Nif::NiTriShape* triShape = static_cast<const Nif::NiTriShape*>(nifNode);
-                if (!triShape->data.empty())
-                {
-                    const Nif::NiTriShapeData* data = triShape->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    if (!data->triangles.empty())
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, data->triangles.size(),
-                                                                                (unsigned short*)data->triangles.data()));
-                }
+                if (niGeometryData->recType != Nif::RC_NiTriShapeData)
+                    return;
+                auto triangles = static_cast<const Nif::NiTriShapeData*>(niGeometryData)->triangles;
+                if (triangles.empty())
+                    return;
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(),
+                                                                        (unsigned short*)triangles.data()));
             }
-            else if (nifNode->recType == Nif::RC_NiTriStrips)
+            else if (niGeometry->recType == Nif::RC_NiTriStrips)
             {
-                const Nif::NiTriStrips* triStrips = static_cast<const Nif::NiTriStrips*>(nifNode);
-                if (!triStrips->data.empty())
+                if (niGeometryData->recType != Nif::RC_NiTriStripsData)
+                    return;
+                auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
+                bool hasGeometry = false;
+                for (const auto& strip : data->strips)
                 {
-                    const Nif::NiTriStripsData* data = triStrips->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    if (!data->strips.empty())
-                    {
-                        for (const auto& strip : data->strips)
-                        {
-                            if (strip.size() >= 3)
-                                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
-                                                                                    (unsigned short*)strip.data()));
-                        }
-                    }
+                    if (strip.size() < 3)
+                        continue;
+                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(),
+                                                                            (unsigned short*)strip.data()));
+                    hasGeometry = true;
                 }
+                if (!hasGeometry)
+                    return;
             }
-            else if (nifNode->recType == Nif::RC_NiLines)
+            else if (niGeometry->recType == Nif::RC_NiLines)
             {
-                const Nif::NiLines* lines = static_cast<const Nif::NiLines*>(nifNode);
-                if (!lines->data.empty())
-                {
-                    const Nif::NiLinesData* data = lines->data.getPtr();
-                    niGeometryData = static_cast<const Nif::NiGeometryData*>(data);
-                    const auto& line = data->lines;
-                    if (!line.empty())
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(), (unsigned short*)line.data()));
-                }
+                if (niGeometryData->recType != Nif::RC_NiLinesData)
+                    return;
+                auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
+                const auto& line = data->lines;
+                if (line.empty())
+                    return;
+                geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(),
+                                                                        (unsigned short*)line.data()));
             }
-            if (niGeometryData)
-                handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
+            handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
 
             // osg::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
@@ -1229,15 +1239,18 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, niGeometryData && !niGeometryData->colors.empty(), animflags);
+            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
         }
 
         void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
-            osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             handleNiGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
+            // If the record had no valid geometry data in it, early-out
+            if (geom->empty())
+                return;
+            osg::ref_ptr<osg::Drawable> drawable;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -1282,6 +1295,8 @@ namespace NifOsg
             assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             handleNiGeometry(nifNode, geometry, parentNode, composite, boundTextures, animflags);
+            if (geometry->empty())
+                return;
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
             rig->setName(nifNode->name);
@@ -1481,6 +1496,17 @@ namespace NifOsg
             return image;
         }
 
+        osg::ref_ptr<osg::TexEnvCombine> createEmissiveTexEnv()
+        {
+            osg::ref_ptr<osg::TexEnvCombine> texEnv(new osg::TexEnvCombine);
+            texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
+            texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+            texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
+            return texEnv;
+        }
+
         void handleTextureProperty(const Nif::NiTexturingProperty* texprop, const std::string& nodeName, osg::StateSet* stateset, SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager, std::vector<unsigned int>& boundTextures, int animflags)
         {
             if (!boundTextures.empty())
@@ -1567,14 +1593,7 @@ namespace NifOsg
 
                     if (i == Nif::NiTexturingProperty::GlowTexture)
                     {
-                        osg::TexEnvCombine* texEnv = new osg::TexEnvCombine;
-                        texEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
-                        texEnv->setSource0_Alpha(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setCombine_RGB(osg::TexEnvCombine::ADD);
-                        texEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
-                        texEnv->setSource1_RGB(osg::TexEnvCombine::TEXTURE);
-
-                        stateset->setTextureAttributeAndModes(texUnit, texEnv, osg::StateAttribute::ON);
+                        stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
                     }
                     else if (i == Nif::NiTexturingProperty::DarkTexture)
                     {

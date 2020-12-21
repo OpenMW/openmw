@@ -1251,6 +1251,18 @@ namespace MWWorld
         return moveObjectImp(ptr, x, y, z, true, moveToActive);
     }
 
+    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, osg::Vec3f vec)
+    {
+        auto* actor = mPhysics->getActor(ptr);
+        if (actor)
+        {
+            actor->adjustPosition(vec);
+            return ptr;
+        }
+        osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
+        return moveObject(ptr, newpos.x(), newpos.y(), newpos.z());
+    }
+
     void World::scaleObject (const Ptr& ptr, float scale)
     {
         if (mPhysics->getActor(ptr))
@@ -1333,7 +1345,7 @@ namespace MWWorld
         }
 
         const float terrainHeight = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
-        pos.z() = std::max(pos.z(), terrainHeight + 20); // place slightly above terrain. will snap down to ground with code below
+        pos.z() = std::max(pos.z(), terrainHeight) + 20; // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr) && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
@@ -1344,12 +1356,6 @@ namespace MWWorld
         }
 
         moveObject(ptr, ptr.getCell(), pos.x(), pos.y(), pos.z());
-        if (force) // force physics to use the new position
-        {
-            auto actor = mPhysics->getActor(ptr);
-            if(actor)
-                actor->resetPosition();
-        }
     }
 
     void World::fixPosition()
@@ -1496,20 +1502,30 @@ namespace MWWorld
 
         mProjectileManager->update(duration);
 
-        const auto results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
+        const auto& results = mPhysics->applyQueuedMovement(duration, mDiscardMovements, frameStart, frameNumber, stats);
         mProjectileManager->processHits();
         mDiscardMovements = false;
 
-        for(const auto& [actor, position]: results)
+        for(const auto& actor : results)
         {
             // Handle player last, in case a cell transition occurs
             if(actor != getPlayerPtr())
+            {
+                auto* physactor = mPhysics->getActor(actor);
+                assert(physactor);
+                const auto position = physactor->getSimulationPosition();
                 moveObjectImp(actor, position.x(), position.y(), position.z(), false);
+            }
         }
 
-        const auto player = results.find(getPlayerPtr());
+        const auto player = std::find(results.begin(), results.end(), getPlayerPtr());
         if (player != results.end())
-            moveObjectImp(player->first, player->second.x(), player->second.y(), player->second.z(), false);
+        {
+            auto* physactor = mPhysics->getActor(*player);
+            assert(physactor);
+            const auto position = physactor->getSimulationPosition();
+            moveObjectImp(*player, position.x(), position.y(), position.z(), false);
+        }
     }
 
     void World::updateNavigator()

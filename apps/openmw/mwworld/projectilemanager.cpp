@@ -387,7 +387,7 @@ namespace MWWorld
             if (magicBoltState.mToDelete)
                 continue;
 
-            const auto* projectile = mPhysics->getProjectile(magicBoltState.mProjectileId);
+            auto* projectile = mPhysics->getProjectile(magicBoltState.mProjectileId);
             if (!projectile->isActive())
                 continue;
             // If the actor caster is gone, the magic bolt needs to be removed from the scene during the next frame.
@@ -423,6 +423,7 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> targetActors;
             if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+            projectile->setValidTargets(targetActors);
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
@@ -469,7 +470,7 @@ namespace MWWorld
             if (projectileState.mToDelete)
                 continue;
 
-            const auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
+            auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
             if (!projectile->isActive())
                 continue;
             // gravity constant - must be way lower than the gravity affecting actors, since we're not
@@ -499,6 +500,7 @@ namespace MWWorld
             std::vector<MWWorld::Ptr> targetActors;
             if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
                 caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
+            projectile->setValidTargets(targetActors);
 
             // Check for impact
             // TODO: use a proper btRigidBody / btGhostObject?
@@ -547,7 +549,7 @@ namespace MWWorld
             const auto pos = projectile->getHitPos();
             MWWorld::Ptr caster = projectileState.getCaster();
             assert(target != caster);
-            if (!isValidTarget(caster, target))
+            if (!projectile->isValidTarget(target))
             {
                 projectile->activate();
                 continue;
@@ -583,7 +585,7 @@ namespace MWWorld
             const auto pos = projectile->getHitPos();
             MWWorld::Ptr caster = magicBoltState.getCaster();
             assert(target != caster);
-            if (!isValidTarget(caster, target))
+            if (!projectile->isValidTarget(target))
             {
                 projectile->activate();
                 continue;
@@ -605,32 +607,6 @@ namespace MWWorld
                 mProjectiles.end());
         mMagicBolts.erase(std::remove_if(mMagicBolts.begin(), mMagicBolts.end(), [](const State& state) { return state.mToDelete; }),
                 mMagicBolts.end());
-    }
-
-    bool ProjectileManager::isValidTarget(const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
-    {
-        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit result.
-        std::vector<MWWorld::Ptr> targetActors;
-        if (!caster.isEmpty() && caster.getClass().isActor() && caster != MWMechanics::getPlayer())
-        {
-            caster.getClass().getCreatureStats(caster).getAiSequence().getCombatTargets(targetActors);
-            if (!targetActors.empty())
-            {
-                bool validTarget = false;
-                for (MWWorld::Ptr& targetActor : targetActors)
-                {
-                    if (targetActor == target)
-                    {
-                        validTarget = true;
-                        break;
-                    }
-                }
-
-                return validTarget;
-            }
-        }
-
-        return true;
     }
 
     void ProjectileManager::cleanupProjectile(ProjectileManager::ProjectileState& state)

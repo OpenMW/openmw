@@ -62,7 +62,8 @@ namespace MWPhysics
             return mHitTarget;
         }
 
-        MWWorld::Ptr getCaster() const { return mCaster; }
+        MWWorld::Ptr getCaster() const;
+        void setCaster(MWWorld::Ptr caster);
 
         osg::Vec3f getHitPos() const
         {
@@ -72,6 +73,9 @@ namespace MWPhysics
 
         void hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal);
         void activate();
+
+        void setValidTargets(const std::vector<MWWorld::Ptr>& targets);
+        bool isValidTarget(const MWWorld::Ptr& target) const;
 
     private:
 
@@ -87,7 +91,9 @@ namespace MWPhysics
         btVector3 mHitPosition;
         btVector3 mHitNormal;
 
-        mutable std::mutex mPositionMutex;
+        std::vector<MWWorld::Ptr> mValidTargets;
+
+        mutable std::mutex mMutex;
 
         osg::Vec3f mPosition;
 

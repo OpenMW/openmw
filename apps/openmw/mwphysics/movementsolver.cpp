@@ -119,12 +119,14 @@ namespace MWPhysics
                                            WorldFrameData& worldData)
     {
         auto* physicActor = actor.mActorRaw;
-        auto ptr = actor.mPtr;
         const ESM::Position& refpos = actor.mRefpos;
         // Early-out for totally static creatures
         // (Not sure if gravity should still apply?)
-        if (!ptr.getClass().isMobile(ptr))
-            return;
+        {
+            const auto ptr = physicActor->getPtr();
+            if (!ptr.getClass().isMobile(ptr))
+                return;
+        }
 
         // Reset per-frame data
         physicActor->setWalkingOnWater(false);
@@ -254,6 +256,7 @@ namespace MWPhysics
             if (usedStepLogic)
             {
                 // don't let pure water creatures move out of water after stepMove
+                const auto ptr = physicActor->getPtr();
                 if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > actor.mWaterlevel)
                     newPosition = oldPosition;
                 else if(!actor.mFlying && actor.mPosition.z() >= swimlevel)
@@ -422,7 +425,7 @@ namespace MWPhysics
 
     void MovementSolver::unstuck(ActorFrameData& actor, const btCollisionWorld* collisionWorld)
     {
-        const auto& ptr = actor.mPtr;
+        const auto& ptr = actor.mActorRaw->getPtr();
         if (!ptr.getClass().isMobile(ptr))
             return;
 

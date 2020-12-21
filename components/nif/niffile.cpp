@@ -129,6 +129,10 @@ static std::map<std::string,RecordFactoryEntry> makeFactory()
     factory["NiPoint3Interpolator"]         = {&construct <NiPoint3Interpolator>        , RC_NiPoint3Interpolator       };
     factory["NiTransformController"]        = {&construct <NiKeyframeController>        , RC_NiKeyframeController       };
     factory["NiTransformInterpolator"]      = {&construct <NiTransformInterpolator>     , RC_NiTransformInterpolator    };
+    factory["NiColorInterpolator"]          = {&construct <NiColorInterpolator>         , RC_NiColorInterpolator        };
+    factory["BSShaderTextureSet"]           = {&construct <BSShaderTextureSet>          , RC_BSShaderTextureSet         };
+    factory["BSLODTriShape"]                = {&construct <BSLODTriShape>               , RC_BSLODTriShape              };
+    factory["BSShaderProperty"]             = {&construct <BSShaderProperty>            , RC_BSShaderProperty           };
     return factory;
 }
 

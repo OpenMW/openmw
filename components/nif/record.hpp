@@ -118,7 +118,11 @@ enum RecordType
   RC_NiFloatInterpolator,
   RC_NiPoint3Interpolator,
   RC_NiBoolInterpolator,
-  RC_NiTransformInterpolator
+  RC_NiTransformInterpolator,
+  RC_NiColorInterpolator,
+  RC_BSShaderTextureSet,
+  RC_BSLODTriShape,
+  RC_BSShaderProperty
 };
 
 /// Base class for all records

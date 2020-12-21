@@ -301,8 +301,6 @@ osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor bgColour
     colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
     colours->push_back(osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f));
 
-    osg::Vec4ub bgVec = osg::Vec4ub(bgColour.red(), bgColour.green(), bgColour.blue(), 1.0f);
-
     geometry->setColorArray(colours, osg::Array::BIND_PER_VERTEX);
 
     geometry->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);

@@ -1,6 +1,7 @@
 0.47.0
 ------
 
+    Bug #832: OpenMW-CS: Handle deleted references
     Bug #1662: Qt4 and Windows binaries crash if there's a non-ASCII character in a file path/config path
     Bug #1952: Incorrect particle lighting
     Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
@@ -67,10 +68,13 @@
     Bug #5644: Summon effects running on the player during game initialization cause crashes
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
+    Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
+    Bug #5731: Editor: skirts are invisible on characters
     Feature #390: 3rd person look "over the shoulder"
+    Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
