@@ -7,6 +7,9 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/convert.hpp>
+#include <osg/PolygonMode>
+#include <osg/ShapeDrawable>
+#include <osg/StateSet>
 
 #include "bulletdebugdraw.hpp"
 #include "vismask.hpp"
@@ -41,6 +44,14 @@ void DebugDrawer::createGeometry()
         mGeometry->addPrimitiveSet(mDrawArrays);
 
         mParentNode->addChild(mGeometry);
+
+        auto* stateSet = new osg::StateSet;
+        stateSet->setAttributeAndModes(new osg::PolygonMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE), osg::StateAttribute::ON);
+        mShapesRoot = new osg::Group;
+        mShapesRoot->setStateSet(stateSet);
+        mShapesRoot->setDataVariance(osg::Object::DYNAMIC);
+        mShapesRoot->setNodeMask(Mask_Debug);
+        mParentNode->addChild(mShapesRoot);
     }
 }
 
@@ -49,6 +60,7 @@ void DebugDrawer::destroyGeometry()
     if (mGeometry)
     {
         mParentNode->removeChild(mGeometry);
+        mParentNode->removeChild(mShapesRoot);
         mGeometry = nullptr;
         mVertices = nullptr;
         mDrawArrays = nullptr;
@@ -66,6 +78,7 @@ void DebugDrawer::step()
     {
         mVertices->clear();
         mColors->clear();
+        mShapesRoot->removeChildren(0, mShapesRoot->getNumChildren());
         mWorld->debugDrawWorld();
         showCollisions();
         mDrawArrays->setCount(mVertices->size());
@@ -106,12 +119,11 @@ void DebugDrawer::showCollisions()
             mCollisionViews.end());
 }
 
-void DebugDrawer::drawContactPoint(const btVector3 &PointOnB, const btVector3 &normalOnB, btScalar distance, int lifeTime, const btVector3 &color)
+void DebugDrawer::drawSphere(btScalar radius, const btTransform& transform, const btVector3& color)
 {
-    mVertices->push_back(Misc::Convert::toOsg(PointOnB));
-    mVertices->push_back(Misc::Convert::toOsg(PointOnB) + (Misc::Convert::toOsg(normalOnB) * distance * 20));
-    mColors->push_back({1,1,1,1});
-    mColors->push_back({1,1,1,1});
+    auto* geom = new osg::ShapeDrawable(new osg::Sphere(Misc::Convert::toOsg(transform.getOrigin()), radius));
+    geom->setColor(osg::Vec4(1, 1, 1, 1));
+    mShapesRoot->addChild(geom);
 }
 
 void DebugDrawer::reportErrorWarning(const char *warningString)
