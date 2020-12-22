@@ -922,7 +922,9 @@ namespace MWPhysics
         mFlying = world->isFlying(ptr);
         mSwimming = world->isSwimming(ptr);
         mWantJump = ptr.getClass().getMovementSettings(ptr).mPosition[2] != 0;
-        mIsDead = ptr.getClass().getCreatureStats(ptr).isDead();
+        auto& stats = ptr.getClass().getCreatureStats(ptr);
+        const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
+        mFloatToSurface = stats.isDead() || (!godmode && stats.isParalyzed());
         mWasOnGround = actor->getOnGround();
     }
 

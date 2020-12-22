@@ -2917,7 +2917,7 @@ namespace MWWorld
         mRendering->rebuildPtr(getPlayerPtr());
     }
 
-    bool World::getGodModeState()
+    bool World::getGodModeState() const
     {
         return mGodMode;
     }

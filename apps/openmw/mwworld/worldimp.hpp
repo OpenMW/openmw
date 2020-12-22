@@ -619,7 +619,7 @@ namespace MWWorld
             /// Returns true if levitation spell effect is allowed.
             bool isLevitationEnabled() const override;
 
-            bool getGodModeState() override;
+            bool getGodModeState() const override;
 
             bool toggleGodMode() override;
 
