@@ -26,7 +26,7 @@ Now Fonts folder should include ``openmw_font.xml`` file and three ``.ttf`` file
 
 If desired, you can now delete the ``Data Files/Fonts`` directory.
 
-It is also possible to adjust the font size and resolution::
+It is also possible to adjust the font size and resolution via ``settings.cfg`` file::
 
 			[GUI]
 			font size = 16
