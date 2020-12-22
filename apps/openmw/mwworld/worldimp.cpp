@@ -2302,8 +2302,12 @@ namespace MWWorld
         if (stats.isDead())
             return false;
 
+        const bool isPlayer = ptr == getPlayerConstPtr();
+        if (!(isPlayer && mGodMode) && stats.isParalyzed())
+            return false;
+
         if (ptr.getClass().canFly(ptr))
-            return !stats.isParalyzed();
+            return true;
 
         if(stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0
                 && isLevitationEnabled())
