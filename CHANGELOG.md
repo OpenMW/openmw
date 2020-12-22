@@ -72,6 +72,7 @@
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
+    Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5731: Editor: skirts are invisible on characters
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
