@@ -519,7 +519,7 @@ namespace MWBase
             /// Returns true if levitation spell effect is allowed.
             virtual bool isLevitationEnabled() const = 0;
 
-            virtual bool getGodModeState() = 0;
+            virtual bool getGodModeState() const = 0;
 
             virtual bool toggleGodMode() = 0;
 

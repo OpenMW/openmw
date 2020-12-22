@@ -2439,8 +2439,14 @@ void CharacterController::update(float duration, bool animationOnly)
         }
     }
 
-    if (mFloatToSurface && cls.isActor() && cls.getCreatureStats(mPtr).isDead() && cls.canSwim(mPtr))
-        moved.z() = 1.0;
+    if (mFloatToSurface && cls.isActor() && cls.canSwim(mPtr))
+    {
+        if (cls.getCreatureStats(mPtr).isDead()
+            || (!godmode && cls.getCreatureStats(mPtr).isParalyzed()))
+        {
+            moved.z() = 1.0;
+        }
+    }    
 
     // Update movement
     if(!animationOnly && mMovementAnimationControlled && mPtr.getClass().isActor())

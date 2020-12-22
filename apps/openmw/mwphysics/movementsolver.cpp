@@ -130,8 +130,9 @@ namespace MWPhysics
                 velocity = velocity + inertia;
         }
 
-        // dead actors underwater will float to the surface, if the CharacterController tells us to do so
-        if (actor.mMovement.z() > 0 && actor.mIsDead && actor.mPosition.z() < swimlevel)
+        // Dead and paralyzed actors underwater will float to the surface,
+        // if the CharacterController tells us to do so
+        if (actor.mMovement.z() > 0 && actor.mFloatToSurface && actor.mPosition.z() < swimlevel)
             velocity = osg::Vec3f(0,0,1) * 25;
 
         if (actor.mWantJump)

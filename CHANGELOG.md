@@ -74,6 +74,7 @@
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5731: Editor: skirts are invisible on characters
+    Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging

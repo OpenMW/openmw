@@ -88,7 +88,7 @@ namespace MWPhysics
         bool mWasOnGround;
         bool mWantJump;
         bool mDidJump;
-        bool mIsDead;
+        bool mFloatToSurface;
         bool mNeedLand;
         bool mMoveToWaterSurface;
         float mWaterlevel;
