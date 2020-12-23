@@ -63,7 +63,7 @@ ShadowsBin::ShadowsBin()
     }
 }
 
-StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
+StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache, bool cullFaceOverridden)
 {
     std::vector<StateGraph*> return_path;
     State state;
@@ -102,10 +102,13 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
             accumulateState(state.mAlphaFunc, static_cast<osg::AlphaFunc*>(rap.first.get()), state.mAlphaFuncOverride, rap.second);
         }
 
-        // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it.
-        found = attributes.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
-        if (found != attributes.end())
-            state.mImportantState = true;
+        if (!cullFaceOverridden)
+        {
+            // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it unless GL_CULL_FACE is off or we flip face culling.
+            found = attributes.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
+            if (found != attributes.end())
+                state.mImportantState = true;
+        }
 
         if ((*itr) != sg && !state.interesting())
             uninterestingCache.insert(*itr);
@@ -188,7 +191,21 @@ void ShadowsBin::sortImplementation()
             return;
     }
     StateGraph* noTestRoot = root->find_or_insert(mNoTestStateSet.get());
-    // root is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
+    // noTestRoot is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
+
+    bool cullFaceOverridden = false;
+    while (root = root->_parent)
+    {
+        if (!root->getStateSet())
+            continue;
+        unsigned int cullFaceFlags = root->getStateSet()->getMode(GL_CULL_FACE);
+        if (cullFaceFlags & osg::StateAttribute::OVERRIDE && !(cullFaceFlags & osg::StateAttribute::ON))
+        {
+            cullFaceOverridden = true;
+            break;
+        }
+    }
+
     noTestRoot->_leaves.reserve(_stateGraphList.size());
     StateGraphList newList;
     std::unordered_set<StateGraph*> uninterestingCache;
@@ -197,7 +214,7 @@ void ShadowsBin::sortImplementation()
         // Render leaves which shouldn't use the diffuse map for shadow alpha but do cast shadows become children of root, so graph is now empty. Don't add to newList.
         // Graphs containing just render leaves which don't cast shadows are discarded. Don't add to newList.
         // Graphs containing other leaves need to be in newList.
-        StateGraph* graphToAdd = cullStateGraph(graph, noTestRoot, uninterestingCache);
+        StateGraph* graphToAdd = cullStateGraph(graph, noTestRoot, uninterestingCache, cullFaceOverridden);
         if (graphToAdd)
             newList.push_back(graphToAdd);
     }

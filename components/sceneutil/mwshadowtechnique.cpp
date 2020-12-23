@@ -870,7 +870,10 @@ void SceneUtil::MWShadowTechnique::enableFrontFaceCulling()
     _useFrontFaceCulling = true;
 
     if (_shadowCastingStateSet)
+    {
         _shadowCastingStateSet->setAttribute(new osg::CullFace(osg::CullFace::FRONT), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+    }
 }
 
 void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
@@ -878,7 +881,10 @@ void SceneUtil::MWShadowTechnique::disableFrontFaceCulling()
     _useFrontFaceCulling = false;
 
     if (_shadowCastingStateSet)
+    {
+        _shadowCastingStateSet->removeAttribute(osg::StateAttribute::CULLFACE);
         _shadowCastingStateSet->setMode(GL_CULL_FACE, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    }
 }
 
 void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & shaderManager)
