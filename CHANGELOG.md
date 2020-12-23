@@ -63,6 +63,7 @@
     Bug #5604: Only one valid NIF root node is loaded from a single file
     Bug #5611: Usable items with "0 Uses" should be used only once
     Bug #5622: Can't properly interact with the console when in pause menu
+    Bug #5627: Bookart not shown if it isn't followed by <BR> statement
     Bug #5633: Damage Spells in effect before god mode is enabled continue to hurt the player character and can kill them
     Bug #5639: Tooltips cover Messageboxes
     Bug #5644: Summon effects running on the player during game initialization cause crashes
