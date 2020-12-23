@@ -27,9 +27,9 @@ namespace
         osg::StateSet::ModeList::const_iterator mf = l.find(mode);
         if (mf == l.end())
             return;
-        int flags = mf->second;
+        unsigned int flags = mf->second;
         bool newValue = flags & osg::StateAttribute::ON;
-        accumulateState(currentValue, newValue, isOverride, ss->getMode(mode));
+        accumulateState(currentValue, newValue, isOverride, flags);
     }
 
     inline bool materialNeedShadows(osg::Material* m)
