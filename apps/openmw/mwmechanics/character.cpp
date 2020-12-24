@@ -1965,7 +1965,7 @@ void CharacterController::update(float duration, bool animationOnly)
             movementSettings.mSpeedFactor *= 2.f;
 
         static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
-        if (smoothMovement && !isFirstPersonPlayer)
+        if (smoothMovement)
         {
             static const float playerTurningCoef = 1.0 / std::max(0.01f, Settings::Manager::getFloat("smooth movement player turning delay", "Game"));
             float angle = mPtr.getRefData().getPosition().rot[2];
@@ -1975,7 +1975,9 @@ void CharacterController::update(float duration, bool animationOnly)
             float deltaLen = delta.length();
 
             float maxDelta;
-            if (std::abs(speedDelta) < deltaLen / 2)
+            if (isFirstPersonPlayer)
+                maxDelta = 1;
+            else if (std::abs(speedDelta) < deltaLen / 2)
                 // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
                 maxDelta = duration * (isPlayer ? playerTurningCoef : 6.f);
             else if (isPlayer && speedDelta < -deltaLen / 2)
@@ -2013,7 +2015,10 @@ void CharacterController::update(float duration, bool animationOnly)
         bool canMove = cls.getMaxSpeed(mPtr) > 0;
         static const bool turnToMovementDirection = Settings::Manager::getBool("turn to movement direction", "Game");
         if (!turnToMovementDirection || isFirstPersonPlayer)
+        {
             movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
+            stats.setSideMovementAngle(0);
+        }
         else if (canMove)
         {
             float targetMovementAngle = vec.y() >= 0 ? std::atan2(-vec.x(), vec.y()) : std::atan2(vec.x(), -vec.y());
