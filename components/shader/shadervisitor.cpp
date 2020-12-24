@@ -374,39 +374,40 @@ namespace Shader
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
 
         defineMap["alphaFunc"] = std::to_string(reqs.mAlphaFunc);
+
+        // back up removed state in case recreateShaders gets rid of the shader later
+        osg::ref_ptr<osg::StateSet> removedState;
+        if ((removedState = getRemovedState(*writableStateSet)) && !mAllowedToModifyStateSets)
+            removedState = new osg::StateSet(*removedState, osg::CopyOp::SHALLOW_COPY);
+        if (!removedState)
+            removedState = new osg::StateSet();
+
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
-
-            // back up removed state in case recreateShaders gets rid of the shader later
-            osg::ref_ptr<osg::StateSet> removedState;
-            if ((removedState = getRemovedState(*writableStateSet)) && !mAllowedToModifyStateSets)
-                removedState = new osg::StateSet(*removedState, osg::CopyOp::SHALLOW_COPY);
-            if (!removedState)
-                removedState = new osg::StateSet();
-
-            if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT)
-                removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));
-            // This disables the deprecated fixed-function alpha test
-            writableStateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
 
             const auto* alphaFunc = writableStateSet->getAttributePair(osg::StateAttribute::ALPHAFUNC);
             if (alphaFunc)
                 removedState->setAttribute(alphaFunc->first, alphaFunc->second);
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+        }
 
-            if (!removedState->getModeList().empty() || !removedState->getAttributeList().empty())
-            {
-                // user data is normally shallow copied so shared with the original stateset
-                osg::ref_ptr<osg::UserDataContainer> writableUserData;
-                if (mAllowedToModifyStateSets)
-                    writableUserData = writableStateSet->getOrCreateUserDataContainer();
-                else
-                    writableUserData = getWritableUserDataContainer(*writableStateSet);
+        if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT)
+            removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));
+        // This disables the deprecated fixed-function alpha test
+        writableStateSet->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
 
-                updateRemovedState(*writableUserData, removedState);
-            }
+        if (!removedState->getModeList().empty() || !removedState->getAttributeList().empty())
+        {
+            // user data is normally shallow copied so shared with the original stateset
+            osg::ref_ptr<osg::UserDataContainer> writableUserData;
+            if (mAllowedToModifyStateSets)
+                writableUserData = writableStateSet->getOrCreateUserDataContainer();
+            else
+                writableUserData = getWritableUserDataContainer(*writableStateSet);
+
+            updateRemovedState(*writableUserData, removedState);
         }
 
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
