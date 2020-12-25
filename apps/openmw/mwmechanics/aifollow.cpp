@@ -113,24 +113,23 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (!mActive)
         return false;
 
-    // The distances below are approximations based on observations of the original engine.
-    // If only one actor is following the target, it uses 186.
-    // If there are multiple actors following the same target, they form a group with each group member at 313 + (130 * i) distance to the target.
-
-    short followDistance = 186;
-    std::list<int> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingIndices(target);
-    if (followers.size() >= 2)
+    // In the original engine the first follower stays closer to the player than any subsequent followers.
+    // Followers beyond the first usually attempt to stand inside each other.
+    osg::Vec3f::value_type floatingDistance = 0;
+    auto followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingByIndex(target);
+    if (followers.size() >= 2 && followers.cbegin()->first != mFollowIndex)
     {
-        followDistance = 313;
-        short i = 0;
-        followers.sort();
-        for (int followIndex : followers)
+        osg::Vec3f::value_type maxSize = 0;
+        for(auto& follower : followers)
         {
-            if (followIndex == mFollowIndex)
-                followDistance += 130 * i;
-            ++i;
+            auto halfExtent = MWBase::Environment::get().getWorld()->getHalfExtents(follower.second).y();
+            if(halfExtent > floatingDistance)
+                floatingDistance = halfExtent;
         }
     }
+    floatingDistance += MWBase::Environment::get().getWorld()->getHalfExtents(target).y();
+    floatingDistance += MWBase::Environment::get().getWorld()->getHalfExtents(actor).y() * 2;
+    short followDistance = static_cast<short>(floatingDistance);
 
     if (!mAlwaysFollow) //Update if you only follow for a bit
     {
