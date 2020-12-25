@@ -158,7 +158,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         zTurn(actor, getZAngleToPoint(position, dest));
         smoothTurn(actor, getXAngleToPoint(position, dest), 0);
         world->removeActorPath(actor);
-        return true;
+        return isDestReached;
     }
 
     world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
