@@ -67,7 +67,7 @@ void KeyboardNavigation::saveFocus(int mode)
     {
         mKeyFocus[mode] = focus;
     }
-    else
+    else if(shouldAcceptKeyFocus(mCurrentFocus))
     {
         mKeyFocus[mode] = mCurrentFocus;
     }
