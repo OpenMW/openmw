@@ -2270,18 +2270,19 @@ void CharacterController::update(float duration, bool animationOnly)
                 sndMgr->playSound3D(mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
         }
 
-        if (turnToMovementDirection)
+        if (turnToMovementDirection && !isFirstPersonPlayer &&
+            (movestate == CharState_SwimRunForward || movestate == CharState_SwimWalkForward ||
+             movestate == CharState_SwimRunBack || movestate == CharState_SwimWalkBack))
         {
-            float targetSwimmingPitch;
-            if (inwater && vec.y() != 0 && !isFirstPersonPlayer && !movementSettings.mIsStrafing)
-                targetSwimmingPitch = -mPtr.getRefData().getPosition().rot[0];
-            else
-                targetSwimmingPitch = 0;
-            float maxSwimPitchDelta = 3.0f * duration;
             float swimmingPitch = mAnimation->getBodyPitchRadians();
+            float targetSwimmingPitch = -mPtr.getRefData().getPosition().rot[0];
+            float maxSwimPitchDelta = 3.0f * duration;
             swimmingPitch += osg::clampBetween(targetSwimmingPitch - swimmingPitch, -maxSwimPitchDelta, maxSwimPitchDelta);
             mAnimation->setBodyPitchRadians(swimmingPitch);
         }
+        else
+            mAnimation->setBodyPitchRadians(0);
+
         static const bool swimUpwardCorrection = Settings::Manager::getBool("swim upward correction", "Game");
         if (inwater && isPlayer && !isFirstPersonPlayer && swimUpwardCorrection)
         {
