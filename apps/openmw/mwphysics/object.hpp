@@ -26,7 +26,7 @@ namespace MWPhysics
     class Object final : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, PhysicsTaskScheduler* scheduler);
+        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, int collisionType, PhysicsTaskScheduler* scheduler);
         ~Object() override;
 
         const Resource::BulletShapeInstance* getShapeInstance() const;

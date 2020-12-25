@@ -58,7 +58,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
-    mCollisionObject.reset(new btCollisionObject);
+    mCollisionObject = std::make_unique<btCollisionObject>();
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     mCollisionObject->setActivationState(DISABLE_DEACTIVATION);
     mCollisionObject->setCollisionShape(mShape.get());
@@ -76,8 +76,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
 
 Actor::~Actor()
 {
-    if (mCollisionObject)
-        mTaskScheduler->removeCollisionObject(mCollisionObject.get());
+    mTaskScheduler->removeCollisionObject(mCollisionObject.get());
 }
 
 void Actor::enableCollisionMode(bool collision)

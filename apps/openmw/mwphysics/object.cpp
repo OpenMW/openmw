@@ -14,29 +14,29 @@
 
 namespace MWPhysics
 {
-    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, PhysicsTaskScheduler* scheduler)
+    Object::Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, int collisionType, PhysicsTaskScheduler* scheduler)
         : mShapeInstance(shapeInstance)
         , mSolid(true)
         , mTaskScheduler(scheduler)
     {
         mPtr = ptr;
 
-        mCollisionObject.reset(new btCollisionObject);
+        mCollisionObject = std::make_unique<btCollisionObject>();
         mCollisionObject->setCollisionShape(shapeInstance->getCollisionShape());
 
         mCollisionObject->setUserPointer(this);
 
         setScale(ptr.getCellRef().getScale());
         setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
-        const float* pos = ptr.getRefData().getPosition().pos;
-        setOrigin(btVector3(pos[0], pos[1], pos[2]));
+        setOrigin(Misc::Convert::toBullet(ptr.getRefData().getPosition().asVec3()));
         commitPositionChange();
+
+        mTaskScheduler->addCollisionObject(mCollisionObject.get(), collisionType, CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
     Object::~Object()
     {
-        if (mCollisionObject)
-            mTaskScheduler->removeCollisionObject(mCollisionObject.get());
+        mTaskScheduler->removeCollisionObject(mCollisionObject.get());
     }
 
     const Resource::BulletShapeInstance* Object::getShapeInstance() const

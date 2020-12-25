@@ -107,12 +107,7 @@ namespace MWPhysics
         if (mWaterCollisionObject)
             mTaskScheduler->removeCollisionObject(mWaterCollisionObject.get());
 
-        for (auto& heightField : mHeightFields)
-        {
-            mTaskScheduler->removeCollisionObject(heightField.second->getCollisionObject());
-            delete heightField.second;
-        }
-
+        mHeightFields.clear();
         mObjects.clear();
         mActors.clear();
         mProjectiles.clear();
@@ -442,22 +437,14 @@ namespace MWPhysics
 
     void PhysicsSystem::addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject)
     {
-        HeightField *heightfield = new HeightField(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject);
-        mHeightFields[std::make_pair(x,y)] = heightfield;
-
-        mTaskScheduler->addCollisionObject(heightfield->getCollisionObject(), CollisionType_HeightMap,
-            CollisionType_Actor|CollisionType_Projectile);
+        mHeightFields[std::make_pair(x,y)] = std::make_unique<HeightField>(heights, x, y, triSize, sqrtVerts, minH, maxH, holdObject, mTaskScheduler.get());
     }
 
     void PhysicsSystem::removeHeightField (int x, int y)
     {
         HeightFieldMap::iterator heightfield = mHeightFields.find(std::make_pair(x,y));
         if(heightfield != mHeightFields.end())
-        {
-            mTaskScheduler->removeCollisionObject(heightfield->second->getCollisionObject());
-            delete heightfield->second;
             mHeightFields.erase(heightfield);
-        }
     }
 
     const HeightField* PhysicsSystem::getHeightField(int x, int y) const
@@ -465,7 +452,7 @@ namespace MWPhysics
         const auto heightField = mHeightFields.find(std::make_pair(x, y));
         if (heightField == mHeightFields.end())
             return nullptr;
-        return heightField->second;
+        return heightField->second.get();
     }
 
     void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)
@@ -474,14 +461,11 @@ namespace MWPhysics
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
-        auto obj = std::make_shared<Object>(ptr, shapeInstance, mTaskScheduler.get());
+        auto obj = std::make_shared<Object>(ptr, shapeInstance, collisionType, mTaskScheduler.get());
         mObjects.emplace(ptr, obj);
 
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj.get());
-
-        mTaskScheduler->addCollisionObject(obj->getCollisionObject(), collisionType,
-                                           CollisionType_Actor|CollisionType_HeightMap|CollisionType_Projectile);
     }
 
     void PhysicsSystem::remove(const MWWorld::Ptr &ptr)
