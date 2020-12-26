@@ -219,6 +219,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
+        resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("convert alpha test to alpha-to-coverage", "Shaders"));
 
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager;
         sceneRoot->setLightingMask(Mask_Lighting);

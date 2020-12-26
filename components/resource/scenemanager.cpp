@@ -290,6 +290,11 @@ namespace Resource
         mApplyLightingToEnvMaps = apply;
     }
 
+    void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)
+    {
+        mConvertAlphaTestToAlphaToCoverage = convert;
+    }
+
     SceneManager::~SceneManager()
     {
         // this has to be defined in the .cpp file as we can't delete incomplete types
@@ -769,6 +774,7 @@ namespace Resource
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
+        shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         return shaderVisitor;
     }
 

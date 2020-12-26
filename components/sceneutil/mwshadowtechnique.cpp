@@ -897,7 +897,7 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
         auto& program = _castingPrograms[alphaFunc - GL_NEVER];
         program = new osg::Program();
         program->addShader(castingVertexShader);
-        program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)} }, osg::Shader::FRAGMENT));
+        program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)}, {"alphaToCoverage", "0"} }, osg::Shader::FRAGMENT));
     }
 }
 

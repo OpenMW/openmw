@@ -40,6 +40,8 @@ namespace Shader
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setConvertAlphaTestToAlphaToCoverage(bool convert);
+
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -62,6 +64,8 @@ namespace Shader
         std::string mSpecularMapPattern;
 
         bool mApplyLightingToEnvMaps;
+
+        bool mConvertAlphaTestToAlphaToCoverage;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;

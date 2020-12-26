@@ -14,25 +14,49 @@ uniform float alphaRef;
 
 void alphaTest()
 {
-    #if @alphaFunc == FUNC_NEVER
-        discard;
-    #elif @alphaFunc == FUNC_LESS
-        if (gl_FragData[0].a > alphaRef)
+    #if @alphaToCoverage 
+        float coverageAlpha = (gl_FragData[0].a - alphaRef) / max(fwidth(gl_FragData[0].a), 0.0001) + 0.5;
+
+        // Some functions don't make sense with A2C or are a pain to think about and no meshes use them anyway
+        // Use regular alpha testing in such cases until someone complains.
+        #if @alphaFunc == FUNC_NEVER
             discard;
-    #elif @alphaFunc == FUNC_EQUAL
-        if (gl_FragData[0].a != alphaRef)
+        #elif @alphaFunc == FUNC_LESS
+            gl_FragData[0].a = 1.0 - coverageAlpha;
+        #elif @alphaFunc == FUNC_EQUAL
+            if (gl_FragData[0].a != alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_LEQUAL
+            gl_FragData[0].a = 1.0 - coverageAlpha;
+        #elif @alphaFunc == FUNC_GREATER
+            gl_FragData[0].a = coverageAlpha;
+        #elif @alphaFunc == FUNC_NOTEQUAL
+            if (gl_FragData[0].a == alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_GEQUAL
+            gl_FragData[0].a = coverageAlpha;
+        #endif
+    #else
+        #if @alphaFunc == FUNC_NEVER
             discard;
-    #elif @alphaFunc == FUNC_LEQUAL
-        if (gl_FragData[0].a >= alphaRef)
-            discard;
-    #elif @alphaFunc == FUNC_GREATER
-        if (gl_FragData[0].a < alphaRef)
-            discard;
-    #elif @alphaFunc == FUNC_NOTEQUAL
-        if (gl_FragData[0].a == alphaRef)
-            discard;
-    #elif @alphaFunc == FUNC_GEQUAL
-        if (gl_FragData[0].a <= alphaRef)
-            discard;
+        #elif @alphaFunc == FUNC_LESS
+            if (gl_FragData[0].a > alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_EQUAL
+            if (gl_FragData[0].a != alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_LEQUAL
+            if (gl_FragData[0].a >= alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_GREATER
+            if (gl_FragData[0].a < alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_NOTEQUAL
+            if (gl_FragData[0].a == alphaRef)
+                discard;
+        #elif @alphaFunc == FUNC_GEQUAL
+            if (gl_FragData[0].a <= alphaRef)
+                discard;
+        #endif
     #endif
 }

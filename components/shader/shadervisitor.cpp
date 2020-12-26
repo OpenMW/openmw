@@ -3,6 +3,7 @@
 #include <osg/AlphaFunc>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/Multisample>
 #include <osg/Texture>
 
 #include <osgUtil/TangentSpaceGenerator>
@@ -382,6 +383,7 @@ namespace Shader
         if (!removedState)
             removedState = new osg::StateSet();
 
+        defineMap["alphaToCoverage"] = "0";
         if (reqs.mAlphaFunc != osg::AlphaFunc::ALWAYS)
         {
             writableStateSet->addUniform(new osg::Uniform("alphaRef", reqs.mAlphaRef));
@@ -391,6 +393,12 @@ namespace Shader
                 removedState->setAttribute(alphaFunc->first, alphaFunc->second);
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+
+            if (mConvertAlphaTestToAlphaToCoverage)
+            {
+                writableStateSet->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB, osg::StateAttribute::ON);
+                defineMap["alphaToCoverage"] = "1";
+            }
         }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT)
@@ -579,6 +587,11 @@ namespace Shader
     void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
     {
         mApplyLightingToEnvMaps = apply;
+    }
+
+    void ShaderVisitor::setConvertAlphaTestToAlphaToCoverage(bool convert)
+    {
+        mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
 }
