@@ -1,6 +1,5 @@
 #include "actor.hpp"
 
-#include <BulletCollision/CollisionShapes/btCapsuleShape.h>
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 
@@ -13,6 +12,8 @@
 
 #include "collisiontype.hpp"
 #include "mtphysics.hpp"
+
+#include <cmath>
 
 namespace MWPhysics
 {
@@ -52,17 +53,8 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
             Log(Debug::Error) << "Error: Failed to calculate bounding box for actor \"" << ptr.getCellRef().getRefId() << "\".";
     }
 
-    // Use capsule shape only if base is square (nonuniform scaling apparently doesn't work on it)
-    if (std::abs(mHalfExtents.x()-mHalfExtents.y())<mHalfExtents.x()*0.05 && mHalfExtents.z() >= mHalfExtents.x())
-    {
-        mShape.reset(new btCapsuleShapeZ(mHalfExtents.x(), 2*mHalfExtents.z() - 2*mHalfExtents.x()));
-        mRotationallyInvariant = true;
-    }
-    else
-    {
-        mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
-        mRotationallyInvariant = false;
-    }
+    mShape.reset(new btBoxShape(Misc::Convert::toBullet(mHalfExtents)));
+    mRotationallyInvariant = (mMeshTranslation.x() == 0.0 && mMeshTranslation.y() == 0.0) && std::fabs(mHalfExtents.x() - mHalfExtents.y()) < 2.2;
 
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
@@ -72,8 +64,11 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     mCollisionObject->setCollisionShape(mShape.get());
     mCollisionObject->setUserPointer(this);
 
-    updateRotation();
     updateScale();
+
+    if(!mRotationallyInvariant)
+        updateRotation();
+
     updatePosition();
     addCollisionMask(getCollisionMask());
     updateCollisionObjectPosition();
@@ -152,6 +147,11 @@ void Actor::setSimulationPosition(const osg::Vec3f& position)
 osg::Vec3f Actor::getSimulationPosition() const
 {
     return mSimulationPosition;
+}
+
+osg::Vec3f Actor::getScaledMeshTranslation() const
+{
+    return mRotation * osg::componentMultiply(mMeshTranslation, mScale);
 }
 
 void Actor::updateCollisionObjectPosition()

@@ -236,7 +236,6 @@ target_link_libraries(components
     ${OSGGA_LIBRARIES}
     ${OSGSHADOW_LIBRARIES}
     ${OSGANIMATION_LIBRARIES}
-    ${BULLET_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
@@ -245,6 +244,12 @@ target_link_libraries(components
     RecastNavigation::Detour
     RecastNavigation::Recast
     )
+
+if (BULLET_USE_DOUBLES AND (UBUNTU_FOUND OR DEBIAN_FOUND))
+    target_link_libraries(components BulletCollision-float64 LinearMath-float64)
+else()
+    target_link_libraries(components ${BULLET_LIBRARIES})
+endif()
 
 if (WIN32)
     target_link_libraries(components
