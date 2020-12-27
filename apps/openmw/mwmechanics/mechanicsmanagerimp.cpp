@@ -1654,6 +1654,11 @@ namespace MWMechanics
         return mActors.getActorsFollowingIndices(actor);
     }
 
+    std::map<int, MWWorld::Ptr> MechanicsManager::getActorsFollowingByIndex(const MWWorld::Ptr& actor)
+    {
+        return mActors.getActorsFollowingByIndex(actor);
+    }
+
     std::list<MWWorld::Ptr> MechanicsManager::getActorsFighting(const MWWorld::Ptr& actor) {
         return mActors.getActorsFighting(actor);
     }

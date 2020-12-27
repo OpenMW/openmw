@@ -1245,9 +1245,12 @@ namespace NifOsg
         void handleGeometry(const Nif::Node* nifNode, osg::Group* parentNode, SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures, int animflags)
         {
             assert(isTypeGeometry(nifNode->recType));
-            osg::ref_ptr<osg::Drawable> drawable;
             osg::ref_ptr<osg::Geometry> geom (new osg::Geometry);
             handleNiGeometry(nifNode, geom, parentNode, composite, boundTextures, animflags);
+            // If the record had no valid geometry data in it, early-out
+            if (geom->empty())
+                return;
+            osg::ref_ptr<osg::Drawable> drawable;
             for (Nif::ControllerPtr ctrl = nifNode->controller; !ctrl.empty(); ctrl = ctrl->next)
             {
                 if (!(ctrl->flags & Nif::NiNode::ControllerFlag_Active))
@@ -1292,6 +1295,8 @@ namespace NifOsg
             assert(isTypeGeometry(nifNode->recType));
             osg::ref_ptr<osg::Geometry> geometry (new osg::Geometry);
             handleNiGeometry(nifNode, geometry, parentNode, composite, boundTextures, animflags);
+            if (geometry->empty())
+                return;
             osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
             rig->setSourceGeometry(geometry);
             rig->setName(nifNode->name);

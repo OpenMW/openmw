@@ -39,6 +39,7 @@
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
     Bug #5422: The player loses all spells when resurrected
+    Bug #5423: Guar follows actors too closely
     Bug #5424: Creatures do not headtrack player
     Bug #5425: Poison effect only appears for one frame
     Bug #5427: GetDistance unknown ID error is misleading
@@ -72,7 +73,9 @@
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
+    Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5731: Editor: skirts are invisible on characters
+    Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging

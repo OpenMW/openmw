@@ -87,12 +87,13 @@ namespace
 
     void updateMechanics(MWPhysics::ActorFrameData& actorData)
     {
+        auto ptr = actorData.mActorRaw->getPtr();
         if (actorData.mDidJump)
-            handleJump(actorData.mPtr);
+            handleJump(ptr);
 
-        MWMechanics::CreatureStats& stats = actorData.mPtr.getClass().getCreatureStats(actorData.mPtr);
+        MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         if (actorData.mNeedLand)
-            stats.land(actorData.mPtr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
+            stats.land(ptr == MWMechanics::getPlayer() && (actorData.mFlying || actorData.mSwimming));
         else if (actorData.mFallHeight < 0)
             stats.addToFallHeight(-actorData.mFallHeight);
     }
@@ -100,15 +101,6 @@ namespace
     osg::Vec3f interpolateMovements(MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
         const float interpolationFactor = timeAccum / physicsDt;
-
-        // account for force change of actor's position in the main thread
-        const auto correction = actorData.mActorRaw->getWorldPosition() - actorData.mOrigin;
-        if (correction.length() != 0)
-        {
-            actorData.mActorRaw->adjustPosition(correction);
-            actorData.mPosition = actorData.mActorRaw->getPosition();
-        }
-
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
@@ -213,45 +205,43 @@ namespace MWPhysics
             thread.join();
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
 
         std::unique_lock lock(mSimulationMutex);
 
-        for (auto& data : actorsData)
-            data.updatePosition();
+        mMovedActors.clear();
 
         // start by finishing previous background computation
         if (mNumThreads != 0)
         {
             for (auto& data : mActorsFrameData)
             {
-                // Ignore actors that were deleted while the background thread was running
-                if (!data.mActor.lock())
-                    continue;
+                const auto actorActive = [&data](const auto& newFrameData) -> bool
+                {
+                    const auto actor = data.mActor.lock();
+                    return actor && actor->getPtr() == newFrameData.mActorRaw->getPtr();
+                };
+                // Only return actors that are still part of the scene
+                if (std::any_of(actorsData.begin(), actorsData.end(), actorActive))
+                {
+                    updateMechanics(data);
 
-                updateMechanics(data);
-                if (mAdvanceSimulation)
-                    data.mActorRaw->setStandingOnPtr(data.mStandingOn);
-
-                if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
+                    // these variables are accessed directly from the main thread, update them here to prevent accessing "too new" values
+                    if (mAdvanceSimulation)
+                        data.mActorRaw->setStandingOnPtr(data.mStandingOn);
+                    data.mActorRaw->setSimulationPosition(interpolateMovements(data, mTimeAccum, mPhysicsDt));
+                    mMovedActors.emplace_back(data.mActorRaw->getPtr());
+                }
             }
-
-            if (mFrameNumber == frameNumber - 1)
-            {
-                stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
-                stats.setAttribute(mFrameNumber, "physicsworker_time_taken", mTimer->delta_s(mTimeBegin, mTimeEnd));
-                stats.setAttribute(mFrameNumber, "physicsworker_time_end", mTimer->delta_s(mFrameStart, mTimeEnd));
-            }
-            mFrameStart = frameStart;
-            mTimeBegin = mTimer->tick();
-            mFrameNumber = frameNumber;
+            updateStats(frameStart, frameNumber, stats);
         }
 
         // init
+        for (auto& data : actorsData)
+            data.updatePosition();
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;
         mActorsFrameData = std::move(actorsData);
@@ -266,52 +256,28 @@ namespace MWPhysics
 
         if (mNumThreads == 0)
         {
-            mMovementResults.clear();
             syncComputation();
-
-            for (auto& data : mActorsFrameData)
-            {
-                if (mAdvanceSimulation)
-                    data.mActorRaw->setStandingOnPtr(data.mStandingOn);
-                if (mMovementResults.find(data.mPtr) != mMovementResults.end())
-                    data.mActorRaw->setSimulationPosition(mMovementResults[data.mPtr]);
-            }
-            return mMovementResults;
+            return mMovedActors;
         }
-
-        // Remove actors that were deleted while the background thread was running
-        for (auto& data : mActorsFrameData)
-        {
-            if (!data.mActor.lock())
-                mMovementResults.erase(data.mPtr);
-        }
-        std::swap(mMovementResults, mPreviousMovementResults);
-
-        // mMovementResults is shared between all workers instance
-        // pre-allocate all nodes so that we don't need synchronization
-        mMovementResults.clear();
-        for (const auto& m : mActorsFrameData)
-            mMovementResults[m.mPtr] = m.mPosition;
 
         lock.unlock();
         mHasJob.notify_all();
-        return mPreviousMovementResults;
+        return mMovedActors;
     }
 
-    const PtrPositionList& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
+    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
         std::unique_lock lock(mSimulationMutex);
-        mMovementResults.clear();
-        mPreviousMovementResults.clear();
+        mMovedActors.clear();
         mActorsFrameData.clear();
-
         for (const auto& [_, actor] : actors)
         {
-            actor->resetPosition();
-            actor->setStandingOnPtr(nullptr);
-            mMovementResults[actor->getPtr()] = actor->getWorldPosition();
+            actor->updatePosition();
+            actor->setSimulationPosition(actor->getWorldPosition()); // updatePosition skip next simulation, now we need to "consume" it
+            actor->updateCollisionObjectPosition();
+            mMovedActors.emplace_back(actor->getPtr());
         }
-        return mMovementResults;
+        return mMovedActors;
     }
 
     void PhysicsTaskScheduler::rayTest(const btVector3& rayFromWorld, const btVector3& rayToWorld, btCollisionWorld::RayResultCallback& resultCallback) const
@@ -379,17 +345,17 @@ namespace MWPhysics
         mCollisionWorld->removeCollisionObject(collisionObject);
     }
 
-    void PhysicsTaskScheduler::updateSingleAabb(std::weak_ptr<PtrHolder> ptr)
+    void PhysicsTaskScheduler::updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate)
     {
-        if (mDeferAabbUpdate)
-        {
-            std::unique_lock lock(mUpdateAabbMutex);
-            mUpdateAabb.insert(std::move(ptr));
-        }
-        else
+        if (!mDeferAabbUpdate || immediate)
         {
             std::unique_lock lock(mCollisionWorldMutex);
             updatePtrAabb(ptr);
+        }
+        else
+        {
+            std::unique_lock lock(mUpdateAabbMutex);
+            mUpdateAabb.insert(std::move(ptr));
         }
     }
 
@@ -493,7 +459,6 @@ namespace MWPhysics
                     {
                         auto& actorData = mActorsFrameData[job];
                         handleFall(actorData, mAdvanceSimulation);
-                        mMovementResults[actorData.mPtr] = interpolateMovements(actorData, mTimeAccum, mPhysicsDt);
                     }
                 }
 
@@ -511,9 +476,7 @@ namespace MWPhysics
         {
             if(const auto actor = actorData.mActor.lock())
             {
-                bool positionChanged = actorData.mPosition != actorData.mActorRaw->getPosition();
-                actorData.mActorRaw->setPosition(actorData.mPosition);
-                if (positionChanged)
+                if (actor->setPosition(actorData.mPosition))
                 {
                     actor->updateCollisionObjectPosition();
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
@@ -550,8 +513,24 @@ namespace MWPhysics
         for (auto& actorData : mActorsFrameData)
         {
             handleFall(actorData, mAdvanceSimulation);
-            mMovementResults[actorData.mPtr] = interpolateMovements(actorData, mTimeAccum, mPhysicsDt);
+            actorData.mActorRaw->setSimulationPosition(interpolateMovements(actorData, mTimeAccum, mPhysicsDt));
             updateMechanics(actorData);
+            mMovedActors.emplace_back(actorData.mActorRaw->getPtr());
+            if (mAdvanceSimulation)
+                actorData.mActorRaw->setStandingOnPtr(actorData.mStandingOn);
         }
+    }
+
+    void PhysicsTaskScheduler::updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    {
+        if (mFrameNumber == frameNumber - 1)
+        {
+            stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
+            stats.setAttribute(mFrameNumber, "physicsworker_time_taken", mTimer->delta_s(mTimeBegin, mTimeEnd));
+            stats.setAttribute(mFrameNumber, "physicsworker_time_end", mTimer->delta_s(mFrameStart, mTimeEnd));
+        }
+        mFrameStart = frameStart;
+        mTimeBegin = mTimer->tick();
+        mFrameNumber = frameNumber;
     }
 }

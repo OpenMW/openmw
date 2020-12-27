@@ -437,7 +437,6 @@ namespace MWPhysics
         ActorMap::iterator found = mActors.find(ptr);
         if (found ==  mActors.end())
             return ptr.getRefData().getPosition().asVec3();
-        found->second->resetPosition();
         return MovementSolver::traceDown(ptr, position, found->second.get(), mCollisionWorld.get(), maxHeight);
     }
 
@@ -642,7 +641,7 @@ namespace MWPhysics
         if (foundActor != mActors.end())
         {
             foundActor->second->updatePosition();
-            mTaskScheduler->updateSingleAabb(foundActor->second);
+            mTaskScheduler->updateSingleAabb(foundActor->second, true);
             return;
         }
     }
@@ -711,7 +710,7 @@ namespace MWPhysics
         mMovementQueue.clear();
     }
 
-    const PtrPositionList& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    const std::vector<MWWorld::Ptr>& PhysicsSystem::applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         mTimeAccum += dt;
 
@@ -770,7 +769,7 @@ namespace MWPhysics
             if (numSteps == 0)
                 standingOn = physicActor->getStandingOnPtr();
 
-            actorsFrameData.emplace_back(std::move(physicActor), character, standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
+            actorsFrameData.emplace_back(std::move(physicActor), standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
         }
         mMovementQueue.clear();
         return actorsFrameData;
@@ -912,25 +911,26 @@ namespace MWPhysics
             mDebugDrawer->addCollision(position, normal);
     }
 
-    ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn,
+    ActorFrameData::ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn,
             bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel)
         : mActor(actor), mActorRaw(actor.get()), mStandingOn(standingOn),
         mDidJump(false), mNeedLand(false), mMoveToWaterSurface(moveToWaterSurface),
         mWaterlevel(waterlevel), mSlowFall(slowFall), mOldHeight(0), mFallHeight(0), mMovement(movement), mPosition(), mRefpos()
     {
         const MWBase::World *world = MWBase::Environment::get().getWorld();
-        mPtr = actor->getPtr();
-        mFlying = world->isFlying(character);
-        mSwimming = world->isSwimming(character);
-        mWantJump = mPtr.getClass().getMovementSettings(mPtr).mPosition[2] != 0;
-        mIsDead = mPtr.getClass().getCreatureStats(mPtr).isDead();
+        const auto ptr = actor->getPtr();
+        mFlying = world->isFlying(ptr);
+        mSwimming = world->isSwimming(ptr);
+        mWantJump = ptr.getClass().getMovementSettings(ptr).mPosition[2] != 0;
+        auto& stats = ptr.getClass().getCreatureStats(ptr);
+        const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
+        mFloatToSurface = stats.isDead() || (!godmode && stats.isParalyzed());
         mWasOnGround = actor->getOnGround();
     }
 
     void ActorFrameData::updatePosition()
     {
-        mActorRaw->updatePosition();
-        mOrigin = mActorRaw->getSimulationPosition();
+        mActorRaw->updateWorldPosition();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {
@@ -938,7 +938,7 @@ namespace MWPhysics
             mActorRaw->setPosition(mPosition);
         }
         mOldHeight = mPosition.z();
-        mRefpos = mPtr.getRefData().getPosition();
+        mRefpos = mActorRaw->getPtr().getRefData().getPosition();
     }
 
     WorldFrameData::WorldFrameData()

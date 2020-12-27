@@ -199,6 +199,7 @@ namespace MWBase
             virtual std::list<MWWorld::Ptr> getActorsSidingWith(const MWWorld::Ptr& actor) = 0;
             virtual std::list<MWWorld::Ptr> getActorsFollowing(const MWWorld::Ptr& actor) = 0;
             virtual std::list<int> getActorsFollowingIndices(const MWWorld::Ptr& actor) = 0;
+            virtual std::map<int, MWWorld::Ptr> getActorsFollowingByIndex(const MWWorld::Ptr& actor) = 0;
 
             ///Returns a list of actors who are fighting the given actor within the fAlarmDistance
             /** ie AiCombat is active and the target is the actor **/

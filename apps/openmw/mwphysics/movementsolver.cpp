@@ -78,12 +78,14 @@ namespace MWPhysics
                                            WorldFrameData& worldData)
     {
         auto* physicActor = actor.mActorRaw;
-        auto ptr = actor.mPtr;
         const ESM::Position& refpos = actor.mRefpos;
         // Early-out for totally static creatures
         // (Not sure if gravity should still apply?)
-        if (!ptr.getClass().isMobile(ptr))
-            return;
+        {
+            const auto ptr = physicActor->getPtr();
+            if (!ptr.getClass().isMobile(ptr))
+                return;
+        }
 
         // Reset per-frame data
         physicActor->setWalkingOnWater(false);
@@ -128,8 +130,9 @@ namespace MWPhysics
                 velocity = velocity + inertia;
         }
 
-        // dead actors underwater will float to the surface, if the CharacterController tells us to do so
-        if (actor.mMovement.z() > 0 && actor.mIsDead && actor.mPosition.z() < swimlevel)
+        // Dead and paralyzed actors underwater will float to the surface,
+        // if the CharacterController tells us to do so
+        if (actor.mMovement.z() > 0 && actor.mFloatToSurface && actor.mPosition.z() < swimlevel)
             velocity = osg::Vec3f(0,0,1) * 25;
 
         if (actor.mWantJump)
@@ -211,6 +214,7 @@ namespace MWPhysics
             if (result)
             {
                 // don't let pure water creatures move out of water after stepMove
+                const auto ptr = physicActor->getPtr();
                 if (ptr.getClass().isPureWaterCreature(ptr) && newPosition.z() + halfExtents.z() > actor.mWaterlevel)
                     newPosition = oldPosition;
             }

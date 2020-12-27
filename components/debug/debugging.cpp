@@ -2,10 +2,12 @@
 
 #include <chrono>
 #include <memory>
+#include <functional>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 
 #ifdef _WIN32
+#   include <components/crashcatcher/windows_crashcatcher.hpp>
 #   undef WIN32_LEAN_AND_MEAN
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
@@ -163,7 +165,6 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
 #endif
 
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
-    const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
     boost::filesystem::ofstream logfile;
 
     int ret = 0;
@@ -187,13 +188,18 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         std::cerr.rdbuf (&cerrsb);
 #endif
 
+#if defined(_WIN32)
+        const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+        Crash::CrashCatcher crashy(argc, argv, (cfgMgr.getLogPath() / crashLogName).make_preferred().string());
+#else
+        const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
         // install the crash handler as soon as possible. note that the log path
         // does not depend on config being read.
         crashCatcherInstall(argc, argv, (cfgMgr.getLogPath() / crashLogName).string());
-
+#endif
         ret = innerApplication(argc, argv);
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
         if (!isatty(fileno(stdin)))
