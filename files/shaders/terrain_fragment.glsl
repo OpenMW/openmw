@@ -18,13 +18,13 @@ varying float linearDepth;
 #define PER_PIXEL_LIGHTING (@normalMap || @forcePPL)
 
 #if !PER_PIXEL_LIGHTING
-centroid varying vec4 lighting;
+centroid varying vec3 passLighting;
 centroid varying vec3 shadowDiffuseLighting;
 #endif
-centroid varying vec4 passColor;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
+#include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 #include "parallax.glsl"
@@ -68,30 +68,33 @@ void main()
     gl_FragData[0].a *= texture2D(blendMap, blendMapUV).a;
 #endif
 
-    float shadowing = unshadowedLightRatio(linearDepth);
+    vec4 diffuseColor = getDiffuseColor();
+    gl_FragData[0].a *= diffuseColor.a;
 
+    float shadowing = unshadowedLightRatio(linearDepth);
+    vec3 lighting;
 #if !PER_PIXEL_LIGHTING
+    lighting = passLighting + shadowDiffuseLighting * shadowing;
+#else
+    vec3 diffuseLight, ambientLight;
+    doLighting(passViewPos, normalize(viewNormal), shadowing, diffuseLight, ambientLight);
+    lighting = diffuseColor.xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
+#endif
 
 #if @clamp
-    gl_FragData[0] *= clamp(lighting + vec4(shadowDiffuseLighting * shadowing, 0), vec4(0.0), vec4(1.0));
+    lighting = clamp(lighting, vec3(0.0), vec3(1.0));
 #else
-    gl_FragData[0] *= lighting + vec4(shadowDiffuseLighting * shadowing, 0);
+    lighting = max(lighting, 0.0);
 #endif
 
-#else
-    gl_FragData[0] *= doLighting(passViewPos, normalize(viewNormal), passColor, shadowing);
-#endif
+    gl_FragData[0].xyz *= lighting;
 
 #if @specularMap
     float shininess = 128.0; // TODO: make configurable
     vec3 matSpec = vec3(diffuseTex.a);
 #else
     float shininess = gl_FrontMaterial.shininess;
-    vec3 matSpec;
-    if (colorMode == ColorMode_Specular)
-        matSpec = passColor.xyz;
-    else
-        matSpec = gl_FrontMaterial.specular.xyz;
+    vec3 matSpec = getSpecularColor().xyz;
 #endif
 
     if (matSpec != vec3(0.0))
