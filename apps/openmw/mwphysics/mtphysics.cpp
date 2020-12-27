@@ -13,6 +13,7 @@
 #include "../mwworld/player.hpp"
 
 #include "actor.hpp"
+#include "contacttestwrapper.h"
 #include "movementsolver.hpp"
 #include "mtphysics.hpp"
 #include "object.hpp"
@@ -167,7 +168,14 @@ namespace MWPhysics
 
         mPreStepBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
             {
+            if (mDeferAabbUpdate)
                 updateAabbs();
+            for (auto& data : mActorsFrameData)
+                if (data.mActor.lock())
+                {
+                    std::unique_lock lock(mCollisionWorldMutex);
+                    MovementSolver::unstuck(data, mCollisionWorld.get());
+                }
             });
 
         mPostStepBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
@@ -295,7 +303,7 @@ namespace MWPhysics
     void PhysicsTaskScheduler::contactTest(btCollisionObject* colObj, btCollisionWorld::ContactResultCallback& resultCallback)
     {
         std::shared_lock lock(mCollisionWorldMutex);
-        mCollisionWorld->contactTest(colObj, resultCallback);
+        ContactTestWrapper::contactTest(mCollisionWorld.get(), colObj, resultCallback);
     }
 
     std::optional<btVector3> PhysicsTaskScheduler::getHitPoint(const btTransform& from, btCollisionObject* target)
@@ -438,8 +446,7 @@ namespace MWPhysics
             if (!mNewFrame)
                 mHasJob.wait(lock, [&]() { return mQuit || mNewFrame; });
 
-            if (mDeferAabbUpdate)
-                mPreStepBarrier->wait();
+            mPreStepBarrier->wait();
 
             int job = 0;
             while (mRemainingSteps && (job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
@@ -505,7 +512,10 @@ namespace MWPhysics
         while (mRemainingSteps--)
         {
             for (auto& actorData : mActorsFrameData)
+            {
+                MovementSolver::unstuck(actorData, mCollisionWorld.get());
                 MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+            }
 
             updateActorsPositions();
         }

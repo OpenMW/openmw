@@ -3,12 +3,14 @@
 
     Bug #832: OpenMW-CS: Handle deleted references
     Bug #1662: Qt4 and Windows binaries crash if there's a non-ASCII character in a file path/config path
+    Bug #1901: Actors colliding behaviour is different from vanilla
     Bug #1952: Incorrect particle lighting
     Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
     Bug #2798: Mutable ESM records
     Bug #2976 [reopened]: Issues combining settings from the command line and both config files
+    Bug #3137: Walking into a wall prevents jumping
     Bug #3372: Projectiles and magic bolts go through moving targets
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
@@ -18,6 +20,11 @@
     Bug #4021: Attributes and skills are not stored as floats
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4083: Door animation freezes when colliding with actors
+    Bug #4247: Cannot walk up stairs in Ebonheart docks
+    Bug #4447: Actor collision capsule shape allows looking through some walls
+    Bug #4465: Collision shape overlapping causes twitching
+    Bug #4476: Abot Gondoliers: player hangs in air during scenic travel
+    Bug #4568: Too many actors in one spot can push other actors out of bounds
     Bug #4623: Corprus implementation is incorrect
     Bug #4631: Setting MSAA level too high doesn't fall back to highest supported level
     Bug #4764: Data race in osg ParticleSystem
@@ -71,12 +78,15 @@
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
+    Bug #5681: Player character can clip or pass through bridges instead of colliding against them
+    Bug #5683: Player character can get stuck with MR's balmora's wooden gate
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5731: Editor: skirts are invisible on characters
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
+    Bug #5762: Movement solver is insufficiently robust
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
