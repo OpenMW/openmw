@@ -109,10 +109,13 @@ void main()
 
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
-    alphaTest();
 #else
     gl_FragData[0] = vec4(1.0);
 #endif
+
+    vec4 diffuseColor = getDiffuseColor();
+    gl_FragData[0].a *= diffuseColor.a;
+    alphaTest();
 
 #if @detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;
@@ -151,10 +154,6 @@ void main()
 #endif
 
 #endif
-
-    vec4 diffuseColor = getDiffuseColor();
-    gl_FragData[0].a *= diffuseColor.a;
-    alphaTest();
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 lighting;
