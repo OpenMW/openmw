@@ -233,7 +233,17 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-    camera->attach(osg::Camera::COLOR_BUFFER, texture);
+    unsigned int samples = 0;
+    unsigned int colourSamples = 0;
+    if (Settings::Manager::getBool("convert alpha test to alpha-to-coverage", "Shaders"))
+    {
+        // Alpha-to-coverage requires a multisampled framebuffer.
+        // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
+        // For some reason, two samples are needed, at least with some drivers.
+        samples = 2;
+        colourSamples = 1;
+    }
+    camera->attach(osg::Camera::COLOR_BUFFER, texture, 0, 0, false, samples, colourSamples);
 
     camera->addChild(mSceneRoot);
     mRoot->addChild(camera);
