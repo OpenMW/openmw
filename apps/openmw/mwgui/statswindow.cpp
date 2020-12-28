@@ -5,6 +5,7 @@
 #include <MyGUI_ProgressBar.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
+#include <MyGUI_LanguageManager.h>
 #include <MyGUI_Gui.h>
 
 #include <components/settings/settings.hpp>
@@ -336,14 +337,16 @@ namespace MWGui
             int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
 
-            std::string detail;
+            std::stringstream detail;
             for (int i = 0; i < ESM::Attribute::Length; ++i)
             {
                 if (auto increase = PCstats.getLevelUpAttributeIncrease(i))
-                    detail += (detail.empty() ? "" : "\n") + ESM::Attribute::sAttributeNames[i] + " x" + MyGUI::utility::toString(increase);
+                    detail << (detail.str().empty() ? "" : "\n") << "#{"
+                    << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[i])
+                    << "} x" << MyGUI::utility::toString(increase);
             }
-            if (!detail.empty())
-                levelWidget->setUserString("Caption_LevelDetailText", detail);
+            if (!detail.str().empty())
+                levelWidget->setUserString("Caption_LevelDetailText", MyGUI::LanguageManager::getInstance().replaceTags(detail.str()));
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelProgressText", MyGUI::utility::toString(PCstats.getLevelProgress()) + "/"
