@@ -18,6 +18,7 @@
     Bug #3862: Random container contents behave differently than vanilla
     Bug #3929: Leveled list merchant containers respawn on barter
     Bug #4021: Attributes and skills are not stored as floats
+    Bug #4039: Multiple followers should have the same following distance
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4083: Door animation freezes when colliding with actors
     Bug #4247: Cannot walk up stairs in Ebonheart docks
