@@ -272,6 +272,7 @@
                 <Property key="AutoResize" value="true"/>
                 <Property key="MultiLine" value="true"/>
                 <Property key="Shrink" value="true"/>
+                <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
         </Widget>
 
