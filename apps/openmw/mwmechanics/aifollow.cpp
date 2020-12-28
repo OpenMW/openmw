@@ -119,7 +119,6 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     auto followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingByIndex(target);
     if (followers.size() >= 2 && followers.cbegin()->first != mFollowIndex)
     {
-        osg::Vec3f::value_type maxSize = 0;
         for(auto& follower : followers)
         {
             auto halfExtent = MWBase::Environment::get().getWorld()->getHalfExtents(follower.second).y();
