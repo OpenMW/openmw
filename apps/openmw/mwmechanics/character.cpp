@@ -2429,7 +2429,7 @@ void CharacterController::update(float duration, bool animationOnly)
     moved.y() *= scale;
 
     // Ensure we're moving in generally the right direction...
-    if(speed > 0.f)
+    if (speed > 0.f && moved != osg::Vec3f())
     {
         float l = moved.length();
         if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2 ||
