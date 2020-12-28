@@ -41,7 +41,7 @@ namespace MWPhysics
             m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask;
             mVelocity = Misc::Convert::toBullet(velocity);
         }
-        virtual btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1)
+        btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) override
         {
             if (isActor(colObj0Wrap->getCollisionObject()) && isActor(colObj1Wrap->getCollisionObject()))
                 return 0.0;
