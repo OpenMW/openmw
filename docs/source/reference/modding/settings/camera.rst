@@ -46,7 +46,7 @@ viewing distance
 
 :Type:		floating point
 :Range:		> 0
-:Default:	6656.0
+:Default:	7168.0
 
 This value controls the maximum visible distance (also called the far clipping plane).
 Larger values significantly improve rendering in exterior spaces,
