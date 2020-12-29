@@ -53,6 +53,21 @@ namespace VFS
         }
     }
 
+    bool FileSystemArchive::contains(const std::string& file, char (*normalize_function)(char)) const
+    {
+        for (const auto& it : mIndex)
+        {
+            if(it.first == file)
+                return true;
+        }
+        return false;
+    }
+
+    std::string FileSystemArchive::getDescription() const
+    {
+        return std::string{"DIR: "} + mPath;
+    }
+
     // ----------------------------------------------------------------------------------
 
     FileSystemArchiveFile::FileSystemArchiveFile(const std::string &path)

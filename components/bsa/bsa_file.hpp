@@ -135,6 +135,11 @@ public:
     /// @note Thread safe.
     const FileList &getList() const
     { return mFiles; }
+
+    const std::string& getFilename() const
+    {
+        return mFilename;
+    }
 };
 
 }
