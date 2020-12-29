@@ -153,6 +153,8 @@ namespace MWWorld
             ContainerStoreIterator getSlot (int slot);
             ConstContainerStoreIterator getSlot(int slot) const;
 
+            ContainerStoreIterator getPreferredShield(const MWWorld::Ptr& actor);
+
             void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
 
