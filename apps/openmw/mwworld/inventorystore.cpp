@@ -556,6 +556,14 @@ void MWWorld::InventoryStore::autoEquip (const MWWorld::Ptr& actor)
     }
 }
 
+MWWorld::ContainerStoreIterator MWWorld::InventoryStore::getPreferredShield(const MWWorld::Ptr& actor)
+{
+    TSlots slots;
+    initSlots (slots);
+    autoEquipArmor(actor, slots);
+    return slots[Slot_CarriedLeft];
+}
+
 const MWMechanics::MagicEffects& MWWorld::InventoryStore::getMagicEffects() const
 {
     return mMagicEffects;
