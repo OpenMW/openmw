@@ -200,7 +200,6 @@ namespace MWRender
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
         osg::ref_ptr<osg::Node> mParticleEffect;
-        std::vector<osg::ref_ptr<AlphaFader> > mParticleFaders;
         osg::ref_ptr<UnderwaterSwitchCallback> mUnderwaterSwitch;
 
         osg::ref_ptr<osg::PositionAttitudeTransform> mCloudNode;
@@ -227,7 +226,6 @@ namespace MWRender
         osg::ref_ptr<osgParticle::BoxPlacer> mPlacer;
         osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
-        osg::ref_ptr<RainFader> mRainFader;
 
         bool mCreated;
 
@@ -269,7 +267,7 @@ namespace MWRender
         bool mEnabled;
         bool mSunEnabled;
 
-        float mWeatherAlpha;
+        float mEffectFade;
 
         osg::Vec4f mMoonScriptColor;
     };
