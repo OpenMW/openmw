@@ -26,6 +26,8 @@
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/optimizer.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include <components/shader/shadervisitor.hpp>
 #include <components/shader/shadermanager.hpp>
 

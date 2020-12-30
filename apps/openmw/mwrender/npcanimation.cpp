@@ -524,7 +524,7 @@ void NpcAnimation::updateNpcBase()
 
     if(!is1stPerson)
     {
-        const std::string base = "meshes\\xbase_anim.nif";
+        const std::string base = Settings::Manager::getString("xbaseanim", "Models");
         if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
@@ -538,7 +538,7 @@ void NpcAnimation::updateNpcBase()
     }
     else
     {
-        const std::string base = "meshes\\xbase_anim.1st.nif";
+        const std::string base = Settings::Manager::getString("xbaseanim1st", "Models");
         if (smodel != base && !isWerewolf)
             addAnimSource(base, smodel);
 
