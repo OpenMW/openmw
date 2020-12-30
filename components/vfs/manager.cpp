@@ -100,10 +100,10 @@ namespace VFS
     {
         std::string normalized = name;
         normalize_path(normalized, mStrict);
-        for(const auto archive : mArchives)
+        for(auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
         {
-            if(archive->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
-                return archive->getDescription();
+            if((*it)->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
+                return (*it)->getDescription();
         }
         return {};
     }
