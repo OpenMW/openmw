@@ -318,6 +318,7 @@ namespace MWMechanics
         mPath.clear();
         mPath.push_back(endPoint);
         mConstructed = true;
+        mPossible = true;
     }
 
     void PathFinder::buildPathByPathgrid(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
@@ -329,6 +330,7 @@ namespace MWMechanics
         buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
 
         mConstructed = true;
+        mPossible = !mPath.empty();
     }
 
     void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
@@ -342,6 +344,7 @@ namespace MWMechanics
             mPath.push_back(endPoint);
 
         mConstructed = true;
+        mPossible = !mPath.empty();
     }
 
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
@@ -367,6 +370,7 @@ namespace MWMechanics
             mPath.push_back(endPoint);
 
         mConstructed = true;
+        mPossible = !mPath.empty();
     }
 
     bool PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
