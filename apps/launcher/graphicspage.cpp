@@ -29,9 +29,8 @@ QString getAspect(int x, int y)
     return QString(QString::number(xaspect) + ":" + QString::number(yaspect));
 }
 
-Launcher::GraphicsPage::GraphicsPage(Files::ConfigurationManager &cfg, Settings::Manager &engineSettings, QWidget *parent)
+Launcher::GraphicsPage::GraphicsPage(Settings::Manager &engineSettings, QWidget *parent)
     : QWidget(parent)
-    , mCfgMgr(cfg)
     , mEngineSettings(engineSettings)
 {
     setObjectName ("GraphicsPage");

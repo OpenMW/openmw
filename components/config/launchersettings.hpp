@@ -9,9 +9,6 @@ namespace Config
     class LauncherSettings : public SettingsBase<QMultiMap<QString, QString> >
     {
     public:
-        LauncherSettings();
-        ~LauncherSettings();
-
         bool writeFile(QTextStream &stream);
 
         /// \return names of all Content Lists in the launcher's .cfg file. 
