@@ -418,7 +418,7 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::NPC> *ref = ptr.get<ESM::NPC>();
 
-        std::string model = Settings::Manager::getString("xbaseanim", "Models");
+        std::string model = Settings::Manager::getString("baseanim", "Models");
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(ref->mBase->mRace);
         if(race->mData.mFlags & ESM::Race::Beast)
             model = Settings::Manager::getString("baseanimkna", "Models");
