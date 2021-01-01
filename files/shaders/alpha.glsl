@@ -15,7 +15,7 @@ uniform float alphaRef;
 void alphaTest()
 {
     #if @alphaToCoverage 
-        float coverageAlpha = (gl_FragData[0].a - alphaRef) / max(fwidth(gl_FragData[0].a), 0.0001) + 0.5;
+        float coverageAlpha = (gl_FragData[0].a - clamp(alphaRef, 0.0001, 0.9999)) / max(fwidth(gl_FragData[0].a), 0.0001) + 0.5;
 
         // Some functions don't make sense with A2C or are a pain to think about and no meshes use them anyway
         // Use regular alpha testing in such cases until someone complains.
