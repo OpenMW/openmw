@@ -26,8 +26,10 @@ namespace Shader
         , mColorMode(0)
         , mMaterialOverridden(false)
         , mAlphaTestOverridden(false)
+        , mAlphaBlendOverridden(false)
         , mAlphaFunc(GL_ALWAYS)
         , mAlphaRef(1.0)
+        , mAlphaBlend(false)
         , mNormalHeight(false)
         , mTexStageRequiringTangents(-1)
         , mNode(nullptr)
@@ -330,6 +332,15 @@ namespace Shader
                 }
             }
         }
+
+        unsigned int alphaBlend = stateset->getMode(GL_BLEND);
+        if (alphaBlend != osg::StateAttribute::INHERIT && (!mRequirements.back().mAlphaBlendOverridden || alphaBlend & osg::StateAttribute::PROTECTED))
+        {
+            if (alphaBlend & osg::StateAttribute::OVERRIDE)
+                mRequirements.back().mAlphaBlendOverridden = true;
+
+            mRequirements.back().mAlphaBlend = alphaBlend & osg::StateAttribute::ON;
+        }
     }
 
     void ShaderVisitor::pushRequirements(osg::Node& node)
@@ -394,7 +405,8 @@ namespace Shader
             // This prevents redundant glAlphaFunc calls while letting the shadows bin still see the test
             writableStateSet->setAttribute(RemovedAlphaFunc::getInstance(reqs.mAlphaFunc), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-            if (mConvertAlphaTestToAlphaToCoverage)
+            // Blending won't work with A2C as we use the alpha channel for coverage. gl_SampleCoverage from ARB_sample_shading would save the day, but requires GLSL 130
+            if (mConvertAlphaTestToAlphaToCoverage && !reqs.mAlphaBlend)
             {
                 writableStateSet->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB, osg::StateAttribute::ON);
                 defineMap["alphaToCoverage"] = "1";
