@@ -40,22 +40,22 @@ void alphaTest()
         #if @alphaFunc == FUNC_NEVER
             discard;
         #elif @alphaFunc == FUNC_LESS
-            if (gl_FragData[0].a > alphaRef)
+            if (gl_FragData[0].a >= alphaRef)
                 discard;
         #elif @alphaFunc == FUNC_EQUAL
             if (gl_FragData[0].a != alphaRef)
                 discard;
         #elif @alphaFunc == FUNC_LEQUAL
-            if (gl_FragData[0].a >= alphaRef)
+            if (gl_FragData[0].a > alphaRef)
                 discard;
         #elif @alphaFunc == FUNC_GREATER
-            if (gl_FragData[0].a < alphaRef)
+            if (gl_FragData[0].a <= alphaRef)
                 discard;
         #elif @alphaFunc == FUNC_NOTEQUAL
             if (gl_FragData[0].a == alphaRef)
                 discard;
         #elif @alphaFunc == FUNC_GEQUAL
-            if (gl_FragData[0].a <= alphaRef)
+            if (gl_FragData[0].a < alphaRef)
                 discard;
         #endif
     #endif
