@@ -82,6 +82,7 @@
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
     Feature #4894: Consider actors as obstacles for pathfinding
+    Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #5043: Head Bobbing
     Feature #5199: Improve Scene Colors
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
