@@ -9,7 +9,6 @@
 
 #include <components/settings/settings.hpp>
 
-namespace Files { struct ConfigurationManager; }
 namespace Config { class GameSettings; }
 
 namespace Launcher
@@ -19,7 +18,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        AdvancedPage(Files::ConfigurationManager &cfg, Config::GameSettings &gameSettings,
+        AdvancedPage(Config::GameSettings &gameSettings,
                      Settings::Manager &engineSettings, QWidget *parent = nullptr);
 
         bool loadSettings();
@@ -35,7 +34,6 @@ namespace Launcher
         void slotViewOverShoulderToggled(bool checked);
 
     private:
-        Files::ConfigurationManager &mCfgMgr;
         Config::GameSettings &mGameSettings;
         Settings::Manager &mEngineSettings;
         QCompleter mCellNameCompleter;

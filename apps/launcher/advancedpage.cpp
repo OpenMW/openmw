@@ -10,11 +10,9 @@
 
 #include <cmath>
 
-Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
-                                     Config::GameSettings &gameSettings,
+Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings,
                                      Settings::Manager &engineSettings, QWidget *parent)
         : QWidget(parent)
-        , mCfgMgr(cfg)
         , mGameSettings(gameSettings)
         , mEngineSettings(engineSettings)
 {

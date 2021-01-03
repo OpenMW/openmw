@@ -14,8 +14,6 @@ Config::GameSettings::GameSettings(Files::ConfigurationManager &cfg)
 {
 }
 
-Config::GameSettings::~GameSettings() = default;
-
 void Config::GameSettings::validatePaths()
 {
     QStringList paths = mSettings.values(QString("data"));
