@@ -81,7 +81,6 @@
     Bug #5661: Region sounds don't play at the right interval
     Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
     Bug #5681: Player character can clip or pass through bridges instead of colliding against them
-    Bug #5683: Player character can get stuck with MR's balmora's wooden gate
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
