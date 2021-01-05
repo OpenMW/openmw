@@ -1,5 +1,7 @@
 #version 120
 
+#extension EXT_gpu_shader4: enable
+
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 
