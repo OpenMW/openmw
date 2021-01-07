@@ -4,6 +4,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "components/misc/convert.hpp"
 
@@ -32,7 +33,7 @@ namespace MWPhysics
     class Projectile final : public PtrHolder
     {
     public:
-        Projectile(const int projectileId, const MWWorld::Ptr& caster, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
+        Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canCrossWaterSurface, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem);
         ~Projectile() override;
 
         btConvexShape* getConvexShape() const { return mConvexShape; }
@@ -40,15 +41,11 @@ namespace MWPhysics
         void commitPositionChange();
 
         void setPosition(const osg::Vec3f& position);
+        osg::Vec3f getPosition() const;
 
         btCollisionObject* getCollisionObject() const
         {
             return mCollisionObject.get();
-        }
-
-        int getProjectileId() const
-        {
-            return mProjectileId;
         }
 
         bool isActive() const
@@ -65,17 +62,15 @@ namespace MWPhysics
         MWWorld::Ptr getCaster() const;
         void setCaster(MWWorld::Ptr caster);
 
-        osg::Vec3f getHitPos() const
-        {
-            assert(!mActive);
-            return Misc::Convert::toOsg(mHitPosition);
-        }
+        bool canTraverseWater() const;
 
         void hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal);
-        void activate();
 
         void setValidTargets(const std::vector<MWWorld::Ptr>& targets);
         bool isValidTarget(const MWWorld::Ptr& target) const;
+
+        std::optional<btVector3> getWaterHitPosition();
+        void setWaterHitPosition(btVector3 pos);
 
     private:
 
@@ -85,9 +80,12 @@ namespace MWPhysics
         std::unique_ptr<btCollisionObject> mCollisionObject;
         btTransform mLocalTransform;
         bool mTransformUpdatePending;
+        bool mCanCrossWaterSurface;
+        bool mCrossedWaterSurface;
         std::atomic<bool> mActive;
         MWWorld::Ptr mCaster;
         MWWorld::Ptr mHitTarget;
+        std::optional<btVector3> mWaterHitPosition;
         btVector3 mHitPosition;
         btVector3 mHitNormal;
 
@@ -95,15 +93,11 @@ namespace MWPhysics
 
         mutable std::mutex mMutex;
 
-        osg::Vec3f mPosition;
-
         PhysicsSystem *mPhysics;
         PhysicsTaskScheduler *mTaskScheduler;
 
         Projectile(const Projectile&);
         Projectile& operator=(const Projectile&);
-
-        int mProjectileId;
     };
 
 }

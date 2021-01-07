@@ -1,6 +1,6 @@
 #include <mutex>
 
-#include "closestnotmeconvexresultcallback.hpp"
+#include "actorconvexcallback.hpp"
 #include "collisiontype.hpp"
 #include "contacttestwrapper.h"
 
@@ -31,13 +31,13 @@ namespace MWPhysics
         }
     };
 
-    ClosestNotMeConvexResultCallback::ClosestNotMeConvexResultCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot, const btCollisionWorld * world)
+    ActorConvexCallback::ActorConvexCallback(const btCollisionObject *me, const btVector3 &motion, btScalar minCollisionDot, const btCollisionWorld * world)
     : btCollisionWorld::ClosestConvexResultCallback(btVector3(0.0, 0.0, 0.0), btVector3(0.0, 0.0, 0.0)),
       mMe(me), mMotion(motion), mMinCollisionDot(minCollisionDot), mWorld(world)
     {
     }
 
-    btScalar ClosestNotMeConvexResultCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
+    btScalar ActorConvexCallback::addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
     {
         if (convexResult.m_hitCollisionObject == mMe)
             return btScalar(1);
