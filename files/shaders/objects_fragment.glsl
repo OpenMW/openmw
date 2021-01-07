@@ -1,6 +1,8 @@
 #version 120
 
-#extension EXT_gpu_shader4: enable
+#if @useGPUShader4
+    #extension EXT_gpu_shader4: require
+#endif
 
 #if @diffuseMap
 uniform sampler2D diffuseMap;

@@ -24,10 +24,10 @@ float coveragePreservingAlphaScale(sampler2D diffuseMap, vec2 uv)
 {
     #if @alphaFunc != FUNC_ALWAYS && @alphaFunc != FUNC_NEVER
         vec2 textureSize;
-        #ifdef GL_EXT_gpu_shader4
+        #if @useGPUShader4
             textureSize = textureSize2D(diffuseMap, 0);
         #else
-            textureSize = 256.0;
+            textureSize = vec2(256.0);
         #endif
             return 1.0 + mipmapLevel(uv * textureSize) * 0.25;
     #else

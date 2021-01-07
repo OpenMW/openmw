@@ -2,6 +2,7 @@
 
 #include <osg/AlphaFunc>
 #include <osg/Geometry>
+#include <osg/GLExtensions>
 #include <osg/Material>
 #include <osg/Multisample>
 #include <osg/Texture>
@@ -411,6 +412,12 @@ namespace Shader
                 writableStateSet->setMode(GL_SAMPLE_ALPHA_TO_COVERAGE_ARB, osg::StateAttribute::ON);
                 defineMap["alphaToCoverage"] = "1";
             }
+
+            // Preventing alpha tested stuff shrinking as lower mip levels are used requires knowing the texture size
+            osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
+            if (exts && exts->isGpuShader4Supported)
+                defineMap["useGPUShader4"] = "1";
+            // We could fall back to a texture size uniform if EXT_gpu_shader4 is missing
         }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT)
