@@ -429,7 +429,7 @@ size_t FFmpeg_Decoder::getSampleOffset()
 }
 
 FFmpeg_Decoder::FFmpeg_Decoder(const VFS::Manager* vfs)
-  : Sound_Decoder(vfs)
+  : mResourceMgr(vfs)
   , mFormatCtx(nullptr)
   , mCodecCtx(nullptr)
   , mStream(nullptr)

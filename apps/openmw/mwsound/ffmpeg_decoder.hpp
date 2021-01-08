@@ -26,6 +26,8 @@ namespace MWSound
 {
     class FFmpeg_Decoder final : public Sound_Decoder
     {
+        const VFS::Manager *mResourceMgr;
+
         AVFormatContext *mFormatCtx;
         AVCodecContext *mCodecCtx;
         AVStream **mStream;

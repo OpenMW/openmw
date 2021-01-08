@@ -12,6 +12,11 @@
 
 #include "sound_output.hpp"
 
+namespace VFS
+{
+    class Manager;
+}
+
 namespace MWSound
 {
     class Sound;
@@ -20,6 +25,7 @@ namespace MWSound
     class OpenAL_Output : public Sound_Output
     {
         const DecoderProvider* mDecoderProvider;
+        const VFS::Manager* mVFS;
 
         ALCdevice *mDevice;
         ALCcontext *mContext;
@@ -96,7 +102,7 @@ namespace MWSound
         void pauseActiveDevice() override;
         void resumeActiveDevice() override;
 
-        OpenAL_Output(const DecoderProvider& decoderBuilder);
+        OpenAL_Output(const DecoderProvider& decoderBuilder, const VFS::Manager& vfs);
         virtual ~OpenAL_Output();
     };
 }

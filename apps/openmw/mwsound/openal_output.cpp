@@ -954,7 +954,7 @@ std::pair<Sound_Handle,size_t> OpenAL_Output::loadSound(const std::string &fname
     {
         DecoderPtr decoder = mDecoderProvider->getDecoder();
         // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.
-        if(decoder->mResourceMgr->exists(fname))
+        if (mVFS->exists(fname))
             decoder->open(fname);
         else
         {
@@ -1510,8 +1510,9 @@ void OpenAL_Output::resumeSounds(int types)
 }
 
 
-OpenAL_Output::OpenAL_Output(const DecoderProvider& decoderBuilder)
+OpenAL_Output::OpenAL_Output(const DecoderProvider& decoderBuilder, const VFS::Manager& vfs)
   : mDecoderProvider(&decoderBuilder)
+  , mVFS(&vfs)
   , mDevice(nullptr), mContext(nullptr)
   , mListenerPos(0.0f, 0.0f, 0.0f), mListenerEnv(Env_Normal)
   , mWaterFilter(0), mWaterEffect(0), mDefaultEffect(0), mEffectSlot(0)

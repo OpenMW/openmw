@@ -32,8 +32,6 @@ namespace MWSound
 
     struct Sound_Decoder
     {
-        const VFS::Manager* mResourceMgr;
-
         virtual void open(const std::string &fname) = 0;
         virtual void close() = 0;
 
@@ -44,8 +42,8 @@ namespace MWSound
         virtual void readAll(std::vector<char> &output);
         virtual size_t getSampleOffset() = 0;
 
-        Sound_Decoder(const VFS::Manager* resourceMgr) : mResourceMgr(resourceMgr)
-        { }
+        Sound_Decoder() = default;
+
         virtual ~Sound_Decoder() { }
 
     private:
