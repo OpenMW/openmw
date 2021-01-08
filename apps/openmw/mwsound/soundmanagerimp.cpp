@@ -117,7 +117,7 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return DecoderPtr(new DEFAULT_DECODER (mVFS));
+        return std::make_shared<FFmpeg_Decoder>(mVFS);
     }
 
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
