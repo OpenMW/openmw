@@ -74,7 +74,6 @@ namespace MWMechanics
         public:
             PathFinder()
                 : mConstructed(false)
-                , mPossible(false)
                 , mCell(nullptr)
             {
             }
@@ -82,7 +81,6 @@ namespace MWMechanics
             void clearPath()
             {
                 mConstructed = false;
-                mPossible = false;
                 mPath.clear();
                 mCell = nullptr;
             }
@@ -109,11 +107,6 @@ namespace MWMechanics
             bool checkPathCompleted() const
             {
                 return mConstructed && mPath.empty();
-            }
-
-            bool pathWasPossible() const
-            {
-                return mPossible;
             }
 
             /// In radians
@@ -144,7 +137,6 @@ namespace MWMechanics
             void addPointToPath(const osg::Vec3f& point)
             {
                 mConstructed = true;
-                mPossible = true;
                 mPath.push_back(point);
             }
 
@@ -204,7 +196,6 @@ namespace MWMechanics
 
         private:
             bool mConstructed;
-            bool mPossible;
             std::deque<osg::Vec3f> mPath;
 
             const MWWorld::CellStore* mCell;
