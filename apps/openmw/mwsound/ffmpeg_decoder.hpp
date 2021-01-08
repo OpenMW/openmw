@@ -74,9 +74,6 @@ namespace MWSound
 
         virtual ~FFmpeg_Decoder();
     };
-#ifndef DEFAULT_DECODER
-#define DEFAULT_DECODER (::MWSound::FFmpeg_Decoder)
-#endif
 }
 
 #endif
