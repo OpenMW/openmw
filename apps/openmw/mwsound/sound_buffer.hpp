@@ -42,9 +42,9 @@ namespace MWSound
 
         private:
             std::string mResourceName;
-            float mVolume = 0;
-            float mMinDist = 0;
-            float mMaxDist = 0;
+            float mVolume;
+            float mMinDist;
+            float mMaxDist;
             Sound_Handle mHandle = nullptr;
             std::size_t mUses = 0;
 
