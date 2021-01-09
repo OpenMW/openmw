@@ -108,7 +108,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
-        if (animSourcesCheckBox->checkState())
+        if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
             loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
             loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
