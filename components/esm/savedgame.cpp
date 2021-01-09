@@ -25,7 +25,7 @@ void ESM::SavedGame::load (ESMReader &esm)
     esm.getSubNameIs("SCRN");
     esm.getSubHeader();
     mScreenshot.resize(esm.getSubSize());
-    esm.getExact(&mScreenshot[0], mScreenshot.size());
+    esm.getExact(mScreenshot.data(), mScreenshot.size());
 }
 
 void ESM::SavedGame::save (ESMWriter &esm) const
