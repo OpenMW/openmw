@@ -254,7 +254,19 @@ namespace
                 level = Debug::Debug;
             }
             std::string_view s(msgCopy);
-            Log(level) << (s.back() == '\n' ? s.substr(0, s.size() - 1) : s);
+            if (s.size() < 1024)
+                Log(level) << (s.back() == '\n' ? s.substr(0, s.size() - 1) : s);
+            else
+            {
+                while (!s.empty())
+                {
+                    size_t lineSize = 1;
+                    while (lineSize < s.size() && s[lineSize - 1] != '\n')
+                        lineSize++;
+                    Log(level) << s.substr(0, s[lineSize - 1] == '\n' ? lineSize - 1 : lineSize);
+                    s = s.substr(lineSize);
+                }
+            }
         }
     };
 }
