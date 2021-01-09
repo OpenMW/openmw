@@ -438,8 +438,8 @@ void CSVDoc::View::updateActions()
     for (std::vector<QAction *>::iterator iter (mEditingActions.begin()); iter!=mEditingActions.end(); ++iter)
         (*iter)->setEnabled (editing);
 
-    mUndo->setEnabled (editing & mDocument->getUndoStack().canUndo());
-    mRedo->setEnabled (editing & mDocument->getUndoStack().canRedo());
+    mUndo->setEnabled (editing && mDocument->getUndoStack().canUndo());
+    mRedo->setEnabled (editing && mDocument->getUndoStack().canRedo());
 
     mSave->setEnabled (!(mDocument->getState() & CSMDoc::State_Saving) && !running);
     mVerify->setEnabled (!(mDocument->getState() & CSMDoc::State_Verifying));
