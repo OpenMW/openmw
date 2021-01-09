@@ -589,8 +589,8 @@ void OMW::Engine::createWindow(Settings::Manager& settings)
             Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->green << " bit green channel.";
         if (traits->blue < 8)
             Log(Debug::Warning) << "Warning: Framebuffer only has a " << traits->blue << " bit blue channel.";
-        if (traits->depth < 8)
-            Log(Debug::Warning) << "Warning: Framebuffer only has " << traits->red << " bits of depth precision.";
+        if (traits->depth < 24)
+            Log(Debug::Warning) << "Warning: Framebuffer only has " << traits->depth << " bits of depth precision.";
 
         traits->alpha = 0; // set to 0 to stop ScreenCaptureHandler reading the alpha channel
     }
