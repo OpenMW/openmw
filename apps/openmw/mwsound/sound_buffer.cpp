@@ -82,9 +82,7 @@ namespace MWSound
 
         if (sfx->getHandle() == nullptr)
         {
-            Sound_Handle handle;
-            size_t size;
-            std::tie(handle, size) = mOutput->loadSound(sfx->getResourceName());
+            auto [handle, size] = mOutput->loadSound(sfx->getResourceName());
             if (handle == nullptr)
                 return {};
 
