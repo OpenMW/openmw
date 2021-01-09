@@ -21,7 +21,7 @@ New Features:
 - Basics of Collada animations are now supported via osgAnimation plugin (#5456)
 
 New Editor Features:
-- ?
+- Instance selection modes are now implemented (centred cube, corner-dragged cube, sphere) with four user-configurable actions (select only, add to selection, remove from selection, invert selection) (#3171)
 
 Bug Fixes:
 - NiParticleColorModifier in NIF files is now properly handled which solves issues regarding particle effects, e.g., smoke and fire (#1952, #3676)

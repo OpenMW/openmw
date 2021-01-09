@@ -10,6 +10,7 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "terrainstorage.hpp"
+#include "instancedragmodes.hpp"
 
 class QModelIndex;
 
@@ -151,6 +152,12 @@ namespace CSVRender
             // Select everything that references the same ID as at least one of the elements
             // already selected
             void selectAllWithSameParentId (int elementMask);
+
+            void handleSelectDrag(Object* object, DragMode dragMode);
+
+            void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode);
+
+            void selectWithinDistance(const osg::Vec3d& pointA, float distance, DragMode dragMode);
 
             void setCellArrows (int mask);
 

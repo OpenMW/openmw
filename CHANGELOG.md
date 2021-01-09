@@ -94,6 +94,7 @@
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
+    Feature #3171: OpenMW-CS: Instance drag selection
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #5043: Head Bobbing
     Feature #5199: Improve Scene Colors

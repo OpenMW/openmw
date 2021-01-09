@@ -7,6 +7,7 @@
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
+#include "instancedragmodes.hpp"
 #include "scenewidget.hpp"
 #include "mask.hpp"
 
@@ -159,6 +160,10 @@ namespace CSVRender
             //
             /// \param elementMask Elements to be affected by the select operation
             virtual void selectAllWithSameParentId (int elementMask) = 0;
+
+            virtual void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) = 0;
+
+            virtual void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) = 0;
 
             /// Return the next intersection with scene elements matched by
             /// \a interactionMask based on \a localPos and the camera vector.
