@@ -25,8 +25,9 @@ namespace MWSound
     class Sound_Buffer
     {
         public:
-            Sound_Buffer(std::string resname, float volume, float mindist, float maxdist)
-                : mResourceName(std::move(resname)), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist)
+            template <class T>
+            Sound_Buffer(T&& resname, float volume, float mindist, float maxdist)
+                : mResourceName(std::forward<T>(resname)), mVolume(volume), mMinDist(mindist), mMaxDist(maxdist)
             {}
 
             const std::string& getResourceName() const noexcept { return mResourceName; }
