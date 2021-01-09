@@ -261,16 +261,10 @@ QWidget *CSVWorld::CommandDelegate::createEditor (QWidget *parent, const QStyleO
             return dsb;
         }
 
+        /// \todo implement size limit. QPlainTextEdit does not support a size limit.
         case CSMWorld::ColumnBase::Display_LongString:
-        {
-            QPlainTextEdit *edit = new QPlainTextEdit(parent);
-            edit->setUndoRedoEnabled (false);
-            return edit;
-        }
-
         case CSMWorld::ColumnBase::Display_LongString256:
         {
-            /// \todo implement size limit. QPlainTextEdit does not support a size limit.
             QPlainTextEdit *edit = new QPlainTextEdit(parent);
             edit->setUndoRedoEnabled (false);
             return edit;
