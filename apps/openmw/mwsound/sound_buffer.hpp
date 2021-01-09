@@ -60,8 +60,12 @@ namespace MWSound
 
             ~SoundBufferPool();
 
+            /// Lookup a soundId for its sound data (resource name, local volume,
+            /// minRange, and maxRange)
             Sound_Buffer* lookup(const std::string& soundId) const;
 
+            /// Lookup a soundId for its sound data (resource name, local volume,
+            /// minRange, and maxRange), and ensure it's ready for use.
             Sound_Buffer* load(const std::string& soundId);
 
             void use(Sound_Buffer& sfx)

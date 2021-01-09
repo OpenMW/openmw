@@ -120,20 +120,6 @@ namespace MWSound
         return DecoderPtr(new DEFAULT_DECODER (mVFS));
     }
 
-    // Lookup a soundId for its sound data (resource name, local volume,
-    // minRange, and maxRange)
-    Sound_Buffer *SoundManager::lookupSound(const std::string &soundId) const
-    {
-        return mSoundBuffers.lookup(soundId);
-    }
-
-    // Lookup a soundId for its sound data (resource name, local volume,
-    // minRange, and maxRange), and ensure it's ready for use.
-    Sound_Buffer *SoundManager::loadSound(const std::string &soundId)
-    {
-        return mSoundBuffers.load(soundId);
-    }
-
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile)
     {
         try
@@ -509,7 +495,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return nullptr;
 
-        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer *sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
         // Only one copy of given sound can be played at time, so stop previous copy
@@ -545,7 +531,7 @@ namespace MWSound
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer *sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
         // Only one copy of given sound can be played at time on ptr, so stop previous copy
@@ -597,7 +583,7 @@ namespace MWSound
             return nullptr;
 
         // Look up the sound in the ESM data
-        Sound_Buffer *sfx = loadSound(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer *sfx = mSoundBuffers.load(Misc::StringUtils::lowerCase(soundId));
         if(!sfx) return nullptr;
 
         SoundPtr sound = getSoundRef();
@@ -645,7 +631,7 @@ namespace MWSound
         if(!mOutput->isInitialized())
             return;
 
-        Sound_Buffer *sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
+        Sound_Buffer *sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
         if (!sfx) return;
 
         stopSound(sfx, ptr);
@@ -697,7 +683,7 @@ namespace MWSound
         SoundMap::iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
-            Sound_Buffer *sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
+            Sound_Buffer *sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
             if (sfx == nullptr)
                 return;
             for(SoundBufferRefPair &sndbuf : snditer->second)
@@ -713,7 +699,7 @@ namespace MWSound
         SoundMap::const_iterator snditer = mActiveSounds.find(ptr);
         if(snditer != mActiveSounds.end())
         {
-            Sound_Buffer *sfx = lookupSound(Misc::StringUtils::lowerCase(soundId));
+            Sound_Buffer *sfx = mSoundBuffers.lookup(Misc::StringUtils::lowerCase(soundId));
             return std::find_if(snditer->second.cbegin(), snditer->second.cend(),
                 [this,sfx](const SoundBufferRefPair &snd) -> bool
                 { return snd.second == sfx && mOutput->isSoundPlaying(snd.first.get()); }
@@ -826,7 +812,7 @@ namespace MWSound
 
             bool soundIdChanged = false;
 
-            Sound_Buffer* sfx = lookupSound(update.mId);
+            Sound_Buffer* sfx = mSoundBuffers.lookup(update.mId);
             if (mLastCell != cell)
             {
                 const auto snditer = mActiveSounds.find(MWWorld::ConstPtr());
