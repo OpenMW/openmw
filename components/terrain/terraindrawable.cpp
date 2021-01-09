@@ -78,7 +78,7 @@ void TerrainDrawable::cull(osgUtil::CullVisitor *cv)
 
     osg::RefMatrix& matrix = *cv->getModelViewMatrix();
 
-    if (cv->getComputeNearFarMode() && bb.valid())
+    if (cv->getComputeNearFarMode() != osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR && bb.valid())
     {
         if (!cv->updateCalculatedNearFar(matrix, *this, false))
             return;

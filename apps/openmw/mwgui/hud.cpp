@@ -587,7 +587,7 @@ namespace MWGui
         // effect box can have variable width -> variable left coordinate
         int effectsDx = 0;
         if (!mMinimapBox->getVisible ())
-            effectsDx = (viewSize.width - mMinimapBoxBaseRight) - (viewSize.width - mEffectBoxBaseRight);
+            effectsDx = mEffectBoxBaseRight - mMinimapBoxBaseRight;
 
         mMapVisible = mMinimapBox->getVisible ();
         if (!mMapVisible)
