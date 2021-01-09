@@ -247,6 +247,15 @@ void CSMPrefs::State::declare()
     EnumValues landeditOutsideVisibleCell;
     landeditOutsideVisibleCell.add (showAndLandEdit).add (dontLandEdit);
 
+    EnumValue SelectOnly ("Select only");
+    EnumValue SelectAdd ("Add to selection");
+    EnumValue SelectRemove ("Remove from selection");
+    EnumValue selectInvert ("Invert selection");
+    EnumValues primarySelectAction;
+    primarySelectAction.add (SelectOnly).add (SelectAdd).add (SelectRemove).add (selectInvert);
+    EnumValues secondarySelectAction;
+    secondarySelectAction.add (SelectOnly).add (SelectAdd).add (SelectRemove).add (selectInvert);
+
     declareCategory ("3D Scene Editing");
     declareInt ("distance", "Drop Distance", 50).
         setTooltip ("If an instance drop can not be placed against another object at the "
@@ -276,6 +285,12 @@ void CSMPrefs::State::declare()
     declareBool ("open-list-view", "Open displays list view", false).
         setTooltip ("When opening a reference from the scene view, it will open the"
         " instance list view instead of the individual instance record view.");
+    declareEnum ("primary-select-action", "Action for primary select", SelectOnly).
+        setTooltip("Selection can be chosen between select only, add to selection, remove from selection and invert selection.").
+        addValues (primarySelectAction);
+    declareEnum ("secondary-select-action", "Action for secondary select", SelectAdd).
+        setTooltip("Selection can be chosen between select only, add to selection, remove from selection and invert selection.").
+        addValues (secondarySelectAction);
 
     declareCategory ("Key Bindings");
 

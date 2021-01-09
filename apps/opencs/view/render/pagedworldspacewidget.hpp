@@ -7,6 +7,7 @@
 
 #include "worldspacewidget.hpp"
 #include "cell.hpp"
+#include "instancedragmodes.hpp"
 
 namespace CSVWidget
 {
@@ -119,6 +120,10 @@ namespace CSVRender
             //
             /// \param elementMask Elements to be affected by the select operation
             void selectAllWithSameParentId (int elementMask) override;
+
+            void selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode) override;
+
+            void selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode) override;
 
             std::string getCellId (const osg::Vec3f& point) const override;
 

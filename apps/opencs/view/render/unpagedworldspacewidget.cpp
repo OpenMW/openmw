@@ -140,6 +140,16 @@ void CSVRender::UnpagedWorldspaceWidget::selectAllWithSameParentId (int elementM
     flagAsModified();
 }
 
+void CSVRender::UnpagedWorldspaceWidget::selectInsideCube(const osg::Vec3d& pointA, const osg::Vec3d& pointB, DragMode dragMode)
+{
+    mCell->selectInsideCube (pointA, pointB, dragMode);
+}
+
+void CSVRender::UnpagedWorldspaceWidget::selectWithinDistance(const osg::Vec3d& point, float distance, DragMode dragMode)
+{
+    mCell->selectWithinDistance (point, distance, dragMode);
+}
+
 std::string CSVRender::UnpagedWorldspaceWidget::getCellId (const osg::Vec3f& point) const
 {
     return mCellId;
