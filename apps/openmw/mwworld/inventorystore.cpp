@@ -120,6 +120,9 @@ MWWorld::InventoryStore::InventoryStore (const InventoryStore& store)
 
 MWWorld::InventoryStore& MWWorld::InventoryStore::operator= (const InventoryStore& store)
 {
+    if (this == &store)
+        return *this;
+
     mListener = store.mListener;
     mInventoryListener = store.mInventoryListener;
     mMagicEffects = store.mMagicEffects;
