@@ -95,6 +95,9 @@ namespace MWRender
                 (*rotations)[i] = mInstances[i].mPos.asRotationVec3();
             }
 
+            // Display lists do not support instancing in OSG 3.4
+            geom.setUseDisplayList(false);
+
             geom.setVertexAttribArray(6, transforms.get(), osg::Array::BIND_PER_VERTEX);
             geom.setVertexAttribArray(7, rotations.get(), osg::Array::BIND_PER_VERTEX);
 
