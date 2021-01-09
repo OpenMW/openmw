@@ -152,6 +152,9 @@ namespace MWPhysics
           , mNextLOS(0)
           , mFrameNumber(0)
           , mTimer(osg::Timer::instance())
+          , mTimeBegin(0)
+          , mTimeEnd(0)
+          , mFrameStart(0)
     {
         mNumThreads = Config::computeNumThreads(mThreadSafeBullet);
 

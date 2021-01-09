@@ -61,7 +61,7 @@ struct NiTexturingProperty : public Property
         3 - hilight  // These two are for PS2 only?
         4 - hilight2
     */
-    unsigned int apply;
+    unsigned int apply{0};
 
     /*
      * The textures in this list are as follows:
@@ -193,7 +193,7 @@ struct S_MaterialProperty
     // The vector components are R,G,B
     osg::Vec3f ambient{1.f,1.f,1.f}, diffuse{1.f,1.f,1.f};
     osg::Vec3f specular, emissive;
-    float glossiness, alpha;
+    float glossiness{0.f}, alpha{0.f};
 
     void read(NIFStream *nif);
 };
