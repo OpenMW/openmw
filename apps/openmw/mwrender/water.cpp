@@ -135,7 +135,7 @@ public:
 
         mClipNodeTransform = new osg::Group;
         mClipNodeTransform->addCullCallback(new FlipCallback(&mPlane));
-        addChild(mClipNodeTransform);
+        osg::Group::addChild(mClipNodeTransform);
 
         mClipNode = new osg::ClipNode;
 
@@ -240,7 +240,7 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
-        setName("RefractionCamera");
+        osg::Camera::setName("RefractionCamera");
         setCullCallback(new InheritViewPointCallback);
         setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
@@ -261,7 +261,7 @@ public:
         getOrCreateStateSet()->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
         mClipCullNode = new ClipCullNode;
-        addChild(mClipCullNode);
+        osg::Camera::addChild(mClipCullNode);
 
         mRefractionTexture = new osg::Texture2D;
         mRefractionTexture->setTextureSize(rttSize, rttSize);
@@ -335,7 +335,7 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
-        setName("ReflectionCamera");
+        osg::Camera::setName("ReflectionCamera");
         setCullCallback(new InheritViewPointCallback);
 
         setInterior(isInterior);
@@ -364,7 +364,7 @@ public:
         getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
 
         mClipCullNode = new ClipCullNode;
-        addChild(mClipCullNode);
+        osg::Camera::addChild(mClipCullNode);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
     }
