@@ -446,9 +446,9 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
     const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
 
     // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
-    if (isRealWeapon && weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
+    if (weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
         groupName += twoHandFallback;
-    else if (isRealWeapon)
+    else
         groupName += oneHandFallback;
 
     // Special case for crossbows - we shouls apply 1h animations a fallback only for lower body
