@@ -270,7 +270,7 @@ namespace CSMWorld
             CSMWorld::Info* ptr = (CSMWorld::Info*) &copy.mModified;
             std::vector<std::string> splitStringContainer;
             Misc::StringUtils::split(destination, splitStringContainer, "#");
-            ptr->mTopicId = splitStringContainer[0];
+            if (!splitStringContainer.empty()) ptr->mTopicId = splitStringContainer[0];
         }
 
         int index = getAppendIndex(destination, type);
