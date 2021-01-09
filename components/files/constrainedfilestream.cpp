@@ -21,7 +21,7 @@ namespace Files
 
         LowLevelFile mFile;
 
-        char mBuffer[sBufferSize];
+        char mBuffer[sBufferSize]{0};
 
     public:
         ConstrainedFileStreamBuf(const std::string &fname, size_t start, size_t length)

@@ -115,7 +115,7 @@ namespace CSMWorld
     {
         const RefIdColumn *mModel;
 
-        ModelColumns (const BaseColumns& base) : BaseColumns (base) {}
+        ModelColumns (const BaseColumns& base) : BaseColumns (base), mModel(nullptr) {}
     };
 
     /// \brief Adapter for IDs with models (all but levelled lists)
