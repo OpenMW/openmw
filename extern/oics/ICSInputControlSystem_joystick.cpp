@@ -286,7 +286,7 @@ namespace ICS
 				//ControlAxisBinderItem joystickBinderItem = mControlsJoystickAxisBinderMap[ evt.which ][ axis ]; // joystic axis start at 0 index
 				//Control* ctrl = joystickBinderItem.control;
 				//if(ctrl && ctrl->isAxisBindable())
-				if(mDetectingBindingControl && mDetectingBindingControl->isAxisBindable())
+				if(mDetectingBindingControl->isAxisBindable())
 				{
 					if( abs( evt.value ) > ICS_JOYSTICK_AXIS_BINDING_MARGIN)
 					{

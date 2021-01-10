@@ -206,7 +206,7 @@ void Launcher::GraphicsPage::saveSettings()
     if (cScreen != mEngineSettings.getInt("screen", "Video"))
         mEngineSettings.setInt("screen", "Video", cScreen);
 
-    if (framerateLimitCheckBox->checkState())
+    if (framerateLimitCheckBox->checkState() != Qt::Unchecked)
     {
         float cFpsLimit = framerateLimitSpinBox->value();
         if (cFpsLimit != mEngineSettings.getFloat("framerate limit", "Video"))
@@ -217,7 +217,7 @@ void Launcher::GraphicsPage::saveSettings()
         mEngineSettings.setFloat("framerate limit", "Video", 0);
     }
 
-    int cShadowDist = shadowDistanceCheckBox->checkState() ? shadowDistanceSpinBox->value() : 0;
+    int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
     if (mEngineSettings.getInt("maximum shadow map distance", "Shadows") != cShadowDist)
         mEngineSettings.setInt("maximum shadow map distance", "Shadows", cShadowDist);
     float cFadeStart = fadeStartSpinBox->value();

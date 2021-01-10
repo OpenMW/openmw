@@ -325,12 +325,6 @@ std::shared_ptr<CSMFilter::Node> CSMFilter::Parser::parseNAry (const Token& keyw
             break;
     }
 
-    if (nodes.empty())
-    {
-        error();
-        return std::shared_ptr<Node>();
-    }
-
     switch (keyword.mType)
     {
         case Token::Type_Keyword_And: return std::shared_ptr<CSMFilter::Node> (new AndNode (nodes));

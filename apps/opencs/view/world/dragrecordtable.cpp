@@ -19,14 +19,10 @@ void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTa
     }
 
     CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (records, mDocument);
-
-    if (mime)
-    {
-        QDrag* drag = new QDrag (this);
-        drag->setMimeData (mime);
-        drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
-        drag->exec (Qt::CopyAction);
-    }
+    QDrag* drag = new QDrag (this);
+    drag->setMimeData (mime);
+    drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
+    drag->exec (Qt::CopyAction);
 }
 
 CSVWorld::DragRecordTable::DragRecordTable (CSMDoc::Document& document, QWidget* parent) :

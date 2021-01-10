@@ -427,14 +427,8 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
                         {
                             if (i_cell == cellX && j_cell == cellY && abs(i-xHitInCell) < r && abs(j-yHitInCell) < r)
                             {
-                                int distanceX(0);
-                                int distanceY(0);
-                                if (i_cell < cellX) distanceX = xHitInCell + landTextureSize * abs(i_cell-cellX) - i;
-                                if (j_cell < cellY) distanceY = yHitInCell + landTextureSize * abs(j_cell-cellY) - j;
-                                if (i_cell > cellX) distanceX = -xHitInCell + landTextureSize* abs(i_cell-cellX) + i;
-                                if (j_cell > cellY) distanceY = -yHitInCell + landTextureSize * abs(j_cell-cellY) + j;
-                                if (i_cell == cellX) distanceX = abs(i-xHitInCell);
-                                if (j_cell == cellY) distanceY = abs(j-yHitInCell);
+                                int distanceX = abs(i-xHitInCell);
+                                int distanceY = abs(j-yHitInCell);
                                 float distance = std::round(sqrt(pow(distanceX, 2)+pow(distanceY, 2)));
                                 float rf = static_cast<float>(mBrushSize) / 2;
                                 if (distance < rf) newTerrain[j*landTextureSize+i] = brushInt;

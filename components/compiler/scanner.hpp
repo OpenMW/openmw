@@ -140,15 +140,12 @@ namespace Compiler
 
             for (int i = 0; i <= length; i++)
             {
-                if (length >= i)
-                {
-                    in.get (ch);
+                in.get (ch);
 
-                    if (!in.good())
-                        return false;
+                if (!in.good())
+                    return false;
 
-                    mData[i] = ch;
-                }
+                mData[i] = ch;
             }
 
             mLength = length;
