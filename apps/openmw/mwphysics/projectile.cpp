@@ -28,7 +28,7 @@ Projectile::Projectile(int projectileId, const MWWorld::Ptr& caster, const osg::
     mShape.reset(new btSphereShape(1.f));
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
-    mCollisionObject.reset(new btCollisionObject);
+    mCollisionObject = std::make_unique<btCollisionObject>();
     mCollisionObject->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     mCollisionObject->setActivationState(DISABLE_DEACTIVATION);
     mCollisionObject->setCollisionShape(mShape.get());
@@ -45,12 +45,9 @@ Projectile::Projectile(int projectileId, const MWWorld::Ptr& caster, const osg::
 
 Projectile::~Projectile()
 {
-    if (mCollisionObject)
-    {
-        if (!mActive)
-            mPhysics->reportCollision(mHitPosition, mHitNormal);
-        mTaskScheduler->removeCollisionObject(mCollisionObject.get());
-    }
+    if (!mActive)
+        mPhysics->reportCollision(mHitPosition, mHitNormal);
+    mTaskScheduler->removeCollisionObject(mCollisionObject.get());
 }
 
 void Projectile::commitPositionChange()

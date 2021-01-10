@@ -274,7 +274,7 @@ namespace MWPhysics
             using ProjectileMap = std::map<int, std::shared_ptr<Projectile>>;
             ProjectileMap mProjectiles;
 
-            using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;
+            using HeightFieldMap = std::map<std::pair<int, int>, std::unique_ptr<HeightField>>;
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;
