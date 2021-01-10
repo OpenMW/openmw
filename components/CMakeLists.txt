@@ -29,7 +29,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate utilpackage
+    luastate utilpackage serialization
     )
 
 add_component_dir (settings

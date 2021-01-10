@@ -17,6 +17,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         lua/test_lua.cpp
         lua/test_utilpackage.cpp
+        lua/test_serialization.cpp
 
         misc/test_stringops.cpp
         misc/test_endianness.cpp
