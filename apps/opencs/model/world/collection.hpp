@@ -15,7 +15,6 @@
 
 #include "columnbase.hpp"
 #include "collectionbase.hpp"
-#include "info.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
 #include "ref.hpp"
@@ -264,13 +263,6 @@ namespace CSMWorld
         if (type == UniversalId::Type_Reference) {
             CSMWorld::CellRef* ptr = (CSMWorld::CellRef*) &copy.mModified;
             ptr->mRefNum.mIndex = 0;
-        }
-        if (type == UniversalId::Type_TopicInfo || type == UniversalId::Type_JournalInfo)
-        {
-            CSMWorld::Info* ptr = (CSMWorld::Info*) &copy.mModified;
-            std::vector<std::string> splitStringContainer;
-            Misc::StringUtils::split(destination, splitStringContainer, "#");
-            if (!splitStringContainer.empty()) ptr->mTopicId = splitStringContainer[0];
         }
 
         int index = getAppendIndex(destination, type);

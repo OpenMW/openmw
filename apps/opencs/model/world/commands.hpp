@@ -183,6 +183,7 @@ namespace CSMWorld
     class CloneCommand : public CreateCommand
     {
             std::string mIdOrigin;
+            std::vector<std::pair<int, QVariant>> mOverrideValues;
 
         public:
 
@@ -194,6 +195,8 @@ namespace CSMWorld
             void redo() override;
 
             void undo() override;
+
+            void setOverrideValue(int column, QVariant value);
     };
 
     class RevertCommand : public QUndoCommand

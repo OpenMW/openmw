@@ -40,10 +40,14 @@ void CSVWorld::InfoCreator::configureCreateCommand (CSMWorld::CreateCommand& com
         command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Rank), -1);
         command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Gender), -1);
         command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_PcRank), -1);
+        CSMWorld::CloneCommand* cloneCommand = dynamic_cast<CSMWorld::CloneCommand*> (&command);
+        if (cloneCommand) cloneCommand->setOverrideValue(table.findColumnIndex(CSMWorld::Columns::ColumnId_Topic), mTopic->text());
     }
     else
     {
         command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
+        CSMWorld::CloneCommand* cloneCommand = dynamic_cast<CSMWorld::CloneCommand*> (&command);
+        if (cloneCommand) cloneCommand->setOverrideValue(table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
     }
 }
 
