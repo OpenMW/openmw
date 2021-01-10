@@ -21,19 +21,32 @@ namespace DetourNavigator
             std::vector<unsigned char> result(indicesSize + verticesSize + areaTypesSize + waterSize + offMeshConnectionsSize);
             unsigned char* dst = result.data();
 
-            std::memcpy(dst, recastMesh.getIndices().data(), indicesSize);
-            dst += indicesSize;
+            if (indicesSize > 0)
+            {
+                std::memcpy(dst, recastMesh.getIndices().data(), indicesSize);
+                dst += indicesSize;
+            }
 
-            std::memcpy(dst, recastMesh.getVertices().data(), verticesSize);
-            dst += verticesSize;
+            if (verticesSize > 0)
+            {
+                std::memcpy(dst, recastMesh.getVertices().data(), verticesSize);
+                dst += verticesSize;
+            }
 
-            std::memcpy(dst, recastMesh.getAreaTypes().data(), areaTypesSize);
-            dst += areaTypesSize;
+            if (areaTypesSize > 0)
+            {
+                std::memcpy(dst, recastMesh.getAreaTypes().data(), areaTypesSize);
+                dst += areaTypesSize;
+            }
 
-            std::memcpy(dst, recastMesh.getWater().data(), waterSize);
-            dst += waterSize;
+            if (waterSize > 0)
+            {
+                std::memcpy(dst, recastMesh.getWater().data(), waterSize);
+                dst += waterSize;
+            }
 
-            std::memcpy(dst, offMeshConnections.data(), offMeshConnectionsSize);
+            if (offMeshConnectionsSize > 0)
+                std::memcpy(dst, offMeshConnections.data(), offMeshConnectionsSize);
 
             return result;
         }
