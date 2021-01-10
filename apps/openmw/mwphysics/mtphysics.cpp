@@ -360,7 +360,6 @@ namespace MWPhysics
     {
         if (!mDeferAabbUpdate || immediate)
         {
-            std::unique_lock lock(mCollisionWorldMutex);
             updatePtrAabb(ptr);
         }
         else
@@ -413,7 +412,7 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateAabbs()
     {
-        std::scoped_lock lock(mCollisionWorldMutex, mUpdateAabbMutex);
+        std::scoped_lock lock(mUpdateAabbMutex);
         std::for_each(mUpdateAabb.begin(), mUpdateAabb.end(),
             [this](const std::weak_ptr<PtrHolder>& ptr) { updatePtrAabb(ptr); });
         mUpdateAabb.clear();
@@ -423,6 +422,7 @@ namespace MWPhysics
     {
         if (const auto p = ptr.lock())
         {
+            std::scoped_lock lock(mCollisionWorldMutex);
             if (const auto actor = std::dynamic_pointer_cast<Actor>(p))
             {
                 actor->updateCollisionObjectPosition();
@@ -454,9 +454,11 @@ namespace MWPhysics
             int job = 0;
             while (mRemainingSteps && (job = mNextJob.fetch_add(1, std::memory_order_relaxed)) < mNumJobs)
             {
-                MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
                 if(const auto actor = mActorsFrameData[job].mActor.lock())
+                {
+                    MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
                     MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+                }
             }
 
             mPostStepBarrier->wait();
@@ -481,13 +483,13 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateActorsPositions()
     {
-        std::unique_lock lock(mCollisionWorldMutex);
         for (auto& actorData : mActorsFrameData)
         {
             if(const auto actor = actorData.mActor.lock())
             {
                 if (actor->setPosition(actorData.mPosition))
                 {
+                    std::scoped_lock lock(mCollisionWorldMutex);
                     actor->updateCollisionObjectPosition();
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
                 }
