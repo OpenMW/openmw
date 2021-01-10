@@ -244,7 +244,7 @@ namespace MWRender
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
         globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
 
-        float groundcoverDistance = (Constants::CellSizeInUnits * Settings::Manager::getInt("distance", "Groundcover") - 1024) * 0.93;
+        float groundcoverDistance = (Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover")) - 1024) * 0.93;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * Settings::Manager::getFloat("fade start", "Groundcover"));
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
 
@@ -1024,7 +1024,7 @@ namespace MWRender
 
         if (mGroundcoverWorld)
         {
-            int groundcoverDistance = Constants::CellSizeInUnits * Settings::Manager::getInt("distance", "Groundcover");
+            int groundcoverDistance = Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover"));
             mGroundcoverWorld->setViewDistance(groundcoverDistance * (distanceMult ? 1.f/distanceMult : 1.f));
         }
     }
