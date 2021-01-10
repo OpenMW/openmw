@@ -14,6 +14,16 @@
 #include "movement.hpp"
 #include "steering.hpp"
 
+namespace
+{
+osg::Vec3f::value_type getHalfExtents(const MWWorld::ConstPtr& actor)
+{
+    if(actor.getClass().isNpc())
+        return 64;
+    return MWBase::Environment::get().getWorld()->getHalfExtents(actor).y();
+}
+}
+
 namespace MWMechanics
 {
 int AiFollow::mFollowIndexCounter = 0;
@@ -121,13 +131,14 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     {
         for(auto& follower : followers)
         {
-            auto halfExtent = MWBase::Environment::get().getWorld()->getHalfExtents(follower.second).y();
+            auto halfExtent = getHalfExtents(follower.second);
             if(halfExtent > floatingDistance)
                 floatingDistance = halfExtent;
         }
+        floatingDistance += 128;
     }
-    floatingDistance += MWBase::Environment::get().getWorld()->getHalfExtents(target).y();
-    floatingDistance += MWBase::Environment::get().getWorld()->getHalfExtents(actor).y() * 2;
+    floatingDistance += getHalfExtents(target) + 64;
+    floatingDistance += getHalfExtents(actor) * 2;
     short followDistance = static_cast<short>(floatingDistance);
 
     if (!mAlwaysFollow) //Update if you only follow for a bit
