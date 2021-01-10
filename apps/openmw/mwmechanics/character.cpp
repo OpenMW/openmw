@@ -1898,7 +1898,7 @@ void CharacterController::updateAnimQueue()
         mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 }
 
-void CharacterController::update(float duration, bool animationOnly)
+void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
@@ -2386,10 +2386,10 @@ void CharacterController::update(float duration, bool animationOnly)
                     world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
             }
 
-            if (!animationOnly && !mMovementAnimationControlled)
+            if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
-        else if (!animationOnly)
+        else
             // We must always queue movement, even if there is none, to apply gravity.
             world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
@@ -2414,8 +2414,7 @@ void CharacterController::update(float duration, bool animationOnly)
                 playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
-        if (!animationOnly)
-            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
+        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     bool isPersist = isPersistentAnimPlaying();
@@ -2452,10 +2451,10 @@ void CharacterController::update(float duration, bool animationOnly)
         {
             moved.z() = 1.0;
         }
-    }    
+    }
 
     // Update movement
-    if(!animationOnly && mMovementAnimationControlled && mPtr.getClass().isActor())
+    if(mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
 
     mSkipAnim = false;

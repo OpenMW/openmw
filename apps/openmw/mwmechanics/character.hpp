@@ -248,7 +248,7 @@ public:
 
     void updatePtr(const MWWorld::Ptr &ptr);
 
-    void update(float duration, bool animationOnly=false);
+    void update(float duration);
 
     bool onOpen();
     void onClose();
