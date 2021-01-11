@@ -74,6 +74,7 @@ namespace MWRender
     class StateUpdater;
 
     class EffectManager;
+    class ScreenshotManager;
     class FogManager;
     class SkyManager;
     class NpcAnimation;
@@ -148,9 +149,8 @@ namespace MWRender
         void setWaterHeight(float level);
 
         /// Take a screenshot of w*h onto the given image, not including the GUI.
-        void screenshot(osg::Image* image, int w, int h, osg::Matrixd cameraTransform=osg::Matrixd()); // make a new render at given size
-        void screenshotFramebuffer(osg::Image* image, int w, int h); // copy directly from framebuffer and scale to given size
-        bool screenshot360(osg::Image* image, std::string settingStr);
+        void screenshot(osg::Image* image, int w, int h);
+        bool screenshot360(osg::Image* image);
 
         struct RayResult
         {
@@ -248,8 +248,6 @@ namespace MWRender
 
         void reportStats() const;
 
-        void renderCameraToImage(osg::Camera *camera, osg::Image *image, int w, int h);
-
         void updateNavMesh();
 
         void updateRecastMesh();
@@ -281,6 +279,7 @@ namespace MWRender
         std::unique_ptr<ObjectPaging> mObjectPaging;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
+        std::unique_ptr<ScreenshotManager> mScreenshotManager;
         std::unique_ptr<EffectManager> mEffectManager;
         std::unique_ptr<SceneUtil::ShadowManager> mShadowManager;
         osg::ref_ptr<NpcAnimation> mPlayerAnimation;

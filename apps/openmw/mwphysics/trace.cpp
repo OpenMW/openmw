@@ -5,9 +5,6 @@
 #include <BulletCollision/CollisionDispatch/btCollisionWorld.h>
 #include <BulletCollision/CollisionShapes/btConvexShape.h>
 
-#include "../mwbase/world.hpp"
-#include "../mwbase/environment.hpp"
-
 #include "collisiontype.hpp"
 #include "actor.hpp"
 #include "closestnotmeconvexresultcallback.hpp"
@@ -27,7 +24,7 @@ void ActorTracer::doTrace(const btCollisionObject *actor, const osg::Vec3f& star
     to.setOrigin(btend);
 
     const btVector3 motion = btstart-btend;
-    ClosestNotMeConvexResultCallback newTraceCallback(actor, motion, btScalar(0.0));
+    ClosestNotMeConvexResultCallback newTraceCallback(actor, motion, btScalar(0.0), world);
     // Inherit the actor's collision group and mask
     newTraceCallback.m_collisionFilterGroup = actor->getBroadphaseHandle()->m_collisionFilterGroup;
     newTraceCallback.m_collisionFilterMask = actor->getBroadphaseHandle()->m_collisionFilterMask;
@@ -65,7 +62,7 @@ void ActorTracer::findGround(const Actor* actor, const osg::Vec3f& start, const 
     btTransform to(trans.getBasis(), btend);
 
     const btVector3 motion = btstart-btend;
-    ClosestNotMeConvexResultCallback newTraceCallback(actor->getCollisionObject(), motion, btScalar(0.0));
+    ClosestNotMeConvexResultCallback newTraceCallback(actor->getCollisionObject(), motion, btScalar(0.0), world);
     // Inherit the actor's collision group and mask
     newTraceCallback.m_collisionFilterGroup = actor->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterGroup;
     newTraceCallback.m_collisionFilterMask = actor->getCollisionObject()->getBroadphaseHandle()->m_collisionFilterMask;

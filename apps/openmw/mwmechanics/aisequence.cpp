@@ -403,7 +403,7 @@ const AiPackage& MWMechanics::AiSequence::getActivePackage()
 void AiSequence::fill(const ESM::AIPackageList &list)
 {
     // If there is more than one package in the list, enable repeating
-    if (!list.mList.empty() && list.mList.begin() != (list.mList.end()-1))
+    if (list.mList.size() >= 2)
         mRepeat = true;
 
     for (const auto& esmPackage : list.mList)
@@ -459,8 +459,15 @@ void AiSequence::readState(const ESM::AiSequence::AiSequence &sequence)
     int count = 0;
     for (auto& container : sequence.mPackages)
     {
-        if (isActualAiPackage(static_cast<AiPackageTypeId>(container.mType)))
-            count++;
+        switch (container.mType)
+        {
+            case ESM::AiSequence::Ai_Wander:
+            case ESM::AiSequence::Ai_Travel:
+            case ESM::AiSequence::Ai_Escort:
+            case ESM::AiSequence::Ai_Follow:
+            case ESM::AiSequence::Ai_Activate:
+                ++count;
+        }
     }
 
     if (count > 1)

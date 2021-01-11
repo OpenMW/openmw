@@ -160,6 +160,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         world->removeActorPath(actor);
         return true;
     }
+    else if (mPathFinder.getPath().empty())
+        return false;
 
     world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
 

@@ -153,6 +153,8 @@ namespace MWWorld
             ContainerStoreIterator getSlot (int slot);
             ConstContainerStoreIterator getSlot(int slot) const;
 
+            ContainerStoreIterator getPreferredShield(const MWWorld::Ptr& actor);
+
             void unequipAll(const MWWorld::Ptr& actor);
             ///< Unequip all currently equipped items.
 
@@ -171,7 +173,7 @@ namespace MWWorld
             ///
             /// @return the number of items actually removed
 
-            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool fireEvent=true);
+            ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool applyUpdates = true);
             ///< Unequip \a slot.
             ///
             /// @return an iterator to the item that was previously in the slot

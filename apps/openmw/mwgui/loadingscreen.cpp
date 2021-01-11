@@ -1,10 +1,12 @@
 #include "loadingscreen.hpp"
 
 #include <array>
+#include <condition_variable>
 
 #include <osgViewer/Viewer>
 
 #include <osg/Texture2D>
+#include <osg/Version>
 
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_ScrollBar.h>
@@ -43,6 +45,8 @@ namespace MWGui
         , mNestedLoadingCount(0)
         , mProgress(0)
         , mShowWallpaper(true)
+        , mOldCallback(nullptr)
+        , mHasCallback(false)
     {
         mMainWidget->setSize(MyGUI::RenderManager::getInstance().getViewSize());
 
@@ -136,24 +140,54 @@ namespace MWGui
     {
     public:
         CopyFramebufferToTextureCallback(osg::Texture2D* texture)
-            : mTexture(texture)
-            , oneshot(true)
+            : mOneshot(true)
+            , mTexture(texture)
         {
         }
 
         void operator () (osg::RenderInfo& renderInfo) const override
         {
-            if (!oneshot)
-                return;
-            oneshot = false;
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                mOneshot = false;
+            }
+            mSignal.notify_all();
+
             int w = renderInfo.getCurrentCamera()->getViewport()->width();
             int h = renderInfo.getCurrentCamera()->getViewport()->height();
             mTexture->copyTexImage2D(*renderInfo.getState(), 0, 0, w, h);
+
+            {
+                std::unique_lock<std::mutex> lock(mMutex);
+                mOneshot = false;
+            }
+            mSignal.notify_all();
+        }
+
+        void wait()
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            while (mOneshot)
+                mSignal.wait(lock);
+        }
+
+        void waitUntilInvoked()
+        {
+            std::unique_lock<std::mutex> lock(mMutex);
+            while (mOneshot)
+                mSignal.wait(lock);
+        }
+
+        void reset()
+        {
+            mOneshot = true;
         }
 
     private:
+        mutable bool mOneshot;
+        mutable std::mutex mMutex;
+        mutable std::condition_variable mSignal;
         osg::ref_ptr<osg::Texture2D> mTexture;
-        mutable bool oneshot;
     };
 
     class DontComputeBoundCallback : public osg::Node::ComputeBoundingSphereCallback
@@ -322,9 +356,20 @@ namespace MWGui
             mGuiTexture.reset(new osgMyGUI::OSGTexture(mTexture));
         }
 
-        // Notice that the next time this is called, the current CopyFramebufferToTextureCallback will be deleted
-        // so there's no memory leak as at most one object of type CopyFramebufferToTextureCallback is allocated at a time.
-        mViewer->getCamera()->setInitialDrawCallback(new CopyFramebufferToTextureCallback(mTexture));
+        if (!mCopyFramebufferToTextureCallback)
+        {
+            mCopyFramebufferToTextureCallback = new CopyFramebufferToTextureCallback(mTexture);
+        }
+
+#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
+        mViewer->getCamera()->addInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#else
+        // TODO: Remove once we officially end support for OSG versions pre 3.5.10
+        mOldCallback = mViewer->getCamera()->getInitialDrawCallback();
+        mViewer->getCamera()->setInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#endif
+        mCopyFramebufferToTextureCallback->reset();
+        mHasCallback = true;
 
         mBackgroundImage->setBackgroundImage("");
         mBackgroundImage->setVisible(false);
@@ -366,6 +411,21 @@ namespace MWGui
         mViewer->updateTraversal();
         mViewer->renderingTraversals();
         mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
+
+        if (mHasCallback)
+        {
+            mCopyFramebufferToTextureCallback->waitUntilInvoked();
+
+            // Note that we are removing the callback before the draw thread has returned from it.
+            // This is OK as we are retaining the ref_ptr.
+#if OSG_VERSION_GREATER_OR_EQUAL(3, 5, 10)
+            mViewer->getCamera()->removeInitialDrawCallback(mCopyFramebufferToTextureCallback);
+#else
+            // TODO: Remove once we officially end support for OSG versions pre 3.5.10
+            mViewer->getCamera()->setInitialDrawCallback(mOldCallback);
+#endif
+            mHasCallback = false;
+        }
 
         mLastRenderTime = mTimer.time_m();
     }

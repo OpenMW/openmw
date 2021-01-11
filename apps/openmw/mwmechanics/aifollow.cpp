@@ -14,6 +14,16 @@
 #include "movement.hpp"
 #include "steering.hpp"
 
+namespace
+{
+osg::Vec3f::value_type getHalfExtents(const MWWorld::ConstPtr& actor)
+{
+    if(actor.getClass().isNpc())
+        return 64;
+    return MWBase::Environment::get().getWorld()->getHalfExtents(actor).y();
+}
+}
+
 namespace MWMechanics
 {
 int AiFollow::mFollowIndexCounter = 0;
@@ -113,24 +123,23 @@ bool AiFollow::execute (const MWWorld::Ptr& actor, CharacterController& characte
     if (!mActive)
         return false;
 
-    // The distances below are approximations based on observations of the original engine.
-    // If only one actor is following the target, it uses 186.
-    // If there are multiple actors following the same target, they form a group with each group member at 313 + (130 * i) distance to the target.
-
-    short followDistance = 186;
-    std::list<int> followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingIndices(target);
-    if (followers.size() >= 2)
+    // In the original engine the first follower stays closer to the player than any subsequent followers.
+    // Followers beyond the first usually attempt to stand inside each other.
+    osg::Vec3f::value_type floatingDistance = 0;
+    auto followers = MWBase::Environment::get().getMechanicsManager()->getActorsFollowingByIndex(target);
+    if (followers.size() >= 2 && followers.cbegin()->first != mFollowIndex)
     {
-        followDistance = 313;
-        short i = 0;
-        followers.sort();
-        for (int followIndex : followers)
+        for(auto& follower : followers)
         {
-            if (followIndex == mFollowIndex)
-                followDistance += 130 * i;
-            ++i;
+            auto halfExtent = getHalfExtents(follower.second);
+            if(halfExtent > floatingDistance)
+                floatingDistance = halfExtent;
         }
+        floatingDistance += 128;
     }
+    floatingDistance += getHalfExtents(target) + 64;
+    floatingDistance += getHalfExtents(actor) * 2;
+    short followDistance = static_cast<short>(floatingDistance);
 
     if (!mAlwaysFollow) //Update if you only follow for a bit
     {

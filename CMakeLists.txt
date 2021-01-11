@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Detect OS
+include(cmake/OSIdentity.cmake)
+
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069)
     cmake_policy(SET CMP0069 NEW)
@@ -21,7 +24,7 @@ option(BUILD_NIFTEST            "Build nif file tester" ON)
 option(BUILD_DOCS               "Build documentation." OFF )
 option(BUILD_WITH_CODE_COVERAGE "Enable code coverage with gconv" OFF)
 option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
-option(BULLET_USE_DOUBLES       "Use double precision for Bullet" OFF)
+option(BULLET_USE_DOUBLES       "Use double precision for Bullet" ON)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -582,6 +585,12 @@ if (WIN32)
     if (MSVC_VERSION GREATER 1800)
         set(WARNINGS_DISABLE ${WARNINGS_DISABLE} 5026 5027
             5031 # #pragma warning(pop): likely mismatch, popping warning state pushed in different file (config_begin.hpp, config_end.hpp)
+        )
+    endif()
+    
+    if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
+        set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
+        4866 # compiler may not enforce left-to-right evaluation order for call
         )
     endif()
 

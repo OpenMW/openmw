@@ -96,6 +96,33 @@ osg::Vec3f CSVRender::InstanceMode::getScreenCoords(const osg::Vec3f& pos)
     return pos * combined;
 }
 
+osg::Vec3f CSVRender::InstanceMode::getProjectionSpaceCoords(const osg::Vec3f& pos)
+{
+    osg::Matrix viewMatrix = getWorldspaceWidget().getCamera()->getViewMatrix();
+    osg::Matrix projMatrix = getWorldspaceWidget().getCamera()->getProjectionMatrix();
+    osg::Matrix combined = viewMatrix * projMatrix;
+
+    return pos * combined;
+}
+
+osg::Vec3f CSVRender::InstanceMode::getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart)
+{
+    osg::Matrix viewMatrix;
+    viewMatrix.invert(getWorldspaceWidget().getCamera()->getViewMatrix());
+    osg::Matrix projMatrix;
+    projMatrix.invert(getWorldspaceWidget().getCamera()->getProjectionMatrix());
+    osg::Matrix combined = projMatrix * viewMatrix;
+
+    /* calculate viewport normalized coordinates
+       note: is there a reason to use getCamera()->getViewport()->computeWindowMatrix() instead? */
+    float x = (point.x() * 2) / getWorldspaceWidget().getCamera()->getViewport()->width() - 1.0f;
+    float y = 1.0f - (point.y() * 2) / getWorldspaceWidget().getCamera()->getViewport()->height();
+
+    osg::Vec3f mousePlanePoint = osg::Vec3f(x, y, dragStart.z()) * combined;
+
+    return mousePlanePoint;
+}
+
 CSVRender::InstanceMode::InstanceMode (WorldspaceWidget *worldspaceWidget,  osg::ref_ptr<osg::Group> parentNode,  QWidget *parent)
 : EditMode (worldspaceWidget, QIcon (":scenetoolbar/editing-instance"), Mask_Reference | Mask_Terrain, "Instance editing",
   parent), mSubMode (nullptr), mSubModeId ("move"), mSelectionMode (nullptr), mDragMode (DragMode_None),
@@ -146,7 +173,7 @@ void CSVRender::InstanceMode::activate (CSVWidget::SceneToolbar *toolbar)
     }
 
     if (!mSelectionMode)
-        mSelectionMode = new InstanceSelectionMode (toolbar, getWorldspaceWidget());
+        mSelectionMode = new InstanceSelectionMode (toolbar, getWorldspaceWidget(), mParentNode);
 
     mDragMode = DragMode_None;
 
@@ -322,6 +349,42 @@ bool CSVRender::InstanceMode::secondaryEditStartDrag (const QPoint& pos)
     return false;
 }
 
+bool CSVRender::InstanceMode::primarySelectStartDrag (const QPoint& pos)
+{
+    if (mDragMode!=DragMode_None || mLocked)
+        return false;
+
+    std::string primarySelectAction = CSMPrefs::get()["3D Scene Editing"]["primary-select-action"].toString();
+
+    if ( primarySelectAction == "Select only" ) mDragMode = DragMode_Select_Only;
+    else if ( primarySelectAction == "Add to selection" ) mDragMode = DragMode_Select_Add;
+    else if ( primarySelectAction == "Remove from selection" ) mDragMode = DragMode_Select_Remove;
+    else if ( primarySelectAction == "Invert selection" ) mDragMode = DragMode_Select_Invert;
+
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+    mSelectionMode->setDragStart(hit.worldPos);
+
+    return true;
+}
+
+bool CSVRender::InstanceMode::secondarySelectStartDrag (const QPoint& pos)
+{
+    if (mDragMode!=DragMode_None || mLocked)
+        return false;
+
+    std::string secondarySelectAction = CSMPrefs::get()["3D Scene Editing"]["secondary-select-action"].toString();
+
+    if ( secondarySelectAction == "Select only" ) mDragMode = DragMode_Select_Only;
+    else if ( secondarySelectAction == "Add to selection" ) mDragMode = DragMode_Select_Add;
+    else if ( secondarySelectAction == "Remove from selection" ) mDragMode = DragMode_Select_Remove;
+    else if ( secondarySelectAction == "Invert selection" ) mDragMode = DragMode_Select_Invert;
+
+    WorldspaceHitResult hit = getWorldspaceWidget().mousePick (pos, getWorldspaceWidget().getInteractionMask());
+    mSelectionMode->setDragStart(hit.worldPos);
+
+    return true;
+}
+
 void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, double speedFactor)
 {
     osg::Vec3f offset;
@@ -432,6 +495,24 @@ void CSVRender::InstanceMode::drag (const QPoint& pos, int diffX, int diffY, dou
         // Only uniform scaling is currently supported
         offset = osg::Vec3f(scale, scale, scale);
     }
+    else if (mSelectionMode->getCurrentId() == "cube-centre")
+    {
+        osg::Vec3f mousePlanePoint = getMousePlaneCoords(pos, getProjectionSpaceCoords(mSelectionMode->getDragStart()));
+        mSelectionMode->drawSelectionCubeCentre (mousePlanePoint);
+        return;
+    }
+    else if (mSelectionMode->getCurrentId() == "cube-corner")
+    {
+        osg::Vec3f mousePlanePoint = getMousePlaneCoords(pos, getProjectionSpaceCoords(mSelectionMode->getDragStart()));
+        mSelectionMode->drawSelectionCubeCorner (mousePlanePoint);
+        return;
+    }
+    else if (mSelectionMode->getCurrentId() == "sphere")
+    {
+        osg::Vec3f mousePlanePoint = getMousePlaneCoords(pos, getProjectionSpaceCoords(mSelectionMode->getDragStart()));
+        mSelectionMode->drawSelectionSphere (mousePlanePoint);
+        return;
+    }
 
     // Apply
     for (std::vector<osg::ref_ptr<TagBase> >::iterator iter (selection.begin()); iter!=selection.end(); ++iter)
@@ -495,6 +576,22 @@ void CSVRender::InstanceMode::dragCompleted(const QPoint& pos)
         case DragMode_Move: description = "Move Instances"; break;
         case DragMode_Rotate: description = "Rotate Instances"; break;
         case DragMode_Scale: description = "Scale Instances"; break;
+        case DragMode_Select_Only :
+            handleSelectDrag(pos);
+            return;
+            break;
+        case DragMode_Select_Add :
+            handleSelectDrag(pos);
+            return;
+            break;
+        case DragMode_Select_Remove :
+            handleSelectDrag(pos);
+            return;
+            break;
+        case DragMode_Select_Invert :
+            handleSelectDrag(pos);
+            return;
+            break;
 
         case DragMode_None: break;
     }
@@ -678,6 +775,13 @@ void CSVRender::InstanceMode::subModeChanged (const std::string& id)
     mSubModeId = id;
     getWorldspaceWidget().abortDrag();
     getWorldspaceWidget().setSubMode (getSubModeFromId (id), Mask_Reference);
+}
+
+void CSVRender::InstanceMode::handleSelectDrag(const QPoint& pos)
+{
+    osg::Vec3f mousePlanePoint = getMousePlaneCoords(pos, getProjectionSpaceCoords(mSelectionMode->getDragStart()));
+    mSelectionMode->dragEnded (mousePlanePoint, mDragMode);
+    mDragMode = DragMode_None;
 }
 
 void CSVRender::InstanceMode::deleteSelectedInstances(bool active)

@@ -177,7 +177,7 @@ struct Node : public Named
     // NiNodes (or types derived from NiNodes) can be parents.
     NiNode *parent;
 
-    bool isBone;
+    bool isBone{false};
 
     void setBone()
     {
@@ -378,7 +378,7 @@ struct NiCamera : Node
 struct NiSwitchNode : public NiNode
 {
     unsigned int switchFlags{0};
-    unsigned int initialIndex;
+    unsigned int initialIndex{0};
 
     void read(NIFStream *nif) override
     {

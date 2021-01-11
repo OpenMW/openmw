@@ -20,7 +20,8 @@ CSMWorld::UniversalId CSVWorld::DragDropUtils::getAcceptedData(const QDropEvent 
 {
     if (canAcceptData(event, type))
     {
-        return getTableMimeData(event)->returnMatching(type);
+        if (const CSMWorld::TableMimeData *data = getTableMimeData(event))
+            return data->returnMatching(type);
     }
     return CSMWorld::UniversalId::Type_None;
 }

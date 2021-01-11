@@ -451,6 +451,7 @@ namespace MWGui
         setTitle(mPtr.getClass().getName(mPtr));
 
         updateTopics();
+        updateTopicsPane(); // force update for new services
 
         updateDisposition();
         restock();
@@ -487,12 +488,14 @@ namespace MWGui
         mHistoryContents.clear();
     }
 
-    void DialogueWindow::setKeywords(std::list<std::string> keyWords)
+    bool DialogueWindow::setKeywords(std::list<std::string> keyWords)
     {
         if (mKeywords == keyWords && isCompanion() == mIsCompanion)
-            return;
+            return false;
         mIsCompanion = isCompanion();
         mKeywords = keyWords;
+        updateTopicsPane();
+        return true;
     }
 
     void DialogueWindow::updateTopicsPane()
@@ -556,6 +559,8 @@ namespace MWGui
         mTopicsList->adjustSize();
 
         updateHistory();
+        // The topics list has been regenerated so topic formatting needs to be updated
+        updateTopicFormat();
     }
 
     void DialogueWindow::updateHistory(bool scrollbar)
@@ -758,9 +763,9 @@ namespace MWGui
 
     void DialogueWindow::updateTopics()
     {
-        setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics());
-        updateTopicsPane();
-        updateTopicFormat();
+        // Topic formatting needs to be updated regardless of whether the topic list has changed
+        if (!setKeywords(MWBase::Environment::get().getDialogueManager()->getAvailableTopics()))
+            updateTopicFormat();
     }
 
     bool DialogueWindow::isCompanion()

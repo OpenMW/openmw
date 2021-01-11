@@ -50,8 +50,6 @@ class btVector3;
 
 namespace MWPhysics
 {
-    using PtrPositionList = std::map<MWWorld::Ptr, osg::Vec3f>;
-
     class HeightField;
     class Object;
     class Actor;
@@ -80,18 +78,17 @@ namespace MWPhysics
 
     struct ActorFrameData
     {
-        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr character, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
+        ActorFrameData(const std::shared_ptr<Actor>& actor, const MWWorld::Ptr standingOn, bool moveToWaterSurface, osg::Vec3f movement, float slowFall, float waterlevel);
         void  updatePosition();
         std::weak_ptr<Actor> mActor;
         Actor* mActorRaw;
-        MWWorld::Ptr mPtr;
         MWWorld::Ptr mStandingOn;
         bool mFlying;
         bool mSwimming;
         bool mWasOnGround;
         bool mWantJump;
         bool mDidJump;
-        bool mIsDead;
+        bool mFloatToSurface;
         bool mNeedLand;
         bool mMoveToWaterSurface;
         float mWaterlevel;
@@ -99,7 +96,6 @@ namespace MWPhysics
         float mOldHeight;
         float mFallHeight;
         osg::Vec3f mMovement;
-        osg::Vec3f mOrigin;
         osg::Vec3f mPosition;
         ESM::Position mRefpos;
     };
@@ -210,7 +206,7 @@ namespace MWPhysics
             void queueObjectMovement(const MWWorld::Ptr &ptr, const osg::Vec3f &velocity);
 
             /// Apply all queued movements, then clear the list.
-            const PtrPositionList& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            const std::vector<MWWorld::Ptr>& applyQueuedMovement(float dt, bool skipSimulation, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             /// Clear the queued movements list without applying.
             void clearQueuedMovement();
@@ -278,7 +274,7 @@ namespace MWPhysics
             using ProjectileMap = std::map<int, std::shared_ptr<Projectile>>;
             ProjectileMap mProjectiles;
 
-            using HeightFieldMap = std::map<std::pair<int, int>, HeightField *>;
+            using HeightFieldMap = std::map<std::pair<int, int>, std::unique_ptr<HeightField>>;
             HeightFieldMap mHeightFields;
 
             bool mDebugDrawEnabled;

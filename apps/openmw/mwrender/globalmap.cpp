@@ -583,7 +583,7 @@ namespace MWRender
             }
 
             mOverlayImage->copySubImage(imageDest.mX, imageDest.mY, 0, imageDest.mImage);
-            it = mPendingImageDest.erase(it);
+            mPendingImageDest.erase(it);
             return true;
         }
     }

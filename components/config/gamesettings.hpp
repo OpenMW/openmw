@@ -21,7 +21,6 @@ namespace Config
     {
     public:
         GameSettings(Files::ConfigurationManager &cfg);
-        ~GameSettings();
 
         inline QString value(const QString &key, const QString &defaultValue = QString())
         {
@@ -54,11 +53,11 @@ namespace Config
             mUserSettings.remove(key);
         }
 
-        inline QStringList getDataDirs() { return mDataDirs; }
+        inline QStringList getDataDirs() const { return mDataDirs; }
 
         inline void removeDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.removeAll(dir); }
         inline void addDataDir(const QString &dir) { if(!dir.isEmpty()) mDataDirs.append(dir); }
-        inline QString getDataLocal() {return mDataLocal; }
+        inline QString getDataLocal() const {return mDataLocal; }
 
         bool hasMaster();
 

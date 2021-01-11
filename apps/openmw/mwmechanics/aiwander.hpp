@@ -99,7 +99,6 @@ namespace MWMechanics
             {
                 AiPackage::Options options;
                 options.mUseVariableSpeed = true;
-                options.mRepeat = false;
                 return options;
             }
 

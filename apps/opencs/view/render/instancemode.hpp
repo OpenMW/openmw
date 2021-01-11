@@ -9,6 +9,7 @@
 #include <osg/Vec3f>
 
 #include "editmode.hpp"
+#include "instancedragmodes.hpp"
 
 namespace CSVWidget
 {
@@ -24,14 +25,6 @@ namespace CSVRender
     class InstanceMode : public EditMode
     {
             Q_OBJECT
-
-            enum DragMode
-            {
-                DragMode_None,
-                DragMode_Move,
-                DragMode_Rotate,
-                DragMode_Scale
-            };
 
             enum DropMode
             {
@@ -57,6 +50,9 @@ namespace CSVRender
 
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
+            osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
+            osg::Vec3f getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
+            void handleSelectDrag(const QPoint& pos);
             void dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight);
             float getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
@@ -83,6 +79,10 @@ namespace CSVRender
             bool primaryEditStartDrag (const QPoint& pos) override;
 
             bool secondaryEditStartDrag (const QPoint& pos) override;
+
+            bool primarySelectStartDrag(const QPoint& pos) override;
+
+            bool secondarySelectStartDrag(const QPoint& pos) override;
 
             void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 

@@ -333,12 +333,8 @@ namespace MWInput
 
     void ActionManager::screenshot()
     {
-        bool regularScreenshot = true;
-
-        std::string settingStr;
-
-        settingStr = Settings::Manager::getString("screenshot type","Video");
-        regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
+        const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
+        bool regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
 
         if (regularScreenshot)
         {
@@ -349,7 +345,7 @@ namespace MWInput
         {
             osg::ref_ptr<osg::Image> screenshot (new osg::Image);
 
-            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get(), settingStr))
+            if (MWBase::Environment::get().getWorld()->screenshot360(screenshot.get()))
             {
                 (*mScreenCaptureOperation) (*(screenshot.get()), 0);
                 // FIXME: mScreenCaptureHandler->getCaptureOperation() causes crash for some reason
