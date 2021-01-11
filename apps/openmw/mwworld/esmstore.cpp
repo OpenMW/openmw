@@ -190,15 +190,6 @@ void ESMStore::setUp(bool validateRecords)
     {
         validate();
         countRecords();
-
-        if (mGroundcovers.empty())
-        {
-            for (const ESM::Static& record : mStatics)
-            {
-                if (record.mIsGroundcover)
-                    mGroundcovers[record.mId] = record.mModel;
-            }
-        }
     }
 }
 

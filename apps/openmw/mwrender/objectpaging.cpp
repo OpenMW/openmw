@@ -373,7 +373,6 @@ namespace MWRender
         std::map<ESM::RefNum, ESM::CellRef> refs;
         std::vector<ESM::ESMReader> esm;
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
@@ -398,7 +397,7 @@ namespace MWRender
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
-                            if (store.isGroundcover(ref.mRefID)) continue;
+                            if (ref.mRefNum.fromGroundcoverFile()) continue;
                             refs[ref.mRefNum] = ref;
                         }
                     }

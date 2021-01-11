@@ -28,8 +28,6 @@ struct Static
 
     std::string mId, mModel;
 
-    bool mIsGroundcover = false;
-
     void load(ESMReader &esm, bool &isDeleted);
     void save(ESMWriter &esm, bool isDeleted = false) const;
 

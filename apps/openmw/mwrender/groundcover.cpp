@@ -13,6 +13,17 @@
 
 namespace MWRender
 {
+    std::string getGroundcoverModel(int type, const std::string& id, const MWWorld::ESMStore& store)
+    {
+        switch (type)
+        {
+          case ESM::REC_STAT:
+            return store.get<ESM::Static>().searchStatic(id)->mModel;
+          default:
+            return std::string();
+        }
+    }
+
     void GroundcoverUpdater::setWindSpeed(float windSpeed)
     {
         mWindSpeed = windSpeed;
@@ -217,15 +228,17 @@ namespace MWRender
                     while(cell->getNextRef(esm[index], ref, deleted))
                     {
                         if (deleted) continue;
-                        Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
-                        std::string model;
-                        if (!store.isGroundcover(ref.mRefID, model)) continue;
-                        if (model.empty()) continue;
+                        if (!ref.mRefNum.fromGroundcoverFile()) continue;
 
                         if (!calculator.isInstanceEnabled()) continue;
                         if (!isInChunkBorders(ref, minBound, maxBound)) continue;
 
+                        Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
+                        int type = store.findStatic(ref.mRefID);
+                        std::string model = getGroundcoverModel(type, ref.mRefID, store);
+                        if (model.empty()) continue;
                         model = "meshes/" + model;
+
                         instances[model].emplace_back(ref, model);
                     }
                 }

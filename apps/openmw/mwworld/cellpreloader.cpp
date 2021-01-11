@@ -1,5 +1,6 @@
 #include "cellpreloader.hpp"
 
+#include <algorithm>
 #include <atomic>
 #include <limits>
 
@@ -36,12 +37,7 @@ namespace MWWorld
 
         virtual bool operator()(const MWWorld::Ptr& ptr)
         {
-            if (ptr.getTypeName()==typeid (ESM::Static).name())
-            {
-                const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
-                if (ref->mBase->mIsGroundcover)
-                    return true;
-            }
+            if (ptr.getCellRef().getRefNum().fromGroundcoverFile()) return true;
 
             ptr.getClass().getModelsToPreload(ptr, mOut);
 

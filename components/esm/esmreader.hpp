@@ -31,7 +31,6 @@ public:
 
   int getVer() const { return mHeader.mData.version; }
   int getRecordCount() const { return mHeader.mData.records; }
-  bool isGroundcoverFile() const { return mIsGroundcoverFile; }
   float getFVer() const { return (mHeader.mData.version == VER_12) ? 1.2f : 1.3f; }
   const std::string getAuthor() const { return mHeader.mData.author; }
   const std::string getDesc() const { return mHeader.mData.desc; }
@@ -67,9 +66,9 @@ public:
 
   /// Load ES file from a new stream, parses the header. Closes the
   /// currently open file first, if any.
-  void open(Files::IStreamPtr _esm, const std::string &name, bool isGroundcover = false);
+  void open(Files::IStreamPtr _esm, const std::string &name);
 
-  void open(const std::string &file, bool isGroundcover = false);
+  void open(const std::string &file);
 
   void openRaw(const std::string &filename);
 
@@ -290,8 +289,6 @@ private:
   ToUTF8::Utf8Encoder* mEncoder;
 
   size_t mFileSize;
-
-  bool mIsGroundcoverFile;
 };
 }
 #endif

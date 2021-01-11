@@ -170,26 +170,12 @@ namespace
 namespace MWWorld
 {
     template <typename X>
-    bool CellRefList<X>::ignoreInstance (const X* ptr)
-    {
-        return false;
-    }
-
-    template <>
-    bool CellRefList<ESM::Static>::ignoreInstance (const ESM::Static* ptr)
-    {
-        return ptr->mIsGroundcover;
-    }
-
-    template <typename X>
     void CellRefList<X>::load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore)
     {
         const MWWorld::Store<X> &store = esmStore.get<X>();
 
         if (const X *ptr = store.search (ref.mRefID))
         {
-            if (ignoreInstance(ptr)) return;
-
             typename std::list<LiveRef>::iterator iter =
                 std::find(mList.begin(), mList.end(), ref.mRefNum);
 
@@ -700,7 +686,11 @@ namespace MWWorld
             case ESM::REC_NPC_: mNpcs.load(ref, deleted, store); break;
             case ESM::REC_PROB: mProbes.load(ref, deleted, store); break;
             case ESM::REC_REPA: mRepairs.load(ref, deleted, store); break;
-            case ESM::REC_STAT: mStatics.load(ref, deleted, store); break;
+            case ESM::REC_STAT:
+            {
+                if (ref.mRefNum.fromGroundcoverFile()) return;
+                mStatics.load(ref, deleted, store); break;
+            }
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
             case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 

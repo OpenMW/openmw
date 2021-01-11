@@ -103,12 +103,12 @@ namespace MWWorld
             return mLoaders.insert(std::make_pair(extension, loader)).second;
         }
 
-        void load(const boost::filesystem::path& filepath, int& index, bool isGroundcover) override
+        void load(const boost::filesystem::path& filepath, int& index) override
         {
             LoadersContainer::iterator it(mLoaders.find(Misc::StringUtils::lowerCase(filepath.extension().string())));
             if (it != mLoaders.end())
             {
-                it->second->load(filepath, index, isGroundcover);
+                it->second->load(filepath, index);
             }
             else
             {
@@ -2951,7 +2951,7 @@ namespace MWWorld
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx, false);
+                contentLoader.load(col.getPath(file), idx);
             }
             else
             {
@@ -2961,13 +2961,15 @@ namespace MWWorld
             idx++;
         }
 
+        ESM::GroundcoverIndex = idx;
+
         for (const std::string &file : groundcover)
         {
             boost::filesystem::path filename(file);
             const Files::MultiDirCollection& col = fileCollections.getCollection(filename.extension().string());
             if (col.doesExist(file))
             {
-                contentLoader.load(col.getPath(file), idx, true);
+                contentLoader.load(col.getPath(file), idx);
             }
             else
             {
