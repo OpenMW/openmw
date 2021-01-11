@@ -86,6 +86,7 @@
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5731: Editor: skirts are invisible on characters
+    Bug #5739: Saving and loading the save a second or two before hitting the ground doesn't count fall damage
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Bug #5762: Movement solver is insufficiently robust
     Feature #390: 3rd person look "over the shoulder"

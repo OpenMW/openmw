@@ -883,7 +883,11 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
+        {
             mIdleState = CharState_Idle;
+            if (cls.getCreatureStats(mPtr).getFallHeight() > 0)
+                mJumpState = JumpState_InAir;
+        }
         else
         {
             const MWMechanics::CreatureStats& cStats = mPtr.getClass().getCreatureStats(mPtr);
