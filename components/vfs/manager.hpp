@@ -58,6 +58,7 @@ namespace VFS
         /// @note May be called from any thread once the index has been built.
         Files::IStreamPtr getNormalized(const std::string& normalizedName) const;
 
+        std::string getArchive(const std::string& name) const;
     private:
         bool mStrict;
 

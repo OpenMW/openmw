@@ -6,6 +6,11 @@ namespace osg
     class Stats;
 }
 
+namespace Resource
+{
+    class ResourceSystem;
+}
+
 namespace MWBase
 {
     class World;
@@ -37,6 +42,7 @@ namespace MWBase
             Journal *mJournal;
             InputManager *mInputManager;
             StateManager *mStateManager;
+            Resource::ResourceSystem *mResourceSystem;
             float mFrameDuration;
             float mFrameRateLimit;
 
@@ -70,6 +76,8 @@ namespace MWBase
 
             void setStateManager (StateManager *stateManager);
 
+            void setResourceSystem (Resource::ResourceSystem *resourceSystem);
+
             void setFrameDuration (float duration);
             ///< Set length of current frame in seconds.
 
@@ -94,6 +102,8 @@ namespace MWBase
             InputManager *getInputManager() const;
 
             StateManager *getStateManager() const;
+
+            Resource::ResourceSystem *getResourceSystem() const;
 
             float getFrameDuration() const;
 

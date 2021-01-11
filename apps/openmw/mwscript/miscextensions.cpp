@@ -13,9 +13,14 @@
 #include <components/interpreter/opcodes.hpp>
 
 #include <components/misc/rng.hpp>
+#include <components/misc/resourcehelpers.hpp>
+
+#include <components/resource/resourcesystem.hpp>
 
 #include <components/esm/loadmgef.hpp>
 #include <components/esm/loadcrea.hpp>
+
+#include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1377,7 +1382,15 @@ namespace MWScript
                         msg << "Grid: " << cell->getCell()->getGridX() << " " << cell->getCell()->getGridY() << std::endl;
                     osg::Vec3f pos (ptr.getRefData().getPosition().asVec3());
                     msg << "Coordinates: " << pos.x() << " " << pos.y() << " " << pos.z() << std::endl;
-                    msg << "Model: " << ptr.getClass().getModel(ptr) << std::endl;
+                    auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+                    std::string model = ::Misc::ResourceHelpers::correctActorModelPath(ptr.getClass().getModel(ptr), vfs);
+                    msg << "Model: " << model << std::endl;
+                    if(!model.empty())
+                    {
+                        const std::string archive = vfs->getArchive(model);
+                        if(!archive.empty())
+                            msg << "(" << archive << ")" << std::endl;
+                    }
                     if (!ptr.getClass().getScript(ptr).empty())
                         msg << "Script: " << ptr.getClass().getScript(ptr) << std::endl;
                 }

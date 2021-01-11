@@ -39,6 +39,23 @@ void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normal
     }
 }
 
+bool BsaArchive::contains(const std::string& file, char (*normalize_function)(char)) const
+{
+    for (const auto& it : mResources)
+    {
+        std::string ent = it.mInfo->name;
+        std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
+        if(file == ent)
+            return true;
+    }
+    return false;
+}
+
+std::string BsaArchive::getDescription() const
+{
+    return std::string{"BSA: "} + mFile->getFilename();
+}
+
 // ------------------------------------------------------------------------------
 
 BsaArchiveFile::BsaArchiveFile(const Bsa::BSAFile::FileStruct *info, Bsa::BSAFile* bsa)

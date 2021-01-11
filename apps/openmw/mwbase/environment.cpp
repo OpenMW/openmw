@@ -4,6 +4,8 @@
 #include <chrono>
 #include <thread>
 
+#include <components/resource/resourcesystem.hpp>
+
 #include "world.hpp"
 #include "scriptmanager.hpp"
 #include "dialoguemanager.hpp"
@@ -74,6 +76,11 @@ void MWBase::Environment::setInputManager (InputManager *inputManager)
 void MWBase::Environment::setStateManager (StateManager *stateManager)
 {
     mStateManager = stateManager;
+}
+
+void MWBase::Environment::setResourceSystem (Resource::ResourceSystem *resourceSystem)
+{
+    mResourceSystem = resourceSystem;
 }
 
 void MWBase::Environment::setFrameDuration (float duration)
@@ -156,6 +163,11 @@ MWBase::StateManager *MWBase::Environment::getStateManager() const
 {
     assert (mStateManager);
     return mStateManager;
+}
+
+Resource::ResourceSystem *MWBase::Environment::getResourceSystem() const
+{
+    return mResourceSystem;
 }
 
 float MWBase::Environment::getFrameDuration() const
