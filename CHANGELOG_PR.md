@@ -35,6 +35,7 @@ Bug Fixes:
 
 Editor Bug Fixes:
 - Deleted and moved objects within a cell are now saved properly (#832)
+- Topic and Journal Info records can now be cloned with a different parent Topic/Journal Id (#4363)
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
 - Loading mods now keeps the master index (#5675)
 - Flicker and crashing on XFCE4 fixed (#5703)

@@ -34,16 +34,29 @@ void CSVWorld::InfoCreator::configureCreateCommand (CSMWorld::CreateCommand& com
 {
     CSMWorld::IdTable& table = dynamic_cast<CSMWorld::IdTable&> (*getData().getTableModel (getCollectionId()));
 
+    CSMWorld::CloneCommand* cloneCommand = dynamic_cast<CSMWorld::CloneCommand*> (&command);
     if (getCollectionId() == CSMWorld::UniversalId::Type_TopicInfos)
     {
-        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Topic), mTopic->text());
-        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Rank), -1);
-        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Gender), -1);
-        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_PcRank), -1);
+        if (!cloneCommand)
+        {
+            command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Topic), mTopic->text());
+            command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Rank), -1);
+            command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Gender), -1);
+            command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_PcRank), -1);
+        }
+        else
+        {
+            cloneCommand->setOverrideValue(table.findColumnIndex(CSMWorld::Columns::ColumnId_Topic), mTopic->text());
+        }
     }
     else
     {
-        command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
+        if (!cloneCommand)
+        {
+            command.addValue (table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
+        }
+        else
+            cloneCommand->setOverrideValue(table.findColumnIndex(CSMWorld::Columns::ColumnId_Journal), mTopic->text());
     }
 }
 

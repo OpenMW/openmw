@@ -22,6 +22,7 @@
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4083: Door animation freezes when colliding with actors
     Bug #4247: Cannot walk up stairs in Ebonheart docks
+    Bug #4363: Editor: Defect in Clone Function for Dialogue Info records
     Bug #4447: Actor collision capsule shape allows looking through some walls
     Bug #4465: Collision shape overlapping causes twitching
     Bug #4476: Abot Gondoliers: player hangs in air during scenic travel
