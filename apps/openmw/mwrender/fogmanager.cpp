@@ -76,8 +76,8 @@ namespace MWRender
                 mLandFogStart = viewDistance * (1 - fogDepth);
                 mLandFogEnd = viewDistance;
             }
-            mUnderwaterFogStart = std::min(viewDistance, 6666.f) * (1 - underwaterFog);
-            mUnderwaterFogEnd = std::min(viewDistance, 6666.f);
+            mUnderwaterFogStart = std::min(viewDistance, 7168.f) * (1 - underwaterFog);
+            mUnderwaterFogEnd = std::min(viewDistance, 7168.f);
         }
         mFogColor = color;
     }
