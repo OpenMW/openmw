@@ -16,18 +16,6 @@ so we can merge them to pages and animate them indifferently from distance from 
 
 This setting can only be configured by editing the settings configuration file.
 
-fade start
-----------
-
-:Type:		floating point
-:Range:		0.0 to 1.0
-:Default:	0.85
-
-Determines on which distance from player groundcover fading starts.
-Does not work for meshes which textures do not have transparency (e.g. rocks).
-
-This setting can only be configured by editing the settings configuration file.
-
 density
 -------
 
