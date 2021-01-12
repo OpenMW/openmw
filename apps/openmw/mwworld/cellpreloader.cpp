@@ -1,6 +1,5 @@
 #include "cellpreloader.hpp"
 
-#include <algorithm>
 #include <atomic>
 #include <limits>
 
@@ -37,8 +36,6 @@ namespace MWWorld
 
         virtual bool operator()(const MWWorld::Ptr& ptr)
         {
-            if (ptr.getCellRef().getRefNum().fromGroundcoverFile()) return true;
-
             ptr.getClass().getModelsToPreload(ptr, mOut);
 
             return true;
