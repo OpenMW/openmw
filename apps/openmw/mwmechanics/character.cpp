@@ -2448,7 +2448,7 @@ void CharacterController::update(float duration)
         }
     }
 
-    if (mFloatToSurface && cls.isActor() && cls.canSwim(mPtr))
+    if (mFloatToSurface && cls.isActor())
     {
         if (cls.getCreatureStats(mPtr).isDead()
             || (!godmode && cls.getCreatureStats(mPtr).isParalyzed()))
