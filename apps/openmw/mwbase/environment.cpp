@@ -19,7 +19,7 @@
 MWBase::Environment *MWBase::Environment::sThis = nullptr;
 
 MWBase::Environment::Environment()
-: mWorld (nullptr), mSoundManager (nullptr), mScriptManager (nullptr), mWindowManager (nullptr),
+: mWorld (nullptr), mSoundManager (nullptr), mScriptManager (nullptr), mWindowManager (nullptr), mResourceSystem (nullptr),
   mMechanicsManager (nullptr),  mDialogueManager (nullptr), mJournal (nullptr), mInputManager (nullptr), mStateManager (nullptr),
   mFrameDuration (0), mFrameRateLimit(0.f)
 {
