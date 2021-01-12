@@ -289,6 +289,7 @@ private:
   ToUTF8::Utf8Encoder* mEncoder;
 
   size_t mFileSize;
+
 };
 }
 #endif

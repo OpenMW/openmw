@@ -169,6 +169,7 @@ namespace
 
 namespace MWWorld
 {
+
     template <typename X>
     void CellRefList<X>::load(ESM::CellRef &ref, bool deleted, const MWWorld::ESMStore &esmStore)
     {

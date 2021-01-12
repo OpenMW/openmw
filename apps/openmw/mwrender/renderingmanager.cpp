@@ -73,6 +73,7 @@
 
 namespace MWRender
 {
+
     class StateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
