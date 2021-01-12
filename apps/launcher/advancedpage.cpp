@@ -62,12 +62,12 @@ namespace
 
     double convertToCells(double unitRadius)
     {
-        return std::round((unitRadius / 0.93 + 1024) / CellSizeInUnits);
+        return std::round((unitRadius + 1024) / CellSizeInUnits);
     }
 
     double convertToUnits(double CellGridRadius)
     {
-        return (CellSizeInUnits * CellGridRadius - 1024) * 0.93;
+        return CellSizeInUnits * CellGridRadius - 1024;
     }
 }
 
