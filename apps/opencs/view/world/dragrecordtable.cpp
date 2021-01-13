@@ -46,7 +46,8 @@ void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent *event)
 void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)))
+    if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)) ||
+        CSVWorld::DragDropUtils::isInfo(*event, getIndexDisplayType(index)) )
     {
         if (index.flags() & Qt::ItemIsEditable)
         {
@@ -74,6 +75,10 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
                 mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model(), index, newIndexData));
             }
         }
+    }
+    else if (CSVWorld::DragDropUtils::isInfo(*event, display) && event->source() == this)
+    {
+        emit moveRecordsFromSameTable(event);
     }
 }
 

@@ -7,6 +7,7 @@
 #include <QString>
 #include <QtCore/qnamespace.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
 #include <components/misc/stringops.hpp>
 
@@ -248,6 +249,7 @@ CSVWorld::Table::Table (const CSMWorld::UniversalId& id,
     if (isInfoTable)
     {
         mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
+        connect (this, &CSVWorld::DragRecordTable::moveRecordsFromSameTable, this, &CSVWorld::Table::moveRecords);
     }
     else if (isLtexTable)
     {
@@ -561,6 +563,74 @@ void CSVWorld::Table::moveDownRecord()
                 dynamic_cast<CSMWorld::IdTable&> (*mModel), row, newOrder));
         }
     }
+}
+
+void CSVWorld::Table::moveRecords(QDropEvent *event)
+{
+    if (mEditLock || (mModel->getFeatures() & CSMWorld::IdTableBase::Feature_Constant))
+        return;
+
+    QModelIndex targedIndex = indexAt(event->pos());
+
+    QModelIndexList selectedRows = selectionModel()->selectedRows();
+    int targetRow = targedIndex.row();
+    int baseRow = targedIndex.row() - 1;
+    int highestDifference = 0;
+
+    for (const auto& thisRowData : selectedRows)
+    {
+        if (std::abs(targetRow - thisRowData.row()) > highestDifference) highestDifference = std::abs(targetRow - thisRowData.row());
+        if (thisRowData.row() - 1 < baseRow) baseRow = thisRowData.row() - 1;
+    }
+
+    std::vector<int> newOrder (highestDifference + 1);
+
+    for (long unsigned int i = 0; i < newOrder.size(); ++i)
+    {
+        newOrder[i] = i;
+    }
+
+    if (selectedRows.size() > 1)
+    {
+        Log(Debug::Warning) << "Move operation failed: Moving multiple selections isn't implemented.";
+        return;
+    }
+
+    for (const auto& thisRowData : selectedRows)
+    {
+        /*
+            Moving algorithm description
+            a) Remove the (ORIGIN + 1)th list member.
+            b) Add (ORIGIN+1)th list member with value TARGET
+            c) If ORIGIN > TARGET,d_INC; ELSE d_DEC
+            d_INC) increase all members after (and including) the TARGET by one, stop before hitting ORIGINth address
+            d_DEC)  decrease all members after the ORIGIN by one, stop after hitting address TARGET
+        */
+
+        int originRow = thisRowData.row();
+        //int sourceMappedOriginRow = mProxyModel->mapToSource (mProxyModel->index (originRow, 0)).row();
+
+        newOrder.erase(newOrder.begin() +  originRow - baseRow - 1);
+        newOrder.emplace(newOrder.begin() + originRow - baseRow - 1, targetRow - baseRow - 1);
+
+        if (originRow > targetRow)
+        {
+            for (int i = targetRow - baseRow - 1; i < originRow - baseRow - 1; ++i)
+            {
+                ++newOrder[i];
+            }
+        }
+        else
+        {
+            for (int i = originRow - baseRow; i <= targetRow - baseRow - 1; ++i)
+            {
+                --newOrder[i];
+            }
+        }
+
+    }
+    mDocument.getUndoStack().push (new CSMWorld::ReorderRowsCommand (
+        dynamic_cast<CSMWorld::IdTable&> (*mModel), baseRow + 1, newOrder));
 }
 
 void CSVWorld::Table::editCell()
