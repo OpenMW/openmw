@@ -1134,6 +1134,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mRainEntranceSpeed(1)
     , mRainMaxRaindrops(0)
     , mWindSpeed(0.f)
+    , mBaseWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
     , mWeatherAlpha(0.f)
@@ -1685,6 +1686,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
     mRainMaxHeight = weather.mRainMaxHeight;
     mRainSpeed = weather.mRainSpeed;
     mWindSpeed = weather.mWindSpeed;
+    mBaseWindSpeed = weather.mBaseWindSpeed;
 
     if (mRainEffect != weather.mRainEffect)
     {
@@ -1851,6 +1853,13 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     for (AlphaFader* fader : mParticleFaders)
         fader->setAlpha(weather.mEffectFade);
+}
+
+float SkyManager::getBaseWindSpeed() const
+{
+    if (!mCreated) return 0.f;
+
+    return mBaseWindSpeed;
 }
 
 void SkyManager::sunEnable()

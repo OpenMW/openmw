@@ -1123,6 +1123,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mCloudBlendFactor = 0;
     mResult.mNextWindSpeed = 0;
     mResult.mWindSpeed = mResult.mCurrentWindSpeed = calculateWindSpeed(weatherID, mWindSpeed);
+    mResult.mBaseWindSpeed = mWeatherSettings[weatherID].mWindSpeed;
 
     mResult.mCloudSpeed = current.mCloudSpeed;
     mResult.mGlareView = current.mGlareView;
@@ -1214,6 +1215,7 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
 
     mResult.mCurrentWindSpeed = calculateWindSpeed(mCurrentWeather, mCurrentWindSpeed);
     mResult.mNextWindSpeed = calculateWindSpeed(mNextWeather, mNextWindSpeed);
+    mResult.mBaseWindSpeed = lerp(current.mBaseWindSpeed, other.mBaseWindSpeed, factor);
 
     mResult.mWindSpeed = lerp(mResult.mCurrentWindSpeed, mResult.mNextWindSpeed, factor);
     mResult.mCloudSpeed = lerp(current.mCloudSpeed, other.mCloudSpeed, factor);
