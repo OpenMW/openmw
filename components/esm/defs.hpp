@@ -54,6 +54,11 @@ struct Position
     {
         return osg::Vec3f(pos[0], pos[1], pos[2]);
     }
+
+    osg::Vec3f asRotationVec3() const
+    {
+        return osg::Vec3f(rot[0], rot[1], rot[2]);
+    }
 };
 #pragma pack(pop)
 
