@@ -35,6 +35,7 @@ Bug Fixes:
 
 Editor Bug Fixes:
 - Deleted and moved objects within a cell are now saved properly (#832)
+- Disabled record sorting in Topic and Journal Info tables, implemented drag-move for records (#4357)
 - Topic and Journal Info records can now be cloned with a different parent Topic/Journal Id (#4363)
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
 - Loading mods now keeps the master index (#5675)
