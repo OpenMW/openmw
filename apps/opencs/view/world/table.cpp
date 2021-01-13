@@ -573,14 +573,17 @@ void CSVWorld::Table::moveRecords(QDropEvent *event)
     QModelIndex targedIndex = indexAt(event->pos());
 
     QModelIndexList selectedRows = selectionModel()->selectedRows();
-    int targetRow = targedIndex.row();
-    int baseRow = targedIndex.row() - 1;
+    int targetRowRaw = targedIndex.row();
+    int targetRow = mProxyModel->mapToSource (mProxyModel->index (targetRowRaw, 0)).row();
+    int baseRowRaw = targedIndex.row() - 1;
+    int baseRow = mProxyModel->mapToSource (mProxyModel->index (baseRowRaw, 0)).row();
     int highestDifference = 0;
 
     for (const auto& thisRowData : selectedRows)
     {
-        if (std::abs(targetRow - thisRowData.row()) > highestDifference) highestDifference = std::abs(targetRow - thisRowData.row());
-        if (thisRowData.row() - 1 < baseRow) baseRow = thisRowData.row() - 1;
+        int thisRow = mProxyModel->mapToSource (mProxyModel->index (thisRowData.row(), 0)).row();
+        if (std::abs(targetRow - thisRow) > highestDifference) highestDifference = std::abs(targetRow - thisRow);
+        if (thisRow - 1 < baseRow) baseRow = thisRow - 1;
     }
 
     std::vector<int> newOrder (highestDifference + 1);
@@ -607,8 +610,8 @@ void CSVWorld::Table::moveRecords(QDropEvent *event)
             d_DEC)  decrease all members after the ORIGIN by one, stop after hitting address TARGET
         */
 
-        int originRow = thisRowData.row();
-        //int sourceMappedOriginRow = mProxyModel->mapToSource (mProxyModel->index (originRow, 0)).row();
+        int originRowRaw = thisRowData.row();
+        int originRow = mProxyModel->mapToSource (mProxyModel->index (originRowRaw, 0)).row();
 
         newOrder.erase(newOrder.begin() +  originRow - baseRow - 1);
         newOrder.emplace(newOrder.begin() + originRow - baseRow - 1, targetRow - baseRow - 1);
