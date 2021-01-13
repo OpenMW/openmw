@@ -121,6 +121,7 @@ void registerSerializers()
         const char* ignore[] = {
             "MWRender::PtrHolder",
             "Resource::TemplateRef",
+            "Resource::TemplateMultiRef",
             "SceneUtil::CompositeStateSetUpdater",
             "SceneUtil::LightListCallback",
             "SceneUtil::LightManagerUpdateCallback",

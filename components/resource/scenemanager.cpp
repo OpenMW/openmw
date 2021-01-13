@@ -110,6 +110,10 @@ namespace
 
 namespace Resource
 {
+    void TemplateMultiRef::addRef(const osg::Node* node)
+    {
+        mObjects.emplace_back(node);
+    }
 
     class SharedStateManager : public osgDB::SharedStateManager
     {
@@ -553,20 +557,6 @@ namespace Resource
         mInstanceCache->addEntryToObjectCache(normalized, node.get());
         return node;
     }
-
-    class TemplateRef : public osg::Object
-    {
-    public:
-        TemplateRef(const Object* object)
-            : mObject(object) {}
-        TemplateRef() {}
-        TemplateRef(const TemplateRef& copy, const osg::CopyOp&) : mObject(copy.mObject) {}
-
-        META_Object(Resource, TemplateRef)
-
-    private:
-        osg::ref_ptr<const Object> mObject;
-    };
 
     osg::ref_ptr<osg::Node> SceneManager::createInstance(const std::string& name)
     {

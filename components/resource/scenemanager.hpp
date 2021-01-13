@@ -37,6 +37,31 @@ namespace Shader
 
 namespace Resource
 {
+    class TemplateRef : public osg::Object
+    {
+    public:
+        TemplateRef(const Object* object) : mObject(object) {}
+        TemplateRef() {}
+        TemplateRef(const TemplateRef& copy, const osg::CopyOp&) : mObject(copy.mObject) {}
+
+        META_Object(Resource, TemplateRef)
+
+    private:
+        osg::ref_ptr<const Object> mObject;
+    };
+
+    class TemplateMultiRef : public osg::Object
+    {
+    public:
+        TemplateMultiRef() {}
+        TemplateMultiRef(const TemplateMultiRef& copy, const osg::CopyOp&) : mObjects(copy.mObjects) {}
+        void addRef(const osg::Node* node);
+
+        META_Object(Resource, TemplateMultiRef)
+
+    private:
+        std::vector<osg::ref_ptr<const Object>> mObjects;
+    };
 
     class MultiObjectCache;
 
