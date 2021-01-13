@@ -514,7 +514,7 @@ namespace Resource
             SetFilterSettingsControllerVisitor setFilterSettingsControllerVisitor(mMinFilter, mMagFilter, mMaxAnisotropy);
             loaded->accept(setFilterSettingsControllerVisitor);
 
-            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor("objects"));
+            osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor (createShaderVisitor());
             loaded->accept(*shaderVisitor);
 
             // share state
