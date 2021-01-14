@@ -323,6 +323,7 @@ include_directories("."
     ${Boost_INCLUDE_DIR}
     ${MyGUI_INCLUDE_DIRS}
     ${OPENAL_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIR}
     ${BULLET_INCLUDE_DIRS}
 )
 
