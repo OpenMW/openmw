@@ -1,8 +1,7 @@
 #!/bin/sh -e
 
 # workaround python issue on travis
-HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python
-brew install python
+HOMEBREW_NO_AUTO_UPDATE=1 brew ls --versions python@3.9.0 && brew uninstall --ignore-dependencies python
 
 # Some of these tools can come from places other than brew, so check before installing
 command -v ccache >/dev/null 2>&1 || brew install ccache
