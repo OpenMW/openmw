@@ -15,6 +15,8 @@
 #include <windows.h>
 // makes __argc and __argv available on windows
 #include <cstdlib>
+
+extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
 #endif
 
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
