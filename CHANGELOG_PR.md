@@ -39,6 +39,7 @@ Editor Bug Fixes:
 - Verifier no longer checks for alleged 'race' entries in clothing body parts (#5400)
 - Loading mods now keeps the master index (#5675)
 - Flicker and crashing on XFCE4 fixed (#5703)
+- Collada models render properly in the Editor (#5713)
 
 Miscellaneous:
 - Prevent save-game bloating by using an appropriate fog texture format (#5108)
