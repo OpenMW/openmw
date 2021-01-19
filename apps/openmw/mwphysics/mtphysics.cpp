@@ -173,6 +173,8 @@ namespace MWPhysics
             {
             if (mDeferAabbUpdate)
                 updateAabbs();
+            if (!mRemainingSteps)
+                return;
             for (auto& data : mActorsFrameData)
                 if (data.mActor.lock())
                 {
