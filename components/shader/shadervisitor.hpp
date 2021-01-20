@@ -40,6 +40,8 @@ namespace Shader
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setTranslucentFramebuffer(bool translucent);
+
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -62,6 +64,8 @@ namespace Shader
         std::string mSpecularMapPattern;
 
         bool mApplyLightingToEnvMaps;
+
+        bool mTranslucentFramebuffer;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;

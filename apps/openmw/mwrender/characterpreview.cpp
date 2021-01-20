@@ -16,6 +16,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/shadow.hpp>
 
@@ -249,6 +251,7 @@ namespace MWRender
 
     void CharacterPreview::setBlendMode()
     {
+        mResourceSystem->getSceneManager()->recreateShaders(mNode, "objects", true);
         SetUpBlendVisitor visitor;
         mNode->accept(visitor);
     }

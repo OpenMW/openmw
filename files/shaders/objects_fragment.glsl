@@ -209,8 +209,11 @@ void main()
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
 
+#if @translucentFramebuffer
+    // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
     if (noAlpha)
         gl_FragData[0].a = 1.0;
+#endif
 
     applyShadowDebugOverlay();
 }
