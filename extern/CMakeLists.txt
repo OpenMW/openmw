@@ -105,8 +105,8 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     # + https://github.com/openscenegraph/OpenSceneGraph/pull/1033
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/glebm/OpenSceneGraph/archive/041090d84d9d4b72f1202457fceae0ec6f79b663.zip
-        URL_HASH MD5=2cbf8126b27a45a2a44efe9fa39090f3
+        URL https://github.com/glebm/OpenSceneGraph/archive/7fd71578dfe9283f15b999e82e802ccfda87d936.zip
+        URL_HASH MD5=c1bad7cc5e263ac650ae1269f212b752
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailableExcludeFromAll(osg)
