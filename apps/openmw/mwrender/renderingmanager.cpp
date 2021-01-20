@@ -370,6 +370,7 @@ namespace MWRender
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
+        mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("noAlpha", false));
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
