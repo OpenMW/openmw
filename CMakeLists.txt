@@ -272,6 +272,25 @@ if(NOT HAVE_STDINT_H)
     message(FATAL_ERROR "stdint.h was not found" )
 endif()
 
+set(USED_OSG_COMPONENTS
+    osgDB
+    osgViewer
+    osgText
+    osgGA
+    osgParticle
+    osgUtil
+    osgFX
+    osgShadow
+    osgAnimation)
+set(USED_OSG_PLUGINS
+    osgdb_bmp
+    osgdb_dds
+    osgdb_freetype
+    osgdb_jpeg
+    osgdb_osg
+    osgdb_png
+    osgdb_serializers_osg
+    osgdb_tga)
 if(OPENMW_USE_SYSTEM_OSG)
     find_package(OpenSceneGraph 3.3.4 REQUIRED ${USED_OSG_COMPONENTS})
     if(OSG_STATIC)

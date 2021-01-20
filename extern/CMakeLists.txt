@@ -70,27 +70,6 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     set(MyGUI_LIBRARIES MyGUIEngine PARENT_SCOPE)
 endif()
 
-set(USED_OSG_COMPONENTS
-    osgDB
-    osgViewer
-    osgText
-    osgGA
-    osgParticle
-    osgUtil
-    osgFX
-    osgShadow
-    osgAnimation)
-set(USED_OSG_COMPONENTS ${USED_OSG_COMPONENTS} PARENT_SCOPE)
-set(USED_OSG_PLUGINS
-    osgdb_bmp
-    osgdb_dds
-    osgdb_freetype
-    osgdb_jpeg
-    osgdb_osg
-    osgdb_png
-    osgdb_serializers_osg
-    osgdb_tga)
-set(USED_OSG_PLUGINS ${USED_OSG_PLUGINS} PARENT_SCOPE)
 if(NOT OPENMW_USE_SYSTEM_OSG)
     set(OSG_STATIC ON CACHE BOOL "")
 
