@@ -1,5 +1,5 @@
 project(OpenMW)
-cmake_minimum_required(VERSION 3.11) # CMP0083 NEW
+cmake_minimum_required(VERSION 3.1.0) # CMP0083 NEW
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 

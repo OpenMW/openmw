@@ -16,6 +16,8 @@ macro(FetchContent_MakeAvailableExcludeFromAll)
 endmacro()
 
 if(NOT OPENMW_USE_SYSTEM_BULLET)
+    cmake_minimum_required(VERSION 3.11) # for FetchContent
+
     set(BUILD_BULLET3 OFF CACHE BOOL "")
     set(BUILD_EXTRAS OFF CACHE BOOL "")
     set(BUILD_OPENGL3_DEMOS OFF CACHE BOOL "")
@@ -50,6 +52,8 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
 endif()
 
 if(NOT OPENMW_USE_SYSTEM_MYGUI)
+    cmake_minimum_required(VERSION 3.11) # for FetchContent
+
     set(MYGUI_STATIC ON CACHE BOOL "")
 
     set(MYGUI_RENDERSYSTEM 4 CACHE STRING "")
@@ -71,6 +75,8 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
 endif()
 
 if(NOT OPENMW_USE_SYSTEM_OSG)
+    cmake_minimum_required(VERSION 3.11) # for FetchContent
+
     set(OSG_STATIC ON CACHE BOOL "")
 
     set(DYNAMIC_OPENTHREADS OFF CACHE BOOL "")
