@@ -152,8 +152,8 @@ if(OSG_STATIC)
         target_link_libraries(openmw_osg_plugins INTERFACE ${${_plugin_uc}_LIBRARY})
     endforeach()
     # We use --whole-archive because OSG plugins use registration.
-    target_link_options(openmw_osg_plugins INTERFACE
-        -Wl,--whole-archive ${_osg_plugins_static_files} -Wl,--no-whole-archive)
+    get_whole_archive_options(_opts ${_osg_plugins_static_files})
+    target_link_options(openmw_osg_plugins INTERFACE ${_opts})
     target_link_libraries(openmw openmw_osg_plugins)
 endif(OSG_STATIC)
 

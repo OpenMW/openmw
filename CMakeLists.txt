@@ -89,6 +89,7 @@ endif(EXISTS ${PROJECT_SOURCE_DIR}/.git)
 
 # Macros
 include(OpenMWMacros)
+include(WholeArchive)
 
 # doxygen main page
 
