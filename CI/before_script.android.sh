@@ -3,7 +3,7 @@
 # hack to work around: FFmpeg version is too old, 3.2 is required
 sed -i s/"NOT FFVER_OK"/"FALSE"/ CMakeLists.txt
 
-mkdir build
+mkdir -p build
 cd build
 
 cmake \
@@ -21,5 +21,7 @@ cmake \
 -DBUILD_ESSIMPORTER=0 \
 -DBUILD_OPENCS=0 \
 -DBUILD_WIZARD=0 \
--DMyGUI_LIBRARY="/usr/lib/android-sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/libMyGUIEngineStatic.a" \
+-DOPENMW_USE_SYSTEM_MYGUI=OFF \
+-DOPENMW_USE_SYSTEM_OSG=OFF \
+-DOPENMW_USE_SYSTEM_BULLET=OFF \
 ..
