@@ -83,6 +83,7 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     set(DYNAMIC_OPENSCENEGRAPH OFF CACHE BOOL "")
     set(BUILD_OSG_APPLICATIONS OFF CACHE BOOL "")
     set(BUILD_OSG_DEPRECATED_SERIALIZERS OFF CACHE BOOL "")
+    set(OSG_FIND_3RD_PARTY_DEPS OFF CACHE BOOL "")
 
     set(BUILD_OSG_PLUGINS_BY_DEFAULT OFF CACHE BOOL "")
     set(BUILD_OSG_PLUGIN_BMP ON CACHE BOOL "")
@@ -103,10 +104,11 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     # branch OpenSceneGraph-3.6 on 18 Jan 2021.
     # + https://github.com/openscenegraph/OpenSceneGraph/pull/1032
     # + https://github.com/openscenegraph/OpenSceneGraph/pull/1033
+    # + https://github.com/openscenegraph/OpenSceneGraph/pull/1037
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/glebm/OpenSceneGraph/archive/7fd71578dfe9283f15b999e82e802ccfda87d936.zip
-        URL_HASH MD5=c1bad7cc5e263ac650ae1269f212b752
+        URL https://github.com/glebm/OpenSceneGraph/archive/7684224d8a9a8f60447d6561faf32a7b58fb5204.zip
+        URL_HASH MD5=d67088aeb976486287343c1287b56ba3
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailableExcludeFromAll(osg)
