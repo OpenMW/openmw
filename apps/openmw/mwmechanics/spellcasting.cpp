@@ -60,7 +60,10 @@ namespace MWMechanics
     void CastSpell::inflict(const MWWorld::Ptr &target, const MWWorld::Ptr &caster,
                             const ESM::EffectList &effects, ESM::RangeType range, bool reflected, bool exploded)
     {
-        if (!target.isEmpty() && target.getClass().isActor())
+        if (target.isEmpty())
+            return;
+
+        if (target.getClass().isActor())
         {
             // Early-out for characters that have departed.
             const auto& stats = target.getClass().getCreatureStats(target);
@@ -82,7 +85,7 @@ namespace MWMechanics
             return;
 
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search (mId);
-        if (spell && !target.isEmpty() && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
+        if (spell && target.getClass().isActor() && (spell->mData.mType == ESM::Spell::ST_Disease || spell->mData.mType == ESM::Spell::ST_Blight))
         {
             int requiredResistance = (spell->mData.mType == ESM::Spell::ST_Disease) ?
                 ESM::MagicEffect::ResistCommonDisease
@@ -105,13 +108,13 @@ namespace MWMechanics
         // This is required for Weakness effects in a spell to apply to any subsequent effects in the spell.
         // Otherwise, they'd only apply after the whole spell was added.
         MagicEffects targetEffects;
-        if (!target.isEmpty() && target.getClass().isActor())
+        if (target.getClass().isActor())
             targetEffects += target.getClass().getCreatureStats(target).getMagicEffects();
 
         bool castByPlayer = (!caster.isEmpty() && caster == getPlayer());
 
         ActiveSpells targetSpells;
-        if (!target.isEmpty() && target.getClass().isActor())
+        if (target.getClass().isActor())
             targetSpells = target.getClass().getCreatureStats(target).getActiveSpells();
 
         bool canCastAnEffect = false;    // For bound equipment.If this remains false
@@ -123,7 +126,7 @@ namespace MWMechanics
 
         int currentEffectIndex = 0;
         for (std::vector<ESM::ENAMstruct>::const_iterator effectIt (effects.mList.begin());
-             !target.isEmpty() && effectIt != effects.mList.end(); ++effectIt, ++currentEffectIndex)
+             effectIt != effects.mList.end(); ++effectIt, ++currentEffectIndex)
         {
             if (effectIt->mRange != range)
                 continue;
@@ -267,7 +270,7 @@ namespace MWMechanics
                 }
 
                 // Re-casting a summon effect will remove the creature from previous castings of that effect.
-                if (isSummoningEffect(effectIt->mEffectID) && !target.isEmpty() && target.getClass().isActor())
+                if (isSummoningEffect(effectIt->mEffectID) && target.getClass().isActor())
                 {
                     CreatureStats& targetStats = target.getClass().getCreatureStats(target);
                     ESM::SummonKey key(effectIt->mEffectID, mId, currentEffectIndex);
@@ -310,18 +313,16 @@ namespace MWMechanics
         if (!exploded)
             MWBase::Environment::get().getWorld()->explodeSpell(mHitPosition, effects, caster, target, range, mId, mSourceName, mFromProjectile);
 
-        if (!target.isEmpty()) {
-            if (!reflectedEffects.mList.empty())
-                inflict(caster, target, reflectedEffects, range, true, exploded);
+        if (!reflectedEffects.mList.empty())
+            inflict(caster, target, reflectedEffects, range, true, exploded);
 
-            if (!appliedLastingEffects.empty())
-            {
-                int casterActorId = -1;
-                if (!caster.isEmpty() && caster.getClass().isActor())
-                    casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
-                target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
-                                                                                      mSourceName, casterActorId);
-            }
+        if (!appliedLastingEffects.empty())
+        {
+            int casterActorId = -1;
+            if (!caster.isEmpty() && caster.getClass().isActor())
+                casterActorId = caster.getClass().getCreatureStats(caster).getActorId();
+            target.getClass().getCreatureStats(target).getActiveSpells().addSpell(mId, mStack, appliedLastingEffects,
+                    mSourceName, casterActorId);
         }
     }
 

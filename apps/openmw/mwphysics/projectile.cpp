@@ -13,19 +13,22 @@
 #include "../mwworld/class.hpp"
 
 #include "collisiontype.hpp"
+#include "memory"
 #include "mtphysics.hpp"
 #include "projectile.hpp"
 
 namespace MWPhysics
 {
-Projectile::Projectile(int projectileId, const MWWorld::Ptr& caster, const osg::Vec3f& position, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
-    : mActive(true)
+Projectile::Projectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canCrossWaterSurface, PhysicsTaskScheduler* scheduler, PhysicsSystem* physicssystem)
+    : mCanCrossWaterSurface(canCrossWaterSurface)
+    , mCrossedWaterSurface(false)
+    , mActive(true)
     , mCaster(caster)
+    , mWaterHitPosition(std::nullopt)
     , mPhysics(physicssystem)
     , mTaskScheduler(scheduler)
-    , mProjectileId(projectileId)
 {
-    mShape.reset(new btSphereShape(1.f));
+    mShape = std::make_unique<btSphereShape>(radius);
     mConvexShape = static_cast<btConvexShape*>(mShape.get());
 
     mCollisionObject = std::make_unique<btCollisionObject>();
@@ -67,6 +70,17 @@ void Projectile::setPosition(const osg::Vec3f &position)
     mTransformUpdatePending = true;
 }
 
+osg::Vec3f Projectile::getPosition() const
+{
+    std::scoped_lock lock(mMutex);
+    return Misc::Convert::toOsg(mLocalTransform.getOrigin());
+}
+
+bool Projectile::canTraverseWater() const
+{
+    return mCanCrossWaterSurface;
+}
+
 void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
 {
     if (!mActive.load(std::memory_order_acquire))
@@ -76,12 +90,6 @@ void Projectile::hit(MWWorld::Ptr target, btVector3 pos, btVector3 normal)
     mHitPosition = pos;
     mHitNormal = normal;
     mActive.store(false, std::memory_order_release);
-}
-
-void Projectile::activate()
-{
-    assert(!mActive);
-    mActive.store(true, std::memory_order_release);
 }
 
 MWWorld::Ptr Projectile::getCaster() const
@@ -108,21 +116,32 @@ bool Projectile::isValidTarget(const MWWorld::Ptr& target) const
     if (mCaster == target)
         return false;
 
-    if (!mValidTargets.empty())
-    {
-        bool validTarget = false;
-        for (const auto& targetActor : mValidTargets)
-        {
-            if (targetActor == target)
-            {
-                validTarget = true;
-                break;
-            }
-        }
+    if (target.isEmpty() || mValidTargets.empty())
+        return true;
 
-        return validTarget;
+    bool validTarget = false;
+    for (const auto& targetActor : mValidTargets)
+    {
+        if (targetActor == target)
+        {
+            validTarget = true;
+            break;
+        }
     }
-    return true;
+    return validTarget;
+}
+
+std::optional<btVector3> Projectile::getWaterHitPosition()
+{
+    return std::exchange(mWaterHitPosition, std::nullopt);
+}
+
+void Projectile::setWaterHitPosition(btVector3 pos)
+{
+    if (mCrossedWaterSurface)
+        return;
+    mCrossedWaterSurface = true;
+    mWaterHitPosition = pos;
 }
 
 }

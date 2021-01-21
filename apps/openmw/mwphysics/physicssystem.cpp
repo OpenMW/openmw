@@ -55,6 +55,7 @@
 #include "deepestnotmecontacttestresultcallback.hpp"
 #include "closestnotmerayresultcallback.hpp"
 #include "contacttestresultcallback.hpp"
+#include "projectileconvexcallback.hpp"
 #include "constants.hpp"
 #include "movementsolver.hpp"
 #include "mtphysics.hpp"
@@ -246,7 +247,7 @@ namespace MWPhysics
         return 0.f;
     }
 
-    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group, int projId) const
+    RayCastingResult PhysicsSystem::castRay(const osg::Vec3f &from, const osg::Vec3f &to, const MWWorld::ConstPtr& ignore, std::vector<MWWorld::Ptr> targets, int mask, int group) const
     {
         if (from == to)
         {
@@ -283,7 +284,7 @@ namespace MWPhysics
             }
         }
 
-        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo, getProjectile(projId));
+        ClosestNotMeRayResultCallback resultCallback(me, targetCollisionObjects, btFrom, btTo);
         resultCallback.m_collisionFilterGroup = group;
         resultCallback.m_collisionFilterMask = mask;
 
@@ -580,15 +581,44 @@ namespace MWPhysics
         }
     }
 
-    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position)
+    void PhysicsSystem::updateProjectile(const int projectileId, const osg::Vec3f &position) const
     {
-        ProjectileMap::iterator foundProjectile = mProjectiles.find(projectileId);
-        if (foundProjectile != mProjectiles.end())
-        {
-            foundProjectile->second->setPosition(position);
-            mTaskScheduler->updateSingleAabb(foundProjectile->second);
+        const auto foundProjectile = mProjectiles.find(projectileId);
+        assert(foundProjectile != mProjectiles.end());
+        auto* projectile = foundProjectile->second.get();
+
+        btVector3 btFrom = Misc::Convert::toBullet(projectile->getPosition());
+        btVector3 btTo = Misc::Convert::toBullet(position);
+
+        if (btFrom == btTo)
             return;
-        }
+
+        const auto casterPtr = projectile->getCaster();
+        const auto* caster = [this,&casterPtr]() -> const btCollisionObject*
+        {
+            const Actor* actor = getActor(casterPtr);
+            if (actor)
+                return actor->getCollisionObject();
+            const Object* object = getObject(casterPtr);
+            if (object)
+                return object->getCollisionObject();
+            return nullptr;
+        }();
+        assert(caster);
+
+        ProjectileConvexCallback resultCallback(caster, btFrom, btTo, projectile);
+        resultCallback.m_collisionFilterMask = 0xff;
+        resultCallback.m_collisionFilterGroup = CollisionType_Projectile;
+
+        const btQuaternion btrot = btQuaternion::getIdentity();
+        btTransform from_ (btrot, btFrom);
+        btTransform to_ (btrot, btTo);
+
+        mTaskScheduler->convexSweepTest(projectile->getConvexShape(), from_, to_, resultCallback);
+
+        const auto newpos = projectile->isActive() ? position : Misc::Convert::toOsg(resultCallback.m_hitPointWorld);
+        projectile->setPosition(newpos);
+        mTaskScheduler->updateSingleAabb(foundProjectile->second);
     }
 
     void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
@@ -651,10 +681,10 @@ namespace MWPhysics
         mActors.emplace(ptr, std::move(actor));
     }
 
-    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position)
+    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canTraverseWater)
     {
         mProjectileId++;
-        auto projectile = std::make_shared<Projectile>(mProjectileId, caster, position, mTaskScheduler.get(), this);
+        auto projectile = std::make_shared<Projectile>(caster, position, radius, canTraverseWater, mTaskScheduler.get(), this);
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;
@@ -863,7 +893,7 @@ namespace MWPhysics
         mWaterCollisionShape.reset(new btStaticPlaneShape(btVector3(0,0,1), mWaterHeight));
         mWaterCollisionObject->setCollisionShape(mWaterCollisionShape.get());
         mTaskScheduler->addCollisionObject(mWaterCollisionObject.get(), CollisionType_Water,
-                                                    CollisionType_Actor);
+                                                    CollisionType_Actor|CollisionType_Projectile);
     }
 
     bool PhysicsSystem::isAreaOccupiedByOtherActor(const osg::Vec3f& position, const float radius, const MWWorld::ConstPtr& ignore) const

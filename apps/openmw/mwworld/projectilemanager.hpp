@@ -80,8 +80,6 @@ namespace MWWorld
             int mActorId;
             int mProjectileId;
 
-            osg::Vec3f mHitPosition;
-
             // TODO: this will break when the game is saved and reloaded, since there is currently
             // no way to write identifiers for non-actors to a savegame.
             MWWorld::Ptr mCasterHandle;
@@ -132,7 +130,7 @@ namespace MWWorld
         void moveProjectiles(float dt);
         void moveMagicBolts(float dt);
 
-        void createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
+        float createModel (State& state, const std::string& model, const osg::Vec3f& pos, const osg::Quat& orient,
                             bool rotate, bool createLight, osg::Vec4 lightDiffuseColor, std::string texture = "");
         void update (State& state, float duration);
 
