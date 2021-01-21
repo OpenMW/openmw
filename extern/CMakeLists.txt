@@ -54,7 +54,7 @@ endif()
 if(NOT OPENMW_USE_SYSTEM_MYGUI)
     cmake_minimum_required(VERSION 3.11) # for FetchContent
 
-    set(MYGUI_STATIC ON CACHE BOOL "")
+    set(MYGUI_STATIC ON CACHE BOOL "" PARENT_SCOPE)
 
     set(MYGUI_RENDERSYSTEM 4 CACHE STRING "")
     set(MYGUI_DISABLE_PLUGINS TRUE CACHE BOOL "")
@@ -77,7 +77,7 @@ endif()
 if(NOT OPENMW_USE_SYSTEM_OSG)
     cmake_minimum_required(VERSION 3.11) # for FetchContent
 
-    set(OSG_STATIC ON CACHE BOOL "")
+    set(OSG_STATIC ON CACHE BOOL "" PARENT_SCOPE)
 
     set(DYNAMIC_OPENTHREADS OFF CACHE BOOL "")
     set(DYNAMIC_OPENSCENEGRAPH OFF CACHE BOOL "")
