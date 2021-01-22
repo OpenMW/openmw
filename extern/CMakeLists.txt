@@ -109,14 +109,11 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
         set(BUILD_SHARED_LIBS ON)
     endif()
 
-    # branch OpenSceneGraph-3.6 on 18 Jan 2021.
-    # + https://github.com/openscenegraph/OpenSceneGraph/pull/1032
-    # + https://github.com/openscenegraph/OpenSceneGraph/pull/1033
-    # + https://github.com/openscenegraph/OpenSceneGraph/pull/1037
+    # branch OpenSceneGraph-3.6 on 23 Jan 2021.
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/glebm/OpenSceneGraph/archive/7684224d8a9a8f60447d6561faf32a7b58fb5204.zip
-        URL_HASH MD5=d67088aeb976486287343c1287b56ba3
+        URL https://github.com/openscenegraph/OpenSceneGraph/archive/b8862d04203c7d5576fc8189fe4df83c4e855b9b.zip
+        URL_HASH MD5=d80a42eb9c983c08b40ecd103bae03f4
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailableExcludeFromAll(osg)
