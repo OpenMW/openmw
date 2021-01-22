@@ -60,13 +60,18 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     set(MYGUI_BUILD_PLUGINS OFF CACHE BOOL "")
     set(MYGUI_BUILD_TOOLS OFF CACHE BOOL "")
 
+    if(MYGUI_STATIC)
+        set(BUILD_SHARED_LIBS OFF)
+    else()
+        set(BUILD_SHARED_LIBS ON)
+    endif()
+
     include(FetchContent)
     FetchContent_Declare(mygui
         URL https://github.com/MyGUI/mygui/archive/MyGUI3.4.0.zip
         URL_HASH MD5=9e990a4240430cbf567bfe73488a274e
         SOURCE_DIR fetched/mygui
     )
-    set(BUILD_SHARED_LIBS ${MYGUI_STATIC})
     FetchContent_MakeAvailableExcludeFromAll(mygui)
 
     set(MyGUI_INCLUDE_DIRS ${mygui_SOURCE_DIR}/MyGUIEngine/include PARENT_SCOPE)
@@ -98,6 +103,12 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
 
     set(OPENGL_PROFILE "GL2" CACHE STRING "")
 
+    if(OSG_STATIC)
+        set(BUILD_SHARED_LIBS OFF)
+    else()
+        set(BUILD_SHARED_LIBS ON)
+    endif()
+
     # branch OpenSceneGraph-3.6 on 18 Jan 2021.
     # + https://github.com/openscenegraph/OpenSceneGraph/pull/1032
     # + https://github.com/openscenegraph/OpenSceneGraph/pull/1033
@@ -108,7 +119,6 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
         URL_HASH MD5=d67088aeb976486287343c1287b56ba3
         SOURCE_DIR fetched/osg
     )
-    set(BUILD_SHARED_LIBS ${OSG_STATIC})
     FetchContent_MakeAvailableExcludeFromAll(osg)
 
     set(OPENSCENEGRAPH_INCLUDE_DIRS ${osg_SOURCE_DIR}/include ${osg_BINARY_DIR}/include PARENT_SCOPE)
