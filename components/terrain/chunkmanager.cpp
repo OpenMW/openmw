@@ -197,8 +197,7 @@ osg::ref_ptr<osg::Node> ChunkManager::createChunk(float chunkSize, const osg::Ve
     bool useCompositeMap = chunkSize >= mCompositeMapLevel;
     unsigned int numUvSets = useCompositeMap ? 1 : 2;
 
-    for (unsigned int i=0; i<numUvSets; ++i)
-        geometry->setTexCoordArray(i, mBufferCache.getUVBuffer(numVerts));
+    geometry->setTexCoordArrayList(osg::Geometry::ArrayList(numUvSets, mBufferCache.getUVBuffer(numVerts)));
 
     geometry->createClusterCullingCallback();
 

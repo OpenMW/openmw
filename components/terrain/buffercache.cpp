@@ -186,7 +186,7 @@ namespace Terrain
 
         int vertexCount = numVerts * numVerts;
 
-        osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array);
+        osg::ref_ptr<osg::Vec2Array> uvs (new osg::Vec2Array(osg::Array::BIND_PER_VERTEX));
         uvs->reserve(vertexCount);
 
         for (unsigned int col = 0; col < numVerts; ++col)
