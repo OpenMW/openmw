@@ -2020,7 +2020,7 @@ namespace MWWorld
             rayToObject = mRendering->castCameraToViewportRay(0.5f, 0.5f, maxDistance, ignorePlayer);
 
         facedObject = rayToObject.mHitObject;
-        if (facedObject.isEmpty() && rayToObject.mHitRefnum.hasContentFile())
+        if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
         {
             for (CellStore* cellstore : mWorldScene->getActiveCells())
             {

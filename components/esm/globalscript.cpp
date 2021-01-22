@@ -30,7 +30,7 @@ void ESM::GlobalScript::save (ESMWriter &esm) const
     if (!mTargetId.empty())
     {
         esm.writeHNOString ("TARG", mTargetId);
-        if (mTargetRef.hasContentFile())
+        if (mTargetRef.isSet())
             mTargetRef.save (esm, true, "FRMR");
     }
 }

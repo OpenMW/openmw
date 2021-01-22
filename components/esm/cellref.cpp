@@ -24,8 +24,9 @@ void ESM::RefNum::save (ESMWriter &esm, bool wide, const std::string& tag) const
         esm.writeHNT (tag, *this, 8);
     else
     {
+        if (isSet() && !hasContentFile())
+            Log(Debug::Error) << "Generated RefNum can not be saved in 32bit format";
         int refNum = (mIndex & 0xffffff) | ((hasContentFile() ? mContentFile : 0xff)<<24);
-
         esm.writeHNT (tag, refNum, 4);
     }
 }
