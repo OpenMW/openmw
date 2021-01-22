@@ -111,11 +111,17 @@ option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_OSG "Use system provided OpenSceneGraph libraries" ON)
 option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" OFF)
+if(NOT OPENMW_USE_SYSTEM_OSG)
+    set(OSG_STATIC ON CACHE BOOL "")
+endif()
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
 
 option(OPENMW_USE_SYSTEM_MYGUI "Use system provided mygui library" ON)
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" OFF)
+if(NOT OPENMW_USE_SYSTEM_MYGUI)
+    set(MYGUI_STATIC ON CACHE BOOL "")
+endif()
 
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
