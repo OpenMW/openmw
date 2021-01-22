@@ -5,6 +5,7 @@
 #include <osg/Material>
 #include <osg/Fog>
 #include <osg/BlendFunc>
+#include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 #include <osg/Camera>
 #include <osg/PositionAttitudeTransform>
@@ -15,6 +16,8 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/resource/scenemanager.hpp>
+#include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/shadow.hpp>
 
@@ -85,7 +88,7 @@ namespace MWRender
     class SetUpBlendVisitor : public osg::NodeVisitor
     {
     public:
-        SetUpBlendVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        SetUpBlendVisitor(): osg::NodeVisitor(TRAVERSE_ALL_CHILDREN), mNoAlphaUniform(new osg::Uniform("noAlpha", false))
         {
         }
 
@@ -102,10 +105,17 @@ namespace MWRender
                     newStateSet->setAttribute(newBlendFunc, osg::StateAttribute::ON);
                     node.setStateSet(newStateSet);
                 }
-
+                if (stateset->getMode(GL_BLEND) & osg::StateAttribute::ON)
+                {
+                    // Disable noBlendAlphaEnv
+                    stateset->setTextureMode(7, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                    stateset->addUniform(mNoAlphaUniform);
+                }
             }
             traverse(node);
         }
+    private:
+        osg::ref_ptr<osg::Uniform> mNoAlphaUniform;
     };
 
     CharacterPreview::CharacterPreview(osg::Group* parent, Resource::ResourceSystem* resourceSystem,
@@ -163,6 +173,20 @@ namespace MWRender
         fog->setStart(10000000);
         fog->setEnd(10000000);
         stateset->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
+
+        // Opaque stuff must have 1 as its fragment alpha as the FBO is translucent, so having blending off isn't enough
+        osg::ref_ptr<osg::TexEnvCombine> noBlendAlphaEnv = new osg::TexEnvCombine();
+        noBlendAlphaEnv->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+        noBlendAlphaEnv->setSource0_Alpha(osg::TexEnvCombine::CONSTANT);
+        noBlendAlphaEnv->setConstantColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+        noBlendAlphaEnv->setCombine_RGB(osg::TexEnvCombine::REPLACE);
+        noBlendAlphaEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
+        osg::ref_ptr<osg::Texture2D> dummyTexture = new osg::Texture2D();
+        dummyTexture->setInternalFormat(GL_RED);
+        dummyTexture->setTextureSize(1, 1);
+        stateset->setTextureAttributeAndModes(7, dummyTexture, osg::StateAttribute::ON);
+        stateset->setTextureAttribute(7, noBlendAlphaEnv, osg::StateAttribute::ON);
+        stateset->addUniform(new osg::Uniform("noAlpha", true));
 
         osg::ref_ptr<osg::LightModel> lightmodel = new osg::LightModel;
         lightmodel->setAmbientIntensity(osg::Vec4(0.0, 0.0, 0.0, 1.0));
@@ -227,6 +251,7 @@ namespace MWRender
 
     void CharacterPreview::setBlendMode()
     {
+        mResourceSystem->getSceneManager()->recreateShaders(mNode, "objects", true);
         SetUpBlendVisitor visitor;
         mNode->accept(visitor);
     }

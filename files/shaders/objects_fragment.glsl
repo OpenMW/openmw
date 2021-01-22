@@ -50,6 +50,7 @@ uniform mat2 bumpMapMatrix;
 #endif
 
 uniform bool simpleWater;
+uniform bool noAlpha;
 
 varying float euclideanDepth;
 varying float linearDepth;
@@ -207,6 +208,12 @@ void main()
     float fogValue = clamp((linearDepth - gl_Fog.start) * gl_Fog.scale, 0.0, 1.0);
 #endif
     gl_FragData[0].xyz = mix(gl_FragData[0].xyz, gl_Fog.color.xyz, fogValue);
+
+#if @translucentFramebuffer
+    // having testing & blending isn't enough - we need to write an opaque pixel to be opaque
+    if (noAlpha)
+        gl_FragData[0].a = 1.0;
+#endif
 
     applyShadowDebugOverlay();
 }

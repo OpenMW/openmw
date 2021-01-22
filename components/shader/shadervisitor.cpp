@@ -40,6 +40,7 @@ namespace Shader
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
+        , mTranslucentFramebuffer(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
         , mDefaultVsTemplate(defaultVsTemplate)
@@ -146,7 +147,7 @@ namespace Shader
                                 mRequirements.back().mShaderRequired = true;
                             }
                         }
-                        else
+                        else if (!mTranslucentFramebuffer)
                             Log(Debug::Error) << "ShaderVisitor encountered unknown texture " << texture;
                     }
                 }
@@ -322,6 +323,8 @@ namespace Shader
 
         writableStateSet->addUniform(new osg::Uniform("colorMode", reqs.mColorMode));
 
+        defineMap["translucentFramebuffer"] = mTranslucentFramebuffer ? "1" : "0";
+
         osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));
 
@@ -472,6 +475,11 @@ namespace Shader
     void ShaderVisitor::setApplyLightingToEnvMaps(bool apply)
     {
         mApplyLightingToEnvMaps = apply;
+    }
+
+    void ShaderVisitor::setTranslucentFramebuffer(bool translucent)
+    {
+        mTranslucentFramebuffer = translucent;
     }
 
 }
