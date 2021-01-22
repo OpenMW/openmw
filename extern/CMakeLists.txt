@@ -68,6 +68,7 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
         URL_HASH MD5=9e990a4240430cbf567bfe73488a274e
         SOURCE_DIR fetched/mygui
     )
+    set(BUILD_SHARED_LIBS ${MYGUI_STATIC})
     FetchContent_MakeAvailableExcludeFromAll(mygui)
 
     set(MyGUI_INCLUDE_DIRS ${mygui_SOURCE_DIR}/MyGUIEngine/include PARENT_SCOPE)
@@ -111,6 +112,7 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
         URL_HASH MD5=d67088aeb976486287343c1287b56ba3
         SOURCE_DIR fetched/osg
     )
+    set(BUILD_SHARED_LIBS ${OSG_STATIC})
     FetchContent_MakeAvailableExcludeFromAll(osg)
 
     set(OPENSCENEGRAPH_INCLUDE_DIRS ${osg_SOURCE_DIR}/include ${osg_BINARY_DIR}/include PARENT_SCOPE)
