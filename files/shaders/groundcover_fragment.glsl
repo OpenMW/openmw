@@ -49,10 +49,6 @@ void main()
     vec3 viewNormal = gl_NormalMatrix * normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
 
-#if (!@normalMap && @forcePPL && false)
-    vec3 viewNormal = gl_NormalMatrix * normalize(passNormal);
-#endif
-
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
 #else
