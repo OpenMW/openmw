@@ -138,7 +138,7 @@ namespace MWPhysics
             Projectile* getProjectile(int projectileId) const;
 
             // Object or Actor
-            void remove (const MWWorld::Ptr& ptr);
+            void remove (const MWWorld::Ptr& ptr, bool keepObject = false);
 
             void updateScale (const MWWorld::Ptr& ptr);
             void updateRotation (const MWWorld::Ptr& ptr, osg::Quat rotate);

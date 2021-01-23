@@ -318,6 +318,10 @@ namespace MWWorld
                 return false;
             }
 
+            virtual bool isStatic() const {
+                return false;
+            }
+
             virtual bool isBipedal(const MWWorld::ConstPtr& ptr) const;
             virtual bool canFly(const MWWorld::ConstPtr& ptr) const;
             virtual bool canSwim(const MWWorld::ConstPtr& ptr) const;
