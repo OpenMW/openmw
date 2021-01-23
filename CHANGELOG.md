@@ -31,6 +31,7 @@
     Bug #4623: Corprus implementation is incorrect
     Bug #4631: Setting MSAA level too high doesn't fall back to highest supported level
     Bug #4764: Data race in osg ParticleSystem
+    Bug #4765: Data race in ChunkManager -> Array::setBinding
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
     Bug #5101: Hostile followers travel with the player
     Bug #5108: Savegame bloating due to inefficient fog textures format
