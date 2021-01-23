@@ -593,7 +593,7 @@ namespace Gui
 
         if (createCopy)
         {
-            MyGUI::xml::ElementPtr copy = _node->createCopy();
+            std::unique_ptr<MyGUI::xml::Element> copy{_node->createCopy()};
 
             MyGUI::xml::ElementEnumerator copyFont = copy->getElementEnumerator();
             while (copyFont.next("Resource"))
@@ -629,8 +629,7 @@ namespace Gui
                 }
             }
 
-            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
-            delete copy;
+            MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy.get(), _file, _version);
         }
     }
 
