@@ -630,6 +630,7 @@ namespace Gui
             }
 
             MyGUI::ResourceManager::getInstance().loadFromXmlNode(copy, _file, _version);
+            delete copy;
         }
     }
 
