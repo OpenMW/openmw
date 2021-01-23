@@ -32,6 +32,10 @@ namespace MWLua
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
+        selfAPI["setEquipment"] = [](const GObject& obj, const sol::table& equipment)
+        {
+            throw std::logic_error("Not implemented");
+        };
         selfAPI["getCombatTarget"] = [worldView=context.mWorldView](SelfObject& self) -> sol::optional<LObject>
         {
             const MWWorld::Ptr& ptr = self.ptr();

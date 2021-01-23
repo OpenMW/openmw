@@ -3,6 +3,8 @@
 #include <components/lua/luastate.hpp>
 #include <components/queries/luabindings.hpp>
 
+#include "../mwworld/inventorystore.hpp"
+
 #include "eventqueue.hpp"
 #include "worldview.hpp"
 
@@ -19,19 +21,41 @@ namespace MWLua
 
     sol::table initCorePackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        auto* lua = context.mLua;
+        sol::table api(lua->sol(), sol::create);
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData)
         {
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
         api["getGameTimeInSeconds"] = [world=context.mWorldView]() { return world->getGameTimeInSeconds(); };
         api["getGameTimeInHours"] = [world=context.mWorldView]() { return world->getGameTimeInHours(); };
-        api["OBJECT_TYPE"] = definitionList(*context.mLua,
+        api["OBJECT_TYPE"] = definitionList(*lua,
         {
             "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",
             "Light", "Miscellaneous", "NPC", "Player", "Potion", "Static", "Weapon"
         });
-        return context.mLua->makeReadOnly(api);
+        api["EQUIPMENT_SLOT"] = lua->makeReadOnly(lua->sol().create_table_with(
+            "Helmet", MWWorld::InventoryStore::Slot_Helmet,
+            "Cuirass", MWWorld::InventoryStore::Slot_Cuirass,
+            "Greaves", MWWorld::InventoryStore::Slot_Greaves,
+            "LeftPauldron", MWWorld::InventoryStore::Slot_LeftPauldron,
+            "RightPauldron", MWWorld::InventoryStore::Slot_RightPauldron,
+            "LeftGauntlet", MWWorld::InventoryStore::Slot_LeftGauntlet,
+            "RightGauntlet", MWWorld::InventoryStore::Slot_RightGauntlet,
+            "Boots", MWWorld::InventoryStore::Slot_Boots,
+            "Shirt", MWWorld::InventoryStore::Slot_Shirt,
+            "Pants", MWWorld::InventoryStore::Slot_Pants,
+            "Skirt", MWWorld::InventoryStore::Slot_Skirt,
+            "Robe", MWWorld::InventoryStore::Slot_Robe,
+            "LeftRing", MWWorld::InventoryStore::Slot_LeftRing,
+            "RightRing", MWWorld::InventoryStore::Slot_RightRing,
+            "Amulet", MWWorld::InventoryStore::Slot_Amulet,
+            "Belt", MWWorld::InventoryStore::Slot_Belt,
+            "CarriedRight", MWWorld::InventoryStore::Slot_CarriedRight,
+            "CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft,
+            "Ammunition", MWWorld::InventoryStore::Slot_Ammunition
+        ));
+        return lua->makeReadOnly(api);
     }
 
     sol::table initWorldPackage(const Context& context)
@@ -57,6 +81,7 @@ namespace MWLua
             // TODO: Use sqlite to search objects that are not in the scene
             // return GObjectList{worldView->selectObjects(query, false)};
         };
+        // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
         return context.mLua->makeReadOnly(api);
     }
 
