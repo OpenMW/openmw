@@ -75,18 +75,20 @@ namespace
             * osg::Quat(xr, osg::Vec3(-1, 0, 0));
     }
 
-    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, RotationOrder order)
+    osg::Quat makeNodeRotation(const MWWorld::Ptr& ptr, RotationOrder order)
     {
-        if (!ptr.getRefData().getBaseNode())
-            return;
+        const auto pos = ptr.getRefData().getPosition();
 
-        rendering.rotateObject(ptr,
-            ptr.getClass().isActor()
-            ? makeActorOsgQuat(ptr.getRefData().getPosition())
-            : (order == RotationOrder::inverse
-                ? makeInversedOrderObjectOsgQuat(ptr.getRefData().getPosition())
-                : makeObjectOsgQuat(ptr.getRefData().getPosition()))
-        );
+        const auto rot = ptr.getClass().isActor() ? makeActorOsgQuat(pos)
+            : (order == RotationOrder::inverse ? makeInversedOrderObjectOsgQuat(pos) : makeObjectOsgQuat(pos));
+
+        return rot;
+    }
+
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, osg::Quat rotation)
+    {
+        if (ptr.getRefData().getBaseNode())
+            rendering.rotateObject(ptr, rotation);
     }
 
     std::string getModel(const MWWorld::Ptr &ptr, const VFS::Manager *vfs)
@@ -117,11 +119,10 @@ namespace
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
-        else
-            ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
-        setNodeRotation(ptr, rendering, RotationOrder::direct);
 
-        ptr.getClass().insertObject (ptr, model, physics);
+        const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+        setNodeRotation(ptr, rendering, rotation);
+        ptr.getClass().insertObject (ptr, model, rotation, physics);
 
         if (useAnim)
             MWBase::Environment::get().getMechanicsManager()->add(ptr);
@@ -276,7 +277,7 @@ namespace MWWorld
         {
             if (!ptr.getRefData().getBaseNode()) return;
             ptr.getClass().insertObjectRendering(ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
-            setNodeRotation(ptr, mRendering, RotationOrder::direct);
+            setNodeRotation(ptr, mRendering, makeNodeRotation(ptr, RotationOrder::direct));
             reloadTerrain();
         }
     }
@@ -292,8 +293,9 @@ namespace MWWorld
 
     void Scene::updateObjectRotation(const Ptr &ptr, RotationOrder order)
     {
-        setNodeRotation(ptr, mRendering, order);
-        mPhysics->updateRotation(ptr);
+        const auto rot = makeNodeRotation(ptr, order);
+        setNodeRotation(ptr, mRendering, rot);
+        mPhysics->updateRotation(ptr, rot);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
