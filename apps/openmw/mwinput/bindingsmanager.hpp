@@ -1,6 +1,7 @@
 #ifndef MWINPUT_MWBINDINGSMANAGER_H
 #define MWINPUT_MWBINDINGSMANAGER_H
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -64,8 +65,8 @@ namespace MWInput
     private:
         void setupSDLKeyMappings();
 
-        InputControlSystem* mInputBinder;
-        BindingsListener* mListener;
+        std::unique_ptr<InputControlSystem> mInputBinder;
+        std::unique_ptr<BindingsListener> mListener;
 
         std::string mUserFile;
 

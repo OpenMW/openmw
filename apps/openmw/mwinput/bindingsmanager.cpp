@@ -171,16 +171,16 @@ namespace MWInput
         , mDragDrop(false)
     {
         std::string file = userFileExists ? userFile : "";
-        mInputBinder = new InputControlSystem(file);
-        mListener = new BindingsListener(mInputBinder, this);
-        mInputBinder->setDetectingBindingListener(mListener);
+        mInputBinder = std::make_unique<InputControlSystem>(file);
+        mListener = std::make_unique<BindingsListener>(mInputBinder.get(), this);
+        mInputBinder->setDetectingBindingListener(mListener.get());
 
         loadKeyDefaults();
         loadControllerDefaults();
 
         for (int i = 0; i < A_Last; ++i)
         {
-            mInputBinder->getChannel(i)->addListener(mListener);
+            mInputBinder->getChannel(i)->addListener(mListener.get());
         }
     }
 
@@ -192,7 +192,6 @@ namespace MWInput
     BindingsManager::~BindingsManager()
     {
         mInputBinder->save(mUserFile);
-        delete mInputBinder;
     }
 
     void BindingsManager::update(float dt)
@@ -315,7 +314,7 @@ namespace MWInput
                       && mInputBinder->getMouseButtonBinding(control, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS
                       && mInputBinder->getMouseWheelBinding(control, ICS::Control::INCREASE) == ICS::InputControlSystem::MouseWheelClick::UNASSIGNED))
             {
-                clearAllKeyBindings(mInputBinder, control);
+                clearAllKeyBindings(mInputBinder.get(), control);
 
                 if (defaultKeyBindings.find(i) != defaultKeyBindings.end()
                         && (force || !mInputBinder->isKeyBound(defaultKeyBindings[i])))
@@ -402,7 +401,7 @@ namespace MWInput
             if (!controlExists || force || (mInputBinder->getJoystickAxisBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS::InputControlSystem::UNASSIGNED &&
                 mInputBinder->getJoystickButtonBinding(control, sFakeDeviceId, ICS::Control::INCREASE) == ICS_MAX_DEVICE_BUTTONS))
             {
-                clearAllControllerBindings(mInputBinder, control);
+                clearAllControllerBindings(mInputBinder.get(), control);
 
                 if (defaultButtonBindings.find(i) != defaultButtonBindings.end()
                         && (force || !mInputBinder->isJoystickButtonBound(sFakeDeviceId, defaultButtonBindings[i])))
