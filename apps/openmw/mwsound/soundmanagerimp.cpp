@@ -109,7 +109,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        clear();
+        SoundManager::clear();
         mSoundBuffers.clear();
         mOutput.reset();
     }
