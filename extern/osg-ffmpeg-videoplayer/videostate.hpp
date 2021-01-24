@@ -95,7 +95,7 @@ struct VideoPicture {
     VideoPicture() : pts(0.0)
     { }
 
-    std::vector<uint8_t> data;
+    AVFrame* rgbaFrame = nullptr;
     double pts;
 };
 
@@ -160,7 +160,6 @@ struct VideoState {
     PacketQueue videoq;
     SwsContext*  sws_context;
     VideoPicture pictq[VIDEO_PICTURE_ARRAY_SIZE];
-    AVFrame*     rgbaFrame; // used as buffer for the frame converted from its native format to RGBA
     int          pictq_size, pictq_rindex, pictq_windex;
     std::mutex pictq_mutex;
     std::condition_variable pictq_cond;

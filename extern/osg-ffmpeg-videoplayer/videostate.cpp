@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -49,7 +50,7 @@ VideoState::VideoState()
     , av_sync_type(AV_SYNC_DEFAULT)
     , audio_st(nullptr)
     , video_st(nullptr), frame_last_pts(0.0)
-    , video_clock(0.0), sws_context(nullptr), rgbaFrame(nullptr), pictq_size(0)
+    , video_clock(0.0), sws_context(nullptr), pictq_size(0)
     , pictq_rindex(0), pictq_windex(0)
     , mSeekRequested(false)
     , mSeekPos(0)
@@ -220,7 +221,7 @@ void VideoState::video_display(VideoPicture *vp)
         osg::ref_ptr<osg::Image> image = new osg::Image;
 
         image->setImage(this->video_ctx->width, this->video_ctx->height,
-                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &vp->data[0], osg::Image::NO_DELETE);
+                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, vp->rgbaFrame->data[0], osg::Image::NO_DELETE);
 
         mTexture->setImage(image);
     }
@@ -308,11 +309,8 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     }
 
     vp->pts = pts;
-    vp->data.resize(this->video_ctx->width * this->video_ctx->height * 4);
-
-    uint8_t *dst[4] = { &vp->data[0], nullptr, nullptr, nullptr };
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
-              0, this->video_ctx->height, dst, this->rgbaFrame->linesize);
+              0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
@@ -364,9 +362,6 @@ public:
 
         pFrame = av_frame_alloc();
 
-        self->rgbaFrame = av_frame_alloc();
-        av_image_alloc(self->rgbaFrame->data, self->rgbaFrame->linesize, self->video_ctx->width, self->video_ctx->height, AV_PIX_FMT_RGBA, 1);
-
         while(self->videoq.get(packet, self) >= 0)
         {
             if(packet->data == flush_pkt.data)
@@ -407,10 +402,7 @@ public:
 
         av_packet_unref(packet);
 
-        av_free(pFrame);
-
-        av_freep(&self->rgbaFrame->data[0]);
-        av_free(self->rgbaFrame);
+        av_frame_free(&pFrame);
     }
 
 private:
@@ -630,6 +622,25 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
             return -1;
         }
 
+        // Allocate RGBA frame queue.
+        for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i) {
+            AVFrame *frame = av_frame_alloc();
+            if (frame == nullptr) {
+                std::cerr << "av_frame_alloc failed" << std::endl;
+                return -1;
+            }
+
+            constexpr AVPixelFormat kPixFmt = AV_PIX_FMT_RGBA;
+            frame->format = kPixFmt;
+            frame->width = this->video_ctx->width;
+            frame->height = this->video_ctx->height;
+            if (av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, kPixFmt, 1) < 0) {
+                std::cerr << "av_image_alloc failed" << std::endl;
+                return -1;
+            }
+            this->pictq[i].rgbaFrame = frame;
+        }
+
         this->video_thread.reset(new VideoThread(this));
         break;
 
@@ -771,6 +782,14 @@ void VideoState::deinit()
         mTexture->setImage(nullptr);
         mTexture = nullptr;
     }
+
+    // Dellocate RGBA frame queue.
+    for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i) {
+        if (this->pictq[i].rgbaFrame == nullptr) continue;
+        av_freep(&this->pictq[i].rgbaFrame->data[0]);
+        av_frame_free(&this->pictq[i].rgbaFrame);
+    }
+
 }
 
 double VideoState::get_external_clock()
