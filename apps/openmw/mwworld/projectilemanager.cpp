@@ -428,6 +428,9 @@ namespace MWWorld
     {
         for (auto& projectileState : mProjectiles)
         {
+            if (projectileState.mToDelete)
+                continue;
+
             auto* projectile = mPhysics->getProjectile(projectileState.mProjectileId);
             if (!projectile->isActive())
                 continue;
