@@ -127,6 +127,14 @@ else()
 endif()
 option(MYGUI_STATIC "Link static build of Mygui into the binaries" ${_mygui_static_default})
 
+option(OPENMW_USE_SYSTEM_RECASTNAVIGATION "Use system provided recastnavigation library" OFF)
+if(OPENMW_USE_SYSTEM_RECASTNAVIGATION)
+    set(_recastnavigation_static_default OFF)
+else()
+    set(_recastnavigation_static_default ON)
+endif()
+option(RECASTNAVIGATION_STATIC "Build recastnavigation static libraries" ${_recastnavigation_static_default})
+
 option(OPENMW_UNITY_BUILD "Use fewer compilation units to speed up compile time" FALSE)
 option(OPENMW_LTO_BUILD "Build OpenMW with Link-Time Optimization (Needs ~2GB of RAM)" OFF)
 
@@ -482,9 +490,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 
 # Extern
-set(RECASTNAVIGATION_STATIC ON CACHE BOOL "Build recastnavigation static libraries")
 
-add_subdirectory (extern/recastnavigation EXCLUDE_FROM_ALL)
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 if (BUILD_OPENCS)

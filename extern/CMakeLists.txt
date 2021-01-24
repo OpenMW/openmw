@@ -129,3 +129,24 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
         set(${_name_uc}_LIBRARY ${_name} PARENT_SCOPE)
     endforeach()
 endif()
+
+if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
+    if(RECASTNAVIGATION_STATIC)
+        set(BUILD_SHARED_LIBS OFF)
+    else()
+        set(BUILD_SHARED_LIBS ON)
+    endif()
+
+    set(RECASTNAVIGATION_DEMO OFF CACHE BOOL "")
+    set(RECASTNAVIGATION_TESTS OFF CACHE BOOL "")
+    set(RECASTNAVIGATION_EXAMPLES OFF CACHE BOOL "")
+
+    # master on 15 Feb 2021
+    include(FetchContent)
+    FetchContent_Declare(recastnavigation
+        URL https://github.com/recastnavigation/recastnavigation/archive/e75adf86f91eb3082220085e42dda62679f9a3ea.zip
+        URL_HASH MD5=af905d121ef9d1cdfa979b0495cba059
+        SOURCE_DIR fetched/recastnavigation
+    )
+    FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
+endif()
