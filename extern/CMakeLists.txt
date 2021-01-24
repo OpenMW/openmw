@@ -112,8 +112,8 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     # branch OpenSceneGraph-3.6 on 23 Jan 2021.
     include(FetchContent)
     FetchContent_Declare(osg
-        URL https://github.com/openscenegraph/OpenSceneGraph/archive/b8862d04203c7d5576fc8189fe4df83c4e855b9b.zip
-        URL_HASH MD5=d80a42eb9c983c08b40ecd103bae03f4
+        URL https://github.com/OpenMW/osg/archive/e65f47c4ab3a0b53cc19f517961671e5f840a08d.zip
+        URL_HASH MD5=0c967fe48d80744f6956f6b0b67ef7c6
         SOURCE_DIR fetched/osg
     )
     FetchContent_MakeAvailableExcludeFromAll(osg)
