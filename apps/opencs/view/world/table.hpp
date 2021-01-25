@@ -141,6 +141,8 @@ namespace CSVWorld
 
             void moveDownRecord();
 
+            void moveRecords(QDropEvent *event);
+
             void viewRecord();
 
             void previewRecord();

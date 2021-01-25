@@ -23,6 +23,7 @@
     Bug #4083: Door animation freezes when colliding with actors
     Bug #4201: Projectile-projectile collision
     Bug #4247: Cannot walk up stairs in Ebonheart docks
+    Bug #4357: OpenMW-CS: TopicInfos index sorting and rearranging isn't fully functional
     Bug #4363: Editor: Defect in Clone Function for Dialogue Info records
     Bug #4447: Actor collision capsule shape allows looking through some walls
     Bug #4465: Collision shape overlapping causes twitching

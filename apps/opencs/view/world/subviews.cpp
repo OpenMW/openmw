@@ -75,10 +75,10 @@ void CSVWorld::addSubViewFactories (CSVDoc::SubViewFactoryManager& manager)
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, JournalCreatorFactory>);
 
     manager.add (CSMWorld::UniversalId::Type_TopicInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>(false));
 
     manager.add (CSMWorld::UniversalId::Type_JournalInfos,
-        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>);
+        new CSVDoc::SubViewFactoryWithCreator<TableSubView, InfoCreatorFactory>(false));
 
     manager.add (CSMWorld::UniversalId::Type_Pathgrids,
         new CSVDoc::SubViewFactoryWithCreator<TableSubView, PathgridCreatorFactory>);
