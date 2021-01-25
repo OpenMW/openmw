@@ -14,7 +14,7 @@ namespace MWClass
             void insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const override;
             ///< Add reference into a cell for rendering
 
-            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
+            void insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const override;
 
             std::string getName (const MWWorld::ConstPtr& ptr) const override;
             ///< \return name or ID; can return an empty string.
@@ -25,6 +25,8 @@ namespace MWClass
             static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
+
+            bool isStatic() const override;
     };
 }
 

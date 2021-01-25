@@ -456,20 +456,20 @@ namespace MWPhysics
         return heightField->second.get();
     }
 
-    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType)
+    void PhysicsSystem::addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType)
     {
         osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
         if (!shapeInstance || !shapeInstance->getCollisionShape())
             return;
 
-        auto obj = std::make_shared<Object>(ptr, shapeInstance, collisionType, mTaskScheduler.get());
+        auto obj = std::make_shared<Object>(ptr, shapeInstance, rotation, collisionType, mTaskScheduler.get());
         mObjects.emplace(ptr, obj);
 
         if (obj->isAnimated())
             mAnimatedObjects.insert(obj.get());
     }
 
-    void PhysicsSystem::remove(const MWWorld::Ptr &ptr)
+    void PhysicsSystem::remove(const MWWorld::Ptr &ptr, bool keepObject)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -479,7 +479,8 @@ namespace MWPhysics
 
             mAnimatedObjects.erase(found->second.get());
 
-            mObjects.erase(found);
+            if (!keepObject)
+                mObjects.erase(found);
         }
 
         ActorMap::iterator foundActor = mActors.find(ptr);
@@ -621,12 +622,12 @@ namespace MWPhysics
         mTaskScheduler->updateSingleAabb(foundProjectile->second);
     }
 
-    void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr)
+    void PhysicsSystem::updateRotation(const MWWorld::Ptr &ptr, osg::Quat rotate)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
         {
-            found->second->setRotation(Misc::Convert::toBullet(ptr.getRefData().getBaseNode()->getAttitude()));
+            found->second->setRotation(rotate);
             mTaskScheduler->updateSingleAabb(found->second);
             return;
         }
@@ -635,7 +636,7 @@ namespace MWPhysics
         {
             if (!foundActor->second->isRotationallyInvariant())
             {
-                foundActor->second->updateRotation();
+                foundActor->second->setRotation(rotate);
                 mTaskScheduler->updateSingleAabb(foundActor->second);
             }
             return;

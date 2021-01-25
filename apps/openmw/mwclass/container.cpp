@@ -111,10 +111,10 @@ namespace MWClass
         }
     }
 
-    void Container::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
+    void Container::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
-            physics.addObject(ptr, model);
+            physics.addObject(ptr, model, rotation);
     }
 
     std::string Container::getModel(const MWWorld::ConstPtr &ptr) const
