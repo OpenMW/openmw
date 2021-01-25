@@ -87,8 +87,6 @@ namespace MWMechanics
 
             int getLevelProgress() const;
 
-            int getLevelUpAttributeIncrease(int attribute) const;
-
             int getLevelupAttributeMultiplier(int attribute) const;
 
             int getSkillIncreasesForSpecialization(int spec) const;
