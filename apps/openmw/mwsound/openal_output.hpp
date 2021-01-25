@@ -99,9 +99,6 @@ namespace MWSound
         OpenAL_Output(const DecoderProvider& decoderBuilder);
         virtual ~OpenAL_Output();
     };
-#ifndef DEFAULT_OUTPUT
-#define DEFAULT_OUTPUT(x) ::MWSound::OpenAL_Output((x))
-#endif
 }
 
 #endif

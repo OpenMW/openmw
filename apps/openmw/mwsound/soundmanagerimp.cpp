@@ -54,7 +54,7 @@ namespace MWSound
 
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
-        , mOutput(new DEFAULT_OUTPUT(*this))
+        , mOutput(new OpenAL_Output(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*vfs, *mOutput)
         , mListenerUnderwater(false)
