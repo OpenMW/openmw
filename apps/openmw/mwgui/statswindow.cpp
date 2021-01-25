@@ -337,21 +337,22 @@ namespace MWGui
             int max = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i==0 ? "Level_str" : "LevelText");
 
-            std::stringstream detail;
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
-            {
-                if (auto increase = PCstats.getLevelUpAttributeIncrease(i))
-                    detail << (detail.str().empty() ? "" : "\n") << "#{"
-                    << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[i])
-                    << "} x" << MyGUI::utility::toString(increase);
-            }
-            if (!detail.str().empty())
-                levelWidget->setUserString("Caption_LevelDetailText", MyGUI::LanguageManager::getInstance().replaceTags(detail.str()));
             levelWidget->setUserString("RangePosition_LevelProgress", MyGUI::utility::toString(PCstats.getLevelProgress()));
             levelWidget->setUserString("Range_LevelProgress", MyGUI::utility::toString(max));
             levelWidget->setUserString("Caption_LevelProgressText", MyGUI::utility::toString(PCstats.getLevelProgress()) + "/"
                                        + MyGUI::utility::toString(max));
         }
+        std::stringstream detail;
+        for (int attribute = 0; attribute < ESM::Attribute::Length; ++attribute)
+        {
+            float mult = PCstats.getLevelupAttributeMultiplier(attribute);
+            mult = std::min(mult, 100 - PCstats.getAttribute(attribute).getBase());
+            if (mult > 1)
+                detail << (detail.str().empty() ? "" : "\n") << "#{"
+                << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[attribute])
+                << "} x" << MyGUI::utility::toString(mult);
+        }
+        levelWidget->setUserString("Caption_LevelDetailText", MyGUI::LanguageManager::getInstance().replaceTags(detail.str()));
 
         setFactions(PCstats.getFactionRanks());
         setExpelled(PCstats.getExpelled ());
