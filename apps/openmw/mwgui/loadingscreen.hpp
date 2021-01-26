@@ -87,8 +87,6 @@ namespace MWGui
 
         osg::ref_ptr<osg::Texture2D> mTexture;
         osg::ref_ptr<CopyFramebufferToTextureCallback> mCopyFramebufferToTextureCallback;
-        osg::ref_ptr<osg::Camera::DrawCallback> mOldCallback;
-        bool mHasCallback;
         std::unique_ptr<MyGUI::ITexture> mGuiTexture;
 
         void changeWallpaper();
