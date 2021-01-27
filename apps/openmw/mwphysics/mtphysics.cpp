@@ -540,6 +540,8 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
+        if (!stats.collectStats("engine"))
+            return;
         if (mFrameNumber == frameNumber - 1)
         {
             stats.setAttribute(mFrameNumber, "physicsworker_time_begin", mTimer->delta_s(mFrameStart, mTimeBegin));
