@@ -16,6 +16,11 @@ endif()
 # Detect OS
 include(cmake/OSIdentity.cmake)
 
+option(OPENMW_GL4ES_MANUAL_INIT "Manually initialize gl4es. This is more reliable on platforms without a windowing system. Requires gl4es to be configured with -DNOEGL=ON -DNO_LOADER=ON -DNO_INIT_CONSTRUCTOR=ON." OFF)
+if(OPENMW_GL4ES_MANUAL_INIT)
+    add_definitions(-DOPENMW_GL4ES_MANUAL_INIT)
+endif()
+
 # Apps and tools
 option(BUILD_OPENMW             "Build OpenMW" ON)
 option(BUILD_LAUNCHER           "Build Launcher" ON)
