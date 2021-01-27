@@ -177,6 +177,8 @@ namespace
 
             ~ScopedProfile()
             {
+                if (!mStats.collectStats("engine"))
+                    return;
                 const osg::Timer_t end = mTimer.tick();
                 const UserStats& stats = UserStatsValue<sType>::sValue;
 
@@ -863,15 +865,28 @@ void OMW::Engine::go()
 
     prepareEngine (settings);
 
+    std::ofstream stats;
+    if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
+    {
+        stats.open(path, std::ios_base::out);
+        if (stats.is_open())
+            Log(Debug::Info) << "Stats will be written to: " << path;
+        else
+            Log(Debug::Warning) << "Failed to open file for stats: " << path;
+    }
+
     // Setup profiler
-    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler;
+    osg::ref_ptr<Resource::Profiler> statshandler = new Resource::Profiler(stats.is_open());
 
     initStatsHandler(*statshandler);
 
     mViewer->addEventHandler(statshandler);
 
-    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler;
+    osg::ref_ptr<Resource::StatsHandler> resourceshandler = new Resource::StatsHandler(stats.is_open());
     mViewer->addEventHandler(resourceshandler);
+
+    if (stats.is_open())
+        Resource::CollectStatistics(mViewer);
 
     // Start the game
     if (!mSaveGameFile.empty())
@@ -895,14 +910,6 @@ void OMW::Engine::go()
     if (!mStartupScript.empty() && mEnvironment.getStateManager()->getState() == MWState::StateManager::State_Running)
     {
         mEnvironment.getWindowManager()->executeInConsole(mStartupScript);
-    }
-
-    std::ofstream stats;
-    if (const auto path = std::getenv("OPENMW_OSG_STATS_FILE"))
-    {
-        stats.open(path, std::ios_base::out);
-        if (!stats)
-            Log(Debug::Warning) << "Failed to open file for stats: " << path;
     }
 
     // Start the main rendering loop
