@@ -62,13 +62,11 @@ vec2 groundcoverDisplacement(in vec3 worldpos, float h)
     harmonics += vec2((1.0 + 0.28*v) * sin(5.0*osg_SimulationTime + worldpos.xy / 200.0));
 
     float d = length(worldpos - footPos.xyz);
-    vec3 stomp = vec3(0.0);
+    vec2 stomp = vec2(0.0);
     if (d < 150.0 && d > 0.0)
-    {
-        stomp = (60.0 / d - 0.4) * (worldpos - footPos.xyz);
-    }
+        stomp = (60.0 / d - 0.4) * (worldpos.xy - footPos.xy);
 
-    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp.xy);
+    return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp);
 }
 
 mat4 rotation(in vec3 angle)
