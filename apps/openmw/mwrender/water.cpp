@@ -244,7 +244,7 @@ public:
         setCullCallback(new InheritViewPointCallback);
         setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting|Mask_Groundcover);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 
@@ -372,12 +372,13 @@ public:
     void setInterior(bool isInterior)
     {
         int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
+        reflectionDetail = std::min(5, std::max(isInterior ? 2 : 0, reflectionDetail));
         unsigned int extraMask = 0;
         if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
         if(reflectionDetail >= 2) extraMask |= Mask_Static;
         if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
         if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
         setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
     }
 

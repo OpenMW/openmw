@@ -127,6 +127,7 @@
     Feature #5692: Improve spell/magic item search to factor in magic effect names
     Feature #5730: Add graphic herbalism option to the launcher and documents
     Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
+    Feature #5813: Instanced groundcover support
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 

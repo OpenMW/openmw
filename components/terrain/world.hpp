@@ -106,6 +106,7 @@ namespace Terrain
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage, int nodeMask, int preCompileMask, int borderMask);
+        World(osg::Group* parent, Storage* storage, int nodeMask);
         virtual ~World();
 
         /// Set a WorkQueue to delete objects in the background thread.

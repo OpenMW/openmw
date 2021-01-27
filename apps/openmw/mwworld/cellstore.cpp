@@ -687,7 +687,11 @@ namespace MWWorld
             case ESM::REC_NPC_: mNpcs.load(ref, deleted, store); break;
             case ESM::REC_PROB: mProbes.load(ref, deleted, store); break;
             case ESM::REC_REPA: mRepairs.load(ref, deleted, store); break;
-            case ESM::REC_STAT: mStatics.load(ref, deleted, store); break;
+            case ESM::REC_STAT:
+            {
+                if (ref.mRefNum.fromGroundcoverFile()) return;
+                mStatics.load(ref, deleted, store); break;
+            }
             case ESM::REC_WEAP: mWeapons.load(ref, deleted, store); break;
             case ESM::REC_BODY: mBodyParts.load(ref, deleted, store); break;
 

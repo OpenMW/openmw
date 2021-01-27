@@ -100,6 +100,7 @@ bool Config::GameSettings::readFile(QTextStream &stream, QMultiMap<QString, QStr
             if (key != QLatin1String("data")
                 && key != QLatin1String("fallback-archive")
                 && key != QLatin1String("content")
+                && key != QLatin1String("groundcover")
                 && key != QLatin1String("script-blacklist"))
                 settings.remove(key);
 
@@ -200,6 +201,7 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
            || line.contains(QRegExp("^\\s*data\\s*="))
            || line.contains(QRegExp("^\\s*data-local\\s*="))
            || line.contains(QRegExp("^\\s*resources\\s*="))
+           || line.contains(QRegExp("^\\s*groundcover\\s*="))
            || line.contains(QRegExp("^\\s*content\\s*="));
 }
 

@@ -76,7 +76,7 @@ namespace Resource
         Shader::ShaderManager& getShaderManager();
 
         /// Re-create shaders for this node, need to call this if texture stages or vertex color mode have changed.
-        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool translucentFramebuffer = false);
+        void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool translucentFramebuffer = false, bool forceShadersForNode = false);
 
         /// @see ShaderVisitor::setForceShaders
         void setForceShaders(bool force);
