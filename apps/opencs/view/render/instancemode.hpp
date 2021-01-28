@@ -28,7 +28,7 @@ namespace CSVRender
 
             enum DropMode
             {
-                Separate = 0x1,
+                Separate = 0b1,
 
                 Collision = 0b10,
                 Terrain = 0b100,
