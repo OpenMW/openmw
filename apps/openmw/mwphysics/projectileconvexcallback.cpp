@@ -55,7 +55,9 @@ namespace MWPhysics
                 }
             default:
                 {
-                    mProjectile->hit(MWWorld::Ptr(), m_hitPointWorld, m_hitNormalWorld);
+                    auto* target = static_cast<PtrHolder*>(result.m_hitCollisionObject->getUserPointer());
+                    auto ptr = target ? target->getPtr() : MWWorld::Ptr();
+                    mProjectile->hit(ptr, m_hitPointWorld, m_hitNormalWorld);
                     break;
                 }
         }
