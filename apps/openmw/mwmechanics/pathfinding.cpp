@@ -309,7 +309,7 @@ namespace MWMechanics
         if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
             mPath.pop_front();
 
-        if (mPath.size() == 1 && (mPath.front() - position).length2() < destinationTolerance * destinationTolerance)
+        if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
             mPath.pop_front();
     }
 
