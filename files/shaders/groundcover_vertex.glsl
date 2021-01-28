@@ -68,8 +68,10 @@ vec2 groundcoverDisplacement(in vec3 worldpos, float h)
     float d = length(worldpos.xy - footPos.xy);
 #endif
     vec2 stomp = vec2(0.0);
-    if (d < 150.0 && d > 0.0)
-        stomp = (60.0 / d - 0.4) * (worldpos.xy - footPos.xy);
+    const float STOMP_RANGE = 150.0; // maximum distance from player that grass is affected by stomping
+    const float STOMP_DISTANCE = 60.0; // maximum distance stomping can move grass
+    if (d < STOMP_RANGE && d > 0.0)
+        stomp = (STOMP_DISTANCE / d - STOMP_DISTANCE / STOMP_RANGE) * (worldpos.xy - footPos.xy);
 
 #if 1
     stomp *= clamp((worldpos.z - footPos.z) / h, 0.0, 1.0);
