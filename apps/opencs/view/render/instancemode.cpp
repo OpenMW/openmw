@@ -854,12 +854,12 @@ void CSVRender::InstanceMode::dropSelectedInstancesToTerrain()
 
 void CSVRender::InstanceMode::dropSelectedInstancesToCollisionSeparately()
 {
-    handleDropMethod(TerrainSep, "Drop instances to next collision level separately");
+    handleDropMethod(CollisionSep, "Drop instances to next collision level separately");
 }
 
 void CSVRender::InstanceMode::dropSelectedInstancesToTerrainSeparately()
 {
-    handleDropMethod(CollisionSep, "Drop instances to terrain level separately");
+    handleDropMethod(TerrainSep, "Drop instances to terrain level separately");
 }
 
 void CSVRender::InstanceMode::handleDropMethod(DropMode dropMode, QString commandMsg)
