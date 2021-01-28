@@ -61,10 +61,19 @@ vec2 groundcoverDisplacement(in vec3 worldpos, float h)
     harmonics += vec2((1.0 + 0.14*v) * sin(3.0*osg_SimulationTime + worldpos.xy / 500.0));
     harmonics += vec2((1.0 + 0.28*v) * sin(5.0*osg_SimulationTime + worldpos.xy / 200.0));
 
+#if 0
+    // akortunov's height adjustment
     float d = length(worldpos - footPos.xyz);
+#else
+    float d = length(worldpos.xy - footPos.xy);
+#endif
     vec2 stomp = vec2(0.0);
     if (d < 150.0 && d > 0.0)
         stomp = (60.0 / d - 0.4) * (worldpos.xy - footPos.xy);
+
+#if 1
+    stomp *= clamp((worldpos.z - footPos.z) / h, 0.0, 1.0);
+#endif
 
     return clamp(0.02 * h, 0.0, 1.0) * (harmonics * displace + stomp);
 }
