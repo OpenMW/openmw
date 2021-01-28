@@ -56,7 +56,7 @@ namespace CSVRender
             osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
             osg::Vec3f getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
             void handleSelectDrag(const QPoint& pos);
-            void dropInstance(CSVRender::Object* object, float objectHeight);
+            void dropInstance(CSVRender::Object* object, float dropHeight);
             float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
         public:
