@@ -1420,7 +1420,7 @@ namespace MWWorld
             mWorldScene->removeFromPagedRefs(ptr);
 
             mRendering->rotateObject(ptr, rotate);
-            mPhysics->updateRotation(ptr, rotate);
+            mPhysics->updateRotation(ptr);
 
             if (const auto object = mPhysics->getObject(ptr))
                 updateNavigatorObject(object);

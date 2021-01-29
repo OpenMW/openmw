@@ -17,12 +17,16 @@
 
 namespace MWClass
 {
+    Actor::Actor() {}
+
+    Actor::~Actor() {}
+
     void Actor::adjustPosition(const MWWorld::Ptr& ptr, bool force) const
     {
         MWBase::Environment::get().getWorld()->adjustPosition(ptr, force);
     }
 
-    void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const
+    void Actor::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if (!model.empty())
         {

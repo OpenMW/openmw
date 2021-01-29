@@ -49,7 +49,7 @@ namespace MWPhysics
         void enableCollisionBody(bool collision);
 
         void updateScale();
-        void setRotation(osg::Quat quat);
+        void updateRotation();
 
         /**
          * Return true if the collision shape looks the same no matter how its Z rotated.

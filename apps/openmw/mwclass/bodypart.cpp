@@ -22,6 +22,10 @@ namespace MWClass
         }
     }
 
+    void BodyPart::insertObject(const MWWorld::Ptr &ptr, const std::string &model, MWPhysics::PhysicsSystem &physics) const
+    {
+    }
+
     std::string BodyPart::getName(const MWWorld::ConstPtr &ptr) const
     {
         return std::string();
