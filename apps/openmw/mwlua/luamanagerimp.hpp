@@ -49,6 +49,15 @@ namespace MWLua
         // Used only in luabindings.cpp
         void addLocalScript(const MWWorld::Ptr&, const std::string& scriptPath);
 
+        // Saving
+        void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
+        void saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data) override;
+
+        // Loading from a save
+        void readRecord(ESM::ESMReader& reader, uint32_t type) override;
+        void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) override;
+        void setContentFileMapping(const std::map<int, int>& mapping) override { mContentFileMapping = mapping; }
+
     private:
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr);
 
@@ -68,6 +77,10 @@ namespace MWLua
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;
+
+        std::map<int, int> mContentFileMapping;
+        std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalLoader;
+        std::unique_ptr<LuaUtil::UserdataSerializer> mLocalLoader;
 
         std::vector<SDL_Keysym> mKeyPressEvents;
         std::vector<ObjectId> mActorAddedEvents;

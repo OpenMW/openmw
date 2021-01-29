@@ -3,6 +3,22 @@
 
 #include "object.hpp"
 
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+}
+
+namespace LuaUtil
+{
+    class UserdataSerializer;
+}
+
+namespace sol
+{
+    class state;
+}
+
 namespace MWLua
 {
     struct GlobalEvent
@@ -18,6 +34,10 @@ namespace MWLua
     };
     using GlobalEventQueue = std::vector<GlobalEvent>;
     using LocalEventQueue = std::vector<LocalEvent>;
+
+    void loadEvents(sol::state& lua, ESM::ESMReader& esm, GlobalEventQueue&, LocalEventQueue&,
+                    const std::map<int, int>& contentFileMapping, const LuaUtil::UserdataSerializer* serializer);
+    void saveEvents(ESM::ESMWriter& esm, const GlobalEventQueue&, const LocalEventQueue&);
 }
 
 #endif // MWLUA_EVENTQUEUE_H

@@ -8,6 +8,18 @@ namespace MWWorld
     class Ptr;
 }
 
+namespace Loading
+{
+    class Listener;
+}
+
+namespace ESM
+{
+    class ESMReader;
+    class ESMWriter;
+    class LuaScripts;
+}
+
 namespace MWBase
 {
 
@@ -35,6 +47,18 @@ namespace MWBase
 
         virtual void clear() = 0;
         virtual void setupPlayer(const MWWorld::Ptr&) = 0;
+
+        // Saving
+        int countSavedGameRecords() const { return 1; };
+        virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
+        virtual void saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data) = 0;
+
+        // Loading from a save
+        virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
+        virtual void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) = 0;
+
+        // Should be called before loading. The map is used to fix refnums if the order of content files was changed.
+        virtual void setContentFileMapping(const std::map<int, int>&) = 0;
     };
 
 }

@@ -1,6 +1,11 @@
 #include "luamanagerimp.hpp"
 
 #include <components/debug/debuglog.hpp>
+
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+#include <components/esm/luascripts.hpp>
+
 #include <components/lua/utilpackage.hpp>
 
 #include "../mwworld/class.hpp"
@@ -15,8 +20,12 @@ namespace MWLua
     LuaManager::LuaManager(const VFS::Manager* vfs) : mLua(vfs)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
+
         mGlobalSerializer = createUserdataSerializer(false, mWorldView.getObjectRegistry());
         mLocalSerializer = createUserdataSerializer(true, mWorldView.getObjectRegistry());
+        mGlobalLoader = createUserdataSerializer(false, mWorldView.getObjectRegistry(), &mContentFileMapping);
+        mLocalLoader = createUserdataSerializer(true, mWorldView.getObjectRegistry(), &mContentFileMapping);
+
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
 
         Context context;
@@ -210,4 +219,56 @@ namespace MWLua
         return refData.getLuaScripts();
     }
 
+    void LuaManager::write(ESM::ESMWriter& writer, Loading::Listener& progress)
+    {
+        writer.startRecord(ESM::REC_LUAM);
+
+        mWorldView.save(writer);
+        ESM::LuaScripts globalScripts;
+        mGlobalScripts.save(globalScripts);
+        globalScripts.save(writer);
+        saveEvents(writer, mGlobalEvents, mLocalEvents);
+
+        writer.endRecord(ESM::REC_LUAM);
+    }
+
+    void LuaManager::readRecord(ESM::ESMReader& reader, uint32_t type)
+    {
+        if (type != ESM::REC_LUAM)
+            throw std::runtime_error("ESM::REC_LUAM is expected");
+
+        mWorldView.load(reader);
+        ESM::LuaScripts globalScripts;
+        globalScripts.load(reader);
+        loadEvents(mLua.sol(), reader, mGlobalEvents, mLocalEvents, mContentFileMapping, mGlobalLoader.get());
+
+        mGlobalScripts.setSerializer(mGlobalLoader.get());
+        mGlobalScripts.load(globalScripts, false);
+        mGlobalScripts.setSerializer(mGlobalSerializer.get());
+    }
+
+    void LuaManager::saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data)
+    {
+        if (ptr.getRefData().getLuaScripts())
+            ptr.getRefData().getLuaScripts()->save(data);
+        else
+            data.mScripts.clear();
+    }
+
+    void LuaManager::loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data)
+    {
+        if (data.mScripts.empty())
+        {
+            if (ptr.getRefData().getLuaScripts())
+                ptr.getRefData().setLuaScripts(nullptr);
+            return;
+        }
+
+        mWorldView.getObjectRegistry()->registerPtr(ptr);
+        LocalScripts* scripts = createLocalScripts(ptr);
+
+        scripts->setSerializer(mLocalLoader.get());
+        scripts->load(data, true);
+        scripts->setSerializer(mLocalSerializer.get());
+    }
 }

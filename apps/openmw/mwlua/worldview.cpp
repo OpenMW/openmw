@@ -1,5 +1,8 @@
 #include "worldview.hpp"
 
+#include <components/esm/esmreader.hpp>
+#include <components/esm/esmwriter.hpp>
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
 
@@ -41,6 +44,20 @@ namespace MWLua
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::TimeStamp timeStamp = world->getTimeStamp();
         return static_cast<double>(timeStamp.getDay()) * 24 + timeStamp.getHour();
+    }
+
+    void WorldView::load(ESM::ESMReader& esm)
+    {
+        esm.getHNT(mGameSeconds, "LUAW");
+        ObjectId lastAssignedId;
+        lastAssignedId.load(esm, true);
+        mObjectRegistry.setLastAssignedId(lastAssignedId);
+    }
+
+    void WorldView::save(ESM::ESMWriter& esm) const
+    {
+        esm.writeHNT("LUAW", mGameSeconds);
+        mObjectRegistry.getLastAssignedId().save(esm, true);
     }
 
     void WorldView::ObjectGroup::updateList()

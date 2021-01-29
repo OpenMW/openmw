@@ -11,8 +11,8 @@ namespace MWLua
     class Serializer final : public LuaUtil::UserdataSerializer
     {
     public:
-        explicit Serializer(bool localSerializer, ObjectRegistry* registry)
-            : mLocalSerializer(localSerializer), mObjectRegistry(registry) {}
+        explicit Serializer(bool localSerializer, ObjectRegistry* registry, std::map<int, int>* contentFileMapping)
+            : mLocalSerializer(localSerializer), mObjectRegistry(registry), mContentFileMapping(contentFileMapping) {}
 
     private:
         // Appends serialized sol::userdata to the end of BinaryData.
@@ -43,6 +43,12 @@ namespace MWLua
                 std::memcpy(&id, binaryData.data(), sizeof(ObjectId));
                 id.mIndex = Misc::fromLittleEndian(id.mIndex);
                 id.mContentFile = Misc::fromLittleEndian(id.mContentFile);
+                if (id.hasContentFile() && mContentFileMapping)
+                {
+                    auto iter = mContentFileMapping->find(id.mContentFile);
+                    if (iter != mContentFileMapping->end())
+                        id.mContentFile = iter->second;
+                }
                 if (mLocalSerializer)
                     sol::stack::push<LObject>(lua, LObject(id, mObjectRegistry));
                 else
@@ -54,11 +60,13 @@ namespace MWLua
 
         bool mLocalSerializer;
         ObjectRegistry* mObjectRegistry;
+        std::map<int, int>* mContentFileMapping;
     };
 
-    std::unique_ptr<LuaUtil::UserdataSerializer> createUserdataSerializer(bool local, ObjectRegistry* registry)
+    std::unique_ptr<LuaUtil::UserdataSerializer> createUserdataSerializer(
+        bool local, ObjectRegistry* registry, std::map<int, int>* contentFileMapping)
     {
-        return std::make_unique<Serializer>(local, registry);
+        return std::make_unique<Serializer>(local, registry, contentFileMapping);
     }
 
 }

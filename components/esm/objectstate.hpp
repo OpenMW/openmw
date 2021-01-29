@@ -6,6 +6,7 @@
 
 #include "cellref.hpp"
 #include "locals.hpp"
+#include "luascripts.hpp"
 #include "animationstate.hpp"
 
 namespace ESM
@@ -27,6 +28,7 @@ namespace ESM
 
         unsigned char mHasLocals;
         Locals mLocals;
+        LuaScripts mLuaScripts;
         unsigned char mEnabled;
         int mCount;
         ESM::Position mPosition;

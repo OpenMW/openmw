@@ -3,6 +3,12 @@
 
 #include "object.hpp"
 
+namespace ESM
+{
+    class ESMWriter;
+    class ESMReader;
+}
+
 namespace MWLua
 {
 
@@ -30,6 +36,9 @@ namespace MWLua
 
         void objectAddedToScene(const MWWorld::Ptr& ptr);
         void objectRemovedFromScene(const MWWorld::Ptr& ptr);
+
+        void load(ESM::ESMReader& esm);
+        void save(ESM::ESMWriter& esm) const;
 
     private:
         struct ObjectGroup
