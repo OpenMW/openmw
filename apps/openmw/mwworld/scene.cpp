@@ -75,20 +75,18 @@ namespace
             * osg::Quat(xr, osg::Vec3(-1, 0, 0));
     }
 
-    osg::Quat makeNodeRotation(const MWWorld::Ptr& ptr, RotationOrder order)
+    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, RotationOrder order)
     {
-        const auto pos = ptr.getRefData().getPosition();
+        if (!ptr.getRefData().getBaseNode())
+            return;
 
-        const auto rot = ptr.getClass().isActor() ? makeActorOsgQuat(pos)
-            : (order == RotationOrder::inverse ? makeInversedOrderObjectOsgQuat(pos) : makeObjectOsgQuat(pos));
-
-        return rot;
-    }
-
-    void setNodeRotation(const MWWorld::Ptr& ptr, MWRender::RenderingManager& rendering, osg::Quat rotation)
-    {
-        if (ptr.getRefData().getBaseNode())
-            rendering.rotateObject(ptr, rotation);
+        rendering.rotateObject(ptr,
+            ptr.getClass().isActor()
+            ? makeActorOsgQuat(ptr.getRefData().getPosition())
+            : (order == RotationOrder::inverse
+                ? makeInversedOrderObjectOsgQuat(ptr.getRefData().getPosition())
+                : makeObjectOsgQuat(ptr.getRefData().getPosition()))
+        );
     }
 
     std::string getModel(const MWWorld::Ptr &ptr, const VFS::Manager *vfs)
@@ -105,7 +103,7 @@ namespace
     }
 
     void addObject(const MWWorld::Ptr& ptr, MWPhysics::PhysicsSystem& physics,
-                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs, bool onlyPhysics)
+                   MWRender::RenderingManager& rendering, std::set<ESM::RefNum>& pagedRefs)
     {
         if (ptr.getRefData().getBaseNode() || physics.getActor(ptr))
         {
@@ -113,31 +111,26 @@ namespace
             return;
         }
 
+        bool useAnim = ptr.getClass().useAnim();
         std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
-        const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
-        if (!onlyPhysics)
-        {
-            bool useAnim = ptr.getClass().useAnim();
 
-            const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
-            if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
-                ptr.getClass().insertObjectRendering(ptr, model, rendering);
-            else
-                ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
+        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        if (!refnum.hasContentFile() || pagedRefs.find(refnum) == pagedRefs.end())
+            ptr.getClass().insertObjectRendering(ptr, model, rendering);
+        else
+            ptr.getRefData().setBaseNode(new SceneUtil::PositionAttitudeTransform); // FIXME remove this when physics code is fixed not to depend on basenode
+        setNodeRotation(ptr, rendering, RotationOrder::direct);
 
-            setNodeRotation(ptr, rendering, rotation);
+        ptr.getClass().insertObject (ptr, model, physics);
 
-            if (useAnim)
-                MWBase::Environment::get().getMechanicsManager()->add(ptr);
+        if (useAnim)
+            MWBase::Environment::get().getMechanicsManager()->add(ptr);
 
-            if (ptr.getClass().isActor())
-                rendering.addWaterRippleEmitter(ptr);
+        if (ptr.getClass().isActor())
+            rendering.addWaterRippleEmitter(ptr);
 
-            // Restore effect particles
-            MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
-        }
-        if (!physics.getObject(ptr))
-            ptr.getClass().insertObject (ptr, model, rotation, physics);
+        // Restore effect particles
+        MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWPhysics::PhysicsSystem& physics, DetourNavigator::Navigator& navigator)
@@ -208,12 +201,11 @@ namespace
     {
         MWWorld::CellStore& mCell;
         Loading::Listener& mLoadingListener;
-        bool mOnlyStatics;
         bool mTest;
 
         std::vector<MWWorld::Ptr> mToInsert;
 
-        InsertVisitor (MWWorld::CellStore& cell, Loading::Listener& loadingListener, bool onlyStatics, bool test);
+        InsertVisitor (MWWorld::CellStore& cell, Loading::Listener& loadingListener, bool test);
 
         bool operator() (const MWWorld::Ptr& ptr);
 
@@ -221,8 +213,8 @@ namespace
         void insert(AddObject&& addObject);
     };
 
-    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, Loading::Listener& loadingListener, bool onlyStatics, bool test)
-    : mCell (cell), mLoadingListener (loadingListener), mOnlyStatics(onlyStatics), mTest(test)
+    InsertVisitor::InsertVisitor (MWWorld::CellStore& cell, Loading::Listener& loadingListener, bool test)
+    : mCell (cell), mLoadingListener (loadingListener), mTest(test)
     {}
 
     bool InsertVisitor::operator() (const MWWorld::Ptr& ptr)
@@ -238,7 +230,7 @@ namespace
     {
         for (MWWorld::Ptr& ptr : mToInsert)
         {
-            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled() && ((mOnlyStatics && ptr.getClass().isStatic()) || !mOnlyStatics))
+            if (!ptr.getRefData().isDeleted() && ptr.getRefData().isEnabled())
             {
                 try
                 {
@@ -271,16 +263,6 @@ namespace
         return std::abs(cellPosition.first) + std::abs(cellPosition.second);
     }
 
-    bool isCellInCollection(int x, int y, MWWorld::Scene::CellStoreCollection& collection)
-    {
-        for (auto *cell : collection)
-        {
-            assert(cell->getCell()->isExterior());
-            if (x == cell->getCell()->getGridX() && y == cell->getCell()->getGridY())
-                return true;
-        }
-        return false;
-    }
 }
 
 
@@ -294,7 +276,7 @@ namespace MWWorld
         {
             if (!ptr.getRefData().getBaseNode()) return;
             ptr.getClass().insertObjectRendering(ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
-            setNodeRotation(ptr, mRendering, makeNodeRotation(ptr, RotationOrder::direct));
+            setNodeRotation(ptr, mRendering, RotationOrder::direct);
             reloadTerrain();
         }
     }
@@ -310,9 +292,8 @@ namespace MWWorld
 
     void Scene::updateObjectRotation(const Ptr &ptr, RotationOrder order)
     {
-        const auto rot = makeNodeRotation(ptr, order);
-        setNodeRotation(ptr, mRendering, rot);
-        mPhysics->updateRotation(ptr, rot);
+        setNodeRotation(ptr, mRendering, order);
+        mPhysics->updateRotation(ptr);
     }
 
     void Scene::updateObjectScale(const Ptr &ptr)
@@ -332,41 +313,15 @@ namespace MWWorld
         mRendering.update (duration, paused);
     }
 
-    void Scene::unloadInactiveCell (CellStore* cell, bool test)
+    void Scene::unloadCell (CellStoreCollection::iterator iter, bool test)
     {
-        assert(mActiveCells.find(cell) == mActiveCells.end());
-        assert(mInactiveCells.find(cell) != mInactiveCells.end());
         if (!test)
-            Log(Debug::Info) << "Unloading cell " << cell->getCell()->getDescription();
-
-        ListObjectsVisitor visitor;
-
-        cell->forEach(visitor);
-        for (const auto& ptr : visitor.mObjects)
-            mPhysics->remove(ptr);
-
-        if (cell->getCell()->isExterior())
-        {
-            const auto cellX = cell->getCell()->getGridX();
-            const auto cellY = cell->getCell()->getGridY();
-            mPhysics->removeHeightField(cellX, cellY);
-        }
-
-        mInactiveCells.erase(cell);
-    }
-
-    void Scene::deactivateCell(CellStore* cell, bool test)
-    {
-        assert(mInactiveCells.find(cell) != mInactiveCells.end());
-        if (mActiveCells.find(cell) == mActiveCells.end())
-            return;
-        if (!test)
-            Log(Debug::Info) << "Deactivate cell " << cell->getCell()->getDescription();
+            Log(Debug::Info) << "Unloading cell " << (*iter)->getCell()->getDescription();
 
         const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
         ListAndResetObjectsVisitor visitor;
 
-        cell->forEach(visitor);
+        (*iter)->forEach(visitor);
         const auto world = MWBase::Environment::get().getWorld();
         for (const auto& ptr : visitor.mObjects)
         {
@@ -377,157 +332,140 @@ namespace MWWorld
                 navigator->removeAgent(world->getPathfindingHalfExtents(ptr));
                 mRendering.removeActorPath(ptr);
             }
-            mPhysics->remove(ptr, ptr.getClass().isStatic());
+            mPhysics->remove(ptr);
         }
 
-        const auto cellX = cell->getCell()->getGridX();
-        const auto cellY = cell->getCell()->getGridY();
+        const auto cellX = (*iter)->getCell()->getGridX();
+        const auto cellY = (*iter)->getCell()->getGridY();
 
-        if (cell->getCell()->isExterior())
+        if ((*iter)->getCell()->isExterior())
         {
             if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                 navigator->removeObject(DetourNavigator::ObjectId(heightField));
+            mPhysics->removeHeightField(cellX, cellY);
         }
 
-        if (cell->getCell()->hasWater())
+        if ((*iter)->getCell()->hasWater())
             navigator->removeWater(osg::Vec2i(cellX, cellY));
 
-        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
+        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*(*iter)->getCell()))
             navigator->removePathgrid(*pathgrid);
 
         const auto player = world->getPlayerPtr();
         navigator->update(player.getRefData().getPosition().asVec3());
 
-        MWBase::Environment::get().getMechanicsManager()->drop (cell);
+        MWBase::Environment::get().getMechanicsManager()->drop (*iter);
 
-        mRendering.removeCell(cell);
-        MWBase::Environment::get().getWindowManager()->removeCell(cell);
+        mRendering.removeCell(*iter);
+        MWBase::Environment::get().getWindowManager()->removeCell(*iter);
 
-        MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (cell);
+        MWBase::Environment::get().getWorld()->getLocalScripts().clearCell (*iter);
 
-        MWBase::Environment::get().getSoundManager()->stopSound (cell);
-        mActiveCells.erase(cell);
+        MWBase::Environment::get().getSoundManager()->stopSound (*iter);
+        mActiveCells.erase(*iter);
     }
 
-    void Scene::activateCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn, bool test)
+    void Scene::loadCell (CellStore *cell, Loading::Listener* loadingListener, bool respawn, bool test)
     {
-        assert(mActiveCells.find(cell) == mActiveCells.end());
-        assert(mInactiveCells.find(cell) != mInactiveCells.end());
-        mActiveCells.insert(cell);
+        std::pair<CellStoreCollection::iterator, bool> result = mActiveCells.insert(cell);
 
-        if (test)
-            Log(Debug::Info) << "Testing cell " << cell->getCell()->getDescription();
-        else
-            Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
-
-        const auto world = MWBase::Environment::get().getWorld();
-        const auto navigator = world->getNavigator();
-
-        const int cellX = cell->getCell()->getGridX();
-        const int cellY = cell->getCell()->getGridY();
-
-        if (!test && cell->getCell()->isExterior())
+        if(result.second)
         {
-            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
-                        heightField->getCollisionObject()->getWorldTransform());
-        }
+            if (test)
+                Log(Debug::Info) << "Testing cell " << cell->getCell()->getDescription();
+            else
+                Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
 
-        if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            navigator->addPathgrid(*cell->getCell(), *pathgrid);
+            float verts = ESM::Land::LAND_SIZE;
+            float worldsize = ESM::Land::REAL_SIZE;
 
-        // register local scripts
-        // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
-        MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
+            const auto world = MWBase::Environment::get().getWorld();
+            const auto navigator = world->getNavigator();
 
-        if (respawn)
-            cell->respawn();
+            const int cellX = cell->getCell()->getGridX();
+            const int cellY = cell->getCell()->getGridY();
 
-        insertCell (*cell, loadingListener, false, test);
-
-        mRendering.addCell(cell);
-        if (!test)
-        {
-            MWBase::Environment::get().getWindowManager()->addCell(cell);
-            bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
-            float waterLevel = cell->getWaterLevel();
-            mRendering.setWaterEnabled(waterEnabled);
-            if (waterEnabled)
+            // Load terrain physics first...
+            if (!test && cell->getCell()->isExterior())
             {
-                mPhysics->enableWater(waterLevel);
-                mRendering.setWaterHeight(waterLevel);
-
-                if (cell->getCell()->isExterior())
+                osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+                if (data)
                 {
-                    if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                        navigator->addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
-                                cell->getWaterLevel(), heightField->getCollisionObject()->getWorldTransform());
+                    mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
                 }
                 else
                 {
-                    navigator->addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
+                    static std::vector<float> defaultHeight;
+                    defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
+                    mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
+                }
+
+                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                    navigator->addObject(DetourNavigator::ObjectId(heightField), *heightField->getShape(),
+                            heightField->getCollisionObject()->getWorldTransform());
+            }
+
+            if (const auto pathgrid = world->getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
+                navigator->addPathgrid(*cell->getCell(), *pathgrid);
+
+            // register local scripts
+            // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
+            MWBase::Environment::get().getWorld()->getLocalScripts().addCell (cell);
+
+            if (respawn)
+                cell->respawn();
+
+            // ... then references. This is important for adjustPosition to work correctly.
+            insertCell (*cell, loadingListener, test);
+
+            mRendering.addCell(cell);
+            if (!test)
+            {
+                MWBase::Environment::get().getWindowManager()->addCell(cell);
+                bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
+                float waterLevel = cell->getWaterLevel();
+                mRendering.setWaterEnabled(waterEnabled);
+                if (waterEnabled)
+                {
+                    mPhysics->enableWater(waterLevel);
+                    mRendering.setWaterHeight(waterLevel);
+
+                    if (cell->getCell()->isExterior())
+                    {
+                        if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                            navigator->addWater(osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE,
+                                cell->getWaterLevel(), heightField->getCollisionObject()->getWorldTransform());
+                    }
+                    else
+                    {
+                        navigator->addWater(osg::Vec2i(cellX, cellY), std::numeric_limits<int>::max(),
                             cell->getWaterLevel(), btTransform::getIdentity());
+                    }
+                }
+                else
+                    mPhysics->disableWater();
+
+                const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                navigator->update(player.getRefData().getPosition().asVec3());
+
+                if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
+                {
+
+                    mRendering.configureAmbient(cell->getCell());
                 }
             }
-            else
-                mPhysics->disableWater();
-
-            const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
-            navigator->update(player.getRefData().getPosition().asVec3());
-
-            if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
-                mRendering.configureAmbient(cell->getCell());
         }
 
         mPreloader->notifyLoaded(cell);
     }
 
-    void Scene::loadInactiveCell (CellStore *cell, Loading::Listener* loadingListener, bool test)
-    {
-        assert(mActiveCells.find(cell) == mActiveCells.end());
-        assert(mInactiveCells.find(cell) == mInactiveCells.end());
-        mInactiveCells.insert(cell);
-
-        if (test)
-            Log(Debug::Info) << "Testing inactive cell " << cell->getCell()->getDescription();
-        else
-            Log(Debug::Info) << "Loading inactive cell " << cell->getCell()->getDescription();
-
-        if (!test && cell->getCell()->isExterior())
-        {
-            float verts = ESM::Land::LAND_SIZE;
-            float worldsize = ESM::Land::REAL_SIZE;
-
-            const int cellX = cell->getCell()->getGridX();
-            const int cellY = cell->getCell()->getGridY();
-
-            osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            if (data)
-            {
-                mPhysics->addHeightField (data->mHeights, cellX, cellY, worldsize / (verts-1), verts, data->mMinHeight, data->mMaxHeight, land.get());
-            }
-            else
-            {
-                static std::vector<float> defaultHeight;
-                defaultHeight.resize(verts*verts, ESM::Land::DEFAULT_HEIGHT);
-                mPhysics->addHeightField (&defaultHeight[0], cell->getCell()->getGridX(), cell->getCell()->getGridY(), worldsize / (verts-1), verts, ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
-            }
-        }
-
-        insertCell (*cell, loadingListener, true, test);
-    }
-
     void Scene::clear()
     {
-        for (auto iter = mInactiveCells.begin(); iter!=mInactiveCells.end(); )
-        {
-            auto* cell = *iter++;
-            deactivateCell(cell);
-            unloadInactiveCell (cell);
-        }
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active!=mActiveCells.end())
+            unloadCell (active++);
         assert(mActiveCells.empty());
-        assert(mInactiveCells.empty());
         mCurrentCell = nullptr;
 
         mPreloader->clear();
@@ -570,24 +508,20 @@ namespace MWWorld
 
     void Scene::changeCellGrid (const osg::Vec3f &pos, int playerCellX, int playerCellY, bool changeEvent)
     {
-        for (auto iter = mInactiveCells.begin(); iter != mInactiveCells.end(); )
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active!=mActiveCells.end())
         {
-            auto* cell = *iter++;
-            if (cell->getCell()->isExterior())
+            if ((*active)->getCell()->isExterior())
             {
-                const auto dx = std::abs(playerCellX - cell->getCell()->getGridX());
-                const auto dy = std::abs(playerCellY - cell->getCell()->getGridY());
-                if (dx > mHalfGridSize || dy > mHalfGridSize)
-                    deactivateCell(cell);
-
-                if (dx > mHalfGridSize+1 || dy > mHalfGridSize+1)
-                    unloadInactiveCell(cell);
+                if (std::abs (playerCellX-(*active)->getCell()->getGridX())<=mHalfGridSize &&
+                    std::abs (playerCellY-(*active)->getCell()->getGridY())<=mHalfGridSize)
+                {
+                    // keep cells within the new grid
+                    ++active;
+                    continue;
+                }
             }
-            else
-            {
-                deactivateCell(cell);
-                unloadInactiveCell(cell);
-            }
+            unloadCell (active++);
         }
 
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
@@ -599,24 +533,32 @@ namespace MWWorld
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
         std::size_t refsToLoad = 0;
-        const auto cellsToLoad = [&playerCellX,&playerCellY,&refsToLoad](CellStoreCollection& collection, int range) -> std::vector<std::pair<int,int>>
+        std::vector<std::pair<int, int>> cellsPositionsToLoad;
+        // get the number of refs to load
+        for (int x = playerCellX - mHalfGridSize; x <= playerCellX + mHalfGridSize; ++x)
         {
-            std::vector<std::pair<int, int>> cellsPositionsToLoad;
-            for (int x = playerCellX - range; x <= playerCellX + range; ++x)
+            for (int y = playerCellY - mHalfGridSize; y <= playerCellY + mHalfGridSize; ++y)
             {
-                for (int y = playerCellY - range; y <= playerCellY + range; ++y)
+                CellStoreCollection::iterator iter = mActiveCells.begin();
+
+                while (iter!=mActiveCells.end())
                 {
-                    if (!isCellInCollection(x, y, collection))
-                    {
-                        refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
-                        cellsPositionsToLoad.emplace_back(x, y);
-                    }
+                    assert ((*iter)->getCell()->isExterior());
+
+                    if (x==(*iter)->getCell()->getGridX() &&
+                        y==(*iter)->getCell()->getGridY())
+                        break;
+
+                    ++iter;
+                }
+
+                if (iter==mActiveCells.end())
+                {
+                    refsToLoad += MWBase::Environment::get().getWorld()->getExterior(x, y)->count();
+                    cellsPositionsToLoad.emplace_back(x, y);
                 }
             }
-            return cellsPositionsToLoad;
-        };
-        auto cellsPositionsToLoad = cellsToLoad(mActiveCells,mHalfGridSize);
-        auto cellsPositionsToLoadInactive = cellsToLoad(mInactiveCells,mHalfGridSize+1);
+        }
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
@@ -640,26 +582,30 @@ namespace MWWorld
                 return getCellPositionPriority(lhs) < getCellPositionPriority(rhs);
             });
 
-        std::sort(cellsPositionsToLoadInactive.begin(), cellsPositionsToLoadInactive.end(),
-            [&] (const std::pair<int, int>& lhs, const std::pair<int, int>& rhs) {
-                return getCellPositionPriority(lhs) < getCellPositionPriority(rhs);
-            });
-
         // Load cells
-        for (const auto& [x,y] : cellsPositionsToLoadInactive)
+        for (const auto& cellPosition : cellsPositionsToLoad)
         {
-            if (!isCellInCollection(x, y, mInactiveCells))
+            const auto x = cellPosition.first;
+            const auto y = cellPosition.second;
+
+            CellStoreCollection::iterator iter = mActiveCells.begin();
+
+            while (iter != mActiveCells.end())
             {
-                CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
-                loadInactiveCell (cell, loadingListener);
+                assert ((*iter)->getCell()->isExterior());
+
+                if (x == (*iter)->getCell()->getGridX() &&
+                    y == (*iter)->getCell()->getGridY())
+                    break;
+
+                ++iter;
             }
-        }
-        for (const auto& [x,y] : cellsPositionsToLoad)
-        {
-            if (!isCellInCollection(x, y, mActiveCells))
+
+            if (iter == mActiveCells.end())
             {
                 CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(x, y);
-                activateCell (cell, loadingListener, changeEvent);
+
+                loadCell (cell, loadingListener, changeEvent);
             }
         }
 
@@ -692,8 +638,7 @@ namespace MWWorld
             CellStoreCollection::iterator iter = mActiveCells.begin();
 
             CellStore *cell = MWBase::Environment::get().getWorld()->getExterior(it->mData.mX, it->mData.mY);
-            loadInactiveCell (cell, loadingListener, true);
-            activateCell (cell, loadingListener, false, true);
+            loadCell (cell, loadingListener, false, true);
 
             iter = mActiveCells.begin();
             while (iter != mActiveCells.end())
@@ -701,8 +646,7 @@ namespace MWWorld
                 if (it->isExterior() && it->mData.mX == (*iter)->getCell()->getGridX() &&
                     it->mData.mY == (*iter)->getCell()->getGridY())
                 {
-                    deactivateCell(*iter, true);
-                    unloadInactiveCell (*iter, true);
+                    unloadCell(iter, true);
                     break;
                 }
 
@@ -740,8 +684,7 @@ namespace MWWorld
             loadingListener->setLabel("Testing interior cells ("+std::to_string(i)+"/"+std::to_string(cells.getIntSize())+")...");
 
             CellStore *cell = MWBase::Environment::get().getWorld()->getInterior(it->mName);
-            loadInactiveCell (cell, loadingListener, true);
-            activateCell (cell, loadingListener, false, true);
+            loadCell (cell, loadingListener, false, true);
 
             CellStoreCollection::iterator iter = mActiveCells.begin();
             while (iter != mActiveCells.end())
@@ -750,8 +693,7 @@ namespace MWWorld
 
                 if (it->mName == (*iter)->getCell()->mName)
                 {
-                    deactivateCell(*iter, true);
-                    unloadInactiveCell (*iter, true);
+                    unloadCell(iter, true);
                     break;
                 }
 
@@ -874,21 +816,15 @@ namespace MWWorld
         Log(Debug::Info) << "Changing to interior";
 
         // unload
-        for (auto iter = mInactiveCells.begin(); iter!=mInactiveCells.end(); )
-        {
-            auto* cell = *iter++;
-            deactivateCell(cell);
-            unloadInactiveCell(cell);
-        }
-        assert(mActiveCells.empty());
-        assert(mInactiveCells.empty());
+        CellStoreCollection::iterator active = mActiveCells.begin();
+        while (active!=mActiveCells.end())
+            unloadCell (active++);
 
         loadingListener->setProgressRange(cell->count());
 
         // Load cell.
         mPagedRefs.clear();
-        loadInactiveCell (cell, loadingListener);
-        activateCell (cell, loadingListener, changeEvent);
+        loadCell (cell, loadingListener, changeEvent);
 
         changePlayerCell(cell, position, adjustPlayerPos);
 
@@ -936,26 +872,23 @@ namespace MWWorld
         mCellChanged = false;
     }
 
-    void Scene::insertCell (CellStore &cell, Loading::Listener* loadingListener, bool onlyStatics, bool test)
+    void Scene::insertCell (CellStore &cell, Loading::Listener* loadingListener, bool test)
     {
-        InsertVisitor insertVisitor (cell, *loadingListener, onlyStatics, test);
+        InsertVisitor insertVisitor (cell, *loadingListener, test);
         cell.forEach (insertVisitor);
-        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs, onlyStatics); });
-        if (!onlyStatics)
-        {
-            insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mRendering, mPagedRefs); });
+        insertVisitor.insert([&] (const MWWorld::Ptr& ptr) { addObject(ptr, *mPhysics, mNavigator); });
 
-            // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
-            PositionVisitor posVisitor;
-            cell.forEach (posVisitor);
-        }
+        // do adjustPosition (snapping actors to ground) after objects are loaded, so we don't depend on the loading order
+        PositionVisitor posVisitor;
+        cell.forEach (posVisitor);
     }
 
     void Scene::addObjectToScene (const Ptr& ptr)
     {
         try
         {
-            addObject(ptr, *mPhysics, mRendering, mPagedRefs, false);
+            addObject(ptr, *mPhysics, mRendering, mPagedRefs);
             addObject(ptr, *mPhysics, mNavigator);
             MWBase::Environment::get().getWorld()->scaleObject(ptr, ptr.getCellRef().getScale());
             const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();

@@ -23,10 +23,10 @@ namespace MWClass
         }
     }
 
-    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const
+    void Static::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
-            physics.addObject(ptr, model, rotation);
+            physics.addObject(ptr, model);
     }
 
     std::string Static::getModel(const MWWorld::ConstPtr &ptr) const
@@ -62,10 +62,5 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Static> *ref = ptr.get<ESM::Static>();
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
-    }
-
-    bool Static::isStatic() const
-    {
-        return true;
     }
 }

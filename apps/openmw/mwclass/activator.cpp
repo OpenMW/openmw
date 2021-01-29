@@ -38,10 +38,10 @@ namespace MWClass
         }
     }
 
-    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const
+    void Activator::insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const
     {
         if(!model.empty())
-            physics.addObject(ptr, model, rotation);
+            physics.addObject(ptr, model);
     }
 
     std::string Activator::getModel(const MWWorld::ConstPtr &ptr) const

@@ -15,16 +15,16 @@ namespace MWClass
     {
     protected:
 
-        Actor() = default;
+        Actor();
 
     public:
-         ~Actor() override = default;
+        virtual ~Actor();
 
         void adjustPosition(const MWWorld::Ptr& ptr, bool force) const override;
         ///< Adjust position to stand on ground. Must be called post model load
         /// @param force do this even if the ptr is flying
 
-        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, osg::Quat rotation, MWPhysics::PhysicsSystem& physics) const override;
+        void insertObject(const MWWorld::Ptr& ptr, const std::string& model, MWPhysics::PhysicsSystem& physics) const override;
 
         bool useAnim() const override;
 
@@ -46,8 +46,8 @@ namespace MWClass
         float getCurrentSpeed(const MWWorld::Ptr& ptr) const override;
         
         // not implemented
-        Actor(const Actor&) = delete;
-        Actor& operator= (const Actor&) = delete;
+        Actor(const Actor&);
+        Actor& operator= (const Actor&);
     };
 }
 
