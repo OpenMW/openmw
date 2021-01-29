@@ -97,12 +97,12 @@ namespace
         float dotProduct = v1.x() * v3.x() + v1.y() * v3.y();
         float crossProduct = v1.x() * v3.y() - v1.y() * v3.x();
 
-        // Check that the angle between v1 and v3 is less or equal than 10 degrees.
-        static const float cos170 = std::cos(osg::PI / 180 * 170);
-        bool checkAngle = dotProduct <= cos170 * v1.length() * v3.length();
+        // Check that the angle between v1 and v3 is less or equal than 5 degrees.
+        static const float cos175 = std::cos(osg::PI * (175.0 / 180));
+        bool checkAngle = dotProduct <= cos175 * v1.length() * v3.length();
 
         // Check that distance from p2 to the line (p1, p3) is less or equal than `pointTolerance`.
-        bool checkDist = std::abs(crossProduct) <= pointTolerance * (p3 - p1).length() * 2;
+        bool checkDist = std::abs(crossProduct) <= pointTolerance * (p3 - p1).length();
 
         return checkAngle && checkDist;
     }
@@ -296,7 +296,7 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    void PathFinder::update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance)
+    void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance, bool shortenIfAlmostStraight)
     {
         if (mPath.empty())
             return;
@@ -304,10 +304,13 @@ namespace MWMechanics
         while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
             mPath.pop_front();
 
-        while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
-            mPath.erase(mPath.begin() + 1);
-        if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
-            mPath.pop_front();
+        if (shortenIfAlmostStraight)
+        {
+            while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
+                mPath.erase(mPath.begin() + 1);
+            if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
+                mPath.pop_front();
+        }
 
         if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
             mPath.pop_front();

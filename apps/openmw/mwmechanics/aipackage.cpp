@@ -150,7 +150,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             + 1.2 * std::max(halfExtents.x(), halfExtents.y());
     const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
-    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE);
+    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE, /*shortenIfAlmostStraight=*/smoothMovement);
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
@@ -180,7 +181,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const auto destination = mPathFinder.getPath().empty() ? dest : mPathFinder.getPath().front();
     mObstacleCheck.update(actor, destination, duration);
 
-    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
     if (smoothMovement)
     {
         const float smoothTurnReservedDist = 150;
