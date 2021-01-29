@@ -28,10 +28,13 @@ namespace CSVRender
 
             enum DropMode
             {
-                Collision,
-                Terrain,
-                CollisionSep,
-                TerrainSep
+                Separate = 0b1,
+
+                Collision = 0b10,
+                Terrain = 0b100,
+
+                CollisionSep = Collision | Separate,
+                TerrainSep = Terrain | Separate,
             };
 
             CSVWidget::SceneToolMode *mSubMode;
@@ -53,8 +56,8 @@ namespace CSVRender
             osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
             osg::Vec3f getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
             void handleSelectDrag(const QPoint& pos);
-            void dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight);
-            float getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+            void dropInstance(CSVRender::Object* object, float dropHeight);
+            float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
         public:
 
@@ -116,11 +119,11 @@ namespace CSVRender
     };
 
     /// \brief Helper class to handle object mask data in safe way
-    class DropObjectDataHandler
+    class DropObjectHeightHandler
     {
         public:
-            DropObjectDataHandler(WorldspaceWidget* worldspacewidget);
-            ~DropObjectDataHandler();
+            DropObjectHeightHandler(WorldspaceWidget* worldspacewidget);
+            ~DropObjectHeightHandler();
             std::vector<float> mObjectHeights;
 
         private:
