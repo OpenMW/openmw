@@ -48,6 +48,7 @@ namespace MWLua
 
         // Used only in luabindings.cpp
         void addLocalScript(const MWWorld::Ptr&, const std::string& scriptPath);
+        void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
 
         // Saving
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;
@@ -63,6 +64,8 @@ namespace MWLua
 
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
+        sol::table mUserInterfacePackage;
+        sol::table mCameraPackage;
 
         std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};
@@ -85,6 +88,9 @@ namespace MWLua
 
         std::vector<SDL_Keysym> mKeyPressEvents;
         std::vector<ObjectId> mActorAddedEvents;
+
+        // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
+        std::vector<std::string> mUIMessages;
     };
 
 }

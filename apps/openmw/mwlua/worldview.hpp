@@ -27,7 +27,10 @@ namespace MWLua
         // Note that the number of seconds in a game hour is not fixed.
         double getGameTimeInHours() const;
 
+        ObjectIdList getActivatorsInScene() const { return mActivatorsInScene.mList; }
         ObjectIdList getActorsInScene() const { return mActorsInScene.mList; }
+        ObjectIdList getContainersInScene() const { return mContainersInScene.mList; }
+        ObjectIdList getDoorsInScene() const { return mDoorsInScene.mList; }
         ObjectIdList getItemsInScene() const { return mItemsInScene.mList; }
 
         ObjectRegistry* getObjectRegistry() { return &mObjectRegistry; }
@@ -51,11 +54,15 @@ namespace MWLua
             std::set<ObjectId> mSet;
         };
 
+        ObjectGroup* chooseGroup(const MWWorld::Ptr& ptr);
         void addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr);
         void removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr);
 
         ObjectRegistry mObjectRegistry;
+        ObjectGroup mActivatorsInScene;
         ObjectGroup mActorsInScene;
+        ObjectGroup mContainersInScene;
+        ObjectGroup mDoorsInScene;
         ObjectGroup mItemsInScene;
 
         double mGameSeconds = 0;

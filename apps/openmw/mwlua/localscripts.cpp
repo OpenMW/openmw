@@ -1,5 +1,10 @@
 #include "localscripts.hpp"
 
+#include "../mwworld/ptr.hpp"
+#include "../mwworld/class.hpp"
+#include "../mwmechanics/aisequence.hpp"
+#include "../mwmechanics/aicombat.hpp"
+
 namespace sol
 {
     template <>
@@ -27,6 +32,28 @@ namespace MWLua
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
+        selfAPI["getCombatTarget"] = [worldView=context.mWorldView](SelfObject& self) -> sol::optional<LObject>
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            MWWorld::Ptr target;
+            if (ai.getCombatTarget(target))
+                return LObject(getId(target), worldView->getObjectRegistry());
+            else
+                return {};
+        };
+        selfAPI["stopCombat"] = [](SelfObject& self)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            ai.stopCombat();
+        };
+        selfAPI["startCombat"] = [](SelfObject& self, const LObject& target)
+        {
+            const MWWorld::Ptr& ptr = self.ptr();
+            MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
+            ai.stack(MWMechanics::AiCombat(target.ptr()), ptr);
+        };
     }
 
     std::unique_ptr<LocalScripts> LocalScripts::create(LuaUtil::LuaState* lua, const LObject& obj)

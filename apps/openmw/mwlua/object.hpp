@@ -1,6 +1,8 @@
 #ifndef MWLUA_OBJECT_H
 #define MWLUA_OBJECT_H
 
+#include <typeindex>
+
 #include <components/esm/cellref.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -15,6 +17,9 @@ namespace MWLua
     using ObjectId = ESM::RefNum;
     inline const ObjectId& getId(const MWWorld::Ptr& ptr) { return ptr.getCellRef().getRefNum(); }
     std::string idToString(const ObjectId& id);
+    std::string ptrToString(const MWWorld::Ptr& ptr);
+    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback = "Unknown");
+    std::string_view getMWClassName(const MWWorld::Ptr& ptr);
 
     // Holds a mapping ObjectId -> MWWord::Ptr.
     class ObjectRegistry
@@ -60,7 +65,7 @@ namespace MWLua
         ObjectId id() const { return mId; }
 
         std::string toString() const;
-        std::string_view type() const;
+        std::string_view type() const { return getMWClassName(ptr()); }
 
         // Updates and returns the underlying Ptr. Throws an exception if object is not available.
         const MWWorld::Ptr& ptr() const;

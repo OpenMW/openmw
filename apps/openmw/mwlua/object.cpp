@@ -1,7 +1,19 @@
 #include "object.hpp"
 
-#include <components/esm/loadnpc.hpp>
-#include <components/esm/loadcrea.hpp>
+#include "../mwclass/activator.hpp"
+#include "../mwclass/armor.hpp"
+#include "../mwclass/book.hpp"
+#include "../mwclass/clothing.hpp"
+#include "../mwclass/container.hpp"
+#include "../mwclass/creature.hpp"
+#include "../mwclass/door.hpp"
+#include "../mwclass/ingredient.hpp"
+#include "../mwclass/light.hpp"
+#include "../mwclass/misc.hpp"
+#include "../mwclass/npc.hpp"
+#include "../mwclass/potion.hpp"
+#include "../mwclass/static.hpp"
+#include "../mwclass/weapon.hpp"
 
 namespace MWLua
 {
@@ -11,33 +23,58 @@ namespace MWLua
         return std::to_string(id.mIndex) + "_" + std::to_string(id.mContentFile);
     }
 
-    std::string Object::toString() const
+    const static std::map<std::type_index, std::string_view> classNames = {
+        {typeid(MWClass::Activator), "Activator"},
+        {typeid(MWClass::Armor), "Armor"},
+        {typeid(MWClass::Book), "Book"},
+        {typeid(MWClass::Clothing), "Clothing"},
+        {typeid(MWClass::Container), "Container"},
+        {typeid(MWClass::Creature), "Creature"},
+        {typeid(MWClass::Door), "Door"},
+        {typeid(MWClass::Ingredient), "Ingredient"},
+        {typeid(MWClass::Light), "Light"},
+        {typeid(MWClass::Miscellaneous), "Miscellaneous"},
+        {typeid(MWClass::Npc), "NPC"},
+        {typeid(MWClass::Potion), "Potion"},
+        {typeid(MWClass::Static), "Static"},
+        {typeid(MWClass::Weapon), "Weapon"},
+    };
+
+    std::string_view getMWClassName(const std::type_index& cls_type, std::string_view fallback)
     {
-        std::string res = idToString(mId);
-        if (isValid())
-        {
-            res.append(" (");
-            res.append(type());
-            res.append(", ");
-            res.append(*ptr().getCellRef().getRefIdPtr());
-            res.append(")");
-        }
+        auto it = classNames.find(cls_type);
+        if (it != classNames.end())
+            return it->second;
         else
-            res.append(" (not found)");
+            return fallback;
+    }
+
+    std::string_view getMWClassName(const MWWorld::Ptr& ptr)
+    {
+        if (*ptr.getCellRef().getRefIdPtr() == "player")
+            return "Player";
+        else
+            return getMWClassName(typeid(ptr.getClass()), ptr.getTypeName());
+    }
+
+    std::string ptrToString(const MWWorld::Ptr& ptr)
+    {
+        std::string res = "object";
+        res.append(idToString(getId(ptr)));
+        res.append(" (");
+        res.append(getMWClassName(ptr));
+        res.append(", ");
+        res.append(*ptr.getCellRef().getRefIdPtr());
+        res.append(")");
         return res;
     }
 
-    std::string_view Object::type() const
+    std::string Object::toString() const
     {
-        if (*ptr().getCellRef().getRefIdPtr() == "player")
-            return "Player";
-        const std::string& typeName = ptr().getTypeName();
-        if (typeName == typeid(ESM::NPC).name())
-            return "NPC";
-        else if (typeName == typeid(ESM::Creature).name())
-            return "Creature";
+        if (isValid())
+            return ptrToString(ptr());
         else
-            return typeName;
+            return "object" + idToString(mId) + " (not found)";
     }
 
     bool Object::isValid() const

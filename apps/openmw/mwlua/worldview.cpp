@@ -3,6 +3,8 @@
 #include <components/esm/esmreader.hpp>
 #include <components/esm/esmwriter.hpp>
 
+#include "../mwclass/container.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
 
@@ -12,31 +14,52 @@ namespace MWLua
     void WorldView::update()
     {
         mObjectRegistry.update();
+        mActivatorsInScene.updateList();
         mActorsInScene.updateList();
+        mContainersInScene.updateList();
+        mDoorsInScene.updateList();
         mItemsInScene.updateList();
     }
 
     void WorldView::clear()
     {
         mObjectRegistry.clear();
+        mActivatorsInScene.clear();
         mActorsInScene.clear();
+        mContainersInScene.clear();
+        mDoorsInScene.clear();
         mItemsInScene.clear();
+    }
+
+    WorldView::ObjectGroup* WorldView::chooseGroup(const MWWorld::Ptr& ptr)
+    {
+        const MWWorld::Class& cls = ptr.getClass();
+        if (cls.isActivator())
+            return &mActivatorsInScene;
+        if (cls.isActor())
+            return &mActorsInScene;
+        if (cls.isDoor())
+            return &mDoorsInScene;
+        if (typeid(cls) == typeid(MWClass::Container))
+            return &mContainersInScene;
+        if (cls.hasToolTip(ptr))
+            return &mItemsInScene;
+        return nullptr;
     }
 
     void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        if (ptr.getClass().isActor())
-            addToGroup(mActorsInScene, ptr);
-        else
-            addToGroup(mItemsInScene, ptr);
+        mObjectRegistry.registerPtr(ptr);
+        ObjectGroup* group = chooseGroup(ptr);
+        if (group)
+            addToGroup(*group, ptr);
     }
 
     void WorldView::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
-        if (ptr.getClass().isActor())
-            removeFromGroup(mActorsInScene, ptr);
-        else
-            removeFromGroup(mItemsInScene, ptr);
+        ObjectGroup* group = chooseGroup(ptr);
+        if (group)
+            removeFromGroup(*group, ptr);
     }
 
     double WorldView::getGameTimeInHours() const

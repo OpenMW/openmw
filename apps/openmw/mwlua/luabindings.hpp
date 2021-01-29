@@ -40,6 +40,12 @@ namespace MWLua
     };
     sol::function getAsyncPackageInitializer(const Context&);
 
+    // Implemented in camerabindings.cpp
+    sol::table initCameraPackage(const Context&);
+
+    // Implemented in uibindings.cpp
+    sol::table initUserInterfacePackage(const Context&);
+
     // openmw.self package is implemented in localscripts.cpp
 }
 

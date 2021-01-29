@@ -8,6 +8,14 @@
 namespace MWLua
 {
 
+    static sol::table definitionList(LuaUtil::LuaState& lua, std::initializer_list<std::string> values)
+    {
+        sol::table res(lua.sol(), sol::create);
+        for (const std::string& v : values)
+            res[v] = v;
+        return lua.makeReadOnly(res);
+    }
+
     sol::table initCorePackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
@@ -17,6 +25,11 @@ namespace MWLua
         };
         api["getGameTimeInSeconds"] = [world=context.mWorldView]() { return world->getGameTimeInSeconds(); };
         api["getGameTimeInHours"] = [world=context.mWorldView]() { return world->getGameTimeInHours(); };
+        api["OBJECT_TYPE"] = definitionList(*context.mLua,
+        {
+            "Activator", "Armor", "Book", "Clothing", "Creature", "Door", "Ingredient",
+            "Light", "Miscellaneous", "NPC", "Player", "Potion", "Static", "Weapon"
+        });
         return context.mLua->makeReadOnly(api);
     }
 
@@ -32,7 +45,10 @@ namespace MWLua
     {
         sol::table api(context.mLua->sol(), sol::create);
         WorldView* worldView = context.mWorldView;
+        api["activators"] = LObjectList{worldView->getActivatorsInScene()};
         api["actors"] = LObjectList{worldView->getActorsInScene()};
+        api["containers"] = LObjectList{worldView->getContainersInScene()};
+        api["doors"] = LObjectList{worldView->getDoorsInScene()};
         api["items"] = LObjectList{worldView->getItemsInScene()};
         return context.mLua->makeReadOnly(api);
     }

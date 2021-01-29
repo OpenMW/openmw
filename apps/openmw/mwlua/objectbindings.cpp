@@ -2,6 +2,8 @@
 
 #include <components/lua/luastate.hpp>
 
+#include "../mwclass/door.hpp"
+
 #include "eventqueue.hpp"
 #include "luamanagerimp.hpp"
 
@@ -19,6 +21,20 @@ namespace sol
 
 namespace MWLua
 {
+
+    template <class Class>
+    static const MWWorld::Ptr& requireClass(const MWWorld::Ptr& ptr)
+    {
+        if (typeid(Class) != typeid(ptr.getClass()))
+        {
+            std::string msg = "Requires type '";
+            msg.append(getMWClassName(typeid(Class)));
+            msg.append("', but applied to ");
+            msg.append(ptrToString(ptr));
+            throw std::runtime_error(msg);
+        }
+        return ptr;
+    }
 
     template <class ObjectT>
     static void registerObjectList(const std::string& prefix, const Context& context)
@@ -84,10 +100,34 @@ namespace MWLua
     }
 
     template <class ObjectT>
+    static void addDoorBindings(sol::usertype<ObjectT>& objectT, const Context& context)
+    {
+        auto ptr = [](const ObjectT& o) -> const MWWorld::Ptr& { return requireClass<MWClass::Door>(o.ptr()); };
+
+        objectT["isTeleport"] = sol::readonly_property([ptr](const ObjectT& o)
+        {
+            return ptr(o).getCellRef().getTeleport();
+        });
+        objectT["destPosition"] = sol::readonly_property([ptr](const ObjectT& o) -> osg::Vec3f
+        {
+            return ptr(o).getCellRef().getDoorDest().asVec3();
+        });
+        objectT["destRotation"] = sol::readonly_property([ptr](const ObjectT& o) -> osg::Vec3f
+        {
+            return ptr(o).getCellRef().getDoorDest().asRotationVec3();
+        });
+        objectT["destCell"] = sol::readonly_property([ptr](const ObjectT& o) -> std::string_view
+        {
+            return ptr(o).getCellRef().getDestCell();
+        });
+    }
+
+    template <class ObjectT>
     static void initObjectBindings(const std::string& prefix, const Context& context)
     {
         sol::usertype<ObjectT> objectT = context.mLua->sol().new_usertype<ObjectT>(prefix + "Object");
         addBasicBindings<ObjectT>(objectT, context);
+        addDoorBindings<ObjectT>(objectT, context);
 
         registerObjectList<ObjectT>(prefix, context);
     }

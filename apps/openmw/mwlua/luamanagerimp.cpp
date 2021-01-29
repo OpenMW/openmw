@@ -8,6 +8,8 @@
 
 #include <components/lua/utilpackage.hpp>
 
+#include "../mwbase/windowmanager.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
 
@@ -47,6 +49,8 @@ namespace MWLua
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
+        mCameraPackage = initCameraPackage(localContext);
+        mUserInterfacePackage = initUserInterfacePackage(localContext);
         mNearbyPackage = initNearbyPackage(localContext);
 
         auto endsWith = [](std::string_view s, std::string_view suffix)
@@ -151,6 +155,10 @@ namespace MWLua
 
     void LuaManager::applyQueuedChanges()
     {
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        for (const std::string& message : mUIMessages)
+            windowManager->messageBox(message);
+        mUIMessages.clear();
     }
 
     void LuaManager::clear()
@@ -238,8 +246,8 @@ namespace MWLua
         {
             mPlayerScripts = new PlayerScripts(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
             scripts = std::unique_ptr<LocalScripts>(mPlayerScripts);
-            // TODO: scripts->addPackage("openmw.ui", ...);
-            // TODO: scripts->addPackage("openmw.camera", ...);
+            scripts->addPackage("openmw.ui", mUserInterfacePackage);
+            scripts->addPackage("openmw.camera", mCameraPackage);
         }
         else
             scripts = LocalScripts::create(&mLua, LObject(getId(ptr), mWorldView.getObjectRegistry()));
