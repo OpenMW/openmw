@@ -921,6 +921,13 @@ namespace MWWorld
             refnum.load(reader, true, "MVRF");
             movedTo.load(reader);
 
+            if (refnum.hasContentFile())
+            {
+                auto iter = contentFileMap.find(refnum.mContentFile);
+                if (iter != contentFileMap.end())
+                    refnum.mContentFile = iter->second;
+            }
+
             // Search for the reference. It might no longer exist if its content file was removed.
             Ptr movedRef = searchViaRefNum(refnum);
             if (movedRef.isEmpty())
