@@ -296,7 +296,8 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance, bool shortenIfAlmostStraight)
+    void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
+                            bool shortenIfAlmostStraight, bool canMoveByZ)
     {
         if (mPath.empty())
             return;
@@ -312,8 +313,16 @@ namespace MWMechanics
                 mPath.pop_front();
         }
 
-        if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
-            mPath.pop_front();
+        if (mPath.size() == 1)
+        {
+            float distSqr;
+            if (canMoveByZ)
+                distSqr = (mPath.front() - position).length2();
+            else
+                distSqr = sqrDistanceIgnoreZ(mPath.front(), position);
+            if (distSqr < destinationTolerance * destinationTolerance)
+                mPath.pop_front();
+        }
     }
 
     void PathFinder::buildStraightPath(const osg::Vec3f& endPoint)

@@ -96,6 +96,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     const float distToTarget = distance(position, dest);
     const bool isDestReached = (distToTarget <= destTolerance);
+    const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
@@ -104,7 +105,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-        const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
         mIsShortcutting = actorCanMoveByZ
@@ -151,7 +151,8 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
     static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
-    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE, /*shortenIfAlmostStraight=*/smoothMovement);
+    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE,
+                       /*shortenIfAlmostStraight=*/smoothMovement, actorCanMoveByZ);
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
