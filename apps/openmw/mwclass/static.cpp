@@ -63,9 +63,4 @@ namespace MWClass
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
-
-    bool Static::isStatic() const
-    {
-        return true;
-    }
 }

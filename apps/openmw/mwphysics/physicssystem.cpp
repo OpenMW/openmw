@@ -469,7 +469,7 @@ namespace MWPhysics
             mAnimatedObjects.insert(obj.get());
     }
 
-    void PhysicsSystem::remove(const MWWorld::Ptr &ptr, bool keepObject)
+    void PhysicsSystem::remove(const MWWorld::Ptr &ptr)
     {
         ObjectMap::iterator found = mObjects.find(ptr);
         if (found != mObjects.end())
@@ -479,8 +479,7 @@ namespace MWPhysics
 
             mAnimatedObjects.erase(found->second.get());
 
-            if (!keepObject)
-                mObjects.erase(found);
+            mObjects.erase(found);
         }
 
         ActorMap::iterator foundActor = mActors.find(ptr);

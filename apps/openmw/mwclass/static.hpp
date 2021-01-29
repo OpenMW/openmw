@@ -25,8 +25,6 @@ namespace MWClass
             static void registerSelf();
 
             std::string getModel(const MWWorld::ConstPtr &ptr) const override;
-
-            bool isStatic() const override;
     };
 }
 
