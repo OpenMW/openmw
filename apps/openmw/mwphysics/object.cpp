@@ -116,6 +116,9 @@ namespace MWPhysics
         if (mShapeInstance->mAnimatedShapes.empty())
             return false;
 
+        if (mPtr.getRefData().getBaseNode() == nullptr)
+            return true;
+
         assert (mShapeInstance->getCollisionShape()->isCompound());
 
         btCompoundShape* compound = static_cast<btCompoundShape*>(mShapeInstance->getCollisionShape());
