@@ -103,10 +103,14 @@ namespace SceneUtil
     }
 
     OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
-    , mMergedAnimationTracks(copy.mMergedAnimationTracks)
     , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
+        for (const auto& mergedAnimationTrack : copy.mMergedAnimationTracks)
+        {
+            Resource::Animation* copiedAnimationTrack = dynamic_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
+            mMergedAnimationTracks.emplace_back(copiedAnimationTrack);
+        }
     }
 
     osg::Vec3f OsgAnimationController::getTranslation(float time) const
