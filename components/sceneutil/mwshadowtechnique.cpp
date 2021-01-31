@@ -997,9 +997,9 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
     }
 
     // 1. Traverse main scene graph
-    cv.pushStateSet( _shadowRecievingPlaceholderStateSet.get() );
-
-    osg::ref_ptr<osgUtil::StateGraph> decoratorStateGraph = cv.getCurrentStateGraph();
+    auto* shadowReceiverStateSet = vdd->getStateSet(cv.getTraversalNumber());
+    shadowReceiverStateSet->clear();
+    cv.pushStateSet(shadowReceiverStateSet);
 
     cullShadowReceivingScene(&cv);
 
@@ -1426,7 +1426,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
 
     if (numValidShadows>0)
     {
-        decoratorStateGraph->setStateSet(selectStateSetForRenderingShadow(*vdd, cv.getTraversalNumber()));
+        selectStateSetForRenderingShadow(*vdd, cv.getTraversalNumber());
     }
 
     // OSG_NOTICE<<"End of shadow setup Projection matrix "<<*cv.getProjectionMatrix()<<std::endl;
