@@ -9,6 +9,7 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
+#include <components/misc/stringops.hpp>
 
 #include "animation.hpp"
 #include "objectcache.hpp"
@@ -21,7 +22,7 @@ namespace Resource
 
     void RetrieveAnimationsVisitor::apply(osg::Node& node)
     {
-        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && node.getName() == std::string("bip01"))
+        if (node.libraryName() == std::string("osgAnimation") && node.className() == std::string("Bone") && Misc::StringUtils::lowerCase(node.getName()) == std::string("bip01"))
             {
                 osg::ref_ptr<SceneUtil::OsgAnimationController> callback = new SceneUtil::OsgAnimationController();
 
