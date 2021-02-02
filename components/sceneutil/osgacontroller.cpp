@@ -108,7 +108,7 @@ namespace SceneUtil
         mLinker = nullptr;
         for (const auto& mergedAnimationTrack : copy.mMergedAnimationTracks)
         {
-            Resource::Animation* copiedAnimationTrack = dynamic_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
+            Resource::Animation* copiedAnimationTrack = static_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
             mMergedAnimationTracks.emplace_back(copiedAnimationTrack);
         }
     }
