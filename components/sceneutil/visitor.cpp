@@ -67,10 +67,8 @@ namespace SceneUtil
         std::size_t foundUnderscore = originalNodeName.find(underscore);
 
         if (foundUnderscore != std::string::npos)
-        {
             std::replace(originalNodeName.begin(), originalNodeName.end(), '_', ' ');
-            //originalNodeName.replace(foundUnderscore.begin(), foundPageNumberEnd - foundPageNumber - 6, " ") );
-        }
+
         const std::string nodeName = originalNodeName;
 
         mMap.emplace(nodeName, &trans);
