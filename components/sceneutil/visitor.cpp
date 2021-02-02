@@ -60,7 +60,19 @@ namespace SceneUtil
     void NodeMapVisitor::apply(osg::MatrixTransform& trans)
     {
         // Take transformation for first found node in file
-        const std::string nodeName = Misc::StringUtils::lowerCase(trans.getName());
+        std::string originalNodeName = Misc::StringUtils::lowerCase(trans.getName());
+
+        // Convert underscores to whitespaces as a workaround for Collada (OpenMW's animation system uses whitespace-separated names)
+        std::string underscore = "_";
+        std::size_t foundUnderscore = originalNodeName.find(underscore);
+
+        if (foundUnderscore != std::string::npos)
+        {
+            std::replace(originalNodeName.begin(), originalNodeName.end(), '_', ' ');
+            //originalNodeName.replace(foundUnderscore.begin(), foundPageNumberEnd - foundPageNumber - 6, " ") );
+        }
+        const std::string nodeName = originalNodeName;
+
         mMap.emplace(nodeName, &trans);
 
         traverse(trans);
