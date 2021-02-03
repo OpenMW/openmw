@@ -95,6 +95,12 @@ namespace DetourNavigator
     {
         return std::tie(lhs.mCellSize, lhs.mTransform) < std::tie(rhs.mCellSize, rhs.mTransform);
     }
+
+    inline bool operator <(const RecastMesh& lhs, const RecastMesh& rhs)
+    {
+        return std::tie(lhs.getIndices(), lhs.getVertices(), lhs.getAreaTypes(), lhs.getWater())
+                < std::tie(rhs.getIndices(), rhs.getVertices(), rhs.getAreaTypes(), rhs.getWater());
+    }
 }
 
 #endif
