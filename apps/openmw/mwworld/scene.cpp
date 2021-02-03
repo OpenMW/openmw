@@ -115,6 +115,8 @@ namespace
 
         std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
         const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+        if (!physics.getObject(ptr))
+            ptr.getClass().insertObject (ptr, model, rotation, physics);
         if (!onlyPhysics)
         {
             bool useAnim = ptr.getClass().useAnim();
@@ -134,8 +136,6 @@ namespace
             // Restore effect particles
             MWBase::Environment::get().getWorld()->applyLoopingParticles(ptr);
         }
-        if (!physics.getObject(ptr))
-            ptr.getClass().insertObject (ptr, model, rotation, physics);
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWPhysics::PhysicsSystem& physics, DetourNavigator::Navigator& navigator)
