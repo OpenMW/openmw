@@ -148,21 +148,18 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
             osg::ref_ptr<osg::Node> node (const_cast<osg::Node*>(constNode.get())); // const-trickery required because there is no const version of NodeVisitor
 
             // Check first if there's a custom collision node
+            unsigned int visitAllNodesMask = 0xffffffff;
             SceneUtil::FindByNameVisitor nameFinder("Collision");
+            nameFinder.setTraversalMask(visitAllNodesMask);
+            nameFinder.setNodeMaskOverride(visitAllNodesMask);
             node->accept(nameFinder);
             if (nameFinder.mFoundNode)
             {
                 NodeToShapeVisitor visitor;
+                visitor.setTraversalMask(visitAllNodesMask);
+                visitor.setNodeMaskOverride(visitAllNodesMask);
                 nameFinder.mFoundNode->accept(visitor);
                 shape = visitor.getShape();
-                for (unsigned int i = 0; i < nameFinder.mFoundNode->getNumParents(); ++i)
-                {
-                    nameFinder.mFoundNode->getParent(i)->removeChild(nameFinder.mFoundNode);
-                }
-
-                /* // CleanObjectRootVisitor is an alternative method
-                SceneUtil::CleanObjectRootVisitor cleanerVisitor;
-                nameFinder.mFoundNode->accept(cleanerVisitor);*/
             }
 
             // Generate a collision shape from the mesh
