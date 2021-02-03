@@ -5,9 +5,12 @@
 #include "chunkytrimesh.hpp"
 #include "bounds.hpp"
 
+#include <components/bullethelpers/operators.hpp>
+
 #include <memory>
 #include <string>
 #include <vector>
+#include <tuple>
 
 #include <osg/Vec3f>
 
@@ -87,6 +90,11 @@ namespace DetourNavigator
         ChunkyTriMesh mChunkyTriMesh;
         Bounds mBounds;
     };
+
+    inline bool operator<(const RecastMesh::Water& lhs, const RecastMesh::Water& rhs)
+    {
+        return std::tie(lhs.mCellSize, lhs.mTransform) < std::tie(rhs.mCellSize, rhs.mTransform);
+    }
 }
 
 #endif

@@ -85,6 +85,8 @@ namespace DetourNavigator
                     std::for_each(byId.first, byId.second, [&] (const auto& v) { result.push_back(v.second); });
                 });
 
+            std::sort(result.begin(), result.end());
+
             return result;
         }
 

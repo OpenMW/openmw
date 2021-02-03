@@ -155,6 +155,7 @@ namespace DetourNavigator
     std::shared_ptr<RecastMesh> RecastMeshBuilder::create(std::size_t generation, std::size_t revision)
     {
         optimizeRecastMesh(mIndices, mVertices);
+        std::sort(mWater.begin(), mWater.end());
         return std::make_shared<RecastMesh>(generation, revision, mIndices, mVertices, mAreaTypes,
             mWater, mSettings.get().mTrianglesPerChunk);
     }
