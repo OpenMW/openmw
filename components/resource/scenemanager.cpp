@@ -390,7 +390,8 @@ namespace Resource
             {
                 const char* reserved[] = {"Head", "Neck", "Chest", "Groin", "Right Hand", "Left Hand", "Right Wrist", "Left Wrist", "Shield Bone", "Right Forearm", "Left Forearm", "Right Upper Arm",
                                           "Left Upper Arm", "Right Foot", "Left Foot", "Right Ankle", "Left Ankle", "Right Knee", "Left Knee", "Right Upper Leg", "Left Upper Leg", "Right Clavicle",
-                                          "Left Clavicle", "Weapon Bone", "Tail", "Bip01", "Root Bone", "BoneOffset", "AttachLight", "Arrow", "Camera"};
+                                          "Left Clavicle", "Weapon Bone", "Tail", "Bip01", "Root Bone", "BoneOffset", "AttachLight", "Arrow", "Camera", "Collision", "Right_Wrist", "Left_Wrist",
+                                          "Shield_Bone", "Right_Forearm", "Left_Forearm", "Right_Upper_Arm", "Left_Clavicle", "Weapon_Bone", "Root_Bone"};
 
                 reservedNames = std::vector<std::string>(reserved, reserved + sizeof(reserved)/sizeof(reserved[0]));
 
