@@ -53,12 +53,15 @@ namespace DetourNavigator
     }
 
     NavMeshTilesCache::NavMeshTilesCache(const std::size_t maxNavMeshDataSize)
-        : mMaxNavMeshDataSize(maxNavMeshDataSize), mUsedNavMeshDataSize(0), mFreeNavMeshDataSize(0) {}
+        : mMaxNavMeshDataSize(maxNavMeshDataSize), mUsedNavMeshDataSize(0), mFreeNavMeshDataSize(0),
+          mHitCount(0), mGetCount(0){}
 
     NavMeshTilesCache::Value NavMeshTilesCache::get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
         const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections)
     {
         const std::lock_guard<std::mutex> lock(mMutex);
+
+        ++mGetCount;
 
         const auto agentValues = mValues.find(agentHalfExtents);
         if (agentValues == mValues.end())
@@ -73,6 +76,8 @@ namespace DetourNavigator
             return Value();
 
         acquireItemUnsafe(tile->second);
+
+        ++mHitCount;
 
         return Value(*this, tile->second);
     }
@@ -123,17 +128,22 @@ namespace DetourNavigator
         std::size_t navMeshCacheSize = 0;
         std::size_t usedNavMeshTiles = 0;
         std::size_t cachedNavMeshTiles = 0;
+        std::size_t hitCount = 0;
+        std::size_t getCount = 0;
 
         {
             const std::lock_guard<std::mutex> lock(mMutex);
             navMeshCacheSize = mUsedNavMeshDataSize;
             usedNavMeshTiles = mBusyItems.size();
             cachedNavMeshTiles = mFreeItems.size();
+            hitCount = mHitCount;
+            getCount = mGetCount;
         }
 
         stats.setAttribute(frameNumber, "NavMesh CacheSize", navMeshCacheSize);
         stats.setAttribute(frameNumber, "NavMesh UsedTiles", usedNavMeshTiles);
         stats.setAttribute(frameNumber, "NavMesh CachedTiles", cachedNavMeshTiles);
+        stats.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(hitCount) / getCount * 100.0);
     }
 
     void NavMeshTilesCache::removeLeastRecentlyUsed()

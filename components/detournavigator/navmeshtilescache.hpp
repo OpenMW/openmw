@@ -194,6 +194,8 @@ namespace DetourNavigator
         std::size_t mMaxNavMeshDataSize;
         std::size_t mUsedNavMeshDataSize;
         std::size_t mFreeNavMeshDataSize;
+        std::size_t mHitCount;
+        std::size_t mGetCount;
         std::list<Item> mBusyItems;
         std::list<Item> mFreeItems;
         std::map<osg::Vec3f, std::map<TilePosition, TileMap>> mValues;
