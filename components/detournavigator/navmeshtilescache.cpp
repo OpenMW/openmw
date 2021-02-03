@@ -97,7 +97,7 @@ namespace DetourNavigator
             return Value();
 
         auto navMeshKey = makeNavMeshKey(recastMesh, offMeshConnections);
-        const auto itemSize = navMeshSize + 2 * navMeshKey.size();
+        const auto itemSize = navMeshSize + navMeshKey.size();
 
         if (itemSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
             return Value();

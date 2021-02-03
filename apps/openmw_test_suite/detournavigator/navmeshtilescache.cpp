@@ -68,7 +68,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections,
@@ -81,7 +81,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
+        const std::size_t maxSize = 2 * (navMeshDataSize + navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
         const auto anotherData = reinterpret_cast<unsigned char*>(dtAlloc(1, DT_ALLOC_PERM));
         NavMeshData anotherNavMeshData {anotherData, 1};
@@ -97,7 +97,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(mNavMeshData));
@@ -142,7 +142,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshWithWaterKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -163,7 +163,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -182,7 +182,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshWithWaterKeySize;
-        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
+        const std::size_t maxSize = 2 * (navMeshDataSize + navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> leastRecentlySetWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -214,7 +214,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshWithWaterKeySize;
-        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
+        const std::size_t maxSize = 2 * (navMeshDataSize + navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> leastRecentlyUsedWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -258,7 +258,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = 2 * (navMeshDataSize + 2 * navMeshKeySize);
+        const std::size_t maxSize = 2 * (navMeshDataSize + navMeshKeySize);
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -277,7 +277,7 @@ namespace
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize1 = cRecastMeshKeySize;
         const std::size_t navMeshKeySize2 = cRecastMeshWithWaterKeySize;
-        const std::size_t maxSize = 2 * navMeshDataSize + 2 * navMeshKeySize1 + 2 * navMeshKeySize2;
+        const std::size_t maxSize = 2 * navMeshDataSize + navMeshKeySize1 + navMeshKeySize2;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> anotherWater {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -306,7 +306,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
@@ -330,7 +330,7 @@ namespace
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
-        const std::size_t maxSize = navMeshDataSize + 2 * navMeshKeySize;
+        const std::size_t maxSize = navMeshDataSize + navMeshKeySize;
         NavMeshTilesCache cache(maxSize);
 
         const std::vector<RecastMesh::Water> water {1, RecastMesh::Water {1, btTransform::getIdentity()}};
