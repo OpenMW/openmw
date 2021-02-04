@@ -86,7 +86,17 @@ public:
             return osg::ref_ptr<BulletShape>();
 
         osg::ref_ptr<BulletShape> shape (new BulletShape);
-        shape->mCollisionShape = new TriangleMeshShape(mTriangleMesh.release(), true);
+        btBvhTriangleMeshShape* triangleMeshShape = new TriangleMeshShape(mTriangleMesh.release(), true);
+        btVector3 aabbMin = triangleMeshShape->getLocalAabbMin();
+        btVector3 aabbMax = triangleMeshShape->getLocalAabbMax();
+        shape->mCollisionBox.extents[0] = (aabbMax[0] - aabbMin[0]) / 2.0f;
+        shape->mCollisionBox.extents[1] = (aabbMax[1] - aabbMin[1]) / 2.0f;
+        shape->mCollisionBox.extents[2] = (aabbMax[2] - aabbMin[2]) / 2.0f;
+        shape->mCollisionBox.center = osg::Vec3f( (aabbMax[0] + aabbMin[0]) / 2.0f,
+                                                  (aabbMax[1] + aabbMin[1]) / 2.0f,
+                                                  (aabbMax[2] + aabbMin[2]) / 2.0f );
+        shape->mCollisionShape = triangleMeshShape;
+
         return shape;
     }
 
