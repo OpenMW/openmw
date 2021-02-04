@@ -74,7 +74,6 @@ namespace Resource
                     std::string line;
                     while ( getline (*textKeysFile, line) )
                     {
-                        Log(Debug::Warning) << "add textkey ***" << parseTextKey(line) << "***" << parseTimeSignature(line) << "***";
                         mTarget.mTextKeys.emplace(parseTimeSignature(line), std::move(parseTextKey(line)));
                     }
                 }
