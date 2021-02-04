@@ -55,27 +55,20 @@ namespace DetourNavigator
         const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
         NavMeshData&& value)
     {
-        const auto navMeshSize = static_cast<std::size_t>(value.mSize);
+        const auto itemSize = static_cast<std::size_t>(value.mSize) + getSize(recastMesh, offMeshConnections);
 
         const std::lock_guard<std::mutex> lock(mMutex);
-
-        if (navMeshSize > mMaxNavMeshDataSize)
-            return Value();
-
-        if (navMeshSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
-            return Value();
-
-        NavMeshKey navMeshKey {
-            RecastMeshData {recastMesh.getIndices(), recastMesh.getVertices(), recastMesh.getAreaTypes(), recastMesh.getWater()},
-            offMeshConnections
-        };
-        const auto itemSize = navMeshSize + getSize(recastMesh, offMeshConnections);
 
         if (itemSize > mFreeNavMeshDataSize + (mMaxNavMeshDataSize - mUsedNavMeshDataSize))
             return Value();
 
         while (!mFreeItems.empty() && mUsedNavMeshDataSize + itemSize > mMaxNavMeshDataSize)
             removeLeastRecentlyUsed();
+
+        NavMeshKey navMeshKey {
+            RecastMeshData {recastMesh.getIndices(), recastMesh.getVertices(), recastMesh.getAreaTypes(), recastMesh.getWater()},
+            offMeshConnections
+        };
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(navMeshKey), itemSize);
         const auto emplaced = mValues[agentHalfExtents][changedTile].mMap.emplace(iterator->mNavMeshKey, iterator);
