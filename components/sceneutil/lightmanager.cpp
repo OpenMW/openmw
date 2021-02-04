@@ -10,7 +10,7 @@ namespace SceneUtil
     class LightStateCache
     {
     public:
-        osg::Light* lastAppliedLight[8];
+        osg::Light* lastAppliedLight[32];
     };
 
     LightStateCache* getLightStateCache(unsigned int contextid)
@@ -165,7 +165,7 @@ namespace SceneUtil
         , mLightingMask(~0u)
     {
         setUpdateCallback(new LightManagerUpdateCallback);
-        for (unsigned int i=0; i<8; ++i)
+        for (unsigned int i=0; i<32; ++i)
             mDummies.push_back(new LightStateAttribute(i, std::vector<osg::ref_ptr<osg::Light> >()));
     }
 
@@ -341,7 +341,7 @@ namespace SceneUtil
         // Set default light state to zero
         // This is necessary because shaders don't respect glDisable(GL_LIGHTX) so in addition to disabling
         // we'll have to set a light state that has no visible effect
-        for (int i=start; i<8; ++i)
+        for (int i=start; i<32; ++i)
         {
             osg::ref_ptr<DisableLight> defaultLight (new DisableLight(i));
             getOrCreateStateSet()->setAttributeAndModes(defaultLight, osg::StateAttribute::OFF);
@@ -443,7 +443,7 @@ namespace SceneUtil
         }
         if (!mLightList.empty())
         {
-            unsigned int maxLights = static_cast<unsigned int> (8 - mLightManager->getStartLight());
+            unsigned int maxLights = static_cast<unsigned int> (32 - mLightManager->getStartLight());
 
             osg::StateSet* stateset = nullptr;
 
