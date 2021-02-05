@@ -32,7 +32,7 @@ namespace Resource
             osg::Vec3f extents;
             osg::Vec3f center;
         };
-        // Used for actors. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
+        // Used for actors and projectiles. mCollisionShape is used for actors only when we need to autogenerate collision box for creatures.
         // For now, use one file <-> one resource for simplicity.
         CollisionBox mCollisionBox;
 
