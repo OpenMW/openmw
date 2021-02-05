@@ -215,6 +215,7 @@ Programmers
     Yohaulticetl
     Yuri Krupenin
     zelurker
+    Noah Gooder
 
 Documentation
 -------------

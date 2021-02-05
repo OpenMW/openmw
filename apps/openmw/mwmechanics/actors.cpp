@@ -951,7 +951,7 @@ namespace MWMechanics
             if (actor.getClass().hasInventoryStore(actor))
                 actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Poison);
         }
-        else if (effects.get(ESM::MagicEffect::CureParalyzation).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::CureParalyzation).getModifier() > 0)
         {
             creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
             creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Paralyze);
