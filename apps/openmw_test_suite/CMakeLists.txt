@@ -16,6 +16,8 @@ if (GTEST_FOUND AND GMOCK_FOUND)
 
         misc/test_stringops.cpp
 
+        misc/test_endianness.cpp
+
         nifloader/testbulletnifloader.cpp
 
         detournavigator/navigator.cpp
