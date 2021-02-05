@@ -122,7 +122,7 @@ namespace MWPhysics
             void setWaterHeight(float height);
             void disableWater();
 
-            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
+            void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, osg::Quat rotation, int collisionType = CollisionType_World, bool skipAnimated = false);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
             int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater);
@@ -143,7 +143,7 @@ namespace MWPhysics
             void remove (const MWWorld::Ptr& ptr);
 
             void updateScale (const MWWorld::Ptr& ptr);
-            void updateRotation (const MWWorld::Ptr& ptr);
+            void updateRotation (const MWWorld::Ptr& ptr, osg::Quat rotate);
             void updatePosition (const MWWorld::Ptr& ptr);
 
             void addHeightField (const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject);

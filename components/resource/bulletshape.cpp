@@ -95,6 +95,11 @@ void BulletShape::setLocalScaling(const btVector3& scale)
         mAvoidCollisionShape->setLocalScaling(scale);
 }
 
+bool BulletShape::isAnimated() const
+{
+    return !mAnimatedShapes.empty();
+}
+
 osg::ref_ptr<BulletShapeInstance> BulletShape::makeInstance() const
 {
     osg::ref_ptr<BulletShapeInstance> instance (new BulletShapeInstance(this));

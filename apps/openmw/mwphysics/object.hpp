@@ -26,12 +26,12 @@ namespace MWPhysics
     class Object final : public PtrHolder
     {
     public:
-        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, int collisionType, PhysicsTaskScheduler* scheduler);
+        Object(const MWWorld::Ptr& ptr, osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance, osg::Quat rotation, int collisionType, PhysicsTaskScheduler* scheduler);
         ~Object() override;
 
         const Resource::BulletShapeInstance* getShapeInstance() const;
         void setScale(float scale);
-        void setRotation(const btQuaternion& quat);
+        void setRotation(osg::Quat quat);
         void setOrigin(const btVector3& vec);
         void commitPositionChange();
         btCollisionObject* getCollisionObject();

@@ -52,6 +52,8 @@ namespace Resource
 
         void setLocalScaling(const btVector3& scale);
 
+        bool isAnimated() const;
+
     private:
 
         void deleteShape(btCollisionShape* shape);
