@@ -951,29 +951,29 @@ namespace MWMechanics
             if (actor.getClass().hasInventoryStore(actor))
                 actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Poison);
         }
-        else if (effects.get(ESM::MagicEffect::CureParalyzation).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::CureParalyzation).getModifier() > 0)
         {
             creatureStats.getActiveSpells().purgeEffect(ESM::MagicEffect::Paralyze);
             creatureStats.getSpells().purgeEffect(ESM::MagicEffect::Paralyze);
             if (actor.getClass().hasInventoryStore(actor))
                 actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Paralyze);
         }
-        else if (effects.get(ESM::MagicEffect::CureCommonDisease).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::CureCommonDisease).getModifier() > 0)
         {
             creatureStats.getSpells().purgeCommonDisease();
         }
-        else if (effects.get(ESM::MagicEffect::CureBlightDisease).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::CureBlightDisease).getModifier() > 0)
         {
             creatureStats.getSpells().purgeBlightDisease();
         }
-        else if (effects.get(ESM::MagicEffect::CureCorprusDisease).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::CureCorprusDisease).getModifier() > 0)
         {
             creatureStats.getActiveSpells().purgeCorprusDisease();
             creatureStats.getSpells().purgeCorprusDisease();
             if (actor.getClass().hasInventoryStore(actor))
                 actor.getClass().getInventoryStore(actor).purgeEffect(ESM::MagicEffect::Corprus, true);
         }
-        else if (effects.get(ESM::MagicEffect::RemoveCurse).getModifier() > 0)
+        if (effects.get(ESM::MagicEffect::RemoveCurse).getModifier() > 0)
         {
             creatureStats.getSpells().purgeCurses();
         }
