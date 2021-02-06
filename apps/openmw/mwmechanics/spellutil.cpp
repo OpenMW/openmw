@@ -123,7 +123,7 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
-        if (checkMagicka && stats.getMagicka().getCurrent() < spell->mData.mCost)
+        if (checkMagicka && spell->mData.mCost > 0 && stats.getMagicka().getCurrent() < spell->mData.mCost)
             return 0;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)
