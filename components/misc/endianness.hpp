@@ -2,6 +2,8 @@
 #define COMPONENTS_MISC_ENDIANNESS_H
 
 #include <cstdint>
+#include <cstring>
+#include <type_traits>
 
 namespace Misc
 {
@@ -15,20 +17,26 @@ namespace Misc
 
         if constexpr (sizeof(T) == 2)
         {
-            uint16_t& v16 = *reinterpret_cast<uint16_t*>(&v);
+            uint16_t v16;
+            std::memcpy(&v16, &v, sizeof(T));
             v16 = (v16 >> 8) | (v16 << 8);
+            std::memcpy(&v, &v16, sizeof(T));
         }
         if constexpr (sizeof(T) == 4)
         {
-            uint32_t& v32 = *reinterpret_cast<uint32_t*>(&v);
-            v32 = (v32 >> 24) | ((v32 >> 8) & 0xff00) | ((v32 & 0xff00) << 8) || v32 << 24;
+            uint32_t v32;
+            std::memcpy(&v32, &v, sizeof(T));
+            v32 = (v32 >> 24) | ((v32 >> 8) & 0xff00) | ((v32 & 0xff00) << 8) | v32 << 24;
+            std::memcpy(&v, &v32, sizeof(T));
         }
         if constexpr (sizeof(T) == 8)
         {
-            uint64_t& v64 = *reinterpret_cast<uint64_t*>(&v);
+            uint64_t v64;
+            std::memcpy(&v64, &v, sizeof(T));
             v64 = (v64 >> 56) | ((v64 & 0x00ff'0000'0000'0000) >> 40) | ((v64 & 0x0000'ff00'0000'0000) >> 24)
                 | ((v64 & 0x0000'00ff'0000'0000) >> 8) | ((v64 & 0x0000'0000'ff00'0000) << 8)
                 | ((v64 & 0x0000'0000'00ff'0000) << 24) | ((v64 & 0x0000'0000'0000'ff00) << 40) | (v64 << 56);
+            std::memcpy(&v, &v64, sizeof(T));
         }
     }
 
