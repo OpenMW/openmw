@@ -18,8 +18,10 @@ namespace MWMechanics
     }
 
     template<typename T>
-    T Stat<T>::getModified() const
+    T Stat<T>::getModified(bool capped) const
     {
+        if(!capped)
+            return mModified;
         return std::max(static_cast<T>(0), mModified);
     }
 

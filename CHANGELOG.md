@@ -98,6 +98,8 @@
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Bug #5762: Movement solver is insufficiently robust
     Bug #5821: NPCs from mods getting removed if mod order was changed
+    Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
+    Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
@@ -130,6 +132,7 @@
     Feature #5813: Instanced groundcover support
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
+    Task #5844: Update 'toggle sneak' documentation
 
 0.46.0
 ------
