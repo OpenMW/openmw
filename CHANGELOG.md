@@ -100,6 +100,7 @@
     Bug #5821: NPCs from mods getting removed if mod order was changed
     Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
     Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
+    Bug #5840: GetSoundPlaying "Health Damage" doesn't play when NPC hits target with shield effect ( vanilla engine behavior )
     Bug #5841: Can't Cast Zero Cost Spells When Magicka is < 0
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
@@ -133,6 +134,7 @@
     Feature #5813: Instanced groundcover support
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
+    Task #5844: Update 'toggle sneak' documentation
 
 0.46.0
 ------

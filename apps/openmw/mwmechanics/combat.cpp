@@ -345,6 +345,8 @@ namespace MWMechanics
             MWMechanics::DynamicStat<float> health = attackerStats.getHealth();
             health.setCurrent(health.getCurrent() - x);
             attackerStats.setHealth(health);
+
+            MWBase::Environment::get().getSoundManager()->playSound3D(attacker, "Health Damage", 1.0f, 1.0f);
         }
     }
 
