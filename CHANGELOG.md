@@ -101,6 +101,7 @@
     Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
     Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
     Bug #5840: GetSoundPlaying "Health Damage" doesn't play when NPC hits target with shield effect ( vanilla engine behavior )
+    Bug #5841: Can't Cast Zero Cost Spells When Magicka is < 0
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
