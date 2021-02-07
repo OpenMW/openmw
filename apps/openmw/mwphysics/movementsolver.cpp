@@ -38,7 +38,7 @@ namespace MWPhysics
         ContactCollectionCallback(const btCollisionObject * me, osg::Vec3f velocity) : mMe(me)
         {
             m_collisionFilterGroup = me->getBroadphaseHandle()->m_collisionFilterGroup;
-            m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask;
+            m_collisionFilterMask = me->getBroadphaseHandle()->m_collisionFilterMask & ~CollisionType_Projectile;
             mVelocity = Misc::Convert::toBullet(velocity);
         }
         btScalar addSingleResult(btManifoldPoint & contact, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) override
