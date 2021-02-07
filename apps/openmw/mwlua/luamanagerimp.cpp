@@ -17,7 +17,7 @@
 namespace MWLua
 {
 
-    LuaManager::LuaManager(const VFS::Manager* vfs) : mLua(vfs)
+    LuaManager::LuaManager(const VFS::Manager* vfs, const std::vector<std::string>& globalScriptLists) : mLua(vfs)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
 
@@ -48,13 +48,45 @@ namespace MWLua
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mNearbyPackage = initNearbyPackage(localContext);
+
+        auto endsWith = [](std::string_view s, std::string_view suffix)
+        {
+            return s.size() >= suffix.size() && std::equal(suffix.rbegin(), suffix.rend(), s.rbegin());
+        };
+        for (const std::string& scriptListFile : globalScriptLists)
+        {
+            if (!endsWith(scriptListFile, ".omwscripts"))
+            {
+                Log(Debug::Error) << "Script list should have suffix '.omwscripts', got: '" << scriptListFile << "'";
+                continue;
+            }
+            std::string content(std::istreambuf_iterator<char>(*vfs->get(scriptListFile)), {});
+            std::string_view view(content);
+            while (!view.empty())
+            {
+                size_t pos = 0;
+                while (pos < view.size() && view[pos] != '\n')
+                    pos++;
+                std::string_view line = view.substr(0, pos);
+                view = view.substr(pos + 1);
+                if (line.empty() || line[0] == '#')
+                    continue;
+                if (line.back() == '\r')
+                    line = line.substr(0, pos - 1);
+                if (endsWith(line, ".lua"))
+                    mGlobalScriptList.push_back(std::string(line));
+                else
+                    Log(Debug::Error) << "Lua script should have suffix '.lua', got: '" << line.substr(0, 300) << "'";
+            }
+        }
     }
 
     void LuaManager::init()
     {
         mKeyPressEvents.clear();
-        if (mGlobalScripts.addNewScript("test.lua"))
-            Log(Debug::Info) << "Global script started: test.lua";
+        for (const std::string& path : mGlobalScriptList)
+            if (mGlobalScripts.addNewScript(path))
+                Log(Debug::Info) << "Global script started: " << path;
     }
 
     void LuaManager::update(bool paused, float dt)

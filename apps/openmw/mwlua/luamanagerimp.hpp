@@ -21,7 +21,7 @@ namespace MWLua
     class LuaManager : public MWBase::LuaManager
     {
     public:
-        LuaManager(const VFS::Manager* vfs);
+        LuaManager(const VFS::Manager* vfs, const std::vector<std::string>& globalScriptLists);
         ~LuaManager() {}
 
         // Called by engine.cpp when environment is fully initialized.
@@ -64,6 +64,7 @@ namespace MWLua
         LuaUtil::LuaState mLua;
         sol::table mNearbyPackage;
 
+        std::vector<std::string> mGlobalScriptList;
         GlobalScripts mGlobalScripts{&mLua};
         std::set<LocalScripts*> mActiveLocalScripts;
         WorldView mWorldView;
