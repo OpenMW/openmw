@@ -132,6 +132,7 @@
     Feature #5813: Instanced groundcover support
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
+    Task #5844: Update 'toggle sneak' documentation
 
 0.46.0
 ------
