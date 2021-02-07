@@ -38,7 +38,7 @@ This setting causes the behavior of the sneak key (bound to Ctrl by default)
 to toggle sneaking on and off rather than requiring the key to be held down while sneaking.
 Players that spend significant time sneaking may find the character easier to control with this option enabled.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be toggled in the launcher under "Advanced" -> "Game Mechanics" -> "Toggle sneak".
 
 always run
 ----------
