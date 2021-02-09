@@ -26,7 +26,7 @@ namespace Misc
         {
             uint32_t v32;
             std::memcpy(&v32, &v, sizeof(T));
-            v32 = (v32 >> 24) | ((v32 >> 8) & 0xff00) | ((v32 & 0xff00) << 8) | v32 << 24;
+            v32 = (v32 >> 24) | ((v32 >> 8) & 0xff00) | ((v32 & 0xff00) << 8) | (v32 << 24);
             std::memcpy(&v, &v32, sizeof(T));
         }
         if constexpr (sizeof(T) == 8)
