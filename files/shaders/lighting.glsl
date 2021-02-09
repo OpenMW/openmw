@@ -13,22 +13,13 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
+    float eyeCosine = dot(normalize(viewPos), viewNormal.xyz);
+    if (lambert < 0.0)
     {
-        float cosine = dot(normalize(viewPos), normalize(viewNormal.xyz));
-        if (lambert >= 0.0)
-            cosine = -cosine;
-
-        float mult = 1.0;
-        float divisor = 8.0;
-
-        if (cosine < 0.0 && cosine >= -1.0/divisor)
-            mult = mix(1.0, 0.3, -cosine*divisor);
-        else if (cosine < -1.0/divisor)
-            mult = 0.3;
-
-        lambert *= mult;
-        lambert = abs(lambert);
+        lambert = -lambert;
+        eyeCosine = -eyeCosine;
     }
+    lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
     diffuseOut = gl_LightSource[lightIndex].diffuse.xyz * lambert;
 }
