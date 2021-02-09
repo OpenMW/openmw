@@ -15,6 +15,7 @@ if (GTEST_FOUND AND GMOCK_FOUND)
         esm/test_fixed_string.cpp
 
         misc/test_stringops.cpp
+        misc/test_endianness.cpp
 
         nifloader/testbulletnifloader.cpp
 
