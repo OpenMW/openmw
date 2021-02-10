@@ -262,6 +262,25 @@ namespace MWMechanics
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
         }
+        else if (!isRangedCombat && !mPathFinder.isPathConstructed() && storage.mCurrentAction->isAttackingOrSpell())
+        {
+            const osg::Vec3f position = actor.getRefData().getPosition().asVec3();
+            const osg::Vec3f destination = target.getRefData().getPosition().asVec3();
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            mPathFinder.buildPath(actor, position, destination, actor.getCell(), getPathGridGraph(actor.getCell()),
+                                  halfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
+
+            if (!mPathFinder.isPathConstructed())
+            {
+                storage.stopAttack();
+                characterController.setAttackingOrSpell(false);
+                currentAction.reset(new ActionFlee());
+                actionCooldown = currentAction->getActionCooldown();
+                storage.startFleeing();
+                MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
+            }
+        }
+
         return false;
     }
 
