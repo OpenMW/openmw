@@ -456,12 +456,15 @@ namespace MWRender
         mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
         mWater->listAssetsToPreload(workItem->mTextures);
 
-        const char* basemodels[] = {"xbase_anim", "xbase_anim.1st", "xbase_anim_female", "xbase_animkna"};
-        for (size_t i=0; i<sizeof(basemodels)/sizeof(basemodels[0]); ++i)
-        {
-            workItem->mModels.push_back(std::string("meshes/") + basemodels[i] + ".nif");
-            workItem->mKeyframes.push_back(std::string("meshes/") + basemodels[i] + ".kf");
-        }
+        workItem->mModels.push_back(Settings::Manager::getString("xbaseanim", "Models"));
+        workItem->mModels.push_back(Settings::Manager::getString("xbaseanim1st", "Models"));
+        workItem->mModels.push_back(Settings::Manager::getString("xbaseanimfemale", "Models"));
+        workItem->mModels.push_back(Settings::Manager::getString("xargonianswimkna", "Models"));
+
+        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanimkf", "Models"));
+        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanim1stkf", "Models"));
+        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanimfemalekf", "Models"));
+        workItem->mKeyframes.push_back(Settings::Manager::getString("xargonianswimknakf", "Models"));
 
         workItem->mTextures.emplace_back("textures/_land_default.dds");
 

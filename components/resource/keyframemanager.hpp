@@ -15,13 +15,21 @@ namespace Resource
     class RetrieveAnimationsVisitor : public osg::NodeVisitor
     {
         public:
-            RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager);
+            RetrieveAnimationsVisitor(SceneUtil::KeyframeHolder& target, osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager,
+                const std::string& normalized, const VFS::Manager* vfs);
 
             virtual void apply(osg::Node& node) override;
 
         private:
+
+            std::string changeFileExtension(const std::string file, const std::string ext);
+            std::string parseTextKey(const std::string& line);
+            double parseTimeSignature(const std::string& line);
+
             SceneUtil::KeyframeHolder& mTarget;
             osg::ref_ptr<osgAnimation::BasicAnimationManager> mAnimationManager;
+            std::string mNormalized;
+            const VFS::Manager* mVFS;
 
     };
 }

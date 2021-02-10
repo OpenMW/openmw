@@ -17,6 +17,7 @@
 #include <osgAnimation/UpdateMatrixTransform>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/stringops.hpp>
 #include <components/resource/animation.hpp>
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/keyframe.hpp>
@@ -83,7 +84,7 @@ namespace SceneUtil
         {
             osgAnimation::UpdateMatrixTransform* umt = dynamic_cast<osgAnimation::UpdateMatrixTransform*>(cb);
             if (umt)
-                if (node.getName() != "bip01") link(umt);
+                if (Misc::StringUtils::lowerCase(node.getName()) != "bip01") link(umt);
             cb = cb->getNestedCallback();
         }
 
@@ -102,10 +103,14 @@ namespace SceneUtil
     }
 
     OsgAnimationController::OsgAnimationController(const OsgAnimationController &copy, const osg::CopyOp &copyop) : SceneUtil::KeyframeController(copy, copyop)
-    , mMergedAnimationTracks(copy.mMergedAnimationTracks)
     , mEmulatedAnimations(copy.mEmulatedAnimations)
     {
         mLinker = nullptr;
+        for (const auto& mergedAnimationTrack : copy.mMergedAnimationTracks)
+        {
+            Resource::Animation* copiedAnimationTrack = static_cast<Resource::Animation*>(mergedAnimationTrack.get()->clone(copyop));
+            mMergedAnimationTracks.emplace_back(copiedAnimationTrack);
+        }
     }
 
     osg::Vec3f OsgAnimationController::getTranslation(float time) const
