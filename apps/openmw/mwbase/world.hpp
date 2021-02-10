@@ -185,6 +185,7 @@ namespace MWBase
             ///
             /// \note If cell==0, the cell the player is currently in will be used instead to
             /// generate a name.
+            virtual std::string getCellName(const ESM::Cell* cell) const = 0;
 
             virtual void removeRefScript (MWWorld::RefData *ref) = 0;
             //< Remove the script attached to ref from mLocalScripts
