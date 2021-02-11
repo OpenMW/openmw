@@ -656,13 +656,19 @@ namespace MWWorld
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
+        return getCellName(cell->getCell());
+    }
 
-        if (!cell->getCell()->isExterior() || !cell->getCell()->mName.empty())
-            return cell->getCell()->mName;
+    std::string World::getCellName(const ESM::Cell* cell) const
+    {
+        if (cell)
+        {
+            if (!cell->isExterior() || !cell->mName.empty())
+                return cell->mName;
 
-        if (const ESM::Region* region = mStore.get<ESM::Region>().search (cell->getCell()->mRegion))
-            return region->mName;
-
+            if (const ESM::Region* region = mStore.get<ESM::Region>().search (cell->mRegion))
+                return region->mName;
+        }
         return mStore.get<ESM::GameSetting>().find ("sDefaultCellname")->mValue.getString();
     }
 
