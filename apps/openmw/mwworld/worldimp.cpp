@@ -1861,6 +1861,13 @@ namespace MWWorld
         {
             doPhysics (duration, frameStart, frameNumber, stats);
         }
+        else
+        {
+            // zero the async stats if we are paused
+            stats.setAttribute(frameNumber, "physicsworker_time_begin", 0);
+            stats.setAttribute(frameNumber, "physicsworker_time_taken", 0);
+            stats.setAttribute(frameNumber, "physicsworker_time_end", 0);
+        }
     }
 
     void World::updatePlayer()
