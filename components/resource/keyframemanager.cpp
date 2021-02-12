@@ -74,7 +74,7 @@ namespace Resource
                     std::string line;
                     while ( getline (*textKeysFile, line) )
                     {
-                        mTarget.mTextKeys.emplace(parseTimeSignature(line), std::move(parseTextKey(line)));
+                        mTarget.mTextKeys.emplace(parseTimeSignature(line), parseTextKey(line));
                     }
                 }
                 catch (std::exception& e)
