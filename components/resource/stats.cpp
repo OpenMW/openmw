@@ -127,7 +127,7 @@ bool Profiler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter 
     if (viewer)
     {
         // Add/remove openmw stats to the osd as necessary
-        viewer->getViewerStats()->collectStats("engine", _statsType == StatsHandler::StatsType::VIEWER_STATS);
+        viewer->getViewerStats()->collectStats("engine", _statsType >= StatsHandler::StatsType::VIEWER_STATS);
 
         if (_offlineCollect)
             CollectStatistics(viewer);
