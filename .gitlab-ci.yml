@@ -122,7 +122,7 @@ variables: &cs-targets
         7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip '*'
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
@@ -213,7 +213,7 @@ Windows_Ninja_CS_RelWithDebInfo:
         7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip '*'
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
