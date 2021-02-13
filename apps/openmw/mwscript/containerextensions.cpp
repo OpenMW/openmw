@@ -308,7 +308,8 @@ namespace MWScript
                     }
                     if (it == invStore.end())
                     {
-                        it = ptr.getClass().getContainerStore (ptr).add (item, 1, ptr);
+                        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+                        it = ptr.getClass().getContainerStore (ptr).add (ref.getPtr(), 1, ptr, false);
                         Log(Debug::Warning) << "Implicitly adding one " << item << 
                             " to the inventory store of " << ptr.getCellRef().getRefId() <<
                             " to fulfill the requirements of Equip instruction";
