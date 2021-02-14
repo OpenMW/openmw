@@ -109,7 +109,8 @@ namespace MWScript
         }
 
         // execute script
-        if (!iter->second.mByteCode.empty() && iter->second.mActive)
+        std::string target = Misc::StringUtils::lowerCase(interpreterContext.getTarget());
+        if (!iter->second.mByteCode.empty() && iter->second.mInactive.find(target) == iter->second.mInactive.end())
             try
             {
                 if (!mOpcodesInstalled)
@@ -129,7 +130,7 @@ namespace MWScript
             {
                 Log(Debug::Error) << "Execution of script " << name << " failed: "  << e.what();
 
-                iter->second.mActive = false; // don't execute again.
+                iter->second.mInactive.insert(target); // don't execute again.
             }
         return false;
     }
@@ -138,7 +139,7 @@ namespace MWScript
     {
         for (auto& script : mScripts)
         {
-            script.second.mActive = true;
+            script.second.mInactive.clear();
         }
 
         mGlobalScripts.clear();

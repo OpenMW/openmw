@@ -129,6 +129,14 @@ namespace MWScript
             mGlobalScriptDesc = globalScriptDesc;
     }
 
+    std::string InterpreterContext::getTarget() const
+    {
+        auto ptr = getReference(false);
+        if(!ptr.isEmpty())
+            return ptr.mRef->mRef.getRefId();
+        return {};
+    }
+
     int InterpreterContext::getLocalShort (int index) const
     {
         if (!mLocals)
@@ -474,7 +482,7 @@ namespace MWScript
         locals.mFloats[findLocalVariableIndex (scriptId, name, 'f')] = value;
     }
 
-    MWWorld::Ptr InterpreterContext::getReference(bool required)
+    MWWorld::Ptr InterpreterContext::getReference(bool required) const
     {
         return getReferenceImp ("", true, required);
     }
