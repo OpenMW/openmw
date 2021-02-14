@@ -96,6 +96,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
     const float distToTarget = distance(position, dest);
     const bool isDestReached = (distToTarget <= destTolerance);
+    const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
     if (!isDestReached && mTimer > AI_REACTION_TIME)
     {
@@ -104,7 +105,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
 
         const bool wasShortcutting = mIsShortcutting;
         bool destInLOS = false;
-        const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
         // Prohibit shortcuts for AiWander, if the actor can not move in 3 dimensions.
         mIsShortcutting = actorCanMoveByZ
@@ -150,7 +150,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             + 1.2 * std::max(halfExtents.x(), halfExtents.y());
     const float pointTolerance = std::max(MIN_TOLERANCE, actorTolerance);
 
-    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE);
+    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE,
+                       /*shortenIfAlmostStraight=*/smoothMovement, actorCanMoveByZ);
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
@@ -158,8 +160,10 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         zTurn(actor, getZAngleToPoint(position, dest));
         smoothTurn(actor, getXAngleToPoint(position, dest), 0);
         world->removeActorPath(actor);
-        return isDestReached;
+        return true;
     }
+    else if (mPathFinder.getPath().empty())
+        return false;
 
     world->updateActorPath(actor, mPathFinder.getPath(), halfExtents, position, dest);
 
@@ -178,7 +182,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const auto destination = mPathFinder.getPath().empty() ? dest : mPathFinder.getPath().front();
     mObstacleCheck.update(actor, destination, duration);
 
-    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
     if (smoothMovement)
     {
         const float smoothTurnReservedDist = 150;

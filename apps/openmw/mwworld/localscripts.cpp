@@ -76,7 +76,7 @@ void MWWorld::LocalScripts::startIteration()
 
 bool MWWorld::LocalScripts::getNext(std::pair<std::string, Ptr>& script)
 {
-    while (mIter!=mScripts.end())
+    if (mIter!=mScripts.end())
     {
         std::list<std::pair<std::string, Ptr> >::iterator iter = mIter++;
         script = *iter;

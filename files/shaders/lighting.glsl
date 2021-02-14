@@ -8,7 +8,20 @@ void perLight(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 vie
     float illumination = clamp(1.0 / (gl_LightSource[lightIndex].constantAttenuation + gl_LightSource[lightIndex].linearAttenuation * lightDistance + gl_LightSource[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 
     ambientOut = gl_LightSource[lightIndex].ambient.xyz * illumination;
-    diffuseOut = gl_LightSource[lightIndex].diffuse.xyz * max(dot(viewNormal, lightDir), 0.0) * illumination;
+
+    float lambert = dot(viewNormal.xyz, lightDir) * illumination;
+#ifndef GROUNDCOVER
+    lambert = max(lambert, 0.0);
+#else
+    float eyeCosine = dot(normalize(viewPos), viewNormal.xyz);
+    if (lambert < 0.0)
+    {
+        lambert = -lambert;
+        eyeCosine = -eyeCosine;
+    }
+    lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
+#endif
+    diffuseOut = gl_LightSource[lightIndex].diffuse.xyz * lambert;
 }
 
 #if PER_PIXEL_LIGHTING

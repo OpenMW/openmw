@@ -19,14 +19,10 @@ void CSVWorld::DragRecordTable::startDragFromTable (const CSVWorld::DragRecordTa
     }
 
     CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData (records, mDocument);
-
-    if (mime)
-    {
-        QDrag* drag = new QDrag (this);
-        drag->setMimeData (mime);
-        drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
-        drag->exec (Qt::CopyAction);
-    }
+    QDrag* drag = new QDrag (this);
+    drag->setMimeData (mime);
+    drag->setPixmap (QString::fromUtf8 (mime->getIcon().c_str()));
+    drag->exec (Qt::CopyAction);
 }
 
 CSVWorld::DragRecordTable::DragRecordTable (CSMDoc::Document& document, QWidget* parent) :
@@ -50,7 +46,8 @@ void CSVWorld::DragRecordTable::dragEnterEvent(QDragEnterEvent *event)
 void CSVWorld::DragRecordTable::dragMoveEvent(QDragMoveEvent *event)
 {
     QModelIndex index = indexAt(event->pos());
-    if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)))
+    if (CSVWorld::DragDropUtils::canAcceptData(*event, getIndexDisplayType(index)) ||
+        CSVWorld::DragDropUtils::isInfo(*event, getIndexDisplayType(index)) )
     {
         if (index.flags() & Qt::ItemIsEditable)
         {
@@ -78,6 +75,10 @@ void CSVWorld::DragRecordTable::dropEvent(QDropEvent *event)
                 mDocument.getUndoStack().push(new CSMWorld::ModifyCommand(*model(), index, newIndexData));
             }
         }
+    }
+    else if (CSVWorld::DragDropUtils::isInfo(*event, display) && event->source() == this)
+    {
+        emit moveRecordsFromSameTable(event);
     }
 }
 

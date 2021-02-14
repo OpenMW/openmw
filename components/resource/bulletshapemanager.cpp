@@ -8,6 +8,7 @@
 
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
+#include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
@@ -86,7 +87,17 @@ public:
             return osg::ref_ptr<BulletShape>();
 
         osg::ref_ptr<BulletShape> shape (new BulletShape);
-        shape->mCollisionShape = new TriangleMeshShape(mTriangleMesh.release(), true);
+        btBvhTriangleMeshShape* triangleMeshShape = new TriangleMeshShape(mTriangleMesh.release(), true);
+        btVector3 aabbMin = triangleMeshShape->getLocalAabbMin();
+        btVector3 aabbMax = triangleMeshShape->getLocalAabbMax();
+        shape->mCollisionBox.extents[0] = (aabbMax[0] - aabbMin[0]) / 2.0f;
+        shape->mCollisionBox.extents[1] = (aabbMax[1] - aabbMin[1]) / 2.0f;
+        shape->mCollisionBox.extents[2] = (aabbMax[2] - aabbMin[2]) / 2.0f;
+        shape->mCollisionBox.center = osg::Vec3f( (aabbMax[0] + aabbMin[0]) / 2.0f,
+                                                  (aabbMax[1] + aabbMin[1]) / 2.0f,
+                                                  (aabbMax[2] + aabbMin[2]) / 2.0f );
+        shape->mCollisionShape = triangleMeshShape;
+
         return shape;
     }
 
@@ -135,11 +146,31 @@ osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string &
 
             osg::ref_ptr<const osg::Node> constNode (mSceneManager->getTemplate(normalized));
             osg::ref_ptr<osg::Node> node (const_cast<osg::Node*>(constNode.get())); // const-trickery required because there is no const version of NodeVisitor
-            NodeToShapeVisitor visitor;
-            node->accept(visitor);
-            shape = visitor.getShape();
+
+            // Check first if there's a custom collision node
+            unsigned int visitAllNodesMask = 0xffffffff;
+            SceneUtil::FindByNameVisitor nameFinder("Collision");
+            nameFinder.setTraversalMask(visitAllNodesMask);
+            nameFinder.setNodeMaskOverride(visitAllNodesMask);
+            node->accept(nameFinder);
+            if (nameFinder.mFoundNode)
+            {
+                NodeToShapeVisitor visitor;
+                visitor.setTraversalMask(visitAllNodesMask);
+                visitor.setNodeMaskOverride(visitAllNodesMask);
+                nameFinder.mFoundNode->accept(visitor);
+                shape = visitor.getShape();
+            }
+
+            // Generate a collision shape from the mesh
             if (!shape)
-                return osg::ref_ptr<BulletShape>();
+            {
+                NodeToShapeVisitor visitor;
+                node->accept(visitor);
+                shape = visitor.getShape();
+                if (!shape)
+                    return osg::ref_ptr<BulletShape>();
+            }
         }
 
         mCache->addEntryToObjectCache(normalized, shape);

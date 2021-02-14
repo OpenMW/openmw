@@ -102,7 +102,8 @@ namespace MWMechanics
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
 
             /// Remove front point if exist and within tolerance
-            void update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance);
+            void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
+                        bool shortenIfAlmostStraight, bool canMoveByZ);
 
             bool checkPathCompleted() const
             {

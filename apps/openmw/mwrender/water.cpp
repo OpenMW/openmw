@@ -135,7 +135,7 @@ public:
 
         mClipNodeTransform = new osg::Group;
         mClipNodeTransform->addCullCallback(new FlipCallback(&mPlane));
-        addChild(mClipNodeTransform);
+        osg::Group::addChild(mClipNodeTransform);
 
         mClipNode = new osg::ClipNode;
 
@@ -240,11 +240,11 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
-        setName("RefractionCamera");
+        osg::Camera::setName("RefractionCamera");
         setCullCallback(new InheritViewPointCallback);
         setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
 
-        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting);
+        setCullMask(Mask_Effect|Mask_Scene|Mask_Object|Mask_Static|Mask_Terrain|Mask_Actor|Mask_ParticleSystem|Mask_Sky|Mask_Sun|Mask_Player|Mask_Lighting|Mask_Groundcover);
         setNodeMask(Mask_RenderToTexture);
         setViewport(0, 0, rttSize, rttSize);
 
@@ -261,7 +261,7 @@ public:
         getOrCreateStateSet()->setAttributeAndModes(fog, osg::StateAttribute::OFF|osg::StateAttribute::OVERRIDE);
 
         mClipCullNode = new ClipCullNode;
-        addChild(mClipCullNode);
+        osg::Camera::addChild(mClipCullNode);
 
         mRefractionTexture = new osg::Texture2D;
         mRefractionTexture->setTextureSize(rttSize, rttSize);
@@ -345,7 +345,7 @@ public:
         setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
         setReferenceFrame(osg::Camera::RELATIVE_RF);
         setSmallFeatureCullingPixelSize(Settings::Manager::getInt("small feature culling pixel size", "Water"));
-        setName("ReflectionCamera");
+        osg::Camera::setName("ReflectionCamera");
         setCullCallback(new InheritViewPointCallback);
 
         setInterior(isInterior);
@@ -384,7 +384,7 @@ public:
         getOrCreateStateSet()->setAttributeAndModes(frontFace, osg::StateAttribute::ON);
 
         mClipCullNode = new ClipCullNode;
-        addChild(mClipCullNode);
+        osg::Camera::addChild(mClipCullNode);
 
         SceneUtil::ShadowManager::disableShadowsForStateSet(getOrCreateStateSet());
     }
@@ -392,12 +392,13 @@ public:
     void setInterior(bool isInterior)
     {
         int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
-        reflectionDetail = std::min(4, std::max(isInterior ? 2 : 0, reflectionDetail));
+        reflectionDetail = std::min(5, std::max(isInterior ? 2 : 0, reflectionDetail));
         unsigned int extraMask = 0;
         if(reflectionDetail >= 1) extraMask |= Mask_Terrain;
         if(reflectionDetail >= 2) extraMask |= Mask_Static;
         if(reflectionDetail >= 3) extraMask |= Mask_Effect|Mask_ParticleSystem|Mask_Object;
         if(reflectionDetail >= 4) extraMask |= Mask_Player|Mask_Actor;
+        if(reflectionDetail >= 5) extraMask |= Mask_Groundcover;
         setCullMask(Mask_Scene|Mask_Sky|Mask_Lighting|extraMask);
     }
 

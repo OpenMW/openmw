@@ -249,15 +249,6 @@ namespace MWRender
         }
     };
 
-    class TemplateRef : public osg::Object
-    {
-    public:
-        TemplateRef() {}
-        TemplateRef(const TemplateRef& copy, const osg::CopyOp&) : mObjects(copy.mObjects) {}
-        META_Object(MWRender, TemplateRef)
-        std::vector<osg::ref_ptr<const Object>> mObjects;
-    };
-
     class RefnumSet : public osg::Object
     {
     public:
@@ -407,6 +398,7 @@ namespace MWRender
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type,size>=2)) continue;
                             if (deleted) { refs.erase(ref.mRefNum); continue; }
+                            if (ref.mRefNum.fromGroundcoverFile()) continue;
                             refs[ref.mRefNum] = ref;
                         }
                     }
@@ -530,7 +522,7 @@ namespace MWRender
 
         osg::ref_ptr<osg::Group> group = new osg::Group;
         osg::ref_ptr<osg::Group> mergeGroup = new osg::Group;
-        osg::ref_ptr<TemplateRef> templateRefs = new TemplateRef;
+        osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
         CopyOp copyop;
         for (const auto& pair : nodes)
@@ -596,7 +588,7 @@ namespace MWRender
             if (numinstances > 0)
             {
                 // add a ref to the original template, to hint to the cache that it's still being used and should be kept in cache
-                templateRefs->mObjects.emplace_back(cnode);
+                templateRefs->addRef(cnode);
 
                 if (pair.second.mNeedCompile)
                 {

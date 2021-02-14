@@ -6,6 +6,9 @@
 #include <MyGUI_TextBox.h>
 
 // correctIconPath
+#include <components/resource/resourcesystem.hpp>
+#include <components/vfs/manager.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
@@ -106,7 +109,10 @@ namespace MWGui
         std::string invIcon = ptr.getClass().getInventoryIcon(ptr);
         if (invIcon.empty())
             invIcon = "default icon.tga";
-        setIcon(MWBase::Environment::get().getWindowManager()->correctIconPath(invIcon));
+        invIcon = MWBase::Environment::get().getWindowManager()->correctIconPath(invIcon);
+        if (!MWBase::Environment::get().getResourceSystem()->getVFS()->exists(invIcon))
+            invIcon = MWBase::Environment::get().getWindowManager()->correctIconPath("default icon.tga");
+        setIcon(invIcon);
     }
 
 

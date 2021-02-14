@@ -71,7 +71,7 @@ struct NiParticlesData : public NiGeometryData
 {
     int numParticles{0};
 
-    int activeCount;
+    int activeCount{0};
 
     std::vector<float> particleRadii, sizes, rotationAngles;
     std::vector<osg::Quat> rotations;
@@ -119,14 +119,14 @@ struct NiPixelData : public Record
         NIPXFMT_DXT5,
         NIPXFMT_DXT5_ALT
     };
-    Format fmt;
+    Format fmt{NIPXFMT_RGB8};
 
-    unsigned int colorMask[4];
-    unsigned int bpp, pixelTiling{0};
+    unsigned int colorMask[4]{0};
+    unsigned int bpp{0}, pixelTiling{0};
     bool sRGB{false};
 
     NiPalettePtr palette;
-    unsigned int numberOfMipmaps;
+    unsigned int numberOfMipmaps{0};
 
     struct Mipmap
     {

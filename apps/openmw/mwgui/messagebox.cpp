@@ -28,10 +28,7 @@ namespace MWGui
 
     MessageBoxManager::~MessageBoxManager ()
     {
-        for (MessageBox* messageBox : mMessageBoxes)
-        {
-            delete messageBox;
-        }
+        MessageBoxManager::clear();
     }
 
     int MessageBoxManager::getMessagesCount()

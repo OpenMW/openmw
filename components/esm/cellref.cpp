@@ -5,6 +5,11 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+namespace ESM
+{
+    int GroundcoverIndex = std::numeric_limits<int>::max();
+}
+
 void ESM::RefNum::load (ESMReader& esm, bool wide, const std::string& tag)
 {
     if (wide)

@@ -14,13 +14,13 @@ namespace MWPhysics
     class ClosestNotMeRayResultCallback : public btCollisionWorld::ClosestRayResultCallback
     {
     public:
-        ClosestNotMeRayResultCallback(const btCollisionObject* me, std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to, Projectile* proj=nullptr);
+        ClosestNotMeRayResultCallback(const btCollisionObject* me, std::vector<const btCollisionObject*> targets, const btVector3& from, const btVector3& to);
 
         btScalar addSingleResult(btCollisionWorld::LocalRayResult& rayResult, bool normalInWorldSpace) override;
+
     private:
         const btCollisionObject* mMe;
         const std::vector<const btCollisionObject*> mTargets;
-        Projectile* mProjectile;
     };
 }
 

@@ -96,4 +96,15 @@ namespace VFS
         normalize_path(name, mStrict);
     }
 
+    std::string Manager::getArchive(const std::string& name) const
+    {
+        std::string normalized = name;
+        normalize_path(normalized, mStrict);
+        for(auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
+        {
+            if((*it)->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
+                return (*it)->getDescription();
+        }
+        return {};
+    }
 }

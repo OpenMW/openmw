@@ -446,9 +446,9 @@ std::string CharacterController::fallbackShortWeaponGroup(const std::string& bas
     const ESM::WeaponType* weapInfo = getWeaponType(mWeaponType);
 
     // For real two-handed melee weapons use 2h swords animations as fallback, otherwise use the 1h ones
-    if (isRealWeapon && weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
+    if (weapInfo->mFlags & ESM::WeaponType::TwoHanded && weapInfo->mWeaponClass == ESM::WeaponType::Melee)
         groupName += twoHandFallback;
-    else if (isRealWeapon)
+    else
         groupName += oneHandFallback;
 
     // Special case for crossbows - we shouls apply 1h animations a fallback only for lower body
@@ -883,7 +883,11 @@ CharacterController::CharacterController(const MWWorld::Ptr &ptr, MWRender::Anim
         }
 
         if(!cls.getCreatureStats(mPtr).isDead())
+        {
             mIdleState = CharState_Idle;
+            if (cls.getCreatureStats(mPtr).getFallHeight() > 0)
+                mJumpState = JumpState_InAir;
+        }
         else
         {
             const MWMechanics::CreatureStats& cStats = mPtr.getClass().getCreatureStats(mPtr);
@@ -1898,7 +1902,7 @@ void CharacterController::updateAnimQueue()
         mAnimation->setLoopingEnabled(mAnimQueue.front().mGroup, mAnimQueue.size() <= 1);
 }
 
-void CharacterController::update(float duration, bool animationOnly)
+void CharacterController::update(float duration)
 {
     MWBase::World *world = MWBase::Environment::get().getWorld();
     const MWWorld::Class &cls = mPtr.getClass();
@@ -2386,10 +2390,10 @@ void CharacterController::update(float duration, bool animationOnly)
                     world->rotateObject(mPtr, rot.x(), rot.y(), 0.0f, true);
             }
 
-            if (!animationOnly && !mMovementAnimationControlled)
+            if (!mMovementAnimationControlled)
                 world->queueMovement(mPtr, vec);
         }
-        else if (!animationOnly)
+        else
             // We must always queue movement, even if there is none, to apply gravity.
             world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
 
@@ -2414,8 +2418,7 @@ void CharacterController::update(float duration, bool animationOnly)
                 playDeath(1.f, mDeathState);
         }
         // We must always queue movement, even if there is none, to apply gravity.
-        if (!animationOnly)
-            world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
+        world->queueMovement(mPtr, osg::Vec3f(0.f, 0.f, 0.f));
     }
 
     bool isPersist = isPersistentAnimPlaying();
@@ -2429,7 +2432,7 @@ void CharacterController::update(float duration, bool animationOnly)
     moved.y() *= scale;
 
     // Ensure we're moving in generally the right direction...
-    if(speed > 0.f)
+    if (speed > 0.f && moved != osg::Vec3f())
     {
         float l = moved.length();
         if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2 ||
@@ -2445,17 +2448,17 @@ void CharacterController::update(float duration, bool animationOnly)
         }
     }
 
-    if (mFloatToSurface && cls.isActor() && cls.canSwim(mPtr))
+    if (mFloatToSurface && cls.isActor())
     {
         if (cls.getCreatureStats(mPtr).isDead()
             || (!godmode && cls.getCreatureStats(mPtr).isParalyzed()))
         {
             moved.z() = 1.0;
         }
-    }    
+    }
 
     // Update movement
-    if(!animationOnly && mMovementAnimationControlled && mPtr.getClass().isActor())
+    if(mMovementAnimationControlled && mPtr.getClass().isActor())
         world->queueMovement(mPtr, moved);
 
     mSkipAnim = false;

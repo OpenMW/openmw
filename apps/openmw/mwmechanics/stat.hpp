@@ -28,7 +28,7 @@ namespace MWMechanics
 
             const T& getBase() const;
 
-            T getModified() const;
+            T getModified(bool capped = true) const;
             T getCurrentModified() const;
             T getModifier() const;
             T getCurrentModifier() const;

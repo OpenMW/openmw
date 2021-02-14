@@ -23,6 +23,8 @@ namespace CSVWorld
 {
     class DragRecordTable : public QTableView
     {
+        Q_OBJECT
+
         protected:
             CSMDoc::Document& mDocument;
             bool mEditLock;
@@ -45,6 +47,9 @@ namespace CSVWorld
 
         private:
             CSMWorld::ColumnBase::Display getIndexDisplayType(const QModelIndex &index) const;
+
+        signals:
+            void moveRecordsFromSameTable(QDropEvent *event);
     };
 }
 

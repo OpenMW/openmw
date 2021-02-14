@@ -63,6 +63,9 @@ int runApplication(int argc, char *argv[])
     application.setWindowIcon (QIcon (":./openmw-cs.png"));
 
     CS::Editor editor(argc, argv);
+#ifdef __linux__
+    setlocale(LC_NUMERIC,"C");
+#endif
 
     if(!editor.makeIPCServer())
     {

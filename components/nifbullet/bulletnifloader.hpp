@@ -23,7 +23,7 @@ class btCollisionShape;
 
 namespace Nif
 {
-    class Node;
+    struct Node;
     struct Transformation;
     struct NiTriShape;
     struct NiTriStrips;

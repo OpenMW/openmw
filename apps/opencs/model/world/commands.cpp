@@ -397,11 +397,20 @@ void CSMWorld::CloneCommand::redo()
 {
     mModel.cloneRecord (mIdOrigin, mId, mType);
     applyModifications();
+    for (auto& value : mOverrideValues)
+    {
+        mModel.setData(mModel.getModelIndex (mId, value.first), value.second);
+    }
 }
 
 void CSMWorld::CloneCommand::undo()
 {
     mModel.removeRow (mModel.getModelIndex (mId, 0).row());
+}
+
+void CSMWorld::CloneCommand::setOverrideValue(int column, QVariant value)
+{
+    mOverrideValues.emplace_back(std::make_pair(column, value));
 }
 
 CSMWorld::CreatePathgridCommand::CreatePathgridCommand(IdTable& model, const std::string& id, QUndoCommand *parent)

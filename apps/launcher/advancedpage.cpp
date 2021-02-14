@@ -10,11 +10,9 @@
 
 #include <cmath>
 
-Launcher::AdvancedPage::AdvancedPage(Files::ConfigurationManager &cfg,
-                                     Config::GameSettings &gameSettings,
+Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings,
                                      Settings::Manager &engineSettings, QWidget *parent)
         : QWidget(parent)
-        , mCfgMgr(cfg)
         , mGameSettings(gameSettings)
         , mEngineSettings(engineSettings)
 {
@@ -64,12 +62,12 @@ namespace
 
     double convertToCells(double unitRadius)
     {
-        return std::round((unitRadius / 0.93 + 1024) / CellSizeInUnits);
+        return std::round((unitRadius + 1024) / CellSizeInUnits);
     }
 
     double convertToUnits(double CellGridRadius)
     {
-        return (CellSizeInUnits * CellGridRadius - 1024) * 0.93;
+        return CellSizeInUnits * CellGridRadius - 1024;
     }
 }
 
@@ -110,7 +108,7 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, SIGNAL(toggled(bool)), this, SLOT(slotAnimSourcesToggled(bool)));
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
-        if (animSourcesCheckBox->checkState())
+        if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
             loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
             loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");

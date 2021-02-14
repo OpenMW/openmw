@@ -62,6 +62,9 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         ("content", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
             ->multitoken()->composing(), "content file(s): esm/esp, or omwgame/omwaddon")
 
+        ("groundcover", bpo::value<Files::EscapeStringVector>()->default_value(Files::EscapeStringVector(), "")
+            ->multitoken()->composing(), "groundcover content file(s): esm/esp, or omwgame/omwaddon")
+
         ("no-sound", bpo::value<bool>()->implicit_value(true)
             ->default_value(false), "disable all sounds")
 
@@ -190,11 +193,15 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
         return false;
     }
 
-    StringsVector::const_iterator it(content.begin());
-    StringsVector::const_iterator end(content.end());
-    for (; it != end; ++it)
+    for (auto& file : content)
     {
-      engine.addContentFile(*it);
+        engine.addContentFile(file);
+    }
+
+    StringsVector groundcover = variables["groundcover"].as<Files::EscapeStringVector>().toStdStringVector();
+    for (auto& file : groundcover)
+    {
+        engine.addGroundcoverFile(file);
     }
 
     // startup-settings
@@ -254,7 +261,19 @@ namespace
                 level = Debug::Debug;
             }
             std::string_view s(msgCopy);
-            Log(level) << (s.back() == '\n' ? s.substr(0, s.size() - 1) : s);
+            if (s.size() < 1024)
+                Log(level) << (s.back() == '\n' ? s.substr(0, s.size() - 1) : s);
+            else
+            {
+                while (!s.empty())
+                {
+                    size_t lineSize = 1;
+                    while (lineSize < s.size() && s[lineSize - 1] != '\n')
+                        lineSize++;
+                    Log(level) << s.substr(0, s[lineSize - 1] == '\n' ? lineSize - 1 : lineSize);
+                    s = s.substr(lineSize);
+                }
+            }
         }
     };
 }

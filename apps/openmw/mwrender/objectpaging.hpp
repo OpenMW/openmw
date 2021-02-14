@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_ESMPAGING_CHUNKMANAGER_H
-#define OPENMW_COMPONENTS_ESMPAGING_CHUNKMANAGER_H
+#ifndef OPENMW_MWRENDER_OBJECTPAGING_H
+#define OPENMW_MWRENDER_OBJECTPAGING_H
 
 #include <components/terrain/quadtreeworld.hpp>
 #include <components/resource/resourcemanager.hpp>

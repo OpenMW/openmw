@@ -97,12 +97,12 @@ namespace
         float dotProduct = v1.x() * v3.x() + v1.y() * v3.y();
         float crossProduct = v1.x() * v3.y() - v1.y() * v3.x();
 
-        // Check that the angle between v1 and v3 is less or equal than 10 degrees.
-        static const float cos170 = std::cos(osg::PI / 180 * 170);
-        bool checkAngle = dotProduct <= cos170 * v1.length() * v3.length();
+        // Check that the angle between v1 and v3 is less or equal than 5 degrees.
+        static const float cos175 = std::cos(osg::PI * (175.0 / 180));
+        bool checkAngle = dotProduct <= cos175 * v1.length() * v3.length();
 
         // Check that distance from p2 to the line (p1, p3) is less or equal than `pointTolerance`.
-        bool checkDist = std::abs(crossProduct) <= pointTolerance * (p3 - p1).length() * 2;
+        bool checkDist = std::abs(crossProduct) <= pointTolerance * (p3 - p1).length();
 
         return checkAngle && checkDist;
     }
@@ -296,7 +296,8 @@ namespace MWMechanics
         return getXAngleToDir(dir);
     }
 
-    void PathFinder::update(const osg::Vec3f& position, const float pointTolerance, const float destinationTolerance)
+    void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
+                            bool shortenIfAlmostStraight, bool canMoveByZ)
     {
         if (mPath.empty())
             return;
@@ -304,13 +305,24 @@ namespace MWMechanics
         while (mPath.size() > 1 && sqrDistanceIgnoreZ(mPath.front(), position) < pointTolerance * pointTolerance)
             mPath.pop_front();
 
-        while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
-            mPath.erase(mPath.begin() + 1);
-        if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
-            mPath.pop_front();
+        if (shortenIfAlmostStraight)
+        {
+            while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance))
+                mPath.erase(mPath.begin() + 1);
+            if (mPath.size() > 1 && isAlmostStraight(position, mPath[0], mPath[1], pointTolerance))
+                mPath.pop_front();
+        }
 
-        if (mPath.size() == 1 && sqrDistanceIgnoreZ(mPath.front(), position) < destinationTolerance * destinationTolerance)
-            mPath.pop_front();
+        if (mPath.size() == 1)
+        {
+            float distSqr;
+            if (canMoveByZ)
+                distSqr = (mPath.front() - position).length2();
+            else
+                distSqr = sqrDistanceIgnoreZ(mPath.front(), position);
+            if (distSqr < destinationTolerance * destinationTolerance)
+                mPath.pop_front();
+        }
     }
 
     void PathFinder::buildStraightPath(const osg::Vec3f& endPoint)
@@ -328,7 +340,7 @@ namespace MWMechanics
 
         buildPathByPathgridImpl(startPoint, endPoint, pathgridGraph, std::back_inserter(mPath));
 
-        mConstructed = true;
+        mConstructed = !mPath.empty();
     }
 
     void PathFinder::buildPathByNavMesh(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
@@ -341,7 +353,7 @@ namespace MWMechanics
         if (!buildPathByNavigatorImpl(actor, startPoint, endPoint, halfExtents, flags, areaCosts, std::back_inserter(mPath)))
             mPath.push_back(endPoint);
 
-        mConstructed = true;
+        mConstructed = !mPath.empty();
     }
 
     void PathFinder::buildPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
@@ -366,7 +378,7 @@ namespace MWMechanics
         if (!hasNavMesh && mPath.empty())
             mPath.push_back(endPoint);
 
-        mConstructed = true;
+        mConstructed = !mPath.empty();
     }
 
     bool PathFinder::buildPathByNavigatorImpl(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,

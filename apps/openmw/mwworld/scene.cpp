@@ -340,17 +340,9 @@ namespace MWWorld
 
         if ((*iter)->getCell()->isExterior())
         {
-            const ESM::Land* land =
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Land>().search(
-                    (*iter)->getCell()->getGridX(),
-                    (*iter)->getCell()->getGridY()
-                );
-            if (land && land->mDataTypes&ESM::Land::DATA_VHGT)
-            {
-                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                    navigator->removeObject(DetourNavigator::ObjectId(heightField));
-                mPhysics->removeHeightField(cellX, cellY);
-            }
+            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                navigator->removeObject(DetourNavigator::ObjectId(heightField));
+            mPhysics->removeHeightField(cellX, cellY);
         }
 
         if ((*iter)->getCell()->hasWater())

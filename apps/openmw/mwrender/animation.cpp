@@ -1500,7 +1500,7 @@ namespace MWRender
                 MWWorld::LiveCellRef<ESM::Creature> *ref = mPtr.get<ESM::Creature>();
                 if(ref->mBase->mFlags & ESM::Creature::Bipedal)
                 {
-                    defaultSkeleton = "meshes\\xbase_anim.nif";
+                    defaultSkeleton = Settings::Manager::getString("xbaseanim", "Models");
                     inject = true;
                 }
             }

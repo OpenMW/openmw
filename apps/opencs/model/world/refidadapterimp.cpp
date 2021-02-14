@@ -10,7 +10,7 @@
 #include "nestedtablewrapper.hpp"
 
 CSMWorld::PotionColumns::PotionColumns (const InventoryColumns& columns)
-: InventoryColumns (columns) {}
+: InventoryColumns (columns), mEffects(nullptr) {}
 
 CSMWorld::PotionRefIdAdapter::PotionRefIdAdapter (const PotionColumns& columns,
     const RefIdColumn *autoCalc)

@@ -187,6 +187,9 @@ namespace MWScript
                                 .getCreatureStats(ptr)
                                 .getDynamic(mIndex)
                                 .getCurrent();
+                        // GetMagicka shouldn't return negative values
+                        if(mIndex == 1 && value < 0)
+                            value = 0;
                     }
                     runtime.push (value);
                 }

@@ -9,6 +9,7 @@
 #include <osg/Vec3f>
 
 #include "editmode.hpp"
+#include "instancedragmodes.hpp"
 
 namespace CSVWidget
 {
@@ -25,20 +26,15 @@ namespace CSVRender
     {
             Q_OBJECT
 
-            enum DragMode
-            {
-                DragMode_None,
-                DragMode_Move,
-                DragMode_Rotate,
-                DragMode_Scale
-            };
-
             enum DropMode
             {
-                Collision,
-                Terrain,
-                CollisionSep,
-                TerrainSep
+                Separate = 0b1,
+
+                Collision = 0b10,
+                Terrain = 0b100,
+
+                CollisionSep = Collision | Separate,
+                TerrainSep = Terrain | Separate,
             };
 
             CSVWidget::SceneToolMode *mSubMode;
@@ -57,8 +53,11 @@ namespace CSVRender
 
             osg::Vec3f getSelectionCenter(const std::vector<osg::ref_ptr<TagBase> >& selection) const;
             osg::Vec3f getScreenCoords(const osg::Vec3f& pos);
-            void dropInstance(DropMode dropMode, CSVRender::Object* object, float objectHeight);
-            float getDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
+            osg::Vec3f getProjectionSpaceCoords(const osg::Vec3f& pos);
+            osg::Vec3f getMousePlaneCoords(const QPoint& point, const osg::Vec3d& dragStart);
+            void handleSelectDrag(const QPoint& pos);
+            void dropInstance(CSVRender::Object* object, float dropHeight);
+            float calculateDropHeight(DropMode dropMode, CSVRender::Object* object, float objectHeight);
 
         public:
 
@@ -83,6 +82,10 @@ namespace CSVRender
             bool primaryEditStartDrag (const QPoint& pos) override;
 
             bool secondaryEditStartDrag (const QPoint& pos) override;
+
+            bool primarySelectStartDrag(const QPoint& pos) override;
+
+            bool secondarySelectStartDrag(const QPoint& pos) override;
 
             void drag (const QPoint& pos, int diffX, int diffY, double speedFactor) override;
 
@@ -116,11 +119,11 @@ namespace CSVRender
     };
 
     /// \brief Helper class to handle object mask data in safe way
-    class DropObjectDataHandler
+    class DropObjectHeightHandler
     {
         public:
-            DropObjectDataHandler(WorldspaceWidget* worldspacewidget);
-            ~DropObjectDataHandler();
+            DropObjectHeightHandler(WorldspaceWidget* worldspacewidget);
+            ~DropObjectHeightHandler();
             std::vector<float> mObjectHeights;
 
         private:

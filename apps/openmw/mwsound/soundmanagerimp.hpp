@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <deque>
 #include <map>
 #include <unordered_map>
 
@@ -18,6 +17,7 @@
 #include "watersoundupdater.hpp"
 #include "type.hpp"
 #include "volumesettings.hpp"
+#include "sound_buffer.hpp"
 
 namespace VFS
 {
@@ -36,17 +36,6 @@ namespace MWSound
     struct Sound_Decoder;
     class Sound;
     class Stream;
-    class Sound_Buffer;
-
-    enum Environment {
-        Env_Normal,
-        Env_Underwater
-    };
-    // Extra play flags, not intended for caller use
-    enum PlayModeEx {
-        Play_2D = 0,
-        Play_3D = 1<<31
-    };
 
     using SoundPtr = Misc::ObjectPtr<Sound>;
     using StreamPtr = Misc::ObjectPtr<Stream>;
@@ -66,21 +55,7 @@ namespace MWSound
 
         WaterSoundUpdater mWaterSoundUpdater;
 
-        typedef std::unique_ptr<std::deque<Sound_Buffer> > SoundBufferList;
-        // List of sound buffers, grown as needed. New enties are added to the
-        // back, allowing existing Sound_Buffer references/pointers to remain
-        // valid.
-        SoundBufferList mSoundBuffers;
-        size_t mBufferCacheMin;
-        size_t mBufferCacheMax;
-        size_t mBufferCacheSize;
-
-        typedef std::unordered_map<std::string,Sound_Buffer*> NameBufferMap;
-        NameBufferMap mBufferNameMap;
-
-        // NOTE: unused buffers are stored in front-newest order.
-        typedef std::deque<Sound_Buffer*> SoundList;
-        SoundList mUnusedBuffers;
+        SoundBufferPool mSoundBuffers;
 
         Misc::ObjectPool<Sound> mSounds;
 
@@ -123,9 +98,6 @@ namespace MWSound
         Sound* mCurrentRegionSound;
 
         Sound_Buffer *insertSound(const std::string &soundId, const ESM::Sound *sound);
-
-        Sound_Buffer *lookupSound(const std::string &soundId) const;
-        Sound_Buffer *loadSound(const std::string &soundId);
 
         // returns a decoder to start streaming, or nullptr if the sound was not found
         DecoderPtr loadVoice(const std::string &voicefile);

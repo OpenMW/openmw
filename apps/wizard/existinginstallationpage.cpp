@@ -95,9 +95,9 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
 {
     QString selectedFile = QFileDialog::getOpenFileName(
                 this,
-                tr("Select master file"),
+                tr("Select Morrowind.esm (located in Data Files)"),
                 QDir::currentPath(),
-                QString(tr("Morrowind master file (*.esm)")),
+                QString(tr("Morrowind master file (Morrowind.esm)")),
                 nullptr,
                 QFileDialog::DontResolveSymlinks);
 
@@ -110,7 +110,18 @@ void Wizard::ExistingInstallationPage::on_browseButton_clicked()
         return;
 
     if (!mWizard->findFiles(QLatin1String("Morrowind"), info.absolutePath()))
-        return; // No valid Morrowind installation found
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Error detecting Morrowind files"));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setText(QObject::tr(
+            "<b>Morrowind.bsa</b> is missing!<br>\
+            Make sure your Morrowind installation is complete."
+        ));
+        msgBox.exec();
+        return;
+    }
 
     QString path(QDir::toNativeSeparators(info.absolutePath()));
     QList<QListWidgetItem*> items = installationsList->findItems(path, Qt::MatchExactly);

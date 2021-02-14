@@ -3,12 +3,14 @@
 
     Bug #832: OpenMW-CS: Handle deleted references
     Bug #1662: Qt4 and Windows binaries crash if there's a non-ASCII character in a file path/config path
+    Bug #1901: Actors colliding behaviour is different from vanilla
     Bug #1952: Incorrect particle lighting
     Bug #2069: Fireflies in Fireflies invade Morrowind look wrong
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
     Bug #2798: Mutable ESM records
     Bug #2976 [reopened]: Issues combining settings from the command line and both config files
+    Bug #3137: Walking into a wall prevents jumping
     Bug #3372: Projectiles and magic bolts go through moving targets
     Bug #3676: NiParticleColorModifier isn't applied properly
     Bug #3714: Savegame fails to load due to conflict between SpellState and MagicEffects
@@ -16,15 +18,26 @@
     Bug #3862: Random container contents behave differently than vanilla
     Bug #3929: Leveled list merchant containers respawn on barter
     Bug #4021: Attributes and skills are not stored as floats
+    Bug #4039: Multiple followers should have the same following distance
     Bug #4055: Local scripts don't inherit variables from their base record
     Bug #4083: Door animation freezes when colliding with actors
+    Bug #4201: Projectile-projectile collision
+    Bug #4247: Cannot walk up stairs in Ebonheart docks
+    Bug #4357: OpenMW-CS: TopicInfos index sorting and rearranging isn't fully functional
+    Bug #4363: Editor: Defect in Clone Function for Dialogue Info records
+    Bug #4447: Actor collision capsule shape allows looking through some walls
+    Bug #4465: Collision shape overlapping causes twitching
+    Bug #4476: Abot Gondoliers: player hangs in air during scenic travel
+    Bug #4568: Too many actors in one spot can push other actors out of bounds
     Bug #4623: Corprus implementation is incorrect
     Bug #4631: Setting MSAA level too high doesn't fall back to highest supported level
     Bug #4764: Data race in osg ParticleSystem
+    Bug #4765: Data race in ChunkManager -> Array::setBinding
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
     Bug #5101: Hostile followers travel with the player
     Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5165: Active spells should use real time intead of timestamps
+    Bug #5300: NPCs don't switch from torch to shield when starting combat
     Bug #5358: ForceGreeting always resets the dialogue window completely
     Bug #5363: Enchantment autocalc not always 0/1
     Bug #5364: Script fails/stops if trying to startscript an unknown script
@@ -33,6 +46,7 @@
     Bug #5370: Opening an unlocked but trapped door uses the key
     Bug #5384: openmw-cs: deleting an instance requires reload of scene window to show in editor
     Bug #5387: Move/MoveWorld don't update the object's cell properly
+    Bug #5391: Races Redone 1.2 bodies don't show on the inventory
     Bug #5397: NPC greeting does not reset if you leave + reenter area
     Bug #5400: Editor: Verifier checks race of non-skin bodyparts
     Bug #5403: Enchantment effect doesn't show on an enemy during death animation
@@ -47,6 +61,7 @@
     Bug #5441: Enemies can't push a player character when in critical strike stance
     Bug #5451: Magic projectiles don't disappear with the caster
     Bug #5452: Autowalk is being included in savegames
+    Bug #5469: Local map is reset when re-entering certain cells
     Bug #5472: Mistify mod causes CTD in 0.46 on Mac
     Bug #5479: NPCs who should be walking around town are standing around without walking
     Bug #5484: Zero value items shouldn't be able to be bought or sold for 1 gold
@@ -64,25 +79,39 @@
     Bug #5604: Only one valid NIF root node is loaded from a single file
     Bug #5611: Usable items with "0 Uses" should be used only once
     Bug #5622: Can't properly interact with the console when in pause menu
+    Bug #5627: Bookart not shown if it isn't followed by <BR> statement
     Bug #5633: Damage Spells in effect before god mode is enabled continue to hurt the player character and can kill them
     Bug #5639: Tooltips cover Messageboxes
     Bug #5644: Summon effects running on the player during game initialization cause crashes
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
+    Bug #5681: Player character can clip or pass through bridges instead of colliding against them
+    Bug #5687: Bound items covering the same inventory slot expiring at the same time freezes the game
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
     Bug #5695: ExplodeSpell for actors doesn't target the ground
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5706: AI sequences stop looping after the saved game is reloaded
+    Bug #5713: OpenMW-CS: Collada models are corrupted in Qt-based scene view
     Bug #5731: Editor: skirts are invisible on characters
+    Bug #5739: Saving and loading the save a second or two before hitting the ground doesn't count fall damage
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
+    Bug #5762: Movement solver is insufficiently robust
+    Bug #5821: NPCs from mods getting removed if mod order was changed
+    Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
+    Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
+    Bug #5838: Local map and other menus become blank in some locations while playing Wizards' Islands mod.
+    Bug #5840: GetSoundPlaying "Health Damage" doesn't play when NPC hits target with shield effect ( vanilla engine behavior )
+    Bug #5841: Can't Cast Zero Cost Spells When Magicka is < 0
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
+    Feature #3171: OpenMW-CS: Instance drag selection
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
+    Feature #4977: Use the "default icon.tga" when an item's icon is not found
     Feature #5043: Head Bobbing
     Feature #5199: Improve Scene Colors
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
@@ -104,8 +133,11 @@
     Feature #5672: Make stretch menu background configuration more accessible
     Feature #5692: Improve spell/magic item search to factor in magic effect names
     Feature #5730: Add graphic herbalism option to the launcher and documents
+    Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
+    Feature #5813: Instanced groundcover support
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
+    Task #5844: Update 'toggle sneak' documentation
 
 0.46.0
 ------

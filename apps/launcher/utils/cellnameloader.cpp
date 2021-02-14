@@ -46,3 +46,4 @@ QString CellNameLoader::getCellName(ESM::ESMReader &esmReader)
 
     return QString::fromStdString(cell.mName);
 }
+

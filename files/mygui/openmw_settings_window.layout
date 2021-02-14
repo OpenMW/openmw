@@ -377,25 +377,25 @@
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="RenderingDistanceSlider">
-                            <Property key="Range" value="4609"/>
+                            <Property key="Range" value="4669"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Integer"/>
-                            <UserString key="SettingMin" value="2048"/>
-                            <UserString key="SettingMax" value="6656"/>
+                            <UserString key="SettingMin" value="2500"/>
+                            <UserString key="SettingMax" value="7168"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
-                            <Property key="Range" value="79873"/>
+                            <Property key="Range" value="79421"/>
                             <Property key="Page" value="2048"/>
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
                             <UserString key="SettingValueType" value="Cell"/>
-                            <UserString key="SettingMin" value="2048"/>
+                            <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="81920"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (x%s)"/>
@@ -449,6 +449,7 @@
                                     <Property key="AddItem" value="World"/>
                                     <Property key="AddItem" value="Objects"/>
                                     <Property key="AddItem" value="Actors"/>
+                                    <Property key="AddItem" value="Groundcover"/>
                                 </Widget>
                                 <Widget type="AutoSizedTextBox" skin="SandText" position="64 4 90 16" align="Left Top">
                                     <Property key="Caption" value="Reflection shader detail"/>

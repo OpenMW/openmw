@@ -115,7 +115,7 @@ namespace CSMWorld
     {
         const RefIdColumn *mModel;
 
-        ModelColumns (const BaseColumns& base) : BaseColumns (base) {}
+        ModelColumns (const BaseColumns& base) : BaseColumns (base), mModel(nullptr) {}
     };
 
     /// \brief Adapter for IDs with models (all but levelled lists)
@@ -1858,18 +1858,18 @@ namespace CSMWorld
                     break; // always save
                 case 16:
                     if (content.mType == ESM::AI_Travel)
-                        content.mTravel.mZ = value.toFloat();
+                        content.mTravel.mX = value.toFloat();
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mTarget.mZ = value.toFloat();
+                        content.mTarget.mX = value.toFloat();
                     else
                         return; // return without saving
 
                     break; // always save
                 case 17:
                     if (content.mType == ESM::AI_Travel)
-                        content.mTravel.mZ = value.toFloat();
+                        content.mTravel.mY = value.toFloat();
                     else if (content.mType == ESM::AI_Follow || content.mType == ESM::AI_Escort)
-                        content.mTarget.mZ = value.toFloat();
+                        content.mTarget.mY = value.toFloat();
                     else
                         return; // return without saving
 

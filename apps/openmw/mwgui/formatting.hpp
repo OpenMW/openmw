@@ -73,6 +73,8 @@ namespace MWGui
                 bool mClosingTag;
                 std::map<std::string, Events> mTagTypes;
                 std::string mBuffer;
+
+                size_t mPlainTextEnd;
         };
 
         class Paginator
