@@ -166,7 +166,7 @@ namespace DetourNavigator
         osg::Vec3f targetPos;
         navMeshQuery.closestPointOnPoly(polygonPath.back(), end.ptr(), targetPos.ptr(), nullptr);
 
-        const float SLOP = 0.01f;
+        constexpr float slop = 0.01f;
 
         *out++ = iterPos;
 
@@ -177,7 +177,7 @@ namespace DetourNavigator
         while (!polygonPath.empty() && smoothPathSize < maxSmoothPathSize)
         {
             // Find location to steer towards.
-            const auto steerTarget = getSteerTarget(navMeshQuery, iterPos, targetPos, SLOP, polygonPath);
+            const auto steerTarget = getSteerTarget(navMeshQuery, iterPos, targetPos, slop, polygonPath);
 
             if (!steerTarget)
                 break;
@@ -209,7 +209,7 @@ namespace DetourNavigator
             iterPos.y() = h;
 
             // Handle end of path and off-mesh links when close enough.
-            if (endOfPath && inRange(iterPos, steerTarget->steerPos, SLOP, 1.0f))
+            if (endOfPath && inRange(iterPos, steerTarget->steerPos, slop, 1.0f))
             {
                 // Reached end of path.
                 iterPos = targetPos;
@@ -217,7 +217,7 @@ namespace DetourNavigator
                 ++smoothPathSize;
                 break;
             }
-            else if (offMeshConnection && inRange(iterPos, steerTarget->steerPos, SLOP, 1.0f))
+            else if (offMeshConnection && inRange(iterPos, steerTarget->steerPos, slop, 1.0f))
             {
                 // Advance the path up to and over the off-mesh connection.
                 dtPolyRef prevRef = 0;
