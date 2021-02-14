@@ -181,6 +181,7 @@ add_component_dir(detournavigator
     settings
     navigator
     findrandompointaroundcircle
+    raycast
     )
 
 set (ESM_UI ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
