@@ -283,11 +283,10 @@ namespace DetourNavigator
         queryFilter.setAreaCost(AreaType_ground, areaCosts.mGround);
 
         dtPolyRef startRef = 0;
-        osg::Vec3f startPolygonPosition;
         for (int i = 0; i < 3; ++i)
         {
             const auto status = navMeshQuery.findNearestPoly(start.ptr(), (halfExtents * (1 << i)).ptr(), &queryFilter,
-                &startRef, startPolygonPosition.ptr());
+                &startRef, nullptr);
             if (!dtStatusFailed(status) && startRef != 0)
                 break;
         }
@@ -296,11 +295,10 @@ namespace DetourNavigator
             return Status::StartPolygonNotFound;
 
         dtPolyRef endRef = 0;
-        osg::Vec3f endPolygonPosition;
         for (int i = 0; i < 3; ++i)
         {
             const auto status = navMeshQuery.findNearestPoly(end.ptr(), (halfExtents * (1 << i)).ptr(), &queryFilter,
-                &endRef, endPolygonPosition.ptr());
+                &endRef, nullptr);
             if (!dtStatusFailed(status) && endRef != 0)
                 break;
         }

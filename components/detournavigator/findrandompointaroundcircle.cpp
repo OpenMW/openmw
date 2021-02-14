@@ -21,11 +21,10 @@ namespace DetourNavigator
         queryFilter.setIncludeFlags(includeFlags);
 
         dtPolyRef startRef = 0;
-        osg::Vec3f startPolygonPosition;
         for (int i = 0; i < 3; ++i)
         {
             const auto status = navMeshQuery.findNearestPoly(start.ptr(), (halfExtents * (1 << i)).ptr(), &queryFilter,
-                &startRef, startPolygonPosition.ptr());
+                &startRef, nullptr);
             if (!dtStatusFailed(status) && startRef != 0)
                 break;
         }
