@@ -52,7 +52,7 @@ namespace DetourNavigator
 
     inline float getTileSize(const Settings& settings)
     {
-        return settings.mTileSize * settings.mCellSize;
+        return static_cast<float>(settings.mTileSize) * settings.mCellSize;
     }
 
     inline TilePosition getTilePosition(const Settings& settings, const osg::Vec3f& position)
@@ -73,7 +73,7 @@ namespace DetourNavigator
 
     inline float getBorderSize(const Settings& settings)
     {
-        return settings.mBorderSize * settings.mCellSize;
+        return static_cast<float>(settings.mBorderSize) * settings.mCellSize;
     }
 
     inline float getSwimLevel(const Settings& settings, const float agentHalfExtentsZ)
