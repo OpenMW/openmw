@@ -116,12 +116,13 @@ variables: &cs-targets
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
+    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip '*'
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
@@ -206,12 +207,13 @@ Windows_Ninja_CS_RelWithDebInfo:
     - cd MSVC2019_64
     - cmake --build . --config $config --target ($targets.Split(','))
     - cd $config
+    - echo "CI_COMMIT_REF_NAME ${CI_COMMIT_REF_NAME}`nCI_JOB_ID ${CI_JOB_ID}`nCI_COMMIT_SHA ${CI_COMMIT_SHA}" | Out-File -Encoding UTF8 CI-ID.txt
     - |
       if (Get-ChildItem -Recurse *.pdb) {
-        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb'
+        7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip '*.pdb' CI-ID.txt
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
-    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}.zip '*'
+    - 7z a -tzip ..\..\OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip '*'
   after_script:
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
