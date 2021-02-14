@@ -103,6 +103,9 @@ namespace DetourNavigator
         return dtStatusSucceed(status);
     }
 
+    dtPolyRef findNearestPolyExpanding(const dtNavMeshQuery& query, const dtQueryFilter& filter,
+            const osg::Vec3f& center, const osg::Vec3f& halfExtents);
+
     struct MoveAlongSurfaceResult
     {
         osg::Vec3f mResultPos;
@@ -282,27 +285,11 @@ namespace DetourNavigator
         queryFilter.setAreaCost(AreaType_pathgrid, areaCosts.mPathgrid);
         queryFilter.setAreaCost(AreaType_ground, areaCosts.mGround);
 
-        dtPolyRef startRef = 0;
-        for (int i = 0; i < 3; ++i)
-        {
-            const auto status = navMeshQuery.findNearestPoly(start.ptr(), (halfExtents * (1 << i)).ptr(), &queryFilter,
-                &startRef, nullptr);
-            if (!dtStatusFailed(status) && startRef != 0)
-                break;
-        }
-
+        dtPolyRef startRef = findNearestPolyExpanding(navMeshQuery, queryFilter, start, halfExtents);
         if (startRef == 0)
             return Status::StartPolygonNotFound;
 
-        dtPolyRef endRef = 0;
-        for (int i = 0; i < 3; ++i)
-        {
-            const auto status = navMeshQuery.findNearestPoly(end.ptr(), (halfExtents * (1 << i)).ptr(), &queryFilter,
-                &endRef, nullptr);
-            if (!dtStatusFailed(status) && endRef != 0)
-                break;
-        }
-
+        dtPolyRef endRef = findNearestPolyExpanding(navMeshQuery, queryFilter, end, halfExtents);
         if (endRef == 0)
             return Status::EndPolygonNotFound;
 
