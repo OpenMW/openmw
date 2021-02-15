@@ -681,9 +681,14 @@ namespace MWPhysics
         mActors.emplace(ptr, std::move(actor));
     }
 
-    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canTraverseWater)
+    int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater)
     {
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
+        assert(shapeInstance);
+        float radius = computeRadius ? shapeInstance->mCollisionBox.extents.length() / 2.f : 1.f;
+
         mProjectileId++;
+
         auto projectile = std::make_shared<Projectile>(caster, position, radius, canTraverseWater, mTaskScheduler.get(), this);
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 

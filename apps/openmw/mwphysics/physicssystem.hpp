@@ -124,7 +124,7 @@ namespace MWPhysics
             void addObject (const MWWorld::Ptr& ptr, const std::string& mesh, int collisionType = CollisionType_World);
             void addActor (const MWWorld::Ptr& ptr, const std::string& mesh);
 
-            int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, float radius, bool canTraverseWater);
+            int addProjectile(const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater);
             void updateProjectile(const int projectileId, const osg::Vec3f &position) const;
             void removeProjectile(const int projectileId);
 
