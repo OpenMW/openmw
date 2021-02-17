@@ -40,6 +40,10 @@ namespace MWLua
         void objectAddedToScene(const MWWorld::Ptr& ptr);
         void objectRemovedFromScene(const MWWorld::Ptr& ptr);
 
+        // Returns list of objects that meets the `query` criteria.
+        // If onlyActive = true, then search only among the objects that are currently in the scene.
+        // TODO: ObjectIdList selectObjects(const Queries::Query& query, bool onlyActive);
+
         void load(ESM::ESMReader& esm);
         void save(ESM::ESMWriter& esm) const;
 

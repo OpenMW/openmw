@@ -56,8 +56,8 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwlua
-    luamanagerimp localscripts object worldview luabindings userdataserializer eventqueue
-    objectbindings asyncbindings camerabindings uibindings
+    luamanagerimp localscripts object worldview userdataserializer eventqueue query
+    luabindings objectbindings asyncbindings camerabindings uibindings
     )
 
 add_openmw_dir (mwsound

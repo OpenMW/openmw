@@ -5,27 +5,21 @@
 #include <components/lua/serialization.hpp>
 #include <components/lua/scriptscontainer.hpp>
 
+#include "context.hpp"
 #include "eventqueue.hpp"
 #include "object.hpp"
+#include "query.hpp"
 #include "worldview.hpp"
 
 namespace MWLua
 {
-    class LuaManager;
-
-    struct Context
-    {
-        LuaManager* mLuaManager;
-        LuaUtil::LuaState* mLua;
-        LuaUtil::UserdataSerializer* mSerializer;
-        WorldView* mWorldView;
-        LocalEventQueue* mLocalEventQueue;
-        GlobalEventQueue* mGlobalEventQueue;
-    };
 
     sol::table initCorePackage(const Context&);
     sol::table initWorldPackage(const Context&);
     sol::table initNearbyPackage(const Context&);
+    sol::table initQueryPackage(const Context&);
+
+    sol::table initFieldGroup(const Context&, const QueryFieldGroup&);
 
     // Implemented in objectbindings.cpp
     void initObjectBindingsForLocalScripts(const Context&);

@@ -31,6 +31,7 @@ namespace MWLua
         mGlobalScripts.setSerializer(mGlobalSerializer.get());
 
         Context context;
+        context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
         context.mWorldView = &mWorldView;
@@ -39,6 +40,7 @@ namespace MWLua
         context.mSerializer = mGlobalSerializer.get();
 
         Context localContext = context;
+        localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
 
         initObjectBindingsForGlobalScripts(context);
@@ -48,6 +50,7 @@ namespace MWLua
         mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
+        mLua.addCommonPackage("openmw.query", initQueryPackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
         mCameraPackage = initCameraPackage(localContext);
         mUserInterfacePackage = initUserInterfacePackage(localContext);

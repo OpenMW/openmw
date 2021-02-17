@@ -1,6 +1,7 @@
 #include "luabindings.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/queries/query.hpp>
 
 #include "../mwclass/door.hpp"
 
@@ -63,6 +64,10 @@ namespace MWLua
                     return sol::nullopt;
             };
             return std::make_tuple(iter, list, 0);
+        };
+        listT["select"] = [context](const ListT& list, const Queries::Query& query)
+        {
+            return ListT{selectObjectsFromList(query, list.mIds, context)};
         };
     }
 
