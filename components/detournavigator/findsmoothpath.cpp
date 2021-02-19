@@ -108,13 +108,13 @@ namespace DetourNavigator
     {
         // Find steer target.
         SteerTarget result;
-        const int MAX_STEER_POINTS = 3;
-        std::array<float, MAX_STEER_POINTS * 3> steerPath;
-        std::array<unsigned char, MAX_STEER_POINTS> steerPathFlags;
-        std::array<dtPolyRef, MAX_STEER_POINTS> steerPathPolys;
+        constexpr int maxSteerPoints = 3;
+        std::array<float, maxSteerPoints * 3> steerPath;
+        std::array<unsigned char, maxSteerPoints> steerPathFlags;
+        std::array<dtPolyRef, maxSteerPoints> steerPathPolys;
         int nsteerPath = 0;
         navQuery.findStraightPath(startPos.ptr(), endPos.ptr(), path.data(), int(path.size()), steerPath.data(),
-                                    steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, MAX_STEER_POINTS);
+            steerPathFlags.data(), steerPathPolys.data(), &nsteerPath, maxSteerPoints);
         assert(nsteerPath >= 0);
         if (!nsteerPath)
             return std::nullopt;
@@ -139,5 +139,18 @@ namespace DetourNavigator
         result.steerPosRef = steerPathPolys[ns];
 
         return result;
+    }
+
+    dtPolyRef findNearestPolyExpanding(const dtNavMeshQuery& query, const dtQueryFilter& filter,
+            const osg::Vec3f& center, const osg::Vec3f& halfExtents)
+    {
+        dtPolyRef ref = 0;
+        for (int i = 0; i < 3; ++i)
+        {
+            const dtStatus status = query.findNearestPoly(center.ptr(), (halfExtents * (1 << i)).ptr(), &filter, &ref, nullptr);
+            if (!dtStatusFailed(status) && ref != 0)
+                break;
+        }
+        return ref;
     }
 }
