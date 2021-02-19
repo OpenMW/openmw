@@ -112,6 +112,17 @@ namespace Shader
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
     };
 
+    class ReinstateRemovedStateVisitor : public osg::NodeVisitor
+    {
+    public:
+        ReinstateRemovedStateVisitor(bool allowedToModifyStateSets);
+
+        void apply(osg::Node& node) override;
+
+    private:
+        bool mAllowedToModifyStateSets;
+    };
+
 }
 
 #endif

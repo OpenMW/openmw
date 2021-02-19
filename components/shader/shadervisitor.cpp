@@ -614,4 +614,43 @@ namespace Shader
         mTranslucentFramebuffer = translucent;
     }
 
+    ReinstateRemovedStateVisitor::ReinstateRemovedStateVisitor(bool allowedToModifyStateSets)
+        : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
+        , mAllowedToModifyStateSets(allowedToModifyStateSets)
+    {
+    }
+
+    void ReinstateRemovedStateVisitor::apply(osg::Node& node)
+    {
+        if (node.getStateSet())
+        {
+            osg::ref_ptr<osg::StateSet> removedState = getRemovedState(*node.getStateSet());
+            if (removedState)
+            {
+                osg::ref_ptr<osg::StateSet> writableStateSet;
+                if (mAllowedToModifyStateSets)
+                    writableStateSet = node.getStateSet();
+                else
+                    writableStateSet = getWritableStateSet(node);
+
+                // user data is normally shallow copied so shared with the original stateset
+                osg::ref_ptr<osg::UserDataContainer> writableUserData;
+                if (mAllowedToModifyStateSets)
+                    writableUserData = writableStateSet->getUserDataContainer();
+                else
+                    writableUserData = getWritableUserDataContainer(*writableStateSet);
+                unsigned int index = writableUserData->getUserObjectIndex("removedState");
+                writableUserData->removeUserObject(index);
+
+                for (const auto&[mode, value] : removedState->getModeList())
+                    writableStateSet->setMode(mode, value);
+
+                for (const auto& attribute : removedState->getAttributeList())
+                    writableStateSet->setAttribute(attribute.second.first, attribute.second.second);
+            }
+        }
+
+        traverse(node);
+    }
+
 }

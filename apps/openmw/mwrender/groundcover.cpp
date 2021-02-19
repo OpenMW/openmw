@@ -258,6 +258,8 @@ namespace MWRender
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
 
+            mSceneManager->reinstateRemovedState(node);
+
             InstancingVisitor visitor(pair.second, worldCenter);
             node->accept(visitor);
             group->addChild(node);
