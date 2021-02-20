@@ -16,6 +16,17 @@ include(LibFindMacros)
 include(Findosg_functions)
 
 if (NOT OSGPlugins_LIB_DIR)
+    unset(OSGPlugins_LIB_DIR)
+    foreach(OSGDB_LIB ${OSGDB_LIBRARY})
+        # Skip library type names
+        if(EXISTS ${OSGDB_LIB} AND NOT IS_DIRECTORY ${OSGDB_LIB})
+            get_filename_component(OSG_LIB_DIR ${OSGDB_LIB} DIRECTORY)
+            list(APPEND OSGPlugins_LIB_DIR "${OSG_LIB_DIR}/osgPlugins-${OPENSCENEGRAPH_VERSION}")
+        endif()
+    endforeach(OSGDB_LIB)
+endif()
+
+if (NOT OSGPlugins_LIB_DIR)
     set(_mode WARNING)
     if (OSGPlugins_FIND_REQUIRED)
         set(_mode FATAL_ERROR)
