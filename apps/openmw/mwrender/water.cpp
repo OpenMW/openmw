@@ -27,6 +27,7 @@
 
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/waterutil.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/misc/constants.hpp>
 
@@ -644,6 +645,8 @@ void Water::createShaderWaterStateSet(osg::Node* node, Reflection* reflection, R
     osg::ref_ptr<osg::Program> program (new osg::Program);
     program->addShader(vertexShader);
     program->addShader(fragmentShader);
+    if (!mResourceSystem->getSceneManager()->getFFPLighting())
+        program->addBindUniformBlock("SunlightBuffer", 9);
     shaderStateset->setAttributeAndModes(program, osg::StateAttribute::ON);
 
     node->setStateSet(shaderStateset);

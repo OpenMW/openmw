@@ -220,12 +220,13 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
-        , mShaderManager(new Shader::ShaderManager)
+        , mShaderManager(new Shader::ShaderManager(this))
         , mForceShaders(false)
         , mClampLighting(true)
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
+        , mFFPLighting(true)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -295,6 +296,16 @@ namespace Resource
     void SceneManager::setApplyLightingToEnvMaps(bool apply)
     {
         mApplyLightingToEnvMaps = apply;
+    }
+
+    void SceneManager::setFFPLighting(bool apply)
+    {
+        mFFPLighting = apply;
+    }
+
+    bool SceneManager::getFFPLighting() const
+    {
+        return mFFPLighting;
     }
 
     SceneManager::~SceneManager()

@@ -8,6 +8,9 @@
 #include <osg/Group>
 #include <osg/NodeVisitor>
 #include <osg/observer_ptr>
+#include <osg/BufferIndexBinding>
+
+#include <components/shader/shadermanager.hpp>
 
 namespace osgUtil
 {
@@ -16,6 +19,27 @@ namespace osgUtil
 
 namespace SceneUtil
 {
+    class SunlightBuffer;
+
+    // Used to override sun. Rarely useful but necassary for local map. 
+    class SunlightStateAttribute : public osg::StateAttribute
+    {
+    public:
+        SunlightStateAttribute();
+        SunlightStateAttribute(const SunlightStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY);
+        
+        int compare(const StateAttribute &sa) const override;
+
+        META_StateAttribute(NifOsg, SunlightStateAttribute, osg::StateAttribute::LIGHT)
+
+        void setFromLight(const osg::Light* light);
+
+        void setStateSet(osg::StateSet* stateset, int mode=osg::StateAttribute::ON);
+
+    private:
+        osg::ref_ptr<SunlightBuffer> mBuffer;
+        osg::ref_ptr<osg::UniformBufferBinding> mUbb;
+    };
 
     /// LightSource managed by a LightManager.
     /// @par Typically used for point lights. Spot lights are not supported yet. Directional lights affect the whole scene
@@ -57,7 +81,7 @@ namespace SceneUtil
         /// Get the osg::Light safe for modification in the given frame.
         /// @par May be used externally to animate the light's color/attenuation properties,
         /// and is used internally to synchronize the light's position with the position of the LightSource.
-        osg::Light* getLight(unsigned int frame)
+        osg::Light* getLight(size_t frame)
         {
             return mLight[frame % 2];
         }
@@ -83,39 +107,11 @@ namespace SceneUtil
     class LightManager : public osg::Group
     {
     public:
-
-        META_Node(SceneUtil, LightManager)
-
-        LightManager();
-
-        LightManager(const LightManager& copy, const osg::CopyOp& copyop);
-
-        /// @param mask This mask is compared with the current Camera's cull mask to determine if lighting is desired.
-        /// By default, it's ~0u i.e. always on.
-        /// If you have some views that do not require lighting, then set the Camera's cull mask to not include
-        /// the lightingMask for a much faster cull and rendering.
-        void setLightingMask (unsigned int mask);
-
-        unsigned int getLightingMask() const;
-
-        /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
-        void setStartLight(int start);
-
-        int getStartLight() const;
-
-        /// Internal use only, called automatically by the LightManager's UpdateCallback
-        void update();
-
-        /// Internal use only, called automatically by the LightSource's UpdateCallback
-        void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, unsigned int frameNum);
-
         struct LightSourceTransform
         {
             LightSource* mLightSource;
             osg::Matrixf mWorldMatrix;
         };
-
-        const std::vector<LightSourceTransform>& getLights() const;
 
         struct LightSourceViewBound
         {
@@ -123,11 +119,50 @@ namespace SceneUtil
             osg::BoundingSphere mViewBound;
         };
 
-        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix);
-
         typedef std::vector<const LightSourceViewBound*> LightList;
 
-        osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, unsigned int frameNum);
+        static bool queryNonFFPLightingSupport();
+
+        META_Node(SceneUtil, LightManager)
+
+        LightManager(bool ffp = true);
+
+        LightManager(const LightManager& copy, const osg::CopyOp& copyop);
+
+        /// @param mask This mask is compared with the current Camera's cull mask to determine if lighting is desired.
+        /// By default, it's ~0u i.e. always on.
+        /// If you have some views that do not require lighting, then set the Camera's cull mask to not include
+        /// the lightingMask for a much faster cull and rendering.
+        void setLightingMask (size_t mask);
+        size_t getLightingMask() const;
+
+        /// Set the first light index that should be used by this manager, typically the number of directional lights in the scene.
+        void setStartLight(int start);
+        int getStartLight() const;
+
+        /// Internal use only, called automatically by the LightManager's UpdateCallback
+        void update();
+
+        /// Internal use only, called automatically by the LightSource's UpdateCallback
+        void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, size_t frameNum);
+
+        const std::vector<LightSourceTransform>& getLights() const;
+
+        const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum);
+
+        osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, size_t frameNum);
+
+        void setSunlight(osg::ref_ptr<osg::Light> sun);
+        osg::ref_ptr<osg::Light> getSunlight();
+
+        osg::ref_ptr<SunlightBuffer> getSunBuffer();
+
+        bool usingFFP() const;
+
+        int getMaxLights() const;
+        int getMaxLightsInScene() const;
+
+        Shader::ShaderManager::DefineMap getLightDefines() const;
 
     private:
         // Lights collected from the scene graph. Only valid during the cull traversal.
@@ -144,7 +179,14 @@ namespace SceneUtil
 
         int mStartLight;
 
-        unsigned int mLightingMask;
+        size_t mLightingMask;
+
+        osg::ref_ptr<osg::Light> mSun;
+        osg::ref_ptr<SunlightBuffer> mSunBuffer;
+
+        bool mFFP;
+
+        static constexpr int mFFPMaxLights = 8;
     };
 
     /// To receive lighting, objects must be decorated by a LightListCallback. Light list callbacks must be added via
@@ -180,7 +222,7 @@ namespace SceneUtil
 
     private:
         LightManager* mLightManager;
-        unsigned int mLastFrameNumber;
+        size_t mLastFrameNumber;
         LightManager::LightList mLightList;
         std::set<SceneUtil::LightSource*> mIgnoredLightSources;
     };

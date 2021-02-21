@@ -1,5 +1,7 @@
 #version 120
 
+#extension GL_ARB_uniform_buffer_object : enable
+
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
@@ -51,7 +53,6 @@ varying vec3 passNormal;
 
 #include "vertexcolors.glsl"
 #include "shadows_vertex.glsl"
-
 #include "lighting.glsl"
 
 void main(void)

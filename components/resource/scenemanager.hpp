@@ -100,6 +100,9 @@ namespace Resource
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setFFPLighting(bool apply);
+        bool getFFPLighting() const;
+
         void setShaderPath(const std::string& path);
 
         /// Check if a given scene is loaded and if so, update its usage timestamp to prevent it from being unloaded
@@ -184,6 +187,7 @@ namespace Resource
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
         bool mApplyLightingToEnvMaps;
+        bool mFFPLighting;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

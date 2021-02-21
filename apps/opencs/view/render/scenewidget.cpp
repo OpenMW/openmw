@@ -72,7 +72,6 @@ RenderWidget::RenderWidget(QWidget *parent, Qt::WindowFlags f)
     mView->getCamera()->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
 
     SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
-    lightMgr->setStartLight(1);
     lightMgr->setLightingMask(Mask_Lighting);
     mRootNode = lightMgr;
 

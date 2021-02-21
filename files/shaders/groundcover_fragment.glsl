@@ -1,4 +1,5 @@
 #version 120
+#extension GL_ARB_uniform_buffer_object : enable
 
 #define GROUNDCOVER
 

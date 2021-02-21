@@ -31,6 +31,7 @@
 #include <components/compiler/extensions0.hpp>
 
 #include <components/sceneutil/workqueue.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <components/files/configurationmanager.hpp>
 

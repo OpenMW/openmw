@@ -11,6 +11,11 @@
 
 #include <osgViewer/Viewer>
 
+namespace Resource
+{
+    class SceneManager;
+}
+
 namespace Shader
 {
 
@@ -19,6 +24,9 @@ namespace Shader
     class ShaderManager
     {
     public:
+
+        ShaderManager(Resource::SceneManager* sceneManager);
+
         void setShaderPath(const std::string& path);
 
         typedef std::map<std::string, std::string> DefineMap;
@@ -58,6 +66,8 @@ namespace Shader
 
         typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
         ProgramMap mPrograms;
+
+        Resource::SceneManager* mSceneManager;
 
         std::mutex mMutex;
     };
