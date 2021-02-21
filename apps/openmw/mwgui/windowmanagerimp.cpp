@@ -50,6 +50,7 @@
 #include <components/widgets/tags.hpp>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/frameratelimiter.hpp>
 
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -710,12 +711,11 @@ namespace MWGui
 
         if (block)
         {
-            osg::Timer frameTimer;
+            Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
             while (mMessageBoxManager->readPressedButton(false) == -1
                    && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
             {
-                double dt = frameTimer.time_s();
-                frameTimer.setStartTick();
+                const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration()).count();
 
                 mKeyboardNavigation->onFrame();
                 mMessageBoxManager->onFrame(dt);
@@ -734,7 +734,7 @@ namespace MWGui
                 // refer to the advance() and frame() order in Engine::go()
                 mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-                MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
+                frameRateLimiter.limit();
             }
         }
     }
@@ -1750,11 +1750,10 @@ namespace MWGui
                 ~MWSound::Type::Movie & MWSound::Type::Mask
             );
 
-        osg::Timer frameTimer;
+        Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(MWBase::Environment::get().getFrameRateLimit());
         while (mVideoWidget->update() && !MWBase::Environment::get().getStateManager()->hasQuitRequest())
         {
-            double dt = frameTimer.time_s();
-            frameTimer.setStartTick();
+            const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(frameRateLimiter.getLastFrameDuration()).count();
 
             MWBase::Environment::get().getInputManager()->update(dt, true, false);
 
@@ -1777,7 +1776,7 @@ namespace MWGui
             // refer to the advance() and frame() order in Engine::go()
             mViewer->advance(mViewer->getFrameStamp()->getSimulationTime());
 
-            MWBase::Environment::get().limitFrameRate(frameTimer.time_s());
+            frameRateLimiter.limit();
         }
         mVideoWidget->stop();
 

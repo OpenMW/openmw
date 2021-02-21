@@ -1,8 +1,6 @@
 #include "environment.hpp"
 
 #include <cassert>
-#include <chrono>
-#include <thread>
 
 #include <components/resource/resourcesystem.hpp>
 
@@ -96,19 +94,6 @@ void MWBase::Environment::setFrameRateLimit(float limit)
 float MWBase::Environment::getFrameRateLimit() const
 {
     return mFrameRateLimit;
-}
-
-void MWBase::Environment::limitFrameRate(double dt) const
-{
-    if (mFrameRateLimit > 0.f)
-    {
-        double thisFrameTime = dt;
-        double minFrameTime = 1.0 / static_cast<double>(mFrameRateLimit);
-        if (thisFrameTime < minFrameTime)
-        {
-            std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - thisFrameTime));
-        }
-    }
 }
 
 MWBase::World *MWBase::Environment::getWorld() const
