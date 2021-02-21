@@ -241,8 +241,9 @@ target_link_libraries(components
     ${OPENGL_gl_LIBRARY}
     ${MyGUI_LIBRARIES}
     LZ4::LZ4
-    RecastNavigation::DebugUtils
-    RecastNavigation::Detour
+# TODO: uncomment these when ready
+#    RecastNavigation::DebugUtils
+#    RecastNavigation::Detour
     RecastNavigation::Recast
     )
 
