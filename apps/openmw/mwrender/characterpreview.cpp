@@ -182,7 +182,7 @@ namespace MWRender
         noBlendAlphaEnv->setCombine_RGB(osg::TexEnvCombine::REPLACE);
         noBlendAlphaEnv->setSource0_RGB(osg::TexEnvCombine::PREVIOUS);
         osg::ref_ptr<osg::Texture2D> dummyTexture = new osg::Texture2D();
-        dummyTexture->setInternalFormat(GL_RED);
+        dummyTexture->setInternalFormat(GL_DEPTH_COMPONENT);
         dummyTexture->setTextureSize(1, 1);
         // This might clash with a shadow map, so make sure it doesn't cast shadows
         dummyTexture->setShadowComparison(true);
