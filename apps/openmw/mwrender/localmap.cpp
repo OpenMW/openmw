@@ -239,7 +239,7 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
 
     unsigned int samples = 0;
     unsigned int colourSamples = 0;
-    if (Settings::Manager::getBool("convert alpha test to alpha-to-coverage", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
+    if (Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
     {
         // Alpha-to-coverage requires a multisampled framebuffer.
         // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
