@@ -185,7 +185,7 @@ void ShadowsBin::sortImplementation()
         root = root->_parent;
         const osg::StateSet* ss = root->getStateSet();
         if (ss->getMode(GL_NORMALIZE) & osg::StateAttribute::ON // that is root stategraph of renderingmanager cpp
-           || ss->getAttribute(osg::StateAttribute::VIEWPORT)) // fallback to rendertargets sg just in case
+           || ss->getAttribute(osg::StateAttribute::VIEWPORT)) // fallback to rendertarget's sg just in case
             break;
         if (!root->_parent)
             return;
@@ -194,7 +194,7 @@ void ShadowsBin::sortImplementation()
     // noTestRoot is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
 
     bool cullFaceOverridden = false;
-    while (root = root->_parent)
+    while ((root = root->_parent))
     {
         if (!root->getStateSet())
             continue;
