@@ -249,7 +249,7 @@ namespace MWGui
                 size_t length = mCommandLine->getTextCursor() - max;
                 if(length > 0)
                 {
-                    std::string text = caption;
+                    auto text = caption;
                     text.erase(max, length);
                     mCommandLine->setCaption(text);
                     mCommandLine->setTextCursor(max);
@@ -259,7 +259,7 @@ namespace MWGui
             {
                 if(mCommandLine->getTextCursor() > 0)
                 {
-                    std::string text = mCommandLine->getCaption();
+                    auto text = mCommandLine->getCaption();
                     text.erase(0, mCommandLine->getTextCursor());
                     mCommandLine->setCaption(text);
                     mCommandLine->setTextCursor(0);
