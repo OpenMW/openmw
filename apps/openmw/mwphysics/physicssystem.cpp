@@ -604,7 +604,9 @@ namespace MWPhysics
                 return object->getCollisionObject();
             return nullptr;
         }();
-        assert(caster);
+
+        if (caster == nullptr)
+            Log(Debug::Warning) << "No caster for projectile " << projectileId;
 
         ProjectileConvexCallback resultCallback(caster, btFrom, btTo, projectile);
         resultCallback.m_collisionFilterMask = 0xff;
@@ -693,6 +695,15 @@ namespace MWPhysics
         mProjectiles.emplace(mProjectileId, std::move(projectile));
 
         return mProjectileId;
+    }
+
+    void PhysicsSystem::setCaster(int projectileId, const MWWorld::Ptr& caster)
+    {
+        const auto foundProjectile = mProjectiles.find(projectileId);
+        assert(foundProjectile != mProjectiles.end());
+        auto* projectile = foundProjectile->second.get();
+
+        projectile->setCaster(caster);
     }
 
     bool PhysicsSystem::toggleCollisionMode()
