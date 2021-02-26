@@ -265,7 +265,8 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
 {
     unsigned int samples = 0;
     unsigned int colourSamples = 0;
-    if (Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
+    bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1;
+    if (addMSAAIntermediateTarget)
     {
         // Alpha-to-coverage requires a multisampled framebuffer.
         // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
@@ -274,6 +275,7 @@ bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::
         colourSamples = 1;
     }
     camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
+    return addMSAAIntermediateTarget;
 }
 
 }
