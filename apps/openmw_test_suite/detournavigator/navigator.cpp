@@ -802,4 +802,26 @@ namespace
         EXPECT_GT(duration, mSettings.mMinUpdateInterval)
             << std::chrono::duration_cast<std::chrono::duration<float, std::milli>>(duration).count() << " ms";
     }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_then_raycast_should_return_position)
+    {
+        const std::array<btScalar, 5 * 5> heightfieldData {{
+            0,   0,    0,    0,    0,
+            0, -25,  -25,  -25,  -25,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+            0, -25, -100, -100, -100,
+        }};
+        btHeightfieldTerrainShape shape(5, 5, heightfieldData.data(), 1, 0, 0, 2, PHY_FLOAT, false);
+        shape.setLocalScaling(btVector3(128, 128, 1));
+
+        mNavigator->addAgent(mAgentHalfExtents);
+        mNavigator->addObject(ObjectId(&shape), shape, btTransform::getIdentity());
+        mNavigator->update(mPlayerPosition);
+        mNavigator->wait();
+
+        const auto result = mNavigator->raycast(mAgentHalfExtents, mStart, mEnd, Flag_walk);
+
+        ASSERT_THAT(result, Optional(Vec3fEq(mEnd.x(), mEnd.y(), 1.87719)));
+    }
 }

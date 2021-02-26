@@ -55,6 +55,9 @@ namespace MWMechanics
         float mFleeBlindRunTimer;
         ESM::Pathgrid::Point mFleeDest;
 
+        bool mUseCustomDestination;
+        osg::Vec3f mCustomDestination;
+
         AiCombatStorage():
         mAttackCooldown(0.0f),
         mTimerReact(AI_REACTION_TIME),
@@ -74,7 +77,9 @@ namespace MWMechanics
         mFleeState(FleeState_None),
         mLOS(false),
         mUpdateLOSTimer(0.0f),
-        mFleeBlindRunTimer(0.0f)
+        mFleeBlindRunTimer(0.0f),
+        mUseCustomDestination(false),
+        mCustomDestination()
         {}
 
         void startCombatMove(bool isDistantCombat, float distToTarget, float rangeAttack, const MWWorld::Ptr& actor, const MWWorld::Ptr& target);
