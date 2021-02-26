@@ -103,6 +103,7 @@
     Bug #5838: Local map and other menus become blank in some locations while playing Wizards' Islands mod.
     Bug #5840: GetSoundPlaying "Health Damage" doesn't play when NPC hits target with shield effect ( vanilla engine behavior )
     Bug #5841: Can't Cast Zero Cost Spells When Magicka is < 0
+    Bug #5871: The console appears if you type the Russian letter "Ё" in the name of the enchantment
     Feature #390: 3rd person look "over the shoulder"
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging

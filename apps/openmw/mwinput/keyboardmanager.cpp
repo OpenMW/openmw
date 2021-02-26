@@ -39,12 +39,14 @@ namespace MWInput
                 && MWBase::Environment::get().getWindowManager()->isConsoleMode())
             SDL_StopTextInput();
 
-        bool consumed = false;
+        bool consumed = SDL_IsTextInputActive() &&  // Little trick to check if key is printable
+                        (!(SDLK_SCANCODE_MASK & arg.keysym.sym) &&
+                        (std::isprint(arg.keysym.sym) ||
+                        // Don't trust isprint for symbols outside the extended ASCII range
+                        (kc == MyGUI::KeyCode::None && arg.keysym.sym > 0xff)));
         if (kc != MyGUI::KeyCode::None && !mBindingsManager->isDetectingBindingState())
         {
-            consumed = MWBase::Environment::get().getWindowManager()->injectKeyPress(kc, 0, arg.repeat);
-            if (SDL_IsTextInputActive() &&  // Little trick to check if key is printable
-                                    (!(SDLK_SCANCODE_MASK & arg.keysym.sym) && std::isprint(arg.keysym.sym)))
+            if (MWBase::Environment::get().getWindowManager()->injectKeyPress(kc, 0, arg.repeat))
                 consumed = true;
             mBindingsManager->setPlayerControlsEnabled(!consumed);
         }
