@@ -26,6 +26,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/waterutil.hpp>
 
 #include <components/misc/constants.hpp>
@@ -271,17 +272,7 @@ public:
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
-        unsigned int samples = 0;
-        unsigned int colourSamples = 0;
-        if (Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
-        {
-            // Alpha-to-coverage requires a multisampled framebuffer.
-            // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
-            // For some reason, two samples are needed, at least with some drivers.
-            samples = 2;
-            colourSamples = 1;
-        }
-        attach(osg::Camera::COLOR_BUFFER, mRefractionTexture, 0, 0, false, samples, colourSamples);
+        SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(this, osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
         mRefractionDepthTexture = new osg::Texture2D;
         mRefractionDepthTexture->setTextureSize(rttSize, rttSize);
@@ -366,17 +357,7 @@ public:
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        unsigned int samples = 0;
-        unsigned int colourSamples = 0;
-        if (Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
-        {
-            // Alpha-to-coverage requires a multisampled framebuffer.
-            // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
-            // For some reason, two samples are needed, at least with some drivers.
-            samples = 2;
-            colourSamples = 1;
-        }
-        attach(osg::Camera::COLOR_BUFFER, mReflectionTexture, 0, 0, false, samples, colourSamples);
+        SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(this, osg::Camera::COLOR_BUFFER, mReflectionTexture);
 
         // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
         osg::ref_ptr<osg::FrontFace> frontFace (new osg::FrontFace);

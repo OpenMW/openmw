@@ -18,6 +18,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -237,17 +238,7 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-    unsigned int samples = 0;
-    unsigned int colourSamples = 0;
-    if (Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1)
-    {
-        // Alpha-to-coverage requires a multisampled framebuffer.
-        // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
-        // For some reason, two samples are needed, at least with some drivers.
-        samples = 2;
-        colourSamples = 1;
-    }
-    camera->attach(osg::Camera::COLOR_BUFFER, texture, 0, 0, false, samples, colourSamples);
+    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, texture);
 
     camera->addChild(mSceneRoot);
     mRoot->addChild(camera);
