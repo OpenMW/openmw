@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <limits>
 #include <ostream>
+#include <tuple>
 
 #include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
 #include <BulletCollision/CollisionShapes/btCompoundShape.h>
