@@ -31,15 +31,11 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
     set(USE_DOUBLE_PRECISION ${BULLET_USE_DOUBLES} CACHE BOOL "")
     set(BULLET2_MULTITHREADING ON CACHE BOOL "")
 
-    # Version 3.08 with the following changes:
-    # 1. Fixes the linking of Threads:
-    #    https://github.com/bulletphysics/bullet3/pull/3237
-    # 2. Removes ~300 MiB of files not used here:
-    #    rm -rf build3 data docs examples test Doxyfile
+    # master on 12 Mar 2021
     include(FetchContent)
     FetchContent_Declare(bullet
-        URL https://github.com/glebm/bullet3/archive/ed5256454f4f84bd2c1728c88ddb0405d614e7d2.zip
-        URL_HASH MD5=e3c94fac35a7be885ad8843f828a0f96
+        URL https://github.com/bulletphysics/bullet3/archive/87e668f6b2a883b4ef63db8a07c8e9283916e9d9.zip
+        URL_HASH MD5=9f13246439968494c2b595cf412d83c8
         SOURCE_DIR fetched/bullet
     )
     FetchContent_MakeAvailableExcludeFromAll(bullet)
