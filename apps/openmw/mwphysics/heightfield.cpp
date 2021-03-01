@@ -58,11 +58,14 @@ namespace MWPhysics
         mShape->setUseDiamondSubdivision(true);
         mShape->setLocalScaling(btVector3(triSize, triSize, 1));
 
-        // Enables acceleration of heighfield collissions.
+#if BT_BULLET_VERSION >= 289
+        // Accelerates some collision tests.
         //
-        // Bullet does not yet use this in the most time-consuming method, `btHeightfieldTerrainShape::processAllTriangle`.
-        // See https://github.com/bulletphysics/bullet3/issues/3276
+        // Note: The accelerator data structure in Bullet is only used
+        // in some operations. This could be improved, see:
+        // https://github.com/bulletphysics/bullet3/issues/3276
         mShape->buildAccelerator();
+#endif
 
         btTransform transform(btQuaternion::getIdentity(),
                                 btVector3((x+0.5f) * triSize * (sqrtVerts-1),
