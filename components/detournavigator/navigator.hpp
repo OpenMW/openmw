@@ -223,6 +223,17 @@ namespace DetourNavigator
         std::optional<osg::Vec3f> findRandomPointAroundCircle(const osg::Vec3f& agentHalfExtents,
             const osg::Vec3f& start, const float maxRadius, const Flags includeFlags) const;
 
+        /**
+         * @brief raycast finds farest navmesh point from start on a line from start to end that has path from start.
+         * @param agentHalfExtents allows to find navmesh for given actor.
+         * @param start of the line
+         * @param end of the line
+         * @param includeFlags setup allowed surfaces for actor to walk.
+         * @return not empty optional with position if point is found and empty optional if point is not found.
+         */
+        std::optional<osg::Vec3f> raycast(const osg::Vec3f& agentHalfExtents, const osg::Vec3f& start,
+            const osg::Vec3f& end, const Flags includeFlags) const;
+
         virtual RecastMeshTiles getRecastMeshTiles() = 0;
     };
 }

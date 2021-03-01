@@ -8,6 +8,7 @@
 #include <components/misc/mathutil.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
+#include <components/detournavigator/navigator.hpp>
 
 #include "../mwphysics/collisiontype.hpp"
 
@@ -127,10 +128,11 @@ namespace MWMechanics
             {
                 //Update every frame. UpdateLOS uses a timer, so the LOS check does not happen every frame.
                 updateLOS(actor, target, duration, storage);
-                float targetReachedTolerance = 0.0f;
-                if (storage.mLOS)
-                    targetReachedTolerance = storage.mAttackRange;
-                const bool is_target_reached = pathTo(actor, target.getRefData().getPosition().asVec3(), duration, targetReachedTolerance);
+                const float targetReachedTolerance = storage.mLOS && !storage.mUseCustomDestination
+                        ? storage.mAttackRange : 0.0f;
+                const osg::Vec3f destination = storage.mUseCustomDestination
+                        ? storage.mCustomDestination : target.getRefData().getPosition().asVec3();
+                const bool is_target_reached = pathTo(actor, destination, duration, targetReachedTolerance);
                 if (is_target_reached) storage.mReadyToAttack = true;
             }
 
@@ -232,8 +234,8 @@ namespace MWMechanics
         const ESM::Weapon* weapon = currentAction->getWeapon();
 
         ESM::Position pos = actor.getRefData().getPosition();
-        osg::Vec3f vActorPos(pos.asVec3());
-        osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
+        const osg::Vec3f vActorPos(pos.asVec3());
+        const osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
 
         osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
         float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
@@ -243,9 +245,7 @@ namespace MWMechanics
         if (isRangedCombat)
         {
             // rotate actor taking into account target movement direction and projectile speed
-            osg::Vec3f& lastTargetPos = storage.mLastTargetPos;
-            vAimDir = AimDirToMovingTarget(actor, target, lastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
-            lastTargetPos = vTargetPos;
+            vAimDir = AimDirToMovingTarget(actor, target, storage.mLastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
 
             storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
             storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
@@ -256,12 +256,69 @@ namespace MWMechanics
             storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
         }
 
+        storage.mLastTargetPos = vTargetPos;
+
         if (storage.mReadyToAttack)
         {
             storage.startCombatMove(isRangedCombat, distToTarget, rangeAttack, actor, target);
             // start new attack
             storage.startAttackIfReady(actor, characterController, weapon, isRangedCombat);
         }
+
+        // If actor uses custom destination it has to try to rebuild path because environment can change
+        // (door is opened between actor and target) or target position has changed and current custom destination
+        // is not good enough to attack target.
+        if (storage.mCurrentAction->isAttackingOrSpell()
+            && ((!storage.mReadyToAttack && !mPathFinder.isPathConstructed())
+                || (storage.mUseCustomDestination && (storage.mCustomDestination - vTargetPos).length() > rangeAttack)))
+        {
+            // Try to build path to the target.
+            const auto halfExtents = MWBase::Environment::get().getWorld()->getPathfindingHalfExtents(actor);
+            const auto navigatorFlags = getNavigatorFlags(actor);
+            const auto areaCosts = getAreaCosts(actor);
+            const auto pathGridGraph = getPathGridGraph(actor.getCell());
+            mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, halfExtents, navigatorFlags, areaCosts);
+
+            if (!mPathFinder.isPathConstructed())
+            {
+                // If there is no path, try to find a point on a line from the actor position to target projected
+                // on navmesh to attack the target from there.
+                const MWBase::World* world = MWBase::Environment::get().getWorld();
+                const auto halfExtents = world->getPathfindingHalfExtents(actor);
+                const auto navigator = world->getNavigator();
+                const auto navigatorFlags = getNavigatorFlags(actor);
+                const auto areaCosts = getAreaCosts(actor);
+                const auto hit = navigator->raycast(halfExtents, vActorPos, vTargetPos, navigatorFlags);
+
+                if (hit.has_value() && (*hit - vTargetPos).length() <= rangeAttack)
+                {
+                    // If the point is close enough, try to find a path to that point.
+                    mPathFinder.buildPath(actor, vActorPos, *hit, actor.getCell(), pathGridGraph, halfExtents, navigatorFlags, areaCosts);
+                    if (mPathFinder.isPathConstructed())
+                    {
+                        // If path to that point is found use it as custom destination.
+                        storage.mCustomDestination = *hit;
+                        storage.mUseCustomDestination = true;
+                    }
+                }
+
+                if (!mPathFinder.isPathConstructed())
+                {
+                    storage.mUseCustomDestination = false;
+                    storage.stopAttack();
+                    characterController.setAttackingOrSpell(false);
+                    currentAction.reset(new ActionFlee());
+                    actionCooldown = currentAction->getActionCooldown();
+                    storage.startFleeing();
+                    MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
+                }
+            }
+            else
+            {
+                storage.mUseCustomDestination = false;
+            }
+        }
+
         return false;
     }
 

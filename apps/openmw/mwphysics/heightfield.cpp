@@ -58,6 +58,15 @@ namespace MWPhysics
         mShape->setUseDiamondSubdivision(true);
         mShape->setLocalScaling(btVector3(triSize, triSize, 1));
 
+#if BT_BULLET_VERSION >= 289
+        // Accelerates some collision tests.
+        //
+        // Note: The accelerator data structure in Bullet is only used
+        // in some operations. This could be improved, see:
+        // https://github.com/bulletphysics/bullet3/issues/3276
+        mShape->buildAccelerator();
+#endif
+
         btTransform transform(btQuaternion::getIdentity(),
                                 btVector3((x+0.5f) * triSize * (sqrtVerts-1),
                                           (y+0.5f) * triSize * (sqrtVerts-1),

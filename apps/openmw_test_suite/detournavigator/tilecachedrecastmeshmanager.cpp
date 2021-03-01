@@ -4,10 +4,6 @@
 #include <components/detournavigator/settingsutils.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
-#include <BulletCollision/CollisionShapes/btBvhTriangleMeshShape.h>
-#include <BulletCollision/CollisionShapes/btTriangleMesh.h>
-#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
-#include <BulletCollision/CollisionShapes/btCompoundShape.h>
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
