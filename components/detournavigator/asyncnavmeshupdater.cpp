@@ -4,6 +4,7 @@
 #include "settings.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/thread.hpp>
 
 #include <osg/Stats>
 
@@ -135,6 +136,7 @@ namespace DetourNavigator
     void AsyncNavMeshUpdater::process() noexcept
     {
         Log(Debug::Debug) << "Start process navigator jobs by thread=" << std::this_thread::get_id();
+        Misc::setCurrentThreadIdlePriority();
         while (!mShouldStop)
         {
             try
