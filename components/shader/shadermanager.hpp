@@ -25,9 +25,11 @@ namespace Shader
     {
     public:
 
-        ShaderManager(Resource::SceneManager* sceneManager);
+        ShaderManager();
 
         void setShaderPath(const std::string& path);
+
+        void setFFPLighting(bool useFFP);
 
         typedef std::map<std::string, std::string> DefineMap;
 
@@ -67,7 +69,7 @@ namespace Shader
         typedef std::map<std::pair<osg::ref_ptr<osg::Shader>, osg::ref_ptr<osg::Shader> >, osg::ref_ptr<osg::Program> > ProgramMap;
         ProgramMap mPrograms;
 
-        Resource::SceneManager* mSceneManager;
+        bool mFFPLighting;
 
         std::mutex mMutex;
     };

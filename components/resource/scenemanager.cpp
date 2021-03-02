@@ -220,7 +220,7 @@ namespace Resource
 
     SceneManager::SceneManager(const VFS::Manager *vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
         : ResourceManager(vfs)
-        , mShaderManager(new Shader::ShaderManager(this))
+        , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
         , mClampLighting(true)
         , mAutoUseNormalMaps(false)

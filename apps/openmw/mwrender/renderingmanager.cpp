@@ -213,9 +213,11 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
-        resourceSystem->getSceneManager()->setFFPLighting(clampLighting || !forceShaders || !SceneUtil::LightManager::queryNonFFPLightingSupport());
-
-        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(mResourceSystem->getSceneManager()->getFFPLighting());
+        bool useFFP = clampLighting || !forceShaders || !SceneUtil::LightManager::queryNonFFPLightingSupport();
+        resourceSystem->getSceneManager()->setFFPLighting(useFFP);
+        resourceSystem->getSceneManager()->getShaderManager().setFFPLighting(useFFP);
+        
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(useFFP);
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);

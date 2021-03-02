@@ -17,15 +17,19 @@
 namespace Shader
 {
 
-    ShaderManager::ShaderManager(Resource::SceneManager* sceneManager)
-        : mSceneManager(sceneManager)
+    ShaderManager::ShaderManager()
+        : mFFPLighting(false)
     {
-
     }
 
     void ShaderManager::setShaderPath(const std::string &path)
     {
         mPath = path;
+    }
+
+    void ShaderManager::setFFPLighting(bool useFFP)
+    {
+        mFFPLighting = useFFP;
     }
 
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
@@ -352,10 +356,10 @@ namespace Shader
             program->addShader(fragmentShader);
             program->addBindAttribLocation("aOffset", 6);
             program->addBindAttribLocation("aRotation", 7);
-            if (!mSceneManager->getFFPLighting())
+            if (!mFFPLighting)
             {
-                program->addBindUniformBlock("PointLightBuffer", 8);
-                program->addBindUniformBlock("SunlightBuffer", 9);
+                program->addBindUniformBlock("SunlightBuffer", 0);
+                program->addBindUniformBlock("PointLightBuffer", 1);
             }
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }

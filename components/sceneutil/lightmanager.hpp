@@ -2,13 +2,15 @@
 #define OPENMW_COMPONENTS_SCENEUTIL_LIGHTMANAGER_H
 
 #include <set>
+#include <cassert>
+#include <unordered_map>
+#include <unordered_set>
 
 #include <osg/Light>
 
 #include <osg/Group>
 #include <osg/NodeVisitor>
 #include <osg/observer_ptr>
-#include <osg/BufferIndexBinding>
 
 #include <components/shader/shadermanager.hpp>
 
@@ -17,9 +19,16 @@ namespace osgUtil
     class CullVisitor;
 }
 
+namespace osg
+{
+    class UniformBufferBinding;
+    class UniformBufferObject;
+}
+
 namespace SceneUtil
 {
     class SunlightBuffer;
+    class PointLightBuffer;
 
     // Used to override sun. Rarely useful but necassary for local map. 
     class SunlightStateAttribute : public osg::StateAttribute
@@ -59,6 +68,8 @@ namespace SceneUtil
 
         int mId;
 
+        float mBrightness[2];
+
     public:
 
         META_Node(SceneUtil, LightSource)
@@ -76,6 +87,16 @@ namespace SceneUtil
         void setRadius(float radius)
         {
             mRadius = radius;
+        }
+
+        float getBrightness(size_t frame)
+        {
+            return mBrightness[frame % 2];
+        }
+
+        void setBrightness(size_t frame, float brightness)
+        {
+            mBrightness[frame % 2] = brightness;
         }
 
         /// Get the osg::Light safe for modification in the given frame.
@@ -119,7 +140,7 @@ namespace SceneUtil
             osg::BoundingSphere mViewBound;
         };
 
-        typedef std::vector<const LightSourceViewBound*> LightList;
+        using LightList = std::vector<const LightSourceViewBound*>;
 
         static bool queryNonFFPLightingSupport();
 
@@ -146,8 +167,6 @@ namespace SceneUtil
         /// Internal use only, called automatically by the LightSource's UpdateCallback
         void addLight(LightSource* lightSource, const osg::Matrixf& worldMat, size_t frameNum);
 
-        const std::vector<LightSourceTransform>& getLights() const;
-
         const std::vector<LightSourceViewBound>& getLightsInViewSpace(osg::Camera* camera, const osg::RefMatrix* viewMatrix, size_t frameNum);
 
         osg::ref_ptr<osg::StateSet> getLightListStateSet(const LightList& lightList, size_t frameNum);
@@ -165,6 +184,11 @@ namespace SceneUtil
         Shader::ShaderManager::DefineMap getLightDefines() const;
 
     private:
+
+        friend class LightManagerStateAttribute;
+
+        void updateGPUPointLight(int index, LightSource* lightSource, size_t frameNum);
+
         // Lights collected from the scene graph. Only valid during the cull traversal.
         std::vector<LightSourceTransform> mLights;
 
@@ -184,6 +208,21 @@ namespace SceneUtil
         osg::ref_ptr<osg::Light> mSun;
         osg::ref_ptr<SunlightBuffer> mSunBuffer;
 
+        struct PointLightProxyData
+        {
+            osg::Vec4 mPosition;
+            float mBrightness;
+        };
+
+        std::vector<PointLightProxyData> mPointLightProxyData;
+        osg::ref_ptr<PointLightBuffer> mPointBuffer;
+
+        // < Light ID , Buffer Index >
+        using LightDataMap = std::unordered_map<int, int>;
+        LightDataMap mLightData;
+
+        bool mIndexNeedsRecompiling;
+        
         bool mFFP;
 
         static constexpr int mFFPMaxLights = 8;
