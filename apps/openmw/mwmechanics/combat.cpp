@@ -305,6 +305,10 @@ namespace MWMechanics
 
     void applyElementalShields(const MWWorld::Ptr &attacker, const MWWorld::Ptr &victim)
     {
+        // Don't let elemental shields harm the player in god mode.
+        bool godmode = attacker == getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
+        if (godmode)
+            return;
         for (int i=0; i<3; ++i)
         {
             float magnitude = victim.getClass().getCreatureStats(victim).getMagicEffects().get(ESM::MagicEffect::FireShield+i).getMagnitude();
