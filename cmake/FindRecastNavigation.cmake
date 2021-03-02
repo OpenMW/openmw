@@ -62,30 +62,38 @@ NOTE: The variables above should not usually be used in CMakeLists.txt files!
 
 #]=======================================================================]
 
-### Find library ##############################################################
+### Find libraries ##############################################################
 
 if(NOT RECASTNAV_LIBRARY)
     find_library(RECASTNAV_LIBRARY_RELEASE NAMES Recast)
     find_library(RECASTNAV_LIBRARY_DEBUG NAMES Recastd)
-
-# TODO: figure out a way to get Recast, Detour and DebugUtils libs together
-#    find_library(RECAST_LIBRARY_RELEASE NAMES Recast)
-#    find_library(RECAST_LIBRARY_DEBUG NAMES Recastd)
-
-#    find_library(DETOUR_LIBRARY_RELEASE NAMES Detour)
-#    find_library(DETOUR_LIBRARY_DEBUG NAMES Detourd)
-
-#    SET(RECASTNAV_LIBRARY_RELEASE ${RECAST_LIBRARY_RELEASE} ${DETOUR_LIBRARY_RELEASE})
-#    SET(RECASTNAV_LIBRARY_DEBUG ${RECAST_LIBRARY_DEBUG} ${DETOUR_LIBRARY_DEBUG})
-
     include(SelectLibraryConfigurations)
     select_library_configurations(RECASTNAV)
 else()
     file(TO_CMAKE_PATH "${RECASTNAV_LIBRARY}" RECASTNAV_LIBRARY)
 endif()
 
+if(NOT DETOUR_LIBRARY)
+    find_library(DETOUR_LIBRARY_RELEASE NAMES Detour)
+    find_library(DETOUR_LIBRARY_DEBUG NAMES Detourd)
+    include(SelectLibraryConfigurations)
+    select_library_configurations(DETOUR)
+else()
+    file(TO_CMAKE_PATH "${DETOUR_LIBRARY}" DETOUR_LIBRARY)
+endif()
+
+if(NOT DEBUGUTILS_LIBRARY)
+    find_library(DEBUGUTILS_LIBRARY_RELEASE NAMES DebugUtils)
+    find_library(DEBUGUTILS_LIBRARY_DEBUG NAMES DebugUtilsd)
+    include(SelectLibraryConfigurations)
+    select_library_configurations(DEBUGUTILS)
+else()
+    file(TO_CMAKE_PATH "${DEBUGUTILS_LIBRARY}" DEBUGUTILS_LIBRARY)
+endif()
+
 ### Find include directory ####################################################
 find_path(RECASTNAV_INCLUDE_DIR NAMES Recast.h PATH_SUFFIXES include RECASTNAV include/recastnavigation)
+mark_as_advanced(RECASTNAV_INCLUDE_DIR RECASTNAV_LIBRARY)
 
 if(RECASTNAV_INCLUDE_DIR AND EXISTS "${RECASTNAV_INCLUDE_DIR}/Recast.h")
     file(STRINGS "${RECASTNAV_INCLUDE_DIR}/Recast.h" _Recast_h_contents
@@ -108,13 +116,17 @@ include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(RecastNavigation DEFAULT_MSG
         RECASTNAV_LIBRARY RECASTNAV_INCLUDE_DIR RECAST_VERSION)
 
-mark_as_advanced(RECASTNAV_INCLUDE_DIR RECASTNAV_LIBRARY)
-
 set(RECASTNAV_LIBRARIES ${RECASTNAV_LIBRARY})
 set(RECASTNAV_INCLUDE_DIRS ${RECASTNAV_INCLUDE_DIR})
 
+set(DETOUR_LIBRARIES ${DETOUR_LIBRARY})
+set(DETOUR_INCLUDE_DIRS ${RECASTNAV_INCLUDE_DIR})
+
+set(DEBUGUTILS_LIBRARIES ${DEBUGUTILS_LIBRARY})
+set(DEBUGUTILS_INCLUDE_DIRS ${RECASTNAV_INCLUDE_DIR})
+
 ### Import targets ############################################################
-if(RECASTNAV_FOUND)
+if(RecastNavigation_FOUND)
     if(NOT TARGET RecastNavigation::Recast)
         add_library(RecastNavigation::Recast UNKNOWN IMPORTED)
         set_target_properties(RecastNavigation::Recast PROPERTIES
@@ -140,4 +152,57 @@ if(RECASTNAV_FOUND)
                     IMPORTED_LOCATION "${RECASTNAV_LIBRARY}")
         endif()
     endif()
+
+    if(NOT TARGET RecastNavigation::Detour)
+        add_library(RecastNavigation::Detour UNKNOWN IMPORTED)
+        set_target_properties(RecastNavigation::Detour PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+                INTERFACE_INCLUDE_DIRECTORIES "${DETOUR_INCLUDE_DIR}")
+
+        if(RECASTNAV_LIBRARY_RELEASE)
+            set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(RecastNavigation::Detour PROPERTIES
+                    IMPORTED_LOCATION_RELEASE "${DETOUR_LIBRARY_RELEASE}")
+        endif()
+
+        if(RECASTNAV_LIBRARY_DEBUG)
+            set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(RecastNavigation::Detour PROPERTIES
+                    IMPORTED_LOCATION_DEBUG "${DETOUR_LIBRARY_DEBUG}")
+        endif()
+
+        if(NOT RECASTNAV_LIBRARY_RELEASE AND NOT RECASTNAV_LIBRARY_DEBUG)
+            set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
+                    IMPORTED_LOCATION "${DETOUR_LIBRARY}")
+        endif()
+    endif()
+
+    if(NOT TARGET RecastNavigation::DebugUtils)
+        add_library(RecastNavigation::DebugUtils UNKNOWN IMPORTED)
+        set_target_properties(RecastNavigation::DebugUtils PROPERTIES
+                IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+                INTERFACE_INCLUDE_DIRECTORIES "${DEBUGUTILS_INCLUDE_DIR}")
+
+        if(RECASTNAV_LIBRARY_RELEASE)
+            set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS RELEASE)
+            set_target_properties(RecastNavigation::DebugUtils PROPERTIES
+                    IMPORTED_LOCATION_RELEASE "${DEBUGUTILS_LIBRARY_RELEASE}")
+        endif()
+
+        if(RECASTNAV_LIBRARY_DEBUG)
+            set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
+                    IMPORTED_CONFIGURATIONS DEBUG)
+            set_target_properties(RecastNavigation::DebugUtils PROPERTIES
+                    IMPORTED_LOCATION_DEBUG "${DEBUGUTILS_LIBRARY_DEBUG}")
+        endif()
+
+        if(NOT RECASTNAV_LIBRARY_RELEASE AND NOT RECASTNAV_LIBRARY_DEBUG)
+            set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
+                    IMPORTED_LOCATION "${DEBUGUTILS_LIBRARY}")
+        endif()
+    endif()
+
 endif()
