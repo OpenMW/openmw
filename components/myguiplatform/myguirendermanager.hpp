@@ -5,6 +5,8 @@
 
 #include <osg/ref_ptr>
 
+#include "myguicompat.h"
+
 namespace Resource
 {
     class ImageManager;
@@ -70,7 +72,8 @@ public:
     const MyGUI::IntSize& getViewSize() const override { return mViewSize; }
 
     /** @see RenderManager::getVertexFormat */
-    MyGUI::VertexColourType getVertexFormat() override { return mVertexFormat; }
+    MyGUI::VertexColourType getVertexFormat() OPENMW_MYGUI_CONST_GETTER_3_4_1 override
+    { return mVertexFormat; }
 
     /** @see RenderManager::isFormatSupported */
     bool isFormatSupported(MyGUI::PixelFormat format, MyGUI::TextureUsage usage) override;
@@ -102,15 +105,20 @@ public:
     void setInjectState(osg::StateSet* stateSet);
 
     /** @see IRenderTarget::getInfo */
-    const MyGUI::RenderTargetInfo& getInfo() override { return mInfo; }
+    const MyGUI::RenderTargetInfo& getInfo() OPENMW_MYGUI_CONST_GETTER_3_4_1 override { return mInfo; }
 
     bool checkTexture(MyGUI::ITexture* _texture);
 
     // setViewSize() is a part of MyGUI::RenderManager interface since 3.4.0 release
-#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3,4,0)
+#if MYGUI_VERSION < MYGUI_DEFINE_VERSION(3, 4, 0)
     void setViewSize(int width, int height);
 #else
     void setViewSize(int width, int height) override;
+#endif
+
+    // registerShader() is a part of MyGUI::RenderManager interface since 3.4.1 release
+#if MYGUI_VERSION > MYGUI_DEFINE_VERSION(3, 4, 0)
+    void registerShader(const std::string& _shaderName, const std::string& _vertexProgramFile, const std::string& _fragmentProgramFile) override;
 #endif
 
 /*internal:*/

@@ -53,7 +53,7 @@ namespace MWGui
         {
             static const int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
 
-            MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
+            const MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
             if (gi)
             {
                 const float scale = font->getDefaultHeight() / (float) fontHeight;
