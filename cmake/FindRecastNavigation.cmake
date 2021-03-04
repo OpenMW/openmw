@@ -162,21 +162,21 @@ if(RecastNavigation_FOUND)
                 IMPORTED_LINK_INTERFACE_LANGUAGES "C"
                 INTERFACE_INCLUDE_DIRECTORIES "${DETOUR_INCLUDE_DIR}")
 
-        if(RECAST_LIBRARY_RELEASE)
+        if(DETOUR_LIBRARY_RELEASE)
             set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
                     IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(RecastNavigation::Detour PROPERTIES
                     IMPORTED_LOCATION_RELEASE "${DETOUR_LIBRARY_RELEASE}")
         endif()
 
-        if(RECAST_LIBRARY_DEBUG)
+        if(DETOUR_LIBRARY_DEBUG)
             set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
                     IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(RecastNavigation::Detour PROPERTIES
                     IMPORTED_LOCATION_DEBUG "${DETOUR_LIBRARY_DEBUG}")
         endif()
 
-        if(NOT RECAST_LIBRARY_RELEASE AND NOT RECAST_LIBRARY_DEBUG)
+        if(NOT DETOUR_LIBRARY_RELEASE AND NOT DETOUR_LIBRARY_DEBUG)
             set_property(TARGET RecastNavigation::Detour APPEND PROPERTY
                     IMPORTED_LOCATION "${DETOUR_LIBRARY}")
         endif()
@@ -188,21 +188,21 @@ if(RecastNavigation_FOUND)
                 IMPORTED_LINK_INTERFACE_LANGUAGES "C"
                 INTERFACE_INCLUDE_DIRECTORIES "${DEBUGUTILS_INCLUDE_DIR}")
 
-        if(RECAST_LIBRARY_RELEASE)
+        if(DEBUGUTILS_LIBRARY_RELEASE)
             set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
                     IMPORTED_CONFIGURATIONS RELEASE)
             set_target_properties(RecastNavigation::DebugUtils PROPERTIES
                     IMPORTED_LOCATION_RELEASE "${DEBUGUTILS_LIBRARY_RELEASE}")
         endif()
 
-        if(RECAST_LIBRARY_DEBUG)
+        if(DEBUGUTILS_LIBRARY_DEBUG)
             set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
                     IMPORTED_CONFIGURATIONS DEBUG)
             set_target_properties(RecastNavigation::DebugUtils PROPERTIES
                     IMPORTED_LOCATION_DEBUG "${DEBUGUTILS_LIBRARY_DEBUG}")
         endif()
 
-        if(NOT RECAST_LIBRARY_RELEASE AND NOT RECAST_LIBRARY_DEBUG)
+        if(NOT DEBUGUTILS_LIBRARY_RELEASE AND NOT DEBUGUTILS_LIBRARY_DEBUG)
             set_property(TARGET RecastNavigation::DebugUtils APPEND PROPERTY
                     IMPORTED_LOCATION "${DEBUGUTILS_LIBRARY}")
         endif()
