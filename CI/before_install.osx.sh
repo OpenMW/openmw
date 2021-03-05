@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh -ex
 
 # workaround python issue on travis
 HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies python@3.8 || true
