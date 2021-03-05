@@ -9,10 +9,11 @@ HOMEBREW_NO_AUTO_UPDATE=1 brew uninstall --ignore-dependencies qt@6 || true
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
+export PATH="/usr/local/opt/qt@5/bin:$PATH"  # needed to use qmake in none default path as qt now points to qt6
 
-export PATH="/usr/local/opt/qt@5/bin:$PATH"
+ccache --version
+cmake --version
 qmake --version
-which qmake
 
 curl -fSL -R -J https://downloads.openmw.org/osx/dependencies/openmw-deps-f8918dd.zip -o ~/openmw-deps.zip
 unzip -o ~/openmw-deps.zip -d /private/tmp/openmw-deps > /dev/null
