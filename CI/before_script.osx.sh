@@ -4,7 +4,7 @@ export CXX=clang++
 export CC=clang
 
 DEPENDENCIES_ROOT="/private/tmp/openmw-deps/openmw-deps"
-QT_PATH=$(brew --prefix qt)
+QT_PATH=$(brew --prefix qt@5)
 CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache
 mkdir build
 cd build
