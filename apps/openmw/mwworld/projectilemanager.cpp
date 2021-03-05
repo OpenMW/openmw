@@ -352,6 +352,29 @@ namespace MWWorld
         mProjectiles.push_back(state);
     }
 
+    void ProjectileManager::updateCasters()
+    {
+        for (auto& state : mProjectiles)
+            mPhysics->setCaster(state.mProjectileId, state.getCaster());
+
+        for (auto& state : mMagicBolts)
+        {
+            // casters are identified by actor id in the savegame. objects doesn't have one so they can't be identified back.
+            // TODO: should object-type caster be restored from savegame?
+            if (state.mActorId == -1)
+                continue;
+
+            auto caster = state.getCaster();
+            if (caster.isEmpty())
+            {
+                Log(Debug::Error) << "Couldn't find caster with ID " << state.mActorId;
+                cleanupMagicBolt(state);
+                continue;
+            }
+            mPhysics->setCaster(state.mProjectileId, caster);
+        }
+    }
+
     void ProjectileManager::update(float dt)
     {
         periodicCleanup(dt);
