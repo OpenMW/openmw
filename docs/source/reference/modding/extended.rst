@@ -306,8 +306,11 @@ For example, we do not need to have collision or animation objects for groundcov
 do not need to render groundcover on the map, do not need to render it for the whole visible area (which can be very large with Distant Terrain). It allows to increase performance a lot.
 
 General advices to create assets for this feature:
+
 1. Alpha properties from Nif files are not used, a unified alpha settings are used (alpha testing, "greater of equal" function, 128/255 threshold).
+
 2. Use a single NiTriShape in groundocver mesh, or at least use same properties (texture, alpha, material, etc), so OpenMW can merge them on the fly. Otherwise animations may not work properly.
+
 3. Smooth fading does not work for meshes, which have textures without alpha (e.g. rock).
 
 Groundcover mods can be registered in the openmw.cfg via "groundcover" entries instead of "content" ones:
