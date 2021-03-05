@@ -32,16 +32,8 @@ namespace DetourNavigator
 
         ++mGetCount;
 
-        const auto agentValues = mValues.find(agentHalfExtents);
-        if (agentValues == mValues.end())
-            return Value();
-
-        const auto tileValues = agentValues->second.find(changedTile);
-        if (tileValues == agentValues->second.end())
-            return Value();
-
-        const auto tile = tileValues->second.mMap.find(NavMeshKeyView(recastMesh, offMeshConnections));
-        if (tile == tileValues->second.mMap.end())
+        const auto tile = mValues.find(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyView(recastMesh, offMeshConnections)));
+        if (tile == mValues.end())
             return Value();
 
         acquireItemUnsafe(tile->second);
@@ -71,7 +63,7 @@ namespace DetourNavigator
         };
 
         const auto iterator = mFreeItems.emplace(mFreeItems.end(), agentHalfExtents, changedTile, std::move(navMeshKey), itemSize);
-        const auto emplaced = mValues[agentHalfExtents][changedTile].mMap.emplace(iterator->mNavMeshKey, iterator);
+        const auto emplaced = mValues.emplace(std::make_tuple(agentHalfExtents, changedTile, NavMeshKeyRef(iterator->mNavMeshKey)), iterator);
 
         if (!emplaced.second)
         {
@@ -115,32 +107,15 @@ namespace DetourNavigator
     {
         const auto& item = mFreeItems.back();
 
-        const auto agentValues = mValues.find(item.mAgentHalfExtents);
-        if (agentValues == mValues.end())
-            return;
-
-        const auto tileValues = agentValues->second.find(item.mChangedTile);
-        if (tileValues == agentValues->second.end())
-            return;
-
-        const auto value = tileValues->second.mMap.find(item.mNavMeshKey);
-        if (value == tileValues->second.mMap.end())
+        const auto value = mValues.find(std::make_tuple(item.mAgentHalfExtents, item.mChangedTile, NavMeshKeyRef(item.mNavMeshKey)));
+        if (value == mValues.end())
             return;
 
         mUsedNavMeshDataSize -= item.mSize;
         mFreeNavMeshDataSize -= item.mSize;
 
-        tileValues->second.mMap.erase(value);
+        mValues.erase(value);
         mFreeItems.pop_back();
-
-        if (!tileValues->second.mMap.empty())
-            return;
-
-        agentValues->second.erase(tileValues);
-        if (!agentValues->second.empty())
-            return;
-
-        mValues.erase(agentValues);
     }
 
     void NavMeshTilesCache::acquireItemUnsafe(ItemIterator iterator)
