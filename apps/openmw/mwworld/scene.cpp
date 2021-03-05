@@ -343,7 +343,10 @@ namespace MWWorld
 
         cell->forEach(visitor);
         for (const auto& ptr : visitor.mObjects)
+        {
             mPhysics->remove(ptr);
+            ptr.mRef->mData.mPhysicsPostponed = false;
+        }
 
         if (cell->getCell()->isExterior())
         {
@@ -626,6 +629,24 @@ namespace MWWorld
             }
             return cellsPositionsToLoad;
         };
+
+        for(const auto& cell : mActiveCells)
+        {
+            cell->forEach([&](const MWWorld::Ptr& ptr)
+            {
+                if(ptr.mRef->mData.mPhysicsPostponed)
+                {
+                    ptr.mRef->mData.mPhysicsPostponed = false;
+                    if(ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0) {
+                        std::string model = getModel(ptr, MWBase::Environment::get().getResourceSystem()->getVFS());
+                        const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);
+                        ptr.getClass().insertObjectPhysics(ptr, model, rotation, *mPhysics);
+                    }
+                }
+                return true;
+            });
+        }
+
         auto cellsPositionsToLoad = cellsToLoad(mActiveCells,mHalfGridSize);
         auto cellsPositionsToLoadInactive = cellsToLoad(mInactiveCells,mHalfGridSize+1);
 
