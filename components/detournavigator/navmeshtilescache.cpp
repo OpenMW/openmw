@@ -74,10 +74,9 @@ namespace DetourNavigator
         }
 
         iterator->mNavMeshData = std::move(value);
+        ++iterator->mUseCount;
         mUsedNavMeshDataSize += itemSize;
-        mFreeNavMeshDataSize += itemSize;
-
-        acquireItemUnsafe(iterator);
+        mBusyItems.splice(mBusyItems.end(), mFreeItems, iterator);
 
         return Value(*this, iterator);
     }
