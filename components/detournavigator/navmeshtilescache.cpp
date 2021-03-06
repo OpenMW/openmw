@@ -1,5 +1,4 @@
 #include "navmeshtilescache.hpp"
-#include "exceptions.hpp"
 
 #include <osg/Stats>
 
@@ -68,7 +67,10 @@ namespace DetourNavigator
         if (!emplaced.second)
         {
             mFreeItems.erase(iterator);
-            throw InvalidArgument("Set existing cache value");
+            acquireItemUnsafe(emplaced.first->second);
+            ++mGetCount;
+            ++mHitCount;
+            return Value(*this, emplaced.first->second);
         }
 
         iterator->mNavMeshData = std::move(value);

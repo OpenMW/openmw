@@ -77,7 +77,7 @@ namespace
         EXPECT_EQ(result.get(), (NavMeshDataRef {mData, 1}));
     }
 
-    TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_existing_element_should_throw_exception)
+    TEST_F(DetourNavigatorNavMeshTilesCacheTest, set_existing_element_should_return_cached_element)
     {
         const std::size_t navMeshDataSize = 1;
         const std::size_t navMeshKeySize = cRecastMeshKeySize;
@@ -87,10 +87,9 @@ namespace
         NavMeshData anotherNavMeshData {anotherData, 1};
 
         cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(mNavMeshData));
-        EXPECT_THROW(
-            cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(anotherNavMeshData)),
-            InvalidArgument
-        );
+        const auto result = cache.set(mAgentHalfExtents, mTilePosition, mRecastMesh, mOffMeshConnections, std::move(anotherNavMeshData));
+        ASSERT_TRUE(result);
+        EXPECT_EQ(result.get(), (NavMeshDataRef {mData, 1}));
     }
 
     TEST_F(DetourNavigatorNavMeshTilesCacheTest, get_should_return_cached_value)
