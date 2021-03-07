@@ -174,6 +174,9 @@ osg::Vec3f Actor::getCollisionObjectPosition() const
 bool Actor::setPosition(const osg::Vec3f& position)
 {
     std::scoped_lock lock(mPositionMutex);
+    // position is being forced, ignore simulation results until we sync up
+    if (mSkipSimulation)
+        return false;
     bool hasChanged = mPosition != position || mPositionOffset.length() != 0 || mWorldPositionChanged;
     mPreviousPosition = mPosition + mPositionOffset;
     mPosition = position + mPositionOffset;
