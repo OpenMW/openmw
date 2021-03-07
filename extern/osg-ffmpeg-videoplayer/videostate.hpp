@@ -95,7 +95,11 @@ struct VideoPicture {
     VideoPicture() : pts(0.0)
     { }
 
-    AVFrame* rgbaFrame = nullptr;
+    struct AVFrameDeleter {
+        void operator()(AVFrame* frame) const;
+    };
+
+    std::unique_ptr<AVFrame, AVFrameDeleter> rgbaFrame;
     double pts;
 };
 

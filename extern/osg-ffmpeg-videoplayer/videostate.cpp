@@ -156,6 +156,12 @@ void PacketQueue::clear()
     this->mutex.unlock ();
 }
 
+void VideoPicture::AVFrameDeleter::operator()(AVFrame* frame) const
+{
+    av_freep(frame->data);
+    av_frame_free(&frame);
+}
+
 int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
 {
     try
@@ -623,8 +629,9 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         }
 
         // Allocate RGBA frame queue.
-        for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i) {
-            AVFrame *frame = av_frame_alloc();
+        for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i)
+        {
+            std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> frame{av_frame_alloc()};
             if (frame == nullptr) {
                 std::cerr << "av_frame_alloc failed" << std::endl;
                 return -1;
@@ -638,7 +645,7 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
                 std::cerr << "av_image_alloc failed" << std::endl;
                 return -1;
             }
-            this->pictq[i].rgbaFrame = frame;
+            this->pictq[i].rgbaFrame = std::move(frame);
         }
 
         this->video_thread.reset(new VideoThread(this));
@@ -784,11 +791,8 @@ void VideoState::deinit()
     }
 
     // Dellocate RGBA frame queue.
-    for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i) {
-        if (this->pictq[i].rgbaFrame == nullptr) continue;
-        av_freep(&this->pictq[i].rgbaFrame->data[0]);
-        av_frame_free(&this->pictq[i].rgbaFrame);
-    }
+    for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i)
+        this->pictq[i].rgbaFrame = nullptr;
 
 }
 
