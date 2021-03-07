@@ -172,7 +172,7 @@ namespace MWGui
       , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
       , mCursorVisible(true)
-      , mCursorActive(false)
+      , mCursorActive(true)
       , mPlayerBounty(-1)
       , mGui(nullptr)
       , mGuiModes()
