@@ -304,7 +304,11 @@ void FFmpeg_Decoder::close()
             {
                 av_freep(&mFormatCtx->pb->buffer);
             }
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
             avio_context_free(&mFormatCtx->pb);
+#else
+            av_freep(&mFormatCtx->pb);
+#endif
         }
         avformat_close_input(&mFormatCtx);
     }
