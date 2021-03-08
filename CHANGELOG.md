@@ -34,6 +34,7 @@
     Bug #4764: Data race in osg ParticleSystem
     Bug #4765: Data race in ChunkManager -> Array::setBinding
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5026: Data races with rain intensity uniform set by sky and used by water
     Bug #5101: Hostile followers travel with the player
     Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5165: Active spells should use real time intead of timestamps

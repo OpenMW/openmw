@@ -7,7 +7,6 @@
 
 #include <osg/ref_ptr>
 #include <osg/Vec4f>
-#include <osg/Uniform>
 
 namespace osg
 {
@@ -157,7 +156,9 @@ namespace MWRender
 
         bool isEnabled();
 
-        bool hasRain();
+        bool hasRain() const;
+
+        float getEffectFade() const;
 
         void setRainSpeed(float speed);
 
@@ -180,8 +181,6 @@ namespace MWRender
 
         void setCamera(osg::Camera *camera);
 
-        void setRainIntensityUniform(osg::Uniform *uniform);
-
         float getBaseWindSpeed() const;
 
     private:
@@ -196,7 +195,6 @@ namespace MWRender
         Resource::SceneManager* mSceneManager;
 
         osg::Camera *mCamera;
-        osg::Uniform *mRainIntensityUniform;
 
         osg::ref_ptr<osg::Group> mRootNode;
         osg::ref_ptr<osg::Group> mEarlyRenderBinRoot;

@@ -1113,7 +1113,6 @@ private:
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
     , mCamera(nullptr)
-    , mRainIntensityUniform(nullptr)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1161,11 +1160,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode->addChild(mEarlyRenderBinRoot);
 
     mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
-}
-
-void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
-{
-    mRainIntensityUniform = uniform;
 }
 
 void SkyManager::create()
@@ -1576,30 +1570,21 @@ bool SkyManager::isEnabled()
     return mEnabled;
 }
 
-bool SkyManager::hasRain()
+bool SkyManager::hasRain() const
 {
     return mRainNode != nullptr;
 }
 
+float SkyManager::getEffectFade() const
+{
+    if (mEnabled && !mIsStorm && (hasRain() || mParticleNode))
+        return mEffectFade;
+
+    return 0.f;
+}
+
 void SkyManager::update(float duration)
 {
-    if (!mEnabled)
-    {
-        if (mRainIntensityUniform)
-            mRainIntensityUniform->set(0.f);
-
-        return;
-    }
-
-    if (mRainIntensityUniform)
-    {
-        float rainIntensity = 0.f;
-        if (!mIsStorm && (hasRain() || mParticleNode))
-            rainIntensity = mEffectFade;
-
-        mRainIntensityUniform->set(rainIntensity);
-    }
-
     switchUnderwaterRain();
 
     if (mIsStorm)
