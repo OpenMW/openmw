@@ -710,12 +710,20 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
           if (this->format_ctx->pb != nullptr)
           {
               av_freep(&this->format_ctx->pb->buffer);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
               avio_context_free(&this->format_ctx->pb);
+#else
+              av_freep(&this->format_ctx->pb);
+#endif
           }
         }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = nullptr;
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
         avio_context_free(&ioCtx);
+#else
+        av_freep(&ioCtx);
+#endif
         throw std::runtime_error("Failed to open video input");
     }
 
@@ -790,7 +798,11 @@ void VideoState::deinit()
         if (this->format_ctx->pb != nullptr)
         {
             av_freep(&this->format_ctx->pb->buffer);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
             avio_context_free(&this->format_ctx->pb);
+#else
+            av_freep(&this->format_ctx->pb);
+#endif
         }
         avformat_close_input(&this->format_ctx);
     }
