@@ -287,9 +287,9 @@ void FFmpeg_Decoder::close()
     mStream = nullptr;
 
     av_packet_unref(&mPacket);
-    av_freep(&mFrame);
-    swr_free(&mSwr);
     av_freep(&mDataBuf);
+    av_frame_free(&mFrame);
+    swr_free(&mSwr);
 
     if(mFormatCtx)
     {
@@ -302,11 +302,9 @@ void FFmpeg_Decoder::close()
             //
             if (mFormatCtx->pb->buffer != nullptr)
             {
-                av_free(mFormatCtx->pb->buffer);
-                mFormatCtx->pb->buffer = nullptr;
+                av_freep(&mFormatCtx->pb->buffer);
             }
-            av_free(mFormatCtx->pb);
-            mFormatCtx->pb = nullptr;
+            avio_context_free(&mFormatCtx->pb);
         }
         avformat_close_input(&mFormatCtx);
     }

@@ -83,10 +83,11 @@ void PacketQueue::put(AVPacket *pkt)
     pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
     if(!pkt1) throw std::bad_alloc();
 
-    if(pkt != &flush_pkt && !pkt->buf && av_packet_ref(&pkt1->pkt, pkt) < 0)
-        throw std::runtime_error("Failed to duplicate packet");
+    if(pkt == &flush_pkt)
+        pkt1->pkt = *pkt;
+    else
+        av_packet_move_ref(&pkt1->pkt, pkt);
 
-    pkt1->pkt = *pkt;
     pkt1->next = nullptr;
 
     this->mutex.lock ();
@@ -117,7 +118,8 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
             this->nb_packets--;
             this->size -= pkt1->pkt.size;
 
-            *pkt = pkt1->pkt;
+            av_packet_unref(pkt);
+            av_packet_move_ref(pkt, &pkt1->pkt);
             av_free(pkt1);
 
             return 1;
@@ -364,6 +366,7 @@ public:
     {
         VideoState* self = mVideoState;
         AVPacket pkt1, *packet = &pkt1;
+        av_init_packet(packet);
         AVFrame *pFrame;
 
         pFrame = av_frame_alloc();
@@ -436,6 +439,7 @@ public:
 
         AVFormatContext *pFormatCtx = self->format_ctx;
         AVPacket pkt1, *packet = &pkt1;
+        av_init_packet(packet);
 
         try
         {
@@ -691,16 +695,13 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
         {
           if (this->format_ctx->pb != nullptr)
           {
-              av_free(this->format_ctx->pb->buffer);
-              this->format_ctx->pb->buffer = nullptr;
-
-              av_free(this->format_ctx->pb);
-              this->format_ctx->pb = nullptr;
+              av_freep(&this->format_ctx->pb->buffer);
+              avio_context_free(&this->format_ctx->pb);
           }
         }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = nullptr;
-        av_free(ioCtx);
+        avio_context_free(&ioCtx);
         throw std::runtime_error("Failed to open video input");
     }
 
@@ -774,11 +775,8 @@ void VideoState::deinit()
         ///
         if (this->format_ctx->pb != nullptr)
         {
-            av_free(this->format_ctx->pb->buffer);
-            this->format_ctx->pb->buffer = nullptr;
-
-            av_free(this->format_ctx->pb);
-            this->format_ctx->pb = nullptr;
+            av_freep(&this->format_ctx->pb->buffer);
+            avio_context_free(&this->format_ctx->pb);
         }
         avformat_close_input(&this->format_ctx);
     }
