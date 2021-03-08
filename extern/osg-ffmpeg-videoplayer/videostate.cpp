@@ -158,6 +158,33 @@ void PacketQueue::clear()
     this->mutex.unlock ();
 }
 
+int VideoPicture::set_dimensions(int w, int h) {
+  if (this->rgbaFrame != nullptr && this->rgbaFrame->width == w &&
+      this->rgbaFrame->height == h) {
+    return 0;
+  }
+
+  std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> frame{
+      av_frame_alloc()};
+  if (frame == nullptr) {
+    std::cerr << "av_frame_alloc failed" << std::endl;
+    return -1;
+  }
+
+  constexpr AVPixelFormat kPixFmt = AV_PIX_FMT_RGBA;
+  frame->format = kPixFmt;
+  frame->width = w;
+  frame->height = h;
+  if (av_image_alloc(frame->data, frame->linesize, frame->width, frame->height,
+                     kPixFmt, 1) < 0) {
+    std::cerr << "av_image_alloc failed" << std::endl;
+    return -1;
+  }
+
+  this->rgbaFrame = std::move(frame);
+  return 0;
+}
+
 void VideoPicture::AVFrameDeleter::operator()(AVFrame* frame) const
 {
     av_freep(frame->data);
@@ -305,18 +332,25 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
-    if(this->sws_context == nullptr)
+    const int w = pFrame->width;
+    const int h = pFrame->height;
+    if(this->sws_context == nullptr || this->sws_context_w != w || this->sws_context_h != h)
     {
-        int w = this->video_ctx->width;
-        int h = this->video_ctx->height;
+        if (this->sws_context != nullptr)
+            sws_freeContext(this->sws_context);
         this->sws_context = sws_getContext(w, h, this->video_ctx->pix_fmt,
                                            w, h, AV_PIX_FMT_RGBA, SWS_BICUBIC,
                                            nullptr, nullptr, nullptr);
         if(this->sws_context == nullptr)
             throw std::runtime_error("Cannot initialize the conversion context!\n");
+        this->sws_context_w = w;
+        this->sws_context_h = h;
     }
 
     vp->pts = pts;
+    if (vp->set_dimensions(w, h) < 0)
+        return -1;
+
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
@@ -630,26 +664,6 @@ int VideoState::stream_open(int stream_index, AVFormatContext *pFormatCtx)
         {
             fprintf(stderr, "Unsupported codec!\n");
             return -1;
-        }
-
-        // Allocate RGBA frame queue.
-        for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i)
-        {
-            std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> frame{av_frame_alloc()};
-            if (frame == nullptr) {
-                std::cerr << "av_frame_alloc failed" << std::endl;
-                return -1;
-            }
-
-            constexpr AVPixelFormat kPixFmt = AV_PIX_FMT_RGBA;
-            frame->format = kPixFmt;
-            frame->width = this->video_ctx->width;
-            frame->height = this->video_ctx->height;
-            if (av_image_alloc(frame->data, frame->linesize, frame->width, frame->height, kPixFmt, 1) < 0) {
-                std::cerr << "av_image_alloc failed" << std::endl;
-                return -1;
-            }
-            this->pictq[i].rgbaFrame = std::move(frame);
         }
 
         this->video_thread.reset(new VideoThread(this));
