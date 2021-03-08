@@ -97,6 +97,7 @@
     Bug #5739: Saving and loading the save a second or two before hitting the ground doesn't count fall damage
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Bug #5762: Movement solver is insufficiently robust
+    Bug #5807: Video decoding crash on ARM
     Bug #5821: NPCs from mods getting removed if mod order was changed
     Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
     Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
