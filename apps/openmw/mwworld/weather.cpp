@@ -1129,7 +1129,7 @@ inline void WeatherManager::calculateResult(const int weatherID, const float gam
     mResult.mGlareView = current.mGlareView;
     mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
     mResult.mAmbientSoundVolume = 1.f;
-    mResult.mEffectFade = 1.f;
+    mResult.mPrecipitationAlpha = 1.f;
 
     mResult.mIsStorm = current.mIsStorm;
 
@@ -1236,7 +1236,7 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mRainSpeed = current.mRainSpeed;
         mResult.mRainEntranceSpeed = current.mRainEntranceSpeed;
         mResult.mAmbientSoundVolume = 1 - factor / threshold;
-        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = current.mAmbientLoopSoundID;
         mResult.mRainDiameter = current.mRainDiameter;
         mResult.mRainMinHeight = current.mRainMinHeight;
@@ -1251,7 +1251,7 @@ inline void WeatherManager::calculateTransitionResult(const float factor, const 
         mResult.mRainSpeed = other.mRainSpeed;
         mResult.mRainEntranceSpeed = other.mRainEntranceSpeed;
         mResult.mAmbientSoundVolume = (factor - threshold) / (1 - threshold);
-        mResult.mEffectFade = mResult.mAmbientSoundVolume;
+        mResult.mPrecipitationAlpha = mResult.mAmbientSoundVolume;
         mResult.mAmbientLoopSoundID = other.mAmbientLoopSoundID;
 
         mResult.mRainDiameter = other.mRainDiameter;
