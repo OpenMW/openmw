@@ -2,6 +2,10 @@
 
 #include <SDL_video.h>
 
+#ifdef OPENMW_GL4ES_MANUAL_INIT
+#include "gl4es_init.h"
+#endif
+
 namespace SDLUtil
 {
 
@@ -91,7 +95,7 @@ void GraphicsWindowSDL2::init()
     SDL_Window *oldWin = SDL_GL_GetCurrentWindow();
     SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
    
-#if defined(ANDROID)
+#if defined(ANDROID) || defined(OPENMW_GL4ES_MANUAL_INIT)
     int major = 1;
     int minor = 1;
     char *ver = getenv("OPENMW_GLES_VERSION");
@@ -115,6 +119,10 @@ void GraphicsWindowSDL2::init()
         OSG_FATAL<< "Error: Unable to create OpenGL graphics context: "<<SDL_GetError() <<std::endl;
         return;
     }
+
+#ifdef OPENMW_GL4ES_MANUAL_INIT
+    openmw_gl4es_init(mWindow);
+#endif
 
     setSwapInterval(_traits->vsync);
 
