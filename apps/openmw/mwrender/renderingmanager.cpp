@@ -657,7 +657,7 @@ namespace MWRender
 
         mUnrefQueue->flush(mWorkQueue.get());
 
-        float rainIntensity = mSky->getEffectFade();
+        float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 
         if (!paused)

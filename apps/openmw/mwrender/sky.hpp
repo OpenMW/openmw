@@ -87,7 +87,7 @@ namespace MWRender
 
         std::string mParticleEffect;
         std::string mRainEffect;
-        float mEffectFade;
+        float mPrecipitationAlpha;
 
         float mRainDiameter;
         float mRainMinHeight;
@@ -158,7 +158,7 @@ namespace MWRender
 
         bool hasRain() const;
 
-        float getEffectFade() const;
+        float getPrecipitationAlpha() const;
 
         void setRainSpeed(float speed);
 
@@ -269,7 +269,7 @@ namespace MWRender
         bool mEnabled;
         bool mSunEnabled;
 
-        float mEffectFade;
+        float mPrecipitationAlpha;
 
         osg::Vec4f mMoonScriptColor;
     };
