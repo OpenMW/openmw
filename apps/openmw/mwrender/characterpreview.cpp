@@ -11,6 +11,7 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/LightModel>
 #include <osg/LightSource>
+#include <osg/ValueObject>
 #include <osgUtil/IntersectionVisitor>
 #include <osgUtil/LineSegmentIntersector>
 
