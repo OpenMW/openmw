@@ -10,6 +10,12 @@
 
 #include <type_traits>
 
+#if BT_BULLET_VERSION < 310
+// Older Bullet versions only support `btScalar` heightfields.
+// Our heightfield data is `float`.
+//
+// These functions handle conversion from `float` to `double` when
+// `btScalar` is `double` (`BT_USE_DOUBLE_PRECISION`).
 namespace
 {
     template <class T>
@@ -40,14 +46,18 @@ namespace
         return btScalarHeights.data();
     }
 }
+#endif
 
 namespace MWPhysics
 {
     HeightField::HeightField(const float* heights, int x, int y, float triSize, float sqrtVerts, float minH, float maxH, const osg::Object* holdObject, PhysicsTaskScheduler* scheduler)
         : mHoldObject(holdObject)
+#if BT_BULLET_VERSION < 310
         , mHeights(makeHeights(heights, sqrtVerts))
+#endif
         , mTaskScheduler(scheduler)
     {
+#if BT_BULLET_VERSION < 310
         mShape = std::make_unique<btHeightfieldTerrainShape>(
             sqrtVerts, sqrtVerts,
             getHeights(heights, mHeights),
@@ -55,6 +65,10 @@ namespace MWPhysics
             minH, maxH, 2,
             PHY_FLOAT, false
         );
+#else
+        mShape = std::make_unique<btHeightfieldTerrainShape>(
+            sqrtVerts, sqrtVerts, heights, minH, maxH, 2, false);
+#endif
         mShape->setUseDiamondSubdivision(true);
         mShape->setLocalScaling(btVector3(triSize, triSize, 1));
 
