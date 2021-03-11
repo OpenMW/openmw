@@ -44,6 +44,8 @@ namespace MWScript
         const MWWorld::Ptr* getPtrIfPresent() const; // Returns a Ptr if one has been resolved
 
         MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
+
+        std::string getId() const; // Returns the target's ID -- if any
     };
 
     class GlobalScripts

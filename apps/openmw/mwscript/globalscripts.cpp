@@ -92,6 +92,21 @@ namespace
             return false;
         }
     };
+
+    struct IdGettingVisitor : public boost::static_visitor<std::string>
+    {
+        std::string operator()(const MWWorld::Ptr& ptr) const
+        {
+            if(ptr.isEmpty())
+                return {};
+            return ptr.mRef->mRef.getRefId();
+        }
+
+        std::string operator()(const std::pair<ESM::RefNum, std::string>& pair) const
+        {
+            return pair.second;
+        }
+    };
 }
 
 namespace MWScript
@@ -108,6 +123,11 @@ namespace MWScript
         MWWorld::Ptr ptr = boost::apply_visitor(PtrResolvingVisitor(), mTarget);
         mTarget = ptr;
         return ptr;
+    }
+
+    std::string GlobalScriptDesc::getId() const
+    {
+        return boost::apply_visitor(IdGettingVisitor(), mTarget);
     }
 
 

@@ -131,9 +131,10 @@ namespace MWScript
 
     std::string InterpreterContext::getTarget() const
     {
-        auto ptr = getReference(false);
-        if(!ptr.isEmpty())
-            return ptr.mRef->mRef.getRefId();
+        if(!mReference.isEmpty())
+            return mReference.mRef->mRef.getRefId();
+        else if(mGlobalScriptDesc)
+            return mGlobalScriptDesc->getId();
         return {};
     }
 
