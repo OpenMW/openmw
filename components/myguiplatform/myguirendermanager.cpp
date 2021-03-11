@@ -7,6 +7,7 @@
 #include <osg/BlendFunc>
 #include <osg/Texture2D>
 #include <osg/TexMat>
+#include <osg/ValueObject>
 
 #include <osgViewer/Viewer>
 
