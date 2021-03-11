@@ -1585,6 +1585,9 @@ float SkyManager::getPrecipitationAlpha() const
 
 void SkyManager::update(float duration)
 {
+    if (!mEnabled)
+        return;
+
     switchUnderwaterRain();
 
     if (mIsStorm)
