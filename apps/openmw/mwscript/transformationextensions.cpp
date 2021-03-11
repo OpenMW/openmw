@@ -42,9 +42,18 @@ namespace MWScript
 
                 void execute (Interpreter::Runtime& runtime) override
                 {
-                    MWWorld::Ptr from = R()(runtime);
+                    MWWorld::Ptr from = R()(runtime, !R::implicit);
                     std::string name = runtime.getStringLiteral (runtime[0].mInteger);
                     runtime.pop();
+
+                    if (from.isEmpty())
+                    {
+                        std::string error = "Missing implicit ref";
+                        runtime.getContext().report(error);
+                        Log(Debug::Error) << error;
+                        runtime.push(0.f);
+                        return;
+                    }
 
                     if (from.getContainerStore()) // is the object contained?
                     {
