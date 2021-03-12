@@ -13,6 +13,14 @@ namespace MWLua
         void update();  // Should be called every frame.
         void clear();  // Should be called every time before starting or loading a new game.
 
+        // Returns the number of seconds passed from the beginning of the game.
+        double getGameTimeInSeconds() const { return mGameSeconds; }
+        void setGameTimeInSeconds(double t) { mGameSeconds = t; }
+
+        // Returns the number of game hours passed from the beginning of the game.
+        // Note that the number of seconds in a game hour is not fixed.
+        double getGameTimeInHours() const;
+
         ObjectIdList getActorsInScene() const { return mActorsInScene.mList; }
         ObjectIdList getItemsInScene() const { return mItemsInScene.mList; }
 
@@ -40,6 +48,8 @@ namespace MWLua
         ObjectRegistry mObjectRegistry;
         ObjectGroup mActorsInScene;
         ObjectGroup mItemsInScene;
+
+        double mGameSeconds = 0;
     };
 
 }

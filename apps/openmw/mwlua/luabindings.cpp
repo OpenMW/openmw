@@ -15,6 +15,8 @@ namespace MWLua
         {
             context.mGlobalEventQueue->push_back({std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer)});
         };
+        api["getGameTimeInSeconds"] = [world=context.mWorldView]() { return world->getGameTimeInSeconds(); };
+        api["getGameTimeInHours"] = [world=context.mWorldView]() { return world->getGameTimeInHours(); };
         return context.mLua->makeReadOnly(api);
     }
 

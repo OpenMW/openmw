@@ -3,6 +3,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/serialization.hpp>
+#include <components/lua/scriptscontainer.hpp>
 
 #include "eventqueue.hpp"
 #include "object.hpp"
@@ -29,6 +30,15 @@ namespace MWLua
     // Implemented in objectbindings.cpp
     void initObjectBindingsForLocalScripts(const Context&);
     void initObjectBindingsForGlobalScripts(const Context&);
+
+    // Implemented in asyncbindings.cpp
+    struct AsyncPackageId
+    {
+        // TODO: add ObjectId mLocalObject;
+        LuaUtil::ScriptsContainer* mContainer;
+        std::string mScript;
+    };
+    sol::function getAsyncPackageInitializer(const Context&);
 
     // openmw.self package is implemented in localscripts.cpp
 }

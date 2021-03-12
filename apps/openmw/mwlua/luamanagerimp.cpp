@@ -34,6 +34,7 @@ namespace MWLua
         initObjectBindingsForLocalScripts(localContext);
         LocalScripts::initializeSelfPackage(localContext);
 
+        mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
@@ -61,6 +62,16 @@ namespace MWLua
         std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
         mGlobalEvents = std::vector<GlobalEvent>();
         mLocalEvents = std::vector<LocalEvent>();
+
+        {  // Update time and process timers
+            double seconds = mWorldView.getGameTimeInSeconds() + dt;
+            mWorldView.setGameTimeInSeconds(seconds);
+            double hours = mWorldView.getGameTimeInHours();
+
+            mGlobalScripts.processTimers(seconds, hours);
+            for (LocalScripts* scripts : mActiveLocalScripts)
+                scripts->processTimers(seconds, hours);
+        }
 
         for (GlobalEvent& e : globalEvents)
             mGlobalScripts.receiveEvent(e.eventName, e.eventData);

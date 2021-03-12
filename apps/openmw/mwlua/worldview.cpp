@@ -1,6 +1,7 @@
 #include "worldview.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/timestamp.hpp"
 
 namespace MWLua
 {
@@ -33,6 +34,13 @@ namespace MWLua
             removeFromGroup(mActorsInScene, ptr);
         else
             removeFromGroup(mItemsInScene, ptr);
+    }
+
+    double WorldView::getGameTimeInHours() const
+    {
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        MWWorld::TimeStamp timeStamp = world->getTimeStamp();
+        return static_cast<double>(timeStamp.getDay()) * 24 + timeStamp.getHour();
     }
 
     void WorldView::ObjectGroup::updateList()
