@@ -3,7 +3,6 @@
 #include <limits>
 #include <cstdlib>
 
-#include <osg/AlphaFunc>
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
@@ -311,10 +310,6 @@ namespace MWRender
             groundcoverRoot->setNodeMask(Mask_Groundcover);
             groundcoverRoot->setName("Groundcover Root");
             sceneRoot->addChild(groundcoverRoot);
-
-            // Force a unified alpha handling instead of data from meshes
-            osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f/255.f);
-            groundcoverRoot->getOrCreateStateSet()->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
 
             mGroundcoverUpdater = new GroundcoverUpdater;
             groundcoverRoot->addUpdateCallback(mGroundcoverUpdater);
