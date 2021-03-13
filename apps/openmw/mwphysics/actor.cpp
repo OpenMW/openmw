@@ -190,6 +190,17 @@ void Actor::adjustPosition(const osg::Vec3f& offset)
     mPositionOffset += offset;
 }
 
+void Actor::applyOffsetChange()
+{
+    if (mPositionOffset.length() == 0)
+        return;
+    mWorldPosition += mPositionOffset;
+    mPosition += mPositionOffset;
+    mPreviousPosition += mPositionOffset;
+    mPositionOffset = osg::Vec3f();
+    mWorldPositionChanged = true;
+}
+
 osg::Vec3f Actor::getPosition() const
 {
     return mPosition;

@@ -96,8 +96,15 @@ namespace MWPhysics
           * Returns true if the new position is different.
           */
         bool setPosition(const osg::Vec3f& position);
+
+        // force set actor position to be as in Ptr::RefData
         void updatePosition();
+
+        // register a position offset that will be applied during simulation.
         void adjustPosition(const osg::Vec3f& offset);
+
+        // apply position offset. Can't be called during simulation
+        void applyOffsetChange();
 
         osg::Vec3f getPosition() const;
 

@@ -270,20 +270,17 @@ namespace MWScript
                     Interpreter::Type_Float pos = runtime[0].mFloat;
                     runtime.pop();
 
-                    float ax = ptr.getRefData().getPosition().pos[0];
-                    float ay = ptr.getRefData().getPosition().pos[1];
-                    float az = ptr.getRefData().getPosition().pos[2];
-
                     // Note: SetPos does not skip weather transitions in vanilla engine, so we do not call setTeleported(true) here.
 
-                    MWWorld::Ptr updated = ptr;
+                    const auto curPos = ptr.getRefData().getPosition().asVec3();
+                    auto newPos = curPos;
                     if(axis == "x")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,pos,ay,az,true);
+                        newPos[0] = pos;
                     }
                     else if(axis == "y")
                     {
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,pos,az,true);
+                        newPos[1] = pos;
                     }
                     else if(axis == "z")
                     {
@@ -292,20 +289,21 @@ namespace MWScript
                         {
                             float terrainHeight = -std::numeric_limits<float>::max();
                             if (ptr.getCell()->isExterior())
-                                terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(osg::Vec3f(ax, ay, az));
+                                terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(curPos);
 
                             if (pos < terrainHeight)
                                 pos = terrainHeight;
                         }
 
-                        updated = MWBase::Environment::get().getWorld()->moveObject(ptr,ax,ay,pos,true);
+                        newPos[2] = pos;
                     }
                     else
                     {
                         return;
                     }
 
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,updated);
+                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, newPos - curPos));
                 }
         };
 
