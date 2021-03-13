@@ -503,8 +503,6 @@ namespace MWGui
         {
             mStatsWatcher.reset();
 
-            mKeyboardNavigation.reset();
-
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
             MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
             MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
@@ -522,6 +520,8 @@ namespace MWGui
             delete mSoulgemDialog;
             delete mCursorManager;
             delete mToolTips;
+
+            mKeyboardNavigation.reset();
 
             cleanupGarbage();
 
