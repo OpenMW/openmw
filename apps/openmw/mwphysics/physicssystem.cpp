@@ -961,6 +961,10 @@ namespace MWPhysics
     void ActorFrameData::updatePosition()
     {
         mActorRaw->updateWorldPosition();
+        // If physics runs "fast enough", position are interpolated without simulation
+        // By calling this here, we are sure that offsets are applied at least once per frame,
+        // regardless of simulation speed.
+        mActorRaw->applyOffsetChange();
         mPosition = mActorRaw->getPosition();
         if (mMoveToWaterSurface)
         {
