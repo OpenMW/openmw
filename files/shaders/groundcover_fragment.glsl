@@ -1,5 +1,9 @@
 #version 120
 
+#if @useGPUShader4
+    #extension EXT_gpu_shader4: require
+#endif
+
 #define GROUNDCOVER
 
 #if @diffuseMap
