@@ -12,6 +12,29 @@
 uniform float alphaRef;
 #endif
 
+float mipmapLevel(vec2 scaleduv)
+{
+    vec2 dUVdx = dFdx(scaleduv);
+    vec2 dUVdy = dFdy(scaleduv);
+    float maxDUVSquared = max(dot(dUVdx, dUVdx), dot(dUVdy, dUVdy));
+    return max(0.0, 0.5 * log2(maxDUVSquared));
+}
+
+float coveragePreservingAlphaScale(sampler2D diffuseMap, vec2 uv)
+{
+    #if @alphaFunc != FUNC_ALWAYS && @alphaFunc != FUNC_NEVER
+        vec2 textureSize;
+        #if @useGPUShader4
+            textureSize = textureSize2D(diffuseMap, 0);
+        #else
+            textureSize = vec2(256.0);
+        #endif
+            return 1.0 + mipmapLevel(uv * textureSize) * 0.25;
+    #else
+        return 1.0;
+    #endif
+}
+
 void alphaTest()
 {
     #if @alphaToCoverage 

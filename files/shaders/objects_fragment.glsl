@@ -1,5 +1,9 @@
 #version 120
 
+#if @useGPUShader4
+    #extension GL_EXT_gpu_shader4: require
+#endif
+
 #if @diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
@@ -110,6 +114,7 @@ void main()
 
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
+    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
 #else
     gl_FragData[0] = vec4(1.0);
 #endif
