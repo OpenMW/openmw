@@ -72,6 +72,7 @@ Actor::Actor(const MWWorld::Ptr& ptr, const Resource::BulletShape* shape, Physic
     updatePosition();
     addCollisionMask(getCollisionMask());
     updateCollisionObjectPosition();
+    mOnGround.store(false, std::memory_order_release);
 }
 
 Actor::~Actor()
