@@ -46,7 +46,7 @@ add_component_dir (resource
     )
 
 add_component_dir (shader
-    shadermanager shadervisitor
+    shadermanager shadervisitor removedalphafunc
     )
 
 add_component_dir (sceneutil

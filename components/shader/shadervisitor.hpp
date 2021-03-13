@@ -40,6 +40,8 @@ namespace Shader
 
         void setApplyLightingToEnvMaps(bool apply);
 
+        void setConvertAlphaTestToAlphaToCoverage(bool convert);
+
         void setTranslucentFramebuffer(bool translucent);
 
         void apply(osg::Node& node) override;
@@ -65,6 +67,8 @@ namespace Shader
 
         bool mApplyLightingToEnvMaps;
 
+        bool mConvertAlphaTestToAlphaToCoverage;
+
         bool mTranslucentFramebuffer;
 
         ShaderManager& mShaderManager;
@@ -83,6 +87,12 @@ namespace Shader
             int mColorMode;
             
             bool mMaterialOverridden;
+            bool mAlphaTestOverridden;
+            bool mAlphaBlendOverridden;
+
+            GLenum mAlphaFunc;
+            float mAlphaRef;
+            bool mAlphaBlend;
 
             bool mNormalHeight; // true if normal map has height info in alpha channel
 
@@ -100,6 +110,17 @@ namespace Shader
         void createProgram(const ShaderRequirements& reqs);
         void ensureFFP(osg::Node& node);
         bool adjustGeometry(osg::Geometry& sourceGeometry, const ShaderRequirements& reqs);
+    };
+
+    class ReinstateRemovedStateVisitor : public osg::NodeVisitor
+    {
+    public:
+        ReinstateRemovedStateVisitor(bool allowedToModifyStateSets);
+
+        void apply(osg::Node& node) override;
+
+    private:
+        bool mAllowedToModifyStateSets;
     };
 
 }

@@ -75,8 +75,13 @@ namespace Resource
 
         Shader::ShaderManager& getShaderManager();
 
-        /// Re-create shaders for this node, need to call this if texture stages or vertex color mode have changed.
+        /// Re-create shaders for this node, need to call this if alpha testing, texture stages or vertex color mode have changed.
         void recreateShaders(osg::ref_ptr<osg::Node> node, const std::string& shaderPrefix = "objects", bool translucentFramebuffer = false, bool forceShadersForNode = false);
+
+        /// Applying shaders to a node may replace some fixed-function state.
+        /// This restores it.
+        /// When editing such state, it should be reinstated before the edits, and shaders should be recreated afterwards.
+        void reinstateRemovedState(osg::ref_ptr<osg::Node> node);
 
         /// @see ShaderVisitor::setForceShaders
         void setForceShaders(bool force);
@@ -99,6 +104,8 @@ namespace Resource
         void setSpecularMapPattern(const std::string& pattern);
 
         void setApplyLightingToEnvMaps(bool apply);
+
+        void setConvertAlphaTestToAlphaToCoverage(bool convert);
 
         void setShaderPath(const std::string& path);
 
@@ -184,6 +191,7 @@ namespace Resource
         bool mAutoUseSpecularMaps;
         std::string mSpecularMapPattern;
         bool mApplyLightingToEnvMaps;
+        bool mConvertAlphaTestToAlphaToCoverage;
 
         osg::ref_ptr<MultiObjectCache> mInstanceCache;
 

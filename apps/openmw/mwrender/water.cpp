@@ -26,6 +26,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/waterutil.hpp>
 
 #include <components/misc/constants.hpp>
@@ -302,7 +303,7 @@ public:
         mRefractionTexture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         mRefractionTexture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
 
-        attach(osg::Camera::COLOR_BUFFER, mRefractionTexture);
+        SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(this, osg::Camera::COLOR_BUFFER, mRefractionTexture);
 
         mRefractionDepthTexture = new osg::Texture2D;
         mRefractionDepthTexture->setTextureSize(rttSize, rttSize);
@@ -387,7 +388,7 @@ public:
         mReflectionTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         mReflectionTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-        attach(osg::Camera::COLOR_BUFFER, mReflectionTexture);
+        SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(this, osg::Camera::COLOR_BUFFER, mReflectionTexture);
 
         // XXX: should really flip the FrontFace on each renderable instead of forcing clockwise.
         osg::ref_ptr<osg::FrontFace> frontFace (new osg::FrontFace);

@@ -21,6 +21,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -166,7 +167,7 @@ namespace MWRender
         mCamera->setProjectionMatrixAsPerspective(fovYDegrees, sizeX/static_cast<float>(sizeY), 0.1f, 10000.f); // zNear and zFar are autocomputed
         mCamera->setViewport(0, 0, sizeX, sizeY);
         mCamera->setRenderOrder(osg::Camera::PRE_RENDER);
-        mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture);
+        mCamera->attach(osg::Camera::COLOR_BUFFER, mTexture, 0, 0, false, Settings::Manager::getInt("antialiasing", "Video"));
         mCamera->setName("CharacterPreview");
         mCamera->setComputeNearFarMode(osg::Camera::COMPUTE_NEAR_FAR_USING_BOUNDING_VOLUMES);
         mCamera->setCullMask(~(Mask_UpdateVisitor));

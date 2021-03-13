@@ -12,6 +12,7 @@ set(SHADER_FILES
     water_vertex.glsl
     water_fragment.glsl
     water_nm.png
+    alpha.glsl
     objects_vertex.glsl
     objects_fragment.glsl
     terrain_vertex.glsl

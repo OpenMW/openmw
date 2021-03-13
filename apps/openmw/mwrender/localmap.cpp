@@ -18,6 +18,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/files/memorystream.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -237,7 +238,7 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-    camera->attach(osg::Camera::COLOR_BUFFER, texture);
+    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, texture);
 
     camera->addChild(mSceneRoot);
     mRoot->addChild(camera);

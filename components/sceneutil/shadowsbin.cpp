@@ -1,7 +1,9 @@
 #include "shadowsbin.hpp"
 #include <unordered_set>
 #include <osg/StateSet>
+#include <osg/AlphaFunc>
 #include <osg/Material>
+#include <osg/Program>
 #include <osgUtil/StateGraph>
 
 using namespace osgUtil;
@@ -25,9 +27,9 @@ namespace
         osg::StateSet::ModeList::const_iterator mf = l.find(mode);
         if (mf == l.end())
             return;
-        int flags = mf->second;
+        unsigned int flags = mf->second;
         bool newValue = flags & osg::StateAttribute::ON;
-        accumulateState(currentValue, newValue, isOverride, ss->getMode(mode));
+        accumulateState(currentValue, newValue, isOverride, flags);
     }
 
     inline bool materialNeedShadows(osg::Material* m)
@@ -40,6 +42,10 @@ namespace
 namespace SceneUtil
 {
 
+std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> ShadowsBin::sCastingPrograms = {
+    nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr
+};
+
 ShadowsBin::ShadowsBin()
 {
     mNoTestStateSet = new osg::StateSet;
@@ -48,10 +54,16 @@ ShadowsBin::ShadowsBin()
 
     mShaderAlphaTestStateSet = new osg::StateSet;
     mShaderAlphaTestStateSet->addUniform(new osg::Uniform("alphaTestShadows", true));
-    mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+    mShaderAlphaTestStateSet->setMode(GL_BLEND, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+
+    for (size_t i = 0; i < sCastingPrograms.size(); ++i)
+    {
+        mAlphaFuncShaders[i] = new osg::StateSet;
+        mAlphaFuncShaders[i]->setAttribute(sCastingPrograms[i], osg::StateAttribute::ON | osg::StateAttribute::PROTECTED | osg::StateAttribute::OVERRIDE);
+    }
 }
 
-StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache)
+StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::unordered_set<StateGraph*>& uninterestingCache, bool cullFaceOverridden)
 {
     std::vector<StateGraph*> return_path;
     State state;
@@ -71,7 +83,6 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
             continue;
 
         accumulateModeState(ss, state.mAlphaBlend, state.mAlphaBlendOverride, GL_BLEND);
-        accumulateModeState(ss, state.mAlphaTest, state.mAlphaTestOverride, GL_ALPHA_TEST);
 
         const osg::StateSet::AttributeList& attributes = ss->getAttributeList();
         osg::StateSet::AttributeList::const_iterator found = attributes.find(std::make_pair(osg::StateAttribute::MATERIAL, 0));
@@ -83,10 +94,21 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
                 state.mMaterial = nullptr;
         }
 
-        // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it.
-        found = attributes.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
+        found = attributes.find(std::make_pair(osg::StateAttribute::ALPHAFUNC, 0));
         if (found != attributes.end())
-            state.mImportantState = true;
+        {
+            // As force shaders is on, we know this is really a RemovedAlphaFunc
+            const osg::StateSet::RefAttributePair& rap = found->second;
+            accumulateState(state.mAlphaFunc, static_cast<osg::AlphaFunc*>(rap.first.get()), state.mAlphaFuncOverride, rap.second);
+        }
+
+        if (!cullFaceOverridden)
+        {
+            // osg::FrontFace specifies triangle winding, not front-face culling. We can't safely reparent anything under it unless GL_CULL_FACE is off or we flip face culling.
+            found = attributes.find(std::make_pair(osg::StateAttribute::FRONTFACE, 0));
+            if (found != attributes.end())
+                state.mImportantState = true;
+        }
 
         if ((*itr) != sg && !state.interesting())
             uninterestingCache.insert(*itr);
@@ -108,21 +130,45 @@ StateGraph* ShadowsBin::cullStateGraph(StateGraph* sg, StateGraph* root, std::un
     if (state.mAlphaBlend)
     {
         sg_new = sg->find_or_insert(mShaderAlphaTestStateSet);
-        for (RenderLeaf* leaf : sg->_leaves)
-        {
+        sg_new->_leaves = std::move(sg->_leaves);
+        for (RenderLeaf* leaf : sg_new->_leaves)
             leaf->_parent = sg_new;
-            sg_new->_leaves.push_back(leaf);
-        }
-        return sg_new;
+        sg = sg_new;
     }
+
+    // GL_ALWAYS is set by default by mwshadowtechnique
+    if (state.mAlphaFunc && state.mAlphaFunc->getFunction() != GL_ALWAYS)
+    {
+        sg_new = sg->find_or_insert(mAlphaFuncShaders[state.mAlphaFunc->getFunction() - GL_NEVER]);
+        sg_new->_leaves = std::move(sg->_leaves);
+        for (RenderLeaf* leaf : sg_new->_leaves)
+            leaf->_parent = sg_new;
+        sg = sg_new;
+    }
+
     return sg;
+}
+
+void ShadowsBin::addPrototype(const std::string & name, const std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1>& castingPrograms)
+{
+    sCastingPrograms = castingPrograms;
+    osg::ref_ptr<osgUtil::RenderBin> bin(new ShadowsBin);
+    osgUtil::RenderBin::addRenderBinPrototype(name, bin);
+}
+
+inline bool ShadowsBin::State::needTexture() const
+{
+    return mAlphaBlend || (mAlphaFunc && mAlphaFunc->getFunction() != GL_ALWAYS);
 }
 
 bool ShadowsBin::State::needShadows() const
 {
-    if (!mMaterial)
-        return true;
-    return materialNeedShadows(mMaterial);
+    if (mAlphaFunc && mAlphaFunc->getFunction() == GL_NEVER)
+        return false;
+    // other alpha func + material combinations might be skippable
+    if (mAlphaBlend && mMaterial)
+        return materialNeedShadows(mMaterial);
+    return true;
 }
 
 void ShadowsBin::sortImplementation()
@@ -139,13 +185,27 @@ void ShadowsBin::sortImplementation()
         root = root->_parent;
         const osg::StateSet* ss = root->getStateSet();
         if (ss->getMode(GL_NORMALIZE) & osg::StateAttribute::ON // that is root stategraph of renderingmanager cpp
-           || ss->getAttribute(osg::StateAttribute::VIEWPORT)) // fallback to rendertargets sg just in case
+           || ss->getAttribute(osg::StateAttribute::VIEWPORT)) // fallback to rendertarget's sg just in case
             break;
         if (!root->_parent)
             return;
     }
     StateGraph* noTestRoot = root->find_or_insert(mNoTestStateSet.get());
-    // root is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
+    // noTestRoot is now a stategraph with useDiffuseMapForShadowAlpha disabled but minimal other state
+
+    bool cullFaceOverridden = false;
+    while ((root = root->_parent))
+    {
+        if (!root->getStateSet())
+            continue;
+        unsigned int cullFaceFlags = root->getStateSet()->getMode(GL_CULL_FACE);
+        if (cullFaceFlags & osg::StateAttribute::OVERRIDE && !(cullFaceFlags & osg::StateAttribute::ON))
+        {
+            cullFaceOverridden = true;
+            break;
+        }
+    }
+
     noTestRoot->_leaves.reserve(_stateGraphList.size());
     StateGraphList newList;
     std::unordered_set<StateGraph*> uninterestingCache;
@@ -154,7 +214,7 @@ void ShadowsBin::sortImplementation()
         // Render leaves which shouldn't use the diffuse map for shadow alpha but do cast shadows become children of root, so graph is now empty. Don't add to newList.
         // Graphs containing just render leaves which don't cast shadows are discarded. Don't add to newList.
         // Graphs containing other leaves need to be in newList.
-        StateGraph* graphToAdd = cullStateGraph(graph, noTestRoot, uninterestingCache);
+        StateGraph* graphToAdd = cullStateGraph(graph, noTestRoot, uninterestingCache, cullFaceOverridden);
         if (graphToAdd)
             newList.push_back(graphToAdd);
     }

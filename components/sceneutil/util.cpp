@@ -11,6 +11,7 @@
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
+#include <components/settings/settings.hpp>
 
 namespace SceneUtil
 {
@@ -258,6 +259,23 @@ osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resourc
     resourceSystem->getSceneManager()->recreateShaders(node);
 
     return glowUpdater;
+}
+
+bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer, osg::Texture * texture, unsigned int level, unsigned int face, bool mipMapGeneration)
+{
+    unsigned int samples = 0;
+    unsigned int colourSamples = 0;
+    bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1;
+    if (addMSAAIntermediateTarget)
+    {
+        // Alpha-to-coverage requires a multisampled framebuffer.
+        // OSG will set that up automatically and resolve it to the specified single-sample texture for us.
+        // For some reason, two samples are needed, at least with some drivers.
+        samples = 2;
+        colourSamples = 1;
+    }
+    camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
+    return addMSAAIntermediateTarget;
 }
 
 }

@@ -116,6 +116,7 @@
     Feature #2686: Timestamps in openmw.log
     Feature #3171: OpenMW-CS: Instance drag selection
     Feature #4894: Consider actors as obstacles for pathfinding
+    Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #4977: Use the "default icon.tga" when an item's icon is not found
     Feature #5043: Head Bobbing
     Feature #5199: OpenMW-CS: Improve scene view colors
