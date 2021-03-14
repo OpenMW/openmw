@@ -2,7 +2,6 @@
 
 #include <LinearMath/btIDebugDraw.h>
 #include <LinearMath/btVector3.h>
-#include <algorithm>
 #include <memory>
 #include <osg/Group>
 #include <osg/Stats>
@@ -681,21 +680,6 @@ namespace MWPhysics
             return;
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get());
-
-        if (ptr == MWMechanics::getPlayer())
-        {
-            osg::Vec3f offset = actor->getCollisionObjectPosition() - ptr.getRefData().getPosition().asVec3();
-            std::cout << "DEBUG Player position: " << actor->getPosition() << std::endl;
-            auto terrainHeight = std::max(0.f, MWBase::Environment::get().getWorld()->getTerrainHeightAt(actor->getPosition()));
-            std::cout << "DEBUG terrain height " << terrainHeight << std::endl;
-            ActorTracer tracer;
-            tracer.findGround(actor.get(), actor->getPosition() + offset, actor->getPosition() + offset - osg::Vec3f(0, 0, 100.f), mCollisionWorld.get());
-            std::cout << "DEBUG mFraction " << tracer.mFraction << std::endl; // it seems that player is loaded before the cell so we can't find the ground.
-
-            std::cout << "DEBUG calculation ::  " << actor->getPosition().z() - terrainHeight << std::endl;
-            if (actor->getPosition().z() - terrainHeight > 300.f)
-                actor->setOnGround(false);
-        }
 
         mActors.emplace(ptr, std::move(actor));
 

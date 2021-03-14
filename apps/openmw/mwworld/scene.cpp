@@ -447,11 +447,14 @@ namespace MWWorld
                     mPhysics->disableWater();
 
                 const auto player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                if (player.getCell() == cell) {
+                    mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
+                }
+
                 navigator->update(player.getRefData().getPosition().asVec3());
 
                 if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
                 {
-
                     mRendering.configureAmbient(cell->getCell());
                 }
             }
