@@ -680,9 +680,7 @@ namespace MWPhysics
             return;
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get());
-
         mActors.emplace(ptr, std::move(actor));
-
     }
 
     int PhysicsSystem::addProjectile (const MWWorld::Ptr& caster, const osg::Vec3f& position, const std::string& mesh, bool computeRadius, bool canTraverseWater)
