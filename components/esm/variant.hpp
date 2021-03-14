@@ -46,8 +46,10 @@ namespace ESM
             ~Variant();
 
             Variant& operator= (const Variant& variant);
+            Variant& operator= (Variant && variant);
 
             Variant (const Variant& variant);
+            Variant (Variant&& variant);
 
             VarType getType() const;
 

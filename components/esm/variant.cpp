@@ -62,9 +62,30 @@ ESM::Variant& ESM::Variant::operator= (const Variant& variant)
     return *this;
 }
 
+ESM::Variant& ESM::Variant::operator= (Variant&& variant)
+{
+    if (&variant!=this)
+    {
+        delete mData;
+
+        mType = variant.mType;
+        mData = variant.mData;
+
+        variant.mData = nullptr;
+    }
+
+    return *this;
+}
+
 ESM::Variant::Variant (const Variant& variant)
 : mType (variant.mType), mData (variant.mData ? variant.mData->clone() : nullptr)
 {}
+
+ESM::Variant::Variant(Variant&& variant)
+: mType (variant.mType), mData (variant.mData)
+{
+    variant.mData = nullptr;
+}
 
 ESM::VarType ESM::Variant::getType() const
 {
