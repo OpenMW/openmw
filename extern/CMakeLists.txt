@@ -55,7 +55,10 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     set(MYGUI_BUILD_DEMOS OFF CACHE BOOL "")
     set(MYGUI_BUILD_PLUGINS OFF CACHE BOOL "")
     set(MYGUI_BUILD_TOOLS OFF CACHE BOOL "")
-    set(MYGUI_DONT_USE_OBSOLETE ON CACHE BOOL "")
+
+    # We appear to be using some obsolete properties in the XML.
+    # See https://gitlab.com/OpenMW/openmw/-/issues/5896
+    set(MYGUI_DONT_USE_OBSOLETE OFF CACHE BOOL "")
 
     if(MYGUI_STATIC)
         set(BUILD_SHARED_LIBS OFF)
