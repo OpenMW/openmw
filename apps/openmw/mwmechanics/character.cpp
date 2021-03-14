@@ -2920,8 +2920,8 @@ void CharacterController::updateHeadTracking(float duration)
     if (!head)
         return;
 
-    float zAngleRadians = 0.f;
-    float xAngleRadians = 0.f;
+    double zAngleRadians = 0.f;
+    double xAngleRadians = 0.f;
 
     if (!mHeadTrackTarget.isEmpty())
     {
@@ -2954,15 +2954,16 @@ void CharacterController::updateHeadTracking(float duration)
         const osg::Vec3f actorDirection = mPtr.getRefData().getBaseNode()->getAttitude() * osg::Vec3f(0,1,0);
 
         zAngleRadians = std::atan2(actorDirection.x(), actorDirection.y()) - std::atan2(direction.x(), direction.y());
+        zAngleRadians = Misc::normalizeAngle(zAngleRadians - mAnimation->getHeadYaw()) + mAnimation->getHeadYaw();
+        zAngleRadians *= (1 - direction.z() * direction.z());
         xAngleRadians = std::asin(direction.z());
     }
 
     const double xLimit = osg::DegreesToRadians(40.0);
     const double zLimit = osg::DegreesToRadians(30.0);
     double zLimitOffset = mAnimation->getUpperBodyYawRadians();
-    xAngleRadians = osg::clampBetween(Misc::normalizeAngle(xAngleRadians), -xLimit, xLimit);
-    zAngleRadians = osg::clampBetween(Misc::normalizeAngle(zAngleRadians),
-                                      -zLimit + zLimitOffset, zLimit + zLimitOffset);
+    xAngleRadians = osg::clampBetween(xAngleRadians, -xLimit, xLimit);
+    zAngleRadians = osg::clampBetween(zAngleRadians, -zLimit + zLimitOffset, zLimit + zLimitOffset);
 
     float factor = duration*5;
     factor = std::min(factor, 1.f);
