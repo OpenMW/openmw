@@ -114,7 +114,6 @@ namespace MWGui
   class TrainingWindow;
   class SpellIcons;
   class MerchantRepair;
-  class Repair;
   class SoulgemDialog;
   class Recharge;
   class CompanionWindow;

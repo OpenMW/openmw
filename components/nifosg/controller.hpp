@@ -24,11 +24,6 @@ namespace osg
     class Material;
 }
 
-namespace osgParticle
-{
-    class Emitter;
-}
-
 namespace NifOsg
 {
 

@@ -6,11 +6,6 @@
 
 #include "itemmodel.hpp"
 
-namespace MWWorld
-{
-    class Environment;
-}
-
 namespace MyGUI
 {
     class Gui;
@@ -19,7 +14,6 @@ namespace MyGUI
 
 namespace MWGui
 {
-    class WindowManager;
     class ContainerWindow;
     class ItemView;
     class SortFilterItemModel;

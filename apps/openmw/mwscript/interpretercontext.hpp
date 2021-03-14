@@ -10,16 +10,6 @@
 
 #include "../mwworld/ptr.hpp"
 
-namespace MWSound
-{
-    class SoundManager;
-}
-
-namespace MWInput
-{
-    struct MWInputManager;
-}
-
 namespace MWScript
 {
     class Locals;
