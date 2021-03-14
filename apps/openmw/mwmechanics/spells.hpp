@@ -57,6 +57,10 @@ namespace MWMechanics
 
             Spells();
 
+            Spells(const Spells&);
+
+            Spells(const Spells&&) = delete;
+
             ~Spells();
 
             static bool hasCorprusEffect(const ESM::Spell *spell);
