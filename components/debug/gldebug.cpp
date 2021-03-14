@@ -183,7 +183,11 @@ namespace Debug
     }
 
     DebugGroup::DebugGroup(const std::string & message, GLuint id)
+    #ifdef GL_DEBUG_OUTPUT
         : mSource(GL_DEBUG_SOURCE_APPLICATION)
+    #else
+        : mSource(0x824A)
+    #endif
         , mId(id)
         , mMessage(message)
     {
