@@ -1725,11 +1725,16 @@ namespace NifOsg
             case Nif::RC_NiZBufferProperty:
             {
                 const Nif::NiZBufferProperty* zprop = static_cast<const Nif::NiZBufferProperty*>(property);
-                // VER_MW doesn't support a DepthFunction according to NifSkope
+                osg::StateSet* stateset = node->getOrCreateStateSet();
+                // Depth test flag
+                stateset->setMode(GL_DEPTH_TEST, zprop->flags&1 ? osg::StateAttribute::ON
+                                                                : osg::StateAttribute::OFF);
                 osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+                // Depth write flag
                 depth->setWriteMask((zprop->flags>>1)&1);
+                // Morrowind ignores depth test function
                 depth = shareAttribute(depth);
-                node->getOrCreateStateSet()->setAttributeAndModes(depth, osg::StateAttribute::ON);
+                stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
                 break;
             }
             // OSG groups the material properties that NIFs have separate, so we have to parse them all again when one changed
