@@ -492,6 +492,7 @@ namespace MWPhysics
                 if (actor->setPosition(actorData.mPosition))
                 {
                     std::scoped_lock lock(mCollisionWorldMutex);
+                    actorData.mPosition = actor->getPosition(); // account for potential position change made by script
                     actor->updateCollisionObjectPosition();
                     mCollisionWorld->updateSingleAabb(actor->getCollisionObject());
                 }

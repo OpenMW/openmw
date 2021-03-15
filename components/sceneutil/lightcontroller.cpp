@@ -11,14 +11,13 @@
 namespace SceneUtil
 {
 
-    LightController::LightController(bool useFFPLighting)
+    LightController::LightController()
         : mType(LT_Normal)
         , mPhase(0.25f + Misc::Rng::rollClosedProbability() * 0.75f)
         , mBrightness(0.675f)
         , mStartTime(0.0)
         , mLastTime(0.0)
         , mTicksToAdvance(0.f)
-        , mFFPLighting(useFFPLighting)
     {
     }
 
@@ -63,11 +62,7 @@ namespace SceneUtil
                 mPhase = mPhase <= 0.5f ? 1.f : 0.25f;
         }
 
-        auto* lightSource = static_cast<SceneUtil::LightSource*>(node);
-        if (mFFPLighting)
-            lightSource->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness);
-        else
-            lightSource->setBrightness(nv->getTraversalNumber(), mBrightness);
+        static_cast<SceneUtil::LightSource*>(node)->getLight(nv->getTraversalNumber())->setDiffuse(mDiffuseColor * mBrightness);
 
         traverse(node, nv);
     }

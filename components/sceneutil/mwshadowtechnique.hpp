@@ -215,6 +215,8 @@ namespace SceneUtil {
 
         virtual void createShaders();
 
+        virtual std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> getCastingPrograms() const { return _castingPrograms; }
+
         virtual bool selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const;
 
         virtual osg::Polytope computeLightViewFrustumPolytope(Frustum& frustum, LightData& positionedLight);
@@ -288,7 +290,7 @@ namespace SceneUtil {
         };
 
         osg::ref_ptr<DebugHUD>                  _debugHud;
-        osg::ref_ptr<osg::Program>              _castingProgram;
+        std::array<osg::ref_ptr<osg::Program>, GL_ALWAYS - GL_NEVER + 1> _castingPrograms;
     };
 
 }

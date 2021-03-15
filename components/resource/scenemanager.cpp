@@ -226,7 +226,7 @@ namespace Resource
         , mAutoUseNormalMaps(false)
         , mAutoUseSpecularMaps(false)
         , mApplyLightingToEnvMaps(false)
-        , mFFPLighting(true)
+        , mLightingMethod(SceneUtil::LightingMethod::FFP)
         , mInstanceCache(new MultiObjectCache)
         , mSharedStateManager(new SharedStateManager)
         , mImageManager(imageManager)
@@ -256,6 +256,12 @@ namespace Resource
         if (forceShadersForNode)
             shaderVisitor->setForceShaders(true);
         node->accept(*shaderVisitor);
+    }
+
+    void SceneManager::reinstateRemovedState(osg::ref_ptr<osg::Node> node)
+    {
+        osg::ref_ptr<Shader::ReinstateRemovedStateVisitor> reinstateRemovedStateVisitor = new Shader::ReinstateRemovedStateVisitor(false);
+        node->accept(*reinstateRemovedStateVisitor);
     }
 
     void SceneManager::setClampLighting(bool clamp)
@@ -298,14 +304,19 @@ namespace Resource
         mApplyLightingToEnvMaps = apply;
     }
 
-    void SceneManager::setFFPLighting(bool apply)
+    void SceneManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
-        mFFPLighting = apply;
+        mLightingMethod = method;
     }
 
-    bool SceneManager::getFFPLighting() const
+    SceneUtil::LightingMethod SceneManager::getLightingMethod() const
     {
-        return mFFPLighting;
+        return mLightingMethod;
+    }
+    
+    void SceneManager::setConvertAlphaTestToAlphaToCoverage(bool convert)
+    {
+        mConvertAlphaTestToAlphaToCoverage = convert;
     }
 
     SceneManager::~SceneManager()
@@ -782,6 +793,7 @@ namespace Resource
         shaderVisitor->setAutoUseSpecularMaps(mAutoUseSpecularMaps);
         shaderVisitor->setSpecularMapPattern(mSpecularMapPattern);
         shaderVisitor->setApplyLightingToEnvMaps(mApplyLightingToEnvMaps);
+        shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setTranslucentFramebuffer(translucentFramebuffer);
         return shaderVisitor;
     }

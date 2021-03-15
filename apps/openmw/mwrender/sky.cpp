@@ -1113,7 +1113,6 @@ private:
 SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager)
     : mSceneManager(sceneManager)
     , mCamera(nullptr)
-    , mRainIntensityUniform(nullptr)
     , mAtmosphereNightRoll(0.f)
     , mCreated(false)
     , mIsStorm(false)
@@ -1139,7 +1138,7 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     , mBaseWindSpeed(0.f)
     , mEnabled(true)
     , mSunEnabled(true)
-    , mEffectFade(0.f)
+    , mPrecipitationAlpha(0.f)
 {
     osg::ref_ptr<CameraRelativeTransform> skyroot (new CameraRelativeTransform);
     skyroot->setName("Sky Root");
@@ -1161,11 +1160,6 @@ SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneMana
     mRootNode->addChild(mEarlyRenderBinRoot);
 
     mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
-}
-
-void SkyManager::setRainIntensityUniform(osg::Uniform *uniform)
-{
-    mRainIntensityUniform = uniform;
 }
 
 void SkyManager::create()
@@ -1522,7 +1516,7 @@ void SkyManager::createRain()
 
     osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
     program->addOperator(new WrapAroundOperator(mCamera,rainRange));
-    program->addOperator(new WeatherAlphaOperator(mEffectFade, true));
+    program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, true));
     program->setParticleSystem(mRainParticleSystem);
     mRainNode->addChild(program);
 
@@ -1576,29 +1570,23 @@ bool SkyManager::isEnabled()
     return mEnabled;
 }
 
-bool SkyManager::hasRain()
+bool SkyManager::hasRain() const
 {
     return mRainNode != nullptr;
+}
+
+float SkyManager::getPrecipitationAlpha() const
+{
+    if (mEnabled && !mIsStorm && (hasRain() || mParticleNode))
+        return mPrecipitationAlpha;
+
+    return 0.f;
 }
 
 void SkyManager::update(float duration)
 {
     if (!mEnabled)
-    {
-        if (mRainIntensityUniform)
-            mRainIntensityUniform->set(0.f);
-
         return;
-    }
-
-    if (mRainIntensityUniform)
-    {
-        float rainIntensity = 0.f;
-        if (!mIsStorm && (hasRain() || mParticleNode))
-            rainIntensity = mEffectFade;
-
-        mRainIntensityUniform->set(rainIntensity);
-    }
 
     switchUnderwaterRain();
 
@@ -1737,7 +1725,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
             SceneUtil::AssignControllerSourcesVisitor assignVisitor(std::shared_ptr<SceneUtil::ControllerSource>(new SceneUtil::FrameTimeSource));
             mParticleEffect->accept(assignVisitor);
 
-            AlphaFader::SetupVisitor alphaFaderSetupVisitor(mEffectFade);
+            AlphaFader::SetupVisitor alphaFaderSetupVisitor(mPrecipitationAlpha);
 
             mParticleEffect->accept(alphaFaderSetupVisitor);
 
@@ -1754,7 +1742,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
                 osg::ref_ptr<osgParticle::ModularProgram> program (new osgParticle::ModularProgram);
                 if (!mIsStorm)
                     program->addOperator(new WrapAroundOperator(mCamera,osg::Vec3(1024,1024,800)));
-                program->addOperator(new WeatherAlphaOperator(mEffectFade, false));
+                program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, false));
                 program->setParticleSystem(ps);
                 mParticleNode->addChild(program);
             }
@@ -1843,7 +1831,7 @@ void SkyManager::setWeather(const WeatherResult& weather)
 
     mAtmosphereNightNode->setNodeMask(weather.mNight ? ~0 : 0);
 
-    mEffectFade = weather.mEffectFade;
+    mPrecipitationAlpha = weather.mPrecipitationAlpha;
 }
 
 float SkyManager::getBaseWindSpeed() const

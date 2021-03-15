@@ -3,7 +3,6 @@
 #include <limits>
 #include <cstdlib>
 
-#include <osg/AlphaFunc>
 #include <osg/Light>
 #include <osg/LightModel>
 #include <osg/Fog>
@@ -26,6 +25,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/resource/keyframemanager.hpp>
 
+#include <components/shader/removedalphafunc.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include <components/settings/settings.hpp>
@@ -199,10 +199,13 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
+        auto lightingModelString = Settings::Manager::getString("lighting method", "Shaders");
+        bool usingFFPLighting = lightingModelString == "legacy" && SceneUtil::LightManager::isValidLightingModelString(lightingModelString);
+
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
         // Shadows and radial fog have problems with fixed-function mode
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows");
+        bool forceShaders = Settings::Manager::getBool("radial fog", "Shaders") || Settings::Manager::getBool("force shaders", "Shaders") || Settings::Manager::getBool("enable shadows", "Shadows") || usingFFPLighting;
         bool clampLighting = Settings::Manager::getBool("clamp lighting", "Shaders");
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
@@ -213,11 +216,13 @@ namespace MWRender
         resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::Manager::getBool("auto use object specular maps", "Shaders"));
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
-        bool useFFP = clampLighting || !forceShaders || !SceneUtil::LightManager::queryNonFFPLightingSupport();
-        resourceSystem->getSceneManager()->setFFPLighting(useFFP);
-        resourceSystem->getSceneManager()->getShaderManager().setFFPLighting(useFFP);
+        resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
         
-        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(useFFP);
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(!forceShaders || usingFFPLighting);
+        // Let LightManager choose which backend to use based, mostly depends on support for UBOs 
+        resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
+        resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
+
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
         sceneRoot->setStartLight(1);
@@ -242,9 +247,6 @@ namespace MWRender
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
         Shader::ShaderManager::DefineMap globalDefines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
 
-        for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
-            globalDefines[itr->first] = itr->second;
-
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
 
@@ -252,6 +254,10 @@ namespace MWRender
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
         globalDefines["preLightEnv"] = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
         globalDefines["radialFog"] = Settings::Manager::getBool("radial fog", "Shaders") ? "1" : "0";
+        globalDefines["useGPUShader4"] = "0";
+
+        for (auto itr = lightDefines.begin(); itr != lightDefines.end(); itr++)
+            globalDefines[itr->first] = itr->second;
 
         float groundcoverDistance = (Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover")) - 1024) * 0.93;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * 0.9f);
@@ -318,10 +324,6 @@ namespace MWRender
             groundcoverRoot->setName("Groundcover Root");
             sceneRoot->addChild(groundcoverRoot);
 
-            // Force a unified alpha handling instead of data from meshes
-            osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f/255.f);
-            groundcoverRoot->getOrCreateStateSet()->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
-
             mGroundcoverUpdater = new GroundcoverUpdater;
             groundcoverRoot->addUpdateCallback(mGroundcoverUpdater);
 
@@ -379,7 +381,6 @@ namespace MWRender
 
         mSky.reset(new SkyManager(sceneRoot, resourceSystem->getSceneManager()));
         mSky->setCamera(mViewer->getCamera());
-        mSky->setRainIntensityUniform(mWater->getRainIntensityUniform());
 
         source->setStateSetModes(*mRootNode->getOrCreateStateSet(), osg::StateAttribute::ON);
 
@@ -417,6 +418,11 @@ namespace MWRender
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("near", mNearClip));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("far", mViewDistance));
         mRootNode->getOrCreateStateSet()->addUniform(new osg::Uniform("simpleWater", false));
+
+        // Hopefully, anything genuinely requiring the default alpha func of GL_ALWAYS explicitly sets it
+        mRootNode->getOrCreateStateSet()->setAttribute(Shader::RemovedAlphaFunc::getInstance(GL_ALWAYS));
+        // The transparent renderbin sets alpha testing on because that was faster on old GPUs. It's now slower and breaks things.
+        mRootNode->getOrCreateStateSet()->setMode(GL_ALPHA_TEST, osg::StateAttribute::OFF);
 
         mUniformNear = mRootNode->getOrCreateStateSet()->getUniform("near");
         mUniformFar = mRootNode->getOrCreateStateSet()->getUniform("far");
@@ -666,6 +672,9 @@ namespace MWRender
         reportStats();
 
         mUnrefQueue->flush(mWorkQueue.get());
+
+        float rainIntensity = mSky->getPrecipitationAlpha();
+        mWater->setRainIntensity(rainIntensity);
 
         if (!paused)
         {

@@ -32,133 +32,246 @@ either expressed or implied, of the FreeBSD Project.
 #include "gldebug.hpp"
 
 #include <cstdlib>
+#include <memory>
 
 #include <components/debug/debuglog.hpp>
 
 // OpenGL constants not provided by OSG:
 #include <SDL_opengl_glext.h>
 
-void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+namespace Debug
 {
+
+    void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
+    {
 #ifdef GL_DEBUG_OUTPUT
-    std::string srcStr;
-    switch (source)
-    {
-    case GL_DEBUG_SOURCE_API:
-        srcStr = "API";
-        break;
-    case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-        srcStr = "WINDOW_SYSTEM";
-        break;
-    case GL_DEBUG_SOURCE_SHADER_COMPILER:
-        srcStr = "SHADER_COMPILER";
-        break;
-    case GL_DEBUG_SOURCE_THIRD_PARTY:
-        srcStr = "THIRD_PARTY";
-        break;
-    case GL_DEBUG_SOURCE_APPLICATION:
-        srcStr = "APPLICATION";
-        break;
-    case GL_DEBUG_SOURCE_OTHER:
-        srcStr = "OTHER";
-        break;
-    default:
-        srcStr = "UNDEFINED";
-        break;
-    }
+        std::string srcStr;
+        switch (source)
+        {
+        case GL_DEBUG_SOURCE_API:
+            srcStr = "API";
+            break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            srcStr = "WINDOW_SYSTEM";
+            break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            srcStr = "SHADER_COMPILER";
+            break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            srcStr = "THIRD_PARTY";
+            break;
+        case GL_DEBUG_SOURCE_APPLICATION:
+            srcStr = "APPLICATION";
+            break;
+        case GL_DEBUG_SOURCE_OTHER:
+            srcStr = "OTHER";
+            break;
+        default:
+            srcStr = "UNDEFINED";
+            break;
+        }
 
-    std::string typeStr;
+        std::string typeStr;
 
-    Debug::Level logSeverity = Debug::Warning;
-    switch (type)
-    {
-    case GL_DEBUG_TYPE_ERROR:
-        typeStr = "ERROR";
-        logSeverity = Debug::Error;
-        break;
-    case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
-        typeStr = "DEPRECATED_BEHAVIOR";
-        break;
-    case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
-        typeStr = "UNDEFINED_BEHAVIOR";
-        break;
-    case GL_DEBUG_TYPE_PORTABILITY:
-        typeStr = "PORTABILITY";
-        break;
-    case GL_DEBUG_TYPE_PERFORMANCE:
-        typeStr = "PERFORMANCE";
-        break;
-    case GL_DEBUG_TYPE_OTHER:
-        typeStr = "OTHER";
-        break;
-    default:
-        typeStr = "UNDEFINED";
-        break;
-    }
+        Level logSeverity = Warning;
+        switch (type)
+        {
+        case GL_DEBUG_TYPE_ERROR:
+            typeStr = "ERROR";
+            logSeverity = Error;
+            break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            typeStr = "DEPRECATED_BEHAVIOR";
+            break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            typeStr = "UNDEFINED_BEHAVIOR";
+            break;
+        case GL_DEBUG_TYPE_PORTABILITY:
+            typeStr = "PORTABILITY";
+            break;
+        case GL_DEBUG_TYPE_PERFORMANCE:
+            typeStr = "PERFORMANCE";
+            break;
+        case GL_DEBUG_TYPE_OTHER:
+            typeStr = "OTHER";
+            break;
+        default:
+            typeStr = "UNDEFINED";
+            break;
+        }
 
-    Log(logSeverity) << "OpenGL " << typeStr << " [" << srcStr << "]: " << message;
+        Log(logSeverity) << "OpenGL " << typeStr << " [" << srcStr << "]: " << message;
 #endif
-}
+    }
 
-void enableGLDebugExtension(unsigned int contextID)
-{
+    class PushDebugGroup
+    {
+    public:
+        static std::unique_ptr<PushDebugGroup> sInstance;
+
+        void (GL_APIENTRY * glPushDebugGroup) (GLenum source, GLuint id, GLsizei length, const GLchar * message);
+
+        void (GL_APIENTRY * glPopDebugGroup) (void);
+
+        bool valid()
+        {
+            return glPushDebugGroup && glPopDebugGroup;
+        }
+    };
+
+    std::unique_ptr<PushDebugGroup> PushDebugGroup::sInstance{ std::make_unique<PushDebugGroup>() };
+
+    EnableGLDebugOperation::EnableGLDebugOperation() : osg::GraphicsOperation("EnableGLDebugOperation", false)
+    {
+    }
+
+    void EnableGLDebugOperation::operator()(osg::GraphicsContext* graphicsContext)
+    {
 #ifdef GL_DEBUG_OUTPUT
-    typedef void (GL_APIENTRY *DEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
-    typedef void (GL_APIENTRY *GLDebugMessageControlFunction)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
-    typedef void (GL_APIENTRY *GLDebugMessageCallbackFunction)(DEBUGPROC, const void* userParam);
-    
-    GLDebugMessageControlFunction glDebugMessageControl = nullptr;
-    GLDebugMessageCallbackFunction glDebugMessageCallback = nullptr;
+        OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
 
-    if (osg::isGLExtensionSupported(contextID, "GL_KHR_debug"))
-    {
-        osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallback");
-        osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControl");
-    }
-    else if (osg::isGLExtensionSupported(contextID, "GL_ARB_debug_output"))
-    {
-        osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallbackARB");
-        osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControlARB");
-    }
-    else if (osg::isGLExtensionSupported(contextID, "GL_AMD_debug_output"))
-    {
-        osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallbackAMD");
-        osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControlAMD");
-    }
+        unsigned int contextID = graphicsContext->getState()->getContextID();
 
-    if (glDebugMessageCallback && glDebugMessageControl)
-    {
-        glEnable(GL_DEBUG_OUTPUT);
-        glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, true);
-        glDebugMessageCallback(debugCallback, nullptr);
+        typedef void (GL_APIENTRY *DEBUGPROC)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+        typedef void (GL_APIENTRY *GLDebugMessageControlFunction)(GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
+        typedef void (GL_APIENTRY *GLDebugMessageCallbackFunction)(DEBUGPROC, const void* userParam);
 
-        Log(Debug::Info) << "OpenGL debug callback attached.";
-    }
-    else
+        GLDebugMessageControlFunction glDebugMessageControl = nullptr;
+        GLDebugMessageCallbackFunction glDebugMessageCallback = nullptr;
+
+        if (osg::isGLExtensionSupported(contextID, "GL_KHR_debug"))
+        {
+            osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallback");
+            osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControl");
+            osg::setGLExtensionFuncPtr(PushDebugGroup::sInstance->glPushDebugGroup, "glPushDebugGroup");
+            osg::setGLExtensionFuncPtr(PushDebugGroup::sInstance->glPopDebugGroup, "glPopDebugGroup");
+        }
+        else if (osg::isGLExtensionSupported(contextID, "GL_ARB_debug_output"))
+        {
+            osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallbackARB");
+            osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControlARB");
+        }
+        else if (osg::isGLExtensionSupported(contextID, "GL_AMD_debug_output"))
+        {
+            osg::setGLExtensionFuncPtr(glDebugMessageCallback, "glDebugMessageCallbackAMD");
+            osg::setGLExtensionFuncPtr(glDebugMessageControl, "glDebugMessageControlAMD");
+        }
+
+        if (glDebugMessageCallback && glDebugMessageControl)
+        {
+            glEnable(GL_DEBUG_OUTPUT);
+            glDebugMessageControl(GL_DONT_CARE, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr, true);
+            glDebugMessageCallback(debugCallback, nullptr);
+
+            Log(Info) << "OpenGL debug callback attached.";
+        }
+        else
 #endif
-        Log(Debug::Error) << "Unable to attach OpenGL debug callback.";
-}
+            Log(Error) << "Unable to attach OpenGL debug callback.";
+    }
 
-Debug::EnableGLDebugOperation::EnableGLDebugOperation() : osg::GraphicsOperation("EnableGLDebugOperation", false)
-{
-}
+    bool shouldDebugOpenGL()
+    {
+        const char* env = std::getenv("OPENMW_DEBUG_OPENGL");
+        if (!env)
+            return false;
+        std::string str(env);
+        if (str.length() == 0)
+            return true;
 
-void Debug::EnableGLDebugOperation::operator()(osg::GraphicsContext* graphicsContext)
-{
-    OpenThreads::ScopedLock<OpenThreads::Mutex> lock(mMutex);
+        return str.find("OFF") == std::string::npos && str.find("0") == std::string::npos && str.find("NO") == std::string::npos;
+    }
 
-    unsigned int contextID = graphicsContext->getState()->getContextID();
-    enableGLDebugExtension(contextID);
-}
+    DebugGroup::DebugGroup(const std::string & message, GLuint id)
+    #ifdef GL_DEBUG_OUTPUT
+        : mSource(GL_DEBUG_SOURCE_APPLICATION)
+    #else
+        : mSource(0x824A)
+    #endif
+        , mId(id)
+        , mMessage(message)
+    {
+    }
 
-bool Debug::shouldDebugOpenGL()
-{
-    const char* env = std::getenv("OPENMW_DEBUG_OPENGL");
-    if (!env)
-        return false;
-    std::string str(env);
-    if (str.length() == 0)
-        return true;
+    DebugGroup::DebugGroup(const DebugGroup & debugGroup, const osg::CopyOp & copyop)
+        : osg::StateAttribute(debugGroup, copyop)
+        , mSource(debugGroup.mSource)
+        , mId(debugGroup.mId)
+        , mMessage(debugGroup.mMessage)
+    {
+    }
 
-    return str.find("OFF") == std::string::npos && str.find("0") == std::string::npos && str.find("NO") == std::string::npos;
+    void DebugGroup::apply(osg::State & state) const
+    {
+        if (!PushDebugGroup::sInstance->valid())
+        {
+            Log(Error) << "OpenGL debug groups not supported on this system, or OPENMW_DEBUG_OPENGL environment variable not set.";
+            return;
+        }
+
+        auto& attributeVec = state.getAttributeVec(this);
+        auto& lastAppliedStack = sLastAppliedStack[state.getContextID()];
+
+        size_t firstNonMatch = 0;
+        while (firstNonMatch < lastAppliedStack.size()
+               && ((firstNonMatch < attributeVec.size() && lastAppliedStack[firstNonMatch] == attributeVec[firstNonMatch].first)
+                   || lastAppliedStack[firstNonMatch] == this))
+            firstNonMatch++;
+
+        for (size_t i = lastAppliedStack.size(); i > firstNonMatch; --i)
+            lastAppliedStack[i - 1]->pop(state);
+        lastAppliedStack.resize(firstNonMatch);
+
+        lastAppliedStack.reserve(attributeVec.size());
+        for (size_t i = firstNonMatch; i < attributeVec.size(); ++i)
+        {
+            const DebugGroup* group = static_cast<const DebugGroup*>(attributeVec[i].first);
+            group->push(state);
+            lastAppliedStack.push_back(group);
+        }
+        if (!(lastAppliedStack.back() == this))
+        {
+            push(state);
+            lastAppliedStack.push_back(this);
+        }
+    }
+
+    int DebugGroup::compare(const StateAttribute & sa) const
+    {
+        COMPARE_StateAttribute_Types(DebugGroup, sa);
+
+        COMPARE_StateAttribute_Parameter(mSource);
+        COMPARE_StateAttribute_Parameter(mId);
+        COMPARE_StateAttribute_Parameter(mMessage);
+
+        return 0;
+    }
+
+    void DebugGroup::releaseGLObjects(osg::State * state) const
+    {
+        if (state)
+            sLastAppliedStack.erase(state->getContextID());
+        else
+            sLastAppliedStack.clear();
+    }
+
+    bool DebugGroup::isValid() const
+    {
+        return mSource || mId || mMessage.length();
+    }
+
+    void DebugGroup::push(osg::State & state) const
+    {
+        if (isValid())
+            PushDebugGroup::sInstance->glPushDebugGroup(mSource, mId, mMessage.size(), mMessage.c_str());
+    }
+
+    void DebugGroup::pop(osg::State & state) const
+    {
+        if (isValid())
+            PushDebugGroup::sInstance->glPopDebugGroup();
+    }
+
+    std::map<unsigned int, std::vector<const DebugGroup *>> DebugGroup::sLastAppliedStack{};
+
 }

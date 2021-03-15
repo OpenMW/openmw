@@ -1,39 +1,86 @@
+#define LIGHTING_MODEL_FFP 0
+#define LIGHTING_MODEL_SINGLE_UBO 1
+#define LIGHTING_MODEL_PER_OBJECT_UNIFORM 2
+
 #if !@ffpLighting
+#define getLight LightBuffer
 
-#include "sun.glsl"
+float quickstep(float x)
+{
+    x = clamp(x, 0.0, 1.0);
+    x = 1.0 - x*x;
+    x = 1.0 - x*x;
+    return x;
+}
 
-#define getLight PointLights
+#if @useUBO
 
-struct PointLight
+const uint mask = uint(0xff);
+
+vec3 unpackRGB(float data)
+{
+    uint colors = uint(data);
+    return vec3( (((colors >>  0) & mask) / 255.0)
+                ,(((colors >>  8) & mask) / 255.0)
+                ,(((colors >> 16) & mask) / 255.0));
+}
+
+vec4 unpackRGBA(float data)
+{
+    uint colors = uint(data);
+    return vec4( (((colors >>  0) & mask) / 255.0)
+                ,(((colors >>  8) & mask) / 255.0)
+                ,(((colors >> 16) & mask) / 255.0)
+                ,(((colors >> 24) & mask) / 255.0));
+}
+
+struct LightData
+{
+    uvec4 packedColors;  // diffuse, ambient, specular
+    vec4 position;
+    vec4 attenuation;   // constant, linear, quadratic, radius
+};
+
+uniform int PointLightIndex[@maxLights];
+uniform int PointLightCount;
+
+layout(std140) uniform LightBufferBinding
+{
+    LightData LightBuffer[@maxLightsInScene];
+};
+
+#else
+
+struct LightData
 {
     vec4 position;
     vec4 diffuse;
     vec4 ambient;
-    float constantAttenuation;
-    float linearAttenuation;
-    float quadraticAttenuation;
-    float radius;
+    vec4 specular;
+    vec4 attenuation;   // constant, linear, quadratic, radius
 };
 
+uniform LightData LightBuffer[@maxLights];
 uniform int PointLightCount;
-uniform int PointLightIndex[@maxLights];
 
-layout(std140) uniform PointLightBuffer
-{
-    PointLight PointLights[@maxLightsInScene];
-};
+#endif
 
 #else
 #define getLight gl_LightSource
 #endif
 
 void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
-{
-    vec3 lightDir = @sunDirection.xyz;
-    lightDir = normalize(lightDir);
+{    
+    vec3 lightDir = normalize(getLight[0].position.xyz);
 
-    ambientOut = @sunAmbient.xyz;
-
+#if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
+    vec4 data = getLight[0].packedColors;
+    ambientOut = unpackRGB(data.y);
+    vec3 sunDiffuse = unpackRGB(data.x);
+#else
+    ambientOut = getLight[0].ambient.xyz;
+    vec3 sunDiffuse = getLight[0].diffuse.xyz;
+#endif
     float lambert = dot(viewNormal.xyz, lightDir);
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
@@ -46,32 +93,33 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
     }
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
-    diffuseOut = @sunDiffuse.xyz * lambert;
+
+    diffuseOut = sunDiffuse * lambert;
 }
 
-
-uniform float osg_SimulationTime;
 void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal)
 {
-    vec4 pos = getLight[lightIndex].position;
-    vec3 lightDir = pos.xyz - viewPos;
+    vec3 lightDir = getLight[lightIndex].position.xyz - viewPos;
 
     float lightDistance = length(lightDir);
     lightDir = normalize(lightDir);
 
+#if @ffpLighting
     float illumination = clamp(1.0 / (getLight[lightIndex].constantAttenuation + getLight[lightIndex].linearAttenuation * lightDistance + getLight[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
-
-// Add an artificial cutoff, otherwise effected objects will be brightly lit and adjacent objects not effected by this light will be dark by contrast
-// This causes nasty artifacts, especially with active grid so it is necassary for now. 
-#if !@ffpLighting
-    float cutoff = getLight[lightIndex].radius * 0.5;
-    illumination *= 1.0 - smoothstep(0.0, 1.0, ((lightDistance / cutoff) - 1.0) * 0.887);
-    illumination = max(0.0, illumination);
+#else
+    float illumination = clamp(1.0 / (getLight[lightIndex].attenuation.x + getLight[lightIndex].attenuation.y * lightDistance + getLight[lightIndex].attenuation.z * lightDistance * lightDistance), 0.0, 1.0);
+    illumination *= 1.0 - quickstep((lightDistance * 0.887 / getLight[lightIndex].attenuation.w) - 0.887);
 #endif
 
+#if @useUBO
+    vec4 data = getLight[lightIndex].packedColors;
+    ambientOut = unpackRGB(data.y) * illumination;
+#else
     ambientOut = getLight[lightIndex].ambient.xyz * illumination;
+#endif
 
     float lambert = dot(viewNormal.xyz, lightDir) * illumination;
+    
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
@@ -84,10 +132,10 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
 
-#if @ffpLighting
-    diffuseOut = getLight[lightIndex].diffuse.xyz * lambert;
+#if @useUBO
+    diffuseOut = unpackRGB(data.x) * lambert;
 #else
-    diffuseOut = (getLight[lightIndex].diffuse.xyz * pos.w) * lambert;
+    diffuseOut = getLight[lightIndex].diffuse.xyz * lambert;
 #endif
 }
 
@@ -109,17 +157,22 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
 #endif
     ambientLight = gl_LightModel.ambient.xyz;
 
-#if !@ffpLighting
     perLightSun(ambientOut, diffuseOut, viewPos, viewNormal);
     ambientLight += ambientOut;
     diffuseLight += diffuseOut;
-    for (int i=0; i<PointLightCount; ++i)
-    {
-        perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);
-#else
-    for (int i=0; i<@maxLights; ++i)
+
+#if @lightingModel == LIGHTING_MODEL_FFP
+    for (int i=1; i < @maxLights; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+#elif @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
+    for (int i=1; i <= PointLightCount; ++i)
+    {
+        perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+#else 
+    for (int i=0; i < PointLightCount; ++i)
+    {
+        perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);
 #endif
         ambientLight += ambientOut;
         diffuseLight += diffuseOut;
@@ -128,11 +181,19 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
 
 vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
 {
-    vec3 lightDir = normalize(@sunDirection.xyz);
+    vec3 sunDir = getLight[0].position.xyz;
+
+#if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
+    vec3 sunSpec = unpackRGB(getLight[0].packedColors.z);
+#else
+    vec3 sunSpec = getLight[0].specular.xyz;
+#endif
+
+    vec3 lightDir = normalize(sunDir);
     float NdotL = dot(viewNormal, lightDir);
     if (NdotL <= 0.0)
         return vec3(0.0);
     vec3 halfVec = normalize(lightDir - viewDirection);
     float NdotH = dot(viewNormal, halfVec);
-    return pow(max(NdotH, 0.0), max(1e-4, shininess)) * @sunSpecular.xyz * matSpec;
+    return pow(max(NdotH, 0.0), max(1e-4, shininess)) * sunSpec * matSpec;
 }

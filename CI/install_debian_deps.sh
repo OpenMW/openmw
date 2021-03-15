@@ -23,6 +23,7 @@ declare -rA GROUPED_DEPS=(
     libsdl2-dev libqt5opengl5-dev libopenal-dev libunshield-dev libtinyxml-dev
     libbullet-dev liblz4-dev libpng-dev libjpeg-dev
   "
+  # TODO: add librecastnavigation-dev when debian is ready
 
   # These dependencies can alternatively be built and linked statically.
   [openmw-deps-dynamic]="libmygui-dev libopenscenegraph-dev"

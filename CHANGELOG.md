@@ -1,7 +1,6 @@
 0.47.0
 ------
 
-    Bug #832: OpenMW-CS: Handle deleted references
     Bug #1662: Qt4 and Windows binaries crash if there's a non-ASCII character in a file path/config path
     Bug #1901: Actors colliding behaviour is different from vanilla
     Bug #1952: Incorrect particle lighting
@@ -9,7 +8,7 @@
     Bug #2311: Targeted scripts are not properly supported on non-unique RefIDs
     Bug #2473: Unable to overstock merchants
     Bug #2798: Mutable ESM records
-    Bug #2976 [reopened]: Issues combining settings from the command line and both config files
+    Bug #2976: [reopened]: Issues combining settings from the command line and both config files
     Bug #3137: Walking into a wall prevents jumping
     Bug #3372: Projectiles and magic bolts go through moving targets
     Bug #3676: NiParticleColorModifier isn't applied properly
@@ -24,7 +23,7 @@
     Bug #4201: Projectile-projectile collision
     Bug #4247: Cannot walk up stairs in Ebonheart docks
     Bug #4357: OpenMW-CS: TopicInfos index sorting and rearranging isn't fully functional
-    Bug #4363: Editor: Defect in Clone Function for Dialogue Info records
+    Bug #4363: OpenMW-CS: Defect in Clone Function for Dialogue Info records
     Bug #4447: Actor collision capsule shape allows looking through some walls
     Bug #4465: Collision shape overlapping causes twitching
     Bug #4476: Abot Gondoliers: player hangs in air during scenic travel
@@ -34,6 +33,7 @@
     Bug #4764: Data race in osg ParticleSystem
     Bug #4765: Data race in ChunkManager -> Array::setBinding
     Bug #4774: Guards are ignorant of an invisible player that tries to attack them
+    Bug #5026: Data races with rain intensity uniform set by sky and used by water
     Bug #5101: Hostile followers travel with the player
     Bug #5108: Savegame bloating due to inefficient fog textures format
     Bug #5165: Active spells should use real time intead of timestamps
@@ -44,11 +44,11 @@
     Bug #5367: Selecting a spell on an enchanted item per hotkey always plays the equip sound
     Bug #5369: Spawnpoint in the Grazelands doesn't produce oversized creatures
     Bug #5370: Opening an unlocked but trapped door uses the key
-    Bug #5384: openmw-cs: deleting an instance requires reload of scene window to show in editor
+    Bug #5384: OpenMW-CS: Deleting an instance requires reload of scene window to show in editor
     Bug #5387: Move/MoveWorld don't update the object's cell properly
     Bug #5391: Races Redone 1.2 bodies don't show on the inventory
     Bug #5397: NPC greeting does not reset if you leave + reenter area
-    Bug #5400: Editor: Verifier checks race of non-skin bodyparts
+    Bug #5400: OpenMW-CS: Verifier checks race of non-skin bodyparts
     Bug #5403: Enchantment effect doesn't show on an enemy during death animation
     Bug #5415: Environment maps in ebony cuirass and HiRez Armors Indoril cuirass don't work
     Bug #5416: Junk non-node records before the root node are not handled gracefully
@@ -70,6 +70,7 @@
     Bug #5499: Faction advance is available when requirements not met
     Bug #5502: Dead zone for analogue stick movement is too small
     Bug #5507: Sound volume is not clamped on ingame settings update
+    Bug #5525: Case-insensitive search in the inventory window does not work with non-ASCII characters
     Bug #5531: Actors flee using current rotation by axis x
     Bug #5539: Window resize breaks when going from a lower resolution to full screen resolution
     Bug #5548: Certain exhausted topics can be highlighted again even though there's no new dialogue
@@ -93,27 +94,33 @@
     Bug #5703: OpenMW-CS menu system crashing on XFCE
     Bug #5706: AI sequences stop looping after the saved game is reloaded
     Bug #5713: OpenMW-CS: Collada models are corrupted in Qt-based scene view
-    Bug #5731: Editor: skirts are invisible on characters
+    Bug #5731: OpenMW-CS: skirts are invisible on characters
     Bug #5739: Saving and loading the save a second or two before hitting the ground doesn't count fall damage
     Bug #5758: Paralyzed actors behavior is inconsistent with vanilla
     Bug #5762: Movement solver is insufficiently robust
+    Bug #5807: Video decoding crash on ARM
     Bug #5821: NPCs from mods getting removed if mod order was changed
     Bug #5835: OpenMW doesn't accept negative values for NPC's hello, alarm, fight, and flee
     Bug #5836: OpenMW dialogue/greeting/voice filter doesn't accept negative Ai values for NPC's hello, alarm, fight, and flee
     Bug #5838: Local map and other menus become blank in some locations while playing Wizards' Islands mod.
     Bug #5840: GetSoundPlaying "Health Damage" doesn't play when NPC hits target with shield effect ( vanilla engine behavior )
     Bug #5841: Can't Cast Zero Cost Spells When Magicka is < 0
+    Bug #5869: Guards can initiate arrest dialogue behind locked doors
     Bug #5871: The console appears if you type the Russian letter "Ё" in the name of the enchantment
+    Bug #5877: Effects appearing with empty icon
+    Bug #5899: Visible modal windows and dropdowns crashing game on exit
     Feature #390: 3rd person look "over the shoulder"
+    Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
     Feature #2386: Distant Statics in the form of Object Paging
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
     Feature #3171: OpenMW-CS: Instance drag selection
     Feature #4894: Consider actors as obstacles for pathfinding
+    Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #4977: Use the "default icon.tga" when an item's icon is not found
     Feature #5043: Head Bobbing
-    Feature #5199: Improve Scene Colors
+    Feature #5199: OpenMW-CS: Improve scene view colors
     Feature #5297: Add a search function to the "Datafiles" tab of the OpenMW launcher
     Feature #5362: Show the soul gems' trapped soul in count dialog
     Feature #5445: Handle NiLines
@@ -122,7 +129,6 @@
     Feature #5486: Fixes trainers to choose their training skills based on their base skill points
     Feature #5519: Code Patch tab in launcher
     Feature #5524: Resume failed script execution after reload
-    Feature #5525: Search fields tweaks (utf-8)
     Feature #5545: Option to allow stealing from an unconscious NPC during combat
     Feature #5563: Run physics update in background thread
     Feature #5579: MCP SetAngle enhancement

@@ -18,6 +18,7 @@
 #include <components/settings/settings.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/sceneutil/shadow.hpp>
+#include <components/sceneutil/util.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/files/memorystream.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -223,12 +224,8 @@ osg::ref_ptr<osg::Camera> LocalMap::createOrthographicCamera(float x, float y, f
     SceneUtil::ShadowManager::disableShadowsForStateSet(stateset);
 
     // override sun for local map 
-    if (!MWBase::Environment::get().getResourceSystem()->getSceneManager()->getFFPLighting())
-    {
-        osg::ref_ptr<SceneUtil::SunlightStateAttribute> sun = new SceneUtil::SunlightStateAttribute;
-        sun->setFromLight(light);
-        sun->setStateSet(stateset, osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
-    }
+    auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();    
+    SceneUtil::configureStateSetSunOverride(lightingMethod, light, stateset);
 
     camera->addChild(lightSource);
     camera->setStateSet(stateset);
@@ -248,7 +245,7 @@ void LocalMap::setupRenderToTexture(osg::ref_ptr<osg::Camera> camera, int x, int
     texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
     texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
-    camera->attach(osg::Camera::COLOR_BUFFER, texture);
+    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER, texture);
 
     camera->addChild(mSceneRoot);
     mRoot->addChild(camera);

@@ -18,7 +18,7 @@ namespace Shader
 {
 
     ShaderManager::ShaderManager()
-        : mFFPLighting(false)
+        : mLightingMethod(SceneUtil::LightingMethod::FFP)
     {
     }
 
@@ -27,9 +27,9 @@ namespace Shader
         mPath = path;
     }
 
-    void ShaderManager::setFFPLighting(bool useFFP)
+    void ShaderManager::setLightingMethod(SceneUtil::LightingMethod method)
     {
-        mFFPLighting = useFFP;
+        mLightingMethod = method;
     }
 
     bool addLineDirectivesAfterConditionalBlocks(std::string& source)
@@ -356,11 +356,8 @@ namespace Shader
             program->addShader(fragmentShader);
             program->addBindAttribLocation("aOffset", 6);
             program->addBindAttribLocation("aRotation", 7);
-            if (!mFFPLighting)
-            {
-                program->addBindUniformBlock("SunlightBuffer", 0);
-                program->addBindUniformBlock("PointLightBuffer", 1);
-            }
+            if (mLightingMethod == SceneUtil::LightingMethod::SingleUBO)
+                program->addBindUniformBlock("LightBufferBinding", static_cast<int>(UBOBinding::LightBuffer));
             found = mPrograms.insert(std::make_pair(std::make_pair(vertexShader, fragmentShader), program)).first;
         }
         return found->second;

@@ -58,7 +58,7 @@ namespace SceneUtil
         light->setQuadraticAttenuation(quadraticAttenuation);
     }
 
-    void addLight (osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior, bool useFFPLighting)
+    void addLight(osg::Group* node, const ESM::Light* esmLight, unsigned int partsysMask, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -85,21 +85,17 @@ namespace SceneUtil
             attachTo = trans;
         }
 
-        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior, osg::Vec4f(0,0,0,1), useFFPLighting);
+        osg::ref_ptr<LightSource> lightSource = createLightSource(esmLight, lightMask, isExterior, osg::Vec4f(0,0,0,1));
         attachTo->addChild(lightSource);
     }
 
-    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient, bool useFFPLighting)
+    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource (new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light (new osg::Light);
         lightSource->setNodeMask(lightMask);
 
         float radius = esmLight->mData.mRadius;
-        // arbitrary multipler to reduce light popping, this is hard to avoid with per-object lighting
-        // we offset this multipler in shaders
-        if (!useFFPLighting)
-            radius *= 2.0;
         lightSource->setRadius(radius);
 
         configureLight(light, radius, isExterior);
@@ -116,7 +112,7 @@ namespace SceneUtil
 
         lightSource->setLight(light);
 
-        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController(useFFPLighting));
+        osg::ref_ptr<SceneUtil::LightController> ctrl (new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
         if (esmLight->mData.mFlags & ESM::Light::Flicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);

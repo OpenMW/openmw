@@ -172,7 +172,7 @@ namespace MWGui
       , mWerewolfOverlayEnabled(Settings::Manager::getBool ("werewolf overlay", "GUI"))
       , mHudEnabled(true)
       , mCursorVisible(true)
-      , mCursorActive(false)
+      , mCursorActive(true)
       , mPlayerBounty(-1)
       , mGui(nullptr)
       , mGuiModes()
@@ -503,8 +503,6 @@ namespace MWGui
         {
             mStatsWatcher.reset();
 
-            mKeyboardNavigation.reset();
-
             MyGUI::LanguageManager::getInstance().eventRequestTag.clear();
             MyGUI::PointerManager::getInstance().eventChangeMousePointer.clear();
             MyGUI::InputManager::getInstance().eventChangeKeyFocus.clear();
@@ -522,6 +520,8 @@ namespace MWGui
             delete mSoulgemDialog;
             delete mCursorManager;
             delete mToolTips;
+
+            mKeyboardNavigation.reset();
 
             cleanupGarbage();
 

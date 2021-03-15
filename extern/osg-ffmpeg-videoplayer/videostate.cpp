@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -49,7 +50,7 @@ VideoState::VideoState()
     , av_sync_type(AV_SYNC_DEFAULT)
     , audio_st(nullptr)
     , video_st(nullptr), frame_last_pts(0.0)
-    , video_clock(0.0), sws_context(nullptr), rgbaFrame(nullptr), pictq_size(0)
+    , video_clock(0.0), sws_context(nullptr), pictq_size(0)
     , pictq_rindex(0), pictq_windex(0)
     , mSeekRequested(false)
     , mSeekPos(0)
@@ -82,10 +83,11 @@ void PacketQueue::put(AVPacket *pkt)
     pkt1 = (AVPacketList*)av_malloc(sizeof(AVPacketList));
     if(!pkt1) throw std::bad_alloc();
 
-    if(pkt != &flush_pkt && !pkt->buf && av_packet_ref(&pkt1->pkt, pkt) < 0)
-        throw std::runtime_error("Failed to duplicate packet");
+    if(pkt == &flush_pkt)
+        pkt1->pkt = *pkt;
+    else
+        av_packet_move_ref(&pkt1->pkt, pkt);
 
-    pkt1->pkt = *pkt;
     pkt1->next = nullptr;
 
     this->mutex.lock ();
@@ -116,7 +118,8 @@ int PacketQueue::get(AVPacket *pkt, VideoState *is)
             this->nb_packets--;
             this->size -= pkt1->pkt.size;
 
-            *pkt = pkt1->pkt;
+            av_packet_unref(pkt);
+            av_packet_move_ref(pkt, &pkt1->pkt);
             av_free(pkt1);
 
             return 1;
@@ -153,6 +156,39 @@ void PacketQueue::clear()
     this->nb_packets = 0;
     this->size = 0;
     this->mutex.unlock ();
+}
+
+int VideoPicture::set_dimensions(int w, int h) {
+  if (this->rgbaFrame != nullptr && this->rgbaFrame->width == w &&
+      this->rgbaFrame->height == h) {
+    return 0;
+  }
+
+  std::unique_ptr<AVFrame, VideoPicture::AVFrameDeleter> frame{
+      av_frame_alloc()};
+  if (frame == nullptr) {
+    std::cerr << "av_frame_alloc failed" << std::endl;
+    return -1;
+  }
+
+  constexpr AVPixelFormat kPixFmt = AV_PIX_FMT_RGBA;
+  frame->format = kPixFmt;
+  frame->width = w;
+  frame->height = h;
+  if (av_image_alloc(frame->data, frame->linesize, frame->width, frame->height,
+                     kPixFmt, 1) < 0) {
+    std::cerr << "av_image_alloc failed" << std::endl;
+    return -1;
+  }
+
+  this->rgbaFrame = std::move(frame);
+  return 0;
+}
+
+void VideoPicture::AVFrameDeleter::operator()(AVFrame* frame) const
+{
+    av_freep(frame->data);
+    av_frame_free(&frame);
 }
 
 int VideoState::istream_read(void *user_data, uint8_t *buf, int buf_size)
@@ -220,7 +256,7 @@ void VideoState::video_display(VideoPicture *vp)
         osg::ref_ptr<osg::Image> image = new osg::Image;
 
         image->setImage(this->video_ctx->width, this->video_ctx->height,
-                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, &vp->data[0], osg::Image::NO_DELETE);
+                        1, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, vp->rgbaFrame->data[0], osg::Image::NO_DELETE);
 
         mTexture->setImage(image);
     }
@@ -296,23 +332,27 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
     // Convert the image into RGBA format
     // TODO: we could do this in a pixel shader instead, if the source format
     // matches a commonly used format (ie YUV420P)
-    if(this->sws_context == nullptr)
+    const int w = pFrame->width;
+    const int h = pFrame->height;
+    if(this->sws_context == nullptr || this->sws_context_w != w || this->sws_context_h != h)
     {
-        int w = this->video_ctx->width;
-        int h = this->video_ctx->height;
+        if (this->sws_context != nullptr)
+            sws_freeContext(this->sws_context);
         this->sws_context = sws_getContext(w, h, this->video_ctx->pix_fmt,
                                            w, h, AV_PIX_FMT_RGBA, SWS_BICUBIC,
                                            nullptr, nullptr, nullptr);
         if(this->sws_context == nullptr)
             throw std::runtime_error("Cannot initialize the conversion context!\n");
+        this->sws_context_w = w;
+        this->sws_context_h = h;
     }
 
     vp->pts = pts;
-    vp->data.resize(this->video_ctx->width * this->video_ctx->height * 4);
+    if (vp->set_dimensions(w, h) < 0)
+        return -1;
 
-    uint8_t *dst[4] = { &vp->data[0], nullptr, nullptr, nullptr };
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
-              0, this->video_ctx->height, dst, this->rgbaFrame->linesize);
+              0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
 
     // now we inform our display thread that we have a pic ready
     this->pictq_windex = (this->pictq_windex+1) % VIDEO_PICTURE_ARRAY_SIZE;
@@ -360,12 +400,10 @@ public:
     {
         VideoState* self = mVideoState;
         AVPacket pkt1, *packet = &pkt1;
+        av_init_packet(packet);
         AVFrame *pFrame;
 
         pFrame = av_frame_alloc();
-
-        self->rgbaFrame = av_frame_alloc();
-        av_image_alloc(self->rgbaFrame->data, self->rgbaFrame->linesize, self->video_ctx->width, self->video_ctx->height, AV_PIX_FMT_RGBA, 1);
 
         while(self->videoq.get(packet, self) >= 0)
         {
@@ -407,10 +445,7 @@ public:
 
         av_packet_unref(packet);
 
-        av_free(pFrame);
-
-        av_freep(&self->rgbaFrame->data[0]);
-        av_free(self->rgbaFrame);
+        av_frame_free(&pFrame);
     }
 
 private:
@@ -438,6 +473,7 @@ public:
 
         AVFormatContext *pFormatCtx = self->format_ctx;
         AVPacket pkt1, *packet = &pkt1;
+        av_init_packet(packet);
 
         try
         {
@@ -673,16 +709,21 @@ void VideoState::init(std::shared_ptr<std::istream> inputstream, const std::stri
         {
           if (this->format_ctx->pb != nullptr)
           {
-              av_free(this->format_ctx->pb->buffer);
-              this->format_ctx->pb->buffer = nullptr;
-
-              av_free(this->format_ctx->pb);
-              this->format_ctx->pb = nullptr;
+              av_freep(&this->format_ctx->pb->buffer);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
+              avio_context_free(&this->format_ctx->pb);
+#else
+              av_freep(&this->format_ctx->pb);
+#endif
           }
         }
         // "Note that a user-supplied AVFormatContext will be freed on failure."
         this->format_ctx = nullptr;
-        av_free(ioCtx);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
+        avio_context_free(&ioCtx);
+#else
+        av_freep(&ioCtx);
+#endif
         throw std::runtime_error("Failed to open video input");
     }
 
@@ -756,11 +797,12 @@ void VideoState::deinit()
         ///
         if (this->format_ctx->pb != nullptr)
         {
-            av_free(this->format_ctx->pb->buffer);
-            this->format_ctx->pb->buffer = nullptr;
-
-            av_free(this->format_ctx->pb);
-            this->format_ctx->pb = nullptr;
+            av_freep(&this->format_ctx->pb->buffer);
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 80, 100)
+            avio_context_free(&this->format_ctx->pb);
+#else
+            av_freep(&this->format_ctx->pb);
+#endif
         }
         avformat_close_input(&this->format_ctx);
     }
@@ -771,6 +813,11 @@ void VideoState::deinit()
         mTexture->setImage(nullptr);
         mTexture = nullptr;
     }
+
+    // Dellocate RGBA frame queue.
+    for (std::size_t i = 0; i < VIDEO_PICTURE_ARRAY_SIZE; ++i)
+        this->pictq[i].rgbaFrame = nullptr;
+
 }
 
 double VideoState::get_external_clock()

@@ -12,6 +12,7 @@ set(SHADER_FILES
     water_vertex.glsl
     water_fragment.glsl
     water_nm.png
+    alpha.glsl
     objects_vertex.glsl
     objects_fragment.glsl
     terrain_vertex.glsl
@@ -25,7 +26,6 @@ set(SHADER_FILES
     shadowcasting_vertex.glsl
     shadowcasting_fragment.glsl
     vertexcolors.glsl
-    sun.glsl
 )
 
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_SHADERS_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

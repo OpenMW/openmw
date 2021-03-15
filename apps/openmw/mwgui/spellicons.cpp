@@ -181,7 +181,9 @@ namespace MWGui
             }
             else if (mWidgetMap.find(effectId) != mWidgetMap.end())
             {
-                mWidgetMap[effectId]->setVisible(false);
+                MyGUI::ImageBox* image = mWidgetMap[effectId];
+                image->setVisible(false);
+                image->setAlpha(1.f);
             }
         }
 

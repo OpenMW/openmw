@@ -1,5 +1,9 @@
 #version 120
 
+#if @useGPUShader4
+    #extension GL_EXT_gpu_shader4: require
+#endif
+
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 
@@ -7,6 +11,8 @@ varying float alphaPassthrough;
 
 uniform bool useDiffuseMapForShadowAlpha;
 uniform bool alphaTestShadows;
+
+#include "alpha.glsl"
 
 void main()
 {
@@ -16,7 +22,10 @@ void main()
     else
         gl_FragData[0].a = alphaPassthrough;
 
-    // Prevent translucent things casting shadow (including the player using an invisibility effect). For now, rely on the deprecated FF test for non-blended stuff.
+    alphaTest();
+
+    // Prevent translucent things casting shadow (including the player using an invisibility effect).
+    // This replaces alpha blending, which obviously doesn't work with depth buffers
     if (alphaTestShadows && gl_FragData[0].a <= 0.5)
         discard;
 }

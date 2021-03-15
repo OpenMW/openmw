@@ -1,5 +1,6 @@
 #include "groundcover.hpp"
 
+#include <osg/AlphaFunc>
 #include <osg/Geometry>
 #include <osg/VertexAttribDivisor>
 
@@ -258,11 +259,16 @@ namespace MWRender
             // Keep link to original mesh to keep it in cache
             group->getOrCreateUserDataContainer()->addUserObject(new Resource::TemplateRef(temp));
 
+            mSceneManager->reinstateRemovedState(node);
+
             InstancingVisitor visitor(pair.second, worldCenter);
             node->accept(visitor);
             group->addChild(node);
         }
 
+        // Force a unified alpha handling instead of data from meshes
+        osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
+        group->getOrCreateStateSet()->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
         group->getBound();
         group->setNodeMask(Mask_Groundcover);
         mSceneManager->recreateShaders(group, "groundcover", false, true);

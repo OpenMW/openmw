@@ -215,12 +215,16 @@ if(APPLE)
 endif(APPLE)
 
 target_link_libraries(openmw-cs
-    ${OSG_LIBRARIES}
-    ${OSGTEXT_LIBRARIES}
-    ${OSGUTIL_LIBRARIES}
+    # CMake's built-in OSG finder does not use pkgconfig, so we have to
+    # manually ensure the order is correct for inter-library dependencies.
+    # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
+    # https://gitlab.kitware.com/cmake/cmake/-/issues/21701
     ${OSGVIEWER_LIBRARIES}
-    ${OSGGA_LIBRARIES}
     ${OSGFX_LIBRARIES}
+    ${OSGGA_LIBRARIES}
+    ${OSGUTIL_LIBRARIES}
+    ${OSGTEXT_LIBRARIES}
+    ${OSG_LIBRARIES}
     ${EXTERN_OSGQT_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
@@ -233,17 +237,24 @@ if(OSG_STATIC)
     add_library(openmw_cs_osg_plugins INTERFACE)
     foreach(_plugin ${USED_OSG_PLUGINS})
         string(TOUPPER ${_plugin} _plugin_uc)
-        if (${_plugin_uc}_LIBRARY MATCHES "[/.]")
+        if(OPENMW_USE_SYSTEM_OSG)
             list(APPEND _osg_plugins_static_files ${${_plugin_uc}_LIBRARY})
         else()
             list(APPEND _osg_plugins_static_files $<TARGET_FILE:${${_plugin_uc}_LIBRARY}>)
+            target_link_libraries(openmw_cs_osg_plugins INTERFACE $<TARGET_PROPERTY:${${_plugin_uc}_LIBRARY},LINK_LIBRARIES>)
+            add_dependencies(openmw_cs_osg_plugins ${${_plugin_uc}_LIBRARY})
         endif()
-        target_link_libraries(openmw_cs_osg_plugins INTERFACE ${${_plugin_uc}_LIBRARY})
     endforeach()
     # We use --whole-archive because OSG plugins use registration.
     get_whole_archive_options(_opts ${_osg_plugins_static_files})
     target_link_options(openmw_cs_osg_plugins INTERFACE ${_opts})
     target_link_libraries(openmw-cs openmw_cs_osg_plugins)
+
+    if(OPENMW_USE_SYSTEM_OSG)
+        # OSG plugin pkgconfig files are missing these dependencies.
+        # https://github.com/openscenegraph/OpenSceneGraph/issues/1052
+        target_link_libraries(openmw freetype jpeg png)
+    endif()
 endif(OSG_STATIC)
 
 target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)

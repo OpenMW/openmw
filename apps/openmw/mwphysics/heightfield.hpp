@@ -34,7 +34,9 @@ namespace MWPhysics
         std::unique_ptr<btHeightfieldTerrainShape> mShape;
         std::unique_ptr<btCollisionObject> mCollisionObject;
         osg::ref_ptr<const osg::Object> mHoldObject;
+#if BT_BULLET_VERSION < 310
         std::vector<btScalar> mHeights;
+#endif
 
         PhysicsTaskScheduler* mTaskScheduler;
 

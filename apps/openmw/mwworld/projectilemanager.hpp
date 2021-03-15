@@ -54,6 +54,8 @@ namespace MWWorld
         void launchProjectile (MWWorld::Ptr actor, MWWorld::ConstPtr projectile,
                                        const osg::Vec3f& pos, const osg::Quat& orient, MWWorld::Ptr bow, float speed, float attackStrength);
 
+        void updateCasters();
+
         void update(float dt);
 
         void processHits();

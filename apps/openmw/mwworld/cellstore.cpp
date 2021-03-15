@@ -104,6 +104,45 @@ namespace
         }
     }
 
+    template<class RecordType, class T>
+    void fixRestockingImpl(const T* base, RecordType& state)
+    {
+        // Workaround for old saves not containing negative quantities
+        for(const auto& baseItem : base->mInventory.mList)
+        {
+            if(baseItem.mCount < 0)
+            {
+                for(auto& item : state.mInventory.mItems)
+                {
+                    if(item.mCount > 0 && Misc::StringUtils::ciEqual(baseItem.mItem, item.mRef.mRefID))
+                        item.mCount = -item.mCount;
+                }
+            }
+        }
+    }
+
+    template<class RecordType, class T>
+    void fixRestocking(const T* base, RecordType& state)
+    {}
+
+    template<>
+    void fixRestocking<>(const ESM::Creature* base, ESM::CreatureState& state)
+    {
+        fixRestockingImpl(base, state);
+    }
+
+    template<>
+    void fixRestocking<>(const ESM::NPC* base, ESM::NpcState& state)
+    {
+        fixRestockingImpl(base, state);
+    }
+
+    template<>
+    void fixRestocking<>(const ESM::Container* base, ESM::ContainerState& state)
+    {
+        fixRestockingImpl(base, state);
+    }
+
     template<typename RecordType, typename T>
     void readReferenceCollection (ESM::ESMReader& reader,
         MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref, const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore)
@@ -133,6 +172,9 @@ namespace
 
         if (!record)
             return;
+
+        if (state.mVersion < 15)
+            fixRestocking(record, state);
 
         if (state.mRef.mRefNum.hasContentFile())
         {

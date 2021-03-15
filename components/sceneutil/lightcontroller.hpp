@@ -20,7 +20,7 @@ namespace SceneUtil
             LT_PulseSlow
         };
 
-        LightController(bool useFFPLighting=true);
+        LightController();
 
         void setType(LightType type);
 
@@ -36,7 +36,6 @@ namespace SceneUtil
         double mStartTime;
         double mLastTime;
         float mTicksToAdvance;
-        bool mFFPLighting;
     };
 
 }
