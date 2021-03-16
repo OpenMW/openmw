@@ -344,7 +344,9 @@ set(BOOST_COMPONENTS system filesystem program_options iostreams)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
     if(MSVC)
-        set(BOOST_COMPONENTS ${BOOST_COMPONENTS} zlib)
+        # boost-zlib is not present (nor needed) in vcpkg version of boost.
+        # there, it is part of boost-iostreams instead.
+        set(BOOST_OPTIONAL_COMPONENTS zlib)
     endif(MSVC)
 endif(WIN32)
 
@@ -354,7 +356,7 @@ endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
 
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
+find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 if(OPENMW_USE_SYSTEM_MYGUI)
     find_package(MyGUI 3.2.2 REQUIRED)
 endif()
