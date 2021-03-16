@@ -24,6 +24,14 @@ namespace MWMechanics
     {
     }
 
+    Spells::Spells(const Spells& spells) : mSpellList(spells.mSpellList), mSpells(spells.mSpells),
+        mSelectedSpell(spells.mSelectedSpell), mUsedPowers(spells.mUsedPowers),
+        mSpellsChanged(spells.mSpellsChanged), mEffects(spells.mEffects), mSourcedEffects(spells.mSourcedEffects)
+    {
+        if(mSpellList)
+            mSpellList->addListener(this);
+    }
+
     std::map<const ESM::Spell*, SpellParams>::const_iterator Spells::begin() const
     {
         return mSpells.begin();
