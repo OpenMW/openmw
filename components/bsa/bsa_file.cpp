@@ -28,12 +28,11 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-using namespace std;
 using namespace Bsa;
 
 
 /// Error handling
-void BSAFile::fail(const string &msg)
+void BSAFile::fail(const std::string &msg)
 {
     throw std::runtime_error("BSA Error: " + msg + "\nArchive: " + mFilename);
 }
@@ -160,7 +159,7 @@ int BSAFile::getIndex(const char *str) const
 }
 
 /// Open an archive file.
-void BSAFile::open(const string &file)
+void BSAFile::open(const std::string &file)
 {
     mFilename = file;
     readHeader();
@@ -171,7 +170,7 @@ Files::IStreamPtr BSAFile::getFile(const char *file)
     assert(file);
     int i = getIndex(file);
     if(i == -1)
-        fail("File not found: " + string(file));
+        fail("File not found: " + std::string(file));
 
     const FileStruct &fs = mFiles[i];
 
