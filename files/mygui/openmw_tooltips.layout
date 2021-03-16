@@ -193,7 +193,6 @@
                 <Property key="Shrink" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
-                <Property key="Spacing" value="28"/>
                 <UserString key="HStretch" value="true"/>
             </Widget>
 
@@ -248,7 +247,6 @@
                 <Property key="MultiLine" value="true"/>
                 <Property key="WordWrap" value="true"/>
                 <Property key="TextAlign" value="Left Top"/>
-                <Property key="Spacing" value="28"/>
             </Widget>
         </Widget>
 
@@ -269,9 +267,6 @@
             </Widget>
 
             <Widget type="AutoSizedTextBox" skin="SandText" position="0 0 0 0" align="Left Top" name="LevelDetailText">
-                <Property key="AutoResize" value="true"/>
-                <Property key="MultiLine" value="true"/>
-                <Property key="Shrink" value="true"/>
                 <Property key="TextAlign" value="HCenter Top"/>
             </Widget>
         </Widget>
