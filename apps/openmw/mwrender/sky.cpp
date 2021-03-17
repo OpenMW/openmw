@@ -497,8 +497,6 @@ public:
         // Disable writing to the color buffer. We are using this geometry for visibility tests only.
         osg::ref_ptr<osg::ColorMask> colormask (new osg::ColorMask(0, 0, 0, 0));
         stateset->setAttributeAndModes(colormask, osg::StateAttribute::ON);
-        osg::ref_ptr<osg::PolygonOffset> po (new osg::PolygonOffset( -1., -1. ));
-        stateset->setAttributeAndModes(po, osg::StateAttribute::ON);
 
         mTransform->addChild(queryNode);
 
@@ -595,7 +593,7 @@ private:
         if (queryVisible)
         {
             osg::ref_ptr<osg::Depth> depth (new osg::Depth);
-            depth->setFunction(osg::Depth::LESS);
+            depth->setFunction(osg::Depth::LEQUAL);
             // This is a trick to make fragments written by the query always use the maximum depth value,
             // without having to retrieve the current far clipping distance.
             // We want the sun glare to be "infinitely" far away.
