@@ -357,16 +357,14 @@ std::string ESMReader::getString(int size)
 
 void ESMReader::fail(const std::string &msg)
 {
-    using namespace std;
-
-    stringstream ss;
+    std::stringstream ss;
 
     ss << "ESM Error: " << msg;
     ss << "\n  File: " << mCtx.filename;
     ss << "\n  Record: " << mCtx.recName.toString();
     ss << "\n  Subrecord: " << mCtx.subName.toString();
     if (mEsm.get())
-        ss << "\n  Offset: 0x" << hex << mEsm->tellg();
+        ss << "\n  Offset: 0x" << std::hex << mEsm->tellg();
     throw std::runtime_error(ss.str());
 }
 

@@ -1,20 +1,19 @@
 // This program generates the file tables_gen.hpp
 
 #include <iostream>
-using namespace std;
 
 #include <iconv.h>
 #include <cassert>
 
-void tab() { cout << "   "; }
+void tab() { std::cout << "   "; }
 
 // write one number with a space in front of it and a comma after it
 void num(char i, bool last)
 {
   // Convert i to its integer value, i.e. -128 to 127. Printing it directly
   // would result in non-printable characters in the source code, which is bad.
-  cout << " " << static_cast<int>(i);
-  if(!last) cout << ",";
+  std::cout << " " << static_cast<int>(i);
+  if(!last) std::cout << ",";
 }
 
 // Write one table entry (UTF8 value), 1-5 bytes
@@ -27,9 +26,9 @@ void writeChar(char *value, int length, bool last, const std::string &comment=""
     num(value[i], last && i==4);
 
   if(comment != "")
-    cout << " // " << comment;
+    std::cout << " // " << comment;
 
-  cout << endl;
+  std::cout << std::endl;
 }
 
 // What to write on missing characters
@@ -46,7 +45,7 @@ void writeMissing(bool last)
 int write_table(const std::string &charset, const std::string &tableName)
 {
   // Write table header
-  cout << "static signed char " << tableName << "[] =\n{\n";
+  std::cout << "static signed char " << tableName << "[] =\n{\n";
 
   // Open conversion system
   iconv_t cd = iconv_open ("UTF-8", charset.c_str());
@@ -74,7 +73,7 @@ int write_table(const std::string &charset, const std::string &tableName)
   iconv_close (cd);
 
   // Finish table
-  cout << "};\n";
+  std::cout << "};\n";
 
   return 0;
 }
@@ -82,37 +81,37 @@ int write_table(const std::string &charset, const std::string &tableName)
 int main()
 {
   // Write header guard
-  cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
+  std::cout << "#ifndef COMPONENTS_TOUTF8_TABLE_GEN_H\n#define COMPONENTS_TOUTF8_TABLE_GEN_H\n\n";
 
   // Write namespace
-  cout << "namespace ToUTF8\n{\n\n";
+  std::cout << "namespace ToUTF8\n{\n\n";
 
   // Central European and Eastern European languages that use Latin script, such as
   // Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian, Serbian (Latin script), Romanian and Albanian.
-  cout << "\n/// Central European and Eastern European languages that use Latin script,"
-          "\n/// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,"
-          "\n/// Serbian (Latin script), Romanian and Albanian."
-          "\n";
+  std::cout << "\n/// Central European and Eastern European languages that use Latin script,"
+               "\n/// such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, Croatian,"
+               "\n/// Serbian (Latin script), Romanian and Albanian."
+               "\n";
   write_table("WINDOWS-1250", "windows_1250");
 
   // Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages
-  cout << "\n/// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic"
-          "\n/// and other languages"
-          "\n";
+  std::cout << "\n/// Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic"
+               "\n/// and other languages"
+               "\n";
   write_table("WINDOWS-1251", "windows_1251");
 
   // English
-  cout << "\n/// Latin alphabet used by English and some other Western languages"
-          "\n";
+  std::cout << "\n/// Latin alphabet used by English and some other Western languages"
+               "\n";
   write_table("WINDOWS-1252", "windows_1252");
 
   write_table("CP437", "cp437");
 
   // Close namespace
-  cout << "\n}\n\n";
+  std::cout << "\n}\n\n";
 
   // Close header guard
-  cout << "#endif\n\n";
+  std::cout << "#endif\n\n";
 
   return 0;
 }
