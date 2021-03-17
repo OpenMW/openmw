@@ -1067,7 +1067,13 @@ if [ -n "$ACTIVATE_MSVC" ]; then
 	echo -n "- Activating MSVC in the current shell... "
 	command -v vswhere >/dev/null 2>&1 || { echo "Error: vswhere is not on the path."; wrappedExit 1; }
 
-	MSVC_INSTALLATION_PATH=$(vswhere -products '*' -version "[$MSVC_REAL_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath)
+	# There are so many arguments now that I'm going to document them:
+	# * products: allow Visual Studio or standalone build tools
+	# * version: obvious. Awk helps make a version range by adding one.
+	# * property installationPath: only give the installation path.
+	# * latest: return only one result if several candidates exist. Prefer the last installed/updated
+	# * requires: make sure it's got the MSVC compiler instead of, for example, just the .NET compiler. The .x86.x64 suffix means it's for either, not that it's the x64 on x86 cross compiler as you always get both
+	MSVC_INSTALLATION_PATH=$(vswhere -products '*' -version "[$MSVC_REAL_VER,$(awk "BEGIN { print $MSVC_REAL_VER + 1; exit }"))" -property installationPath -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64)
 	if [ -z "$MSVC_INSTALLATION_PATH" ]; then
 		echo "vswhere was unable to find MSVC $MSVC_DISPLAY_YEAR"
 		wrappedExit 1
