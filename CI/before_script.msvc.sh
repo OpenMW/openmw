@@ -325,6 +325,16 @@ add_qt_platform_dlls() {
 	QT_PLATFORMS[$CONFIG]="${QT_PLATFORMS[$CONFIG]} $@"
 }
 
+declare -A QT_STYLES
+QT_STYLES["Release"]=""
+QT_STYLES["Debug"]=""
+QT_STYLES["RelWithDebInfo"]=""
+add_qt_style_dlls() {
+	local CONFIG=$1
+	shift
+	QT_STYLES[$CONFIG]="${QT_STYLES[$CONFIG]} $@"
+}
+
 if [ -z $PLATFORM ]; then
 	PLATFORM="$(uname -m)"
 fi
@@ -868,6 +878,7 @@ fi
 			fi
 			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
 			add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
+			add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		done
 		echo Done.
 	else
@@ -883,6 +894,7 @@ fi
 			DIR=$(windowsPathAsUnix "${QT_SDK}")
 			add_runtime_dlls $CONFIGURATION "${DIR}/bin/Qt5"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
 			add_qt_platform_dlls $CONFIGURATION "${DIR}/plugins/platforms/qwindows${DLLSUFFIX}.dll"
+			add_qt_style_dlls $CONFIGURATION "${DIR}/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 		done
 		echo Done.
 	fi
@@ -1058,6 +1070,13 @@ fi
 		for DLL in ${QT_PLATFORMS[$CONFIGURATION]}; do
 			echo "    $(basename $DLL)"
 			cp "$DLL" "${DLL_PREFIX}platforms"
+		done
+		echo
+		echo "- Qt Style DLLs..."
+		mkdir -p ${DLL_PREFIX}styles
+		for DLL in ${QT_STYLES[$CONFIGURATION]}; do
+			echo "    $(basename $DLL)"
+			cp "$DLL" "${DLL_PREFIX}styles"
 		done
 		echo
 	done
