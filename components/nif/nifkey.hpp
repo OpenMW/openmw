@@ -77,7 +77,7 @@ struct KeyMapT {
 
         mInterpolationType = nif->getUInt();
 
-        KeyT<T> key;
+        KeyType key = {};
         NIFStream &nifReference = *nif;
 
         if (mInterpolationType == InterpolationType_Linear
