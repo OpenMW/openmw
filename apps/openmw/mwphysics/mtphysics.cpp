@@ -186,9 +186,11 @@ namespace MWPhysics
         mPostStepBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
             {
                 if (mRemainingSteps)
+                {
                     --mRemainingSteps;
+                    updateActorsPositions();
+                }
                 mNextJob.store(0, std::memory_order_release);
-                updateActorsPositions();
             });
 
         mPostSimBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
