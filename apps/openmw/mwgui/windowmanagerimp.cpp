@@ -495,6 +495,8 @@ namespace MWGui
         }
         else
             allow(GW_ALL);
+
+        mStatsWatcher->forceUpdate();
     }
 
     WindowManager::~WindowManager()
