@@ -115,6 +115,12 @@ option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
 option(QT_STATIC "Link static build of QT into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
+if(OPENMW_USE_SYSTEM_BULLET)
+    set(_bullet_static_default OFF)
+else()
+    set(_bullet_static_default ON)
+endif()
+option(BULLET_STATIC "Link static build of Bullet into the binaries" ${_bullet_static_default})
 
 option(OPENMW_USE_SYSTEM_OSG "Use system provided OpenSceneGraph libraries" ON)
 if(OPENMW_USE_SYSTEM_OSG)
