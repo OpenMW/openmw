@@ -146,19 +146,10 @@ namespace MWMechanics
         }
         storage.mActionCooldown -= duration;
 
-        float& timerReact = storage.mTimerReact;
-        if (timerReact < AI_REACTION_TIME)
-        {
-            timerReact += duration;
-        }
-        else
-        {
-            timerReact = 0;
-            if (attack(actor, target, storage, characterController))
-                return true;
-        }
+        if (storage.mReaction.update(duration) == Misc::TimerStatus::Waiting)
+            return false;
 
-        return false;
+        return attack(actor, target, storage, characterController);
     }
 
     bool AiCombat::attack(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, AiCombatStorage& storage, CharacterController& characterController)

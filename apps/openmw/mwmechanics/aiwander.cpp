@@ -223,15 +223,10 @@ namespace MWMechanics
 
         doPerFrameActionsForState(actor, duration, storage);
 
-        float& lastReaction = storage.mReaction;
-        lastReaction += duration;
-        if (AI_REACTION_TIME <= lastReaction)
-        {
-            lastReaction = 0;
-            return reactionTimeActions(actor, storage, pos);
-        }
-        else
+        if (storage.mReaction.update(duration) == Misc::TimerStatus::Waiting)
             return false;
+
+        return reactionTimeActions(actor, storage, pos);
     }
 
     bool AiWander::reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos)
