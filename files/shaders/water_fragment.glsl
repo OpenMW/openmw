@@ -236,7 +236,11 @@ void main(void)
     if (cameraPos.z < 0.0)
         refraction = clamp(refraction * 1.5, 0.0, 1.0);
     else
-        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+    {
+        vec3 refractionA = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+        vec3 refractionB = mix(refraction, waterColor, clamp(realWaterDepth/VISIBILITY, 0.0, 1.0));
+        refraction = mix(refractionA, refractionB, 0.8);
+    }
 
     // sunlight scattering
     // normal for sunlight scattering
