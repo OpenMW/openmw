@@ -34,6 +34,7 @@ const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
+const float BUMP_SUPPRESS_DEPTH_SS = 1000.0;      // modifier using screenspace depth (helps prevent same artifacts but at higher distances)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
@@ -218,7 +219,10 @@ void main(void)
     float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x) * radialise;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z) * radialise;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
-    screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
+    screenCoordsOffset *= clamp(
+            realWaterDepth / (BUMP_SUPPRESS_DEPTH
+                * max(1, depthSample / BUMP_SUPPRESS_DEPTH_SS)) // suppress more at distance
+        ,0 ,1);
 #endif
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
