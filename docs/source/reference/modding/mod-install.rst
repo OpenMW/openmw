@@ -11,6 +11,7 @@ Install
 
 	#.	Locate the plugin files, ``.esp`` or ``.omwaddon``, or possibly ``.esm``. The folder containing the plugin files we will call your *data folder*
 	#.	Check that all resource folders (``Meshes``, ``Textures``, etc.) containing additional resource files (the actual meshes, textures, etc.) are in the *data folder*.
+	#.	Note that not all mods have a plugin, and not all mods have resources, but they must at minimum have one or the other.
 	
 	.. note::
 		There may be multiple levels of folders, but the location of the plugins must be the same as the resource folders.
