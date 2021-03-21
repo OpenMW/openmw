@@ -34,7 +34,7 @@ namespace CSMPrefs
             void storeValue(const QKeySequence& sequence);
             void resetState();
 
-            static const int MaxKeys = 4;
+            static constexpr int MaxKeys = 4;
 
             QPushButton* mButton;
 

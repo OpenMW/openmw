@@ -102,7 +102,7 @@ public:
         BlendMask_All = BlendMask_LowerBody | BlendMask_UpperBody
     };
     /* This is the number of *discrete* blend masks. */
-    static const size_t sNumBlendMasks = 4;
+    static constexpr size_t sNumBlendMasks = 4;
 
     /// Holds an animation priority value for each BoneGroup.
     struct AnimPriority

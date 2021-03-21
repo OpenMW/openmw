@@ -24,7 +24,7 @@ namespace MWMechanics
 {
     struct CorprusStats
     {
-        static const int sWorseningPeriod = 24;
+        static constexpr int sWorseningPeriod = 24;
 
         int mWorsenings[ESM::Attribute::Length];
         MWWorld::TimeStamp mNextWorsening;
