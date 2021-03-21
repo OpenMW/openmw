@@ -848,9 +848,11 @@ fi
 				wrappedExit 1
 			fi
 
-			if ! [ -e "aqt-venv/${VENV_BIN_DIR}/aqt" ]; then
+			# check version
+			pip list | grep 'aqtinstall\s*1.1.3'
+			if [ $? -ne 0 ]; then
 				echo "  Installing aqt wheel into virtualenv..."
-				run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==0.9.2
+				run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==1.1.3
 			fi
 			popd > /dev/null
 
