@@ -42,29 +42,29 @@ namespace MWWorld
     {
         public:
 
-            static const int Slot_Helmet = 0;
-            static const int Slot_Cuirass = 1;
-            static const int Slot_Greaves = 2;
-            static const int Slot_LeftPauldron = 3;
-            static const int Slot_RightPauldron = 4;
-            static const int Slot_LeftGauntlet = 5;
-            static const int Slot_RightGauntlet = 6;
-            static const int Slot_Boots = 7;
-            static const int Slot_Shirt = 8;
-            static const int Slot_Pants = 9;
-            static const int Slot_Skirt = 10;
-            static const int Slot_Robe = 11;
-            static const int Slot_LeftRing = 12;
-            static const int Slot_RightRing = 13;
-            static const int Slot_Amulet = 14;
-            static const int Slot_Belt = 15;
-            static const int Slot_CarriedRight = 16;
-            static const int Slot_CarriedLeft = 17;
-            static const int Slot_Ammunition = 18;
+            static constexpr int Slot_Helmet = 0;
+            static constexpr int Slot_Cuirass = 1;
+            static constexpr int Slot_Greaves = 2;
+            static constexpr int Slot_LeftPauldron = 3;
+            static constexpr int Slot_RightPauldron = 4;
+            static constexpr int Slot_LeftGauntlet = 5;
+            static constexpr int Slot_RightGauntlet = 6;
+            static constexpr int Slot_Boots = 7;
+            static constexpr int Slot_Shirt = 8;
+            static constexpr int Slot_Pants = 9;
+            static constexpr int Slot_Skirt = 10;
+            static constexpr int Slot_Robe = 11;
+            static constexpr int Slot_LeftRing = 12;
+            static constexpr int Slot_RightRing = 13;
+            static constexpr int Slot_Amulet = 14;
+            static constexpr int Slot_Belt = 15;
+            static constexpr int Slot_CarriedRight = 16;
+            static constexpr int Slot_CarriedLeft = 17;
+            static constexpr int Slot_Ammunition = 18;
 
-            static const int Slots = 19;
+            static constexpr int Slots = 19;
 
-            static const int Slot_NoSlot = -1;
+            static constexpr int Slot_NoSlot = -1;
 
         private:
 

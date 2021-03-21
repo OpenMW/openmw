@@ -35,20 +35,20 @@ namespace MWGui
         bool onDropItem(const MWWorld::Ptr &item, int count) override;
         bool onTakeItem(const MWWorld::Ptr &item, int count) override;
 
-        static const int Category_Weapon = (1<<1);
-        static const int Category_Apparel = (1<<2);
-        static const int Category_Misc = (1<<3);
-        static const int Category_Magic = (1<<4);
-        static const int Category_All = 255;
+        static constexpr int Category_Weapon = (1<<1);
+        static constexpr int Category_Apparel = (1<<2);
+        static constexpr int Category_Misc = (1<<3);
+        static constexpr int Category_Magic = (1<<4);
+        static constexpr int Category_All = 255;
 
-        static const int Filter_OnlyIngredients = (1<<0);
-        static const int Filter_OnlyEnchanted = (1<<1);
-        static const int Filter_OnlyEnchantable = (1<<2);
-        static const int Filter_OnlyChargedSoulstones = (1<<3);
-        static const int Filter_OnlyUsableItems = (1<<4); // Only items with a Use action
-        static const int Filter_OnlyRepairable = (1<<5);
-        static const int Filter_OnlyRechargable = (1<<6);
-        static const int Filter_OnlyRepairTools = (1<<7);
+        static constexpr int Filter_OnlyIngredients = (1<<0);
+        static constexpr int Filter_OnlyEnchanted = (1<<1);
+        static constexpr int Filter_OnlyEnchantable = (1<<2);
+        static constexpr int Filter_OnlyChargedSoulstones = (1<<3);
+        static constexpr int Filter_OnlyUsableItems = (1<<4); // Only items with a Use action
+        static constexpr int Filter_OnlyRepairable = (1<<5);
+        static constexpr int Filter_OnlyRechargable = (1<<6);
+        static constexpr int Filter_OnlyRepairTools = (1<<7);
 
 
     private:
