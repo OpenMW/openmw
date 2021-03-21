@@ -744,19 +744,14 @@ namespace MWPhysics
     {
         mTimeAccum += dt;
 
-        const int maxAllowedSteps = 20;
-        int numSteps = mTimeAccum / mPhysicsDt;
-        numSteps = std::min(numSteps, maxAllowedSteps);
-
-        mTimeAccum -= numSteps * mPhysicsDt;
-
         if (skipSimulation)
             return mTaskScheduler->resetSimulation(mActors);
 
-        return mTaskScheduler->moveActors(numSteps, mTimeAccum, prepareFrameData(numSteps), frameStart, frameNumber, stats);
+        // modifies mTimeAccum
+        return mTaskScheduler->moveActors(mTimeAccum, prepareFrameData(mTimeAccum >= mPhysicsDt), frameStart, frameNumber, stats);
     }
 
-    std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(int numSteps)
+    std::vector<ActorFrameData> PhysicsSystem::prepareFrameData(bool willSimulate)
     {
         std::vector<ActorFrameData> actorsFrameData;
         actorsFrameData.reserve(mMovementQueue.size());
@@ -796,7 +791,7 @@ namespace MWPhysics
 
             // Ue current value only if we don't advance the simulation. Otherwise we might get a stale value.
             MWWorld::Ptr standingOn;
-            if (numSteps == 0)
+            if (!willSimulate)
                 standingOn = physicActor->getStandingOnPtr();
 
             actorsFrameData.emplace_back(std::move(physicActor), standingOn, moveToWaterSurface, movement, slowFall, waterlevel);
