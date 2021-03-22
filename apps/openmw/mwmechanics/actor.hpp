@@ -5,6 +5,8 @@
 
 #include "../mwmechanics/actorutil.hpp"
 
+#include <components/misc/timer.hpp>
+
 namespace MWRender
 {
     class Animation;
@@ -41,12 +43,18 @@ namespace MWMechanics
         bool isTurningToPlayer() const;
         void setTurningToPlayer(bool turning);
 
+        Misc::TimerStatus updateEngageCombatTimer(float duration)
+        {
+            return mEngageCombat.update(duration);
+        }
+
     private:
         std::unique_ptr<CharacterController> mCharacterController;
         int mGreetingTimer{0};
         float mTargetAngleRadians{0.f};
         GreetingState mGreetingState{Greet_None};
         bool mIsTurningToPlayer{false};
+        Misc::DeviatingPeriodicTimer mEngageCombat{1.0f, 0.25f, Misc::Rng::deviate(0, 0.25f)};
     };
 
 }

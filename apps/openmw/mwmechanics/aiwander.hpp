@@ -10,6 +10,7 @@
 #include "pathfinding.hpp"
 #include "obstacle.hpp"
 #include "aistate.hpp"
+#include "aitimer.hpp"
 
 namespace ESM
 {
@@ -25,7 +26,7 @@ namespace MWMechanics
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
     struct AiWanderStorage : AiTemporaryBase
     {
-        float mReaction; // update some actions infrequently
+        AiReactionTimer mReaction;
 
         // AiWander states
         enum WanderState
@@ -57,7 +58,6 @@ namespace MWMechanics
         int mStuckCount;
 
         AiWanderStorage():
-            mReaction(0),
             mState(Wander_ChooseAction),
             mIsWanderingManually(false),
             mCanWanderAlongPathGrid(true),

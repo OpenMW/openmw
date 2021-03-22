@@ -10,6 +10,7 @@
 #include "obstacle.hpp"
 #include "aistate.hpp"
 #include "aipackagetypeid.hpp"
+#include "aitimer.hpp"
 
 namespace MWWorld
 {
@@ -28,8 +29,6 @@ namespace ESM
 
 namespace MWMechanics
 {
-    const float AI_REACTION_TIME = 0.25f;
-
     class CharacterController;
     class PathgridGraph;
 
@@ -158,7 +157,7 @@ namespace MWMechanics
             PathFinder mPathFinder;
             ObstacleCheck mObstacleCheck;
 
-            float mTimer;
+            AiReactionTimer mReaction;
 
             std::string mTargetActorRefId;
             mutable int mTargetActorId;
