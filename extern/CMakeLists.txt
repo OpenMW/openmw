@@ -75,10 +75,11 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
         set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     endif()
 
+    # master on 13 Mar 2021
     include(FetchContent)
     FetchContent_Declare(mygui
-        URL https://github.com/MyGUI/mygui/archive/MyGUI3.4.1.zip
-        URL_HASH MD5=952d4033854612c99a5d9bf4b8550c26
+        URL https://github.com/MyGUI/mygui/archive/59c1388b942721887d18743ada15f1906ff11a1f.zip
+        URL_HASH MD5=0a64c9cccc8f96dc8c08172175e68e1c
         SOURCE_DIR fetched/mygui
     )
     FetchContent_MakeAvailableExcludeFromAll(mygui)
