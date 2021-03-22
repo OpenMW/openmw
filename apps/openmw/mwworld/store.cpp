@@ -250,9 +250,15 @@ namespace MWWorld
         }
     }
     template<typename T>
-    T *Store<T>::insert(const T &item)
+    T *Store<T>::insert(const T &item, bool overrideOnly)
     {
         std::string id = Misc::StringUtils::lowerCase(item.mId);
+        if(overrideOnly)
+        {
+            auto it = mStatic.find(id);
+            if(it == mStatic.end())
+                return nullptr;
+        }
         std::pair<typename Dynamic::iterator, bool> result =
             mDynamic.insert(std::pair<std::string, T>(id, item));
         T *ptr = &result.first->second;
@@ -337,13 +343,13 @@ namespace MWWorld
         }
     }
     template<typename T>
-    RecordId Store<T>::read(ESM::ESMReader& reader)
+    RecordId Store<T>::read(ESM::ESMReader& reader, bool overrideOnly)
     {
         T record;
         bool isDeleted = false;
 
         record.load (reader, isDeleted);
-        insert (record);
+        insert (record, overrideOnly);
 
         return RecordId(record.mId, isDeleted);
     }

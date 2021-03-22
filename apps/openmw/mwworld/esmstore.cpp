@@ -384,12 +384,14 @@ void ESMStore::validate()
             case ESM::REC_ENCH:
             case ESM::REC_SPEL:
             case ESM::REC_WEAP:
-            case ESM::REC_NPC_:
             case ESM::REC_LEVI:
             case ESM::REC_LEVC:
+                mStores[type]->read (reader);
+                return true;
+            case ESM::REC_NPC_:
             case ESM::REC_CREA:
             case ESM::REC_CONT:
-                mStores[type]->read (reader);
+                mStores[type]->read (reader, true);
                 return true;
 
             case ESM::REC_DYNA:
