@@ -118,6 +118,34 @@ void BSShaderLightingProperty::read(NIFStream *nif)
         clamp = nif->getUInt();
 }
 
+void BSShaderPPLightingProperty::read(NIFStream *nif)
+{
+    BSShaderLightingProperty::read(nif);
+    textureSet.read(nif);
+    if (nif->getBethVersion() <= 14)
+        return;
+    refraction.strength = nif->getFloat();
+    refraction.period = nif->getInt();
+    if (nif->getBethVersion() <= 24)
+        return;
+    parallax.passes = nif->getFloat();
+    parallax.scale = nif->getFloat();
+}
+
+void BSShaderPPLightingProperty::post(NIFFile *nif)
+{
+    BSShaderLightingProperty::post(nif);
+    textureSet.post(nif);
+}
+
+void BSShaderNoLightingProperty::read(NIFStream *nif)
+{
+    BSShaderLightingProperty::read(nif);
+    filename = nif->getSizedString();
+    if (nif->getBethVersion() >= 27)
+        falloffParams = nif->getVector4();
+}
+
 void NiFogProperty::read(NIFStream *nif)
 {
     Property::read(nif);
@@ -137,8 +165,8 @@ void S_MaterialProperty::read(NIFStream *nif)
     emissive = nif->getVector3();
     glossiness = nif->getFloat();
     alpha = nif->getFloat();
-    if (nif->getBethVersion() > 21)
-        emissive *= nif->getFloat();
+    if (nif->getBethVersion() >= 22)
+        emissiveMult = nif->getFloat();
 }
 
 void S_VertexColorProperty::read(NIFStream *nif)
