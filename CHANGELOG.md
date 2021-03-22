@@ -112,6 +112,7 @@
     Bug #5899: Visible modal windows and dropdowns crashing game on exit
     Bug #5902: NiZBufferProperty is unable to disable the depth test
     Bug #5906: Sunglare doesn't work with Mesa drivers and AMD GPUs
+    Bug #5912: ImprovedBound mod doesn't work
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu

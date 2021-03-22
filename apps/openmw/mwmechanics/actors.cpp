@@ -346,7 +346,11 @@ namespace MWMechanics
         if (actor != MWMechanics::getPlayer())
             return;
 
-        MWWorld::Ptr newItem = *store.getSlot(slot);
+        MWWorld::Ptr newItem;
+        auto it = store.getSlot(slot);
+        // Equip can fail because beast races cannot equip boots/helmets
+        if(it != store.end())
+            newItem = *it;
 
         if (newItem.isEmpty() || boundPtr != newItem)
             return;
