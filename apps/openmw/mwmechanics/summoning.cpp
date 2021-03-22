@@ -145,6 +145,12 @@ namespace MWMechanics
 
         for (std::map<ESM::SummonKey, int>::iterator it = creatureMap.begin(); it != creatureMap.end(); )
         {
+            if(it->second == -1)
+            {
+                // Keep the spell effect active if we failed to spawn anything
+                it++;
+                continue;
+            }
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->searchPtrViaActorId(it->second);
             if (ptr.isEmpty() || (ptr.getClass().getCreatureStats(ptr).isDead() && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished()))
             {
