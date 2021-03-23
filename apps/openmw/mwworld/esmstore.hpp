@@ -179,6 +179,9 @@ namespace MWWorld
             mNpcs.insert(*player);
         }
 
+        /// Validate entries in store after loading a save
+        void validateDynamic();
+
         void load(ESM::ESMReader &esm, Loading::Listener* listener);
 
         template <class T>

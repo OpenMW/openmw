@@ -549,6 +549,8 @@ namespace MWWorld
             void applyDeferredPreviewRotationToPlayer(float dt) override;
             void disableDeferredPreviewRotation() override;
 
+            void saveLoaded() override;
+
             void setupPlayer() override;
             void renderPlayer() override;
 
