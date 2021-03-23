@@ -82,14 +82,16 @@ namespace MWMechanics
                 mRemainingDuration = mDuration;
                 return true;
             }
-            mMaxDist = 450;
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            mMaxDist = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z())) + 450.0f;
         }
         else
         {
             // Stop moving if the player is too far away
             MWBase::Environment::get().getMechanicsManager()->playAnimationGroup(actor, "idle3", 0, 1);
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
-            mMaxDist = 250;
+            const osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
+            mMaxDist = std::max(halfExtents.x(), std::max(halfExtents.y(), halfExtents.z())) + 250.0f;
         }
 
         return false;
