@@ -235,6 +235,8 @@ namespace DetourNavigator
             const osg::Vec3f& end, const Flags includeFlags) const;
 
         virtual RecastMeshTiles getRecastMeshTiles() = 0;
+
+        virtual float getMaxNavmeshAreaRealRadius() const = 0;
     };
 }
 
