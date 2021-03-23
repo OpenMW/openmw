@@ -80,8 +80,6 @@ namespace MWWorld
 
         std::map<int, StoreBase *> mStores;
 
-        ESM::NPC mPlayerTemplate;
-
         unsigned int mDynamicCount;
 
         mutable std::map<std::string, std::weak_ptr<MWMechanics::SpellList> > mSpellListCache;
@@ -172,14 +170,13 @@ namespace MWWorld
             for (std::map<int, StoreBase *>::iterator it = mStores.begin(); it != mStores.end(); ++it)
                 it->second->clearDynamic();
 
-            mNpcs.insert(mPlayerTemplate);
+            movePlayerRecord();
         }
 
         void movePlayerRecord ()
         {
-            mPlayerTemplate = *mNpcs.find("player");
-            mNpcs.eraseStatic(mPlayerTemplate.mId);
-            mNpcs.insert(mPlayerTemplate);
+            auto player = mNpcs.find("player");
+            mNpcs.insert(*player);
         }
 
         void load(ESM::ESMReader &esm, Loading::Listener* listener);
