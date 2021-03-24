@@ -3873,7 +3873,7 @@ namespace MWWorld
         osg::Vec3f weaponHalfExtents = mPhysics->getHalfExtents(actor);
         osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
         osg::Vec3f targetHalfExtents = mPhysics->getHalfExtents(target);
-        weaponPos.z() += weaponHalfExtents.z() * 2 * 0.75; // projectilemanager.cpp spawns bolts at 0.75 actor height
+        weaponPos.z() += weaponHalfExtents.z() * 2 * Constants::TorsoHeight;
         targetPos.z() += targetHalfExtents.z();
         return (targetPos - weaponPos);
     }

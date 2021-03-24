@@ -1,5 +1,7 @@
 #include "aicast.hpp"
 
+#include <components/misc/constants.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -54,12 +56,12 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
     if (target != actor && target.getClass().isActor())
     {
         osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(target);
-        targetPos.z() += halfExtents.z() * 2 * 0.75f;
+        targetPos.z() += halfExtents.z() * 2 * Constants::TorsoHeight;
     }
 
     osg::Vec3f actorPos = actor.getRefData().getPosition().asVec3();
     osg::Vec3f halfExtents = MWBase::Environment::get().getWorld()->getHalfExtents(actor);
-    actorPos.z() += halfExtents.z() * 2 * 0.75f;
+    actorPos.z() += halfExtents.z() * 2 * Constants::TorsoHeight;
 
     osg::Vec3f dir = targetPos - actorPos;
 

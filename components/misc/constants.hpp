@@ -33,6 +33,9 @@ const std::string NightDayLabel = "NightDaySwitch";
 // A label to mark visual switches for herbalism feature
 const std::string HerbalismLabel = "HerbalismSwitch";
 
+// Percentage height at which projectiles are spawned from an actor
+const float TorsoHeight = 0.75f;
+
 }
 
 #endif

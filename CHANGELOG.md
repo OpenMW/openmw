@@ -88,6 +88,7 @@
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
+    Bug #5680: Enemy AI incorrectly aims projectiles
     Bug #5681: Player character can clip or pass through bridges instead of colliding against them
     Bug #5687: Bound items covering the same inventory slot expiring at the same time freezes the game
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
