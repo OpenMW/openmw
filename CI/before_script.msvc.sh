@@ -849,8 +849,8 @@ fi
 			fi
 
 			# check version
-			pip list | grep 'aqtinstall\s*1.1.3'
-			if [ $? -ne 0 ]; then
+			aqt-venv/${VENV_BIN_DIR}/pip list | grep 'aqtinstall\s*1.1.3' || [[ $? -ne 0 ]]
+			if [[ $? -eq 0 ]]; then
 				echo "  Installing aqt wheel into virtualenv..."
 				run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==1.1.3
 			fi
