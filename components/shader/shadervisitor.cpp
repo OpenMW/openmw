@@ -6,6 +6,7 @@
 #include <osg/Material>
 #include <osg/Multisample>
 #include <osg/Texture>
+#include <osg/ValueObject>
 
 #include <osgUtil/TangentSpaceGenerator>
 
