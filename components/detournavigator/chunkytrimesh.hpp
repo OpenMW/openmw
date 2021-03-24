@@ -46,6 +46,9 @@ namespace DetourNavigator
         ChunkyTriMesh(const std::vector<float>& verts, const std::vector<int>& tris,
                       const std::vector<AreaType>& flags, const std::size_t trisPerChunk);
 
+        ChunkyTriMesh(ChunkyTriMesh&&) = default;
+        ChunkyTriMesh& operator=(ChunkyTriMesh&&) = default;
+
         ChunkyTriMesh(const ChunkyTriMesh&) = delete;
         ChunkyTriMesh& operator=(const ChunkyTriMesh&) = delete;
 

@@ -88,27 +88,27 @@ namespace DetourNavigator
         return Value(*this, iterator);
     }
 
-    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& stats) const
+    NavMeshTilesCache::Stats NavMeshTilesCache::getStats() const
     {
-        std::size_t navMeshCacheSize = 0;
-        std::size_t usedNavMeshTiles = 0;
-        std::size_t cachedNavMeshTiles = 0;
-        std::size_t hitCount = 0;
-        std::size_t getCount = 0;
-
+        Stats result;
         {
             const std::lock_guard<std::mutex> lock(mMutex);
-            navMeshCacheSize = mUsedNavMeshDataSize;
-            usedNavMeshTiles = mBusyItems.size();
-            cachedNavMeshTiles = mFreeItems.size();
-            hitCount = mHitCount;
-            getCount = mGetCount;
+            result.mNavMeshCacheSize = mUsedNavMeshDataSize;
+            result.mUsedNavMeshTiles = mBusyItems.size();
+            result.mCachedNavMeshTiles = mFreeItems.size();
+            result.mHitCount = mHitCount;
+            result.mGetCount = mGetCount;
         }
+        return result;
+    }
 
-        stats.setAttribute(frameNumber, "NavMesh CacheSize", navMeshCacheSize);
-        stats.setAttribute(frameNumber, "NavMesh UsedTiles", usedNavMeshTiles);
-        stats.setAttribute(frameNumber, "NavMesh CachedTiles", cachedNavMeshTiles);
-        stats.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(hitCount) / getCount * 100.0);
+    void NavMeshTilesCache::reportStats(unsigned int frameNumber, osg::Stats& out) const
+    {
+        const Stats stats = getStats();
+        out.setAttribute(frameNumber, "NavMesh CacheSize", stats.mNavMeshCacheSize);
+        out.setAttribute(frameNumber, "NavMesh UsedTiles", stats.mUsedNavMeshTiles);
+        out.setAttribute(frameNumber, "NavMesh CachedTiles", stats.mCachedNavMeshTiles);
+        out.setAttribute(frameNumber, "NavMesh CacheHitRate", static_cast<double>(stats.mHitCount) / stats.mGetCount * 100.0);
     }
 
     void NavMeshTilesCache::removeLeastRecentlyUsed()

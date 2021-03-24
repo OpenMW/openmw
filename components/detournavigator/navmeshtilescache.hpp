@@ -188,6 +188,15 @@ namespace DetourNavigator
             ItemIterator mIterator;
         };
 
+        struct Stats
+        {
+            std::size_t mNavMeshCacheSize;
+            std::size_t mUsedNavMeshTiles;
+            std::size_t mCachedNavMeshTiles;
+            std::size_t mHitCount;
+            std::size_t mGetCount;
+        };
+
         NavMeshTilesCache(const std::size_t maxNavMeshDataSize);
 
         Value get(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
@@ -196,6 +205,8 @@ namespace DetourNavigator
         Value set(const osg::Vec3f& agentHalfExtents, const TilePosition& changedTile,
             const RecastMesh& recastMesh, const std::vector<OffMeshConnection>& offMeshConnections,
             NavMeshData&& value);
+
+        Stats getStats() const;
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;
 
