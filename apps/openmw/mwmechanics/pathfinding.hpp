@@ -101,6 +101,10 @@ namespace MWMechanics
             void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor, const osg::Vec3f& halfExtents,
                 const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
 
+            void buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+                const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+                const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts);
+
             /// Remove front point if exist and within tolerance
             void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
                         bool shortenIfAlmostStraight, bool canMoveByZ);

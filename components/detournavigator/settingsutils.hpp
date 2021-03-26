@@ -1,4 +1,4 @@
-#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGSUTILS_H
+﻿#ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGSUTILS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_SETTINGSUTILS_H
 
 #include "settings.hpp"
@@ -88,6 +88,16 @@ namespace DetourNavigator
             transform.getBasis(),
             transform.getOrigin() + btVector3(0, 0, getSwimLevel(settings, agentHalfExtentsZ) - agentHalfExtentsZ)
         );
+    }
+
+    inline float getRealTileSize(const Settings& settings)
+    {
+        return settings.mTileSize * settings.mCellSize / settings.mRecastScaleFactor;
+    }
+
+    inline float getMaxNavmeshAreaRadius(const Settings& settings)
+    {
+        return std::floor(std::sqrt(settings.mMaxTilesNumber / osg::PI)) - 1;
     }
 }
 

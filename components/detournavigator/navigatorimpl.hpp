@@ -60,6 +60,8 @@ namespace DetourNavigator
 
         RecastMeshTiles getRecastMeshTiles() override;
 
+        float getMaxNavmeshAreaRealRadius() const override;
+
     private:
         Settings mSettings;
         NavMeshManager mNavMeshManager;

@@ -92,6 +92,11 @@ namespace DetourNavigator
             return {};
         }
 
+        float getMaxNavmeshAreaRealRadius() const override
+        {
+            return std::numeric_limits<float>::max();
+        }
+
     private:
         Settings mDefaultSettings {};
         SharedNavMeshCacheItem mEmptyNavMeshCacheItem;

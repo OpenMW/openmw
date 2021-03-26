@@ -442,4 +442,21 @@ namespace MWMechanics
 
         std::copy(prePath.rbegin(), prePath.rend(), std::front_inserter(mPath));
     }
+
+    void PathFinder::buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
+        const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph, const osg::Vec3f& halfExtents,
+        const DetourNavigator::Flags flags, const DetourNavigator::AreaCosts& areaCosts)
+    {
+        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
+        const auto maxDistance = std::min(
+            navigator->getMaxNavmeshAreaRealRadius(),
+            static_cast<float>(Constants::CellSizeInUnits)
+        );
+        const auto startToEnd = endPoint - startPoint;
+        const auto distance = startToEnd.length();
+        if (distance <= maxDistance)
+            return buildPath(actor, startPoint, endPoint, cell, pathgridGraph, halfExtents, flags, areaCosts);
+        const auto end = startPoint + startToEnd * maxDistance / distance;
+        buildPath(actor, startPoint, end, cell, pathgridGraph, halfExtents, flags, areaCosts);
+    }
 }
