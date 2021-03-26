@@ -2473,6 +2473,11 @@ namespace MWWorld
         mRendering->getCamera()->adjustCameraDistance(dist);
     }
 
+    void World::saveLoaded()
+    {
+        mStore.validateDynamic();
+    }
+
     void World::setupPlayer()
     {
         const ESM::NPC *player = mStore.get<ESM::NPC>().find("player");

@@ -46,7 +46,7 @@ namespace MWWorld
 
         virtual void write (ESM::ESMWriter& writer, Loading::Listener& progress) const {}
 
-        virtual RecordId read (ESM::ESMReader& reader) { return RecordId(); }
+        virtual RecordId read (ESM::ESMReader& reader, bool overrideOnly = false) { return RecordId(); }
         ///< Read into dynamic storage
     };
 
@@ -192,7 +192,7 @@ namespace MWWorld
         /// @note The record identifiers are listed in the order that the records were defined by the content files.
         void listIdentifier(std::vector<std::string> &list) const override;
 
-        T *insert(const T &item);
+        T *insert(const T &item, bool overrideOnly = false);
         T *insertStatic(const T &item);
 
         bool eraseStatic(const std::string &id) override;
@@ -201,7 +201,7 @@ namespace MWWorld
 
         RecordId load(ESM::ESMReader &esm) override;
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const override;
-        RecordId read(ESM::ESMReader& reader) override;
+        RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) override;
     };
 
     template <>
