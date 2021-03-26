@@ -9,6 +9,7 @@
 #include "components/settings/settings.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
@@ -137,11 +138,12 @@ namespace
 
 namespace MWPhysics
 {
-    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, btCollisionWorld *collisionWorld)
+    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, btCollisionWorld *collisionWorld, MWRender::DebugDrawer* debugDrawer)
           : mDefaultPhysicsDt(physicsDt)
           , mPhysicsDt(physicsDt)
           , mTimeAccum(0.f)
           , mCollisionWorld(collisionWorld)
+          , mDebugDrawer(debugDrawer)
           , mNumJobs(0)
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
@@ -625,5 +627,11 @@ namespace MWPhysics
         mFrameStart = frameStart;
         mTimeBegin = mTimer->tick();
         mFrameNumber = frameNumber;
+    }
+
+    void PhysicsTaskScheduler::debugDraw()
+    {
+        std::shared_lock lock(mCollisionWorldMutex);
+        mDebugDrawer->step();
     }
 }

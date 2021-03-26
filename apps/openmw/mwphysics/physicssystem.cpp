@@ -97,8 +97,8 @@ namespace MWPhysics
             }
         }
 
-        mTaskScheduler = std::make_unique<PhysicsTaskScheduler>(mPhysicsDt, mCollisionWorld.get());
         mDebugDrawer = std::make_unique<MWRender::DebugDrawer>(mParentNode, mCollisionWorld.get(), mDebugDrawEnabled);
+        mTaskScheduler = std::make_unique<PhysicsTaskScheduler>(mPhysicsDt, mCollisionWorld.get(), mDebugDrawer.get());
     }
 
     PhysicsSystem::~PhysicsSystem()
@@ -827,7 +827,7 @@ namespace MWPhysics
     void PhysicsSystem::debugDraw()
     {
         if (mDebugDrawEnabled)
-            mDebugDrawer->step();
+            mTaskScheduler->debugDraw();
     }
 
     bool PhysicsSystem::isActorStandingOn(const MWWorld::Ptr &actor, const MWWorld::ConstPtr &object) const
