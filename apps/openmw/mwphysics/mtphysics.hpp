@@ -25,7 +25,7 @@ namespace MWPhysics
     class PhysicsTaskScheduler
     {
         public:
-            PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld);
+            PhysicsTaskScheduler(float physicsDt, btCollisionWorld* collisionWorld);
             ~PhysicsTaskScheduler();
 
             /// @brief move actors taking into account desired movements and collisions
@@ -67,7 +67,7 @@ namespace MWPhysics
             float mDefaultPhysicsDt;
             float mPhysicsDt;
             float mTimeAccum;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            btCollisionWorld* mCollisionWorld;
             std::vector<LOSRequest> mLOSCache;
             std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
 

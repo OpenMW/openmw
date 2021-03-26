@@ -259,7 +259,7 @@ namespace MWPhysics
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
             std::unique_ptr<btCollisionDispatcher> mDispatcher;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            std::unique_ptr<btCollisionWorld> mCollisionWorld;
             std::unique_ptr<PhysicsTaskScheduler> mTaskScheduler;
 
             std::unique_ptr<Resource::BulletShapeManager> mShapeManager;
