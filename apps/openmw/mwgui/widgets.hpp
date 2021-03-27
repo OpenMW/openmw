@@ -268,7 +268,7 @@ namespace MWGui
             void initialiseOverride() override;
 
         private:
-            static const int sIconOffset = 24;
+            static constexpr int sIconOffset = 24;
             
             void updateWidgets();
 

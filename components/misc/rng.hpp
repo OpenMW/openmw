@@ -42,6 +42,8 @@ public:
 
     /// returns default seed for RNG
     static unsigned int generateDefaultSeed();
+
+    static float deviate(float mean, float deviation, Seed& seed = getSeed());
 };
 
 }

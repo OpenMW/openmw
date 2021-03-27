@@ -13,10 +13,16 @@
 
 #include "physicssystem.hpp"
 #include "ptrholder.hpp"
+#include "components/misc/budgetmeasurement.hpp"
 
 namespace Misc
 {
     class Barrier;
+}
+
+namespace MWRender
+{
+    class DebugDrawer;
 }
 
 namespace MWPhysics
@@ -24,7 +30,7 @@ namespace MWPhysics
     class PhysicsTaskScheduler
     {
         public:
-            PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld);
+            PhysicsTaskScheduler(float physicsDt, btCollisionWorld* collisionWorld, MWRender::DebugDrawer* debugDrawer);
             ~PhysicsTaskScheduler();
 
             /// @brief move actors taking into account desired movements and collisions
@@ -32,7 +38,7 @@ namespace MWPhysics
             /// @param timeAccum accumulated time from previous run to interpolate movements
             /// @param actorsData per actor data needed to compute new positions
             /// @return new position of each actor
-            const std::vector<MWWorld::Ptr>& moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            const std::vector<MWWorld::Ptr>& moveActors(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
 
             const std::vector<MWWorld::Ptr>& resetSimulation(const ActorMap& actors);
 
@@ -48,6 +54,7 @@ namespace MWPhysics
             void removeCollisionObject(btCollisionObject* collisionObject);
             void updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate=false);
             bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
+            void debugDraw();
 
         private:
             void syncComputation();
@@ -58,13 +65,16 @@ namespace MWPhysics
             void updateAabbs();
             void updatePtrAabb(const std::weak_ptr<PtrHolder>& ptr);
             void updateStats(osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats);
+            std::tuple<int, float> calculateStepConfig(float timeAccum) const;
 
             std::unique_ptr<WorldFrameData> mWorldFrameData;
             std::vector<ActorFrameData> mActorsFrameData;
             std::vector<MWWorld::Ptr> mMovedActors;
-            const float mPhysicsDt;
+            float mDefaultPhysicsDt;
+            float mPhysicsDt;
             float mTimeAccum;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            btCollisionWorld* mCollisionWorld;
+            MWRender::DebugDrawer* mDebugDrawer;
             std::vector<LOSRequest> mLOSCache;
             std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
 
@@ -94,6 +104,12 @@ namespace MWPhysics
 
             unsigned int mFrameNumber;
             const osg::Timer* mTimer;
+
+            int mPrevStepCount;
+            Misc::BudgetMeasurement mBudget;
+            Misc::BudgetMeasurement mAsyncBudget;
+            unsigned int mBudgetCursor;
+            osg::Timer_t mAsyncStartTime;
             osg::Timer_t mTimeBegin;
             osg::Timer_t mTimeEnd;
             osg::Timer_t mFrameStart;

@@ -53,6 +53,7 @@ varying float linearDepth;
 #if !PER_PIXEL_LIGHTING
 centroid varying vec3 passLighting;
 centroid varying vec3 shadowDiffuseLighting;
+uniform float emissiveMult;
 #endif
 varying vec3 passViewPos;
 varying vec3 passNormal;
@@ -121,7 +122,8 @@ void main(void)
 #if !PER_PIXEL_LIGHTING
     vec3 diffuseLight, ambientLight;
     doLighting(viewPos.xyz, viewNormal, diffuseLight, ambientLight, shadowDiffuseLighting);
-    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + getEmissionColor().xyz;
+    vec3 emission = getEmissionColor().xyz * emissiveMult;
+    passLighting = getDiffuseColor().xyz * diffuseLight + getAmbientColor().xyz * ambientLight + emission;
     shadowDiffuseLighting *= getDiffuseColor().xyz;
 #endif
 

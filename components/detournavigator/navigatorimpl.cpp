@@ -213,4 +213,10 @@ namespace DetourNavigator
                 ++it;
         }
     }
+
+    float NavigatorImpl::getMaxNavmeshAreaRealRadius() const
+    {
+        const auto& settings = getSettings();
+        return getRealTileSize(settings) * getMaxNavmeshAreaRadius(settings);
+    }
 }

@@ -37,19 +37,20 @@ const float BUMP_RAIN = 2.5;
 const float REFL_BUMP = 0.10;                      // reflection distortion amount
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
 
-const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scattering
-const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
-
 const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
 const float SPEC_HARDNESS = 256.0;                 // specular highlights hardness
 
 const float BUMP_SUPPRESS_DEPTH = 300.0;           // at what water depth bumpmap will be suppressed for reflections and refractions (prevents artifacts at shores)
+const float BUMP_SUPPRESS_DEPTH_SS = 1000.0;      // modifier using screenspace depth (helps prevent same artifacts but at higher distances)
 
 const vec2 WIND_DIR = vec2(0.5f, -0.8f);
 const float WIND_SPEED = 0.2f;
 
 const vec3 WATER_COLOR = vec3(0.090195, 0.115685, 0.12745);
+
+const float SCATTER_AMOUNT = 0.5;                  // amount of sunlight scattering
+const vec3 SCATTER_COLOUR = WATER_COLOR * 8.0;     // colour of sunlight scattering
 
 // ---------------- rain ripples related stuff ---------------------
 
@@ -227,7 +228,10 @@ void main(void)
     float depthSampleDistorted = linearizeDepth(texture2D(refractionDepthMap,screenCoords-screenCoordsOffset).x) * radialise;
     float surfaceDepth = linearizeDepth(gl_FragCoord.z) * radialise;
     float realWaterDepth = depthSample - surfaceDepth;  // undistorted water depth in view direction, independent of frustum
-    screenCoordsOffset *= clamp(realWaterDepth / BUMP_SUPPRESS_DEPTH,0,1);
+    screenCoordsOffset *= clamp(
+            realWaterDepth / (BUMP_SUPPRESS_DEPTH
+                * max(1, depthSample / BUMP_SUPPRESS_DEPTH_SS)) // suppress more at distance
+        ,0 ,1);
 #endif
     // reflection
     vec3 reflection = texture2D(reflectionMap, screenCoords + screenCoordsOffset).rgb;
@@ -251,7 +255,11 @@ void main(void)
     if (cameraPos.z < 0.0)
         refraction = clamp(refraction * 1.5, 0.0, 1.0);
     else
-        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+    {
+        vec3 refractionA = mix(refraction, waterColor, clamp(depthSampleDistorted/VISIBILITY, 0.0, 1.0));
+        vec3 refractionB = mix(refraction, waterColor, clamp(realWaterDepth/VISIBILITY, 0.0, 1.0));
+        refraction = mix(refractionA, refractionB, 0.8);
+    }
 
     // sunlight scattering
     // normal for sunlight scattering

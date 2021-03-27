@@ -54,7 +54,7 @@ namespace MWSound
 
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
-        , mOutput(new DEFAULT_OUTPUT(*this))
+        , mOutput(new OpenAL_Output(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*vfs, *mOutput)
         , mListenerUnderwater(false)
@@ -109,7 +109,7 @@ namespace MWSound
 
     SoundManager::~SoundManager()
     {
-        clear();
+        SoundManager::clear();
         mSoundBuffers.clear();
         mOutput.reset();
     }
@@ -117,7 +117,7 @@ namespace MWSound
     // Return a new decoder instance, used as needed by the output implementations
     DecoderPtr SoundManager::getDecoder()
     {
-        return DecoderPtr(new DEFAULT_DECODER (mVFS));
+        return std::make_shared<FFmpeg_Decoder>(mVFS);
     }
 
     DecoderPtr SoundManager::loadVoice(const std::string &voicefile)

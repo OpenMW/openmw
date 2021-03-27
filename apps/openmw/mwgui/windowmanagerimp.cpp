@@ -189,7 +189,7 @@ namespace MWGui
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
         mGuiPlatform = new osgMyGUI::Platform(viewer, guiRoot, resourceSystem->getImageManager(), uiScale);
-        mGuiPlatform->initialise(resourcePath, logpath);
+        mGuiPlatform->initialise(resourcePath, (boost::filesystem::path(logpath) / "MyGUI.log").generic_string());
 
         mGui = new MyGUI::Gui;
         mGui->initialise("");
@@ -495,6 +495,8 @@ namespace MWGui
         }
         else
             allow(GW_ALL);
+
+        mStatsWatcher->forceUpdate();
     }
 
     WindowManager::~WindowManager()

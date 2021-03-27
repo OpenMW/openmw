@@ -9,6 +9,7 @@
 #include "components/settings/settings.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
@@ -101,7 +102,7 @@ namespace
 
     osg::Vec3f interpolateMovements(MWPhysics::ActorFrameData& actorData, float timeAccum, float physicsDt)
     {
-        const float interpolationFactor = timeAccum / physicsDt;
+        const float interpolationFactor = std::clamp(timeAccum / physicsDt, 0.0f, 1.0f);
         return actorData.mPosition * interpolationFactor + actorData.mActorRaw->getPreviousPosition() * (1.f - interpolationFactor);
     }
 
@@ -137,10 +138,12 @@ namespace
 
 namespace MWPhysics
 {
-    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld)
-          : mPhysicsDt(physicsDt)
+    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, btCollisionWorld *collisionWorld, MWRender::DebugDrawer* debugDrawer)
+          : mDefaultPhysicsDt(physicsDt)
+          , mPhysicsDt(physicsDt)
           , mTimeAccum(0.f)
-          , mCollisionWorld(std::move(collisionWorld))
+          , mCollisionWorld(collisionWorld)
+          , mDebugDrawer(debugDrawer)
           , mNumJobs(0)
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
@@ -152,6 +155,11 @@ namespace MWPhysics
           , mNextLOS(0)
           , mFrameNumber(0)
           , mTimer(osg::Timer::instance())
+          , mPrevStepCount(1)
+          , mBudget(physicsDt)
+          , mAsyncBudget(0.0f)
+          , mBudgetCursor(0)
+          , mAsyncStartTime(0)
           , mTimeBegin(0)
           , mTimeEnd(0)
           , mFrameStart(0)
@@ -179,16 +187,18 @@ namespace MWPhysics
                 if (data.mActor.lock())
                 {
                     std::unique_lock lock(mCollisionWorldMutex);
-                    MovementSolver::unstuck(data, mCollisionWorld.get());
+                    MovementSolver::unstuck(data, mCollisionWorld);
                 }
             });
 
         mPostStepBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
             {
                 if (mRemainingSteps)
+                {
                     --mRemainingSteps;
+                    updateActorsPositions();
+                }
                 mNextJob.store(0, std::memory_order_release);
-                updateActorsPositions();
             });
 
         mPostSimBarrier = std::make_unique<Misc::Barrier>(mNumThreads, [&]()
@@ -218,12 +228,60 @@ namespace MWPhysics
             thread.join();
     }
 
-    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::moveActors(int numSteps, float timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    std::tuple<int, float> PhysicsTaskScheduler::calculateStepConfig(float timeAccum) const
+    {
+        int maxAllowedSteps = 2;
+        int numSteps = timeAccum / mDefaultPhysicsDt;
+
+        // adjust maximum step count based on whether we're likely physics bottlenecked or not
+        // if maxAllowedSteps ends up higher than numSteps, we will not invoke delta time
+        // if it ends up lower than numSteps, but greater than 1, we will run a number of true delta time physics steps that we expect to be within budget
+        // if it ends up lower than numSteps and also 1, we will run a single delta time physics step
+        // if we did not do this, and had a fixed step count limit,
+        // we would have an unnecessarily low render framerate if we were only physics bottlenecked,
+        // and we would be unnecessarily invoking true delta time if we were only render bottlenecked
+
+        // get physics timing stats
+        float budgetMeasurement = std::max(mBudget.get(), mAsyncBudget.get());
+        // time spent per step in terms of the intended physics framerate
+        budgetMeasurement /= mDefaultPhysicsDt;
+        // ensure sane minimum value
+        budgetMeasurement = std::max(0.00001f, budgetMeasurement);
+        // we're spending almost or more than realtime per physics frame; limit to a single step
+        if (budgetMeasurement > 0.95)
+            maxAllowedSteps = 1;
+        // physics is fairly cheap; limit based on expense
+        if (budgetMeasurement < 0.5)
+            maxAllowedSteps = std::ceil(1.0/budgetMeasurement);
+        // limit to a reasonable amount
+        maxAllowedSteps = std::min(10, maxAllowedSteps);
+
+        // fall back to delta time for this frame if fixed timestep physics would fall behind
+        float actualDelta = mDefaultPhysicsDt;
+        if (numSteps > maxAllowedSteps)
+        {
+            numSteps = maxAllowedSteps;
+            // ensure that we do not simulate a frame ahead when doing delta time; this reduces stutter and latency
+            // this causes interpolation to 100% use the most recent physics result when true delta time is happening
+            // and we deliberately simulate up to exactly the timestamp that we want to render
+            actualDelta = timeAccum/float(numSteps+1);
+            // actually: if this results in a per-step delta less than the target physics steptime, clamp it
+            // this might reintroduce some stutter, but only comes into play in obscure cases
+            // (because numSteps is originally based on mDefaultPhysicsDt, this won't cause us to overrun)
+            actualDelta = std::max(actualDelta, mDefaultPhysicsDt);
+        }
+
+        return std::make_tuple(numSteps, actualDelta);
+    }
+
+    const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::moveActors(float & timeAccum, std::vector<ActorFrameData>&& actorsData, osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
     {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
 
         std::unique_lock lock(mSimulationMutex);
+
+        double timeStart = mTimer->tick();
 
         mMovedActors.clear();
 
@@ -249,14 +307,21 @@ namespace MWPhysics
                     mMovedActors.emplace_back(data.mActorRaw->getPtr());
                 }
             }
+            if(mAdvanceSimulation)
+                mAsyncBudget.update(mTimer->delta_s(mAsyncStartTime, mTimeEnd), mPrevStepCount, mBudgetCursor);
             updateStats(frameStart, frameNumber, stats);
         }
+
+        auto [numSteps, newDelta] = calculateStepConfig(timeAccum);
+        timeAccum -= numSteps*newDelta;
 
         // init
         for (auto& data : actorsData)
             data.updatePosition();
+        mPrevStepCount = numSteps;
         mRemainingSteps = numSteps;
         mTimeAccum = timeAccum;
+        mPhysicsDt = newDelta;
         mActorsFrameData = std::move(actorsData);
         mAdvanceSimulation = (mRemainingSteps != 0);
         mNewFrame = true;
@@ -267,20 +332,30 @@ namespace MWPhysics
         if (mAdvanceSimulation)
             mWorldFrameData = std::make_unique<WorldFrameData>();
 
+        if (mAdvanceSimulation)
+            mBudgetCursor += 1;
+
         if (mNumThreads == 0)
         {
             syncComputation();
+            if(mAdvanceSimulation)
+                mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), numSteps, mBudgetCursor);
             return mMovedActors;
         }
 
+        mAsyncStartTime = mTimer->tick();
         lock.unlock();
         mHasJob.notify_all();
+        if (mAdvanceSimulation)
+            mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), 1, mBudgetCursor);
         return mMovedActors;
     }
 
     const std::vector<MWWorld::Ptr>& PhysicsTaskScheduler::resetSimulation(const ActorMap& actors)
     {
         std::unique_lock lock(mSimulationMutex);
+        mBudget.reset(mDefaultPhysicsDt);
+        mAsyncBudget.reset(0.0f);
         mMovedActors.clear();
         mActorsFrameData.clear();
         for (const auto& [_, actor] : actors)
@@ -308,7 +383,7 @@ namespace MWPhysics
     void PhysicsTaskScheduler::contactTest(btCollisionObject* colObj, btCollisionWorld::ContactResultCallback& resultCallback)
     {
         std::shared_lock lock(mCollisionWorldMutex);
-        ContactTestWrapper::contactTest(mCollisionWorld.get(), colObj, resultCallback);
+        ContactTestWrapper::contactTest(mCollisionWorld, colObj, resultCallback);
     }
 
     std::optional<btVector3> PhysicsTaskScheduler::getHitPoint(const btTransform& from, btCollisionObject* target)
@@ -459,7 +534,7 @@ namespace MWPhysics
                 if(const auto actor = mActorsFrameData[job].mActor.lock())
                 {
                     MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
-                    MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+                    MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld, *mWorldFrameData);
                 }
             }
 
@@ -521,8 +596,8 @@ namespace MWPhysics
         {
             for (auto& actorData : mActorsFrameData)
             {
-                MovementSolver::unstuck(actorData, mCollisionWorld.get());
-                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+                MovementSolver::unstuck(actorData, mCollisionWorld);
+                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld, *mWorldFrameData);
             }
 
             updateActorsPositions();
@@ -552,5 +627,11 @@ namespace MWPhysics
         mFrameStart = frameStart;
         mTimeBegin = mTimer->tick();
         mFrameNumber = frameNumber;
+    }
+
+    void PhysicsTaskScheduler::debugDraw()
+    {
+        std::shared_lock lock(mCollisionWorldMutex);
+        mDebugDrawer->step();
     }
 }

@@ -204,7 +204,7 @@ namespace MWPhysics
         osg::Vec3f lastSlideNormalFallback(0,0,1);
         bool forceGroundTest = false;
 
-        for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.01f; ++iterations)
+        for (int iterations = 0; iterations < sMaxIterations && remainingTime > 0.0001f; ++iterations)
         {
             osg::Vec3f nextpos = newPosition + velocity * remainingTime;
 
@@ -394,6 +394,12 @@ namespace MWPhysics
                     isOnGround = false;
                 }
             }
+            // forcibly treat stuck actors as if they're on flat ground because buggy collisions when inside of things can/will break ground detection
+            if(physicActor->getStuckFrames() > 0)
+            {
+                isOnGround = true;
+                isOnSlope = false;
+            }
         }
 
         if((isOnGround && !isOnSlope) || newPosition.z() < swimlevel || actor.mFlying)
@@ -437,13 +443,23 @@ namespace MWPhysics
         auto* collisionObject = physicActor->getCollisionObject();
         auto tempPosition = actor.mPosition;
 
+        if(physicActor->getStuckFrames() >= 10)
+        {
+            if((physicActor->getLastStuckPosition() - actor.mPosition).length2() < 100)
+                return;
+            else
+            {
+                physicActor->setStuckFrames(0);
+                physicActor->setLastStuckPosition({0, 0, 0});
+            }
+        }
+
         // use vanilla-accurate collision hull position hack (do same hitbox offset hack as movement solver)
         // if vanilla compatibility didn't matter, the "correct" collision hull position would be physicActor->getScaledMeshTranslation()
         const auto verticalHalfExtent = osg::Vec3f(0.0, 0.0, physicActor->getHalfExtents().z());
 
         // use a 3d approximation of the movement vector to better judge player intent
-        const ESM::Position& refpos = ptr.getRefData().getPosition();
-        auto velocity = (osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
+        auto velocity = (osg::Quat(actor.mRefpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(actor.mRefpos.rot[2], osg::Vec3f(0, 0, -1))) * actor.mMovement;
         // try to pop outside of the world before doing anything else if we're inside of it
         if (!physicActor->getOnGround() || physicActor->getOnSlope())
                 velocity += physicActor->getInertialForce();
@@ -470,6 +486,8 @@ namespace MWPhysics
         auto contactCallback = gatherContacts({0.0, 0.0, 0.0});
         if(contactCallback.mDistance < -sAllowedPenetration)
         {
+            physicActor->setStuckFrames(physicActor->getStuckFrames() + 1);
+            physicActor->setLastStuckPosition(actor.mPosition);
             // we are; try moving it out of the world
             auto positionDelta = contactCallback.mContactSum;
             // limit rejection delta to the largest known individual rejections
@@ -501,6 +519,11 @@ namespace MWPhysics
                         tempPosition = goodPosition - verticalHalfExtent;
                 }
             }
+        }
+        else
+        {
+            physicActor->setStuckFrames(0);
+            physicActor->setLastStuckPosition({0, 0, 0});
         }
 
         collisionObject->setWorldTransform(oldTransform);

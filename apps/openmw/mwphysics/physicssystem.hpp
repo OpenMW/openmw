@@ -252,14 +252,14 @@ namespace MWPhysics
 
             void updateWater();
 
-            std::vector<ActorFrameData> prepareFrameData(int numSteps);
+            std::vector<ActorFrameData> prepareFrameData(bool willSimulate);
 
             osg::ref_ptr<SceneUtil::UnrefQueue> mUnrefQueue;
 
             std::unique_ptr<btBroadphaseInterface> mBroadphase;
             std::unique_ptr<btDefaultCollisionConfiguration> mCollisionConfiguration;
             std::unique_ptr<btCollisionDispatcher> mDispatcher;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            std::unique_ptr<btCollisionWorld> mCollisionWorld;
             std::unique_ptr<PhysicsTaskScheduler> mTaskScheduler;
 
             std::unique_ptr<Resource::BulletShapeManager> mShapeManager;

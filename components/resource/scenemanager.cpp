@@ -785,7 +785,7 @@ namespace Resource
 
     Shader::ShaderVisitor *SceneManager::createShaderVisitor(const std::string& shaderPrefix, bool translucentFramebuffer)
     {
-        Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix+"_vertex.glsl", shaderPrefix+"_fragment.glsl");
+        Shader::ShaderVisitor* shaderVisitor = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix);
         shaderVisitor->setForceShaders(mForceShaders);
         shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
         shaderVisitor->setNormalMapPattern(mNormalMapPattern);

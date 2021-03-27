@@ -10,6 +10,7 @@
 #include "pathfinding.hpp"
 #include "movement.hpp"
 #include "obstacle.hpp"
+#include "aitimer.hpp"
 
 namespace ESM
 {
@@ -27,7 +28,7 @@ namespace MWMechanics
     struct AiCombatStorage : AiTemporaryBase
     {
         float mAttackCooldown;
-        float mTimerReact;
+        AiReactionTimer mReaction;
         float mTimerCombatMove;
         bool mReadyToAttack;
         bool mAttack;
@@ -60,7 +61,6 @@ namespace MWMechanics
 
         AiCombatStorage():
         mAttackCooldown(0.0f),
-        mTimerReact(AI_REACTION_TIME),
         mTimerCombatMove(0.0f),
         mReadyToAttack(false),
         mAttack(false),

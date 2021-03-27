@@ -6,6 +6,7 @@
 #include <osg/Material>
 #include <osg/Multisample>
 #include <osg/Texture>
+#include <osg/ValueObject>
 
 #include <osgUtil/TangentSpaceGenerator>
 
@@ -42,7 +43,7 @@ namespace Shader
 
     }
 
-    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultVsTemplate, const std::string &defaultFsTemplate)
+    ShaderVisitor::ShaderVisitor(ShaderManager& shaderManager, Resource::ImageManager& imageManager, const std::string &defaultShaderPrefix)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mForceShaders(false)
         , mAllowedToModifyStateSets(true)
@@ -52,8 +53,7 @@ namespace Shader
         , mTranslucentFramebuffer(false)
         , mShaderManager(shaderManager)
         , mImageManager(imageManager)
-        , mDefaultVsTemplate(defaultVsTemplate)
-        , mDefaultFsTemplate(defaultFsTemplate)
+        , mDefaultShaderPrefix(defaultShaderPrefix)
     {
         mRequirements.emplace_back();
     }
@@ -129,6 +129,10 @@ namespace Shader
         if (mAllowedToModifyStateSets)
             writableStateSet = node.getStateSet();
         const osg::StateSet::TextureAttributeList& texAttributes = stateset->getTextureAttributeList();
+        bool shaderRequired = false;
+        if (node.getUserValue("shaderRequired", shaderRequired) && shaderRequired)
+            mRequirements.back().mShaderRequired = true;
+
         if (!texAttributes.empty())
         {
             const osg::Texture* diffuseMap = nullptr;
@@ -440,8 +444,12 @@ namespace Shader
 
         defineMap["translucentFramebuffer"] = mTranslucentFramebuffer ? "1" : "0";
 
-        osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(mDefaultVsTemplate, defineMap, osg::Shader::VERTEX));
-        osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(mDefaultFsTemplate, defineMap, osg::Shader::FRAGMENT));
+        std::string shaderPrefix;
+        if (!node.getUserValue("shaderPrefix", shaderPrefix))
+            shaderPrefix = mDefaultShaderPrefix;
+
+        osg::ref_ptr<osg::Shader> vertexShader (mShaderManager.getShader(shaderPrefix + "_vertex.glsl", defineMap, osg::Shader::VERTEX));
+        osg::ref_ptr<osg::Shader> fragmentShader (mShaderManager.getShader(shaderPrefix + "_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
 
         if (vertexShader && fragmentShader)
         {

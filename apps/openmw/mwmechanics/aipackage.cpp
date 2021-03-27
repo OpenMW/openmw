@@ -28,7 +28,6 @@
 MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options) :
     mTypeId(typeId),
     mOptions(options),
-    mTimer(AI_REACTION_TIME + 1.0f), // to force initial pathbuild
     mTargetActorRefId(""),
     mTargetActorId(-1),
     mRotateOnTheRunChecks(0),
@@ -64,7 +63,7 @@ MWWorld::Ptr MWMechanics::AiPackage::getTarget() const
 void MWMechanics::AiPackage::reset()
 {
     // reset all members
-    mTimer = AI_REACTION_TIME + 1.0f;
+    mReaction.reset();
     mIsShortcutting = false;
     mShortcutProhibited = false;
     mShortcutFailPos = osg::Vec3f();
@@ -75,7 +74,7 @@ void MWMechanics::AiPackage::reset()
 
 bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration, float destTolerance)
 {
-    mTimer += duration; //Update timer
+    const Misc::TimerStatus timerStatus = mReaction.update(duration);
 
     const osg::Vec3f position = actor.getRefData().getPosition().asVec3(); //position of the actor
     MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -98,7 +97,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const bool isDestReached = (distToTarget <= destTolerance);
     const bool actorCanMoveByZ = canActorMoveByZAxis(actor);
 
-    if (!isDestReached && mTimer > AI_REACTION_TIME)
+    if (!isDestReached && timerStatus == Misc::TimerStatus::Elapsed)
     {
         if (actor.getClass().isBipedal(actor))
             openDoors(actor);
@@ -115,7 +114,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
             if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
                 const auto pathfindingHalfExtents = world->getPathfindingHalfExtents(actor);
-                mPathFinder.buildPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
+                mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
                     pathfindingHalfExtents, getNavigatorFlags(actor), getAreaCosts(actor));
                 mRotateOnTheRunChecks = 3;
 
@@ -142,8 +141,6 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
                     mPathFinder.addPointToPath(dest); //Adds the final destination to the path, to try to get to where you want to go
             }
         }
-
-        mTimer = 0;
     }
 
     const float actorTolerance = 2 * actor.getClass().getMaxSpeed(actor) * duration

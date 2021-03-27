@@ -12,7 +12,7 @@ namespace MWMechanics
 {
     struct Movement;
 
-    static const int NUM_EVADE_DIRECTIONS = 4;
+    static constexpr int NUM_EVADE_DIRECTIONS = 4;
 
     /// tests actor's proximity to a closed door by default
     bool proximityToDoor(const MWWorld::Ptr& actor, float minDist);

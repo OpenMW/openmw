@@ -63,6 +63,8 @@ namespace MWGui
 
         void watchActor(const MWWorld::Ptr& ptr);
         MWWorld::Ptr getWatchedActor() const { return mWatched; }
+
+        void forceUpdate() { mWatchedStatsEmpty = true; }
     };
 }
 

@@ -73,22 +73,22 @@ namespace MWWorld
     {
         public:
 
-            static const int Type_Potion = 0x0001;
-            static const int Type_Apparatus = 0x0002;
-            static const int Type_Armor = 0x0004;
-            static const int Type_Book = 0x0008;
-            static const int Type_Clothing = 0x0010;
-            static const int Type_Ingredient = 0x0020;
-            static const int Type_Light = 0x0040;
-            static const int Type_Lockpick = 0x0080;
-            static const int Type_Miscellaneous = 0x0100;
-            static const int Type_Probe = 0x0200;
-            static const int Type_Repair = 0x0400;
-            static const int Type_Weapon = 0x0800;
+            static constexpr int Type_Potion = 0x0001;
+            static constexpr int Type_Apparatus = 0x0002;
+            static constexpr int Type_Armor = 0x0004;
+            static constexpr int Type_Book = 0x0008;
+            static constexpr int Type_Clothing = 0x0010;
+            static constexpr int Type_Ingredient = 0x0020;
+            static constexpr int Type_Light = 0x0040;
+            static constexpr int Type_Lockpick = 0x0080;
+            static constexpr int Type_Miscellaneous = 0x0100;
+            static constexpr int Type_Probe = 0x0200;
+            static constexpr int Type_Repair = 0x0400;
+            static constexpr int Type_Weapon = 0x0800;
 
-            static const int Type_Last = Type_Weapon;
+            static constexpr int Type_Last = Type_Weapon;
 
-            static const int Type_All = 0xffff;
+            static constexpr int Type_All = 0xffff;
 
             static const std::string sGoldId;
 
@@ -265,13 +265,13 @@ namespace MWWorld
         template<class From, class To, class Dummy>
         struct IsConvertible
         {
-            static const bool value = true;
+            static constexpr bool value = true;
         };
 
         template<class Dummy>
         struct IsConvertible<ConstPtr, Ptr, Dummy>
         {
-            static const bool value = false;
+            static constexpr bool value = false;
         };
 
         template<class T, class U>

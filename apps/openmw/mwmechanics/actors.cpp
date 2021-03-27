@@ -346,7 +346,11 @@ namespace MWMechanics
         if (actor != MWMechanics::getPlayer())
             return;
 
-        MWWorld::Ptr newItem = *store.getSlot(slot);
+        MWWorld::Ptr newItem;
+        auto it = store.getSlot(slot);
+        // Equip can fail because beast races cannot equip boots/helmets
+        if(it != store.end())
+            newItem = *it;
 
         if (newItem.isEmpty() || boundPtr != newItem)
             return;
@@ -1901,14 +1905,11 @@ namespace MWMechanics
     {
         if(!paused)
         {
-            static float timerUpdateAITargets = 0;
             static float timerUpdateHeadTrack = 0;
             static float timerUpdateEquippedLight = 0;
             static float timerUpdateHello = 0;
             const float updateEquippedLightInterval = 1.0f;
 
-            // target lists get updated once every 1.0 sec
-            if (timerUpdateAITargets >= 1.0f) timerUpdateAITargets = 0;
             if (timerUpdateHeadTrack >= 0.3f) timerUpdateHeadTrack = 0;
             if (timerUpdateHello >= 0.25f) timerUpdateHello = 0;
             if (mTimerDisposeSummonsCorpses >= 0.2f) mTimerDisposeSummonsCorpses = 0;
@@ -1961,6 +1962,8 @@ namespace MWMechanics
 
                 iter->first.getClass().getCreatureStats(iter->first).getActiveSpells().update(duration);
 
+                const Misc::TimerStatus engageCombatTimerStatus = iter->second->updateEngageCombatTimer(duration);
+
                 // For dead actors we need to update looping spell particles
                 if (iter->first.getClass().getCreatureStats(iter->first).isDead())
                 {
@@ -1989,7 +1992,7 @@ namespace MWMechanics
                     }
                     if (aiActive && inProcessingRange)
                     {
-                        if (timerUpdateAITargets == 0)
+                        if (engageCombatTimerStatus == Misc::TimerStatus::Elapsed)
                         {
                             if (!isPlayer)
                                 adjustCommandedActor(iter->first);
@@ -2076,7 +2079,6 @@ namespace MWMechanics
             if (avoidCollisions)
                 predictAndAvoidCollisions();
 
-            timerUpdateAITargets += duration;
             timerUpdateHeadTrack += duration;
             timerUpdateEquippedLight += duration;
             timerUpdateHello += duration;

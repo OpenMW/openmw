@@ -57,6 +57,7 @@
     Bug #5424: Creatures do not headtrack player
     Bug #5425: Poison effect only appears for one frame
     Bug #5427: GetDistance unknown ID error is misleading
+    Bug #5431: Physics performance degradation after a specific number of actors on a scene
     Bug #5435: Enemies can't hurt the player when collision is off
     Bug #5441: Enemies can't push a player character when in critical strike stance
     Bug #5451: Magic projectiles don't disappear with the caster
@@ -87,6 +88,7 @@
     Bug #5656: Sneaking characters block hits while standing
     Bug #5661: Region sounds don't play at the right interval
     Bug #5675: OpenMW-cs. FRMR subrecords are saved with the wrong MastIdx
+    Bug #5680: Bull Netches incorrectly aim over the player character's head and always miss
     Bug #5681: Player character can clip or pass through bridges instead of colliding against them
     Bug #5687: Bound items covering the same inventory slot expiring at the same time freezes the game
     Bug #5688: Water shader broken indoors with enable indoor shadows = false
@@ -109,6 +111,10 @@
     Bug #5871: The console appears if you type the Russian letter "Ё" in the name of the enchantment
     Bug #5877: Effects appearing with empty icon
     Bug #5899: Visible modal windows and dropdowns crashing game on exit
+    Bug #5902: NiZBufferProperty is unable to disable the depth test
+    Bug #5906: Sunglare doesn't work with Mesa drivers and AMD GPUs
+    Bug #5912: ImprovedBound mod doesn't work
+    Bug #5914: BM: The Swimmer can't reach destination
     Feature #390: 3rd person look "over the shoulder"
     Feature #832: OpenMW-CS: Handle deleted references
     Feature #1536: Show more information about level on menu
@@ -141,6 +147,7 @@
     Feature #5730: Add graphic herbalism option to the launcher and documents
     Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
     Feature #5813: Instanced groundcover support
+    Feature #5910: Fall back to delta time when physics can't keep up
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
     Task #5844: Update 'toggle sneak' documentation

@@ -47,4 +47,9 @@ namespace Misc
     {
         return static_cast<unsigned int>(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     }
+
+    float Rng::deviate(float mean, float deviation, Seed& seed)
+    {
+        return std::uniform_real_distribution<float>(mean - deviation, mean + deviation)(seed.mGenerator);
+    }
 }
