@@ -20,12 +20,17 @@ namespace Misc
     class Barrier;
 }
 
+namespace MWRender
+{
+    class DebugDrawer;
+}
+
 namespace MWPhysics
 {
     class PhysicsTaskScheduler
     {
         public:
-            PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld);
+            PhysicsTaskScheduler(float physicsDt, btCollisionWorld* collisionWorld, MWRender::DebugDrawer* debugDrawer);
             ~PhysicsTaskScheduler();
 
             /// @brief move actors taking into account desired movements and collisions
@@ -49,6 +54,7 @@ namespace MWPhysics
             void removeCollisionObject(btCollisionObject* collisionObject);
             void updateSingleAabb(std::weak_ptr<PtrHolder> ptr, bool immediate=false);
             bool getLineOfSight(const std::weak_ptr<Actor>& actor1, const std::weak_ptr<Actor>& actor2);
+            void debugDraw();
 
         private:
             void syncComputation();
@@ -67,7 +73,8 @@ namespace MWPhysics
             float mDefaultPhysicsDt;
             float mPhysicsDt;
             float mTimeAccum;
-            std::shared_ptr<btCollisionWorld> mCollisionWorld;
+            btCollisionWorld* mCollisionWorld;
+            MWRender::DebugDrawer* mDebugDrawer;
             std::vector<LOSRequest> mLOSCache;
             std::set<std::weak_ptr<PtrHolder>, std::owner_less<std::weak_ptr<PtrHolder>>> mUpdateAabb;
 

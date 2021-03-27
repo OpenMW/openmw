@@ -9,6 +9,7 @@
 #include "components/settings/settings.hpp"
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/movement.hpp"
+#include "../mwrender/bulletdebugdraw.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/player.hpp"
 
@@ -137,11 +138,12 @@ namespace
 
 namespace MWPhysics
 {
-    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, std::shared_ptr<btCollisionWorld> collisionWorld)
+    PhysicsTaskScheduler::PhysicsTaskScheduler(float physicsDt, btCollisionWorld *collisionWorld, MWRender::DebugDrawer* debugDrawer)
           : mDefaultPhysicsDt(physicsDt)
           , mPhysicsDt(physicsDt)
           , mTimeAccum(0.f)
-          , mCollisionWorld(std::move(collisionWorld))
+          , mCollisionWorld(collisionWorld)
+          , mDebugDrawer(debugDrawer)
           , mNumJobs(0)
           , mRemainingSteps(0)
           , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
@@ -185,7 +187,7 @@ namespace MWPhysics
                 if (data.mActor.lock())
                 {
                     std::unique_lock lock(mCollisionWorldMutex);
-                    MovementSolver::unstuck(data, mCollisionWorld.get());
+                    MovementSolver::unstuck(data, mCollisionWorld);
                 }
             });
 
@@ -381,7 +383,7 @@ namespace MWPhysics
     void PhysicsTaskScheduler::contactTest(btCollisionObject* colObj, btCollisionWorld::ContactResultCallback& resultCallback)
     {
         std::shared_lock lock(mCollisionWorldMutex);
-        ContactTestWrapper::contactTest(mCollisionWorld.get(), colObj, resultCallback);
+        ContactTestWrapper::contactTest(mCollisionWorld, colObj, resultCallback);
     }
 
     std::optional<btVector3> PhysicsTaskScheduler::getHitPoint(const btTransform& from, btCollisionObject* target)
@@ -532,7 +534,7 @@ namespace MWPhysics
                 if(const auto actor = mActorsFrameData[job].mActor.lock())
                 {
                     MaybeSharedLock lockColWorld(mCollisionWorldMutex, mThreadSafeBullet);
-                    MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+                    MovementSolver::move(mActorsFrameData[job], mPhysicsDt, mCollisionWorld, *mWorldFrameData);
                 }
             }
 
@@ -594,8 +596,8 @@ namespace MWPhysics
         {
             for (auto& actorData : mActorsFrameData)
             {
-                MovementSolver::unstuck(actorData, mCollisionWorld.get());
-                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld.get(), *mWorldFrameData);
+                MovementSolver::unstuck(actorData, mCollisionWorld);
+                MovementSolver::move(actorData, mPhysicsDt, mCollisionWorld, *mWorldFrameData);
             }
 
             updateActorsPositions();
@@ -625,5 +627,11 @@ namespace MWPhysics
         mFrameStart = frameStart;
         mTimeBegin = mTimer->tick();
         mFrameNumber = frameNumber;
+    }
+
+    void PhysicsTaskScheduler::debugDraw()
+    {
+        std::shared_lock lock(mCollisionWorldMutex);
+        mDebugDrawer->step();
     }
 }
