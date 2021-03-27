@@ -56,7 +56,15 @@ namespace SceneUtil
 
         void setDiffuse(int index, const osg::Vec4& value)
         {
-            *(unsigned int*)(&(*mData)[3*index][0]) = asRGBA(value);
+            auto signedValue = value;
+            float signBit = 1.0;
+            if (value[0] < 0)
+            {
+                signedValue *= -1.0;
+                signBit = -1.0;
+            }
+            *(unsigned int*)(&(*mData)[3*index][0]) = asRGBA(signedValue);
+            *(int*)(&(*mData)[3*index][3]) = signBit;
         }
 
         void setAmbient(int index, const osg::Vec4& value)
@@ -587,8 +595,16 @@ namespace SceneUtil
         : mStartLight(0)
         , mLightingMask(~0u)
         , mSun(nullptr)
-        , mPointLightRadiusMultiplier(std::max(0.0f, Settings::Manager::getFloat("light bounds multiplier", "Shaders")))
+        , mPointLightRadiusMultiplier(std::max(0.f, Settings::Manager::getFloat("light bounds multiplier", "Shaders")))
+        , mPointLightFadeStart(0.f)
     {
+        mPointLightFadeEnd = std::max(0.f, Settings::Manager::getFloat("maximum light distance", "Shaders"));
+        if (mPointLightFadeEnd > 0)
+        {
+            mPointLightFadeStart = std::clamp(Settings::Manager::getFloat("light fade start", "Shaders"), 0.f, 1.f);
+            mPointLightFadeStart = mPointLightFadeEnd * mPointLightFadeStart;
+        }
+
         auto lightingModelString = Settings::Manager::getString("lighting method", "Shaders");
         bool validLightingModel = isValidLightingModelString(lightingModelString);
         if (!validLightingModel)
@@ -869,6 +885,19 @@ namespace SceneUtil
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius * mPointLightRadiusMultiplier);
                 transformBoundingSphere(worldViewMat, viewBound);
 
+                static const float fadeDelta = mPointLightFadeEnd - mPointLightFadeStart;
+
+                if (mPointLightFadeEnd != 0.f)
+                {
+                    float fade = 1 - std::clamp((viewBound.center().length() - mPointLightFadeStart) / fadeDelta, 0.f, 1.f);
+
+                    if (fade == 0.f)
+                        continue;
+
+                    auto* light = transform.mLightSource->getLight(frameNum);
+                    light->setDiffuse(light->getDiffuse() * fade);
+                }
+
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
                 l.mViewBound = viewBound;
@@ -896,7 +925,7 @@ namespace SceneUtil
         auto* light = lightSource->getLight(frameNum);
         auto& buf = getLightBuffer(frameNum);
         buf->setDiffuse(index, light->getDiffuse());
-        buf->setAmbient(index, light->getSpecular());
+        buf->setAmbient(index, light->getAmbient());
         buf->setAttenuation(index, light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation());
         buf->setRadius(index, lightSource->getRadius());
         buf->setPosition(index, light->getPosition() * (*viewMatrix));

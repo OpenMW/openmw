@@ -16,22 +16,21 @@ float quickstep(float x)
 #if @useUBO
 
 const uint mask = uint(0xff);
+const uvec4 shift = uvec4(uint(0), uint(8), uint(16), uint(24));
 
-vec3 unpackRGB(float data)
+vec3 unpackRGB(uint data)
 {
-    uint colors = uint(data);
-    return vec3( (((colors >>  0) & mask) / 255.0)
-                ,(((colors >>  8) & mask) / 255.0)
-                ,(((colors >> 16) & mask) / 255.0));
+    return vec3( (float(((data >> shift.x) & mask)) / 255.0)
+                ,(float(((data >> shift.y) & mask)) / 255.0)
+                ,(float(((data >> shift.z) & mask)) / 255.0));
 }
 
-vec4 unpackRGBA(float data)
+vec4 unpackRGBA(uint data)
 {
-    uint colors = uint(data);
-    return vec4( (((colors >>  0) & mask) / 255.0)
-                ,(((colors >>  8) & mask) / 255.0)
-                ,(((colors >> 16) & mask) / 255.0)
-                ,(((colors >> 24) & mask) / 255.0));
+    return vec4( (float(((data >> shift.x) & mask)) / 255.0)
+                ,(float(((data >> shift.y) & mask)) / 255.0)
+                ,(float(((data >> shift.z) & mask)) / 255.0)
+                ,(float(((data >> shift.w) & mask)) / 255.0));
 }
 
 struct LightData
@@ -74,7 +73,7 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
     vec3 lightDir = normalize(getLight[0].position.xyz);
 
 #if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
-    vec4 data = getLight[0].packedColors;
+    uvec4 data = getLight[0].packedColors;
     ambientOut = unpackRGB(data.y);
     vec3 sunDiffuse = unpackRGB(data.x);
 #else
@@ -108,11 +107,11 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     float illumination = clamp(1.0 / (getLight[lightIndex].constantAttenuation + getLight[lightIndex].linearAttenuation * lightDistance + getLight[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
 #else
     float illumination = clamp(1.0 / (getLight[lightIndex].attenuation.x + getLight[lightIndex].attenuation.y * lightDistance + getLight[lightIndex].attenuation.z * lightDistance * lightDistance), 0.0, 1.0);
-    illumination *= 1.0 - quickstep((lightDistance * 0.887 / getLight[lightIndex].attenuation.w) - 0.887);
+    illumination *= 1.0 - quickstep((lightDistance / (getLight[lightIndex].attenuation.w)) - 1.0);
 #endif
 
 #if @useUBO
-    vec4 data = getLight[lightIndex].packedColors;
+    uvec4 data = getLight[lightIndex].packedColors;
     ambientOut = unpackRGB(data.y) * illumination;
 #else
     ambientOut = getLight[lightIndex].ambient.xyz * illumination;
@@ -133,7 +132,7 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
 #endif
 
 #if @useUBO
-    diffuseOut = unpackRGB(data.x) * lambert;
+    diffuseOut =  unpackRGB(data.x) * lambert * float(int(data.w));
 #else
     diffuseOut = getLight[lightIndex].diffuse.xyz * lambert;
 #endif

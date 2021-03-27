@@ -215,6 +215,8 @@ namespace SceneUtil
         LightingMethod mLightingMethod;
 
         float mPointLightRadiusMultiplier;
+        float mPointLightFadeEnd;
+        float mPointLightFadeStart;
 
         int mMaxLights;
 
