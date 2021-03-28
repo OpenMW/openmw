@@ -16,7 +16,7 @@
 
 #include "apps/openmw/mwrender/vismask.hpp"
 
-namespace 
+namespace
 {
     /* similar to the boost::hash_combine */
     template <class T>
@@ -136,33 +136,35 @@ namespace SceneUtil
         switch (method)
         {
         case LightingMethod::FFP:
-            break;
+            {
+                break;
+            }
         case LightingMethod::PerObjectUniform:
-        {
-            stateset->addUniform(new osg::Uniform("LightBuffer[0].diffuse", light->getDiffuse()), mode);
-            stateset->addUniform(new osg::Uniform("LightBuffer[0].ambient", light->getAmbient()), mode);
-            stateset->addUniform(new osg::Uniform("LightBuffer[0].specular", light->getSpecular()), mode);
-            stateset->addUniform(new osg::Uniform("LightBuffer[0].position", light->getPosition()), mode);
+            {
+                stateset->addUniform(new osg::Uniform("LightBuffer[0].diffuse", light->getDiffuse()), mode);
+                stateset->addUniform(new osg::Uniform("LightBuffer[0].ambient", light->getAmbient()), mode);
+                stateset->addUniform(new osg::Uniform("LightBuffer[0].specular", light->getSpecular()), mode);
+                stateset->addUniform(new osg::Uniform("LightBuffer[0].position", light->getPosition()), mode);
 
-            break;
-        }
+                break;
+            }
         case LightingMethod::SingleUBO:
-        {
-            osg::ref_ptr<LightBuffer> buffer = new LightBuffer(1);
+            {
+                osg::ref_ptr<LightBuffer> buffer = new LightBuffer(1);
 
-            buffer->setDiffuse(0, light->getDiffuse());
-            buffer->setAmbient(0, light->getAmbient());
-            buffer->setSpecular(0, light->getSpecular());
-            buffer->setPosition(0, light->getPosition());
+                buffer->setDiffuse(0, light->getDiffuse());
+                buffer->setAmbient(0, light->getAmbient());
+                buffer->setSpecular(0, light->getSpecular());
+                buffer->setPosition(0, light->getPosition());
 
-            osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
-            buffer->mData->setBufferObject(ubo);
-            osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->mData.get(), 0, buffer->mData->getTotalDataSize());
+                osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
+                buffer->mData->setBufferObject(ubo);
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->mData.get(), 0, buffer->mData->getTotalDataSize());
 
-            stateset->setAttributeAndModes(ubb, mode);
+                stateset->setAttributeAndModes(ubb, mode);
 
-            break;
-        }
+                break;
+            }
         }
     }
 
@@ -201,9 +203,9 @@ namespace SceneUtil
         void apply(osg::State& state) const override
         {
             int lightNum = GL_LIGHT0 + mIndex;
-            glLightfv( lightNum, GL_AMBIENT,               mnullptr.ptr() );
-            glLightfv( lightNum, GL_DIFFUSE,               mnullptr.ptr() );
-            glLightfv( lightNum, GL_SPECULAR,              mnullptr.ptr() );
+            glLightfv(lightNum, GL_AMBIENT, mnullptr.ptr());
+            glLightfv(lightNum, GL_DIFFUSE, mnullptr.ptr());
+            glLightfv(lightNum, GL_SPECULAR, mnullptr.ptr());
 
             LightStateCache* cache = getLightStateCache(state.getContextID());
             cache->lastAppliedLight[mIndex] = nullptr;
@@ -334,7 +336,7 @@ namespace SceneUtil
                     cache->lastAppliedLight[i] = mLights[i];
                 }
             }
-            
+
             state.applyModelViewMatrix(modelViewMatrix);
         }
 
@@ -344,7 +346,7 @@ namespace SceneUtil
     };
 
     struct StateSetGenerator
-    {  
+    {
         LightManager* mLightManager;
 
         virtual ~StateSetGenerator() {}
@@ -475,9 +477,9 @@ namespace SceneUtil
                 mLightManager = findLightManager(nv->getNodePath());
 
                 if (!mLightManager)
-                    throw std::runtime_error("can't find parent LightManager");                
+                    throw std::runtime_error("can't find parent LightManager");
             }
-            
+
             mLightManager->addLight(static_cast<LightSource*>(node), osg::computeLocalToWorld(nv->getNodePath()), nv->getTraversalNumber());
 
             traverse(node, nv);
@@ -523,7 +525,7 @@ namespace SceneUtil
                 mLastFrameNumber = cv->getTraversalNumber();
 
                 if (mLightManager->getLightingMethod() == LightingMethod::SingleUBO)
-                {   
+                {
                     auto stateset = mLightManager->getStateSet();
                     auto bo = mLightManager->getLightBuffer(mLastFrameNumber);
                     osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), bo->getData().get(), 0, bo->getData()->getTotalDataSize());
@@ -548,7 +550,7 @@ namespace SceneUtil
                         buf->setDiffuse(0, sun->getDiffuse());
                         buf->setAmbient(0, sun->getAmbient());
                         buf->setSpecular(0, sun->getSpecular());
-                        buf->setPosition(0, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));                           
+                        buf->setPosition(0, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
                     }
                 }
             }
@@ -560,12 +562,12 @@ namespace SceneUtil
         LightManager* mLightManager;
         size_t mLastFrameNumber;
     };
-    
+
     class LightManagerStateAttribute : public osg::StateAttribute
     {
     public:
         LightManagerStateAttribute() : mLightManager(nullptr) {}
-        LightManagerStateAttribute(LightManager* lightManager) : mLightManager(lightManager) {} 
+        LightManagerStateAttribute(LightManager* lightManager) : mLightManager(lightManager) {}
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
             : osg::StateAttribute(copy,copyop),mLightManager(copy.mLightManager) {}
@@ -595,7 +597,7 @@ namespace SceneUtil
         : mStartLight(0)
         , mLightingMask(~0u)
         , mSun(nullptr)
-        , mPointLightRadiusMultiplier(std::max(0.f, Settings::Manager::getFloat("light bounds multiplier", "Shaders")))
+        , mPointLightRadiusMultiplier(std::clamp(Settings::Manager::getFloat("light bounds multiplier", "Shaders"), 0.f, 10.f))
         , mPointLightFadeStart(0.f)
     {
         mPointLightFadeEnd = std::max(0.f, Settings::Manager::getFloat("maximum light distance", "Shaders"));
@@ -608,7 +610,7 @@ namespace SceneUtil
         auto lightingModelString = Settings::Manager::getString("lighting method", "Shaders");
         bool validLightingModel = isValidLightingModelString(lightingModelString);
         if (!validLightingModel)
-            Log(Debug::Error)   << "Invalid option for 'lighting model':  got '" << lightingModelString 
+            Log(Debug::Error)   << "Invalid option for 'lighting model':  got '" << lightingModelString
                                 << "',  expected legacy, default, or experimental.";
 
         if (ffp || !validLightingModel)
@@ -625,10 +627,10 @@ namespace SceneUtil
 
         osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
         bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
-        bool supportsGPU4 = exts && exts->isGpuShader4Supported;    
+        bool supportsGPU4 = exts && exts->isGpuShader4Supported;
 
         if (!supportsUBO)
-            Log(Debug::Info) << "GL_ARB_uniform_buffer_object not supported: using fallback uniforms"; 
+            Log(Debug::Info) << "GL_ARB_uniform_buffer_object not supported: using fallback uniforms";
         else if (!supportsGPU4)
             Log(Debug::Info) << "GL_EXT_gpu_shader4 not supported: using fallback uniforms";
 
@@ -648,7 +650,7 @@ namespace SceneUtil
                 osg::ref_ptr<osg::Uniform> uambient = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].ambient").c_str());
                 osg::ref_ptr<osg::Uniform> uposition = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].position").c_str());
                 osg::ref_ptr<osg::Uniform> uattenuation = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].attenuation").c_str());
-                
+
                 mLightUniforms[i].emplace(UniformKey::Diffuse, udiffuse);
                 mLightUniforms[i].emplace(UniformKey::Ambient, uambient);
                 mLightUniforms[i].emplace(UniformKey::Specular, uspecular);
@@ -681,7 +683,7 @@ namespace SceneUtil
 
             stateset->setAttribute(new LightManagerStateAttribute(this), osg::StateAttribute::ON);
         }
-        
+
         stateset->addUniform(new osg::Uniform("PointLightCount", 0));
 
         setUpdateCallback(new LightManagerUpdateCallback);
@@ -720,10 +722,10 @@ namespace SceneUtil
     {
         mMaxLights = value;
     }
-    
+
     int LightManager::getMaxLightsInScene() const
     {
-        static constexpr int max = 16384 / LightBuffer::queryBlockSize(1);        
+        static constexpr int max = 16384 / LightBuffer::queryBlockSize(1);
         return  max;
     }
 
@@ -732,7 +734,7 @@ namespace SceneUtil
         Shader::ShaderManager::DefineMap defines;
 
         bool ffp = usingFFP();
-        
+
         defines["ffpLighting"] = ffp ? "1" : "0";
         defines["maxLights"] = std::to_string(getMaxLights());
         defines["maxLightsInScene"] = std::to_string(getMaxLightsInScene());
@@ -794,7 +796,7 @@ namespace SceneUtil
     }
 
     void LightManager::update(size_t frameNum)
-    {   
+    {
         getLightIndexMap(frameNum).clear();
         mLights.clear();
         mLightsInViewSpace.clear();
@@ -802,7 +804,7 @@ namespace SceneUtil
         // Do an occasional cleanup for orphaned lights.
         for (int i=0; i<2; ++i)
         {
-            if (mStateSetCache[i].size() > 5000) 
+            if (mStateSetCache[i].size() > 5000)
                 mStateSetCache[i].clear();
         }
     }
@@ -839,9 +841,9 @@ namespace SceneUtil
             auto id = lightList[i]->mLightSource->getId();
             hash_combine(hash, id);
 
-            if (getLightingMethod() != LightingMethod::SingleUBO) 
+            if (getLightingMethod() != LightingMethod::SingleUBO)
                 continue;
-            
+
             if (getLightIndexMap(frameNum).find(id) != getLightIndexMap(frameNum).end())
                 continue;
 
@@ -875,11 +877,11 @@ namespace SceneUtil
         if (it == mLightsInViewSpace.end())
         {
             it = mLightsInViewSpace.insert(std::make_pair(camPtr, LightSourceViewBoundCollection())).first;
-            
+
             for (const auto& transform : mLights)
             {
                 osg::Matrixf worldViewMat = transform.mWorldMatrix * (*viewMatrix);
-                
+
                 float radius = transform.mLightSource->getRadius();
 
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius * mPointLightRadiusMultiplier);
@@ -901,7 +903,7 @@ namespace SceneUtil
                 LightSourceViewBound l;
                 l.mLightSource = transform.mLightSource;
                 l.mViewBound = viewBound;
-                it->second.push_back(l);  
+                it->second.push_back(l);
             }
         }
 
@@ -985,7 +987,7 @@ namespace SceneUtil
             // Don't use Camera::getViewMatrix, that one might be relative to another camera!
             const osg::RefMatrix* viewMatrix = cv->getCurrentRenderStage()->getInitialViewMatrix();
             const std::vector<LightManager::LightSourceViewBound>& lights = mLightManager->getLightsInViewSpace(cv->getCurrentCamera(), viewMatrix, mLastFrameNumber);
-            
+
             // get the node bounds in view space
             // NB do not node->getBound() * modelView, that would apply the node's transformation twice
             osg::BoundingSphere nodeBound;
@@ -1026,7 +1028,7 @@ namespace SceneUtil
                 for (auto it = lightList.begin(); it != lightList.end() && lightList.size() > maxLights; )
                 {
                     osg::CullStack::CullingStack& stack = cv->getModelViewCullingStack();
-                    
+
                     osg::BoundingSphere bs = (*it)->mViewBound;
                     bs._radius = bs._radius * 2.0;
                     osg::CullingSet& cullingSet = stack.front();

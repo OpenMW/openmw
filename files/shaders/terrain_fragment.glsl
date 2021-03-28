@@ -34,8 +34,8 @@ varying vec3 passNormal;
 
 #include "vertexcolors.glsl"
 #include "shadows_fragment.glsl"
-#include "parallax.glsl"
 #include "lighting.glsl"
+#include "parallax.glsl"
 
 void main()
 {

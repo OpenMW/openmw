@@ -148,6 +148,69 @@ By default, the fog becomes thicker proportionally to your distance from the cli
 This setting makes the fog use the actual eye point distance (or so called Euclidean distance) to calculate the fog, which makes the fog look less artificial, especially if you have a wide FOV.
 Note that the rendering will act as if you have 'force shaders' option enabled with this on, which means that shaders will be used to render all objects and the terrain.
 
+lighting method
+---------------
+
+:Type:		string
+:Range:		legacy|default|experimental
+:Default:	default
+
+Sets the internal handling of light sources. 
+
+'legacy' is restricted to a maximum of 8 lights per object and guarantees fixed function pipeline compatible lighting.
+
+'default' removes the light limit via :ref:`max lights` and follows a new attenuation formula which can drastically reduce light popping and seams.
+It is recommended to use this mode with older hardware, as the technique ensures a range of compatibility equal to that of 'legacy'.
+
+'experimental' carries all of the benefits that 'legacy' has, but uses a modern approach that allows for a higher 'max lights' count with little to no performance penalties on modern hardware.
+
+light bounds multiplier
+-----------------------
+
+:Type:		float
+:Range:		0.0-10.0
+:Default:	2.0
+
+Controls the bounding sphere radius of point lights, which is used to determine if an object should receive lighting from a particular light source.
+Note, this has no direct effect on the overall illumination of lights.
+Larger multipliers will allow for smoother transitions of light sources, but may require an increase in :ref:`max lights` and thus carries a performance penalty.
+This especially helps with abrupt light popping with handheld light sources such as torches and lanterns.
+
+It is recommended to keep this at 1.0 if :ref:`lighting method` is set to 'legacy', as the number of lights is fixed in that mode.
+
+maximum light distance
+----------------------
+
+:Type:		float
+:Range:		The whole range of 32-bit floating point
+:Default:	8192
+
+The maximum distance from the camera that lights will be illuminated, applies to both interiors and exteriors.
+A lower distance will improve performance.
+Set this to a non-positive value to disable fading.
+
+light fade start
+----------------
+
+:Type:		float
+:Range:		0.0-1.0
+:Default:	0.85
+
+The fraction of the maximum distance at which lights will begin to fade away.
+Tweaking it will make the transition proportionally more or less smooth.
+This setting has no effect if the maximum light distance is non-positive.
+
+max lights
+----------
+
+:Type:		integer
+:Range:		>=2
+:Default:	16
+
+Sets the maximum number of lights that each object can receive lighting from.
+Has no effect if :ref:`force shaders` option is off or :ref:`lighting method` is 'legacy'. In this case the maximum number of lights is fixed at 8.
+Increasing this too much can cause significant performance loss, especially if :ref:`lighting method` is not set to 'experimental' or :ref:`force per pixel lighting` is on. 
+
 antialias alpha test
 ---------------------------------------
 
