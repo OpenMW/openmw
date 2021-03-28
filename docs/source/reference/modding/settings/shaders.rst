@@ -160,6 +160,7 @@ Sets the internal handling of light sources.
 'legacy' is restricted to a maximum of 8 lights per object and guarantees fixed function pipeline compatible lighting.
 
 'default' removes the light limit via :ref:`max lights` and follows a new attenuation formula which can drastically reduce light popping and seams.
+This mode also enables vertex lighting on groundcover, which is otherwise completely disabled with 'legacy'.
 It is recommended to use this mode with older hardware, as the technique ensures a range of compatibility equal to that of 'legacy'.
 
 'experimental' carries all of the benefits that 'legacy' has, but uses a modern approach that allows for a higher 'max lights' count with little to no performance penalties on modern hardware.
