@@ -15,17 +15,17 @@ float quickstep(float x)
 
 #if @useUBO
 
-const uint mask = uint(0xff);
-const uvec4 shift = uvec4(uint(0), uint(8), uint(16), uint(24));
+const int mask = int(0xff);
+const ivec4 shift = ivec4(int(0), int(8), int(16), int(24));
 
-vec3 unpackRGB(uint data)
+vec3 unpackRGB(int data)
 {
     return vec3( (float(((data >> shift.x) & mask)) / 255.0)
                 ,(float(((data >> shift.y) & mask)) / 255.0)
                 ,(float(((data >> shift.z) & mask)) / 255.0));
 }
 
-vec4 unpackRGBA(uint data)
+vec4 unpackRGBA(int data)
 {
     return vec4( (float(((data >> shift.x) & mask)) / 255.0)
                 ,(float(((data >> shift.y) & mask)) / 255.0)
@@ -35,7 +35,7 @@ vec4 unpackRGBA(uint data)
 
 struct LightData
 {
-    uvec4 packedColors;  // diffuse, ambient, specular
+    ivec4 packedColors;  // diffuse, ambient, specular
     vec4 position;
     vec4 attenuation;   // constant, linear, quadratic, radius
 };
@@ -73,7 +73,7 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
     vec3 lightDir = normalize(getLight[0].position.xyz);
 
 #if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
-    uvec4 data = getLight[0].packedColors;
+    ivec4 data = getLight[0].packedColors;
     ambientOut = unpackRGB(data.y);
     vec3 sunDiffuse = unpackRGB(data.x);
 #else
@@ -122,7 +122,7 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
 #endif
 
 #if @useUBO
-    uvec4 data = getLight[lightIndex].packedColors;
+    ivec4 data = getLight[lightIndex].packedColors;
     ambientOut = unpackRGB(data.y) * illumination;
 #else
     ambientOut = getLight[lightIndex].ambient.xyz * illumination;
