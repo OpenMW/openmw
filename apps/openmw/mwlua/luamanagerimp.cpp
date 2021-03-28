@@ -98,6 +98,17 @@ namespace MWLua
 
     void LuaManager::update(bool paused, float dt)
     {
+        if (!mPlayer.isEmpty())
+        {
+            MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
+            if (!(getId(mPlayer) == getId(newPlayerPtr)))
+                throw std::logic_error("Player Refnum was changed unexpectedly");
+            if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
+            {
+                mPlayer = newPlayerPtr;
+                mWorldView.getObjectRegistry()->registerPtr(mPlayer);
+            }
+        }
         mWorldView.update();
 
         if (paused)
@@ -162,6 +173,14 @@ namespace MWLua
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);
         mUIMessages.clear();
+
+        for (std::unique_ptr<Action>& action : mActionQueue)
+            action->apply(mWorldView);
+        mActionQueue.clear();
+        
+        if (mTeleportPlayerAction)
+            mTeleportPlayerAction->apply(mWorldView);
+        mTeleportPlayerAction.reset();
     }
 
     void LuaManager::clear()
@@ -314,4 +333,5 @@ namespace MWLua
         scripts->load(data, true);
         scripts->setSerializer(mLocalSerializer.get());
     }
+
 }

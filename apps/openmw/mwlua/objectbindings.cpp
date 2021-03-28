@@ -95,6 +95,11 @@ namespace MWLua
         {
             return o.ptr().getCellRef().getRefId();
         });
+        objectT["cell"] = sol::readonly_property([](const ObjectT& o)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            return world->getCellName(o.ptr().getCell());
+        });
         objectT["position"] = sol::readonly_property([](const ObjectT& o) -> osg::Vec3f
         {
             return o.ptr().getRefData().getPosition().asVec3();
@@ -120,10 +125,15 @@ namespace MWLua
             };
 
             objectT["teleport"] = [luaManager=context.mLuaManager](const GObject& object, std::string_view cell,
-                                                                   const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& rot)
+                                                                   const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot)
             {
-                // TODO
-                throw std::logic_error("Not implemented");
+                MWWorld::Ptr ptr = object.ptr();
+                osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
+                auto action = std::make_unique<TeleportAction>(object.id(), std::string(cell), pos, rot);
+                if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    luaManager->addTeleportPlayerAction(std::move(action));
+                else
+                    luaManager->addAction(std::move(action));
             };
         }
     }
@@ -151,6 +161,20 @@ namespace MWLua
         });
     }
 
+    static SetEquipmentAction::Equipment parseEquipmentTable(sol::table equipment)
+    {
+        SetEquipmentAction::Equipment eqp;
+        for (auto& [key, value] : equipment)
+        {
+            int slot = key.as<int>();
+            if (value.is<GObject>())
+                eqp[slot] = value.as<GObject>().id();
+            else
+                eqp[slot] = value.as<std::string>();
+        }
+        return eqp;
+    }
+    
     template <class ObjectT>
     static void addInventoryBindings(sol::usertype<ObjectT>& objectT, const std::string& prefix, const Context& context)
     {
@@ -160,8 +184,11 @@ namespace MWLua
         objectT["getEquipment"] = [context](const ObjectT& o)
         {
             const MWWorld::Ptr& ptr = o.ptr();
-            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
             sol::table equipment(context.mLua->sol(), sol::create);
+            if (!ptr.getClass().hasInventoryStore(ptr))
+                return equipment;
+
+            MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
             for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
             {
                 auto it = store.getSlot(slot);
@@ -175,6 +202,8 @@ namespace MWLua
         objectT["isEquipped"] = [](const ObjectT& actor, const ObjectT& item)
         {
             const MWWorld::Ptr& ptr = actor.ptr();
+            if (!ptr.getClass().hasInventoryStore(ptr))
+                return false;
             MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
             return store.isEquipped(item.ptr());
         };
@@ -234,17 +263,26 @@ namespace MWLua
 
         if constexpr (std::is_same_v<ObjectT, GObject>)
         {  // Only for global scripts
-            // TODO
-            objectT["moveInto"] = [](const GObject& obj, const InventoryT& inventory) {};
-            objectT["setEquipment"] = [](const GObject& obj, const sol::table& equipment) {};
+            objectT["setEquipment"] = [manager=context.mLuaManager](const GObject& obj, sol::table equipment)
+            {
+                if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
+                {
+                    if (!equipment.empty())
+                        throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
+                    return;
+                }
+                manager->addAction(std::make_unique<SetEquipmentAction>(obj.id(), parseEquipmentTable(equipment)));
+            };
 
+            // TODO
             // obj.inventory:drop(obj2, [count])
             // obj.inventory:drop(recordId, [count])
             // obj.inventory:addNew(recordId, [count])
             // obj.inventory:remove(obj/recordId, [count])
+            /*objectT["moveInto"] = [](const GObject& obj, const InventoryT& inventory) {};
             inventoryT["drop"] = [](const InventoryT& inventory) {};
             inventoryT["addNew"] = [](const InventoryT& inventory) {};
-            inventoryT["remove"] = [](const InventoryT& inventory) {};
+            inventoryT["remove"] = [](const InventoryT& inventory) {};*/
         }
     }
 

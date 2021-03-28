@@ -5,6 +5,8 @@
 #include "../mwmechanics/aisequence.hpp"
 #include "../mwmechanics/aicombat.hpp"
 
+#include "luamanagerimp.hpp"
+
 namespace sol
 {
     template <>
@@ -32,9 +34,24 @@ namespace MWLua
         selfAPI["object"] = sol::readonly_property([](SelfObject& self) -> LObject { return LObject(self); });
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["setDirectControl"] = [](SelfObject& self, bool v) { self.mControls.controlledFromLua = v; };
-        selfAPI["setEquipment"] = [](const GObject& obj, const sol::table& equipment)
+        selfAPI["setEquipment"] = [manager=context.mLuaManager](const SelfObject& obj, sol::table equipment)
         {
-            throw std::logic_error("Not implemented");
+            if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
+            {
+                if (!equipment.empty())
+                    throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
+                return;
+            }
+            SetEquipmentAction::Equipment eqp;
+            for (auto& [key, value] : equipment)
+            {
+                int slot = key.as<int>();
+                if (value.is<LObject>())
+                    eqp[slot] = value.as<LObject>().id();
+                else
+                    eqp[slot] = value.as<std::string>();
+            }
+            manager->addAction(std::make_unique<SetEquipmentAction>(obj.id(), std::move(eqp)));
         };
         selfAPI["getCombatTarget"] = [worldView=context.mWorldView](SelfObject& self) -> sol::optional<LObject>
         {

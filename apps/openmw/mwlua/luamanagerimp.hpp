@@ -8,6 +8,7 @@
 
 #include "../mwbase/luamanager.hpp"
 
+#include "actions.hpp"
 #include "object.hpp"
 #include "eventqueue.hpp"
 #include "globalscripts.hpp"
@@ -46,8 +47,10 @@ namespace MWLua
         void clear() override;  // should be called before loading game or starting a new game to reset internal state.
         void setupPlayer(const MWWorld::Ptr& ptr) override;  // Should be called once after each "clear".
 
-        // Used only in luabindings.cpp
+        // Used only in luabindings
         void addLocalScript(const MWWorld::Ptr&, const std::string& scriptPath);
+        void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
+        void addTeleportPlayerAction(std::unique_ptr<TeleportAction>&& action) { mTeleportPlayerAction = std::move(action); }
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
 
         // Saving
@@ -90,6 +93,8 @@ namespace MWLua
         std::vector<ObjectId> mActorAddedEvents;
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
+        std::vector<std::unique_ptr<Action>> mActionQueue;
+        std::unique_ptr<TeleportAction> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
     };
 
