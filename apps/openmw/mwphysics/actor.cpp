@@ -123,6 +123,7 @@ void Actor::updatePosition()
     mSimulationPosition = mWorldPosition;
     mStandingOnPtr = nullptr;
     mSkipSimulation = true;
+    mPositionOffset = osg::Vec3f();
 }
 
 void Actor::updateWorldPosition()
@@ -179,9 +180,9 @@ bool Actor::setPosition(const osg::Vec3f& position)
     if (mSkipSimulation)
         return false;
     bool hasChanged = mPosition != position || mPositionOffset.length() != 0 || mWorldPositionChanged;
-    mPreviousPosition = mPosition + mPositionOffset;
-    mPosition = position + mPositionOffset;
-    mPositionOffset = osg::Vec3f();
+    applyOffsetChange();
+    mPreviousPosition = mPosition;
+    mPosition = position;
     return hasChanged;
 }
 
@@ -198,6 +199,7 @@ void Actor::applyOffsetChange()
     mWorldPosition += mPositionOffset;
     mPosition += mPositionOffset;
     mPreviousPosition += mPositionOffset;
+    mSimulationPosition += mPositionOffset;
     mPositionOffset = osg::Vec3f();
     mWorldPositionChanged = true;
 }

@@ -862,6 +862,19 @@ namespace MWWorld
         if (reference == getPlayerPtr())
             throw std::runtime_error("can not disable player object");
 
+        // A common pattern to teleport NPC in scripts is a sequence of SetPos/Disable/Enable
+        // Disable/Enable create a new physics actor, and so the SetPos call is lost
+        // Call moveObject so that the newly created physics actor will have up-to-date position
+        if (reference.getClass().isActor())
+        {
+            auto* physactor = mPhysics->getActor(reference);
+            if (physactor)
+            {
+                physactor->applyOffsetChange();
+                const auto position = physactor->getSimulationPosition();
+                moveObject(reference, position.x(), position.y(), position.z(), true);
+            }
+        }
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())
