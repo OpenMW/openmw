@@ -101,6 +101,17 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     vec3 lightDir = getLight[lightIndex].position.xyz - viewPos;
 
     float lightDistance = length(lightDir);
+
+#if !@ffpLighting
+    // This has a *considerable* performance uplift where GPU is a bottleneck
+    if (lightDistance > getLight[lightIndex].attenuation.w * 2.0)
+    {
+        ambientOut = vec3(0.0);
+        diffuseOut = vec3(0.0);
+        return;
+    }
+#endif
+
     lightDir = normalize(lightDir);
 
 #if @ffpLighting
