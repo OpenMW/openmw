@@ -60,6 +60,7 @@ varying vec3 passNormal;
 
 #include "vertexcolors.glsl"
 #include "shadows_vertex.glsl"
+
 #include "lighting.glsl"
 
 void main(void)
