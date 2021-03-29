@@ -151,6 +151,8 @@ uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
+#define PER_PIXEL_LIGHTING 0
+
 #include "shadows_fragment.glsl"
 #include "lighting.glsl"
 

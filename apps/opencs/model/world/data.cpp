@@ -83,7 +83,7 @@ CSMWorld::Data::Data (ToUTF8::FromType encoding, bool fsStrict, const Files::Pat
     defines["clamp"] = "1"; // Clamp lighting
     defines["preLightEnv"] = "0"; // Apply environment maps after lighting like Morrowind
     defines["radialFog"] = "0";
-    defines["ffpLighting"] = "0";
+    defines["ffpLighting"] = "1";
     for (const auto& define : shadowDefines)
         defines[define.first] = define.second;
     mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(defines);

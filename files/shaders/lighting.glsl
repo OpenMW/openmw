@@ -69,7 +69,7 @@ uniform int PointLightCount;
 #endif
 
 void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
-{    
+{
     vec3 lightDir = normalize(getLight[0].position.xyz);
 
 #if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
@@ -98,9 +98,9 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
 
 void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec3 viewPos, vec3 viewNormal)
 {
-    vec3 lightDir = getLight[lightIndex].position.xyz - viewPos;
+    vec3 lightPos = getLight[lightIndex].position.xyz - viewPos;
 
-    float lightDistance = length(lightDir);
+    float lightDistance = length(lightPos);
 
 #if !@ffpLighting
     // This has a *considerable* performance uplift where GPU is a bottleneck
@@ -112,7 +112,7 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     }
 #endif
 
-    lightDir = normalize(lightDir);
+    lightPos = normalize(lightPos);
 
 #if @ffpLighting
     float illumination = clamp(1.0 / (getLight[lightIndex].constantAttenuation + getLight[lightIndex].linearAttenuation * lightDistance + getLight[lightIndex].quadraticAttenuation * lightDistance * lightDistance), 0.0, 1.0);
@@ -128,8 +128,8 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     ambientOut = getLight[lightIndex].ambient.xyz * illumination;
 #endif
 
-    float lambert = dot(viewNormal.xyz, lightDir) * illumination;
-    
+    float lambert = dot(viewNormal.xyz, lightPos) * illumination;
+
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
@@ -179,7 +179,7 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
     for (int i=1; i <= PointLightCount; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
-#else 
+#else
     for (int i=0; i < PointLightCount; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);

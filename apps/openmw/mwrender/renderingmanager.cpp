@@ -199,8 +199,8 @@ namespace MWRender
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
     {
-        auto lightingModelString = Settings::Manager::getString("lighting method", "Shaders");
-        bool usingFFPLighting = lightingModelString == "legacy" && SceneUtil::LightManager::isValidLightingModelString(lightingModelString);
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
+        bool usingFFPLighting = lightingMethod == SceneUtil::LightingMethod::FFP;
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         resourceSystem->getSceneManager()->setShaderPath(resourcePath + "/shaders");
@@ -217,9 +217,9 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::Manager::getString("specular map pattern", "Shaders"));
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
         resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1);
-        
+
         osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(!forceShaders || usingFFPLighting);
-        // Let LightManager choose which backend to use based, mostly depends on support for UBOs 
+        // Let LightManager choose which backend to use based on our hint, mostly depends on support for UBOs
         resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
 
@@ -262,7 +262,7 @@ namespace MWRender
         float groundcoverDistance = (Constants::CellSizeInUnits * std::max(1, Settings::Manager::getInt("distance", "Groundcover")) - 1024) * 0.93;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * 0.9f);
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
-        
+
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 

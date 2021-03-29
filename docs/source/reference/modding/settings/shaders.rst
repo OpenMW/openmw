@@ -40,7 +40,7 @@ Only affects objects that render with shaders (see 'force shaders' option).
 Always affects terrain.
 
 Leaving this option at its default makes the lighting compatible with Morrowind's fixed-function method,
-but the lighting may appear dull and there might be colour shifts. 
+but the lighting may appear dull and there might be colour shifts.
 Setting this option to 'false' results in more dynamic lighting.
 
 auto use object normal maps
@@ -152,32 +152,51 @@ lighting method
 ---------------
 
 :Type:		string
-:Range:		legacy|default|experimental
+:Range:		legacy|shaders compatibility|shaders
 :Default:	default
 
-Sets the internal handling of light sources. 
+Sets the internal handling of light sources.
 
-'legacy' is restricted to a maximum of 8 lights per object and guarantees fixed function pipeline compatible lighting.
+'legacy' is restricted to 8 lights per object and emulates fixed function
+pipeline compatible lighting.
 
-'default' removes the light limit via :ref:`max lights` and follows a new attenuation formula which can drastically reduce light popping and seams.
-This mode also enables vertex lighting on groundcover, which is otherwise completely disabled with 'legacy'.
-It is recommended to use this mode with older hardware, as the technique ensures a range of compatibility equal to that of 'legacy'.
+'shaders compatibility' removes the light limit via :ref:`max lights` and
+follows a modifed attenuation formula which can drastically reduce light popping
+and seams. This mode also enables lighting on groundcover and a configurable
+light fade. It is recommended to use this with older hardware and a light limit
+closer to 8. Because of its wide range of compatibility it is set as the
+default.
 
-'experimental' carries all of the benefits that 'legacy' has, but uses a modern approach that allows for a higher 'max lights' count with little to no performance penalties on modern hardware.
+'shaders' carries all of the benefits that 'shaders compatibility' does, but
+uses a modern approach that allows for a higher :ref:`max lights` count with
+little to no performance penalties on modern hardware. It is recommended to use
+this mode when supported and where the GPU is not a bottleneck. On some weaker
+devices, using this mode along with :ref:`force per pixel lighting` can carry
+performance penalties.
+
+Note that when enabled, groundcover lighting is forced to be vertex lighting,
+unless normal maps are provided. This is due to some groundcover mods using the
+Z-Up Normals technique to avoid some common issues with shading. As a
+consequence, per pixel lighting would give undesirable results.
+
+This setting has no effect if :ref:`force shaders` is 'false'.
 
 light bounds multiplier
 -----------------------
 
 :Type:		float
 :Range:		0.0-10.0
-:Default:	2.0
+:Default:	1.75
 
-Controls the bounding sphere radius of point lights, which is used to determine if an object should receive lighting from a particular light source.
-Note, this has no direct effect on the overall illumination of lights.
-Larger multipliers will allow for smoother transitions of light sources, but may require an increase in :ref:`max lights` and thus carries a performance penalty.
-This especially helps with abrupt light popping with handheld light sources such as torches and lanterns.
+Controls the bounding sphere radius of point lights, which is used to determine
+if an object should receive lighting from a particular light source. Note, this
+has no direct effect on the overall illumination of lights. Larger multipliers
+will allow for smoother transitions of light sources, but may require an
+increase in :ref:`max lights` and thus carries a performance penalty. This
+especially helps with abrupt light popping with handheld light sources such as
+torches and lanterns.
 
-It is recommended to keep this at 1.0 if :ref:`lighting method` is set to 'legacy', as the number of lights is fixed in that mode.
+This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 maximum light distance
 ----------------------
@@ -186,9 +205,11 @@ maximum light distance
 :Range:		The whole range of 32-bit floating point
 :Default:	8192
 
-The maximum distance from the camera that lights will be illuminated, applies to both interiors and exteriors.
-A lower distance will improve performance.
-Set this to a non-positive value to disable fading.
+The maximum distance from the camera that lights will be illuminated, applies to
+both interiors and exteriors. A lower distance will improve performance. Set
+this to a non-positive value to disable fading.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 light fade start
 ----------------
@@ -199,18 +220,23 @@ light fade start
 
 The fraction of the maximum distance at which lights will begin to fade away.
 Tweaking it will make the transition proportionally more or less smooth.
-This setting has no effect if the maximum light distance is non-positive.
+
+This setting has no effect if the :ref:`maximum light distance` is non-positive
+or :ref:`lighting method` is 'legacy'.
 
 max lights
 ----------
 
 :Type:		integer
 :Range:		>=2
-:Default:	16
+:Default:	8
 
 Sets the maximum number of lights that each object can receive lighting from.
-Has no effect if :ref:`force shaders` option is off or :ref:`lighting method` is 'legacy'. In this case the maximum number of lights is fixed at 8.
-Increasing this too much can cause significant performance loss, especially if :ref:`lighting method` is not set to 'experimental' or :ref:`force per pixel lighting` is on. 
+Increasing this too much can cause significant performance loss, especially if
+:ref:`lighting method` is not set to 'shaders' or :ref:`force per pixel
+lighting` is on.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
 
 antialias alpha test
 ---------------------------------------

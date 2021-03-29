@@ -10,7 +10,6 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/resource/scenemanager.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 
