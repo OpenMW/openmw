@@ -18,14 +18,14 @@ void MWState::QuickSaveManager::visitSave(const Slot *saveSlot)
     }
 }
 
-bool MWState::QuickSaveManager::isOldestSave(const Slot *compare)
+bool MWState::QuickSaveManager::isOldestSave(const Slot *compare) const
 {
     if(mOldestSlotVisited == nullptr)
         return true;
     return (compare->mTimeStamp <= mOldestSlotVisited->mTimeStamp);
 }
 
-bool MWState::QuickSaveManager::shouldCreateNewSlot()
+bool MWState::QuickSaveManager::shouldCreateNewSlot() const
 {
     return (mSlotsVisited < mMaxSaves);
 }

@@ -63,7 +63,7 @@ namespace MWRender
         {
             std::set<ESM::RefNum> mDisabled;
             std::set<ESM::RefNum> mBlacklist;
-            bool operator==(const RefTracker&other) { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
+            bool operator==(const RefTracker&other) const { return mDisabled == other.mDisabled && mBlacklist == other.mBlacklist; }
         };
         RefTracker mRefTracker;
         RefTracker mRefTrackerNew;
