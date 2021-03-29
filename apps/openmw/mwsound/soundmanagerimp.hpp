@@ -141,7 +141,7 @@ namespace MWSound
 
     public:
         SoundManager(const VFS::Manager* vfs, bool useSound);
-        virtual ~SoundManager();
+        ~SoundManager() override;
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
