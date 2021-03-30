@@ -24,7 +24,7 @@ Programmers
     Alex McKibben
     alexanderkjall
     Alexander Nadeau (wareya)
-    Alexander Olofsson (Ace)
+    Alexander Olofsson (Ananace)
     Alex Rice
     Alex S (docwest)
     Allofich
@@ -235,7 +235,7 @@ Documentation
 Packagers
 ---------
 
-    Alexander Olofsson (Ace) - Windows
+    Alexander Olofsson (Ananace) - Windows and Flatpak
     Alexey Sokolov (DarthGandalf) - Gentoo Linux
     Bret Curtis (psi29a) - Debian and Ubuntu Linux
     Edmondo Tommasina (edmondo) - Gentoo Linux
