@@ -195,6 +195,7 @@ namespace MWRender
         , mWorkQueue(workQueue)
         , mUnrefQueue(new SceneUtil::UnrefQueue)
         , mNavigator(navigator)
+        , mMinimumAmbientLuminance(0.f)
         , mNightEyeFactor(0.f)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
@@ -222,6 +223,9 @@ namespace MWRender
         // Let LightManager choose which backend to use based on our hint, mostly depends on support for UBOs
         resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
+
+        if (sceneRoot->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+            mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
 
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
@@ -1072,7 +1076,25 @@ namespace MWRender
         osg::Vec4f color = mAmbientColor;
 
         if (mNightEyeFactor > 0.f)
+        {
             color += osg::Vec4f(0.7, 0.7, 0.7, 0.0) * mNightEyeFactor;
+        }
+        // optionally brighten up ambient interiors when using a non-FFP emulated lighting method
+        else if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+        {
+            static constexpr float pR = 0.2126;
+            static constexpr float pG = 0.7152;
+            static constexpr float pB = 0.0722;
+
+            // we already work in linear RGB so no conversions are needed for the luminosity function
+            float relativeLuminance = pR*color.r() + pG*color.g() + pB*color.b();
+            if (relativeLuminance < mMinimumAmbientLuminance)
+            {
+                // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data as least we can
+                float targetBrightnessIncreaseFactor = mMinimumAmbientLuminance / relativeLuminance;
+                color *= targetBrightnessIncreaseFactor;
+            }
+        }
 
         mStateUpdater->setAmbientColor(color);
     }

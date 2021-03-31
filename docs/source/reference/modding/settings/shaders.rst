@@ -238,6 +238,25 @@ lighting` is on.
 
 This setting has no effect if :ref:`lighting method` is 'legacy'.
 
+minimum interior brightness
+------------------------
+
+:Type:		float
+:Range:		0.0-1.0
+:Default:	0.1
+
+Sets the minimum interior ambient brightness for interior cells when
+:ref:`lighting method` is not 'legacy'. A consequence of the new lighting system
+is that interiors will sometimes be darker since light sources now have sensible
+fall-offs. A couple solutions are to either add more lights or increase their
+radii to compensate, but these require content changes. For best results it is
+recommended to set this to 0.0 to retain the colors that level designers
+intended. If brighter interiors are wanted, however, this setting should be
+increased. Note, it is advised to keep this number small (< 0.1) to avoid the
+aforementioned changes in visuals.
+
+This setting has no effect if :ref:`lighting method` is 'legacy'.
+
 antialias alpha test
 ---------------------------------------
 
