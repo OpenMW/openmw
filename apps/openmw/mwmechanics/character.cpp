@@ -211,38 +211,48 @@ void CharacterController::refreshHitRecoilAnims(CharacterState& idle)
     if(mHitState == CharState_None)
     {
         if ((mPtr.getClass().getCreatureStats(mPtr).getFatigue().getCurrent() < 0
-                || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0)
-                && mAnimation->hasAnimation("knockout"))
+                || mPtr.getClass().getCreatureStats(mPtr).getFatigue().getBase() == 0))
         {
             mTimeUntilWake = Misc::Rng::rollClosedProbability() * 2 + 1; // Wake up after 1 to 3 seconds
             if (isSwimming && mAnimation->hasAnimation("swimknockout"))
             {
                 mHitState = CharState_SwimKnockOut;
                 mCurrentHit = "swimknockout";
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
             }
-            else
+            else if (!isSwimming && mAnimation->hasAnimation("knockout"))
             {
                 mHitState = CharState_KnockOut;
                 mCurrentHit = "knockout";
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
+            }
+            else
+            {
+                // Knockout animations are missing. Fall back to idle animation, so target actor still can be killed via HtH.
+                mCurrentHit.erase();
             }
 
-            mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, false, 1, "start", "stop", 0.0f, ~0ul);
             mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(true);
         }
-        else if(knockdown && mAnimation->hasAnimation("knockdown"))
+        else if (knockdown)
         {
             if (isSwimming && mAnimation->hasAnimation("swimknockdown"))
             {
                 mHitState = CharState_SwimKnockDown;
                 mCurrentHit = "swimknockdown";
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
             }
-            else
+            else if (!isSwimming && mAnimation->hasAnimation("knockdown"))
             {
                 mHitState = CharState_KnockDown;
                 mCurrentHit = "knockdown";
+                mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
             }
-
-            mAnimation->play(mCurrentHit, Priority_Knockdown, MWRender::Animation::BlendMask_All, true, 1, "start", "stop", 0.0f, 0);
+            else
+            {
+                // Knockdown animation is missing. Cancel knockdown state.
+                mPtr.getClass().getCreatureStats(mPtr).setKnockedDown(false);
+            }
         }
         else if (recovery)
         {

@@ -8,6 +8,7 @@
 #include <osg/NodeVisitor>
 #include <osg/TexGen>
 #include <osg/TexEnvCombine>
+#include <osg/Version>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -263,6 +264,10 @@ osg::ref_ptr<GlowUpdater> addEnchantedGlow(osg::ref_ptr<osg::Node> node, Resourc
 
 bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer, osg::Texture * texture, unsigned int level, unsigned int face, bool mipMapGeneration)
 {
+#if OSG_VERSION_LESS_THAN(3, 6, 6)
+    // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
+    osg::GLExtensions::Get(0, false)->glRenderbufferStorageMultisampleCoverageNV = nullptr;
+#endif
     unsigned int samples = 0;
     unsigned int colourSamples = 0;
     bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders") && Settings::Manager::getInt("antialiasing", "Video") > 1;
