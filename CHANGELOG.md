@@ -147,6 +147,7 @@
     Feature #5730: Add graphic herbalism option to the launcher and documents
     Feature #5771: ori command should report where a mesh is loaded from and whether the x version is used.
     Feature #5813: Instanced groundcover support
+    Feature #5828: Support more than 8 lights
     Feature #5910: Fall back to delta time when physics can't keep up
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
