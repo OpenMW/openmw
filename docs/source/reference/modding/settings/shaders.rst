@@ -160,12 +160,12 @@ Sets the internal handling of light sources.
 'legacy' is restricted to 8 lights per object and emulates fixed function
 pipeline compatible lighting.
 
-'shaders compatibility' removes the light limit via :ref:`max lights` and
-follows a modifed attenuation formula which can drastically reduce light popping
-and seams. This mode also enables lighting on groundcover and a configurable
-light fade. It is recommended to use this with older hardware and a light limit
-closer to 8. Because of its wide range of compatibility it is set as the
-default.
+'shaders compatibility' removes the light limit controllable through :ref:`max
+lights` and follows a modifed attenuation formula which can drastically reduce
+light popping and seams. This mode also enables lighting on groundcover and a
+configurable light fade. It is recommended to use this with older hardware and a
+light limit closer to 8. Because of its wide range of compatibility it is set as
+the default.
 
 'shaders' carries all of the benefits that 'shaders compatibility' does, but
 uses a modern approach that allows for a higher :ref:`max lights` count with
@@ -174,9 +174,9 @@ this mode when supported and where the GPU is not a bottleneck. On some weaker
 devices, using this mode along with :ref:`force per pixel lighting` can carry
 performance penalties.
 
-Note that when enabled, groundcover lighting is forced to be vertex lighting,
+Note that when enabled groundcover lighting is forced to be vertex lighting,
 unless normal maps are provided. This is due to some groundcover mods using the
-Z-Up Normals technique to avoid some common issues with shading. As a
+Z-Up normals technique to avoid some common issues with shading. As a
 consequence, per pixel lighting would give undesirable results.
 
 This setting has no effect if :ref:`force shaders` is 'false'.

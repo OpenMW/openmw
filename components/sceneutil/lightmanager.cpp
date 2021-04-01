@@ -381,27 +381,14 @@ namespace SceneUtil
 
         void apply(osg::State &state) const override
         {
-            osg::Matrix modelViewMatrix = state.getModelViewMatrix();
-
-            state.applyModelViewMatrix(state.getInitialViewMatrix());
-
-            LightStateCache* cache = getLightStateCache(state.getContextID(), mLightManager->getMaxLights());
             for (size_t i = 0; i < mLights.size(); ++i)
             {
-                osg::Light* current = cache->lastAppliedLight[i];
                 auto light = mLights[i];
-                if (current != light.get())
-                {
-                    mLightManager->getLightUniform(i+1, LightManager::UniformKey::Diffuse)->set(light->getDiffuse());
-                    mLightManager->getLightUniform(i+1, LightManager::UniformKey::Ambient)->set(light->getAmbient());
-                    mLightManager->getLightUniform(i+1, LightManager::UniformKey::Attenuation)->set(osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), getLightRadius(light)));
-                    mLightManager->getLightUniform(i+1, LightManager::UniformKey::Position)->set(light->getPosition() * state.getModelViewMatrix());
-
-                    cache->lastAppliedLight[i] = mLights[i];
-                }
+                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Diffuse)->set(light->getDiffuse());
+                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Ambient)->set(light->getAmbient());
+                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Attenuation)->set(osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), getLightRadius(light)));
+                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Position)->set(light->getPosition() * state.getInitialViewMatrix());
             }
-
-            state.applyModelViewMatrix(modelViewMatrix);
         }
 
     private:
@@ -643,7 +630,7 @@ namespace SceneUtil
             mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
             // Needed to query the layout of the buffer object. The layout specifier needed to use the std140 layout is not reliably
             // available, regardless of extensions, until GLSL 140.
-            mLightManager->getOrCreateStateSet()->setAttributeAndModes(mDummyProgram, osg::StateAttribute::ON|osg::StateAttribute::PROTECTED);
+            mLightManager->getOrCreateStateSet()->setAttributeAndModes(mDummyProgram, osg::StateAttribute::ON);
         }
 
         LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
@@ -756,9 +743,10 @@ namespace SceneUtil
         , mPointLightFadeEnd(0.f)
         , mPointLightFadeStart(0.f)
     {
+        setUpdateCallback(new LightManagerUpdateCallback);
+
         if (ffp)
         {
-            setLightingMethod(LightingMethod::FFP);
             initFFP(LightManager::mFFPMaxLights);
             return;
         }
@@ -769,11 +757,7 @@ namespace SceneUtil
         {
             Log(Debug::Error) << "Invalid option for 'lighting method': got '" << lightingMethodString
                               << "', expected legacy, shaders compatible, or shaders. Falling back to 'shaders compatible'.";
-            setLightingMethod(LightingMethod::PerObjectUniform);
-        }
-        else
-        {
-            setLightingMethod(lightingMethod);
+            lightingMethod = LightingMethod::PerObjectUniform;
         }
 
         mPointLightRadiusMultiplier = std::clamp(Settings::Manager::getFloat("light bounds multiplier", "Shaders"), 0.f, 10.f);
@@ -791,7 +775,7 @@ namespace SceneUtil
 
         static bool hasLoggedWarnings = false;
 
-        if (getLightingMethod() == LightingMethod::SingleUBO && !hasLoggedWarnings)
+        if (lightingMethod == LightingMethod::SingleUBO && !hasLoggedWarnings)
         {
             if (!supportsUBO)
                 Log(Debug::Warning) << "GL_ARB_uniform_buffer_object not supported: switching to shader compatibility lighting mode";
@@ -802,19 +786,13 @@ namespace SceneUtil
 
         int targetLights = Settings::Manager::getInt("max lights", "Shaders");
 
-        if (!supportsUBO || !supportsGPU4 || getLightingMethod() == LightingMethod::PerObjectUniform)
-        {
-            setLightingMethod(LightingMethod::PerObjectUniform);
+        if (!supportsUBO || !supportsGPU4 || lightingMethod == LightingMethod::PerObjectUniform)
             initPerObjectUniform(targetLights);
-        }
         else
-        {
             initSingleUBO(targetLights);
-        }
 
         getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
 
-        setUpdateCallback(new LightManagerUpdateCallback);
         addCullCallback(new LightManagerCullCallback(this));
     }
 
@@ -876,18 +854,18 @@ namespace SceneUtil
 
     void LightManager::initFFP(int targetLights)
     {
+        setLightingMethod(LightingMethod::FFP);
         setMaxLights(targetLights);
 
         for (int i = 0; i < getMaxLights(); ++i)
             mDummies.push_back(new FFPLightStateAttribute(i, std::vector<osg::ref_ptr<osg::Light>>()));
-
-        setUpdateCallback(new LightManagerUpdateCallback);
     }
 
     void LightManager::initPerObjectUniform(int targetLights)
     {
         auto* stateset = getOrCreateStateSet();
 
+        setLightingMethod(LightingMethod::PerObjectUniform);
         setMaxLights(std::max(2, targetLights));
 
         mLightUniforms.resize(getMaxLights()+1);
@@ -918,6 +896,7 @@ namespace SceneUtil
 
     void LightManager::initSingleUBO(int targetLights)
     {
+        setLightingMethod(LightingMethod::SingleUBO);
         setMaxLights(std::clamp(targetLights, 2, getMaxLightsInScene() / 2));
 
         for (int i = 0; i < 2; ++i)
@@ -1059,6 +1038,7 @@ namespace SceneUtil
 
     const std::vector<LightManager::LightSourceViewBound>& LightManager::getLightsInViewSpace(osg::Camera *camera, const osg::RefMatrix* viewMatrix, size_t frameNum)
     {
+        bool isReflectionCamera = camera->getName() == "ReflectionCamera";
         osg::observer_ptr<osg::Camera> camPtr (camera);
         auto it = mLightsInViewSpace.find(camPtr);
 
@@ -1075,17 +1055,18 @@ namespace SceneUtil
                 osg::BoundingSphere viewBound = osg::BoundingSphere(osg::Vec3f(0,0,0), radius * mPointLightRadiusMultiplier);
                 transformBoundingSphere(worldViewMat, viewBound);
 
-                static const float fadeDelta = mPointLightFadeEnd - mPointLightFadeStart;
-
-                if (mPointLightFadeEnd != 0.f)
+                if (!isReflectionCamera)
                 {
-                    float fade = 1 - std::clamp((viewBound.center().length() - mPointLightFadeStart) / fadeDelta, 0.f, 1.f);
+                    static const float fadeDelta = mPointLightFadeEnd - mPointLightFadeStart;
+                    if (mPointLightFadeEnd != 0.f)
+                    {
+                        float fade = 1 - std::clamp((viewBound.center().length() - mPointLightFadeStart) / fadeDelta, 0.f, 1.f);
+                        if (fade == 0.f)
+                            continue;
 
-                    if (fade == 0.f)
-                        continue;
-
-                    auto* light = transform.mLightSource->getLight(frameNum);
-                    light->setDiffuse(light->getDiffuse() * fade);
+                        auto* light = transform.mLightSource->getLight(frameNum);
+                        light->setDiffuse(light->getDiffuse() * fade);
+                    }
                 }
 
                 LightSourceViewBound l;

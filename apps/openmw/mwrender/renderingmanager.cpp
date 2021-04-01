@@ -537,7 +537,32 @@ namespace MWRender
 
     void RenderingManager::configureAmbient(const ESM::Cell *cell)
     {
-        setAmbientColour(SceneUtil::colourFromRGB(cell->mAmbi.mAmbient));
+        bool needsAdjusting = false;
+        if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+            needsAdjusting = !cell->isExterior() && !(cell->mData.mFlags & ESM::Cell::QuasiEx);
+
+        auto ambient = SceneUtil::colourFromRGB(cell->mAmbi.mAmbient);
+
+        if (needsAdjusting)
+        {
+            static constexpr float pR = 0.2126;
+            static constexpr float pG = 0.7152;
+            static constexpr float pB = 0.0722;
+
+            // we already work in linear RGB so no conversions are needed for the luminosity function
+            float relativeLuminance = pR*ambient.r() + pG*ambient.g() + pB*ambient.b();
+            if (relativeLuminance < mMinimumAmbientLuminance)
+            {
+                // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data as least we can
+                float targetBrightnessIncreaseFactor = mMinimumAmbientLuminance / relativeLuminance;
+                if (ambient.r() == 0.f && ambient.g() == 0.f && ambient.b() == 0.f)
+                    ambient = osg::Vec4(targetBrightnessIncreaseFactor, targetBrightnessIncreaseFactor, targetBrightnessIncreaseFactor, ambient.a());
+                else
+                    ambient *= targetBrightnessIncreaseFactor;
+            }
+        }
+
+        setAmbientColour(ambient);
 
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
         mSunLight->setDiffuse(diffuse);
@@ -1076,25 +1101,7 @@ namespace MWRender
         osg::Vec4f color = mAmbientColor;
 
         if (mNightEyeFactor > 0.f)
-        {
             color += osg::Vec4f(0.7, 0.7, 0.7, 0.0) * mNightEyeFactor;
-        }
-        // optionally brighten up ambient interiors when using a non-FFP emulated lighting method
-        else if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-        {
-            static constexpr float pR = 0.2126;
-            static constexpr float pG = 0.7152;
-            static constexpr float pB = 0.0722;
-
-            // we already work in linear RGB so no conversions are needed for the luminosity function
-            float relativeLuminance = pR*color.r() + pG*color.g() + pB*color.b();
-            if (relativeLuminance < mMinimumAmbientLuminance)
-            {
-                // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data as least we can
-                float targetBrightnessIncreaseFactor = mMinimumAmbientLuminance / relativeLuminance;
-                color *= targetBrightnessIncreaseFactor;
-            }
-        }
 
         mStateUpdater->setAmbientColor(color);
     }
