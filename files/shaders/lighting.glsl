@@ -35,15 +35,16 @@ vec4 unpackRGBA(int data)
 
 struct LightData
 {
-    ivec4 packedColors;  // diffuse, ambient, specular
+    ivec4 packedColors; // diffuse, ambient, specular
     vec4 position;
-    vec4 attenuation;   // constant, linear, quadratic, radius
+    vec4 attenuation; // constant, linear, quadratic, radius
 };
 
 uniform int PointLightIndex[@maxLights];
 uniform int PointLightCount;
 
-layout(std140) uniform LightBufferBinding
+// Defaults to shared layout. If we ever move to GLSL 140, std140 layout should be considered
+uniform LightBufferBinding
 {
     LightData LightBuffer[@maxLightsInScene];
 };
@@ -56,7 +57,7 @@ struct LightData
     vec4 diffuse;
     vec4 ambient;
     vec4 specular;
-    vec4 attenuation;   // constant, linear, quadratic, radius
+    vec4 attenuation; // constant, linear, quadratic, radius
 };
 
 uniform LightData LightBuffer[@maxLights];
@@ -92,7 +93,6 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
     }
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
-
     diffuseOut = sunDiffuse * lambert;
 }
 

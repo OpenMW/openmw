@@ -47,55 +47,81 @@ namespace SceneUtil
 {
     static int sLightId = 0;
 
+    // Handles a GLSL shared layout by using configured offsets and strides to fill a continuous buffer, making the data upload to GPU simpler.
     class LightBuffer : public osg::Referenced
     {
     public:
 
-        LightBuffer(int count) : mData(new osg::Vec4Array(3*count)), mEndian(osg::getCpuByteOrder()) {}
+        enum LayoutOffset
+        {
+            Diffuse,
+            DiffuseSign,
+            Ambient,
+            Specular,
+            Position,
+            AttenuationRadius
+        };
+
+        LightBuffer(int count)
+            : mData(new osg::FloatArray(3*4*count))
+            , mEndian(osg::getCpuByteOrder())
+            , mCount(count)
+            , mStride(12)
+        {
+            mOffsets[Diffuse] = 0;
+            mOffsets[Ambient] = 1;
+            mOffsets[Specular] = 2;
+            mOffsets[DiffuseSign] = 3;
+            mOffsets[Position] = 4;
+            mOffsets[AttenuationRadius] = 8;
+        }
+
+        LightBuffer(const LightBuffer& copy)
+            : osg::Referenced()
+            , mData(copy.mData)
+            , mEndian(copy.mEndian)
+            , mCount(copy.mCount)
+            , mStride(copy.mStride)
+            , mOffsets(copy.mOffsets)
+        {}
 
         void setDiffuse(int index, const osg::Vec4& value)
         {
-            auto signedValue = value;
+            // Deal with negative lights (negative diffuse) by passing a sign bit in the unused alpha component
+            auto positiveColor = value;
             float signBit = 1.0;
             if (value[0] < 0)
             {
-                signedValue *= -1.0;
+                positiveColor *= -1.0;
                 signBit = -1.0;
             }
-            *(unsigned int*)(&(*mData)[3*index][0]) = asRGBA(signedValue);
-            *(int*)(&(*mData)[3*index][3]) = signBit;
+            *(unsigned int*)(&(*mData)[getOffset(index, Diffuse)]) = asRGBA(positiveColor);
+            *(int*)(&(*mData)[getOffset(index, DiffuseSign)]) = signBit;
         }
 
         void setAmbient(int index, const osg::Vec4& value)
         {
-            *(unsigned int*)(&(*mData)[3*index][1]) = asRGBA(value);
+            *(unsigned int*)(&(*mData)[getOffset(index, Ambient)]) = asRGBA(value);
         }
 
         void setSpecular(int index, const osg::Vec4& value)
         {
-            *(unsigned int*)(&(*mData)[3*index][2]) = asRGBA(value);
+            *(unsigned int*)(&(*mData)[getOffset(index, Specular)]) = asRGBA(value);
         }
 
         void setPosition(int index, const osg::Vec4& value)
         {
-            (*mData)[3*index+1] = value;
+            *(osg::Vec4*)(&(*mData)[getOffset(index, Position)]) = value;
         }
 
-        void setAttenuation(int index, float c, float l, float q)
+        void setAttenuationRadius(int index, const osg::Vec4& value)
         {
-            (*mData)[3*index+2][0] = c;
-            (*mData)[3*index+2][1] = l;
-            (*mData)[3*index+2][2] = q;
-        }
-
-        void setRadius(int index, float value)
-        {
-            (*mData)[3*index+2][3] = value;
+            *(osg::Vec4*)(&(*mData)[getOffset(index, AttenuationRadius)]) = value;
         }
 
         auto getPosition(int index)
         {
-            return (*mData)[3*index+1];
+            return *(osg::Vec4*)(&(*mData)[getOffset(index, Position)]);
         }
 
         auto& getData()
@@ -118,8 +144,40 @@ namespace SceneUtil
             return mEndian == osg::BigEndian ? value.asABGR() : value.asRGBA();
         }
 
-        osg::ref_ptr<osg::Vec4Array> mData;
+        int getOffset(int index, LayoutOffset slot)
+        {
+            return mStride * index + mOffsets[slot];
+        }
+
+        void configureLayout(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
+        {
+            static constexpr auto sizeofVec4 = sizeof(GL_FLOAT) * osg::Vec4::num_components;
+            static constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+
+            mOffsets[Diffuse] = offsetColors / sizeofFloat;
+            mOffsets[Ambient] = mOffsets[Diffuse] + 1;
+            mOffsets[Specular] = mOffsets[Diffuse] + 2;
+            mOffsets[DiffuseSign] = mOffsets[Diffuse] + 3;
+            mOffsets[Position] = offsetPosition / sizeofFloat;
+            mOffsets[AttenuationRadius] = offsetAttenuationRadius / sizeofFloat;
+            mStride = (offsetAttenuationRadius + sizeofVec4 + stride) / 4;
+
+            // Copy over previous buffers light data. Buffers populate before we know the layout.
+            LightBuffer oldBuffer = LightBuffer(*this);
+            for (int i = 0; i < oldBuffer.mCount; ++i)
+            {
+                *(osg::Vec4*)(&(*mData)[getOffset(i, Diffuse)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, Diffuse)]);
+                *(osg::Vec4*)(&(*mData)[getOffset(i, Position)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, Position)]);
+                *(osg::Vec4*)(&(*mData)[getOffset(i, AttenuationRadius)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, AttenuationRadius)]);
+            }
+        }
+
+    private:
+        osg::ref_ptr<osg::FloatArray> mData;
         osg::Endian mEndian;
+        int mCount;
+        int mStride;
+        std::unordered_map<LayoutOffset, int> mOffsets;
     };
 
     class LightStateCache
@@ -165,8 +223,8 @@ namespace SceneUtil
                 buffer->setPosition(0, light->getPosition());
 
                 osg::ref_ptr<osg::UniformBufferObject> ubo = new osg::UniformBufferObject;
-                buffer->mData->setBufferObject(ubo);
-                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->mData.get(), 0, buffer->mData->getTotalDataSize());
+                buffer->getData()->setBufferObject(ubo);
+                osg::ref_ptr<osg::UniformBufferBinding> ubb = new osg::UniformBufferBinding(static_cast<int>(Shader::UBOBinding::LightBuffer), buffer->getData().get(), 0, buffer->getData()->getTotalDataSize());
 
                 stateset->setAttributeAndModes(ubb, mode);
 
@@ -572,11 +630,24 @@ namespace SceneUtil
     class LightManagerStateAttribute : public osg::StateAttribute
     {
     public:
-        LightManagerStateAttribute() : mLightManager(nullptr) {}
-        LightManagerStateAttribute(LightManager* lightManager) : mLightManager(lightManager) {}
+        LightManagerStateAttribute()
+            : mLightManager(nullptr) {}
 
-        LightManagerStateAttribute(const LightManagerStateAttribute& copy,const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
-            : osg::StateAttribute(copy,copyop),mLightManager(copy.mLightManager) {}
+        LightManagerStateAttribute(LightManager* lightManager)
+        : mLightManager(lightManager)
+        , mDummyProgram(new osg::Program)
+        {
+            static const std::string dummyVertSource = generateDummyShader(mLightManager->getMaxLightsInScene());
+
+            mDummyProgram->addShader(new osg::Shader(osg::Shader::VERTEX, dummyVertSource));
+            mDummyProgram->addBindUniformBlock("LightBufferBinding", static_cast<int>(Shader::UBOBinding::LightBuffer));
+            // Needed to query the layout of the buffer object. The layout specifier needed to use the std140 layout is not reliably
+            // available, regardless of extensions, until GLSL 140.
+            mLightManager->getOrCreateStateSet()->setAttributeAndModes(mDummyProgram, osg::StateAttribute::ON|osg::StateAttribute::PROTECTED);
+        }
+
+        LightManagerStateAttribute(const LightManagerStateAttribute& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mLightManager(copy.mLightManager) {}
 
         int compare(const StateAttribute &sa) const override
         {
@@ -585,12 +656,76 @@ namespace SceneUtil
 
         META_StateAttribute(NifOsg, LightManagerStateAttribute, osg::StateAttribute::LIGHT)
 
+        void initSharedLayout(osg::GLExtensions* ext, int handle) const
+        {
+            std::vector<unsigned int> index = { static_cast<int>(Shader::UBOBinding::LightBuffer) };
+            int totalBlockSize = -1;
+            int stride = -1;
+
+            ext->glGetActiveUniformBlockiv(handle, 0, GL_UNIFORM_BLOCK_DATA_SIZE, &totalBlockSize);
+            ext->glGetActiveUniformsiv(handle, index.size(), index.data(), GL_UNIFORM_ARRAY_STRIDE, &stride);
+
+            std::vector<const char*> names = {
+                 "LightBuffer[0].packedColors"
+                ,"LightBuffer[0].position"
+                ,"LightBuffer[0].attenuation"
+            };
+            std::vector<unsigned int> indices(names.size());
+            std::vector<int> offsets(names.size());
+
+            ext->glGetUniformIndices(handle, names.size(), names.data(), indices.data());
+            ext->glGetActiveUniformsiv(handle, indices.size(), indices.data(), GL_UNIFORM_OFFSET, offsets.data());
+
+            for (int i = 0; i < 2; ++i)
+            {
+                auto& buf = mLightManager->getLightBuffer(i);
+                buf->configureLayout(offsets[0], offsets[1], offsets[2], totalBlockSize, stride);
+            }
+        }
+
         void apply(osg::State& state) const override
         {
-            mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
+            static bool init = false;
+            if (!init)
+            {
+                auto handle = mDummyProgram->getPCP(state)->getHandle();
+                auto* ext = state.get<osg::GLExtensions>();
+
+                int activeUniformBlocks = 0;
+                ext->glGetProgramiv(handle, GL_ACTIVE_UNIFORM_BLOCKS, &activeUniformBlocks);
+
+                // wait until the UBO binding is created
+                if (activeUniformBlocks > 0)
+                {
+                    initSharedLayout(ext, handle);
+                    init = true;
+                }
+            }
+            else
+            {
+                mLightManager->getLightBuffer(state.getFrameStamp()->getFrameNumber())->dirty();
+            }
+        }
+
+    private:
+
+        std::string generateDummyShader(int maxLightsInScene)
+        {
+            return "#version 120\n"
+            "#extension GL_ARB_uniform_buffer_object : require\n"
+            "struct LightData {\n"
+            "   ivec4 packedColors;\n"
+            "   vec4 position;\n"
+            "   vec4 attenuation;\n"
+            "};\n"
+            "uniform LightBufferBinding {\n"
+            "   LightData LightBuffer[" + std::to_string(mLightManager->getMaxLightsInScene()) + "];\n"
+            "};\n"
+            "void main() { gl_Position = vec4(0.0); }\n";
         }
 
         LightManager* mLightManager;
+        osg::ref_ptr<osg::Program> mDummyProgram;
     };
 
     const std::unordered_map<std::string, LightingMethod> LightManager::mLightingMethodSettingMap = {
@@ -654,12 +789,15 @@ namespace SceneUtil
         bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
         bool supportsGPU4 = exts && exts->isGpuShader4Supported;
 
-        if (getLightingMethod() == LightingMethod::SingleUBO)
+        static bool hasLoggedWarnings = false;
+
+        if (getLightingMethod() == LightingMethod::SingleUBO && !hasLoggedWarnings)
         {
             if (!supportsUBO)
-                Log(Debug::Info) << "GL_ARB_uniform_buffer_object not supported: using fallback uniforms";
-            else if (!supportsGPU4)
-                Log(Debug::Info) << "GL_EXT_gpu_shader4 not supported: using fallback uniforms";
+                Log(Debug::Warning) << "GL_ARB_uniform_buffer_object not supported: switching to shader compatibility lighting mode";
+            if (!supportsGPU4)
+                Log(Debug::Warning) << "GL_EXT_gpu_shader4 not supported: switching to shader compatibility lighting mode";
+            hasLoggedWarnings = true;
         }
 
         int targetLights = Settings::Manager::getInt("max lights", "Shaders");
@@ -978,8 +1116,7 @@ namespace SceneUtil
         auto& buf = getLightBuffer(frameNum);
         buf->setDiffuse(index, light->getDiffuse());
         buf->setAmbient(index, light->getAmbient());
-        buf->setAttenuation(index, light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation());
-        buf->setRadius(index, lightSource->getRadius());
+        buf->setAttenuationRadius(index, osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), lightSource->getRadius()));
         buf->setPosition(index, light->getPosition() * (*viewMatrix));
     }
 
