@@ -24,7 +24,7 @@ namespace MWMechanics
         return schoolSkillArray.at(school);
     }
 
-    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect)
+    float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
     {
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (!magicEffect)
@@ -39,12 +39,41 @@ namespace MWMechanics
             duration = std::max(1, duration);
         static const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
 
+        int durationOffset = 0;
+        int minArea = 0;
+        if (method == EffectCostMethod::PlayerSpell) {
+            durationOffset = 1;
+            minArea = 1;
+        }
+
         float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
         x *= 0.1 * magicEffect->mData.mBaseCost;
-        x *= 1 + duration;
-        x += 0.05 * std::max(1, effect.mArea) * magicEffect->mData.mBaseCost;
+        x *= durationOffset + duration;
+        x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
 
         return x * fEffectCostMult;
+    }
+
+    int calcSpellCost (const ESM::Spell& spell)
+    {
+        if (!(spell.mData.mFlags & ESM::Spell::F_Autocalc))
+            return spell.mData.mCost;
+
+        float cost = 0;
+
+        for (const ESM::ENAMstruct& effect : spell.mEffects.mList)
+        {
+            float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect));
+
+            // This is applied to the whole spell cost for each effect when
+            // creating spells, but is only applied on the effect itself in TES:CS.
+            if (effect.mRange == ESM::RT_Target)
+                effectCost *= 1.5;
+
+            cost += effectCost;
+        }
+
+        return std::round(cost);
     }
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr &actor)
@@ -97,7 +126,7 @@ namespace MWMechanics
         float actorWillpower = stats.getAttribute(ESM::Attribute::Willpower).getModified();
         float actorLuck = stats.getAttribute(ESM::Attribute::Luck).getModified();
 
-        float castChance = (lowestSkill - spell->mData.mCost + 0.2f * actorWillpower + 0.1f * actorLuck);
+        float castChance = (lowestSkill - calcSpellCost(*spell) + 0.2f * actorWillpower + 0.1f * actorLuck);
 
         return castChance;
     }
@@ -123,7 +152,7 @@ namespace MWMechanics
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100;
 
-        if (checkMagicka && spell->mData.mCost > 0 && stats.getMagicka().getCurrent() < spell->mData.mCost)
+        if (checkMagicka && calcSpellCost(*spell) > 0 && stats.getMagicka().getCurrent() < calcSpellCost(*spell))
             return 0;
 
         if (spell->mData.mFlags & ESM::Spell::F_Always)

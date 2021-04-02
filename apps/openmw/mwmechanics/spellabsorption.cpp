@@ -72,7 +72,7 @@ namespace MWMechanics
         int spellCost = 0;
         if (spell)
         {
-            spellCost = spell->mData.mCost;
+            spellCost = MWMechanics::calcSpellCost(*spell);
         }
         else
         {

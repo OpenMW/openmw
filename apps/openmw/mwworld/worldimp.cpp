@@ -40,6 +40,7 @@
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellcasting.hpp"
+#include "../mwmechanics/spellutil.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/aiavoiddoor.hpp" //Used to tell actors to avoid doors
@@ -3017,11 +3018,12 @@ namespace MWWorld
         if (!selectedSpell.empty())
         {
             const ESM::Spell* spell = mStore.get<ESM::Spell>().find(selectedSpell);
+            int spellCost = MWMechanics::calcSpellCost(*spell);
 
             // Check mana
             bool godmode = (isPlayer && mGodMode);
             MWMechanics::DynamicStat<float> magicka = stats.getMagicka();
-            if (spell->mData.mCost > 0 && magicka.getCurrent() < spell->mData.mCost && !godmode)
+            if (spellCost > 0 && magicka.getCurrent() < spellCost && !godmode)
             {
                 message = "#{sMagicInsufficientSP}";
                 fail = true;
@@ -3037,7 +3039,7 @@ namespace MWWorld
             // Reduce mana
             if (!fail && !godmode)
             {
-                magicka.setCurrent(magicka.getCurrent() - spell->mData.mCost);
+                magicka.setCurrent(magicka.getCurrent() - spellCost);
                 stats.setMagicka(magicka);
             }
         }

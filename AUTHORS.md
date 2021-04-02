@@ -118,6 +118,7 @@ Programmers
     Kurnevsky Evgeny (kurnevsky)
     Lars Söderberg (Lazaroth)
     lazydev
+    Léo Peltier
     Leon Krieg (lkrieg)
     Leon Saunders (emoose)
     logzero

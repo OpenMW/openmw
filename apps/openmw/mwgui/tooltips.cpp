@@ -251,7 +251,7 @@ namespace MWGui
                     }
                     std::string cost = focus->getUserString("SpellCost");
                     if (cost != "" && cost != "0")
-                        info.text += MWGui::ToolTips::getValueString(spell->mData.mCost, "#{sCastCost}");
+                        info.text += MWGui::ToolTips::getValueString(MWMechanics::calcSpellCost(*spell), "#{sCastCost}");
                     info.effects = effects;
                     tooltipSize = createToolTip(info);
                 }
