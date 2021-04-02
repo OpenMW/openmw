@@ -5,6 +5,7 @@
 #include <components/esm/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include <string>
 #include <memory>
@@ -69,6 +70,7 @@ namespace MWWorld
             /// perform these operations).
 
             RefData (const RefData& refData);
+            RefData (RefData&& other) noexcept = default;
 
             ~RefData();
 
@@ -77,6 +79,7 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
+            RefData& operator= (RefData&& other) noexcept = default;
 
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
