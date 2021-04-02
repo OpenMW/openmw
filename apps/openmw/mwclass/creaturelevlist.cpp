@@ -17,7 +17,7 @@ namespace MWClass
         int mSpawnActorId;
         bool mSpawn; // Should a new creature be spawned?
 
-        MWWorld::CustomData *clone() const override;
+        std::unique_ptr<MWWorld::CustomData> clone() const override;
 
         CreatureLevListCustomData& asCreatureLevListCustomData() override
         {
@@ -29,9 +29,9 @@ namespace MWClass
         }
     };
 
-    MWWorld::CustomData *CreatureLevListCustomData::clone() const
+    std::unique_ptr<MWWorld::CustomData> CreatureLevListCustomData::clone() const
     {
-        return new CreatureLevListCustomData (*this);
+        return std::make_unique<CreatureLevListCustomData>(*this);
     }
 
     std::string CreatureLevList::getName (const MWWorld::ConstPtr& ptr) const
@@ -138,11 +138,11 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<CreatureLevListCustomData> data (new CreatureLevListCustomData);
+            std::unique_ptr<CreatureLevListCustomData> data = std::make_unique<CreatureLevListCustomData>();
             data->mSpawnActorId = -1;
             data->mSpawn = true;
 
-            ptr.getRefData().setCustomData(data.release());
+            ptr.getRefData().setCustomData(std::move(data));
         }
     }
 

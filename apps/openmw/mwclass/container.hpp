@@ -20,7 +20,7 @@ namespace MWClass
         ContainerCustomData(const ESM::Container& container, MWWorld::CellStore* cell);
         ContainerCustomData(const ESM::InventoryState& inventory);
 
-        MWWorld::CustomData *clone() const override;
+        std::unique_ptr<MWWorld::CustomData> clone() const override;
 
         ContainerCustomData& asContainerCustomData() override;
         const ContainerCustomData& asContainerCustomData() const override;

@@ -1,6 +1,8 @@
 #ifndef GAME_MWWORLD_CUSTOMDATA_H
 #define GAME_MWWORLD_CUSTOMDATA_H
 
+#include <memory>
+
 namespace MWClass
 {
     class CreatureCustomData;
@@ -19,7 +21,7 @@ namespace MWWorld
 
             virtual ~CustomData() {}
 
-            virtual CustomData *clone() const = 0;
+            virtual std::unique_ptr<CustomData> clone() const = 0;
 
             // Fast version of dynamic_cast<X&>. Needs to be overridden in the respective class.
 

@@ -36,7 +36,7 @@ namespace MWClass
     public:
         MWWorld::DoorState mDoorState = MWWorld::DoorState::Idle;
 
-        MWWorld::CustomData *clone() const override;
+        std::unique_ptr<MWWorld::CustomData> clone() const override;
 
         DoorCustomData& asDoorCustomData() override
         {
@@ -48,9 +48,9 @@ namespace MWClass
         }
     };
 
-    MWWorld::CustomData *DoorCustomData::clone() const
+    std::unique_ptr<MWWorld::CustomData> DoorCustomData::clone() const
     {
-        return new DoorCustomData (*this);
+        return std::make_unique<DoorCustomData>(*this);
     }
 
     void Door::insertObjectRendering (const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface) const
@@ -327,8 +327,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
-            std::unique_ptr<DoorCustomData> data(new DoorCustomData);
-            ptr.getRefData().setCustomData(data.release());
+            ptr.getRefData().setCustomData(std::make_unique<DoorCustomData>());
         }
     }
 

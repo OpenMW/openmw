@@ -7,6 +7,7 @@
 #include "../mwscript/locals.hpp"
 
 #include <string>
+#include <memory>
 
 namespace SceneUtil
 {
@@ -44,7 +45,7 @@ namespace MWWorld
 
             ESM::AnimationState mAnimationState;
 
-            CustomData *mCustomData;
+            std::unique_ptr<CustomData> mCustomData;
 
             void copy (const RefData& refData);
 
@@ -117,7 +118,7 @@ namespace MWWorld
             void setPosition (const ESM::Position& pos);
             const ESM::Position& getPosition() const;
 
-            void setCustomData (CustomData *data);
+            void setCustomData(std::unique_ptr<CustomData>&& value) noexcept;
             ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
             /// transferred to this.
 
