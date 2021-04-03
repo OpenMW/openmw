@@ -246,14 +246,12 @@ namespace
 namespace MWClass
 {
 
-    class NpcCustomData : public MWWorld::CustomData
+    class NpcCustomData : public MWWorld::TypedCustomData<NpcCustomData>
     {
     public:
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::Movement mMovement;
         MWWorld::InventoryStore mInventoryStore;
-
-        std::unique_ptr<MWWorld::CustomData> clone() const override;
 
         NpcCustomData& asNpcCustomData() override
         {
@@ -264,11 +262,6 @@ namespace MWClass
             return *this;
         }
     };
-
-    std::unique_ptr<MWWorld::CustomData> NpcCustomData::clone() const
-    {
-        return std::make_unique<NpcCustomData>(*this);
-    }
 
     const Npc::GMST& Npc::getGmst()
     {

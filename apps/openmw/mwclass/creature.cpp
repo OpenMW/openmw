@@ -51,7 +51,7 @@ namespace
 namespace MWClass
 {
 
-    class CreatureCustomData : public MWWorld::CustomData
+    class CreatureCustomData : public MWWorld::TypedCustomData<CreatureCustomData>
     {
     public:
         MWMechanics::CreatureStats mCreatureStats;
@@ -61,8 +61,6 @@ namespace MWClass
         CreatureCustomData() = default;
         CreatureCustomData(const CreatureCustomData& other);
         CreatureCustomData(CreatureCustomData&& other) noexcept = default;
-
-        std::unique_ptr<MWWorld::CustomData> clone() const override;
 
         CreatureCustomData& asCreatureCustomData() override
         {
@@ -79,11 +77,6 @@ namespace MWClass
           mContainerStore(other.mContainerStore->clone()),
           mMovement(other.mMovement)
     {
-    }
-
-    std::unique_ptr<MWWorld::CustomData> CreatureCustomData::clone() const
-    {
-        return std::make_unique<CreatureCustomData>(*this);
     }
 
     const Creature::GMST& Creature::getGmst()

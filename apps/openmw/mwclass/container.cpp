@@ -46,11 +46,6 @@ namespace MWClass
         mStore.readState(inventory);
     }
 
-    std::unique_ptr<MWWorld::CustomData> ContainerCustomData::clone() const
-    {
-        return std::make_unique<ContainerCustomData>(*this);
-    }
-
     ContainerCustomData& ContainerCustomData::asContainerCustomData()
     {
         return *this;
