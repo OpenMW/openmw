@@ -52,6 +52,7 @@
 #include "../mwgui/loadingscreen.hpp"
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwmechanics/actorutil.hpp"
 
 #include "sky.hpp"
 #include "effectmanager.hpp"
@@ -224,8 +225,7 @@ namespace MWRender
         resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
 
-        if (sceneRoot->getLightingMethod() != SceneUtil::LightingMethod::FFP)
-            mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
+        mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
 
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
@@ -1144,9 +1144,25 @@ namespace MWRender
             else if (it->first == "General" && (it->second == "texture filter" ||
                                                 it->second == "texture mipmap" ||
                                                 it->second == "anisotropy"))
+            {
                 updateTextureFiltering();
+            }
             else if (it->first == "Water")
+            {
                 mWater->processChangedSettings(changed);
+            }
+            else if (it->first == "Shaders" && it->second == "minimum interior brightness")
+            {
+                mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
+                if (MWMechanics::getPlayer().getCell())
+                    configureAmbient(MWMechanics::getPlayer().getCell()->getCell());
+            }
+            else if (it->first == "Shaders" && (it->second == "light bounds multiplier" ||
+                                                it->second == "maximum light distance" ||
+                                                it->second == "light fade start"))
+            {
+                static_cast<SceneUtil::LightManager*>(getLightRoot())->processChangedSettings(changed);
+            }
         }
     }
 

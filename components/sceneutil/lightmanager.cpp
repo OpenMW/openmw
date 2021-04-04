@@ -10,8 +10,6 @@
 
 #include <components/misc/stringops.hpp>
 
-#include <components/settings/settings.hpp>
-
 #include <components/debug/debuglog.hpp>
 
 namespace
@@ -40,6 +38,43 @@ namespace
     void setLightRadius(osg::Light* light, float value)
     {
         light->setUserValue("radius", value);
+    }
+
+    void configurePosition(osg::Matrixf& mat, const osg::Vec4& pos)
+    {
+        mat(0, 0) = pos.x();
+        mat(0, 1) = pos.y();
+        mat(0, 2) = pos.z();
+    }
+
+    void configureAmbient(osg::Matrixf& mat, const osg::Vec4& color)
+    {
+        mat(1, 0) = color.r();
+        mat(1, 1) = color.g();
+        mat(1, 2) = color.b();
+    }
+
+    void configureDiffuse(osg::Matrixf& mat, const osg::Vec4& color)
+    {
+        mat(2, 0) = color.r();
+        mat(2, 1) = color.g();
+        mat(2, 2) = color.b();
+    }
+
+    void configureSpecular(osg::Matrixf& mat, const osg::Vec4& color)
+    {
+        mat(3, 0) = color.r();
+        mat(3, 1) = color.g();
+        mat(3, 2) = color.b();
+        mat(3, 3) = color.a();
+    }
+
+    void configureAttenuation(osg::Matrixf& mat, float c, float l, float q, float r)
+    {
+        mat(0, 3) = c;
+        mat(1, 3) = l;
+        mat(2, 3) = q;
+        mat(3, 3) = r;
     }
 }
 
@@ -206,11 +241,12 @@ namespace SceneUtil
             }
         case LightingMethod::PerObjectUniform:
             {
-                stateset->addUniform(new osg::Uniform("LightBuffer[0].diffuse", light->getDiffuse()), mode);
-                stateset->addUniform(new osg::Uniform("LightBuffer[0].ambient", light->getAmbient()), mode);
-                stateset->addUniform(new osg::Uniform("LightBuffer[0].specular", light->getSpecular()), mode);
-                stateset->addUniform(new osg::Uniform("LightBuffer[0].position", light->getPosition()), mode);
-
+                osg::Matrixf lightMat;
+                configurePosition(lightMat, light->getPosition());
+                configureAmbient(lightMat, light->getAmbient());
+                configureDiffuse(lightMat, light->getDiffuse());
+                configureSpecular(lightMat, light->getSpecular());
+                stateset->addUniform(new osg::Uniform("LightBuffer", lightMat), mode);
                 break;
             }
         case LightingMethod::SingleUBO:
@@ -381,14 +417,20 @@ namespace SceneUtil
 
         void apply(osg::State &state) const override
         {
+            auto* lightUniform = mLightManager->getStateSet()->getUniform("LightBuffer");
             for (size_t i = 0; i < mLights.size(); ++i)
             {
                 auto light = mLights[i];
-                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Diffuse)->set(light->getDiffuse());
-                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Ambient)->set(light->getAmbient());
-                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Attenuation)->set(osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), getLightRadius(light)));
-                mLightManager->getLightUniform(i+1, LightManager::UniformKey::Position)->set(light->getPosition() * state.getInitialViewMatrix());
+                osg::Matrixf lightMat;
+
+                configurePosition(lightMat, light->getPosition() * state.getInitialViewMatrix());
+                configureAmbient(lightMat, light->getAmbient());
+                configureDiffuse(lightMat, light->getDiffuse());
+                configureAttenuation(lightMat, light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(), getLightRadius(light));
+
+                lightUniform->setElement(i+1, lightMat);
             }
+            lightUniform->dirty();
         }
 
     private:
@@ -589,10 +631,12 @@ namespace SceneUtil
                 {
                     if (mLightManager->getLightingMethod() == LightingMethod::PerObjectUniform)
                     {
-                        mLightManager->getLightUniform(0, LightManager::UniformKey::Diffuse)->set(sun->getDiffuse());
-                        mLightManager->getLightUniform(0, LightManager::UniformKey::Ambient)->set(sun->getAmbient());
-                        mLightManager->getLightUniform(0, LightManager::UniformKey::Specular)->set(sun->getSpecular());
-                        mLightManager->getLightUniform(0, LightManager::UniformKey::Position)->set(sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+                        osg::Matrixf lightMat;
+                        configurePosition(lightMat, sun->getPosition() * (*cv->getCurrentRenderStage()->getInitialViewMatrix()));
+                        configureAmbient(lightMat, sun->getAmbient());
+                        configureDiffuse(lightMat, sun->getDiffuse());
+                        configureSpecular(lightMat, sun->getSpecular());
+                        mLightManager->getStateSet()->getUniform("LightBuffer")->setElement(0, lightMat);
                     }
                     else
                     {
@@ -760,14 +804,7 @@ namespace SceneUtil
             lightingMethod = LightingMethod::PerObjectUniform;
         }
 
-        mPointLightRadiusMultiplier = std::clamp(Settings::Manager::getFloat("light bounds multiplier", "Shaders"), 0.f, 10.f);
-
-        mPointLightFadeEnd = std::max(0.f, Settings::Manager::getFloat("maximum light distance", "Shaders"));
-        if (mPointLightFadeEnd > 0)
-        {
-            mPointLightFadeStart = std::clamp(Settings::Manager::getFloat("light fade start", "Shaders"), 0.f, 1.f);
-            mPointLightFadeStart = mPointLightFadeEnd * mPointLightFadeStart;
-        }
+        updateSettings();
 
         osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
         bool supportsUBO = exts && exts->isUniformBufferObjectSupported;
@@ -839,9 +876,6 @@ namespace SceneUtil
     {
         Shader::ShaderManager::DefineMap defines;
 
-        bool ffp = usingFFP();
-
-        defines["ffpLighting"] = ffp ? "1" : "0";
         defines["maxLights"] = std::to_string(getMaxLights());
         defines["maxLightsInScene"] = std::to_string(getMaxLightsInScene());
         defines["lightingModel"] = std::to_string(static_cast<int>(mLightingMethod));
@@ -850,6 +884,26 @@ namespace SceneUtil
         defines["useGPUShader4"] = std::to_string(mLightingMethod == LightingMethod::SingleUBO);
 
         return defines;
+    }
+
+    void LightManager::processChangedSettings(const Settings::CategorySettingVector& changed)
+    {
+        updateSettings();
+    }
+
+    void LightManager::updateSettings()
+    {
+        if (getLightingMethod() == LightingMethod::FFP)
+            return;
+
+        mPointLightRadiusMultiplier = std::clamp(Settings::Manager::getFloat("light bounds multiplier", "Shaders"), 0.f, 5.f);
+
+        mPointLightFadeEnd = std::max(0.f, Settings::Manager::getFloat("maximum light distance", "Shaders"));
+        if (mPointLightFadeEnd > 0)
+        {
+            mPointLightFadeStart = std::clamp(Settings::Manager::getFloat("light fade start", "Shaders"), 0.f, 1.f);
+            mPointLightFadeStart = mPointLightFadeEnd * mPointLightFadeStart;
+        }
     }
 
     void LightManager::initFFP(int targetLights)
@@ -866,38 +920,15 @@ namespace SceneUtil
         auto* stateset = getOrCreateStateSet();
 
         setLightingMethod(LightingMethod::PerObjectUniform);
-        setMaxLights(std::max(2, targetLights));
+        setMaxLights(std::clamp(targetLights, 2, 64));
 
-        mLightUniforms.resize(getMaxLights()+1);
-        for (size_t i = 0; i < mLightUniforms.size(); ++i)
-        {
-            osg::ref_ptr<osg::Uniform> udiffuse = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].diffuse").c_str());
-            osg::ref_ptr<osg::Uniform> uspecular = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].specular").c_str());
-            osg::ref_ptr<osg::Uniform> uambient = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].ambient").c_str());
-            osg::ref_ptr<osg::Uniform> uposition = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].position").c_str());
-            osg::ref_ptr<osg::Uniform> uattenuation = new osg::Uniform(osg::Uniform::FLOAT_VEC4, ("LightBuffer[" + std::to_string(i) + "].attenuation").c_str());
-
-            mLightUniforms[i].emplace(UniformKey::Diffuse, udiffuse);
-            mLightUniforms[i].emplace(UniformKey::Ambient, uambient);
-            mLightUniforms[i].emplace(UniformKey::Specular, uspecular);
-            mLightUniforms[i].emplace(UniformKey::Position, uposition);
-            mLightUniforms[i].emplace(UniformKey::Attenuation, uattenuation);
-
-            stateset->addUniform(udiffuse);
-            stateset->addUniform(uambient);
-            stateset->addUniform(uposition);
-            stateset->addUniform(uattenuation);
-
-            // specular isn't used besides sun, complete waste to upload it
-            if (i == 0)
-                stateset->addUniform(uspecular);
-        }
+        stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights() + 1));
     }
 
     void LightManager::initSingleUBO(int targetLights)
     {
         setLightingMethod(LightingMethod::SingleUBO);
-        setMaxLights(std::clamp(targetLights, 2, getMaxLightsInScene() / 2));
+        setMaxLights(std::clamp(targetLights, 2, 64));
 
         for (int i = 0; i < 2; ++i)
         {
@@ -911,7 +942,6 @@ namespace SceneUtil
 
         getOrCreateStateSet()->setAttribute(new LightManagerStateAttribute(this), osg::StateAttribute::ON);
     }
-
 
     void LightManager::setLightingMethod(LightingMethod method)
     {

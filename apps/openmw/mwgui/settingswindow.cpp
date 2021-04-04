@@ -6,6 +6,7 @@
 #include <MyGUI_ScrollView.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_TabControl.h>
+#include <MyGUI_TabItem.h>
 
 #include <SDL_video.h>
 
@@ -17,6 +18,7 @@
 #include <components/misc/constants.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -107,7 +109,7 @@ namespace
 
 namespace MWGui
 {
-    void SettingsWindow::configureWidgets(MyGUI::Widget* widget)
+    void SettingsWindow::configureWidgets(MyGUI::Widget* widget, bool init)
     {
         MyGUI::EnumeratorWidgetPtr widgets = widget->getEnumerator();
         while (widgets.next())
@@ -121,7 +123,8 @@ namespace MWGui
                                                                       getSettingCategory(current))
                         ? "#{sOn}" : "#{sOff}";
                 current->castType<MyGUI::Button>()->setCaptionWithReplacing(initialValue);
-                current->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
+                if (init)
+                    current->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
             }
             if (type == sliderType)
             {
@@ -141,6 +144,12 @@ namespace MWGui
                         ss << std::fixed << std::setprecision(2) << value/Constants::CellSizeInUnits;
                         valueStr = ss.str();
                     }
+                    else if (valueType == "Float")
+                    {
+                        std::stringstream ss;
+                        ss << std::fixed << std::setprecision(2) << value;
+                        valueStr = ss.str();
+                    }
                     else
                         valueStr = MyGUI::utility::toString(int(value));
 
@@ -155,12 +164,13 @@ namespace MWGui
                     valueStr = MyGUI::utility::toString(value);
                     scroll->setScrollPosition(value);
                 }
-                scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
+                if (init)
+                    scroll->eventScrollChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onSliderChangePosition);
                 if (scroll->getVisible())
                     updateSliderLabel(scroll, valueStr);
             }
 
-            configureWidgets(current);
+            configureWidgets(current, init);
         }
     }
 
@@ -187,7 +197,7 @@ namespace MWGui
         getWidget(unusedSlider, widgetName);
         unusedSlider->setVisible(false);
 
-        configureWidgets(mMainWidget);
+        configureWidgets(mMainWidget, true);
 
         setTitle("#{sOptions}");
 
@@ -204,6 +214,9 @@ namespace MWGui
         getWidget(mControllerSwitch, "ControllerButton");
         getWidget(mWaterTextureSize, "WaterTextureSize");
         getWidget(mWaterReflectionDetail, "WaterReflectionDetail");
+        getWidget(mLightingMethodButton, "LightingMethodButton");
+        getWidget(mMaxLightsSlider, "MaxLightsSlider");
+        getWidget(mLightsResetButton, "LightsResetButton");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -228,6 +241,9 @@ namespace MWGui
 
         mWaterTextureSize->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterTextureSizeChanged);
         mWaterReflectionDetail->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWaterReflectionDetailChanged);
+
+        mLightingMethodButton->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onLightingMethodChanged);
+        mLightsResetButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onLightsResetButtonClicked);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onControllerSwitchClicked);
@@ -271,6 +287,21 @@ namespace MWGui
         int waterReflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
         waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
+
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
+        switch (lightingMethod)
+        {
+        case SceneUtil::LightingMethod::Undefined:
+        case SceneUtil::LightingMethod::FFP:
+            mLightingMethodButton->setIndexSelected(0);
+            break;
+        case SceneUtil::LightingMethod::PerObjectUniform:
+            mLightingMethodButton->setIndexSelected(1);
+            break;
+        case SceneUtil::LightingMethod::SingleUBO:
+            mLightingMethodButton->setIndexSelected(2);
+            break;
+        }
 
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
@@ -355,6 +386,49 @@ namespace MWGui
     {
         unsigned int level = std::min((unsigned int)5, (unsigned int)pos);
         Settings::Manager::setInt("reflection detail", "Water", level);
+        apply();
+    }
+
+    void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* _sender)
+    {
+        std::vector<std::string> buttons = {"#{sYes}", "#{sNo}"};
+        std::string message = "This will reset all lighting settings to default, some changes will require a restart. Would you like to continue?";
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons, true);
+        int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
+        if (selectedButton == 1 || selectedButton == -1)
+            return;
+
+        Settings::Manager::setString("lighting method", "Shaders", "shaders compatibility");
+        Settings::Manager::setFloat("light bounds multiplier", "Shaders", 1.75);
+        Settings::Manager::setInt("maximum light distance", "Shaders", 8192);
+        Settings::Manager::setFloat("light fade start", "Shaders", 0.85);
+        Settings::Manager::setFloat("minimum interior brightness", "Shaders", 0.1);
+        Settings::Manager::setInt("max lights", "Shaders", 8);
+
+        mLightingMethodButton->setIndexSelected(1);
+
+        apply();
+        configureWidgets(mMainWidget, false);
+    }
+
+    void SettingsWindow::onLightingMethodChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        std::string setting;
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(_sender->getItemNameAt(pos));
+        switch (lightingMethod)
+        {
+        case SceneUtil::LightingMethod::FFP:
+            setting = "legacy";
+            break;
+        case SceneUtil::LightingMethod::Undefined:
+        case SceneUtil::LightingMethod::PerObjectUniform:
+            setting = "shaders compatibility";
+            break;
+        case SceneUtil::LightingMethod::SingleUBO:
+            setting = "shaders";
+            break;
+        }
+        Settings::Manager::setString("lighting method", "Shaders", setting);
         apply();
     }
 
@@ -458,6 +532,12 @@ namespace MWGui
                 {
                     std::stringstream ss;
                     ss << std::fixed << std::setprecision(2) << value/Constants::CellSizeInUnits;
+                    valueStr = ss.str();
+                }
+                else if (valueType == "Float")
+                {
+                    std::stringstream ss;
+                    ss << std::fixed << std::setprecision(2) << value;
                     valueStr = ss.str();
                 }
                 else

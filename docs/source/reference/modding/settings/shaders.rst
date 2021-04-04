@@ -185,7 +185,7 @@ light bounds multiplier
 -----------------------
 
 :Type:		float
-:Range:		0.0-10.0
+:Range:		0.0-5.0
 :Default:	1.75
 
 Controls the bounding sphere radius of point lights, which is used to determine
@@ -228,7 +228,7 @@ max lights
 ----------
 
 :Type:		integer
-:Range:		>=2
+:Range:		2-64
 :Default:	8
 
 Sets the maximum number of lights that each object can receive lighting from.

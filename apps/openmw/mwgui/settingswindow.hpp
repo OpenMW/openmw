@@ -35,6 +35,10 @@ namespace MWGui
             MyGUI::ComboBox* mWaterTextureSize;
             MyGUI::ComboBox* mWaterReflectionDetail;
 
+            MyGUI::ComboBox* mLightingMethodButton;
+            MyGUI::ScrollBar* mMaxLightsSlider;
+            MyGUI::Button* mLightsResetButton;
+
             // controls
             MyGUI::ScrollView* mControlsBox;
             MyGUI::Button* mResetControlsButton;
@@ -55,6 +59,9 @@ namespace MWGui
             void onWaterTextureSizeChanged(MyGUI::ComboBox* _sender, size_t pos);
             void onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos);
 
+            void onLightsResetButtonClicked(MyGUI::Widget* _sender);
+            void onLightingMethodChanged(MyGUI::ComboBox* _sender, size_t pos);
+
             void onRebindAction(MyGUI::Widget* _sender);
             void onInputTabMouseWheel(MyGUI::Widget* _sender, int _rel);
             void onResetDefaultBindings(MyGUI::Widget* _sender);
@@ -66,7 +73,7 @@ namespace MWGui
 
             void apply();
 
-            void configureWidgets(MyGUI::Widget* widget);
+            void configureWidgets(MyGUI::Widget* widget, bool init);
             void updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value);
 
             void layoutControlsBox();

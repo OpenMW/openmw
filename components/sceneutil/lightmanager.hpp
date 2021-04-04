@@ -14,6 +14,8 @@
 
 #include <components/shader/shadermanager.hpp>
 
+#include <components/settings/settings.hpp>
+
 namespace osgUtil
 {
     class CullVisitor;
@@ -172,9 +174,9 @@ namespace SceneUtil
 
         auto& getLightBuffer(size_t frameNum) { return mLightBuffers[frameNum%2]; }
 
-        auto& getLightUniform(int index, UniformKey key) { return mLightUniforms[index][key]; }
-
         std::map<std::string, std::string> getLightDefines() const;
+
+        void processChangedSettings(const Settings::CategorySettingVector& changed);
 
     private:
         friend class LightManagerStateAttribute;
@@ -183,6 +185,8 @@ namespace SceneUtil
         void initFFP(int targetLights);
         void initPerObjectUniform(int targetLights);
         void initSingleUBO(int targetLights);
+
+        void updateSettings();
 
         void setLightingMethod(LightingMethod method);
         void setMaxLights(int value);
@@ -211,9 +215,6 @@ namespace SceneUtil
         // < Light ID , Buffer Index >
         using LightIndexMap = std::unordered_map<int, int>;
         LightIndexMap mLightIndexMaps[2];
-
-        using UniformMap = std::vector<std::unordered_map<UniformKey, osg::ref_ptr<osg::Uniform>>>;
-        UniformMap mLightUniforms;
 
         std::unique_ptr<StateSetGenerator> mStateSetGenerator;
 
