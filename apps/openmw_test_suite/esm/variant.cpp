@@ -180,19 +180,19 @@ namespace
 
     TEST(ESMVariantGetStringTest, for_default_constructed_should_throw_exception)
     {
-        ASSERT_THROW(Variant().getString(), std::runtime_error);
+        ASSERT_THROW(Variant().getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_int_should_throw_exception)
     {
         const Variant variant(int{42});
-        ASSERT_THROW(variant.getString(), std::runtime_error);
+        ASSERT_THROW(variant.getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_float_should_throw_exception)
     {
         const Variant variant(float{2.7});
-        ASSERT_THROW(variant.getString(), std::runtime_error);
+        ASSERT_THROW(variant.getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_string_should_return_same_value)
@@ -372,40 +372,40 @@ namespace
     TEST(ESMVariantSetStringTest, for_default_constructed_should_throw_exception)
     {
         Variant variant;
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_unknown_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Unknown);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_default_int_should_throw_exception)
     {
         Variant variant(int{13});
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_int_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Int);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_short_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Short);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_float_should_throw_exception)
     {
         Variant variant(float{2.7f});
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_string_should_change_value)
