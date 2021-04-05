@@ -5,8 +5,10 @@
 #include <components/esm/animationstate.hpp>
 
 #include "../mwscript/locals.hpp"
+#include "../mwworld/customdata.hpp"
 
 #include <string>
+#include <memory>
 
 namespace SceneUtil
 {
@@ -44,7 +46,7 @@ namespace MWWorld
 
             ESM::AnimationState mAnimationState;
 
-            CustomData *mCustomData;
+            std::unique_ptr<CustomData> mCustomData;
 
             void copy (const RefData& refData);
 
@@ -68,6 +70,7 @@ namespace MWWorld
             /// perform these operations).
 
             RefData (const RefData& refData);
+            RefData (RefData&& other) noexcept = default;
 
             ~RefData();
 
@@ -76,6 +79,7 @@ namespace MWWorld
             /// perform this operations).
 
             RefData& operator= (const RefData& refData);
+            RefData& operator= (RefData&& other) noexcept = default;
 
             /// Return base node (can be a null pointer).
             SceneUtil::PositionAttitudeTransform* getBaseNode();
@@ -117,7 +121,7 @@ namespace MWWorld
             void setPosition (const ESM::Position& pos);
             const ESM::Position& getPosition() const;
 
-            void setCustomData (CustomData *data);
+            void setCustomData(std::unique_ptr<CustomData>&& value) noexcept;
             ///< Set custom data (potentially replacing old custom data). The ownership of \a data is
             /// transferred to this.
 

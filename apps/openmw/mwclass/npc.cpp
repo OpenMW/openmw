@@ -246,14 +246,12 @@ namespace
 namespace MWClass
 {
 
-    class NpcCustomData : public MWWorld::CustomData
+    class NpcCustomData : public MWWorld::TypedCustomData<NpcCustomData>
     {
     public:
         MWMechanics::NpcStats mNpcStats;
         MWMechanics::Movement mMovement;
         MWWorld::InventoryStore mInventoryStore;
-
-        MWWorld::CustomData *clone() const override;
 
         NpcCustomData& asNpcCustomData() override
         {
@@ -264,11 +262,6 @@ namespace MWClass
             return *this;
         }
     };
-
-    MWWorld::CustomData *NpcCustomData::clone() const
-    {
-        return new NpcCustomData (*this);
-    }
 
     const Npc::GMST& Npc::getGmst()
     {
@@ -397,7 +390,7 @@ namespace MWClass
             data->mNpcStats.setGoldPool(gold);
 
             // store
-            ptr.getRefData().setCustomData (data.release());
+            ptr.getRefData().setCustomData(std::move(data));
 
             getInventoryStore(ptr).autoEquip(ptr);
         }
@@ -1302,8 +1295,7 @@ namespace MWClass
             if (!ptr.getRefData().getCustomData())
             {
                 // Create a CustomData, but don't fill it from ESM records (not needed)
-                std::unique_ptr<NpcCustomData> data (new NpcCustomData);
-                ptr.getRefData().setCustomData (data.release());
+                ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
             }
         }
         else

@@ -46,11 +46,6 @@ namespace MWClass
         mStore.readState(inventory);
     }
 
-    MWWorld::CustomData *ContainerCustomData::clone() const
-    {
-        return new ContainerCustomData (*this);
-    }
-
     ContainerCustomData& ContainerCustomData::asContainerCustomData()
     {
         return *this;
@@ -72,7 +67,7 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Container> *ref = ptr.get<ESM::Container>();
 
             // store
-            ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()).release());
+            ptr.getRefData().setCustomData (std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()));
 
             MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
@@ -317,7 +312,7 @@ namespace MWClass
             return;
 
         const ESM::ContainerState& containerState = state.asContainerState();
-        ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory).release());
+        ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory));
     }
 
     void Container::writeAdditionalState (const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
