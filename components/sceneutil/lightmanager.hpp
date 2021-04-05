@@ -29,8 +29,8 @@ namespace SceneUtil
     enum class LightingMethod
     {
         FFP,
-        SingleUBO,
         PerObjectUniform,
+        SingleUBO,
         Undefined
     };
 
@@ -54,6 +54,8 @@ namespace SceneUtil
 
         int mId;
 
+        float mActorFade;
+
     public:
 
         META_Node(SceneUtil, LightSource)
@@ -71,6 +73,16 @@ namespace SceneUtil
         void setRadius(float radius)
         {
             mRadius = radius;
+        }
+
+        void setActorFade(float alpha)
+        {
+            mActorFade = alpha;
+        }
+
+        float getActorFade() const
+        {
+            return mActorFade;
         }
 
         /// Get the osg::Light safe for modification in the given frame.
@@ -104,15 +116,8 @@ namespace SceneUtil
     public:
         static bool isValidLightingModelString(const std::string& value);
         static LightingMethod getLightingMethodFromString(const std::string& value);
-
-        enum class UniformKey
-        {
-            Diffuse,
-            Ambient,
-            Specular,
-            Position,
-            Attenuation
-        };
+        /// Returns string as used in settings file, or the empty string if the method is undefined
+        static std::string getLightingMethodString(LightingMethod method);
 
         struct LightSourceTransform
         {
@@ -178,10 +183,10 @@ namespace SceneUtil
 
         void processChangedSettings(const Settings::CategorySettingVector& changed);
 
-    private:
-        friend class LightManagerStateAttribute;
-        friend class LightManagerCullCallback;
+        /// Not thread safe, it is the responsibility of the caller to stop/start threading on the viewer
+        void updateMaxLights();
 
+    private:
         void initFFP(int targetLights);
         void initPerObjectUniform(int targetLights);
         void initSingleUBO(int targetLights);
@@ -226,6 +231,8 @@ namespace SceneUtil
 
         int mMaxLights;
 
+        static constexpr auto mMaxLightsLowerLimit = 2;
+        static constexpr auto mMaxLightsUpperLimit = 64;
         static constexpr auto mFFPMaxLights = 8;
 
         static const std::unordered_map<std::string, LightingMethod> mLightingMethodSettingMap;

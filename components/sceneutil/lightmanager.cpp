@@ -415,6 +415,11 @@ namespace SceneUtil
 
         META_StateAttribute(NifOsg, LightStateAttributePerObjectUniform, osg::StateAttribute::LIGHT)
 
+        void resize(int numLights)
+        {
+            mLights.resize(std::min(static_cast<size_t>(numLights), mLights.size()));
+        }
+
         void apply(osg::State &state) const override
         {
             auto* lightUniform = mLightManager->getStateSet()->getUniform("LightBuffer");
@@ -510,6 +515,9 @@ namespace SceneUtil
             auto uOldCount = stateset->getUniform("PointLightCount");
 
             uOldCount->get(oldCount);
+
+            // max lights count can change during runtime
+            oldCount = std::min(mLightManager->getMaxLights(), oldCount);
 
             auto& lightData = mLightManager->getLightIndexMap(frameNum);
 
@@ -779,6 +787,14 @@ namespace SceneUtil
             return LightingMethod::Undefined;
     }
 
+    std::string LightManager::getLightingMethodString(LightingMethod method)
+    {
+        for (const auto& p : LightManager::mLightingMethodSettingMap)
+            if (p.second == method)
+                return p.first;
+        return "";
+    }
+
     LightManager::LightManager(bool ffp)
         : mStartLight(0)
         , mLightingMask(~0u)
@@ -891,6 +907,61 @@ namespace SceneUtil
         updateSettings();
     }
 
+    void LightManager::updateMaxLights()
+    {
+        if (usingFFP())
+            return;
+
+        setMaxLights(std::clamp(Settings::Manager::getInt("max lights", "Shaders"), mMaxLightsLowerLimit, mMaxLightsUpperLimit));
+
+        if (getLightingMethod() == LightingMethod::PerObjectUniform)
+        {
+            auto* prevUniform = getStateSet()->getUniform("LightBuffer");
+            osg::ref_ptr<osg::Uniform> newUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights() + 1);
+
+            for (int i = 0; i < getMaxLights() + 1; ++i)
+            {
+                osg::Matrixf prevLightData;
+                prevUniform->getElement(i, prevLightData);
+                newUniform->setElement(i, prevLightData);
+            }
+
+            getStateSet()->removeUniform(prevUniform);
+            getStateSet()->addUniform(newUniform);
+
+            for (int i = 0; i < 2; ++i)
+            {
+                for (auto& pair : mStateSetCache[i])
+                    static_cast<LightStateAttributePerObjectUniform*>(pair.second->getAttribute(osg::StateAttribute::LIGHT))->resize(getMaxLights());
+                mStateSetCache[i].clear();
+            }
+        }
+        else
+        {
+            for (int i = 0; i < 2; ++i)
+            {
+                for (auto& pair : mStateSetCache[i])
+                {
+                    auto& stateset = pair.second;
+                    osg::Uniform* uOldArray = stateset->getUniform("PointLightIndex");
+                    osg::Uniform* uOldCount = stateset->getUniform("PointLightCount");
+
+                    int prevCount;
+                    uOldCount->get(prevCount);
+                    int newCount = std::min(getMaxLights(), prevCount);
+                    uOldCount->set(newCount);
+
+                    osg::ref_ptr<osg::IntArray> newArray = uOldArray->getIntArray();
+                    newArray->resize(newCount);
+
+                    stateset->removeUniform(uOldArray);
+                    stateset->addUniform(new osg::Uniform("PointLightIndex", newArray));
+                }
+                mStateSetCache[i].clear();
+            }
+        }
+    }
+
     void LightManager::updateSettings()
     {
         if (getLightingMethod() == LightingMethod::FFP)
@@ -920,7 +991,7 @@ namespace SceneUtil
         auto* stateset = getOrCreateStateSet();
 
         setLightingMethod(LightingMethod::PerObjectUniform);
-        setMaxLights(std::clamp(targetLights, 2, 64));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
 
         stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights() + 1));
     }
@@ -928,7 +999,7 @@ namespace SceneUtil
     void LightManager::initSingleUBO(int targetLights)
     {
         setLightingMethod(LightingMethod::SingleUBO);
-        setMaxLights(std::clamp(targetLights, 2, 64));
+        setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
 
         for (int i = 0; i < 2; ++i)
         {
@@ -1000,7 +1071,7 @@ namespace SceneUtil
         getLightIndexMap(frameNum).clear();
         mLights.clear();
         mLightsInViewSpace.clear();
-
+        return;
         // Do an occasional cleanup for orphaned lights.
         for (int i = 0; i < 2; ++i)
         {
@@ -1133,6 +1204,7 @@ namespace SceneUtil
 
     LightSource::LightSource()
         : mRadius(0.f)
+        , mActorFade(1.f)
     {
         setUpdateCallback(new CollectLightCallback);
         mId = sLightId++;
@@ -1141,6 +1213,7 @@ namespace SceneUtil
     LightSource::LightSource(const LightSource &copy, const osg::CopyOp &copyop)
         : osg::Node(copy, copyop)
         , mRadius(copy.mRadius)
+        , mActorFade(copy.mActorFade)
     {
         mId = sLightId++;
 

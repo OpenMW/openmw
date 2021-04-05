@@ -460,91 +460,110 @@
 
                     <Widget type="TabItem" skin="" position="4 32 360 308">
                         <Property key="Caption" value="  Lights  "/>
-                        <!-- Lighting Method -->
-                        <Widget type="TextBox" skin="NormalText" position="0 4 160 18" align="Left Top">
-                            <Property key="Caption" value="*Lighting Method"/>
+                        <Widget type="Widget" skin="" position="0 0 360 315" align="Stretch">
+                        <Widget type="Widget" skin="" position="0 0 360 315" align="Stretch" name="LightSettingOverlay">
+                            <!-- Lighting Method -->
+                            <Widget type="TextBox" skin="NormalText" position="0 4 170 18" align="Left Top">
+                                <Property key="Caption" value="Lighting Method:"/>
+                            </Widget>
+                            <Widget type="TextBox" skin="SandText" position="0 28 170 18" align="Left Top" name="LightingMethodText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                            </Widget>
+                            <!-- Max Lights -->
+                            <Widget type="TextBox" skin="NormalText" position="178 4 160 18" align="Left Top" name="MaxLightsText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="Default: 8\nMaximum number of lights per object.\n\nA low number near default will cause light popping similar to what you would see with legacy lighting."/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="178 30 160 18" align="Right Top HStretch" name="MaxLightsSlider">
+                                <Property key="Range" value="24"/>
+                                <Property key="Page" value="1"/>
+                                <UserString key="SettingType" value="Slider"/>
+                                <UserString key="SettingMin" value="4"/>
+                                <UserString key="SettingMax" value="32"/>
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="max lights"/>
+                                <UserString key="SettingValueType" value="Integer"/>
+                                <UserString key="SettingLabelWidget" value="MaxLightsText"/>
+                                <UserString key="SettingLabelCaption" value="Max Lights (%s)"/>
+                            </Widget>
+                            <Widget type="ImageBox" skin="MW_HLine" position="0 54 360 18" align="Top HStretch"/>
+                            <!-- Light Fade Start -->
+                            <Widget type="TextBox" skin="NormalText" position="0 78 352 18" align="Left Top" name="MaxLightDistanceText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="Default: 8192 (units)\nMaximum distance at which lights will appear.\n\nSet this to 0.0 to disable it."/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
+                                <Property key="Range" value="8192"/>
+                                <Property key="Page" value="1"/>
+                                <UserString key="SettingType" value="Slider"/>
+                                <UserString key="SettingMin" value="0"/>
+                                <UserString key="SettingMax" value="8192"/>
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="maximum light distance"/>
+                                <UserString key="SettingValueType" value="Integer"/>
+                                <UserString key="SettingLabelWidget" value="MaxLightDistanceText"/>
+                                <UserString key="SettingLabelCaption" value="Maximum Light Distance (%s)"/>
+                            </Widget>
+                            <!-- Light Fade Multiplier -->
+                            <Widget type="TextBox" skin="NormalText" position="0 128 352 18" align="Left Top" name="LightFadeMultiplierText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="Default: 0.85\nFraction of maximum distance at which lights will start to fade.\n\nSet this to a low value for slower transitions or a high value of quicker transitions."/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 152 352 18" align="HStretch Top">
+                                <Property key="Range" value="10000"/>
+                                <Property key="Page" value="100"/>
+                                <UserString key="SettingType" value="Slider"/>
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="light fade start"/>
+                                <UserString key="SettingValueType" value="Float"/>
+                                <UserString key="SettingMin" value="0.0"/>
+                                <UserString key="SettingMax" value="1.0"/>
+                                <UserString key="SettingLabelWidget" value="LightFadeMultiplierText"/>
+                                <UserString key="SettingLabelCaption" value="Fade Start Multiplier (%s)"/>
+                            </Widget>
+                            <!-- Bounding Sphere Multiplier -->
+                            <Widget type="TextBox" skin="NormalText" position="0 176 352 18" align="Left Top" name="BoundingSphereMultText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="Default: 1.75\nMultipler for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 200 352 18" align="HStretch Top">
+                                <Property key="Range" value="500000"/>
+                                <Property key="Page" value="1000"/>
+                                <UserString key="SettingType" value="Slider"/>
+                                <UserString key="SettingMin" value="0.0"/>
+                                <UserString key="SettingMax" value="5.0"/>
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="light bounds multiplier"/>
+                                <UserString key="SettingValueType" value="Float"/>
+                                <UserString key="SettingLabelWidget" value="BoundingSphereMultText"/>
+                                <UserString key="SettingLabelCaption" value="Bounding Sphere Multiplier (%s)"/>
+                            </Widget>
+                            <!-- Minimum Ambient Brightness -->
+                            <Widget type="TextBox" skin="NormalText" position="0 224 352 18" align="Left Top" name="MinimumBrightnessText">
+                                <UserString key="ToolTipType" value="Layout"/>
+                                <UserString key="ToolTipLayout" value="TextToolTip"/>
+                                <UserString key="Caption_Text" value="Default: 0.1\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark."/>
+                            </Widget>
+                            <Widget type="ScrollBar" skin="MW_HScroll" position="0 248 352 18" align="HStretch Top">
+                                <Property key="Range" value="10000"/>
+                                <Property key="Page" value="100"/>
+                                <UserString key="SettingType" value="Slider"/>
+                                <UserString key="SettingCategory" value="Shaders"/>
+                                <UserString key="SettingName" value="minimum interior brightness"/>
+                                <UserString key="SettingValueType" value="Float"/>
+                                <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
+                                <UserString key="SettingLabelCaption" value="Minimum Interior Brightness (%s)"/>
+                            </Widget>
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 290 0 0" align="Top Left" name="LightsResetButton">
+                                <Property key="Caption" value="Reset To Defaults"/>
+                            </Widget>
                         </Widget>
-                        <Widget type="ComboBox" skin="MW_ComboBox" position="0 28 170 24" align="Left Top" name="LightingMethodButton">
-                            <Property key="AddItem" value="legacy"/>
-                            <Property key="AddItem" value="shaders compatibility"/>
-                            <Property key="AddItem" value="shaders"/>
                         </Widget>
-                        <!-- Max Lights -->
-                        <Widget type="TextBox" skin="NormalText" position="178 4 160 18" align="Left Top" name="MaxLightsText"/>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="178 30 160 18" align="Right Top HStretch" name="MaxLightsSlider">
-                            <Property key="Range" value="24"/>
-                            <Property key="Page" value="1"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingMin" value="8"/>
-                            <UserString key="SettingMax" value="32"/>
-                            <UserString key="SettingCategory" value="Shaders"/>
-                            <UserString key="SettingName" value="max lights"/>
-                            <UserString key="SettingValueType" value="Integer"/>
-                            <UserString key="SettingLabelWidget" value="MaxLightsText"/>
-                            <UserString key="SettingLabelCaption" value="*Max Lights (%s)"/>
-                        </Widget>
-                        <Widget type="ImageBox" skin="MW_HLine" position="0 54 360 18" align="Top HStretch"/>
-                        <!-- Light Fade Start -->
-                        <Widget type="TextBox" skin="NormalText" position="0 78 352 18" align="Left Top" name="MaxLightDistanceText"/>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 104 352 18" align="HStretch Top">
-                            <Property key="Range" value="8192"/>
-                            <Property key="Page" value="1"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingMin" value="0"/>
-                            <UserString key="SettingMax" value="8192"/>
-                            <UserString key="SettingCategory" value="Shaders"/>
-                            <UserString key="SettingName" value="maximum light distance"/>
-                            <UserString key="SettingValueType" value="Integer"/>
-                            <UserString key="SettingLabelWidget" value="MaxLightDistanceText"/>
-                            <UserString key="SettingLabelCaption" value="Maximum Light Distance (%s)"/>
-                        </Widget>
-                        <!-- Light Fade Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 128 352 18" align="Left Top" name="LightFadeMultiplierText"/>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 152 352 18" align="HStretch Top">
-                            <Property key="Range" value="10000"/>
-                            <Property key="Page" value="300"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="Shaders"/>
-                            <UserString key="SettingName" value="light fade start"/>
-                            <UserString key="SettingValueType" value="Float"/>
-                            <UserString key="SettingLabelWidget" value="LightFadeMultiplierText"/>
-                            <UserString key="SettingLabelCaption" value="Fade Start Multiplier (%s)"/>
-                        </Widget>
-                        <!-- Bounding Sphere Multiplier -->
-                        <Widget type="TextBox" skin="NormalText" position="0 176 352 18" align="Left Top" name="BoundingSphereMultText"/>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 200 352 18" align="HStretch Top">
-                            <Property key="Range" value="10000"/>
-                            <Property key="Page" value="300"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingMin" value="0.1"/>
-                            <UserString key="SettingMax" value="5.0"/>
-                            <UserString key="SettingCategory" value="Shaders"/>
-                            <UserString key="SettingName" value="light bounds multiplier"/>
-                            <UserString key="SettingValueType" value="Float"/>
-                            <UserString key="SettingLabelWidget" value="BoundingSphereMultText"/>
-                            <UserString key="SettingLabelCaption" value="Bounding Sphere Multiplier (%s)"/>
-                        </Widget>
-                        <!-- Minimum Ambient Brightness -->
-                        <Widget type="TextBox" skin="NormalText" position="0 224 352 18" align="Left Top" name="MinimumBrightnessText"/>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 248 352 18" align="HStretch Top">
-                            <Property key="Range" value="10000"/>
-                            <Property key="Page" value="300"/>
-                            <UserString key="SettingType" value="Slider"/>
-                            <UserString key="SettingCategory" value="Shaders"/>
-                            <UserString key="SettingName" value="minimum interior brightness"/>
-                            <UserString key="SettingValueType" value="Float"/>
-                            <UserString key="SettingLabelWidget" value="MinimumBrightnessText"/>
-                            <UserString key="SettingLabelCaption" value="Minimum Interior Brightness (%s)"/>
-                        </Widget>
-
-                        <Widget type="AutoSizedButton" skin="MW_Button" position="0 308 0 0" align="Bottom Left" name="LightsResetButton">
-                            <Property key="Caption" value="Reset To Defaults"/>
-                        </Widget>
-                        <Widget type="AutoSizedTextBox" skin="NormalText" position="210 308 0 0" align="Bottom Right HStretch">
-                            <Property key="Caption" value="(*) Requires Restart"/>
-                            <Property key="TextAlign" value="Right"/>
-                        </Widget>
-
                     </Widget>
                     <!--
                     <Widget type="TabItem" skin="" position="0 28 352 268">

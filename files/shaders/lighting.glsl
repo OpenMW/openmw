@@ -1,6 +1,6 @@
 #define LIGHTING_MODEL_FFP 0
-#define LIGHTING_MODEL_SINGLE_UBO 1
-#define LIGHTING_MODEL_PER_OBJECT_UNIFORM 2
+#define LIGHTING_MODEL_PER_OBJECT_UNIFORM 1
+#define LIGHTING_MODEL_SINGLE_UBO 2
 
 #if @lightingModel != LIGHTING_MODEL_FFP
 #define getLight LightBuffer
@@ -35,7 +35,7 @@ vec4 unpackRGBA(int data)
 
 /* Layout:
 packedColors: 8-bit unsigned RGB packed as (diffuse, ambient, specular).
-              sign bit is stored in diffuse alpha component
+              sign bit is stored in unused alpha component
 attenuation: constant, linear, quadratic, light radius (as defined in content)
 */
 struct LightData
@@ -138,10 +138,12 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
 #if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
     float illumination = clamp(1.0 / (getLight[lightIndex][0].w + getLight[lightIndex][1].w * lightDistance + getLight[lightIndex][2].w * lightDistance * lightDistance), 0.0, 1.0);
     illumination *= 1.0 - quickstep((lightDistance / radius) - 1.0);
+
     ambientOut = getLight[lightIndex][1].xyz * illumination;
 #elif @lightingModel == LIGHTING_MODEL_SINGLE_UBO
     float illumination = clamp(1.0 / (getLight[lightIndex].attenuation.x + getLight[lightIndex].attenuation.y * lightDistance + getLight[lightIndex].attenuation.z * lightDistance * lightDistance), 0.0, 1.0);
     illumination *= 1.0 - quickstep((lightDistance / radius) - 1.0);
+
     ivec4 data = getLight[lightIndex].packedColors;
     ambientOut = unpackRGB(data.y) * illumination;
 #else

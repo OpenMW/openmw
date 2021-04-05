@@ -7,6 +7,7 @@
 #include <QProxyStyle>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
+#include <components/sceneutil/lightmanager.hpp>
 
 #include <cmath>
 
@@ -124,6 +125,11 @@ bool Launcher::AdvancedPage::loadSettings()
 
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
         viewingDistanceComboBox->setValue(convertToCells(mEngineSettings.getInt("viewing distance", "Camera")));
+
+        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(mEngineSettings.getString("lighting method", "Shaders"));
+        if (lightingMethod == SceneUtil::LightingMethod::Undefined)
+            lightingMethod = SceneUtil::LightingMethod::PerObjectUniform;
+        lightingMethodComboBox->setCurrentIndex(static_cast<int>(lightingMethod));
     }
 
     // Camera
@@ -246,6 +252,9 @@ void Launcher::AdvancedPage::saveSettings()
         {
             mEngineSettings.setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
         }
+
+        auto lightingMethodStr = SceneUtil::LightManager::getLightingMethodString(static_cast<SceneUtil::LightingMethod>(lightingMethodComboBox->currentIndex()));
+        mEngineSettings.setString("lighting method", "Shaders", lightingMethodStr);
     }
 
     // Camera

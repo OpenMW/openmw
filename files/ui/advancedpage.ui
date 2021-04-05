@@ -273,6 +273,36 @@
            </property>
           </widget>
          </item>
+         <item row="6" column="1">
+          <layout class="QHBoxLayout" name="lightingMethodLayout">
+           <item>
+            <widget class="QLabel" name="lightingMethodLabel">
+             <property name="text">
+              <string>Lighting Method:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="lightingMethodComboBox">
+             <item>
+              <property name="text">
+               <string>legacy</string>
+                </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>shaders compatibility</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>shaders</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item row="5" column="0">
           <widget class="QCheckBox" name="smoothMovementCheckBox">
            <property name="toolTip">
