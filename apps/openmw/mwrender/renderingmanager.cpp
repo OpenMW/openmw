@@ -224,6 +224,7 @@ namespace MWRender
         // Let LightManager choose which backend to use based on our hint, mostly depends on support for UBOs
         resourceSystem->getSceneManager()->getShaderManager().setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
+        Settings::Manager::setString("lighting method", "Shaders", SceneUtil::LightManager::getLightingMethodString(sceneRoot->getLightingMethod()));
 
         mMinimumAmbientLuminance = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
 
