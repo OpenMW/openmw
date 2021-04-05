@@ -130,6 +130,9 @@ namespace MWWorld
         {}
     }
 
+    RefData::RefData(RefData&& other) noexcept = default;
+    RefData& RefData::operator=(RefData&& other) noexcept = default;
+
     void RefData::setBaseNode(SceneUtil::PositionAttitudeTransform *base)
     {
         mBaseNode = base;
