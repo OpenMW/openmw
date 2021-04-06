@@ -4,6 +4,7 @@
 #include <memory>
 #include <sstream>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <components/esm/records.hpp>
 #include "store.hpp"
@@ -76,7 +77,7 @@ namespace MWWorld
         std::map<std::string, int> mIds;
         std::map<std::string, int> mStaticIds;
 
-        std::map<std::string, int> mRefCount;
+        std::unordered_map<std::string, int> mRefCount;
 
         std::map<int, StoreBase *> mStores;
 
