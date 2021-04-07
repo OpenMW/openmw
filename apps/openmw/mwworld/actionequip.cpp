@@ -91,13 +91,30 @@ namespace MWWorld
         // move all slots one towards begin(), then equip the item in the slot that is now free
         if (slot == slots_.first.end())
         {
-            for (slot=slots_.first.begin();slot!=slots_.first.end(); ++slot)
+            ContainerStoreIterator enchItem = invStore.getSelectedEnchantItem();
+            bool bReEquipEnchItem = false;
+            for (slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
             {
                 invStore.unequipSlot(*slot, actor, false);
-                if (slot+1 != slots_.first.end())
-                    invStore.equip(*slot, invStore.getSlot(*(slot+1)), actor);
+                if (slot + 1 != slots_.first.end())
+                {
+                    invStore.equip(*slot, invStore.getSlot(*(slot + 1)), actor);
+                }
                 else
+                {
                     invStore.equip(*slot, it, actor);
+                }
+
+                //if an enchanted item was re-equipped, set reEquipEnchItem = true
+                if (invStore.getSlot(*slot) == enchItem)
+                {
+                    bReEquipEnchItem = true;
+                }
+            }
+            //if re-equip flag is true, select the enchanted item again
+            if (bReEquipEnchItem)
+            {
+                invStore.setSelectedEnchantItem(enchItem);
             }
         }
     }
