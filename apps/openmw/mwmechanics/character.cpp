@@ -2955,7 +2955,7 @@ void CharacterController::updateHeadTracking(float duration)
             }
             else
                 // no head node to look at, fall back to look at center of collision box
-                direction = MWBase::Environment::get().getWorld()->aimToTarget(mPtr, mHeadTrackTarget);
+                direction = MWBase::Environment::get().getWorld()->aimToTarget(mPtr, mHeadTrackTarget, false);
         }
         direction.normalize();
 

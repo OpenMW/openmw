@@ -3885,14 +3885,12 @@ namespace MWWorld
         return false;
     }
 
-    osg::Vec3f World::aimToTarget(const ConstPtr &actor, const ConstPtr &target)
+    osg::Vec3f World::aimToTarget(const ConstPtr &actor, const ConstPtr &target, bool isRangedCombat)
     {
         osg::Vec3f weaponPos = actor.getRefData().getPosition().asVec3();
-        osg::Vec3f weaponHalfExtents = mPhysics->getHalfExtents(actor);
-        osg::Vec3f targetPos = target.getRefData().getPosition().asVec3();
-        osg::Vec3f targetHalfExtents = mPhysics->getHalfExtents(target);
-        weaponPos.z() += weaponHalfExtents.z() * 2 * Constants::TorsoHeight;
-        targetPos.z() += targetHalfExtents.z();
+        float heightRatio = isRangedCombat ? 2.f * Constants::TorsoHeight : 1.f;
+        weaponPos.z() += mPhysics->getHalfExtents(actor).z() * heightRatio;
+        osg::Vec3f targetPos = mPhysics->getCollisionObjectPosition(target);
         return (targetPos - weaponPos);
     }
 

@@ -228,7 +228,6 @@ namespace MWMechanics
         const osg::Vec3f vActorPos(pos.asVec3());
         const osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
 
-        osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
         float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
 
         storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
@@ -236,13 +235,14 @@ namespace MWMechanics
         if (isRangedCombat)
         {
             // rotate actor taking into account target movement direction and projectile speed
-            vAimDir = AimDirToMovingTarget(actor, target, storage.mLastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
+            osg::Vec3f vAimDir = AimDirToMovingTarget(actor, target, storage.mLastTargetPos, AI_REACTION_TIME, (weapon ? weapon->mData.mType : 0), storage.mStrength);
 
             storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
             storage.mMovement.mRotation[2] = getZAngleToDir(vAimDir);
         }
         else
         {
+            osg::Vec3f vAimDir = MWBase::Environment::get().getWorld()->aimToTarget(actor, target, false);
             storage.mMovement.mRotation[0] = getXAngleToDir(vAimDir);
             storage.mMovement.mRotation[2] = getZAngleToDir((vTargetPos-vActorPos)); // using vAimDir results in spastic movements since the head is animated
         }
@@ -698,7 +698,7 @@ osg::Vec3f AimDirToMovingTarget(const MWWorld::Ptr& actor, const MWWorld::Ptr& t
     // idea: perpendicular to dir to target speed components of target move vector and projectile vector should be the same
 
     osg::Vec3f vTargetPos = target.getRefData().getPosition().asVec3();
-    osg::Vec3f vDirToTarget = MWBase::Environment::get().getWorld()->aimToTarget(actor, target);
+    osg::Vec3f vDirToTarget = MWBase::Environment::get().getWorld()->aimToTarget(actor, target, true);
     float distToTarget = vDirToTarget.length();
 
     osg::Vec3f vTargetMoveDir = vTargetPos - vLastTargetPos;
