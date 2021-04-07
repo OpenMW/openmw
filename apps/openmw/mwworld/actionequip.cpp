@@ -92,7 +92,7 @@ namespace MWWorld
         if (slot == slots_.first.end())
         {
             ContainerStoreIterator enchItem = invStore.getSelectedEnchantItem();
-            bool bReEquipEnchItem = false;
+            bool reEquip = false;
             for (slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
             {
                 invStore.unequipSlot(*slot, actor, false);
@@ -105,14 +105,13 @@ namespace MWWorld
                     invStore.equip(*slot, it, actor);
                 }
 
-                //if an enchanted item was re-equipped, set reEquipEnchItem = true
+                //Fix for issue of selected enchated item getting remmoved on cycle
                 if (invStore.getSlot(*slot) == enchItem)
                 {
-                    bReEquipEnchItem = true;
+                    reEquip = true;
                 }
             }
-            //if re-equip flag is true, select the enchanted item again
-            if (bReEquipEnchItem)
+            if (reEquip)
             {
                 invStore.setSelectedEnchantItem(enchItem);
             }
