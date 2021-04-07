@@ -73,7 +73,7 @@ namespace MWScript
 
             void write (ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-            bool readRecord (ESM::ESMReader& reader, uint32_t type);
+            bool readRecord (ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
             ///< Records for variables that do not exist are dropped silently.
             ///
             /// \return Known type?
