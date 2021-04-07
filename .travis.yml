@@ -66,11 +66,13 @@ deploy:
   repo: OpenMW/openmw
 notifications:
   email:
+    if: repository_slug = OpenMW/openmw AND branch = master
     recipients:
       - corrmage+travis-ci@gmail.com
     on_success: change
     on_failure: always
   irc:
+    if: repository_slug = OpenMW/openmw AND branch = master
     channels:
       - "chat.freenode.net#openmw"
     on_success: change
