@@ -94,6 +94,7 @@ Debian_Clang_tests:
     BUILD_TESTS_ONLY: 1
 
 MacOS:
+  image: macos-11-xcode-12
   tags:
     - macos
   stage: build
@@ -110,6 +111,10 @@ MacOS:
     paths:
       - build/OpenMW-*.dmg
       - "build/**/*.log"
+
+macOS10.15_Xcode11:
+  extends: MacOS
+  image: macos-10.15-xcode-11
 
 variables: &engine-targets
   targets: "openmw,openmw-essimporter,openmw-iniimporter,openmw-launcher,openmw-wizard"
