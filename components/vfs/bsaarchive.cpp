@@ -32,7 +32,7 @@ void BsaArchive::listResources(std::map<std::string, File *> &out, char (*normal
 {
     for (std::vector<BsaArchiveFile>::iterator it = mResources.begin(); it != mResources.end(); ++it)
     {
-        std::string ent = it->mInfo->name;
+        std::string ent = it->mInfo->name();
         std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
 
         out[ent] = &*it;
@@ -43,7 +43,7 @@ bool BsaArchive::contains(const std::string& file, char (*normalize_function)(ch
 {
     for (const auto& it : mResources)
     {
-        std::string ent = it.mInfo->name;
+        std::string ent = it.mInfo->name();
         std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
         if(file == ent)
             return true;
