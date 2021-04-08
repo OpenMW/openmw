@@ -1,5 +1,7 @@
 #include "advancedpage.hpp"
 
+#include <unordered_map>
+
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
 #include <QFileDialog>
@@ -7,7 +9,6 @@
 #include <QProxyStyle>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
-#include <components/sceneutil/lightmanager.hpp>
 
 #include <cmath>
 
@@ -126,10 +127,12 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
         viewingDistanceComboBox->setValue(convertToCells(mEngineSettings.getInt("viewing distance", "Camera")));
 
-        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(mEngineSettings.getString("lighting method", "Shaders"));
-        if (lightingMethod == SceneUtil::LightingMethod::Undefined)
-            lightingMethod = SceneUtil::LightingMethod::PerObjectUniform;
-        lightingMethodComboBox->setCurrentIndex(static_cast<int>(lightingMethod));
+        int lightingMethod = 1;
+        if (mEngineSettings.getString("lighting method", "Shaders") == "legacy")
+            lightingMethod = 0;
+        else if (mEngineSettings.getString("lighting method", "Shaders") == "shaders")
+            lightingMethod = 2;
+        lightingMethodComboBox->setCurrentIndex(lightingMethod);
     }
 
     // Camera
@@ -253,8 +256,8 @@ void Launcher::AdvancedPage::saveSettings()
             mEngineSettings.setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
         }
 
-        auto lightingMethodStr = SceneUtil::LightManager::getLightingMethodString(static_cast<SceneUtil::LightingMethod>(lightingMethodComboBox->currentIndex()));
-        mEngineSettings.setString("lighting method", "Shaders", lightingMethodStr);
+        static std::unordered_map<int, std::string> lightingMethodMap = {{0, "legacy"}, {1, "shaders compatibility"}, {2, "shaders"}};
+        mEngineSettings.setString("lighting method", "Shaders", lightingMethodMap[lightingMethodComboBox->currentIndex()]);
     }
 
     // Camera

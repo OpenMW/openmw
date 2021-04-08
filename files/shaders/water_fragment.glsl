@@ -203,11 +203,7 @@ void main(void)
                    normal3 * midWaves.y + normal4 * smallWaves.x + normal5 * smallWaves.y + rippleAdd);
     normal = normalize(vec3(-normal.x * bump, -normal.y * bump, normal.z));
 
-#if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
-    vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(getLight[0][0].xyz, 0.0)).xyz);
-#else
-    vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(getLight[0].position.xyz, 0.0)).xyz);
-#endif
+    vec3 lVec = normalize((gl_ModelViewMatrixInverse * vec4(lcalcPosition(0).xyz, 0.0)).xyz);
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 vVec = normalize(position.xyz - cameraPos.xyz);
 
@@ -242,13 +238,7 @@ void main(void)
 
     vec3 waterColor = WATER_COLOR * sunFade;
 
-#if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
-  vec4 sunSpec = unpackRGBA(getLight[0].packedColors.z);
-#elif @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
-  vec4 sunSpec = getLight[0][3];
-#else
-  vec4 sunSpec = getLight[0].specular;
-#endif
+    vec4 sunSpec = lcalcSpecular(0);
 
 #if REFRACTION
     // refraction

@@ -551,7 +551,7 @@ namespace SceneUtil
 
             stateset->setAttributeAndModes(new LightStateAttributePerObjectUniform(std::move(lights), mLightManager), osg::StateAttribute::ON);
 
-            stateset->addUniform(new osg::Uniform("PointLightCount", static_cast<int>(lightList.size())));
+            stateset->addUniform(new osg::Uniform("PointLightCount", static_cast<int>(lightList.size() + 1)));
 
             return stateset;
         }
@@ -894,10 +894,15 @@ namespace SceneUtil
 
         defines["maxLights"] = std::to_string(getMaxLights());
         defines["maxLightsInScene"] = std::to_string(getMaxLightsInScene());
-        defines["lightingModel"] = std::to_string(static_cast<int>(mLightingMethod));
-        defines["useUBO"] = std::to_string(mLightingMethod == LightingMethod::SingleUBO);
+        defines["lightingMethodFFP"] = getLightingMethod() == LightingMethod::FFP ? "1" : "0";
+        defines["lightingMethodPerObjectUniform"] = getLightingMethod() == LightingMethod::PerObjectUniform ? "1" : "0";
+        defines["lightingMethodUBO"] = getLightingMethod() == LightingMethod::SingleUBO ? "1" : "0";
+        defines["useUBO"] = std::to_string(getLightingMethod() == LightingMethod::SingleUBO);
         // exposes bitwise operators
-        defines["useGPUShader4"] = std::to_string(mLightingMethod == LightingMethod::SingleUBO);
+        defines["useGPUShader4"] = std::to_string(getLightingMethod() == LightingMethod::SingleUBO);
+        defines["getLight"] = getLightingMethod() == LightingMethod::FFP ? "gl_LightSource" : "LightBuffer";
+        defines["startLight"] =  getLightingMethod() == LightingMethod::SingleUBO ? "0" : "1";
+        defines["endLight"] = getLightingMethod() == LightingMethod::FFP ? defines["maxLights"] : "PointLightCount";
 
         return defines;
     }
