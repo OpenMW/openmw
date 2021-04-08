@@ -17,6 +17,9 @@ namespace Wizard
 
         int nextId() const override;
 
+    private slots:
+        void handleBuyButton();
+        
     private:
         MainWizard *mWizard;
 
