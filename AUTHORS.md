@@ -197,6 +197,7 @@ Programmers
     Sylvain Thesnieres (Garvek)
     t6
     terrorfisch
+    Tess (tescoShoppah)
     thegriglat
     Thomas Luppi (Digmaster)
     tlmullis

@@ -123,6 +123,7 @@
     Feature #2404: Levelled List can not be placed into a container
     Feature #2686: Timestamps in openmw.log
     Feature #3171: OpenMW-CS: Instance drag selection
+    Feature #3983: Wizard: Add link to buy Morrowind
     Feature #4894: Consider actors as obstacles for pathfinding
     Feature #4899: Alpha-To-Coverage Anti-Aliasing for alpha testing
     Feature #4977: Use the "default icon.tga" when an item's icon is not found
