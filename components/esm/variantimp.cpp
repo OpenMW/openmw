@@ -98,6 +98,9 @@ void ESM::VariantStringData::write (ESMWriter& esm, Variant::Format format, VarT
     if (format==Variant::Format_Info)
         throw std::runtime_error ("info variables of type string not supported");
 
+    if (format==Variant::Format_Local)
+        throw std::runtime_error ("local variables of type string not supported");
+
     // GMST
     esm.writeHNString ("STRV", mValue);
 }
