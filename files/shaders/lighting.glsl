@@ -76,24 +76,25 @@ uniform int PointLightCount;
 void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 viewNormal)
 {
 #if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
-    vec3 lightDir = normalize(getLight[0][0].xyz);
-#else
-    vec3 lightDir = normalize(getLight[0].position.xyz);
-#endif
-
-#if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
     ambientOut = getLight[0][1].xyz;
+
     vec3 sunDiffuse = getLight[0][2].xyz;
+    vec3 lightDir = normalize(getLight[0][0].xyz);
 #elif @lightingModel == LIGHTING_MODEL_SINGLE_UBO
     ivec4 data = getLight[0].packedColors;
     ambientOut = unpackRGB(data.y);
+
     vec3 sunDiffuse = unpackRGB(data.x);
-#else
+    vec3 lightDir = normalize(getLight[0].position.xyz);
+#else // LIGHTING_MODEL_SINGLE_UBO
     ambientOut = getLight[0].ambient.xyz;
+
     vec3 sunDiffuse = getLight[0].diffuse.xyz;
+    vec3 lightDir = normalize(getLight[0].position.xyz);
 #endif
 
     float lambert = dot(viewNormal.xyz, lightDir);
+
 #ifndef GROUNDCOVER
     lambert = max(lambert, 0.0);
 #else
@@ -105,6 +106,7 @@ void perLightSun(out vec3 ambientOut, out vec3 diffuseOut, vec3 viewPos, vec3 vi
     }
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
+
     diffuseOut = sunDiffuse * lambert;
 }
 
@@ -118,6 +120,7 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
 
     float lightDistance = length(lightPos);
 
+// cull non-FFP point lighting by radius, light is guaranteed to not fall outside this bound with our cutoff
 #if @lightingModel != LIGHTING_MODEL_FFP
 #if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
     float radius = getLight[lightIndex][3][3];
@@ -181,53 +184,54 @@ void doLighting(vec3 viewPos, vec3 viewNormal, out vec3 diffuseLight, out vec3 a
 #endif
 {
     vec3 ambientOut, diffuseOut;
-    // This light gets added a second time in the loop to fix Mesa users' slowdown, so we need to negate its contribution here.
-    perLightSun(ambientOut, diffuseOut, viewPos, viewNormal);
-
-#if PER_PIXEL_LIGHTING
-    diffuseLight = diffuseOut * shadowing - diffuseOut;
-#else
-    shadowDiffuse = diffuseOut;
-    diffuseLight = -diffuseOut;
-#endif
     ambientLight = gl_LightModel.ambient.xyz;
 
+// sun light
     perLightSun(ambientOut, diffuseOut, viewPos, viewNormal);
     ambientLight += ambientOut;
-    diffuseLight += diffuseOut;
+#if PER_PIXEL_LIGHTING
+    diffuseLight = diffuseOut * shadowing;
+#else
+    shadowDiffuse = diffuseOut;
+    diffuseLight = diffuseOut;
+#endif
 
+// point lights
 #if @lightingModel == LIGHTING_MODEL_FFP
     for (int i=1; i < @maxLights; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+        ambientLight += ambientOut;
+        diffuseLight += diffuseOut;
+    }
 #elif @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
     for (int i=1; i <= PointLightCount; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, i, viewPos, viewNormal);
+        ambientLight += ambientOut;
+        diffuseLight += diffuseOut;
+    }
 #else
     for (int i=0; i < PointLightCount; ++i)
     {
         perLightPoint(ambientOut, diffuseOut, PointLightIndex[i], viewPos, viewNormal);
-#endif
         ambientLight += ambientOut;
         diffuseLight += diffuseOut;
     }
+#endif
 }
 
 vec3 getSpecular(vec3 viewNormal, vec3 viewDirection, float shininess, vec3 matSpec)
 {
-#if @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
-    vec3 sunDir = getLight[0][0].xyz;
-#else
-    vec3 sunDir = getLight[0].position.xyz;
-#endif
-
 #if @lightingModel == LIGHTING_MODEL_SINGLE_UBO
+    vec3 sunDir = getLight[0].position.xyz;
     vec3 sunSpec = unpackRGB(getLight[0].packedColors.z);
 #elif @lightingModel == LIGHTING_MODEL_PER_OBJECT_UNIFORM
+    vec3 sunDir = getLight[0][0].xyz;
     vec3 sunSpec = getLight[0][3].xyz;
 #else
     vec3 sunSpec = getLight[0].specular.xyz;
+    vec3 sunDir = getLight[0].position.xyz;
 #endif
 
     vec3 lightDir = normalize(sunDir);

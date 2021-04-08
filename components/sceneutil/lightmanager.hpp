@@ -228,6 +228,7 @@ namespace SceneUtil
         float mPointLightRadiusMultiplier;
         float mPointLightFadeEnd;
         float mPointLightFadeStart;
+        float mPointLightFadeDelta;
 
         int mMaxLights;
 
