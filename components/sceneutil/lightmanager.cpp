@@ -644,7 +644,7 @@ namespace SceneUtil
                         configureAmbient(lightMat, sun->getAmbient());
                         configureDiffuse(lightMat, sun->getDiffuse());
                         configureSpecular(lightMat, sun->getSpecular());
-                        mLightManager->getStateSet()->getUniform("LightBuffer")->setElement(0, lightMat);
+                        mLightManager->setSunlightBuffer(lightMat, mLastFrameNumber);
                     }
                     else
                     {
@@ -767,6 +767,36 @@ namespace SceneUtil
         osg::ref_ptr<osg::Program> mDummyProgram;
     };
 
+    class LightManagerStateAttributePerObjectUniform : public osg::StateAttribute
+    {
+    public:
+        LightManagerStateAttributePerObjectUniform()
+            : mLightManager(nullptr) {}
+
+        LightManagerStateAttributePerObjectUniform(LightManager* lightManager)
+        : mLightManager(lightManager)
+        {
+        }
+
+        LightManagerStateAttributePerObjectUniform(const LightManagerStateAttributePerObjectUniform& copy, const osg::CopyOp& copyop=osg::CopyOp::SHALLOW_COPY)
+            : osg::StateAttribute(copy,copyop), mLightManager(copy.mLightManager) {}
+
+        int compare(const StateAttribute &sa) const override
+        {
+            throw std::runtime_error("LightManagerStateAttributePerObjectUniform::compare: unimplemented");
+        }
+
+        META_StateAttribute(NifOsg, LightManagerStateAttributePerObjectUniform, osg::StateAttribute::LIGHT)
+
+        void apply(osg::State& state) const override
+        {
+            mLightManager->getStateSet()->getUniform("LightBuffer")->setElement(0, mLightManager->getSunlightBuffer(state.getFrameStamp()->getFrameNumber()));
+        }
+
+    private:
+        LightManager* mLightManager;
+    };
+
     const std::unordered_map<std::string, LightingMethod> LightManager::mLightingMethodSettingMap = {
          {"legacy", LightingMethod::FFP}
         ,{"shaders compatibility", LightingMethod::PerObjectUniform}
@@ -845,6 +875,7 @@ namespace SceneUtil
             initSingleUBO(targetLights);
 
         getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
+        getOrCreateStateSet()->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
 
         addCullCallback(new LightManagerCullCallback(this));
     }
