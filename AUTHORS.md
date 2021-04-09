@@ -184,6 +184,7 @@ Programmers
     sergoz
     ShadowRadiance
     Siimacore
+    Simon Meulenbeek (simonmb)
     sir_herrbatka
     smbas
     Sophie Kirschner (pineapplemachine)

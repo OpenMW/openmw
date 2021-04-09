@@ -13,6 +13,7 @@ set(LAUNCHER
     utils/profilescombobox.cpp
     utils/textinputdialog.cpp
     utils/lineedit.cpp
+    utils/openalutil.cpp
 
     ${CMAKE_SOURCE_DIR}/files/windows/launcher.rc
 )
@@ -31,6 +32,7 @@ set(LAUNCHER_HEADER
     utils/profilescombobox.hpp
     utils/textinputdialog.hpp
     utils/lineedit.hpp
+    utils/openalutil.hpp
 )
 
 # Headers that must be pre-processed
@@ -47,6 +49,7 @@ set(LAUNCHER_HEADER_MOC
     utils/textinputdialog.hpp
     utils/profilescombobox.hpp
     utils/lineedit.hpp
+    utils/openalutil.hpp
 
 )
 
@@ -95,6 +98,7 @@ endif (WIN32)
 
 target_link_libraries(openmw-launcher
     ${SDL2_LIBRARY_ONLY}
+    ${OPENAL_LIBRARY}
     components
 )
 
