@@ -5,7 +5,7 @@ device
 ------
 
 :Type:		string
-:Range:		
+:Range:
 :Default:	""
 
 This setting determines which audio device to use. A blank or missing setting means to use the default device,
@@ -13,7 +13,7 @@ which should usually be sufficient, but if you need to explicitly specify a devi
 
 The names of detected devices can be found in the openmw.log file in your configuration directory.
 
-This setting can only be configured by editing the settings configuration file.
+This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.
 
 master volume
 -------------
@@ -111,13 +111,13 @@ Enabling HRTF may also require an OpenAL Soft version greater than 1.17.0,
 and possibly some operating system configuration.
 A value of 0 disables HRTF processing, while a value of 1 explicitly enables HRTF processing.
 The default value is -1, which should enable the feature automatically for most users when possible.
-This setting can only be configured by editing the settings configuration file.
+This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.
 
 hrtf
 ----
 
 :Type:		string
-:Range:		
+:Range:
 :Default:	""
 
 This setting specifies which HRTF profile to use when HRTF is enabled. Blank means use the default.
@@ -125,4 +125,4 @@ This setting has no effect if HRTF is not enabled based on the hrtf enable setti
 Allowed values for this field are enumerated in openmw.log file is an HRTF enabled audio system is installed.
 
 The default value is empty, which uses the default profile.
-This setting can only be configured by editing the settings configuration file.
+This setting can be configured by editing the settings configuration file, or in the Audio tab of the OpenMW Launcher.

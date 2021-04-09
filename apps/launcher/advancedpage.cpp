@@ -5,10 +5,13 @@
 #include <QFileDialog>
 #include <QCompleter>
 #include <QProxyStyle>
+#include <QString>
 #include <components/contentselector/view/contentselector.hpp>
 #include <components/contentselector/model/esmfile.hpp>
 
 #include <cmath>
+
+#include "utils/openalutil.hpp"
 
 Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings,
                                      Settings::Manager &engineSettings, QWidget *parent)
@@ -19,7 +22,17 @@ Launcher::AdvancedPage::AdvancedPage(Config::GameSettings &gameSettings,
     setObjectName ("AdvancedPage");
     setupUi(this);
 
+    for(const char * name : Launcher::enumerateOpenALDevices())
+    {
+        audioDeviceSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+    }
+    for(const char * name : Launcher::enumerateOpenALDevicesHrtf())
+    {
+        hrtfProfileSelectorComboBox->addItem(QString::fromUtf8(name), QString::fromUtf8(name));
+    }
+
     loadSettings();
+
     mCellNameCompleter.setModel(&mCellNameCompleterModel);
     startDefaultCharacterAtField->setCompleter(&mCellNameCompleter);
 }
@@ -125,6 +138,34 @@ bool Launcher::AdvancedPage::loadSettings()
         loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
         viewingDistanceComboBox->setValue(convertToCells(mEngineSettings.getInt("viewing distance", "Camera")));
     }
+
+    // Audio
+    {
+        std::string selectedAudioDevice = mEngineSettings.getString("device", "Sound");
+        if (selectedAudioDevice.empty() == false)
+        {
+            int audioDeviceIndex = audioDeviceSelectorComboBox->findData(QString::fromStdString(selectedAudioDevice));
+            if (audioDeviceIndex != -1)
+            {
+                audioDeviceSelectorComboBox->setCurrentIndex(audioDeviceIndex);
+            }
+        }
+        int hrtfEnabledIndex = mEngineSettings.getInt("hrtf enable", "Sound");
+        if (hrtfEnabledIndex >= -1 && hrtfEnabledIndex <= 1)
+        {
+            enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
+        }
+        std::string selectedHRTFProfile = mEngineSettings.getString("hrtf", "Sound");
+        if (selectedHRTFProfile.empty() == false)
+        {
+            int hrtfProfileIndex = hrtfProfileSelectorComboBox->findData(QString::fromStdString(selectedHRTFProfile));
+            if (hrtfProfileIndex != -1)
+            {
+                hrtfProfileSelectorComboBox->setCurrentIndex(hrtfProfileIndex);
+            }
+        }
+    }
+
 
     // Camera
     {
@@ -245,6 +286,33 @@ void Launcher::AdvancedPage::saveSettings()
         if (viewingDistance != convertToCells(mEngineSettings.getInt("viewing distance", "Camera")))
         {
             mEngineSettings.setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
+        }
+    }
+    
+    // Audio
+    {
+        int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
+        if (audioDeviceIndex != 0)
+        {
+            mEngineSettings.setString("device", "Sound", audioDeviceSelectorComboBox->currentText().toUtf8().constData());
+        } 
+        else 
+        {
+            mEngineSettings.setString("device", "Sound", "");
+        }
+        int hrtfEnabledIndex = enableHRTFComboBox->currentIndex() - 1;
+        if (hrtfEnabledIndex != mEngineSettings.getInt("hrtf enable", "Sound"))
+        {
+            mEngineSettings.setInt("hrtf enable", "Sound", hrtfEnabledIndex);
+        }
+        int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
+        if (selectedHRTFProfileIndex != 0)
+        {
+            mEngineSettings.setString("hrtf", "Sound", hrtfProfileSelectorComboBox->currentText().toUtf8().constData());
+        }
+        else 
+        {
+            mEngineSettings.setString("hrtf", "Sound", "");
         }
     }
 
