@@ -45,13 +45,13 @@ bool MWMechanics::AiAvoidDoor::execute (const MWWorld::Ptr& actor, CharacterCont
         return true; //Door is no longer opening
 
     ESM::Position tPos = mDoorPtr.getRefData().getPosition(); //Position of the door
-    float x = pos.pos[0] - tPos.pos[0];
-    float y = pos.pos[1] - tPos.pos[1];
+    float x = pos.pos[1] - tPos.pos[1];
+    float y = pos.pos[0] - tPos.pos[0];
 
     actor.getClass().getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
     // Turn away from the door and move when turn completed
-    if (zTurn(actor, std::atan2(x,y) + getAdjustedAngle(), osg::DegreesToRadians(5.f)))
+    if (zTurn(actor, std::atan2(y,x) + getAdjustedAngle(), osg::DegreesToRadians(5.f)))
         actor.getClass().getMovementSettings(actor).mPosition[1] = 1;
     else
         actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
