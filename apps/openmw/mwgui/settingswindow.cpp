@@ -11,12 +11,15 @@
 
 #include <iomanip>
 #include <numeric>
+#include <array>
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/stringops.hpp>
 #include <components/misc/constants.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 #include <components/settings/settings.hpp>
+#include <components/resource/resourcesystem.hpp>
+#include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -103,6 +106,22 @@ namespace
             min = MyGUI::utility::parseFloat(widget->getUserString(settingMin));
         if (!widget->getUserString(settingMax).empty())
             max = MyGUI::utility::parseFloat(widget->getUserString(settingMax));
+    }
+
+    const char* getLightingMethodCaptionText(SceneUtil::LightingMethod lightingMethod)
+    {
+        switch (lightingMethod)
+        {
+            case SceneUtil::LightingMethod::FFP:
+                return "Emulates fixed function pipeline lighting, advanced light settings are disabled when this mode is active";
+            case SceneUtil::LightingMethod::PerObjectUniform:
+                return "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
+                        "\n\nDesigned for compatibility across hardware, and is not meant for large max light counts.";
+            case SceneUtil::LightingMethod::SingleUBO:
+                return "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
+                        "\n\nDesigned for more modern hardware and large max light counts.";
+        }
+        return "";
     }
 }
 
@@ -286,36 +305,6 @@ namespace MWGui
         waterReflectionDetail = std::min(5, std::max(0, waterReflectionDetail));
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
-        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(Settings::Manager::getString("lighting method", "Shaders"));
-        mLightingMethodText->setCaption(SceneUtil::LightManager::getLightingMethodString(lightingMethod));
-
-        if (lightingMethod == SceneUtil::LightingMethod::FFP || !Settings::Manager::getBool("force shaders", "Shaders"))
-        {
-            MyGUI::Widget* parent = mLightSettingOverlay->getParent();
-            mLightSettingOverlay->setEnabled(false);
-            mLightSettingOverlay->setAlpha(0.8);
-            parent->setUserString("ToolTipType", "Layout");
-            parent->setUserString("ToolTipLayout", "TextToolTip");
-            parent->setUserString("Caption_Text", "Unavailable with current settings.");
-            parent->setEnabled(true);
-        }
-        else
-        {
-            std::string captionText;
-            if (lightingMethod == SceneUtil::LightingMethod::FFP)
-                captionText =
-                    "Emulates fixed function pipeline lighting, advanced light settings are disabled when this mode is active";
-            else if (lightingMethod == SceneUtil::LightingMethod::PerObjectUniform)
-                captionText =
-                    "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
-                    "\n\nDesigned for compatibility across hardware, and is not meant for large max light counts.";
-            else if (lightingMethod == SceneUtil::LightingMethod::SingleUBO)
-                captionText =
-                    "Removes limit of 8 lights per object, fixes lighting attenuation, and enables groundcover lighting and light fade."
-                    "\n\nDesigned for more modern hardware and large max light counts.";
-            mLightingMethodText->setUserString("Caption_Text", captionText);
-        }
-
         mWindowBorderButton->setEnabled(!Settings::Manager::getBool("fullscreen", "Video"));
 
         mKeyboardSwitch->setStateSelected(true);
@@ -411,7 +400,7 @@ namespace MWGui
         if (selectedButton == 1 || selectedButton == -1)
             return;
 
-        const std::vector<std::string> settings = {"light bounds multiplier", "maximum light distance", "light fade start", "minimum interior brightness", "max lights"};
+        constexpr std::array<const char*, 5> settings = {"light bounds multiplier", "maximum light distance", "light fade start", "minimum interior brightness", "max lights"};
         for (const auto& setting : settings)
             Settings::Manager::setString(setting, "Shaders", Settings::Manager::mDefaultSettings[{"Shaders", setting}]);
 
@@ -617,6 +606,25 @@ namespace MWGui
         layoutControlsBox();
     }
 
+    void SettingsWindow::updateLightSettings()
+    {
+        auto lightingMethod = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getLightingMethod();
+        mLightingMethodText->setCaption(SceneUtil::LightManager::getLightingMethodString(lightingMethod));
+
+        if (lightingMethod == SceneUtil::LightingMethod::FFP || !Settings::Manager::getBool("force shaders", "Shaders"))
+        {
+            MyGUI::Widget* parent = mLightSettingOverlay->getParent();
+            mLightSettingOverlay->setEnabled(false);
+            mLightSettingOverlay->setAlpha(0.8);
+            parent->setUserString("ToolTipType", "Layout");
+            parent->setUserString("ToolTipLayout", "TextToolTip");
+            parent->setUserString("Caption_Text", "Unavailable with current settings.");
+            parent->setEnabled(true);
+        }
+
+        mLightingMethodText->setUserString("Caption_Text", getLightingMethodCaptionText(lightingMethod));
+    }
+
     void SettingsWindow::layoutControlsBox()
     {
         const int h = 18;
@@ -679,6 +687,7 @@ namespace MWGui
     {
         highlightCurrentResolution();
         updateControlsBox();
+        updateLightSettings();
         resetScrollbars();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);
     }

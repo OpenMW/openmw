@@ -529,7 +529,7 @@
                             <Widget type="TextBox" skin="NormalText" position="0 176 352 18" align="Left Top" name="BoundingSphereMultText">
                                 <UserString key="ToolTipType" value="Layout"/>
                                 <UserString key="ToolTipLayout" value="TextToolTip"/>
-                                <UserString key="Caption_Text" value="Default: 1.75\nMultipler for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."/>
+                                <UserString key="Caption_Text" value="Default: 1.65\nMultipler for bounding sphere of lights.\nHigher numbers allows for smooth falloff but require an increase in number of max lights.\n\nDoes not effect the illumination or strength of lights."/>
                             </Widget>
                             <Widget type="ScrollBar" skin="MW_HScroll" position="0 200 352 18" align="HStretch Top">
                                 <Property key="Range" value="500000"/>
@@ -547,7 +547,7 @@
                             <Widget type="TextBox" skin="NormalText" position="0 224 352 18" align="Left Top" name="MinimumBrightnessText">
                                 <UserString key="ToolTipType" value="Layout"/>
                                 <UserString key="ToolTipLayout" value="TextToolTip"/>
-                                <UserString key="Caption_Text" value="Default: 0.1\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark."/>
+                                <UserString key="Caption_Text" value="Default: 0.08\nMinimum ambient interior brightness.\n\nIncrease this if you feel interiors are too dark."/>
                             </Widget>
                             <Widget type="ScrollBar" skin="MW_HScroll" position="0 248 352 18" align="HStretch Top">
                                 <Property key="Range" value="10000"/>

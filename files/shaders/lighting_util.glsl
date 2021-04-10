@@ -102,7 +102,7 @@ vec3 lcalcDiffuse(int lightIndex)
 #if @lightingMethodPerObjectUniform
     return @getLight[lightIndex][2].xyz;
 #elif @lightingMethodUBO
-    return unpackRGB(@getLight[lightIndex].packedColors.x) * float(int(@getLight[lightIndex].packedColors.w));
+    return unpackRGB(@getLight[lightIndex].packedColors.x) * float(@getLight[lightIndex].packedColors.w);
 #else
     return @getLight[lightIndex].diffuse.xyz;
 #endif

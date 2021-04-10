@@ -31,7 +31,6 @@ namespace SceneUtil
         FFP,
         PerObjectUniform,
         SingleUBO,
-        Undefined
     };
 
     void configureStateSetSunOverride(LightingMethod method, const osg::Light* light, osg::StateSet* stateset, int mode = osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
@@ -114,7 +113,6 @@ namespace SceneUtil
     class LightManager : public osg::Group
     {
     public:
-        static bool isValidLightingModelString(const std::string& value);
         static LightingMethod getLightingMethodFromString(const std::string& value);
         /// Returns string as used in settings file, or the empty string if the method is undefined
         static std::string getLightingMethodString(LightingMethod method);
@@ -138,8 +136,6 @@ namespace SceneUtil
         LightManager(bool ffp = true);
 
         LightManager(const LightManager& copy, const osg::CopyOp& copyop);
-
-        ~LightManager();
 
         /// @param mask This mask is compared with the current Camera's cull mask to determine if lighting is desired.
         /// By default, it's ~0u i.e. always on.
@@ -233,7 +229,6 @@ namespace SceneUtil
         float mPointLightRadiusMultiplier;
         float mPointLightFadeEnd;
         float mPointLightFadeStart;
-        float mPointLightFadeDelta;
 
         int mMaxLights;
 

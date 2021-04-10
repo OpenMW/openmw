@@ -1,5 +1,7 @@
 #include "lightmanager.hpp"
 
+#include <array>
+
 #include <osg/BufferObject>
 #include <osg/BufferIndexBinding>
 #include <osg/Endian>
@@ -8,20 +10,13 @@
 
 #include <components/sceneutil/util.hpp>
 
+#include <components/misc/hash.hpp>
 #include <components/misc/stringops.hpp>
 
 #include <components/debug/debuglog.hpp>
 
 namespace
 {
-    /* similar to the boost::hash_combine */
-    template <class T>
-    inline void hash_combine(std::size_t& seed, const T& v)
-    {
-        std::hash<T> hasher;
-        seed ^= hasher(v) + 0x9e3779b9 + (seed<<6) + (seed>>2);
-    }
-
     bool sortLights(const SceneUtil::LightManager::LightSourceViewBound* left, const SceneUtil::LightManager::LightSourceViewBound* right)
     {
         static auto constexpr illuminationBias = 81.f;
@@ -124,39 +119,37 @@ namespace SceneUtil
         {
             // Deal with negative lights (negative diffuse) by passing a sign bit in the unused alpha component
             auto positiveColor = value;
-            float signBit = 1.0;
+            unsigned int signBit = 1;
             if (value[0] < 0)
             {
                 positiveColor *= -1.0;
-                signBit = -1.0;
+                signBit = -1;
             }
-            *(unsigned int*)(&(*mData)[getOffset(index, Diffuse)]) = asRGBA(positiveColor);
-            *(int*)(&(*mData)[getOffset(index, DiffuseSign)]) = signBit;
+            unsigned int packedColor = asRGBA(positiveColor);
+            std::memcpy(&(*mData)[getOffset(index, Diffuse)], &packedColor, sizeof(unsigned int));
+            std::memcpy(&(*mData)[getOffset(index, DiffuseSign)], &signBit, sizeof(unsigned int));
         }
 
         void setAmbient(int index, const osg::Vec4& value)
         {
-            *(unsigned int*)(&(*mData)[getOffset(index, Ambient)]) = asRGBA(value);
+            unsigned int packed = asRGBA(value);
+            std::memcpy(&(*mData)[getOffset(index, Ambient)], &packed, sizeof(unsigned int));
         }
 
         void setSpecular(int index, const osg::Vec4& value)
         {
-            *(unsigned int*)(&(*mData)[getOffset(index, Specular)]) = asRGBA(value);
+            unsigned int packed = asRGBA(value);
+            std::memcpy(&(*mData)[getOffset(index, Specular)], &packed, sizeof(unsigned int));
         }
 
         void setPosition(int index, const osg::Vec4& value)
         {
-            *(osg::Vec4*)(&(*mData)[getOffset(index, Position)]) = value;
+            std::memcpy(&(*mData)[getOffset(index, Position)], value.ptr(), sizeof(osg::Vec4f));
         }
 
         void setAttenuationRadius(int index, const osg::Vec4& value)
         {
-            *(osg::Vec4*)(&(*mData)[getOffset(index, AttenuationRadius)]) = value;
-        }
-
-        auto getPosition(int index)
-        {
-            return *(osg::Vec4*)(&(*mData)[getOffset(index, Position)]);
+            std::memcpy(&(*mData)[getOffset(index, AttenuationRadius)], value.ptr(), sizeof(osg::Vec4f));
         }
 
         auto& getData()
@@ -186,8 +179,8 @@ namespace SceneUtil
 
         void configureLayout(int offsetColors, int offsetPosition, int offsetAttenuationRadius, int size, int stride)
         {
-            static constexpr auto sizeofVec4 = sizeof(GL_FLOAT) * osg::Vec4::num_components;
-            static constexpr auto sizeofFloat = sizeof(GL_FLOAT);
+            constexpr auto sizeofVec4 = sizeof(GL_FLOAT) * osg::Vec4::num_components;
+            constexpr auto sizeofFloat = sizeof(GL_FLOAT);
 
             mOffsets[Diffuse] = offsetColors / sizeofFloat;
             mOffsets[Ambient] = mOffsets[Diffuse] + 1;
@@ -201,9 +194,9 @@ namespace SceneUtil
             LightBuffer oldBuffer = LightBuffer(*this);
             for (int i = 0; i < oldBuffer.mCount; ++i)
             {
-                *(osg::Vec4*)(&(*mData)[getOffset(i, Diffuse)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, Diffuse)]);
-                *(osg::Vec4*)(&(*mData)[getOffset(i, Position)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, Position)]);
-                *(osg::Vec4*)(&(*mData)[getOffset(i, AttenuationRadius)]) = *(osg::Vec4*)(&(*mData)[oldBuffer.getOffset(i, AttenuationRadius)]);
+                std::memcpy(&(*mData)[getOffset(i, Diffuse)], &(*mData)[oldBuffer.getOffset(i, Diffuse)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, Position)], &(*mData)[oldBuffer.getOffset(i, Position)], sizeof(osg::Vec4f));
+                std::memcpy(&(*mData)[getOffset(i, AttenuationRadius)], &(*mData)[oldBuffer.getOffset(i, AttenuationRadius)], sizeof(osg::Vec4f));
             }
         }
 
@@ -212,7 +205,7 @@ namespace SceneUtil
         osg::Endian mEndian;
         int mCount;
         int mStride;
-        std::unordered_map<LayoutOffset, int> mOffsets;
+        std::array<std::size_t, 6> mOffsets;
     };
 
     class LightStateCache
@@ -234,7 +227,6 @@ namespace SceneUtil
     {
         switch (method)
         {
-        case LightingMethod::Undefined:
         case LightingMethod::FFP:
             {
                 break;
@@ -304,9 +296,9 @@ namespace SceneUtil
         void apply(osg::State& state) const override
         {
             int lightNum = GL_LIGHT0 + mIndex;
-            glLightfv(lightNum, GL_AMBIENT, mnullptr.ptr());
-            glLightfv(lightNum, GL_DIFFUSE, mnullptr.ptr());
-            glLightfv(lightNum, GL_SPECULAR, mnullptr.ptr());
+            glLightfv(lightNum, GL_AMBIENT, mNullptr.ptr());
+            glLightfv(lightNum, GL_DIFFUSE, mNullptr.ptr());
+            glLightfv(lightNum, GL_SPECULAR, mNullptr.ptr());
 
             LightStateCache* cache = getLightStateCache(state.getContextID());
             cache->lastAppliedLight[mIndex] = nullptr;
@@ -314,7 +306,7 @@ namespace SceneUtil
 
     private:
         size_t mIndex;
-        osg::Vec4f mnullptr;
+        osg::Vec4f mNullptr;
     };
 
     class FFPLightStateAttribute : public osg::StateAttribute
@@ -697,17 +689,17 @@ namespace SceneUtil
 
         void initSharedLayout(osg::GLExtensions* ext, int handle) const
         {
-            std::vector<unsigned int> index = { static_cast<int>(Shader::UBOBinding::LightBuffer) };
+            constexpr std::array<unsigned int, 1> index = { static_cast<unsigned int>(Shader::UBOBinding::LightBuffer) };
             int totalBlockSize = -1;
             int stride = -1;
 
             ext->glGetActiveUniformBlockiv(handle, 0, GL_UNIFORM_BLOCK_DATA_SIZE, &totalBlockSize);
             ext->glGetActiveUniformsiv(handle, index.size(), index.data(), GL_UNIFORM_ARRAY_STRIDE, &stride);
 
-            std::vector<const char*> names = {
-                 "LightBuffer[0].packedColors"
-                ,"LightBuffer[0].position"
-                ,"LightBuffer[0].attenuation"
+            std::array<const char*, 3> names = {
+                "LightBuffer[0].packedColors",
+                "LightBuffer[0].position",
+                "LightBuffer[0].attenuation",
             };
             std::vector<unsigned int> indices(names.size());
             std::vector<int> offsets(names.size());
@@ -803,18 +795,15 @@ namespace SceneUtil
         ,{"shaders", LightingMethod::SingleUBO}
     };
 
-    bool LightManager::isValidLightingModelString(const std::string& value)
-    {
-        return LightManager::mLightingMethodSettingMap.find(value) != LightManager::mLightingMethodSettingMap.end();
-    }
-
     LightingMethod LightManager::getLightingMethodFromString(const std::string& value)
     {
         auto it = LightManager::mLightingMethodSettingMap.find(value);
         if (it != LightManager::mLightingMethodSettingMap.end())
             return it->second;
-        else
-            return LightingMethod::Undefined;
+
+        constexpr const char* fallback = "shaders compatibility";
+        Log(Debug::Warning) << "Unknown lighting method '" << value << "', returning fallback '" << fallback << "'";
+        return LightingMethod::PerObjectUniform;
     }
 
     std::string LightManager::getLightingMethodString(LightingMethod method)
@@ -843,12 +832,6 @@ namespace SceneUtil
 
         std::string lightingMethodString = Settings::Manager::getString("lighting method", "Shaders");
         auto lightingMethod = LightManager::getLightingMethodFromString(lightingMethodString);
-        if (lightingMethod == LightingMethod::Undefined)
-        {
-            Log(Debug::Error) << "Invalid option for 'lighting method': got '" << lightingMethodString
-                              << "', expected legacy, shaders compatible, or shaders. Falling back to 'shaders compatible'.";
-            lightingMethod = LightingMethod::PerObjectUniform;
-        }
 
         updateSettings();
 
@@ -875,7 +858,6 @@ namespace SceneUtil
             initSingleUBO(targetLights);
 
         getOrCreateStateSet()->addUniform(new osg::Uniform("PointLightCount", 0));
-        getOrCreateStateSet()->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
 
         addCullCallback(new LightManagerCullCallback(this));
     }
@@ -892,10 +874,6 @@ namespace SceneUtil
     LightingMethod LightManager::getLightingMethod() const
     {
         return mLightingMethod;
-    }
-
-    LightManager::~LightManager()
-    {
     }
 
     bool LightManager::usingFFP() const
@@ -1029,6 +1007,7 @@ namespace SceneUtil
         setLightingMethod(LightingMethod::PerObjectUniform);
         setMaxLights(std::clamp(targetLights, mMaxLightsLowerLimit, LightManager::mMaxLightsUpperLimit));
 
+        stateset->setAttributeAndModes(new LightManagerStateAttributePerObjectUniform(this), osg::StateAttribute::ON);
         stateset->addUniform(new osg::Uniform(osg::Uniform::FLOAT_MAT4, "LightBuffer", getMaxLights()));
     }
 
@@ -1063,9 +1042,6 @@ namespace SceneUtil
             break;
         case LightingMethod::PerObjectUniform:
             mStateSetGenerator = std::make_unique<StateSetGeneratorPerObjectUniform>();
-            break;
-        case LightingMethod::Undefined:
-            mStateSetGenerator = nullptr;
             break;
         }
         mStateSetGenerator->mLightManager = this;
@@ -1107,7 +1083,7 @@ namespace SceneUtil
         getLightIndexMap(frameNum).clear();
         mLights.clear();
         mLightsInViewSpace.clear();
-        return;
+
         // Do an occasional cleanup for orphaned lights.
         for (int i = 0; i < 2; ++i)
         {
@@ -1146,7 +1122,7 @@ namespace SceneUtil
         for (size_t i = 0; i < lightList.size(); ++i)
         {
             auto id = lightList[i]->mLightSource->getId();
-            hash_combine(hash, id);
+            Misc::hashCombine(hash, id);
 
             if (getLightingMethod() != LightingMethod::SingleUBO)
                 continue;

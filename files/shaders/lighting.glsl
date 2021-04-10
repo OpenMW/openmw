@@ -56,7 +56,7 @@ void perLightPoint(out vec3 ambientOut, out vec3 diffuseOut, int lightIndex, vec
     lambert *= clamp(-8.0 * (1.0 - 0.3) * eyeCosine + 1.0, 0.3, 1.0);
 #endif
 
-    diffuseOut =  lcalcDiffuse(lightIndex) * lambert;
+    diffuseOut = lcalcDiffuse(lightIndex) * lambert;
 }
 
 #if PER_PIXEL_LIGHTING

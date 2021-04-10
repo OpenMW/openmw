@@ -522,7 +522,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("colorMode", 0), osg::StateAttribute::ON|osg::StateAttribute::OVERRIDE);
         }
 
-        void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
+        void apply(osg::StateSet* stateset, osg::NodeVisitor* /*nv*/) override
         {
             osg::Material* material = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
             material->setAlpha(osg::Material::FRONT_AND_BACK, mAlpha);

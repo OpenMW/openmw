@@ -19,6 +19,8 @@ namespace MWGui
 
             void updateControlsBox();
 
+            void updateLightSettings();
+
             void onResChange(int, int) override { center(); }
 
     protected:

@@ -186,7 +186,7 @@ light bounds multiplier
 
 :Type:		float
 :Range:		0.0-5.0
-:Default:	1.75
+:Default:	1.65
 
 Controls the bounding sphere radius of point lights, which is used to determine
 if an object should receive lighting from a particular light source. Note, this
@@ -243,7 +243,7 @@ minimum interior brightness
 
 :Type:		float
 :Range:		0.0-1.0
-:Default:	0.1
+:Default:	0.08
 
 Sets the minimum interior ambient brightness for interior cells when
 :ref:`lighting method` is not 'legacy'. A consequence of the new lighting system

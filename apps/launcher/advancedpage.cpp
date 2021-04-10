@@ -1,6 +1,6 @@
 #include "advancedpage.hpp"
 
-#include <unordered_map>
+#include <array>
 
 #include <components/config/gamesettings.hpp>
 #include <components/config/launchersettings.hpp>
@@ -256,7 +256,7 @@ void Launcher::AdvancedPage::saveSettings()
             mEngineSettings.setInt("viewing distance", "Camera", convertToUnits(viewingDistance));
         }
 
-        static std::unordered_map<int, std::string> lightingMethodMap = {{0, "legacy"}, {1, "shaders compatibility"}, {2, "shaders"}};
+        static std::array<std::string, 3> lightingMethodMap = {"legacy", "shaders compatibility", "shaders"};
         mEngineSettings.setString("lighting method", "Shaders", lightingMethodMap[lightingMethodComboBox->currentIndex()]);
     }
 
