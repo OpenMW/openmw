@@ -375,6 +375,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
             pack_evt.y = mMouseY = evt.motion.y;
             pack_evt.xrel = evt.motion.xrel;
             pack_evt.yrel = evt.motion.yrel;
+            pack_evt.type = SDL_MOUSEMOTION;
             if (mFirstMouseMove)
             {
                 // first event should be treated as non-relative, since there's no point of reference
@@ -387,6 +388,7 @@ InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> v
         {
             mMouseZ += pack_evt.zrel = (evt.wheel.y * 120);
             pack_evt.z = mMouseZ;
+            pack_evt.type = SDL_MOUSEWHEEL;
         }
         else
         {

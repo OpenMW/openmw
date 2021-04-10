@@ -42,6 +42,7 @@ void ESM::Header::load (ESMReader &esm)
         MasterData m;
         m.name = esm.getHString();
         m.size = esm.getHNLong ("DATA");
+        m.index = -1;
         mMaster.push_back (m);
     }
 

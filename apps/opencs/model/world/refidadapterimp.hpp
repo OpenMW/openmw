@@ -178,7 +178,11 @@ namespace CSMWorld
         const RefIdColumn *mName;
         const RefIdColumn *mScript;
 
-        NameColumns (const ModelColumns& base) : ModelColumns (base) {}
+        NameColumns (const ModelColumns& base)
+        : ModelColumns (base)
+        , mName(nullptr)
+        , mScript(nullptr)
+        {}
     };
 
     /// \brief Adapter for IDs with names (all but levelled lists and statics)
@@ -247,7 +251,12 @@ namespace CSMWorld
         const RefIdColumn *mWeight;
         const RefIdColumn *mValue;
 
-        InventoryColumns (const NameColumns& base) : NameColumns (base) {}
+        InventoryColumns (const NameColumns& base)
+        : NameColumns (base)
+        , mIcon(nullptr)
+        , mWeight(nullptr)
+        , mValue(nullptr)
+        {}
     };
 
     /// \brief Adapter for IDs that can go into an inventory
@@ -405,7 +414,11 @@ namespace CSMWorld
         const RefIdColumn *mEnchantment;
         const RefIdColumn *mEnchantmentPoints;
 
-        EnchantableColumns (const InventoryColumns& base) : InventoryColumns (base) {}
+        EnchantableColumns (const InventoryColumns& base)
+        : InventoryColumns (base)
+        , mEnchantment(nullptr)
+        , mEnchantmentPoints(nullptr)
+        {}
     };
 
     /// \brief Adapter for enchantable IDs
@@ -474,7 +487,11 @@ namespace CSMWorld
         const RefIdColumn *mQuality;
         const RefIdColumn *mUses;
 
-        ToolColumns (const InventoryColumns& base) : InventoryColumns (base) {}
+        ToolColumns (const InventoryColumns& base)
+        : InventoryColumns (base)
+        , mQuality(nullptr)
+        , mUses(nullptr)
+        {}
     };
 
     /// \brief Adapter for tools with limited uses IDs (lockpick, repair, probes)
@@ -549,7 +566,17 @@ namespace CSMWorld
         const RefIdColumn *mAiPackages;
         std::map<const RefIdColumn *, unsigned int> mServices;
 
-        ActorColumns (const NameColumns& base) : NameColumns (base) {}
+        ActorColumns (const NameColumns& base)
+            : NameColumns (base)
+            , mHello(nullptr)
+            , mFlee(nullptr)
+            , mFight(nullptr)
+            , mAlarm(nullptr)
+            , mInventory(nullptr)
+            , mSpells(nullptr)
+            , mDestinations(nullptr)
+            , mAiPackages(nullptr)
+            {}
     };
 
     /// \brief Adapter for actor IDs (handles common AI functionality)
@@ -2054,7 +2081,11 @@ namespace CSMWorld
         const RefIdColumn *mLevList;
         const RefIdColumn *mNestedListLevList;
 
-        LevListColumns (const BaseColumns& base) : BaseColumns (base) {}
+        LevListColumns (const BaseColumns& base)
+        : BaseColumns (base)
+        , mLevList(nullptr)
+        , mNestedListLevList(nullptr)
+        {}
     };
 
     template<typename RecordT>

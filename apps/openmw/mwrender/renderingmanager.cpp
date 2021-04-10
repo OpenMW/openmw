@@ -815,6 +815,7 @@ namespace MWRender
         RenderingManager::RayResult result;
         result.mHit = false;
         result.mHitRefnum.mContentFile = -1;
+        result.mHitRefnum.mIndex = -1;
         result.mRatio = 0;
         if (intersector->containsIntersections())
         {
