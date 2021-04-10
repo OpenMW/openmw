@@ -180,19 +180,19 @@ namespace
 
     TEST(ESMVariantGetStringTest, for_default_constructed_should_throw_exception)
     {
-        ASSERT_THROW(Variant().getString(), std::runtime_error);
+        ASSERT_THROW(Variant().getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_int_should_throw_exception)
     {
         const Variant variant(int{42});
-        ASSERT_THROW(variant.getString(), std::runtime_error);
+        ASSERT_THROW(variant.getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_float_should_throw_exception)
     {
         const Variant variant(float{2.7});
-        ASSERT_THROW(variant.getString(), std::runtime_error);
+        ASSERT_THROW(variant.getString(), std::bad_variant_access);
     }
 
     TEST(ESMVariantGetStringTest, for_constructed_from_string_should_return_same_value)
@@ -372,40 +372,40 @@ namespace
     TEST(ESMVariantSetStringTest, for_default_constructed_should_throw_exception)
     {
         Variant variant;
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_unknown_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Unknown);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_default_int_should_throw_exception)
     {
         Variant variant(int{13});
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_int_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Int);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_short_should_throw_exception)
     {
         Variant variant;
         variant.setType(VT_Short);
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_float_should_throw_exception)
     {
         Variant variant(float{2.7f});
-        ASSERT_THROW(variant.setString("foo"), std::runtime_error);
+        ASSERT_THROW(variant.setString("foo"), std::bad_variant_access);
     }
 
     TEST(ESMVariantSetStringTest, for_string_should_change_value)
@@ -420,7 +420,6 @@ namespace
         Variant mVariant;
         Variant::Format mFormat;
         std::size_t mDataSize {};
-        std::size_t mDataHash {};
     };
 
     std::string write(const Variant& variant, const Variant::Format format)
@@ -442,11 +441,10 @@ namespace
         return result;
     }
 
-    Variant writeAndRead(const Variant& variant, const Variant::Format format, std::size_t dataSize, std::size_t dataHash)
+    Variant writeAndRead(const Variant& variant, const Variant::Format format, std::size_t dataSize)
     {
         const std::string data = write(variant, format);
         EXPECT_EQ(data.size(), dataSize);
-        EXPECT_EQ(std::hash<std::string>{}(data), dataHash);
         return read(format, data);
     }
 
@@ -455,20 +453,20 @@ namespace
     TEST_P(ESMVariantToESMTest, deserialized_is_equal_to_serialized)
     {
         const auto param = GetParam();
-        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize, param.mDataHash);
+        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize);
         ASSERT_EQ(param.mVariant, result);
     }
 
     INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMTest, Values(
-        WriteToESMTestCase {Variant(), Variant::Format_Gmst, 324, 10398667754238537314ul},
-        WriteToESMTestCase {Variant(int{42}), Variant::Format_Global, 345, 2440845426097842853ul},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Global, 345, 8428720798053904009ul},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Info, 336, 11930997575130354755ul},
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Local, 336, 11930997575130354755ul},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Global, 345, 7812065815960720679ul},
-        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Local, 334, 5017869102981712080ul},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Info, 336, 12560431547347287906ul},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Local, 336, 12560431547347287906ul}
+        WriteToESMTestCase {Variant(), Variant::Format_Gmst, 324},
+        WriteToESMTestCase {Variant(int{42}), Variant::Format_Global, 345},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Global, 345},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Info, 336},
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Local, 336},
+        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Global, 345},
+        WriteToESMTestCase {makeVariant(VT_Short, 42), Variant::Format_Local, 334},
+        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Info, 336},
+        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Local, 336}
     ));
 
     struct ESMVariantToESMNoneTest : TestWithParam<WriteToESMTestCase> {};
@@ -476,14 +474,14 @@ namespace
     TEST_P(ESMVariantToESMNoneTest, deserialized_is_none)
     {
         const auto param = GetParam();
-        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize, param.mDataHash);
+        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize);
         ASSERT_EQ(Variant(), result);
     }
 
     INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMNoneTest, Values(
-        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Gmst, 336, 11930997575130354755ul},
-        WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Gmst, 335, 7604528240659685057ul},
-        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Gmst, 336, 12560431547347287906ul}
+        WriteToESMTestCase {Variant(float{2.7f}), Variant::Format_Gmst, 336},
+        WriteToESMTestCase {Variant(std::string("foo")), Variant::Format_Gmst, 335},
+        WriteToESMTestCase {makeVariant(VT_Int, 42), Variant::Format_Gmst, 336}
     ));
 
     struct ESMVariantWriteToESMFailTest : TestWithParam<WriteToESMTestCase> {};
