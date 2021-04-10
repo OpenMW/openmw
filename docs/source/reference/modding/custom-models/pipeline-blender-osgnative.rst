@@ -1,17 +1,9 @@
-##################
-Native Mesh Format
-##################
+#################################
+Blender to OpenMW with OSG native
+#################################
 
-This article explains how to export a model from Blender to OpenMW using the OSG model format.
-Starting with OpenMW version 0.38 we can utilize the OSG native model format.
-The OSG model format doesn't yet support all the features that NIF's support,
-but works for basic models. For more details on the format, refer to
-`this forum post <https://forum.openmw.org/viewtopic.php?f=20&t=2949&p=35514#p35514>`_.
-
-Previously, NIF files were the only way to get models into the game.
-Unfortunately, the NIF format is proprietary, bloated,
-and the available exporters are not in great shape.
-For example, the Blender NIF exporter currently only works with the very old Blender 2.49.
+This article explains how to export a model from Blender to OpenMW using the OSG model format. It supports only basic, static models.
+For more details on the format, refer to `this forum post <https://forum.openmw.org/viewtopic.php?f=20&t=2949&p=35514#p35514>`_.
 
 Prerequisites
 #############
@@ -103,12 +95,5 @@ Using shaders/normal maps
 #########################
 
 See :ref:`OSG Native Files`
+ 
 
-Conclusion
-##########
-
-These are the basics of getting a textured, static model from Blender into the game.
-In the future, we will want a way to add texture animations,
-skeletal animations, separate collision shapes,
-and some other features that are currently only available via NIF files.
-We will likely add these features to the native OSG format after OpenMW 1.0.
