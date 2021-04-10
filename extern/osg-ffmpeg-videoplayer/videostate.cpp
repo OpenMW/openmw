@@ -349,7 +349,10 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     vp->pts = pts;
     if (vp->set_dimensions(w, h) < 0)
+    {
+        this->pictq_mutex.unlock();
         return -1;
+    }
 
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);
