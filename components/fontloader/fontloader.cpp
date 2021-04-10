@@ -569,7 +569,8 @@ namespace Gui
                 resolution = std::min(960, std::max(48, resolution));
 
                 float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-                resolution *= uiScale;
+                if (uiScale > 0.f)
+                    resolution *= uiScale;
 
                 MyGUI::xml::ElementPtr resolutionNode = resourceNode->createChild("Property");
                 resolutionNode->addAttribute("key", "Resolution");

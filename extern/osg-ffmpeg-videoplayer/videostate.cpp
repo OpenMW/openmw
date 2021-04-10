@@ -50,8 +50,9 @@ VideoState::VideoState()
     , av_sync_type(AV_SYNC_DEFAULT)
     , audio_st(nullptr)
     , video_st(nullptr), frame_last_pts(0.0)
-    , video_clock(0.0), sws_context(nullptr), pictq_size(0)
-    , pictq_rindex(0), pictq_windex(0)
+    , video_clock(0.0), sws_context(nullptr)
+    , sws_context_w(0), sws_context_h(0)
+    , pictq_size(0), pictq_rindex(0), pictq_windex(0)
     , mSeekRequested(false)
     , mSeekPos(0)
     , mVideoEnded(false)
@@ -349,7 +350,10 @@ int VideoState::queue_picture(AVFrame *pFrame, double pts)
 
     vp->pts = pts;
     if (vp->set_dimensions(w, h) < 0)
+    {
+        this->pictq_mutex.unlock();
         return -1;
+    }
 
     sws_scale(this->sws_context, pFrame->data, pFrame->linesize,
               0, this->video_ctx->height, vp->rgbaFrame->data, vp->rgbaFrame->linesize);

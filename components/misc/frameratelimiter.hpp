@@ -13,6 +13,7 @@ namespace Misc
             explicit FrameRateLimiter(std::chrono::duration<Rep, Ratio> maxFrameDuration,
                                       std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now())
                 : mMaxFrameDuration(std::chrono::duration_cast<std::chrono::steady_clock::duration>(maxFrameDuration))
+                , mLastFrameDuration(0)
                 , mLastMeasurement(now)
             {}
 

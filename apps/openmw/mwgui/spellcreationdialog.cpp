@@ -393,15 +393,14 @@ namespace MWGui
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
 
-        if (MyGUI::utility::parseInt(mPriceLabel->getCaption()) > playerGold)
+        int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
+        if (price > playerGold)
         {
             MWBase::Environment::get().getWindowManager()->messageBox ("#{sNotifyMessage18}");
             return;
         }
 
         mSpell.mName = mNameEdit->getCaption();
-
-        int price = MyGUI::utility::parseInt(mPriceLabel->getCaption());
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
