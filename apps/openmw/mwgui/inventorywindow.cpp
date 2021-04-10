@@ -71,7 +71,7 @@ namespace MWGui
         , mUpdateTimer(0.f)
     {
         float uiScale = Settings::Manager::getFloat("scaling factor", "GUI");
-        if (uiScale > 1.0)
+        if (uiScale > 0.f)
             mScaleFactor = uiScale;
 
         mPreviewTexture.reset(new osgMyGUI::OSGTexture(mPreview->getTexture()));
