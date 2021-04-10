@@ -381,8 +381,10 @@ Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
             LZ4F_decompressionContext_t context = nullptr;
             LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
             LZ4F_decompressOptions_t options = {};
-            LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
-            LZ4F_errorCode_t errorCode = LZ4F_freeDecompressionContext(context);
+            LZ4F_errorCode_t errorCode = LZ4F_decompress(context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.get(), &size, &options);
+            if (LZ4F_isError(errorCode))
+                fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
+            errorCode = LZ4F_freeDecompressionContext(context);
             if (LZ4F_isError(errorCode))
                 fail("LZ4 decompression error (file " + mFilename + "): " + LZ4F_getErrorName(errorCode));
         }
