@@ -146,11 +146,10 @@ static void gdb_info(pid_t pid)
     /*
      * Create a temp file to put gdb commands into.
      * Note: POSIX.1-2008 declares that the file should be already created with mode 0600 by default.
-     * Modern systems implement it and and suggest to do not touch masks in multithreaded applications.
+     * Modern systems implement it and suggest to do not touch masks in multithreaded applications.
      * So CoverityScan warning is valid only for ancient versions of stdlib.
     */
     strcpy(respfile, "/tmp/gdb-respfile-XXXXXX");
-    // coverity[secure_temp]
     if((fd=mkstemp(respfile)) >= 0 && (f=fdopen(fd, "w")) != nullptr)
     {
         fprintf(f, "attach %d\n"
