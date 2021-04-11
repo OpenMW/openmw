@@ -13,11 +13,6 @@ namespace ESM
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-namespace MWGui
-{
     class ReviewDialog : public WindowModal
     {
     public:

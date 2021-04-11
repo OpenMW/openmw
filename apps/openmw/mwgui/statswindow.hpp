@@ -6,8 +6,6 @@
 
 namespace MWGui
 {
-    class WindowManager;
-
     class StatsWindow : public WindowPinnableBase, public NoDrop, public StatsListener
     {
         public:

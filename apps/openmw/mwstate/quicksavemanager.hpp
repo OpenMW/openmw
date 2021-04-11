@@ -13,8 +13,8 @@ namespace MWState{
         unsigned int mSlotsVisited;
         const Slot *mOldestSlotVisited;
     private:
-        bool shouldCreateNewSlot();
-        bool isOldestSave(const Slot *compare);
+        bool shouldCreateNewSlot() const;
+        bool isOldestSave(const Slot *compare) const;
     public:
         QuickSaveManager(std::string &saveName, unsigned int maxSaves);
         ///< A utility class to manage multiple quicksave slots

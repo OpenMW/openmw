@@ -14,8 +14,8 @@ namespace MWGui
             void stop();
             void onFrame(float dt);
 
-            int getHours();
-            bool isRunning();
+            int getHours() const;
+            bool isRunning() const;
 
             // signals
             typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;

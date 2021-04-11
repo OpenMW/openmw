@@ -13,12 +13,6 @@ namespace MyGUI
 
 namespace MWGui
 {
-    class WindowManager;
-}
-
-
-namespace MWGui
-{
     class TravelWindow : public ReferenceInterface, public WindowBase
     {
         public:

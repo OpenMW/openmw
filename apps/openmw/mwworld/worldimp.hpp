@@ -60,8 +60,6 @@ namespace ToUTF8
     class Utf8Encoder;
 }
 
-struct ContentLoader;
-
 namespace MWPhysics
 {
     class Object;
