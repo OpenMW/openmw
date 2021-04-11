@@ -958,7 +958,7 @@ namespace MWPhysics
         if (mWaterCollision && mPosition.z() < mWaterlevel && canMoveToWaterSurface(mActorRaw, mWaterlevel, world))
         {
             mPosition.z() = mWaterlevel;
-            MWBase::Environment::get().getWorld()->moveObject(mActorRaw->getPtr(), mPosition.x(), mPosition.y(), mPosition.z(), false);
+            MWBase::Environment::get().getWorld()->moveObject(mActorRaw->getPtr(), mPosition, false);
         }
         mOldHeight = mPosition.z();
         mRefpos = mActorRaw->getPtr().getRefData().getPosition();

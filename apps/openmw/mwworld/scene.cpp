@@ -842,7 +842,7 @@ namespace MWWorld
         mRendering.updatePlayerPtr(player);
 
         if (adjustPlayerPos) {
-            world->moveObject(player, pos.pos[0], pos.pos[1], pos.pos[2]);
+            world->moveObject(player, pos.asVec3());
 
             float x = pos.rot[0];
             float y = pos.rot[1];
@@ -921,7 +921,7 @@ namespace MWWorld
         if(mCurrentCell != nullptr && *mCurrentCell == *cell)
         {
             MWBase::World *world = MWBase::Environment::get().getWorld();
-            world->moveObject(world->getPlayerPtr(), position.pos[0], position.pos[1], position.pos[2]);
+            world->moveObject(world->getPlayerPtr(), position.asVec3());
 
             float x = position.rot[0];
             float y = position.rot[1];

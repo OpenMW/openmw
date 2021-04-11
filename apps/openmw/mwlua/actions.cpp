@@ -39,7 +39,7 @@ namespace MWLua
         }
         else
         {
-            MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos.x(), mPos.y(), mPos.z());
+            MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
             world->rotateObject(newObj, mRot.x(), mRot.y(), mRot.z());
         }
     }

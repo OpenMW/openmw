@@ -93,11 +93,12 @@ namespace MWMechanics
 
     void AiTravel::fastForward(const MWWorld::Ptr& actor, AiState& state)
     {
-        if (!isWithinMaxRange(osg::Vec3f(mX, mY, mZ), actor.getRefData().getPosition().asVec3()))
+        osg::Vec3f pos(mX, mY, mZ);
+        if (!isWithinMaxRange(pos, actor.getRefData().getPosition().asVec3()))
             return;
         // does not do any validation on the travel target (whether it's in air, inside collision geometry, etc),
         // that is the user's responsibility
-        MWBase::Environment::get().getWorld()->moveObject(actor, mX, mY, mZ);
+        MWBase::Environment::get().getWorld()->moveObject(actor, pos);
         actor.getClass().adjustPosition(actor, false);
         reset();
     }

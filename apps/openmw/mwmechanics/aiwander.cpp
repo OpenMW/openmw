@@ -744,8 +744,8 @@ namespace MWMechanics
 
         state.moveIn(new AiWanderStorage());
 
-        MWBase::Environment::get().getWorld()->moveObject(actor, static_cast<float>(dest.mX),
-            static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
+        osg::Vec3f pos(static_cast<float>(dest.mX), static_cast<float>(dest.mY), static_cast<float>(dest.mZ));
+        MWBase::Environment::get().getWorld()->moveObject(actor, pos);
         actor.getClass().adjustPosition(actor, false);
     }
 
